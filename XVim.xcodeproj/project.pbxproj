@@ -13,12 +13,10 @@
 		A24782C114D6F56E003B6433 /* XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B814D6F56E003B6433 /* XVim.m */; };
 		A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782BA14D6F56E003B6433 /* XVimCommandField.m */; };
 		A24782C614D6F6DC003B6433 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A24782C414D6F6DC003B6433 /* InfoPlist.strings */; };
-		A29EC37B14DB652B00F98015 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A29EC37A14DB652B00F98015 /* XVimEvaluator.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
-		A2C9AFDC14DBFBA800E44918 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C9AFDB14DBFBA800E44918 /* Hooker.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,8 +32,6 @@
 		A24782B914D6F56E003B6433 /* XVimCommandField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandField.h; path = XVim/XVimCommandField.h; sourceTree = SOURCE_ROOT; };
 		A24782BA14D6F56E003B6433 /* XVimCommandField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandField.m; path = XVim/XVimCommandField.m; sourceTree = SOURCE_ROOT; };
 		A24782C514D6F6DC003B6433 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = XVim/en.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
-		A29EC37914DB652B00F98015 /* XVimEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEvaluator.h; path = XVim.xcodeproj/XVimEvaluator.h; sourceTree = SOURCE_ROOT; };
-		A29EC37A14DB652B00F98015 /* XVimEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEvaluator.m; path = XVim.xcodeproj/XVimEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandLine.h; path = XVim/XVimCommandLine.h; sourceTree = SOURCE_ROOT; };
 		A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLine.m; path = XVim/XVimCommandLine.m; sourceTree = SOURCE_ROOT; };
 		A2B4BABB14D59F6600D817B0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -46,8 +42,6 @@
 		A2C4E79714E7F35300751199 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim/Hooker.m; sourceTree = "<group>"; };
 		A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEvaluator.h; path = XVim/XVimEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEvaluator.m; path = XVim/XVimEvaluator.m; sourceTree = SOURCE_ROOT; };
-		A2C9AFDA14DBFBA800E44918 /* Hooker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hooker.h; path = XVim.xcodeproj/Hooker.h; sourceTree = SOURCE_ROOT; };
-		A2C9AFDB14DBFBA800E44918 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim.xcodeproj/Hooker.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,8 +92,6 @@
 			children = (
 				A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */,
 				A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */,
-				A29EC37914DB652B00F98015 /* XVimEvaluator.h */,
-				A29EC37A14DB652B00F98015 /* XVimEvaluator.m */,
 				A24782AE14D6F56E003B6433 /* DVTSourceTextViewHook.h */,
 				A24782AF14D6F56E003B6433 /* DVTSourceTextViewHook.m */,
 				A24782B814D6F56E003B6433 /* XVim.m */,
@@ -129,8 +121,6 @@
 			children = (
 				A2C4E79614E7F35300751199 /* Hooker.h */,
 				A2C4E79714E7F35300751199 /* Hooker.m */,
-				A2C9AFDA14DBFBA800E44918 /* Hooker.h */,
-				A2C9AFDB14DBFBA800E44918 /* Hooker.m */,
 			);
 			name = Support;
 			sourceTree = "<group>";
@@ -209,8 +199,6 @@
 				A24782BF14D6F56E003B6433 /* Logger.m in Sources */,
 				A24782C114D6F56E003B6433 /* XVim.m in Sources */,
 				A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */,
-				A29EC37B14DB652B00F98015 /* XVimEvaluator.m in Sources */,
-				A2C9AFDC14DBFBA800E44918 /* Hooker.m in Sources */,
 				A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */,
 				A2C4E79814E7F35300751199 /* Hooker.m in Sources */,
 				A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */,
