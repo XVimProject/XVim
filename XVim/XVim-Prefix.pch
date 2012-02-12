@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'XVim_lite2' target in the 'XVim_lite2' project
+//
+
+#ifdef __OBJC__
+    #import <Cocoa/Cocoa.h>
+#endif
