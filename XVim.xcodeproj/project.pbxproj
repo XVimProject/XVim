@@ -16,6 +16,8 @@
 		A29EC37B14DB652B00F98015 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A29EC37A14DB652B00F98015 /* XVimEvaluator.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
+		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
+		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
 		A2C9AFDC14DBFBA800E44918 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C9AFDB14DBFBA800E44918 /* Hooker.m */; };
 /* End PBXBuildFile section */
 
@@ -40,6 +42,10 @@
 		A2B4BABE14D59F6600D817B0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A2B4BABF14D59F6600D817B0 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		A2B4BAC014D59F6600D817B0 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A2C4E79614E7F35300751199 /* Hooker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hooker.h; path = XVim/Hooker.h; sourceTree = "<group>"; };
+		A2C4E79714E7F35300751199 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim/Hooker.m; sourceTree = "<group>"; };
+		A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEvaluator.h; path = XVim/XVimEvaluator.h; sourceTree = SOURCE_ROOT; };
+		A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEvaluator.m; path = XVim/XVimEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2C9AFDA14DBFBA800E44918 /* Hooker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hooker.h; path = XVim.xcodeproj/Hooker.h; sourceTree = SOURCE_ROOT; };
 		A2C9AFDB14DBFBA800E44918 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim.xcodeproj/Hooker.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -90,6 +96,8 @@
 		A2B4BAC114D59F6600D817B0 /* XVim */ = {
 			isa = PBXGroup;
 			children = (
+				A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */,
+				A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */,
 				A29EC37914DB652B00F98015 /* XVimEvaluator.h */,
 				A29EC37A14DB652B00F98015 /* XVimEvaluator.m */,
 				A24782AE14D6F56E003B6433 /* DVTSourceTextViewHook.h */,
@@ -119,6 +127,8 @@
 		A2C4E78F14E7EA0B00751199 /* Support */ = {
 			isa = PBXGroup;
 			children = (
+				A2C4E79614E7F35300751199 /* Hooker.h */,
+				A2C4E79714E7F35300751199 /* Hooker.m */,
 				A2C9AFDA14DBFBA800E44918 /* Hooker.h */,
 				A2C9AFDB14DBFBA800E44918 /* Hooker.m */,
 			);
@@ -202,6 +212,8 @@
 				A29EC37B14DB652B00F98015 /* XVimEvaluator.m in Sources */,
 				A2C9AFDC14DBFBA800E44918 /* Hooker.m in Sources */,
 				A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */,
+				A2C4E79814E7F35300751199 /* Hooker.m in Sources */,
+				A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
