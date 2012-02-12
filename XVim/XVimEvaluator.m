@@ -167,6 +167,19 @@ static char* keynames[] = {
         char* keyname = keynames[charcode];
         [keyStr appendFormat:[NSString stringWithCString:keyname encoding:NSASCIIStringEncoding]];
     }
+    else if ( charcode == 63232 ){
+        [keyStr appendString:@"Up"];
+    }
+    else if ( charcode == 63233 ){
+        [keyStr appendString:@"Down"];
+    }
+    else if ( charcode == 63234 ){
+        [keyStr appendString:@"Left"];
+    }
+    else if ( charcode == 63235 ){
+        [keyStr appendString:@"Right"];
+    }
+       
     return keyStr;
 }
 
@@ -189,7 +202,7 @@ static char* keynames[] = {
     NSString* key = [XVimEvaluator keyStringFromKeyEvent:event];
     
     // Invokes each key event handler
-    // <C-k> invokes "C-k:" selector
+    // <C-k> invokes "C_k:" selector
     // each method returns next evaluator(maybe self or maybe another evaluator )
     SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
     if( [self respondsToSelector:handler] ){
@@ -754,6 +767,25 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return nil;
 }
 
+
+- (XVimEvaluator*)Up:(id)arg{
+    return [self k:(id)arg];
+}
+
+- (XVimEvaluator*)Down:(id)arg{
+    return [self j:(id)arg];
+    
+}
+
+- (XVimEvaluator*)Left:(id)arg{
+    return [self h:(id)arg];
+    
+}
+
+- (XVimEvaluator*)Right:(id)arg{
+    return [self l:(id)arg];
+}
+
 - (XVimEvaluator*)textObjectFixed{
     // in normal mode
     // move the aaacursor to the end of range
@@ -787,7 +819,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
-    if( [keyStr isEqualToString:@"ESC"] ){
+    if( [keyStr isEqualToString:@"ESC"] || [keyStr isEqualToString:@"C_LSQUAREBRACKET"] || [keyStr isEqualToString:@"C_c"]){
         if( !_insertedEventsAbort ){
             for( int i = 0 ; i < _repeat-1; i++ ){
                 for( NSEvent* e in _insertedEvents ){
