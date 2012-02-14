@@ -11,6 +11,7 @@ From zip
 --------
 
 Download XVim.zip and extract it into followng direcotry.
+
     $(HOME)/Library/Application Support/Developer/Shared/Xcode/Plug-ins
 
 Make the directory if you don't have one already.
