@@ -472,32 +472,69 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self textObjectFixed];
 }
 
+/* 
+ * Space acts like 'l' in vi. moves  cursor forward
+ */
+- (XVimEvaluator*)SP:(id)arg{
+    return [self l:arg];
+}
+
+/* 
+ * Delete (DEL) acts like 'h' in vi. moves cursor backward
+ */
+- (XVimEvaluator*)DEL:(id)arg{
+    return [self h:arg];
+}
 
 - (XVimEvaluator*)PLUS:(id)arg{
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveDown:self];
         [view moveToBeginningOfLine:self];
     }
     NSRange end = [view selectedRange];
-    _destLocation = end.location;
+    // move to 1st non whitespace char, now that we are on the destination line
+    for (NSUInteger idx = end.location; idx < s.length; idx++) {
+        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+            break;
+        [view moveRight:self];
+    }
+    end = [view selectedRange];
+   _destLocation = end.location;
     [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
     
     [view setSelectedRange:begin];
     return [self textObjectFixed];
 }
 
+/* 
+ * CR (return) acts like PLUS in vi
+ */
+- (XVimEvaluator*)CR:(id)arg{
+    return [self PLUS:arg];
+}
+
+
 - (XVimEvaluator*)MINUS:(id)arg{
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveUp:self];
         [view moveToBeginningOfLine:self];
     }
     NSRange end = [view selectedRange];
+    // move to 1st non whitespace char, now that we are on the destination line
+    for (NSUInteger idx = end.location; idx < s.length; idx++) {
+        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+            break;
+        [view moveRight:self];
+    }
+    end = [view selectedRange];
     _destLocation = end.location;
-   [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
+    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
     
     [view setSelectedRange:begin];
     return [self textObjectFixed];
