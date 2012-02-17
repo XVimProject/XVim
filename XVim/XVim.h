@@ -30,6 +30,8 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
      NSMutableString* _lastSearchString;
      NSUInteger _lastSearchIndex;
      BOOL _searchBackword;
+     BOOL _ignoreCase;
+     BOOL _wrapScan;
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
 }
