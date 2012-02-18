@@ -402,6 +402,29 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self textObjectFixed];
 }
 
+
+// CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
+// Note: CARET always moves to start of the current line ignoring any numericArg.
+- (XVimEvaluator*)CARET:(id)arg{
+    NSTextView* view = [self textView];
+    NSRange begin = [view selectedRange];
+    NSMutableString* s = [[view textStorage] mutableString];
+    [view moveToBeginningOfLine:self];
+    NSRange end = [view selectedRange];
+    // move to 1st non whitespace char
+    for (NSUInteger idx = end.location; idx < s.length; idx++) {
+        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+            break;
+        [view moveRight:self];
+    }
+    end = [view selectedRange];
+    _destLocation = end.location;
+    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
+    
+    [view setSelectedRange:begin];
+    return [self textObjectFixed];
+}
+
 - (XVimEvaluator*)DOLLAR:(id)arg{
     NSTextView* view = [self textView];
     NSRange begin = [view selectedRange];
@@ -472,32 +495,69 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self textObjectFixed];
 }
 
+/* 
+ * Space acts like 'l' in vi. moves  cursor forward
+ */
+- (XVimEvaluator*)SP:(id)arg{
+    return [self l:arg];
+}
+
+/* 
+ * Delete (DEL) acts like 'h' in vi. moves cursor backward
+ */
+- (XVimEvaluator*)DEL:(id)arg{
+    return [self h:arg];
+}
 
 - (XVimEvaluator*)PLUS:(id)arg{
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveDown:self];
         [view moveToBeginningOfLine:self];
     }
     NSRange end = [view selectedRange];
-    _destLocation = end.location;
+    // move to 1st non whitespace char, now that we are on the destination line
+    for (NSUInteger idx = end.location; idx < s.length; idx++) {
+        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+            break;
+        [view moveRight:self];
+    }
+    end = [view selectedRange];
+   _destLocation = end.location;
     [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
     
     [view setSelectedRange:begin];
     return [self textObjectFixed];
 }
 
+/* 
+ * CR (return) acts like PLUS in vi
+ */
+- (XVimEvaluator*)CR:(id)arg{
+    return [self PLUS:arg];
+}
+
+
 - (XVimEvaluator*)MINUS:(id)arg{
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveUp:self];
         [view moveToBeginningOfLine:self];
     }
     NSRange end = [view selectedRange];
+    // move to 1st non whitespace char, now that we are on the destination line
+    for (NSUInteger idx = end.location; idx < s.length; idx++) {
+        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+            break;
+        [view moveRight:self];
+    }
+    end = [view selectedRange];
     _destLocation = end.location;
-   [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
+    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
     
     [view setSelectedRange:begin];
     return [self textObjectFixed];
@@ -725,8 +785,34 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 - (XVimEvaluator*)x:(id)arg{
     NSTextView* view = [self textView];
-    for( NSUInteger i = 0 ; i < [self numericArg]; i++ ){
+    NSMutableString* s = [[view textStorage] mutableString];
+    // note: in vi you are not supposed to move beyond the end of a line when doing "x" operations
+    // it's that way on purpose. this allows you to hit a bunch of x's in a row and not worry about 
+    // accidentally joining the next line into the current line.
+    NSRange begin = [view selectedRange];
+    NSUInteger idx = begin.location;
+    for( NSUInteger i = 0 ; idx < s.length && i < [self numericArg]; i++,idx++ ){
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+            break;
         [view moveForwardAndModifySelection:self];
+    }
+    [view delete:self];
+    return nil;
+}
+
+// like 'x" but it goes backwards instead of forwards
+- (XVimEvaluator*)X:(id)arg{
+    NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
+    // note: in vi you are not supposed to move beyond the start of a line when doing "X" operations
+    // it's that way on purpose. this allows you to hit a bunch of X's in a row and not worry about 
+    // accidentally joining the current line up into the previous line.
+    NSRange begin = [view selectedRange];
+    NSUInteger idx = begin.location;
+    for( NSUInteger i = 0 ; idx > 0 && i < [self numericArg]; i++,idx-- ){
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]])
+            break;
+        [view moveBackwardAndModifySelection:self]; 
     }
     [view delete:self];
     return nil;

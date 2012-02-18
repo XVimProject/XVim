@@ -93,6 +93,8 @@
         _lastSearchString = [[NSMutableString alloc] init];
         
         _searchBackword = NO;
+        _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
+        _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
     }
     
@@ -135,7 +137,19 @@
             ex_command = @"";
         }
         TRACE_LOG(@"EX COMMAND:%@", ex_command);
-        if( [ex_command isEqualToString:@"w"] ){
+        NSCharacterSet *words_cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+        NSArray* words = [ex_command componentsSeparatedByCharactersInSet:words_cs];            
+        NSUInteger words_count = [words count];
+        int scanned_int_arg = -1;
+        
+        // check to see if it's a simple ":NNN" ( go-line-NNN command )
+        if ((words_count == 1) && [[NSScanner scannerWithString:[words objectAtIndex:0]] scanInt:&scanned_int_arg]) {
+            // single arg that's a parsable int, go to line in scanned_int
+            if (scanned_int_arg > 0) {
+                // TBD: move to line scanned_int_arg
+            }
+        }
+        else if( [ex_command isEqualToString:@"w"] ){
             NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
             NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"s" charactersIgnoringModifiers:@"s" isARepeat:NO keyCode:1];
             [[NSApplication sharedApplication] sendEvent:keyPress];
@@ -154,19 +168,41 @@
             NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"{" charactersIgnoringModifiers:@"{" isARepeat:NO keyCode:1];
             [[NSApplication sharedApplication] sendEvent:keyPress];
         }
-        else if( [ex_command hasPrefix:@"set"] ){
-            if( [ex_command length] > 3 ){
-                NSString* setCommand = [[c substringFromIndex:3] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        else if( [ex_command hasPrefix:@"se"] ){
+            // vi users are used to doing ":se" as well as ":set"
+            // after 25+ yrs, my fingers are trained to use ":se ic" or ":se noic" -MH
+            NSString* arg0 = [words objectAtIndex:0];
+            if( ([words count] > 1) && ([arg0 isEqualToString:@"se"] || [arg0 isEqualToString:@"set"]) ){
+                NSString* setCommand = [words objectAtIndex:1];
                 if( [setCommand isEqualToString:@"wrap"] ){
                     [srcView setWrapsLines:YES];
                 }
                 else if( [setCommand isEqualToString:@"nowrap"] ){
                     [srcView setWrapsLines:NO];
+                }                
+                else if( [setCommand isEqualToString:@"ignorecase"] || [setCommand isEqualToString:@"ic"] ){
+                    _ignoreCase = TRUE;
+                }                
+                else if( [setCommand isEqualToString:@"noignorecase"] || [setCommand isEqualToString:@"noic"] ){
+                    _ignoreCase = FALSE;
+                }            
+                else if( [setCommand isEqualToString:@"wrapscan"] || [setCommand isEqualToString:@"ws"] ){
+                    _wrapScan = TRUE;
+                }                
+                else if( [setCommand isEqualToString:@"nowrapscan"] || [setCommand isEqualToString:@"nows"] ){
+                    _wrapScan = FALSE;
+                }            
+
+                else {
+                    TRACE_LOG("Don't recognize '%@' sub command for ex_command line %@", setCommand, ex_command);
                 }
             }
         }
         else if( [ex_command hasPrefix:@"!"] ){
             
+        }
+        else {
+            TRACE_LOG("Don't recognize ex_command %@", ex_command);
         }
     }
     else if( [c characterAtIndex:0] == '/' ){
@@ -197,7 +233,20 @@
     
     // search text from the index
     if( [[srcView string] length]-1 > r.location ){
-        NSRange found = [[srcView string] rangeOfString:_lastSearchString options:NSCaseInsensitiveSearch range:NSMakeRange(r.location+1, [[srcView string] length] - r.location - 1)];
+        NSRange found = [[srcView string] 
+             rangeOfString:_lastSearchString 
+             options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) 
+             range:NSMakeRange(r.location+1, [[srcView string] length] - r.location - 1)];
+        
+        // if wrapscan is on, wrap to the top and try again
+        if (found.location == NSNotFound && _wrapScan == TRUE) {
+            // TBD: vi usually puts something around the NORMAL|INSERT status msg is that says "scan wrapped"
+            found = [[srcView string] 
+                rangeOfString:_lastSearchString 
+                options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) 
+                range:NSMakeRange(0, [[srcView string] length])];
+        }
+        
         if( found.location != NSNotFound ){
             //Move cursor and show the found string
             [srcView scrollRangeToVisible:found];
@@ -216,7 +265,20 @@
     
     // search text from the index
     if( r.location > 0 ){
-        NSRange found = [[srcView string] rangeOfString:_lastSearchString options:NSBackwardsSearch|NSCaseInsensitiveSearch range:NSMakeRange(0, r.location-1)];
+        NSRange found = [[srcView string] 
+            rangeOfString:_lastSearchString 
+            options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch)
+            range:NSMakeRange(0, r.location-1)];
+        
+        // if wrapscan is on, wrap to the top and try again
+        if (found.location == NSNotFound && _wrapScan == TRUE) {
+            // TBD: vi usually puts something around the NORMAL|INSERT status msg is that says "scan wrapped"
+            found = [[srcView string] 
+                     rangeOfString:_lastSearchString 
+                     options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) 
+                     range:NSMakeRange(0, [[srcView string] length])];
+        }
+        
         if( found.location != NSNotFound ){
             //Move cursor and show the found string
             [srcView scrollRangeToVisible:found];
