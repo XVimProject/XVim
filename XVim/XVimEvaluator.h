@@ -72,9 +72,10 @@
 
 @interface XVimDeleteEvaluator : XVimTextObjectEvaluator{
 @private
+    BOOL _insertModeAtCompletion;
     NSUInteger _repeat;
 }
-- (id)initWithRepeat:(NSUInteger)repeat;
+- (id)initWithRepeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end
 
 @interface XVimYankEvaluator : XVimTextObjectEvaluator{

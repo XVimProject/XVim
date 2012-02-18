@@ -136,17 +136,32 @@
         }else{
             ex_command = @"";
         }
-        TRACE_LOG(@"EX COMMAND:%@", ex_command);
         NSCharacterSet *words_cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
         NSArray* words = [ex_command componentsSeparatedByCharactersInSet:words_cs];            
         NSUInteger words_count = [words count];
         int scanned_int_arg = -1;
-        
+        TRACE_LOG(@"EX COMMAND:%@, word count = %d", ex_command, words_count);
+
         // check to see if it's a simple ":NNN" ( go-line-NNN command )
         if ((words_count == 1) && [[NSScanner scannerWithString:[words objectAtIndex:0]] scanInt:&scanned_int_arg]) {
             // single arg that's a parsable int, go to line in scanned_int
+            TRACE_LOG("go to line CMD line no = %d", scanned_int_arg);
+            id mvid = nil; //seems to be ok to use nil for this for the movement calls we are doing
             if (scanned_int_arg > 0) {
-                // TBD: move to line scanned_int_arg
+                [srcView moveToBeginningOfDocument:mvid];
+                // move to line 'scanned_int_arg'
+                for( int i = 1; i < scanned_int_arg; i++ ){ // TODO: there is probabaly a more efficient way to do this
+                    [srcView moveDown:mvid]; 
+                }
+                // move to first non whitespace char in line
+                [srcView moveToBeginningOfLine:mvid];
+                NSMutableString* s = [[srcView textStorage] mutableString];
+                NSRange end = [srcView selectedRange];
+                for (NSUInteger idx = end.location; idx < s.length; idx++) {
+                    if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+                        break;
+                    [srcView moveRight:mvid];
+                }
             }
         }
         else if( [ex_command isEqualToString:@"w"] ){
