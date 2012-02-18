@@ -1,0 +1,66 @@
+<html>
+<head>
+<title>XVim Developers Guide</title>
+</head>
+
+<body>
+<h1>XVim - XCode plugin for Vim keybindings</h1>
+XVim is a plugin for XCode4 which enables you to edit codes as if you are using Vim in XCode.
+
+<h2>Goal</h2>
+The goal of this project is to provide confortable environment for Vim users to use XCode4 to develop their software.
+This means the goal is NOT to provide full compatiblity to Vim operations.
+Some keybinds could behave differently than Vim's original one since there are lot of difference between Vim environment and IDE environment of XCode with rich of features.
+
+<h2>Goal in short term</h2>
+This project has started in Jan 2012. In short term goal is to implement major operations like navigation with "h,j,k,l", search with "/,?" or replace with ":s".
+See project page which are implemented and not implemented.
+
+<h2>Internal Design</h2>
+It may be difficult to implement new features or fix bugs without understanding the overview of the plugin design.
+Here is the overview of the design.
+
+<h3>Big picture</h3>
+This plugin consits of mainly 2 parts. "Hooks" and "Operations".
+Hooks part hook some methods of XCode classes. The most important hook is hooking "keyDown:" in DVTSourceTextView class. This hook catches keydown event in source editor and fowards its event to the "Operations" part .(DVTSourceTextView is the area(view) where you write code in XCode source editor.)
+Operations part handles inputs from keyboard (or mouse) and reflects its result to DVTSourceTextView or other views.
+
+For the detail of these two parts see comments in corresponds codes. 
+
+<h3>Loading</h3>
+Unfortunately XCode plugin system is not documented and we do not know well about loading sequences of plugins.
+The only thing we( could be "I" ) know is that the bundle in the following directory is loaded into XCode automatically.
+
+<pre><code>
+$(HOME)/Library/Application Support/Developer/Shared/Xcode/Plug-ins/
+</code></pre>
+
+When the plugin is loaded, the class method "load" in principle class( XVim class in this case ) is called.
+This ( "load" method in XVim.m" ) is the entry point of the plugin and we setup hooks here.
+
+<h3>Hooks</h3>
+So in "load" method we hooks some methods. Here is all the hooks we should know.
+The hooking is kind of replacing methods with other methods.
+For example, keyDown: method in DVTSourceTextView is replaced with keyDown: method in DVTSourceTextViewHook class (which is our class).
+What happend to the original method is that it is renamed. In this case it is renamed to XVimKeyDown method.
+So the following picture describes the methods after hook is done to keyDown: method in DVTSourceTextView class.
+
+<h4>initWithCoder</h4>
+This is called when a DVTSourceTextView object is initialized. What we want to do in this hook is to bind "Operations" part to this object.
+As explained, we hook keyDown: and forward it to "Operations" part (which is a object we make). In the hook method of keyDown: we want to know where is the "operation" object corresponds to the DVTSourceTextView.
+
+
+<h4>keyDown: and Evaluators</h4>
+Will be writen later
+
+<h2>XCode internal classes</h2>
+I list up all the <a href="XCodeClasses.html">
+classes and their methods in XCode</a>.
+
+This will be big help to understand its internal and functions.
+Especially the class DVTSourceTextView has a lot of methods and can be reusable to implement Vi operations.
+
+
+</body>
+
+</html>
