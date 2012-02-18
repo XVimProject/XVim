@@ -613,7 +613,16 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 /////////////////////////////////////////////////////////////
 
 - (XVimEvaluator*)a:(id)arg{
+    // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
+    // next line. it appends to the current line
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
+    NSRange begin = [view selectedRange];
+    NSUInteger idx = begin.location;
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
+        [self xvim].mode = MODE_INSERT;
+        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    } 
     [view moveForward:self];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
@@ -630,8 +639,14 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return nil;
 }
 
+// 'c' works like 'd' except that once it's done deleting
+// it should go you into insert mode
+- (XVimEvaluator*)c:(id)arg{
+    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
+}
+
 - (XVimEvaluator*)d:(id)arg{
-    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:FALSE];
 }
 
 - (XVimEvaluator*)D:(id)arg{
@@ -678,18 +693,27 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
+// For 'J' (join line) bring the line up from below. all leading whitespac 
+// of the line joined in should be stripped and then one space should be inserted 
+// between the joined lines
 - (XVimEvaluator*)J:(id)arg{
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
     NSUInteger repeat = [self numericArg];
-    if( 1 != repeat ){
-        repeat--;
-    }
+    //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
     for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        [view moveToEndOfLine:self];
+        [view moveToEndOfLine:self]; // move to eol
         [view deleteForward:self];
+        NSRange at = [view selectedRange];
+        [[view textStorage] replaceCharactersInRange:at withString:@" "];
+        while (TRUE) { // delete any leading whitespace from lower line
+            if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
+                break;
+            [view deleteForward:self];
+        }
+        [view setSelectedRange:r];
     }
-    [view setSelectedRange:r];
     return nil;
 }
 
@@ -792,8 +816,15 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
     for( NSUInteger i = 0 ; idx < s.length && i < [self numericArg]; i++,idx++ ){
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]])
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
+            // if at the end of line, and are just doing a single x it's like doing X
+            if ([self numericArg] == 1) {
+                if (idx > 0 && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]]) {
+                    [view moveBackwardAndModifySelection:self]; 
+                }
+            }
             break;
+        }
         [view moveForwardAndModifySelection:self];
     }
     [view delete:self];
@@ -934,29 +965,51 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 - (id)init
 {
-    return [self initWithRepeat:1];
+    return [self initWithRepeat:1 insertModeAtCompletion:FALSE];
 }
 
-- (id)initWithRepeat:(NSUInteger)repeat{
+- (id)initWithRepeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion {
     self = [super init];
     if (self) {
+        _insertModeAtCompletion = insertModeAtCompletion;
         _repeat = repeat;
     }
     return self;
 }
 
 - (XVimEvaluator*)d:(id)arg{
-    NSTextView* view = [self textView];
-    [view selectLine:self];
-    [view cut:self];
+    // 'dd' should obey the repeat specifier
+    // '3dd' should delete/cut the current line and the 2 lines below it
     
-    return nil;
+    if (_repeat < 1) 
+        return nil;
+    NSTextView* view = [self textView];
+    NSRange begin = [view selectedRange];
+    [view moveToBeginningOfLine:self];
+    NSRange start = [view selectedRange];
+    for (int i = 1; i < _repeat; i++) {
+        [view moveDown:self];
+    }
+    [view moveToEndOfLine:self];
+    [view moveRight:self]; // include eol
+    NSRange end = [view selectedRange];
+    //_destLocation = end.location;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    // set cursor back to original position
+    [view setSelectedRange:begin];
+    
+    return [self textObjectFixed];
 }
 
 -(XVimEvaluator*)textObjectFixed{
     NSTextView* view = [self textView];
     [view setSelectedRange:[self textObject]];
     [view cut:self];
+    if (_insertModeAtCompletion == TRUE) {
+        // Go to insert 
+        [self xvim].mode = MODE_INSERT;
+        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    }
     return nil;
 }
 
@@ -978,12 +1031,27 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)y:(id)arg{
+    // 'yy' should obey the repeat specifier 
+    // e.g., '3yy' should yank/copy the current line and the two lines below it
+    
+    if (_repeat < 1) 
+        return nil;
     NSTextView* view = [self textView];
-    NSRange r = [view selectedRange];
-    [view selectLine:self];
-    [view copy:self];
-    [view setSelectedRange:r];
-    return nil;
+    NSRange begin = [view selectedRange];
+    [view moveToBeginningOfLine:self];
+    NSRange start = [view selectedRange];
+    for (int i = 1; i < _repeat; i++) {
+        [view moveDown:self];
+    }
+    [view moveToEndOfLine:self];
+    [view moveRight:self]; // include eol
+    NSRange end = [view selectedRange];
+    //_destLocation = end.location;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    // set cursor back to original position
+    [view setSelectedRange:begin];
+    
+    return [self textObjectFixed];
 }
 
 -(XVimEvaluator*)textObjectFixed{
