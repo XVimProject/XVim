@@ -693,18 +693,27 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
+// For 'J' (join line) bring the line up from below. all leading whitespac 
+// of the line joined in should be stripped and then one space should be inserted 
+// between the joined lines
 - (XVimEvaluator*)J:(id)arg{
     NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
     NSUInteger repeat = [self numericArg];
-    if( 1 != repeat ){
-        repeat--;
-    }
+    //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
     for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        [view moveToEndOfLine:self];
+        [view moveToEndOfLine:self]; // move to eol
         [view deleteForward:self];
+        NSRange at = [view selectedRange];
+        [[view textStorage] replaceCharactersInRange:at withString:@" "];
+        while (TRUE) { // delete any leading whitespace from lower line
+            if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
+                break;
+            [view deleteForward:self];
+        }
+        [view setSelectedRange:r];
     }
-    [view setSelectedRange:r];
     return nil;
 }
 
@@ -969,13 +978,27 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)d:(id)arg{
-    // TODO: 'dd' should obey the repeat specifier
+    // 'dd' should obey the repeat specifier
     // '3dd' should delete/cut the current line and the 2 lines below it
-    NSTextView* view = [self textView];
-    [view selectLine:self];
-    [view cut:self];
     
-    return nil;
+    if (_repeat < 1) 
+        return nil;
+    NSTextView* view = [self textView];
+    NSRange begin = [view selectedRange];
+    [view moveToBeginningOfLine:self];
+    NSRange start = [view selectedRange];
+    for (int i = 1; i < _repeat; i++) {
+        [view moveDown:self];
+    }
+    [view moveToEndOfLine:self];
+    [view moveRight:self]; // include eol
+    NSRange end = [view selectedRange];
+    //_destLocation = end.location;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    // set cursor back to original position
+    [view setSelectedRange:begin];
+    
+    return [self textObjectFixed];
 }
 
 -(XVimEvaluator*)textObjectFixed{
@@ -1008,14 +1031,27 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)y:(id)arg{
-    // TODO: 'yy' should obey the repeat specifier 3yy should yank/copy the current line 
-    // and the two lines below it
+    // 'yy' should obey the repeat specifier 
+    // e.g., '3yy' should yank/copy the current line and the two lines below it
+    
+    if (_repeat < 1) 
+        return nil;
     NSTextView* view = [self textView];
-    NSRange r = [view selectedRange];
-    [view selectLine:self];
-    [view copy:self];
-    [view setSelectedRange:r];
-    return nil;
+    NSRange begin = [view selectedRange];
+    [view moveToBeginningOfLine:self];
+    NSRange start = [view selectedRange];
+    for (int i = 1; i < _repeat; i++) {
+        [view moveDown:self];
+    }
+    [view moveToEndOfLine:self];
+    [view moveRight:self]; // include eol
+    NSRange end = [view selectedRange];
+    //_destLocation = end.location;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    // set cursor back to original position
+    [view setSelectedRange:begin];
+    
+    return [self textObjectFixed];
 }
 
 -(XVimEvaluator*)textObjectFixed{
