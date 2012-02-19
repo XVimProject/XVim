@@ -29,6 +29,7 @@
 #import "Hooker.h"
 #import "DVTSourceTextViewHook.h"
 #import "XVimEvaluator.h"
+#import "XVimNormalEvaluator.h"
 
 @implementation XVim
 @synthesize tag,mode,cmdLine,sourceView;

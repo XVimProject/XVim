@@ -2,8 +2,8 @@
 //  XVimEvaluator.m
 //  XVim
 //
-//  Created by Shuichiro Suzuki on 2/3/12.
-//  Copyright 2012 JugglerShu.Net. All rights reserved.
+//  Created by Shuichiro Suzuki on 2/3/12.  
+//  Copyright 2012 JugglerShu.Net. All rights reserved.  
 //
 
 #import "XVimEvaluator.h"
@@ -280,6 +280,7 @@ static char* keynames[] = {
 @end
 
 #pragma mark Text Object Evaluator
+
 
 static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     TRACE_LOG(@"pos1:%d  pos2:%d", pos1, pos2);
@@ -565,33 +566,151 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 
 - (XVimEvaluator*)LSQUAREBRACKET:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveUp:self];
-        [view moveToBeginningOfLine:self];
-    }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    // TODO: implement XVimLSquareBracketEvaluator
+    return nil;
 }
 
 - (XVimEvaluator*)RSQUAREBRACKET:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveUp:self];
-        [view moveToBeginningOfLine:self];
-    }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
+    // TODO: implement XVimRSquareBracketEvaluator
+    return nil;
+}
+
+- (XVimEvaluator*)LBRACE:(id)arg{ // {
     
-    [view setSelectedRange:begin];
+}
+
+- (XVimEvaluator*)RBRACE:(id)arg{ // }
+    
+}
+
+/*
+ Definition of Sentence from gVim help
+ 
+ - A sentence is defined as ending at a '.', '!' or '?' followed by either the
+ end of a line, or by a space or tab.  Any number of closing ')', ']', '"'
+ and ''' characters may appear after the '.', '!' or '?' before the spaces,
+ tabs or end of line.  A paragraph and section boundary is also a sentence
+ boundary.
+ If the 'J' flag is present in 'cpoptions', at least two spaces have to
+ follow the punctuation mark; <Tab>s are not recognized as white space.
+ The definition of a sentence cannot be changed.
+ */
+- (XVimEvaluator*)LPARENTHESIS:(id)arg{ // (
+    NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
+    NSRange begin = [view selectedRange];
+    NSUInteger pos = begin.location;
+    
+    NSUInteger sentence_head = NSNotFound;
+    int sentence_found = 0;
+    // Search "." or "!" or "?" backwards and check if it is followed by spaces(and closing characters)
+    for( ; pos > 0 && NSNotFound == sentence_head ; pos-- ){
+        unichar c = [s characterAtIndex:pos];
+        if( c == '.' || c == '!' || c == '?' ){
+             // search forward for a space while ignoring ")","]",'"','''
+            for( NSUInteger k = pos+1; k < s.length && k < begin.location ; k++ ){
+                unichar c2 = [s characterAtIndex:k];
+                if( c2 == ')' || c2 == ']' || c2 == '"' || c2 == '\'' ){
+                    continue;
+                }else if( [[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
+                    // search next character(which is not white space) to find the head of sentence.
+                    for( k++; k < s.length; k++ ){
+                        if( ![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
+                            // Found a head of sentence.
+                            // if the current insertion point is the head of sentence we do not count it as we find a head of sentence.
+                            if( begin.location != k ){
+                                sentence_found++;
+                                if( [self numericArg] == sentence_found ){
+                                    sentence_head = k;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }else{
+                    // not a head of sentence
+                    break;
+                }
+                if( NSNotFound != sentence_head ){
+                    // already found the position we want
+                    break;
+                }
+            }   
+        }
+    }
+    
+    if( ((sentence_found+1) == [self numericArg] && pos == 0 ) ){
+        //begining of document
+        sentence_head = 0;
+        
+    }
+    
+    if( NSNotFound != sentence_head  ){
+        _destLocation = sentence_head;
+        [self setTextObject:makeRangeFromLocations(sentence_head, begin.location)];
+        return [self textObjectFixed];
+    }else{
+        // no movement
+        return nil;
+    }
+   
+    
+}
+
+- (XVimEvaluator*)RPARENTHESIS:(id)arg{ // )
+    NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
+    NSRange begin = [view selectedRange];
+    NSUInteger pos = begin.location;
+    
+    NSUInteger sentence_head = NSNotFound;
+    int sentence_found = 0;
+    // Search "." or "!" or "?" forward and check if it is followed by spaces(and closing characters)
+    for( ; pos < s.length && NSNotFound == sentence_head ; pos++ ){
+        unichar c = [s characterAtIndex:pos];
+        if( c == '.' || c == '!' || c == '?' ){
+            // search forward for a space while ignoring ")","]",'"','''
+            for( NSUInteger k = pos+1; k < s.length ; k++ ){
+                unichar c2 = [s characterAtIndex:k];
+                if( c2 == ')' || c2 == ']' || c2 == '"' || c2 == '\'' ){
+                    continue;
+                }else if( [[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
+                    // search next character(which is not white space) to find the head of sentence.
+                    for( k++; k < s.length; k++ ){
+                        if( ![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
+                            // Found a head of sentence.
+                            // if the current insertion point is the head of sentence we do not count it as we find a head of sentence.
+                            if( begin.location != k ){
+                                sentence_found++;
+                                if( [self numericArg] == sentence_found ){
+                                    sentence_head = k;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }else{
+                    // not a end of sentence
+                    break;
+                }
+                if( NSNotFound != sentence_head ){
+                    // already found the position we want
+                    break;
+                }
+            }   
+        }
+    }
+    
+    if( NSNotFound == sentence_head   ){
+        // end of document
+        sentence_head = s.length-1;
+        
+    }
+    
+    _destLocation = sentence_head;
+    [self setTextObject:makeRangeFromLocations(sentence_head, begin.location)];
     return [self textObjectFixed];
+   
 }
 
 
@@ -605,313 +724,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 @end
 
-#pragma mark Normal Command Evaluator
-
-@implementation XVimNormalEvaluator
-/////////////////////////////////////////////////////////////
-// Keep command implementation alphabetical order please.  //
-/////////////////////////////////////////////////////////////
-
-- (XVimEvaluator*)a:(id)arg{
-    // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
-    // next line. it appends to the current line
-    NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    NSRange begin = [view selectedRange];
-    NSUInteger idx = begin.location;
-    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
-        [self xvim].mode = MODE_INSERT;
-        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-    } 
-    [view moveForward:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-- (XVimEvaluator*)A:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveToEndOfLine:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-- (XVimEvaluator*)C_b:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageUp:self];
-    return nil;
-}
-
-// 'c' works like 'd' except that once it's done deleting
-// it should go you into insert mode
-- (XVimEvaluator*)c:(id)arg{
-    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
-}
-
-- (XVimEvaluator*)d:(id)arg{
-    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:FALSE];
-}
-
-- (XVimEvaluator*)D:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveToEndOfLineAndModifySelection:self];
-    [view cut:self];
-    return nil;
-}
-
-- (XVimEvaluator*)C_d:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageDown:self];
-    return nil;
-}
-
-- (XVimEvaluator*)f:(id)arg{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.forward = YES;
-    return eval;
-}
-
-- (XVimEvaluator*)F:(id)arg{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.forward = NO;
-    return eval;
-}
-
-- (XVimEvaluator*)C_f:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageDown:self];
-    return nil;
-}
-
-
-- (XVimEvaluator*)i:(id)arg{
-    // Go to insert 
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-- (XVimEvaluator*)I:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveToBeginningOfLine:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-// For 'J' (join line) bring the line up from below. all leading whitespac 
-// of the line joined in should be stripped and then one space should be inserted 
-// between the joined lines
-- (XVimEvaluator*)J:(id)arg{
-    NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    NSUInteger repeat = [self numericArg];
-    //if( 1 != repeat ){ repeat--; }
-    NSRange r = [view selectedRange];
-    for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        [view moveToEndOfLine:self]; // move to eol
-        [view deleteForward:self];
-        NSRange at = [view selectedRange];
-        [[view textStorage] replaceCharactersInRange:at withString:@" "];
-        while (TRUE) { // delete any leading whitespace from lower line
-            if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
-                break;
-            [view deleteForward:self];
-        }
-        [view setSelectedRange:r];
-    }
-    return nil;
-}
-
-- (XVimEvaluator*)n:(id)arg{
-    [[self xvim] searchNext];
-    return nil;
-}
-
-- (XVimEvaluator*)N:(id)arg{
-    [[self xvim] searchPrevious];
-    return nil;
-}
-
-- (XVimEvaluator*)o:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveToEndOfLine:self];
-    [view insertNewline:self];
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-- (XVimEvaluator*)O:(id)arg{
-    NSTextView* view = [self textView];
-    if( [view _currentLineNumber] == 1 ){
-        [view moveToBeginningOfLine:self];
-        [view insertNewline:self];
-        [view moveUp:self];
-    }
-    else {
-        [view moveUp:self];
-        [view moveToEndOfLine:self];
-        [view insertNewline:self];
-    }
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-- (XVimEvaluator*)p:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveForward:self];
-    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-        [view paste:self];
-    }
-    return nil;
-    
-}
-
-- (XVimEvaluator*)P:(id)arg{
-    NSTextView* view = [self textView];
-    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-        [view paste:self];
-    }
-    return nil;
-    
-}
-
-- (XVimEvaluator*)C_r:(id)arg{
-    // Go to insert 
-    NSTextView* view = [self textView];
-    for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [[view undoManager] redo];
-    }
-    return nil;
-}
-
-- (XVimEvaluator*)u:(id)arg{
-    // Go to insert
-    NSTextView* view = [self textView];
-    for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [[view undoManager] undo];
-    }
-    return nil;
-}
-
-- (XVimEvaluator*)C_u:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageUp:self];
-    return nil;
-}
-
-- (XVimEvaluator*)v:(id)arg{
-    NSTextView* view = [self textView];
-    [self xvim].mode = MODE_VISUAL;
-    return [[XVimVisualEvaluator alloc] initWithOriginalSelectedRange:[view selectedRange]];
-}
-
-- (XVimEvaluator*)V:(id)arg{
-    NSTextView* view = [self textView];
-    [view selectLine:self];
-    [self xvim].mode = MODE_VISUAL;
-    return [[XVimVisualEvaluator alloc] initWithOriginalSelectedRange:[view selectedRange]];
-}
-
-- (XVimEvaluator*)x:(id)arg{
-    NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    // note: in vi you are not supposed to move beyond the end of a line when doing "x" operations
-    // it's that way on purpose. this allows you to hit a bunch of x's in a row and not worry about 
-    // accidentally joining the next line into the current line.
-    NSRange begin = [view selectedRange];
-    NSUInteger idx = begin.location;
-    for( NSUInteger i = 0 ; idx < s.length && i < [self numericArg]; i++,idx++ ){
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
-            // if at the end of line, and are just doing a single x it's like doing X
-            if ([self numericArg] == 1) {
-                if (idx > 0 && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]]) {
-                    [view moveBackwardAndModifySelection:self]; 
-                }
-            }
-            break;
-        }
-        [view moveForwardAndModifySelection:self];
-    }
-    [view delete:self];
-    return nil;
-}
-
-// like 'x" but it goes backwards instead of forwards
-- (XVimEvaluator*)X:(id)arg{
-    NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    // note: in vi you are not supposed to move beyond the start of a line when doing "X" operations
-    // it's that way on purpose. this allows you to hit a bunch of X's in a row and not worry about 
-    // accidentally joining the current line up into the previous line.
-    NSRange begin = [view selectedRange];
-    NSUInteger idx = begin.location;
-    for( NSUInteger i = 0 ; idx > 0 && i < [self numericArg]; i++,idx-- ){
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]])
-            break;
-        [view moveBackwardAndModifySelection:self]; 
-    }
-    [view delete:self];
-    return nil;
-}
-
-- (XVimEvaluator*)y:(id)arg{
-    return [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
-}
-
-- (XVimEvaluator*)GREATERTHAN:(id)arg{
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.unshift = NO;
-    return eval;
-}
-
-- (XVimEvaluator*)LESSTHAN:(id)arg{
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.unshift = YES;
-    return eval;
-    
-}
-
-- (XVimEvaluator*)COLON:(id)arg{
-    // Go to Cmd Line mode
-    // Command line mode is treated totally different way from this XVimEvaluation system
-    // set firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
-    [[self xvim] commandModeWithFirstLetter:@":"];
-    return nil;
-}
-
-- (XVimEvaluator*)SLASH:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"/"];
-    return nil;
-}
-
-- (XVimEvaluator*)QUESTION:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"?"];
-    return nil;
-}
-
-
-- (XVimEvaluator*)Up:(id)arg{
-    return [self k:(id)arg];
-}
-
-- (XVimEvaluator*)Down:(id)arg{
-    return [self j:(id)arg];
-    
-}
-
-- (XVimEvaluator*)Left:(id)arg{
-    return [self h:(id)arg];
-    
-}
-
-- (XVimEvaluator*)Right:(id)arg{
-    return [self l:(id)arg];
-}
-
-- (XVimEvaluator*)textObjectFixed{
-    // in normal mode
-    // move the aaacursor to the end of range
-    NSTextView* view = [self textView];
-    [view setSelectedRange:NSMakeRange([self destLocation], 0)];
-    return nil;
-}
-
-@end
 
 @implementation XVimInsertEvaluator
 - (id)init
@@ -1066,246 +878,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 @end
 
 
-@implementation XVimVisualEvaluator 
-@synthesize lineSelection;
-
-- (id)initWithOriginalSelectedRange:(NSRange)selection{
-    self = [super init];
-    if (self) {
-        _origin = selection.location;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)defaultNextEvaluator{
-    return self;
-}
-
-- (XVimEvaluator*)d:(id)arg{
-    NSTextView* view = [self textView];
-    [view cut:self];
-    return nil;
-}
-
-- (XVimEvaluator*)y:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange r = [view selectedRange];
-    [view copy:self];
-    r.length = 0;
-    [view setSelectedRange:r];
-    return nil;
-}
-- (XVimEvaluator*)w:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveWordForwardAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)W:(id)arg{
-    
-    return self;
-}
-
-- (XVimEvaluator*)b:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveWordBackwardAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)B:(id)arg{
-    return self;
-}
-
-- (XVimEvaluator*)C_d:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view pageDownAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-        
-}
-
-- (XVimEvaluator*)C_u:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view pageUpAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)NUM0:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveToBeginningOfLineAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)DOLLAR:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveToEndOfLineAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)k:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveUpAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)j:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveDownAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)l:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveRightAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)h:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveLeftAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-
-- (XVimEvaluator*)PLUS:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveDownAndModifySelection:self];
-        [view moveToBeginningOfLineAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)MINUS:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveUpAndModifySelection:self];
-        [view moveToBeginningOfLineAndModifySelection:self];
-    }
-    [self resetNumericArg];
-    return self;
-}
-
-- (XVimEvaluator*)ESC:(id)arg{
-    [self xvim].mode = MODE_NORMAL;
-    NSRange r = [[self textView] selectedRange];
-    r.length = 0;
-    [[self textView] setSelectedRange:r];
-   return nil;
-}
-
-- (XVimEvaluator*)GREATERTHAN:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view shiftRight:self];
-    }
-    NSRange r = [[self textView] selectedRange];
-    r.length = 0;
-    [view setSelectedRange:r];
-    [self resetNumericArg];
-    [self xvim].mode = MODE_NORMAL;
-    return nil;
-}
-
-- (XVimEvaluator*)LESSTHAN:(id)arg{
-    NSTextView* view = [self textView];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view shiftLeft:self];
-    }
-    NSRange r = [[self textView] selectedRange];
-    r.length = 0;
-    [view setSelectedRange:r];
-    [self resetNumericArg];
-    [self xvim].mode = MODE_NORMAL;
-    return nil;
-}
-@end
-
-@implementation XVimSearchLineEvaluator
-@synthesize forward;
-
-- (id) initWithRepeat:(NSUInteger)repeat{
-    self = [super init];
-    if (self) {
-        _repeat = repeat;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)eval:(NSEvent *)event ofXVim:(XVim *)xvim{
-    NSString* str = [event characters];
-    NSTextView* view = [xvim sourceView];
-    NSRange original = [view selectedRange];
-    NSRange result = original;
-    NSRange findRange;
-    if( forward ){
-        for( NSUInteger i = 0 ; i < _repeat; i++ ){
-            if( result.location != NSNotFound ){
-                [view setSelectedRange:NSMakeRange(result.location,0)];
-                [view moveToEndOfLineAndModifySelection:self];
-                findRange = [view selectedRange];
-                findRange.location++;
-            }
-            else{
-                break;
-            }
-            result = [[view string] rangeOfString:str options:0 range:findRange];
-        }
-    }
-    else{
-        for( NSUInteger i = 0 ; i < _repeat; i++ ){
-            if( result.location != NSNotFound ){
-                [view setSelectedRange:NSMakeRange(result.location,0)];
-                [view moveToBeginningOfLineAndModifySelection:self];
-                findRange = [view selectedRange];
-            }
-            else{
-                break;
-            }
-            result = [[view string] rangeOfString:str options:NSBackwardsSearch range:findRange];
-        }
-    }
-    if( result.location != NSNotFound ){
-        [view setSelectedRange:NSMakeRange(result.location, 0)];
-    }
-    else{
-        [view setSelectedRange:original];
-    }
-    return nil;
-}
-
-
-@end
 
 
 
