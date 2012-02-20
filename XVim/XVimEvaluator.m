@@ -195,7 +195,7 @@ static char* keynames[] = {
 
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    // This is default implemantation of evaluator.
+    // This is default implementation of evaluator.
     _xvim = xvim; // weak reference
     
     // Only keyDown event supporsed to be passed here.
@@ -752,8 +752,15 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)p:(id)arg{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
+    // the line boundary and then paste the data in.
     NSTextView* view = [self textView];
-    [view moveForward:self];
+    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+        [view moveToEndOfLine:self];
+        [view moveForward:self];
+    }
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
     }
@@ -762,13 +769,21 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)P:(id)arg{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
+    // the line boundary and then paste the data in.
     NSTextView* view = [self textView];
+    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+        [view moveToBeginningOfLine:self];
+    }
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
     }
     return nil;
     
 }
+
 
 - (XVimEvaluator*)C_r:(id)arg{
     // Go to insert 
@@ -805,6 +820,13 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     [view selectLine:self];
     [self xvim].mode = MODE_VISUAL;
     return [[XVimVisualEvaluator alloc] initWithOriginalSelectedRange:[view selectedRange]];
+}
+
+- (XVimEvaluator*)r:(id)arg{
+    NSTextView* view = [self textView];
+    [view moveForwardAndModifySelection:self];
+    [self xvim].mode = MODE_INSERT;
+    return [[XVimInsertEvaluator alloc] initOneCharMode:TRUE];
 }
 
 - (XVimEvaluator*)x:(id)arg{
@@ -925,6 +947,18 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         _repeat = repeat;
         _insertedEvents = [[NSMutableArray alloc] init];
         _insertedEventsAbort = NO;
+        _oneCharMode = FALSE;
+    }
+    return self;
+}
+
+- (id)initOneCharMode:(BOOL)oneCharMode{
+    self = [super init];
+    if (self) {
+        _repeat = 1;
+        _insertedEvents = [[NSMutableArray alloc] init];
+        _insertedEventsAbort = NO;
+        _oneCharMode = TRUE;
     }
     return self;
 }
@@ -956,7 +990,12 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         [_insertedEvents addObject:event];
     }
     [[xvim sourceView] XVimKeyDown:event];
-    return self;
+    if (_oneCharMode == TRUE) {
+        xvim.mode = MODE_NORMAL;
+        return nil;
+    } else {
+        return self;
+    }
 }
 
 @end
@@ -1304,10 +1343,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return nil;
 }
 
-
 @end
-
-
 
 @implementation XVimgEvaluator
 - (XVimEvaluator*)g:(id)arg{
@@ -1316,7 +1352,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return nil;
 }
 @end
-
 
 @implementation XVimShiftEvaluator
 @synthesize unshift;

@@ -89,9 +89,11 @@
     NSUInteger _repeat;
     BOOL _insertedEventsAbort;
     NSMutableArray* _insertedEvents;
+    BOOL _oneCharMode;
 }
 
 - (id)initWithRepeat:(NSUInteger)repeat;
+- (id)initOneCharMode:(BOOL)oneCharMode;
 @end
 
 @interface XVimVisualEvaluator : XVimTextObjectEvaluator{
@@ -110,7 +112,8 @@
 // Evaluates 'g' command
 @interface XVimgEvaluator : XVimTextObjectEvaluator{
 }
-
-
 @end
-   
+// Evaluates 'r' command
+@interface XVimrEvaluator : XVimTextObjectEvaluator{
+}
+@end
