@@ -1033,10 +1033,10 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     [view moveRight:self]; // include eol
     NSRange end = [view selectedRange];
     //_destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    NSUInteger max = [[[self textView] string] length] - 1;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location > max ? max: end.location)];
     // set cursor back to original position
     [view setSelectedRange:begin];
-    
     return [self textObjectFixed];
 }
 
@@ -1086,7 +1086,8 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     [view moveRight:self]; // include eol
     NSRange end = [view selectedRange];
     //_destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    NSUInteger max = [[[self textView] string] length] - 1;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location > max ? max: end.location)];
     // set cursor back to original position
     [view setSelectedRange:begin];
     
