@@ -60,6 +60,7 @@ static NSMutableArray* queue;
         cmdline.xvim = xvim;
         xvim.cmdLine = cmdline; 
         xvim.sourceView = self;
+        
         // Try to find parent scroll view
         NSScrollView* scrollView = [self enclosingScrollView]; // DVTSourceTextScrollView
         if( nil != scrollView ){
@@ -96,16 +97,16 @@ static NSMutableArray* queue;
     }
     else{
         if(flag){
-            color = [NSColor colorWithDeviceRed:0.0 green:0.0 blue:0.0 alpha:0.5];
+            color = [color colorWithAlphaComponent:0.5];
             NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
             int glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
             NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
             
-            [color set ];
+            [color set];
             rect.size.width =rect.size.height/2;
             if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
                 rect.size.width=glyphRect.size.width;
-            NSRectFillUsingOperation( rect, NSCompositePlusDarker);
+            NSRectFillUsingOperation( rect, NSCompositeSourceOver);
         } else {
             [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:NO];
         }

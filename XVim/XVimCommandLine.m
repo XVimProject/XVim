@@ -106,15 +106,17 @@
 
 - (void)drawRect:(NSRect)dirtyRect{
     [_status setStringValue:[xvim modeName]];
+    id fontAndColors = [[[xvim sourceView] textStorage] fontAndColorTheme];
+    
     NSColor* color;
     if( [_command.stringValue isEqualToString:@""] ){
-        color = [NSColor colorWithSRGBRed:0 green:0.0 blue:0.0 alpha:0.0];
-        [_status setTextColor:[NSColor blackColor]];
+        color = [NSColor colorWithSRGBRed:0 green:0.0 blue:0.0 alpha:0.0]; // not visible
+        [_status setTextColor:[fontAndColors sourcePlainTextColor]];
 
     }else{
-        color = [NSColor colorWithSRGBRed:0 green:0.0 blue:0.0 alpha:0.6];
-        [_command setTextColor:[NSColor whiteColor]];
-        [_status setTextColor:[NSColor whiteColor]];
+        color = [[fontAndColors sourcePlainTextColor] colorWithAlphaComponent:0.8];
+        [_command setTextColor:[fontAndColors sourceTextBackgroundColor]];
+        [_status setTextColor:[fontAndColors sourceTextBackgroundColor]];
     }
     [color set];
     NSBezierPath* path= [NSBezierPath bezierPathWithRect:dirtyRect];

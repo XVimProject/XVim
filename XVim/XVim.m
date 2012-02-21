@@ -25,6 +25,12 @@
 //                     |- DVTTextSidebarView <- area to display line number or debug point
 //                     
 
+//
+//  DVTSourceTextView
+//         |- DVTFoldingTextStorage (textStorage property)
+//                    |- DVTFontAndColorsTheme (fontAndColorsTheme property)
+//
+
 #import "Logger.h"
 #import "Hooker.h"
 #import "DVTSourceTextViewHook.h"
@@ -80,6 +86,7 @@
     //[Logger registerTracing:@"DVTSourceTextView"];
     //[Logger registerTracing:@"DVTTextFinder"];
     //[Logger registerTracing:@"DVTIncrementalFindBar"];
+    
 }
 
 //////////////////////////////
