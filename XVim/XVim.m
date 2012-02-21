@@ -29,6 +29,7 @@
 #import "Hooker.h"
 #import "DVTSourceTextViewHook.h"
 #import "XVimEvaluator.h"
+#import "XVimNormalEvaluator.h"
 
 @implementation XVim
 @synthesize tag,mode,cmdLine,sourceView;
@@ -215,6 +216,16 @@
         }
         else if( [ex_command hasPrefix:@"!"] ){
             
+        }
+        else if( [ex_command isEqualToString:@"make"] ){
+            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
+            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
+            [[NSApplication sharedApplication] sendEvent:keyPress];
+        }
+        else if( [ex_command isEqualToString:@"run"] ){
+            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
+            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
+            [[NSApplication sharedApplication] sendEvent:keyPress];
         }
         else {
             TRACE_LOG("Don't recognize ex_command %@", ex_command);

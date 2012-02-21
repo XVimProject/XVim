@@ -41,6 +41,8 @@
 // When text object is generated this calls rangeFixed method.
 // Subclasses can override rangeFiexd to do other operation
 // on this range (deletion, e.g.)
+
+// The name "TextObject" may not really good since Vim's text object seems differnet concept
 @interface XVimTextObjectEvaluator : XVimNumericEvaluator{
 @private    
     NSRange _textObject;
@@ -56,19 +58,8 @@
 @end
 
 
-// This evaluates events in Normal (COMMAND) mode
-// This is the root evaluator.
-// Every command and mode transition starts from this object.
-// If XVimTextObjectEvaluator returns valid range object
-// move the cusor to the position
-@interface XVimNormalEvaluator : XVimTextObjectEvaluator
-@end
 
-@interface XVimSearchLineEvaluator : XVimEvaluator{
-    NSUInteger _repeat;
-}
-@property BOOL forward;
-@end
+
 
 @interface XVimDeleteEvaluator : XVimTextObjectEvaluator{
 @private
@@ -93,14 +84,7 @@
 }
 
 - (id)initWithRepeat:(NSUInteger)repeat;
-- (id)initOneCharMode:(BOOL)oneCharMode;
-@end
-
-@interface XVimVisualEvaluator : XVimTextObjectEvaluator{
-    NSUInteger _origin;
-    NSUInteger _end;
-}
-@property BOOL lineSelection;
+- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat;
 @end
 
 @interface XVimShiftEvaluator : XVimTextObjectEvaluator{
