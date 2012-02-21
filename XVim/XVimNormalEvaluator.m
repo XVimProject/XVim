@@ -158,22 +158,36 @@
 }
 
 - (XVimEvaluator*)p:(id)arg{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
+    // the line boundary and then paste the data in.
+    // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
+    // because dw is not working quite right it seems
     NSTextView* view = [self textView];
+    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+        [view moveToEndOfLine:self];
+    }
     [view moveForward:self];
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
     }
     return nil;
-    
 }
 
 - (XVimEvaluator*)P:(id)arg{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
+    // the line boundary and then paste the data in.
     NSTextView* view = [self textView];
+    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+        [view moveToBeginningOfLine:self];
+    }
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
     }
     return nil;
-    
 }
 
 - (XVimEvaluator*)C_r:(id)arg{
@@ -183,6 +197,13 @@
         [[view undoManager] redo];
     }
     return nil;
+}
+
+- (XVimEvaluator*)r:(id)arg{
+    NSTextView* view = [self textView];
+    [view moveForwardAndModifySelection:self];
+    [self xvim].mode = MODE_INSERT;
+    return [[XVimInsertEvaluator alloc] initOneCharMode:TRUE withRepeat:1];
 }
 
 - (XVimEvaluator*)u:(id)arg{
@@ -275,7 +296,7 @@
 - (XVimEvaluator*)COLON:(id)arg{
     // Go to Cmd Line mode
     // Command line mode is treated totally different way from this XVimEvaluation system
-    // set firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
+    // aet firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
     [[self xvim] commandModeWithFirstLetter:@":"];
     return nil;
 }

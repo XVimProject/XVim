@@ -202,7 +202,7 @@ static char* keynames[] = {
 
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    // This is default implemantation of evaluator.
+    // This is default implementation of evaluator.
     _xvim = xvim; // weak reference
     
     // Only keyDown event supporsed to be passed here.
@@ -834,9 +834,13 @@ paragraph boundary |posix|.
 }
 
 - (id)initWithRepeat:(NSUInteger)repeat{
-    self = [super init];
+    return [self initOneCharMode:FALSE withRepeat:repeat];
+}
+
+- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat{
     if (self) {
         _repeat = repeat;
+        _oneCharMode = oneCharMode;
         _insertedEvents = [[NSMutableArray alloc] init];
         _insertedEventsAbort = NO;
     }
@@ -870,7 +874,12 @@ paragraph boundary |posix|.
         [_insertedEvents addObject:event];
     }
     [[xvim sourceView] XVimKeyDown:event];
-    return self;
+    if (_oneCharMode == TRUE) {
+        xvim.mode = MODE_NORMAL;
+        return nil;
+    } else {
+        return self;
+    }
 }
 
 @end
@@ -908,10 +917,10 @@ paragraph boundary |posix|.
     [view moveRight:self]; // include eol
     NSRange end = [view selectedRange];
     //_destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    NSUInteger max = [[[self textView] string] length] - 1;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location > max ? max: end.location)];
     // set cursor back to original position
     [view setSelectedRange:begin];
-    
     return [self textObjectFixed];
 }
 
@@ -961,7 +970,8 @@ paragraph boundary |posix|.
     [view moveRight:self]; // include eol
     NSRange end = [view selectedRange];
     //_destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(start.location, end.location)];
+    NSUInteger max = [[[self textView] string] length] - 1;
+    [self setTextObject:makeRangeFromLocations(start.location, end.location > max ? max: end.location)];
     // set cursor back to original position
     [view setSelectedRange:begin];
     
@@ -990,7 +1000,6 @@ paragraph boundary |posix|.
     return nil;
 }
 @end
-
 
 @implementation XVimShiftEvaluator
 @synthesize unshift;
