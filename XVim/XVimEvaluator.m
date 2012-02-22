@@ -1,9 +1,17 @@
+
+
 //
+
+
+
 //  XVimEvaluator.m
 //  XVim
 //
+//  Created by Shuichiro Suzuki on 2/3/12.  
 //  Copyright 2012 JugglerShu.Net. All rights reserved.  
 //
+
+
 
 #import "XVimEvaluator.h"
 #import "Logger.h"
@@ -642,13 +650,109 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return nil;
 }
 
+
+/*
+ Definition of Sentence from gVim help
+ 
+A paragraph begins after each empty line, and also at each of a set of
+paragraph macros, specified by the pairs of characters in the 'paragraphs'
+option.  The default is "IPLPPPQPP TPHPLIPpLpItpplpipbp", which corresponds to
+the macros ".IP", ".LP", etc.  (These are nroff macros, so the dot must be in
+                                the first column).  A section boundary is also a paragraph boundary.
+Note that a blank line (only containing white space) is NOT a paragraph
+boundary.
+Also note that this does not include a '{' or '}' in the first column.  When
+the '{' flag is in 'cpoptions' then '{' in the first column is used as a
+paragraph boundary |posix|.
+ */
 - (XVimEvaluator*)LBRACE:(id)arg{ // {
+    NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
+    NSRange begin = [view selectedRange];
+    NSUInteger pos = begin.location;
+    if( pos == 0 ){
+        return nil;
+    }
+    NSUInteger prevpos = pos - 1;
+    NSUInteger paragraph_head = NSNotFound;
+    int paragraph_found = 0;
+    BOOL newlines_skipped = NO;
+    for( ; pos > 0 && NSNotFound == paragraph_head ; pos--,prevpos-- ){
+        unichar c = [s characterAtIndex:pos];
+        unichar prevc = [s characterAtIndex:prevpos];
+        if( [[NSCharacterSet newlineCharacterSet] characterIsMember:c] && [[NSCharacterSet newlineCharacterSet] characterIsMember:prevc]){
+            if( newlines_skipped ){
+                paragraph_found++;
+                if( [self numericArg] == paragraph_found ){
+                    paragraph_head = pos;
+                    break;
+                }else{
+                    newlines_skipped = NO;
+                }
+            }else{
+                // skip continuous newlines 
+                continue;
+            }
+        }else{
+            newlines_skipped = YES;
+        }
+    }
     
+    if( NSNotFound == paragraph_head   ){
+        // begining of document
+        paragraph_head = 0;
+    }
+    
+    _destLocation = paragraph_head;
+    [self setTextObject:makeRangeFromLocations(paragraph_head, begin.location)];
+    return [self textObjectFixed];
 }
 
 - (XVimEvaluator*)RBRACE:(id)arg{ // }
+    NSTextView* view = [self textView];
+    NSMutableString* s = [[view textStorage] mutableString];
+    NSRange begin = [view selectedRange];
+    NSUInteger pos = begin.location;
+    if( 0 == pos ){
+        pos = 1;
+    }
+    NSUInteger prevpos = pos - 1;
     
+    NSUInteger paragraph_head = NSNotFound;
+    int paragraph_found = 0;
+    BOOL newlines_skipped = NO;
+    for( ; pos < s.length && NSNotFound == paragraph_head ; pos++,prevpos++ ){
+        unichar c = [s characterAtIndex:pos];
+        unichar prevc = [s characterAtIndex:prevpos];
+        if( [[NSCharacterSet newlineCharacterSet] characterIsMember:c] && [[NSCharacterSet newlineCharacterSet] characterIsMember:prevc]){
+            if( newlines_skipped ){
+                paragraph_found++;
+                if( [self numericArg] == paragraph_found ){
+                    paragraph_head = pos;
+                    break;
+                }else{
+                    newlines_skipped = NO;
+                }
+            }else{
+                // skip continuous newlines 
+                continue;
+            }
+        }else{
+            newlines_skipped = YES;
+        }
+    }
+    
+    if( NSNotFound == paragraph_head   ){
+        // end of document
+        paragraph_head = s.length-1;
+    }
+    
+    _destLocation = paragraph_head;
+    [self setTextObject:makeRangeFromLocations(paragraph_head, begin.location)];
+    return [self textObjectFixed];
+  
 }
+
 
 /*
  Definition of Sentence from gVim help
@@ -771,7 +875,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     if( NSNotFound == sentence_head   ){
         // end of document
         sentence_head = s.length-1;
-        
     }
     
     _destLocation = sentence_head;

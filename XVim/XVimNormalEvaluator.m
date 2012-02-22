@@ -301,7 +301,7 @@
 - (XVimEvaluator*)COLON:(id)arg{
     // Go to Cmd Line mode
     // Command line mode is treated totally different way from this XVimEvaluation system
-    // set firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
+    // aet firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
     [[self xvim] commandModeWithFirstLetter:@":"];
     return nil;
 }

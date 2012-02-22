@@ -6,6 +6,11 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
+// Currently the navigation in VISUAL MODE is not corresponds to that of NORMAL MODE.
+// Wwe may be able reuse NormalEvaluator as Super class of VisualEvaluator
+// (I have tried once but the problem was when we want to expand the selection range. I did not think well about the problem so it might not be a big problem.)
+// 
+
 #import "XVimVisualEvaluator.h"
 #import "XVim.h"
 
