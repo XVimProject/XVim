@@ -123,6 +123,11 @@
     return nil;
 }
 
+- (XVimEvaluator*)m:(id)arg{
+    // 'm{letter}' sets a local mark. 
+    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
+}
+
 - (XVimEvaluator*)n:(id)arg{
     [[self xvim] searchNext];
     return nil;
