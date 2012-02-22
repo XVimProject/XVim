@@ -97,6 +97,7 @@
         _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
         _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
+        _localMarks = [[NSMutableDictionary alloc] init];
     }
     
     return self;
@@ -105,6 +106,10 @@
 -(void)dealloc{
     [_lastSearchString release];
     [XVimNormalEvaluator release];
+}
+
+- (NSMutableDictionary *)getLocalMarks{
+    return _localMarks;
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{

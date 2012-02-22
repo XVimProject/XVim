@@ -9,6 +9,13 @@
 
 @class XVim;
 
+typedef enum {
+  MARKOPERATOR_SET,
+  MARKOPERATOR_MOVETO,
+  MARKOPERATOR_MOVETOSTARTOFLINE
+} XVimMarkOperator;
+
+
 @interface XVimEvaluator : NSObject{
 @private
     NSTextView* _textView;
@@ -32,6 +39,14 @@
 - (void)resetNumericArg;
 @end
 
+// This evaluator is collecting a mark name as part of the 'm{mark-name-letter}' command
+@interface XVimLocalMarkEvaluator : XVimEvaluator{
+@private
+     XVimMarkOperator _markOperator;
+     XVim *_xvimTarget;
+}
+- (id)initWithMarkOperator:(XVimMarkOperator)markOperator xvimTarget:(XVim *)xvimTarget;
+@end
 
 // This evaluator is waiting for the text object command.
 // Text Object is a range of string.
