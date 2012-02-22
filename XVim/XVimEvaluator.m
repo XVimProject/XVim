@@ -1,17 +1,10 @@
-
-
 //
-
-
-
 //  XVimEvaluator.m
 //  XVim
 //
 //  Created by Shuichiro Suzuki on 2/3/12.  
 //  Copyright 2012 JugglerShu.Net. All rights reserved.  
 //
-
-
 
 #import "XVimEvaluator.h"
 #import "Logger.h"
@@ -274,11 +267,16 @@ static char* keynames[] = {
             return nil;
         }
         NSTextView* view = [_xvimTarget sourceView];
+        NSString* s = [[view textStorage] string];
+        if (r.location > [s length]) {
+            // mark is past end of file do nothing
+            return nil;
+        }
+        
         [view setSelectedRange:r];
         if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
             [view moveToBeginningOfLine:nil];
             r = [view selectedRange];
-            NSString* s = [[view textStorage] string];
             for (NSUInteger idx = r.location; idx < s.length; idx++) {// moveto 1st non whitespace
                 if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]]) break;
                 [view moveRight:self];
