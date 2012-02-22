@@ -21,7 +21,6 @@ enum{
 static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT", 
     @"VISUAL"};
 
-
 #define XVIM_TAG 1209 // This is my birthday!
 
 @interface XVim : NSTextView <NSTextFieldDelegate>
@@ -34,6 +33,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
      BOOL _wrapScan;
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
+     NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 }
 
 @property NSInteger tag;
@@ -53,4 +53,5 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)searchBackward;
 - (NSString*)modeName;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
+- (NSMutableDictionary *)getLocalMarks;
 @end
