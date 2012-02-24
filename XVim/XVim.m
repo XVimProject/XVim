@@ -117,6 +117,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
         _searchBackword = NO;
         _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
         _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
+        _errorBells = FALSE; // ring bell on input errors.
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
         _localMarks = [[NSMutableDictionary alloc] init];
     }
@@ -233,6 +234,12 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
                 }                
                 else if( [setCommand isEqualToString:@"nowrapscan"] || [setCommand isEqualToString:@"nows"] ){
                     _wrapScan = FALSE;
+                }            
+                else if( [setCommand isEqualToString:@"errorbells"] || [setCommand isEqualToString:@"eb"] ){
+                    _errorBells= TRUE;
+                }            
+                else if( [setCommand isEqualToString:@"noerrorbells"] || [setCommand isEqualToString:@"noeb"] ){
+                    _errorBells= FALSE;
                 }            
 
                 else {
@@ -471,6 +478,22 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     }
     rr.location = x; 
     return rr;
+}
+
+- (void)ringBell {
+    if (_errorBells) {
+        NSBeep();
+    }
+    return;
+}
+- (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell {
+    // right now we don't do anything w/ the message
+    // it should go into the status area before the MODE word and get cleared next time 
+    // the mode changes ?
+    if (ringBell) {
+        [self ringBell];
+    }
+    return;
 }
 
 @end

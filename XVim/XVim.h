@@ -31,6 +31,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
      BOOL _searchBackword;
      BOOL _ignoreCase;
      BOOL _wrapScan;
+     BOOL _errorBells;
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
      NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
@@ -56,5 +57,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (NSInteger)wordCharSetIdForChar:(unichar)c;
 - (NSRange)wordForward:(NSTextView *)view begin:(NSRange)at;
 - (NSRange)wordBackward:(NSTextView *)view begin:(NSRange)at;
-
+- (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell;
+- (void)ringBell;
 @end
