@@ -54,14 +54,17 @@ typedef enum {
 // text object which represents current insertion point
 // to the begining of next word.
 // When text object is generated this calls rangeFixed method.
-// Subclasses can override rangeFiexd to do other operation
+// Subclasses can override rangeFixed to do other operation
 // on this range (deletion, e.g.)
 
 // The name "TextObject" may not really good since Vim's text object seems differnet concept
 @interface XVimTextObjectEvaluator : XVimNumericEvaluator{
+
 @private    
     NSRange _textObject;
-    NSUInteger _destLocation; // end point of the text object. This is neccesary since we can't determine which is the start and end point of the range(text object).
+    // end point of the text object. This is neccesary since we can't determine which is 
+    // the start and end point of the range(text object).
+    NSUInteger _destLocation; 
     id _textObjectFixedHandlerObject;
     SEL _textObjectFixedHandler;
 }
