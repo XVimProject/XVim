@@ -7,12 +7,14 @@
 //
 
 // Currently the navigation in VISUAL MODE is not corresponds to that of NORMAL MODE.
-// Wwe may be able reuse NormalEvaluator as Super class of VisualEvaluator
-// (I have tried once but the problem was when we want to expand the selection range. I did not think well about the problem so it might not be a big problem.)
+// We may be able reuse NormalEvaluator as Super class of VisualEvaluator
+// (I have tried once but the problem was when we want to expand the selection range. I did not think well 
+// about the problem so it might not be a big problem.)
 // 
 
 #import "XVimVisualEvaluator.h"
 #import "XVim.h"
+#import "Logger.h"
 
 @implementation XVimVisualEvaluator 
 @synthesize lineSelection;
@@ -44,12 +46,23 @@
     return nil;
 }
 - (XVimEvaluator*)w:(id)arg{
+#if 1
+    // question: when is this executed ?
     NSTextView* view = [self textView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveWordForwardAndModifySelection:self];
     }
     [self resetNumericArg];
     return self;
+#else
+    NSTextView* view = [self textView];
+    NSRange at = [view selectedRange];
+    for( int i = 0; i < [self numericArg]; i++ ){
+        at = [[self xvim] wordForward:view begin:[view selectedRange]];
+    }
+    [self resetNumericArg];
+    return self;
+#endif
 }
 
 - (XVimEvaluator*)W:(id)arg{
@@ -58,12 +71,23 @@
 }
 
 - (XVimEvaluator*)b:(id)arg{
+#if 1
+    // question: when is this executed ?
     NSTextView* view = [self textView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveWordBackwardAndModifySelection:self];
     }
     [self resetNumericArg];
     return self;
+#else
+    NSTextView* view = [self textView];
+    NSRange at = [view selectedRange];
+    for( int i = 0; i < [self numericArg]; i++ ){
+        at = [[self xvim] wordBackward:view begin:[view selectedRange]];
+    }
+    [self resetNumericArg];
+    return self;
+#endif
 }
 
 - (XVimEvaluator*)B:(id)arg{

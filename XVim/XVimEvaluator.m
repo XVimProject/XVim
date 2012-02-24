@@ -376,7 +376,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     _textObjectFixedHandlerObject = [obj retain];
     _textObjectFixedHandler = sel;
 }
-
 - (NSRange)textObject{
     return _textObject;
 }
@@ -388,23 +387,14 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return _destLocation;
 }
 
-// TODO: parse string and find the end of word byourself.
 - (XVimEvaluator*)w:(id)arg{
-    // Currently implemented easily
-    NSTextView* view = [self textView];
-    // Current position
-    NSRange begin = [view selectedRange];
-    
-    // Position to next word
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveWordForward:self];
+    NSRange begin = [[self textView] selectedRange];
+    NSRange at = [[self textView] selectedRange];
+    for (int i = 0; i < [self numericArg]; i++) {
+        at = [[self xvim] wordForward:[self textView] begin:at];
     }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    // set cursor back to original position
-    [view setSelectedRange:begin];
+    [self setTextObject:makeRangeFromLocations(begin.location, at.location)];
+    _destLocation = at.location;
     return [self textObjectFixed];
 }
 
@@ -413,16 +403,13 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)b:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveWordBackward:self];
+    NSRange begin = [[self textView] selectedRange];
+    NSRange at = [[self textView] selectedRange];
+    for (int i = 0; i < [self numericArg]; i++) {
+        at = [[self xvim] wordBackward:[self textView] begin:at];
     }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    [view setSelectedRange:begin];
+    [self setTextObject:makeRangeFromLocations(begin.location, at.location)];
+    _destLocation = at.location;
     return [self textObjectFixed];
 }
 
@@ -589,8 +576,8 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     NSRange begin = [view selectedRange];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view moveDown:self];
-        [view moveToBeginningOfLine:self];
     }
+    [view moveToBeginningOfLine:self];
     NSRange end = [view selectedRange];
     // move to 1st non whitespace char, now that we are on the destination line
     for (NSUInteger idx = end.location; idx < s.length; idx++) {
@@ -939,11 +926,15 @@ paragraph boundary |posix|.
     else{
         [_insertedEvents addObject:event];
     }
-    [[xvim sourceView] XVimKeyDown:event];
+    
     if (_oneCharMode == TRUE) {
+        NSRange save = [[xvim sourceView] selectedRange];
+        [[xvim sourceView] XVimKeyDown:event];
         xvim.mode = MODE_NORMAL;
+        [[xvim sourceView] setSelectedRange:save];
         return nil;
     } else {
+        [[xvim sourceView] XVimKeyDown:event];
         return self;
     }
 }

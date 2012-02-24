@@ -44,7 +44,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 
 
 - (void)commandModeWithFirstLetter:(NSString*)first;
-
 - (void)commandDetermined:(NSString*)command;
 - (void)commandCanceled;
 - (void)searchNext;
@@ -54,4 +53,8 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (NSString*)modeName;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (NSMutableDictionary *)getLocalMarks;
+- (NSInteger)wordCharSetIdForChar:(unichar)c;
+- (NSRange)wordForward:(NSTextView *)view begin:(NSRange)at;
+- (NSRange)wordBackward:(NSTextView *)view begin:(NSRange)at;
+
 @end
