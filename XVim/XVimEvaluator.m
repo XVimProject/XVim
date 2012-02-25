@@ -343,7 +343,6 @@ static char* keynames[] = {
 @end
 
 
-
 @implementation XVimInsertEvaluator
 - (id)init
 {

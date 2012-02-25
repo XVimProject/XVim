@@ -125,6 +125,93 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self motionFixedFrom:begin.location To:end.location];
 }
 
+- (XVimEvaluator*)PERCENT:(id)arg {
+    // find matching bracketing character and go to it
+    // as long as the nesting level matches up
+    NSTextView* view = [self textView];
+    NSString* s = [[view textStorage] string];
+    NSRange at = [view selectedRange]; 
+    if (at.location >= s.length-1) {
+        // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
+        [[self xvim] ringBell];
+        return self;
+    }
+    at.length = 1;
+    
+    NSString* start_with = [s substringWithRange:at];
+    NSString* look_for;
+    
+    // note: these two much match up with regards to character order
+    NSString* open_chars = @"{[(<";
+    NSString* close_chars = @"}])>";
+    
+    NSInteger direction = 0;
+    NSRange search = [open_chars rangeOfString:start_with];
+    if (search.location != NSNotFound) {
+        direction = 1;
+        look_for = [close_chars substringWithRange:search];
+    }
+    if (direction == 0) {
+        search = [close_chars rangeOfString:start_with];
+        if (search.location != NSNotFound) {
+            direction = -1;
+            look_for = [open_chars substringWithRange:search];
+        }
+    }
+    if (direction == 0) {
+        // src is not an open or close char
+        // vim does not produce an error msg for this so we won't either i guess
+        // [[self xvim] statusMessage:@"Not a match character" :ringBell TRUE]
+        [[self xvim] ringBell];
+        return self;
+    }
+    
+    unichar start_with_c = [start_with characterAtIndex:0];
+    unichar look_for_c = [look_for characterAtIndex:0];
+    NSInteger nest_level = 0;
+    
+    search.location = NSNotFound;
+    search.length = 0;
+    
+    if (direction > 0) {
+        for(NSUInteger x=at.location; x < s.length; x++) {
+            if ([s characterAtIndex:x] == look_for_c) {
+                nest_level--;
+                if (nest_level == 0) { // found match at proper level
+                    search.location = x;
+                    break;
+                }
+            } else if ([s characterAtIndex:x] == start_with_c) {
+                nest_level++;
+            }
+        }
+    } else {
+        for(NSUInteger x=at.location; ; x--) {
+            if ([s characterAtIndex:x] == look_for_c) {
+                nest_level--;
+                if (nest_level == 0) { // found match at proper level
+                    search.location = x;
+                    break;
+                }
+            } else if ([s characterAtIndex:x] == start_with_c) {
+                nest_level++;
+            }
+            if( 0 == x ){
+                break;
+            }
+        }
+    }
+    
+    if (search.location == NSNotFound) {
+        // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
+        [[self xvim] ringBell];
+    } else {
+        [self motionFixedFrom:at.location To:search.location];
+    }
+    
+    return self;
+}
+
 - (XVimEvaluator*)k:(id)arg{
     return [self commonMotion:@selector(prevLine:)];
 }
@@ -451,5 +538,4 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     return [self motionFixedFrom:begin.location To:sentence_head];
 }
-
 @end
