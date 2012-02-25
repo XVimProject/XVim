@@ -17,18 +17,35 @@
 #import "Logger.h"
 
 @implementation XVimVisualEvaluator 
-@synthesize lineSelection;
 
-- (id)initWithOriginalSelectedRange:(NSRange)selection{
+- (id)initWithMode:(VISUAL_MODE)mode initialSelection:(NSUInteger)begin :(NSUInteger)end{
     self = [super init];
     if (self) {
-        _origin = selection.location;
+        _begin = begin;
+        _insertion = end;
+        _mode = mode;
     }
     return self;
 }
 
+
+- (void)dealloc{
+    [super dealloc];
+}
+
 - (XVimEvaluator*)defaultNextEvaluator{
     return self;
+}
+
+- (void)updateSelection:(NSTextView*)view{
+    if( _mode == MODE_CHARACTER ){
+            
+    }else if( _mode == MODE_LINE ){
+        
+    
+    }else if( _mode == MODE_BLOCK){
+        // later
+    }
 }
 
 - (XVimEvaluator*)d:(id)arg{

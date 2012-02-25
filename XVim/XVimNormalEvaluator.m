@@ -10,7 +10,9 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
-
+#import "XVimYankEvaluator.h"
+#import "XVimShiftEvaluator.h"
+#import "XVimDeleteEvaluator.h"
 #import "XVim.h"
 
 @implementation XVimNormalEvaluator
@@ -229,14 +231,16 @@
 - (XVimEvaluator*)v:(id)arg{
     NSTextView* view = [self textView];
     [self xvim].mode = MODE_VISUAL;
-    return [[XVimVisualEvaluator alloc] initWithOriginalSelectedRange:[view selectedRange]];
+    NSRange r = [view selectedRange];
+    return [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER initialSelection:r.location :(NSUInteger)r.location+r.length];
 }
 
 - (XVimEvaluator*)V:(id)arg{
     NSTextView* view = [self textView];
     [view selectLine:self];
     [self xvim].mode = MODE_VISUAL;
-    return [[XVimVisualEvaluator alloc] initWithOriginalSelectedRange:[view selectedRange]];
+    NSRange r = [view selectedRange];
+    return [[XVimVisualEvaluator alloc] initWithMode:MODE_LINE initialSelection:r.location :(NSUInteger)r.location+r.length];
 }
 
 - (XVimEvaluator*)x:(id)arg{

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimEvaluator.h"
+#import "XVimTextObjectEvaluator.h"
 
 // This evaluates events in Normal (COMMAND) mode
 // This is the root evaluator.
