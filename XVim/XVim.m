@@ -37,7 +37,6 @@
 #import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
 
-static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 @implementation XVim
 @synthesize tag,mode,cmdLine,sourceView;
@@ -93,13 +92,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 + (void)initialize
 {
-    if (XVimWordDelimiterCharacterSets == nil) {
-        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects:
-            [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
-            [NSCharacterSet  characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_"],
-            nil
-        ];
-    }
+
     return;
 }
 
@@ -376,101 +369,9 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     return MODE_STRINGS[self.mode];
 }
 
-- (NSInteger)wordCharSetIdForChar:(unichar)c {
-    NSInteger cs_id=0;
-    for (NSCharacterSet* cs in XVimWordDelimiterCharacterSets) {
-        if ([cs characterIsMember:c])
-            break;
-        cs_id++;
-    }
-    return cs_id;
-};
 - (NSRange)wordForward:(NSTextView *)view begin:(NSRange)begin{
-    NSRange rr = begin;
-    NSRange save = begin;
-    NSString *s = [[view textStorage] string];
-    NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:save.location]];
-    NSUInteger x;
-    for (x = save.location+1; x < s.length; x++) {
-        NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-        if (xid != start_cs_id)
-            break;
-    }
-    if (x >= s.length) { // hit end
-        x = s.length-1;
-        rr.location = x;
-        return rr;
-    }
-    if (start_cs_id == 0) {// started in whitespace so we are done
-        rr.location = x;
-        return rr;
-    }
-    // did not start in whitespace if now we are in in non-whitespace we are done
-    NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-    if (cs_id_2 != 0) {
-        rr.location = x;
-        return rr;
-    }
-    // moved out of word into whitespace, move past whitespace
-    for (; x < s.length; x++) {
-        if ([self wordCharSetIdForChar:[s characterAtIndex:x]] != cs_id_2)
-            break;
-    }
-    if (x >= s.length)
-        x = s.length-1;
-    rr.location = x; 
-    return rr;
+
 }
 
-- (NSRange)wordBackward:(NSTextView *)view begin:(NSRange)begin{
-    // summary --
-    // if we are on a boundary start on prev char
-    // move back to start of 1st span
-    // if 1st span was not whitespace we are done
-    // if it was then move back one char and then move to start of 2nd span
-    NSRange rr = begin;
-    NSRange save = begin;
-    NSString *s = [[view textStorage] string];
-    if (save.location == 0) {
-        return save;
-    }
-    // if we are on a boundary start on prev char
-    NSUInteger x = save.location;
-    NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-    NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x-1]];
-    if (start_cs_id != cs_id_2) {
-        start_cs_id = cs_id_2;
-        x--;
-    }
-    // move back to start of current span
-    for (; x > 0; x--) { 
-        NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-        if (xid != start_cs_id) {
-            x++;
-            break;
-        }
-    }
-    // if 1st span was not whitespace we are done
-    if (start_cs_id != 0) {
-        rr.location = x;
-        return rr;
-    }
-    // move back one char
-    x--;
-    if (x == 0) { // start of file. done
-        rr.location = x;
-        return rr;
-    }
-    //  move to start of 2nd span
-    cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-    for (; x > 0; x--) {
-        if ([self wordCharSetIdForChar:[s characterAtIndex:x]] != cs_id_2) {
-            x++;
-            break;
-        }
-    }
-    rr.location = x; 
-    return rr;
-}
 
 @end

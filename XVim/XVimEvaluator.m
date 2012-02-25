@@ -405,9 +405,6 @@ static char* keynames[] = {
 
 @end
 
-
-
-
 @implementation XVimgEvaluator
 - (XVimEvaluator*)g:(id)arg{
     NSTextView* view = [self textView];

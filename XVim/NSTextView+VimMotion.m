@@ -9,13 +9,35 @@
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 
-
 //
 // This category deals Vim's motion in NSTextView.
 // Each method of motion should return the destination position of the motion.
 // They shouldn't change the position of current insertion point(selected range)
 
+static NSArray* XVimWordDelimiterCharacterSets = nil;
+
 @implementation NSTextView (VimMotion)
+
++ (NSArray*) wordDelimiterCharacterSets{
+    if (XVimWordDelimiterCharacterSets == nil) {
+        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects:
+                                          [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
+                                          [NSCharacterSet  characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_"],
+                                          nil
+                                          ];
+    }    
+    return XVimWordDelimiterCharacterSets;
+}
+
+- (NSInteger)wordCharSetIdForChar:(unichar)c {
+    NSInteger cs_id=0;
+    for (NSCharacterSet* cs in [NSTextView wordDelimiterCharacterSets]) {
+        if ([cs characterIsMember:c])
+            break;
+        cs_id++;
+    }
+    return cs_id;
+};
 
 - (NSUInteger)prev:(NSNumber*)count{ //h
     // sample impl
@@ -61,16 +83,47 @@
     return dest;
 }
 
-- (NSUInteger)wordsForward:(NSNumber*)count{ //w
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveWordForward:self];
+- (NSUInteger)wordForward:(NSUInteger)begin{
+    NSRange rr = NSMakeRange(begin, 0);
+    NSRange save = rr;
+    NSString *s = [[self textStorage] string];
+    NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:save.location]];
+    NSUInteger x;
+    for (x = save.location+1; x < s.length; x++) {
+        NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
+        if (xid != start_cs_id)
+            break;
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+    if (x >= s.length) { // hit end
+        x = s.length-1;
+        return x;
+    }
+    if (start_cs_id == 0) {// started in whitespace so we are done
+        return x;
+    }
+    // did not start in whitespace if now we are in in non-whitespace we are done
+    NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x]];
+    if (cs_id_2 != 0) {
+        return x;
+    }
+    // moved out of word into whitespace, move past whitespace
+    for (; x < s.length; x++) {
+        if ([self wordCharSetIdForChar:[s characterAtIndex:x]] != cs_id_2)
+            break;
+    }
+    if (x >= s.length)
+        x = s.length-1;
+    return x;    
 }
+- (NSUInteger)wordsForward:(NSNumber*)count{ //w
+    METHOD_TRACE_LOG();
+    NSRange r = [self selectedRange];
+    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
+        r.location = [self wordForward:r.location];
+    }
+    return r.location;
+}
+
 
 - (NSUInteger)WORDSForward:(NSNumber*)count{ //W
     // sample impl
@@ -92,15 +145,60 @@
     return 0;
 }
 
-- (NSUInteger)wordsBackward:(NSNumber*)count{ //b
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveWordBackward:self];
+- (NSUInteger)wordBackward:(NSUInteger)begin{
+    // summary --
+    // if we are on a boundary start on prev char
+    // move back to start of 1st span
+    // if 1st span was not whitespace we are done
+    // if it was then move back one char and then move to start of 2nd span
+    NSRange rr = NSMakeRange(begin,0);
+    NSRange save = rr;
+    NSString *s = [[self textStorage] string];
+    if (save.location == 0) {
+        return save.location;
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+    // if we are on a boundary start on prev char
+    NSUInteger x = save.location;
+    NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:x]];
+    NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x-1]];
+    if (start_cs_id != cs_id_2) {
+        start_cs_id = cs_id_2;
+        x--;
+    }
+    // move back to start of current span
+    for (; x > 0; x--) { 
+        NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
+        if (xid != start_cs_id) {
+            x++;
+            break;
+        }
+    }
+    // if 1st span was not whitespace we are done
+    if (start_cs_id != 0) {
+        return x;
+    }
+    // move back one char
+    x--;
+    if (x == 0) { // start of file. done
+        return x;
+    }
+    //  move to start of 2nd span
+    cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x]];
+    for (; x > 0; x--) {
+        if ([self wordCharSetIdForChar:[s characterAtIndex:x]] != cs_id_2) {
+            x++;
+            break;
+        }
+    }
+    return x;   
+}
+
+- (NSUInteger)wordsBackward:(NSNumber*)count{ //b
+    NSRange r = [self selectedRange];
+    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
+        r.location = [self wordBackward:r.location];
+    }
+    return r.location;
 }
 
 - (NSUInteger)WORDSBackward:(NSNumber*)count{ //B
