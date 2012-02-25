@@ -42,15 +42,15 @@
     [view moveForward:self]; // include eol
     NSRange end = [view selectedRange];
     NSUInteger max = [[[self textView] string] length] - 1;
-    [self setTextObject:NSMakeRange(start.location, end.location > max ? max-start.location: end.location-start.location)];
+
     // set cursor back to original position
     [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self motionFixedFrom:start.location To:end.location>max?max:end.location];
 }
 
--(XVimEvaluator*)textObjectFixed{
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
     NSTextView* view = [self textView];
-    [view setSelectedRange:[self textObject]];
+    [view setSelectedRange:NSMakeRange(from, to-from)];
     [view cut:self];
     if (_insertModeAtCompletion == TRUE) {
         // Go to insert 

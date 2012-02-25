@@ -20,6 +20,9 @@
 // Keep command implementation alphabetical order please(Except specical characters).  //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+
+// Command which results in cursor motion should be implemented in XVimTextObjectEvaluator
+
 - (XVimEvaluator*)a:(id)arg{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
     // next line. it appends to the current line
@@ -41,12 +44,6 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)C_b:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageUp:self];
-    return nil;
-}
-
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
 - (XVimEvaluator*)c:(id)arg{
@@ -58,36 +55,27 @@
 }
 
 - (XVimEvaluator*)D:(id)arg{
+    // TODO: handle numericArg
     NSTextView* view = [self textView];
     [view moveToEndOfLineAndModifySelection:self];
     [view cut:self];
     return nil;
 }
 
-- (XVimEvaluator*)C_d:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageDown:self];
-    return nil;
-}
 
+// Should be moved to XVimTextObjectEvaluator
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithRepeat:[self numericArg]];
     eval.forward = YES;
     return eval;
 }
 
+// Should be moved to XVimTextObjectEvaluator
 - (XVimEvaluator*)F:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithRepeat:[self numericArg]];
     eval.forward = NO;
     return eval;
 }
-
-- (XVimEvaluator*)C_f:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageDown:self];
-    return nil;
-}
-
 
 - (XVimEvaluator*)i:(id)arg{
     // Go to insert 
@@ -125,6 +113,7 @@
     return nil;
 }
 
+// Should be moveed to XVimTextObjectEvaluator
 - (XVimEvaluator*)m:(id)arg{
     // 'm{letter}' sets a local mark. 
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
@@ -219,12 +208,6 @@
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] undo];
     }
-    return nil;
-}
-
-- (XVimEvaluator*)C_u:(id)arg{
-    NSTextView* view = [self textView];
-    [view pageUp:self];
     return nil;
 }
 
@@ -338,14 +321,14 @@
     return [self l:(id)arg];
 }
 
-- (XVimEvaluator*)textObjectFixed{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
     // in normal mode
-    // move the a cursor to the end of range
+    // move the a cursor to end of motion
     NSTextView* view = [self textView];
-    NSRange r = NSMakeRange([self destLocation], 0);
+    NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
     [view scrollRangeToVisible:r];
-   return nil;
+    return nil;
 }
 
 @end

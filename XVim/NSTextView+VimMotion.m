@@ -32,7 +32,7 @@
     // sample impl
     NSRange original = [self selectedRange];
     for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveLeft:self];
+        [self moveRight:self];
     }
     NSUInteger dest = [self selectedRange].location;
     [self setSelectedRange:original];
@@ -112,6 +112,50 @@
     NSUInteger dest = [self selectedRange].location;
     [self setSelectedRange:original];
     return dest;
+}
+
+- (NSUInteger)halfPageForward:(NSNumber*)count{ // C-d
+    // sample impl
+    NSRange original = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        [self pageDown:self];
+    }
+    NSUInteger dest = [self selectedRange].location;
+    [self setSelectedRange:original];
+    return dest;   
+}
+
+- (NSUInteger)halfPageBackward:(NSNumber*)count{ // C-u
+    // sample impl
+    NSRange original = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        [self pageUp:self];
+    }
+    NSUInteger dest = [self selectedRange].location;
+    [self setSelectedRange:original];
+    return dest;   
+}
+
+- (NSUInteger)pageForward:(NSNumber*)count{ // C-f
+    // sample impl
+    NSRange original = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        [self pageDown:self];
+    }
+    NSUInteger dest = [self selectedRange].location;
+    [self setSelectedRange:original];
+    return dest;   
+}
+
+- (NSUInteger)pageBackward:(NSNumber*)count{ // C-b
+    // sample impl
+    NSRange original = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        [self pageUp:self];
+    }
+    NSUInteger dest = [self selectedRange].location;
+    [self setSelectedRange:original];
+    return dest;   
 }
 
 - (NSUInteger)sentencesBackward:(NSNumber*)count{ //(

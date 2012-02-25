@@ -29,13 +29,10 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 {
     self = [super init];
     if (self) {
-        _textObject = NSMakeRange(0, 0);
+        _motionFrom = 0;
+        _motionTo = 0;
     }
     return self;
-}
-
-- (void)dealloc{
-    [_textObjectFixedHandlerObject release];
 }
 
 - (XVimEvaluator*)commonMotion:(SEL)motion{
@@ -46,29 +43,8 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self motionFixedFrom:_motionFrom To:_motionTo];
 }
 
-
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
-    // Currently call textObjectFixed (This should be override by derived classes)
-    NSRange r = NSMakeRange(from<to?from:to , from<to?(to-from):(from-to) );
-    [self setTextObject:r];
-    _destLocation = to;
-    return [self textObjectFixed];
-}
-
-- (void)setTextObjectFixed:(id)obj handler:(SEL)sel{
-    [_textObjectFixedHandlerObject release];
-    _textObjectFixedHandlerObject = [obj retain];
-    _textObjectFixedHandler = sel;
-}
-- (NSRange)textObject{
-    return _textObject;
-}
-- (void)setTextObject:(NSRange)textObject{
-    _textObject = textObject;
-}
-
-- (NSUInteger)destLocation{
-    return _destLocation;
+    return nil;
 }
 
 - (XVimEvaluator*)w:(id)arg{
@@ -76,15 +52,15 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)W:(id)arg{
-    return [self commonMotion:@selector(WORDSBackword:)];
+    return [self commonMotion:@selector(WORDSBackward:)];
 }
 
 - (XVimEvaluator*)b:(id)arg{
-    return [self commonMotion:@selector(wordsBackword:)];
+    return [self commonMotion:@selector(wordsBackward:)];
 }
 
 - (XVimEvaluator*)B:(id)arg{
-    return [self commonMotion:@selector(WORDSBackword:)];
+    return [self commonMotion:@selector(WORDSBackward:)];
 }
 
 - (XVimEvaluator*)g:(id)arg{
@@ -111,7 +87,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 // It does nothing if the mark is not defined or if the mark is no longer within
 //  the range of the document
 
-// TODO: Move these operation to XVimTextObjectEvaluator since they returns a kind of motion(text range) and can be used by other command like 'd'
 - (XVimEvaluator*)SQUOTE:(id)arg{
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETOSTARTOFLINE xvimTarget:[self xvim]];
 }
@@ -135,11 +110,8 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         [view moveRight:self];
     }
     end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
     [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self motionFixedFrom:begin.location To:end.location];
 }
 
 - (XVimEvaluator*)DOLLAR:(id)arg{
@@ -149,68 +121,42 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         [view moveToEndOfLine:self];
     }
     NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
     [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self motionFixedFrom:begin.location To:end.location];
 }
 
 - (XVimEvaluator*)k:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveUp:self];
-    }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self commonMotion:@selector(prevLine:)];
 }
 
 - (XVimEvaluator*)j:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveDown:self];
-    }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self commonMotion:@selector(nextLine:)];
 }
 
 - (XVimEvaluator*)l:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveRight:self];
-    }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self commonMotion:@selector(next:)];
 }
 
 - (XVimEvaluator*)h:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveLeft:self];
-    }
-    NSRange end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
-    [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self commonMotion:@selector(prev:)];
 }
+
+- (XVimEvaluator*)C_u:(id)arg{
+    return [self commonMotion:@selector(halfPageBackward:)];
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    return [self commonMotion:@selector(halfPageForward:)];
+}
+
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:)];
+}
+
+- (XVimEvaluator*)C_f:(id)arg{
+    return [self commonMotion:@selector(pageForward:)];
+}
+
 
 /* 
  * Space acts like 'l' in vi. moves  cursor forward
@@ -242,11 +188,8 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         [view moveRight:self];
     }
     end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
     [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self motionFixedFrom:begin.location To:end.location];
 }
 
 /* 
@@ -273,11 +216,8 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         [view moveRight:self];
     }
     end = [view selectedRange];
-    _destLocation = end.location;
-    [self setTextObject:makeRangeFromLocations(begin.location, end.location)];
-    
     [view setSelectedRange:begin];
-    return [self textObjectFixed];
+    return [self motionFixedFrom:begin.location To:end.location];
 }
 
 
@@ -344,9 +284,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         paragraph_head = 0;
     }
     
-    _destLocation = paragraph_head;
-    [self setTextObject:makeRangeFromLocations(paragraph_head, begin.location)];
-    return [self textObjectFixed];
+    return [self motionFixedFrom:begin.location To:paragraph_head];
 }
 
 - (XVimEvaluator*)RBRACE:(id)arg{ // }
@@ -387,11 +325,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         // end of document
         paragraph_head = s.length-1;
     }
-    
-    _destLocation = paragraph_head;
-    [self setTextObject:makeRangeFromLocations(paragraph_head, begin.location)];
-    return [self textObjectFixed];
-    
+    return [self motionFixedFrom:begin.location To:paragraph_head];
 }
 
 
@@ -458,9 +392,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     
     if( NSNotFound != sentence_head  ){
-        _destLocation = sentence_head;
-        [self setTextObject:makeRangeFromLocations(sentence_head, begin.location)];
-        return [self textObjectFixed];
+        return [self motionFixedFrom:begin.location To:sentence_head];
     }else{
         // no movement
         return nil;
@@ -517,20 +449,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         // end of document
         sentence_head = s.length-1;
     }
-    
-    _destLocation = sentence_head;
-    [self setTextObject:makeRangeFromLocations(sentence_head, begin.location)];
-    return [self textObjectFixed];
-    
+    return [self motionFixedFrom:begin.location To:sentence_head];
 }
 
-
-- (XVimEvaluator*)textObjectFixed{
-    if( nil != _textObjectFixedHandlerObject ){
-        return [_textObjectFixedHandlerObject performSelector:_textObjectFixedHandler withObject:self];
-    }
-    else{
-        return nil;
-    }
-}
 @end

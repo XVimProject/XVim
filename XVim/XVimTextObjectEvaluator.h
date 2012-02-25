@@ -21,13 +21,6 @@
 @interface XVimTextObjectEvaluator : XVimNumericEvaluator{
     
 @private    
-    NSRange _textObject;
-    // end point of the text object. This is neccesary since we can't determine which is 
-    // the start and end point of the range(text object).
-    NSUInteger _destLocation; 
-    id _textObjectFixedHandlerObject;
-    SEL _textObjectFixedHandler;
-    
     // New design. (_textObject will be replaced with following 2 variables );
     NSUInteger _motionFrom;
     NSUInteger _motionTo;
