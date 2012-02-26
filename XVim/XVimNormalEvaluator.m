@@ -41,6 +41,7 @@
 - (XVimEvaluator*)A:(id)arg{
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
+    [self xvim].mode=MODE_INSERT;
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
