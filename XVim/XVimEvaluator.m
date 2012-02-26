@@ -354,6 +354,7 @@ static char* keynames[] = {
 }
 
 - (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat{
+    self = [super init];
     if (self) {
         _repeat = repeat;
         _oneCharMode = oneCharMode;
