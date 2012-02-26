@@ -28,8 +28,6 @@ typedef enum {
 - (XVim*)xvim;
 @end
 
-
-
 // This evaluator is waiting for number input.
 @interface XVimNumericEvaluator : XVimEvaluator{
     NSUInteger _numericArg;
@@ -48,51 +46,6 @@ typedef enum {
 - (id)initWithMarkOperator:(XVimMarkOperator)markOperator xvimTarget:(XVim *)xvimTarget;
 @end
 
-// This evaluator is waiting for the text object command.
-// Text Object is a range of string.
-// The simplest one is just "w" which will generate
-// text object which represents current insertion point
-// to the begining of next word.
-// When text object is generated this calls rangeFixed method.
-// Subclasses can override rangeFixed to do other operation
-// on this range (deletion, e.g.)
-
-// The name "TextObject" may not really good since Vim's text object seems differnet concept
-@interface XVimTextObjectEvaluator : XVimNumericEvaluator{
-
-@private    
-    NSRange _textObject;
-    // end point of the text object. This is neccesary since we can't determine which is 
-    // the start and end point of the range(text object).
-    NSUInteger _destLocation; 
-    id _textObjectFixedHandlerObject;
-    SEL _textObjectFixedHandler;
-}
-- (XVimEvaluator*)textObjectFixed;
-- (NSRange)textObject;
-- (void)setTextObject:(NSRange)textObject;
-- (NSUInteger) destLocation;
-- (void)setTextObjectFixed:(id)obj handler:(SEL)sel;
-@end
-
-
-
-
-
-@interface XVimDeleteEvaluator : XVimTextObjectEvaluator{
-@private
-    BOOL _insertModeAtCompletion;
-    NSUInteger _repeat;
-}
-- (id)initWithRepeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion;
-@end
-
-@interface XVimYankEvaluator : XVimTextObjectEvaluator{
-@private
-    NSUInteger _repeat;
-}
-- (id)initWithRepeat:(NSUInteger)repeat;
-@end
 
 @interface XVimInsertEvaluator : XVimEvaluator{
     NSUInteger _repeat;
@@ -105,17 +58,5 @@ typedef enum {
 - (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat;
 @end
 
-@interface XVimShiftEvaluator : XVimTextObjectEvaluator{
-    NSUInteger _repeat;
-}
-@property BOOL unshift;
-- (id) initWithRepeat:(NSUInteger)repeat;
-@end
-// Evaluates 'g' command
-@interface XVimgEvaluator : XVimTextObjectEvaluator{
-}
-@end
-// Evaluates 'r' command
-@interface XVimrEvaluator : XVimTextObjectEvaluator{
-}
-@end
+
+
