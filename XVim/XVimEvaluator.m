@@ -7,6 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
+#import "XVimTextObjectEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 #import "XVim.h"
@@ -143,6 +144,7 @@ static char* keynames[] = {
 };
 
 
+#pragma mark XVimEvaluator
 @implementation XVimEvaluator
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event{
     // S- Shift
@@ -230,6 +232,7 @@ static char* keynames[] = {
 
 @end
 
+#pragma mark VimLocalMarkEvaluator
 @implementation XVimLocalMarkEvaluator
 
 - (id)init
@@ -342,6 +345,36 @@ static char* keynames[] = {
 }
 @end
 
+
+// This evaluator is base class of an evaluator which takes argument to fix the motion
+// e.g. 'f','F'
+@implementation XVimMotionArgumentEvaluator
+- (id)initWithMotionEvaluator:(XVimTextObjectEvaluator*)evaluator withRepeat:(NSUInteger)repeat{
+    self = [super init];
+    if( self ){
+        _repeat = repeat;
+        _motionEvaluator = [evaluator retain];
+    }
+    return self;
+}
+
+
+- (void)dealloc{
+    [_motionEvaluator release];
+    [super dealloc];
+}
+
+- (NSUInteger)repeat{
+    return _repeat;
+}
+
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+    if( nil != _motionEvaluator ){
+        return [_motionEvaluator motionFixedFrom:from To:to];
+    }
+    return nil;
+}
+@end
 
 @implementation XVimInsertEvaluator
 - (id)init

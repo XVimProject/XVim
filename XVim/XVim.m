@@ -287,7 +287,7 @@
     if( [[srcView string] length]-1 > r.location ){
         NSRange found = [[srcView string] 
              rangeOfString:_lastSearchString 
-             options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) 
+             options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
              range:NSMakeRange(r.location+1, [[srcView string] length] - r.location - 1)];
         
         // if wrapscan is on, wrap to the top and try again
@@ -295,7 +295,7 @@
             // TBD: vi usually puts something around the NORMAL|INSERT status msg is that says "scan wrapped"
             found = [[srcView string] 
                 rangeOfString:_lastSearchString 
-                options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) 
+                options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
                 range:NSMakeRange(0, [[srcView string] length])];
         }
         
@@ -319,7 +319,7 @@
     if( r.location > 0 ){
         NSRange found = [[srcView string] 
             rangeOfString:_lastSearchString 
-            options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch)
+            options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
             range:NSMakeRange(0, r.location-1)];
         
         // if wrapscan is on, wrap to the top and try again
@@ -327,7 +327,7 @@
             // TBD: vi usually puts something around the NORMAL|INSERT status msg is that says "scan wrapped"
             found = [[srcView string] 
                      rangeOfString:_lastSearchString 
-                     options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) 
+                     options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
                      range:NSMakeRange(0, [[srcView string] length])];
         }
         

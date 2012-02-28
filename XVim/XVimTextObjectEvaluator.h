@@ -18,6 +18,7 @@
 // on this range (deletion, e.g.)
 
 // The name "TextObject" may not really good since Vim's text object seems differnet concept
+// The name will change to XVimMotionEvaluator
 @interface XVimTextObjectEvaluator : XVimNumericEvaluator{
     
 @private    
@@ -28,11 +29,10 @@
 // textObjectFixed will be replaced with this method
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to;
 
-- (XVimEvaluator*)textObjectFixed;
-- (NSRange)textObject;
-- (void)setTextObject:(NSRange)textObject;
-- (NSUInteger) destLocation;
-- (void)setTextObjectFixed:(id)obj handler:(SEL)sel;
-
 
 @end
+
+
+
+    
+
