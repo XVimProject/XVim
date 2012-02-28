@@ -8,6 +8,7 @@
 
 
 @class XVim;
+@class XVimTextObjectEvaluator;
 
 typedef enum {
   MARKOPERATOR_SET,
@@ -36,6 +37,18 @@ typedef enum {
 - (NSUInteger)numericArg;
 - (void)resetNumericArg;
 @end
+
+// This is base class of an evaluator which takes arguments to determing the motion such as 'f','F'.
+// When the subclass fix the motion it must call motionFixedFrom:To: method.
+@interface XVimMotionArgumentEvaluator : XVimEvaluator{
+@private
+    XVimTextObjectEvaluator* _motionEvaluator;
+    NSUInteger _repeat;
+}
+- (id)initWithMotionEvaluator:(XVimTextObjectEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to;
+@end
+
 
 // This evaluator is collecting a mark name as part of the 'm{mark-name-letter}' command
 @interface XVimLocalMarkEvaluator : XVimEvaluator{

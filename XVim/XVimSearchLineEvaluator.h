@@ -7,9 +7,9 @@
 //
 
 #import "XVimEvaluator.h"
+#import "XVimTextObjectEvaluator.h"
 
-@interface XVimSearchLineEvaluator : XVimEvaluator{
-    NSUInteger _repeat;
+@interface XVimSearchLineEvaluator : XVimMotionArgumentEvaluator{
 }
 @property BOOL forward;
 @end

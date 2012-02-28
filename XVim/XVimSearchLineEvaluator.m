@@ -8,61 +8,64 @@
 
 #import "XVimSearchLineEvaluator.h"
 #import "XVim.h"
-
+#import "Logger.h"
 
 // Search Line 
 @implementation XVimSearchLineEvaluator
 @synthesize forward;
 
-- (id) initWithRepeat:(NSUInteger)repeat{
-    self = [super init];
-    if (self) {
-        _repeat = repeat;
-    }
-    return self;
-}
-
 - (XVimEvaluator*)eval:(NSEvent *)event ofXVim:(XVim *)xvim{
-    NSString* str = [event characters];
+    unichar searchChar = [[event characters] characterAtIndex:0];
     NSTextView* view = [xvim sourceView];
     NSRange original = [view selectedRange];
-    NSRange result = original;
-    NSRange findRange;
+    NSString* source = [view string];
+    NSRange result = NSMakeRange(NSNotFound, 0);
+    NSUInteger num = [self repeat];
     if( forward ){
-        for( NSUInteger i = 0 ; i < _repeat; i++ ){
-            if( result.location != NSNotFound ){
-                [view setSelectedRange:NSMakeRange(result.location,0)];
-                [view moveToEndOfLineAndModifySelection:self];
-                findRange = [view selectedRange];
-                findRange.location++;
+        // Get the position of the newlinebreak
+        NSRange nextNewline = [source rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:NSMakeRange(original.location, source.length-original.location)];
+        if( nextNewline.location == NSNotFound ){
+            nextNewline.location = source.length;
+        }
+        // find the char forwards for "num" times
+        for( NSUInteger i = original.location+1; i < nextNewline.location; i++ ){
+            if( [source characterAtIndex:i] == searchChar ){
+                num--;
+                if( 0 == num ){
+                    result.location = i;
+                    break;
+                }
             }
-            else{
-                break;
-            }
-            result = [[view string] rangeOfString:str options:0 range:findRange];
         }
     }
     else{
-        for( NSUInteger i = 0 ; i < _repeat; i++ ){
-            if( result.location != NSNotFound ){
-                [view setSelectedRange:NSMakeRange(result.location,0)];
-                [view moveToBeginningOfLineAndModifySelection:self];
-                findRange = [view selectedRange];
+        // Get the position of the prev newlinebreak
+        if( 0 == original.location )
+            return nil;
+        
+        NSRange prevNewLine= [source rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, original.location)];
+        if( prevNewLine.location == NSNotFound ){
+            prevNewLine.location = 0;
+        }
+        // find the char backwards for "num" times
+        for( NSUInteger i = original.location-1; i >= prevNewLine.location; i-- ){
+            if( [source characterAtIndex:i] == searchChar ){
+                num--;
+                if( 0 == num ){
+                    result.location = i;
+                    break;
+                }
             }
-            else{
-                break;
+            if( 0 == i ){
+                break; // since i is unsigned, we need this.
             }
-            result = [[view string] rangeOfString:str options:NSBackwardsSearch range:findRange];
         }
     }
     if( result.location != NSNotFound ){
-        [view setSelectedRange:NSMakeRange(result.location, 0)];
-    }
-    else{
-        [view setSelectedRange:original];
+        TRACE_LOG(@"%d %d", original.location, result.location );
+        return [self motionFixedFrom:original.location To:result.location];
     }
     return nil;
 }
-
 
 @end

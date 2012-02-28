@@ -64,19 +64,7 @@
 }
 
 
-// Should be moved to XVimTextObjectEvaluator
-- (XVimEvaluator*)f:(id)arg{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.forward = YES;
-    return eval;
-}
 
-// Should be moved to XVimTextObjectEvaluator
-- (XVimEvaluator*)F:(id)arg{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.forward = NO;
-    return eval;
-}
 
 - (XVimEvaluator*)i:(id)arg{
     // Go to insert 

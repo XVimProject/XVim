@@ -7,6 +7,7 @@
 //
 
 #import "XVimTextObjectEvaluator.h"
+#import "XVimSearchLineEvaluator.h"
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
@@ -47,13 +48,9 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return nil;
 }
 
-- (XVimEvaluator*)w:(id)arg{
-    return [self commonMotion:@selector(wordsForward:)];
-}
-
-- (XVimEvaluator*)W:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:)];
-}
+////////////KeyDown Handlers///////////////
+// Please keep it in alphabetical order ///
+///////////////////////////////////////////
 
 - (XVimEvaluator*)b:(id)arg{
     return [self commonMotion:@selector(wordsBackward:)];
@@ -63,6 +60,31 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self commonMotion:@selector(WORDSBackward:)];
 }
 
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:)];
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    return [self commonMotion:@selector(halfPageForward:)];
+}
+
+- (XVimEvaluator*)f:(id)arg{
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    eval.forward = YES;
+    return eval;
+}
+
+// Should be moved to XVimTextObjectEvaluator
+- (XVimEvaluator*)F:(id)arg{
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    eval.forward = NO;
+    return eval;
+}
+
+- (XVimEvaluator*)C_f:(id)arg{
+    return [self commonMotion:@selector(pageForward:)];
+}
+
 - (XVimEvaluator*)g:(id)arg{
     return [[XVimgEvaluator alloc] init];
 }
@@ -70,6 +92,33 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 - (XVimEvaluator*)G:(id)arg{
     NSTextView* view = [self textView];
     return [self motionFixedFrom:[view selectedRange].location To:[view string].length]; // Is this safe? Should it be [view string].length-1?
+}
+- (XVimEvaluator*)h:(id)arg{
+    return [self commonMotion:@selector(prev:)];
+}
+
+- (XVimEvaluator*)j:(id)arg{
+    return [self commonMotion:@selector(nextLine:)];
+}
+
+- (XVimEvaluator*)k:(id)arg{
+    return [self commonMotion:@selector(prevLine:)];
+}
+
+- (XVimEvaluator*)l:(id)arg{
+    return [self commonMotion:@selector(next:)];
+}
+
+- (XVimEvaluator*)C_u:(id)arg{
+    return [self commonMotion:@selector(halfPageBackward:)];
+}
+
+- (XVimEvaluator*)w:(id)arg{
+    return [self commonMotion:@selector(wordsForward:)];
+}
+
+- (XVimEvaluator*)W:(id)arg{
+    return [self commonMotion:@selector(WORDSBackward:)];
 }
 
 - (XVimEvaluator*)NUM0:(id)arg{
@@ -211,39 +260,6 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     
     return self;
 }
-
-- (XVimEvaluator*)k:(id)arg{
-    return [self commonMotion:@selector(prevLine:)];
-}
-
-- (XVimEvaluator*)j:(id)arg{
-    return [self commonMotion:@selector(nextLine:)];
-}
-
-- (XVimEvaluator*)l:(id)arg{
-    return [self commonMotion:@selector(next:)];
-}
-
-- (XVimEvaluator*)h:(id)arg{
-    return [self commonMotion:@selector(prev:)];
-}
-
-- (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:)];
-}
-
-- (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:)];
-}
-
-- (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:)];
-}
-
-- (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:)];
-}
-
 
 /* 
  * Space acts like 'l' in vi. moves  cursor forward
@@ -539,3 +555,4 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self motionFixedFrom:begin.location To:sentence_head];
 }
 @end
+
