@@ -8,6 +8,7 @@
 
 #import "XVimDeleteEvaluator.h"
 #import "XVim.h"
+#import "Logger.h"
 
 @implementation XVimDeleteEvaluator
 
@@ -31,21 +32,46 @@
     
     if (_repeat < 1) 
         return nil;
+        
     NSTextView* view = [self textView];
+    NSUInteger max = [[view string] length];
+    if (max > 0) 
+        max--;
     NSRange begin = [view selectedRange];
+    NSRange start;
+    NSRange end;
+    
+    if (_repeat == 1 && begin.location == max) {
+        // edge case:
+        // if repeat is only one and we are at the end of a file at an empty line
+        // delete the current line even though it's "behind us" (sort of)
+        // this is vi behavior.
+        [view moveToBeginningOfLine:self];
+        start = [view selectedRange];
+        if (NSEqualRanges(start, begin)) { // we didn't move at all (empty line)
+            [view moveBackward:self];
+            start = [view selectedRange];
+            end = begin;
+            return [self motionFixedFrom:start.location To:end.location];
+        }
+    }
+    
     [view moveToBeginningOfLine:self];
-    NSRange start = [view selectedRange];
+    start = [view selectedRange];
     for (int i = 1; i < _repeat; i++) {
         [view moveDown:self];
     }
     [view moveToEndOfLine:self];
     [view moveForward:self]; // include eol
-    NSRange end = [view selectedRange];
-    NSUInteger max = [[[self textView] string] length] - 1;
-
-    // set cursor back to original position
+    end = [view selectedRange];
+    if (end.location > max) {
+        end.location = max, end.length = 0;
+    }
+    if (start.location > max) {
+        start.location = max, start.length = 0;
+    }
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:start.location To:end.location>max?max:end.location];
+    return [self motionFixedFrom:start.location To:end.location];
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
