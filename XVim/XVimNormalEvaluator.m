@@ -215,6 +215,11 @@
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_LINE initialSelection:r.location :(NSUInteger)r.location+r.length];
 }
 
+- (XVimEvaluator*)C_v:(id)arg{
+    // Block selection
+    return nil;
+}
+
 - (XVimEvaluator*)x:(id)arg{
     NSTextView* view = [self textView];
     NSMutableString* s = [[view textStorage] mutableString];
