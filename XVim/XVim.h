@@ -27,7 +27,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
  {
 @private
      NSMutableString* _lastSearchString;
-     NSUInteger _lastSearchIndex;
+     NSUInteger _nextSearchBaseLocation;
      BOOL _searchBackword;
      BOOL _ignoreCase;
      BOOL _wrapScan;
@@ -41,8 +41,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @property NSInteger mode;
 @property(retain) XVimCommandLine* cmdLine;
 @property(retain) NSTextView* sourceView;
-
-
 
 - (void)commandModeWithFirstLetter:(NSString*)first;
 - (void)commandDetermined:(NSString*)command;
@@ -59,4 +57,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (NSRange)wordBackward:(NSTextView *)view begin:(NSRange)at;
 - (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)ringBell;
+- (void)setNextSearchBaseLocation:(NSUInteger)location;
+- (NSUInteger)getNextSearchBaseLocation;
 @end

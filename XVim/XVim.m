@@ -54,6 +54,9 @@
     Class c = NSClassFromString(@"DVTSourceTextView");
     
     // Hook initWithCoder:
+    [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
+    
+    // Hook initWithCoder:
     [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
     
     // Hook viewDidMoveToSuperview
@@ -106,7 +109,7 @@
         mode = MODE_NORMAL;
         tag = XVIM_TAG;
         _lastSearchString = [[NSMutableString alloc] init];
-        
+        _nextSearchBaseLocation = 0;
         _searchBackword = NO;
         _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
         _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
@@ -146,7 +149,7 @@
     NSTextView* srcView = [self superview]; // DVTTextSourceView
     TRACE_LOG(@"command : %@", c);
     if( [c length] == 0 ){
-        // Something wroing
+        // Something wrong
         ERROR_LOG(@"command string empty");
     }
     else if( [c characterAtIndex:0] == ':' ){
@@ -194,14 +197,14 @@
             // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
             // TODO: set first responder to the new DVTSourceTextView after switching tabs.
             NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"}" charactersIgnoringModifiers:@"}" isARepeat:NO keyCode:1];
+            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:/*{*/@"}" charactersIgnoringModifiers:/*{*/@"}" isARepeat:NO keyCode:1];
             [[NSApplication sharedApplication] sendEvent:keyPress];
         }
         else if( [ex_command isEqualToString:@"bp"] ){
             // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
             // TODO: set first responder to the new DVTSourceTextView after switching tabs.
             NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"{" charactersIgnoringModifiers:@"{" isARepeat:NO keyCode:1];
+            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"{"/*}*/ charactersIgnoringModifiers:@"{"/*}*/ isARepeat:NO keyCode:1];
             [[NSApplication sharedApplication] sendEvent:keyPress];
         }
         else if( [ex_command hasPrefix:@"se"] ){
@@ -257,19 +260,22 @@
             TRACE_LOG("Don't recognize ex_command %@", ex_command);
         }
     }
-    else if( [c characterAtIndex:0] == '/' ){
-        // search
-        _searchBackword = NO;
-        if( [c length] > 1 ){
-            [_lastSearchString setString: [[c substringFromIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
-            // I think there should be better solution to handle search action by using XCode features...
+    else if ([c characterAtIndex:0] == '/' || [c characterAtIndex:0] == '?') {
+        if ([c characterAtIndex:0] == '?') {
+            _searchBackword = YES;
+        } else {
+            _searchBackword = NO;
+        }
+        if([c length] == 1) {
+            // in vi, if there's no search string. use the last one specified. like you do for 'n'
+            // just set the direction of the search
             [self searchNext];
         }
-    }
-    else if( [c characterAtIndex:0] == '?' ){
-        _searchBackword = YES;
-        if( [c length] > 1 ){
-            [_lastSearchString setString: [[c substringFromIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+        else if([c length] > 1) {
+            // Don't trim whitespace. that's valid search criteria. just move past the command letter
+            NSString *s = [c substringFromIndex:1];
+            TRACE_LOG(">>>> search string is '%@'", s);
+            [_lastSearchString setString: s];
             [self searchNext];
         }
     }
@@ -278,67 +284,123 @@
     mode = MODE_NORMAL;
 }
 
-- (void)searchForward{
-    NSTextView* srcView = [self superview];
-    // get current insert position
-    NSRange r = [srcView selectedRange];
+- (void)searchForward {
+    // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
+    // We use NSRegularExpression which does (if you tell it to)
     
-    // search text from the index
-    if( [[srcView string] length]-1 > r.location ){
-        NSRange found = [[srcView string] 
-             rangeOfString:_lastSearchString 
-             options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
-             range:NSMakeRange(r.location+1, [[srcView string] length] - r.location - 1)];
-        
-        // if wrapscan is on, wrap to the top and try again
-        if (found.location == NSNotFound && _wrapScan == TRUE) {
-            // TBD: vi usually puts something around the NORMAL|INSERT status msg is that says "scan wrapped"
-            found = [[srcView string] 
-                rangeOfString:_lastSearchString 
-                options:((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
-                range:NSMakeRange(0, [[srcView string] length])];
-        }
-        
-        if( found.location != NSNotFound ){
-            //Move cursor and show the found string
-            [srcView scrollRangeToVisible:found];
-            [srcView showFindIndicatorForRange:found];
-            [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-        }
+    NSTextView* srcView = [self superview];
+    NSUInteger search_base = [self getNextSearchBaseLocation];
+    search_base = [srcView selectedRange].location;
+    NSRange found = {NSNotFound, 0};
+    
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
+    if (_ignoreCase == TRUE) {
+        r_opts |= NSRegularExpressionCaseInsensitive;
     }
-
+    
+    NSError *error = NULL;
+    NSRegularExpression *regex = [NSRegularExpression 
+        regularExpressionWithPattern:_lastSearchString
+        options:r_opts
+        error:&error];
+        
+    if (error != nil) {
+        [self statusMessage:[NSString stringWithFormat:
+            @"Cannot compile regular expression '%@'",_lastSearchString] ringBell:TRUE];
+        return;
+    }
+    
+    // search text beyond the search_base
+    if( [[srcView string] length]-1 > search_base){
+        found = [regex rangeOfFirstMatchInString:[srcView string] 
+            options:r_opts
+            range:NSMakeRange(search_base+1, [[srcView string] length] - search_base - 1)];
+    }
+    
+    // if wrapscan is on, wrap to the top and search
+    if (found.location == NSNotFound && _wrapScan == TRUE) {
+        found = [regex rangeOfFirstMatchInString:[srcView string] 
+            options:r_opts
+            range:NSMakeRange(0, [[srcView string] length])];
+        [self statusMessage:[NSString stringWithFormat:
+            @"Search wrapped for '%@'",_lastSearchString] ringBell:TRUE];
+    }
+    if( found.location != NSNotFound ){
+        //Move cursor and show the found string
+        [srcView scrollRangeToVisible:found];
+        [srcView showFindIndicatorForRange:found];
+        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        // note: make sure this stays *after* setSelectedRange which also updates 
+        // _nextSearchBaseLocation as a side effect
+        [self setNextSearchBaseLocation:found.location + ((found.length==0)? 0: found.length-1)];
+    } else {
+        [self statusMessage:[NSString stringWithFormat:
+            @"Cannot find '%@'",_lastSearchString] ringBell:TRUE];
+    }
 }
 
 
-- (void)searchBackward{
+- (void)searchBackward {
+    // opts = (NSBackwardsSearch | NSRegularExpressionSearch) is not supported by [NSString rangeOfString:opts]
+    // What we do instead is a search for all occurences and then
+    // use the range of the last match. Not very efficient, but i don't think
+    // optimization is warranted until slowness is experienced at the user level.
     NSTextView* srcView = [self superview];
-    // get current insert position
-    NSRange r = [srcView selectedRange];
+    NSUInteger search_base = [self getNextSearchBaseLocation];
+    search_base = [srcView selectedRange].location;
+    NSRange found = {NSNotFound, 0};
     
-    // search text from the index
-    if( r.location > 0 ){
-        NSRange found = [[srcView string] 
-            rangeOfString:_lastSearchString 
-            options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
-            range:NSMakeRange(0, r.location-1)];
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
+    if (_ignoreCase == TRUE) {
+        r_opts |= NSRegularExpressionCaseInsensitive;
+    }
+     
+    NSError *error = NULL;
+    NSRegularExpression *regex = [NSRegularExpression 
+        regularExpressionWithPattern:_lastSearchString
+        options:r_opts
+        error:&error];
         
-        // if wrapscan is on, wrap to the top and try again
-        if (found.location == NSNotFound && _wrapScan == TRUE) {
-            // TBD: vi usually puts something around the NORMAL|INSERT status msg is that says "scan wrapped"
-            found = [[srcView string] 
-                     rangeOfString:_lastSearchString 
-                     options:NSBackwardsSearch|((_ignoreCase == TRUE) ? NSCaseInsensitiveSearch : NSLiteralSearch) | NSRegularExpressionSearch
-                     range:NSMakeRange(0, [[srcView string] length])];
-        }
-        
-        if( found.location != NSNotFound ){
-            //Move cursor and show the found string
-            [srcView scrollRangeToVisible:found];
-            [srcView showFindIndicatorForRange:found];
-            [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-        }
+    if (error != nil) {
+        [self statusMessage:[NSString stringWithFormat:
+            @"Cannot compile regular expression '%@'",_lastSearchString] ringBell:TRUE];
+        return;
     }
     
+    NSArray*  matches = [regex matchesInString:[srcView string]
+        options:r_opts
+        range:NSMakeRange(0, [[srcView string] length]-1)];
+        
+    // search above base
+    if (search_base > 0) {
+        for (NSTextCheckingResult *match in matches) { // get last match in area before search_base
+            NSRange tmp = [match range];
+            if (tmp.location >= search_base)
+                break;
+            found = tmp;
+        }
+    }
+    // if wrapscan is on, search below base as well
+    if (found.location == NSNotFound && _wrapScan == TRUE) {
+        if ([matches count] > 0) {
+            NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
+            found = [match range];
+            [self statusMessage:[NSString stringWithFormat:
+                @"Search wrapped for '%@'",_lastSearchString] ringBell:FALSE];
+        }
+    }
+    if (found.location != NSNotFound) {
+        // Move cursor and show the found string
+        [srcView scrollRangeToVisible:found];
+        [srcView showFindIndicatorForRange:found];
+        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        // note: make sure this stays *after* setSelectedRange which also updates 
+        // _nextSearchBaseLocation as a side effect
+        [self setNextSearchBaseLocation:found.location]; // demonstrative. not really needed
+    } else {
+        [self statusMessage:[NSString stringWithFormat:
+            @"Cannot find '%@'",_lastSearchString] ringBell:TRUE];
+    }
 }
 
 
@@ -377,8 +439,9 @@
 }
 
 - (NSRange)wordForward:(NSTextView *)view begin:(NSRange)begin{
-
+   // question: this produces a warning because it does not return anything. what should it return ?
 }
+
 
 
 - (void)ringBell {
@@ -388,12 +451,21 @@
     return;
 }
 - (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell {
-    // right now we don't do anything w/ the message
+    // right now we ERROR_LOG the message
     // it should go into the status area before the MODE word and get cleared next time 
     // the mode changes ?
+    ERROR_LOG("%@", message);
     if (ringBell) {
         [self ringBell];
     }
     return;
 }
+
+- (void)setNextSearchBaseLocation:(NSUInteger)location {
+    _nextSearchBaseLocation = location;
+}
+- (NSUInteger)getNextSearchBaseLocation {
+    return _nextSearchBaseLocation;
+}
+
 @end
