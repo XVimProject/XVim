@@ -36,6 +36,14 @@ static NSMutableArray* queue;
     return self;
 }
 
+- (void)setSelectedRange:(NSRange)charRange {
+    // Call original method
+    [self XVimSetSelectedRange:charRange];
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    [xvim setNextSearchBaseLocation: charRange.location];
+    return;
+}
+
 - (id)initWithCoder:(NSCoder *)aDecoder{
     // New DVTSourceTextView is being created. (Remember that "self" is DVTSourceTextView object since this is hooked method )
     // What we do here is to create XVim object

@@ -19,6 +19,7 @@
 
 
 // DVTSourceTextView hooks
+- (void)setSelectedRange:(NSRange)charRange;
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)viewDidMoveToSuperview;
 - (void)insertText:(NSString *)str;
