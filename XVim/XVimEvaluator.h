@@ -60,16 +60,6 @@ typedef enum {
 @end
 
 
-@interface XVimInsertEvaluator : XVimEvaluator{
-    NSUInteger _repeat;
-    BOOL _insertedEventsAbort;
-    NSMutableArray* _insertedEvents;
-    BOOL _oneCharMode;
-}
-
-- (id)initWithRepeat:(NSUInteger)repeat;
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat;
-@end
 
 
 

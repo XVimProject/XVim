@@ -13,6 +13,7 @@
 #import "XVimYankEvaluator.h"
 #import "XVimShiftEvaluator.h"
 #import "XVimDeleteEvaluator.h"
+#import "XVimInsertEvaluator.h"
 #import "XVim.h"
 
 @implementation XVimNormalEvaluator

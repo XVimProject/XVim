@@ -8,6 +8,7 @@
 
 #import "XVimTextObjectEvaluator.h"
 
+// Handles input after 'd' or 'c'
 @interface XVimDeleteEvaluator : XVimTextObjectEvaluator{
 @private
     BOOL _insertModeAtCompletion;

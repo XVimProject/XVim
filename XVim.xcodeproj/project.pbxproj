@@ -18,6 +18,8 @@
 		A24782C114D6F56E003B6433 /* XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B814D6F56E003B6433 /* XVim.m */; };
 		A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782BA14D6F56E003B6433 /* XVimCommandField.m */; };
 		A24782C614D6F6DC003B6433 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A24782C414D6F6DC003B6433 /* InfoPlist.strings */; };
+		A28D42F514FE87AF004BC121 /* XVimGEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A28D42F414FE87AF004BC121 /* XVimGEvaluator.m */; };
+		A28D42F814FE8E2A004BC121 /* XVimInsertEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A28D42F714FE8E2A004BC121 /* XVimInsertEvaluator.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
@@ -50,6 +52,10 @@
 		A24782B914D6F56E003B6433 /* XVimCommandField.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandField.h; path = XVim/XVimCommandField.h; sourceTree = SOURCE_ROOT; };
 		A24782BA14D6F56E003B6433 /* XVimCommandField.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandField.m; path = XVim/XVimCommandField.m; sourceTree = SOURCE_ROOT; };
 		A24782C514D6F6DC003B6433 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = XVim/en.lproj/InfoPlist.strings; sourceTree = SOURCE_ROOT; };
+		A28D42F314FE87AF004BC121 /* XVimGEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimGEvaluator.h; path = XVim/XVimGEvaluator.h; sourceTree = SOURCE_ROOT; };
+		A28D42F414FE87AF004BC121 /* XVimGEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimGEvaluator.m; path = XVim/XVimGEvaluator.m; sourceTree = SOURCE_ROOT; };
+		A28D42F614FE8E2A004BC121 /* XVimInsertEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimInsertEvaluator.h; path = XVim/XVimInsertEvaluator.h; sourceTree = SOURCE_ROOT; };
+		A28D42F714FE8E2A004BC121 /* XVimInsertEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimInsertEvaluator.m; path = XVim/XVimInsertEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandLine.h; path = XVim/XVimCommandLine.h; sourceTree = SOURCE_ROOT; };
 		A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLine.m; path = XVim/XVimCommandLine.m; sourceTree = SOURCE_ROOT; };
 		A2B4BABB14D59F6600D817B0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -162,6 +168,8 @@
 		A2F4A34014F00B35006DA5A5 /* Evaluators */ = {
 			isa = PBXGroup;
 			children = (
+				A28D42F314FE87AF004BC121 /* XVimGEvaluator.h */,
+				A28D42F414FE87AF004BC121 /* XVimGEvaluator.m */,
 				A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */,
 				A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */,
 				A2277ED914F80D5000A6B70C /* XVimYankEvaluator.h */,
@@ -178,6 +186,8 @@
 				A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */,
 				A2277ED614F80BFE00A6B70C /* XVimShiftEvaluator.h */,
 				A2277ED714F80BFE00A6B70C /* XVimShiftEvaluator.m */,
+				A28D42F614FE8E2A004BC121 /* XVimInsertEvaluator.h */,
+				A28D42F714FE8E2A004BC121 /* XVimInsertEvaluator.m */,
 			);
 			name = Evaluators;
 			sourceTree = "<group>";
@@ -258,6 +268,8 @@
 				A2277ED414F80BCB00A6B70C /* XVimDeleteEvaluator.m in Sources */,
 				A2277ED814F80BFE00A6B70C /* XVimShiftEvaluator.m in Sources */,
 				A2277EDB14F80D5000A6B70C /* XVimYankEvaluator.m in Sources */,
+				A28D42F514FE87AF004BC121 /* XVimGEvaluator.m in Sources */,
+				A28D42F814FE8E2A004BC121 /* XVimInsertEvaluator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

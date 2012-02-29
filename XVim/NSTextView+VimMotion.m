@@ -13,6 +13,8 @@
 // This category deals Vim's motion in NSTextView.
 // Each method of motion should return the destination position of the motion.
 // They shouldn't change the position of current insertion point(selected range)
+// They also have some support methods for Vim motions such as obtaining next newline break.
+//
 
 static NSArray* XVimWordDelimiterCharacterSets = nil;
 
@@ -278,5 +280,51 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 - (NSUInteger)sectionsForward:(NSNumber*)count{ //]]
     return 0;
+}
+
+- (NSUInteger)nextNewLine{
+    NSRange r = [self selectedRange];
+    NSRange nextNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:NSMakeRange(r.location, [self string].length-r.location)];
+    return nextNewline.location;
+    
+}
+
+- (void)moveCursorWithBoundsCheck:(NSUInteger)to{
+    if( [self string].length == 0 ){
+        // nothing to do;
+        return;
+    }
+    
+    if( to >= [self string].length ){
+        to = [self string].length - 1;
+    }    
+    
+    [self setSelectedRange:NSMakeRange(to,0)];
+}
+- (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to{
+    // This is inclusive selection, which means the letter at "from" and "to" is included in the result of selction.
+    // You can not use this method to move cursor since this method select 1 letter at leaset.
+    if( from > to ){
+        NSUInteger tmp = from;
+        from = to;
+        to = tmp;
+    }    
+    
+    if( [self string].length == 0 ){
+        // nothing to do;
+        return;
+    }
+    
+    if( from >= [self string].length ){
+        // end of document
+        from = [self string].length -1;
+        to = [self string].length -1;
+        return;
+    }
+    if( to >= [self string].length ){
+        to = [self string].length - 1;
+    }
+    
+    [self setSelectedRange:NSMakeRange(from, to-from+1)];
 }
 @end

@@ -8,6 +8,7 @@
 
 #import "XVimTextObjectEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
+#import "XVimGEvaluator.h"
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
@@ -86,7 +87,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)g:(id)arg{
-    return [[XVimgEvaluator alloc] init];
+    return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)G:(id)arg{

@@ -7,7 +7,9 @@
 //
 
 #import "XVimDeleteEvaluator.h"
+#import "XVimInsertEvaluator.h"
 #import "XVim.h"
+#import "NSTextView+VimMotion.h"
 #import "Logger.h"
 
 @implementation XVimDeleteEvaluator
@@ -76,7 +78,7 @@
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
     NSTextView* view = [self textView];
-    [view setSelectedRange:NSMakeRange(from, to-from)];
+    [view setSelectedRangeWithBoundsCheck:from To:to];
     [view cut:self];
     if (_insertModeAtCompletion == TRUE) {
         // Go to insert 
