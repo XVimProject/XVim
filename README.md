@@ -44,9 +44,23 @@ For Japanese Users/Developsers(日本の開発者のみなさまへ）
 
 Donations
 ===========
+If you think the plugin is useful please donate.
+Since I do not intend make money from this project I decided to donate all the donation
+to this project to the people who are suffering from the damage of Tohoku earthquake and tsunami in 2011 in Japan.
 
-Fortunately, some people offer donation for this project.
-Donations are accepted via Paypal.
-See the following project page.
+To reduce fee of trasfer please donate directly through Paypal donation site below.
 
-[XVim Projedt Page](http://programming.jugglershu.net/softwares/xvim.html)
+https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
+
+Since no messages are sent to me(us) when you donate from above
+it is appreciated to write a message on [Message Board]( https://github.com/JugglerShu/XVim/wiki/Message-Board ).
+It will really motivate me(us)!
+
+このプロジェクト、プラグインがよいと思われましたら寄付をいただけると非常にうれしいです。
+寄付はすべて東日本大震災の復興のためにそのまま寄付をいたします。
+手数料などがかかってしまいますので、賛同いただける方は以下から直接寄付いただければと思います。
+
+https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
+
+この場合、こちらにメッセージなどが来ることはありませんので、
+メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Message-Board )にいただけると、開発のモチベーションにつながります。
