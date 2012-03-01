@@ -10,6 +10,7 @@
 #import "Logger.h"
 #import "XVimCommandLine.h"
 #import "XVim.h"
+#import <objc/runtime.h>
 @implementation DVTSourceTextViewHook
 
 static NSMutableArray* queue;
@@ -190,11 +191,9 @@ static NSMutableArray* queue;
     [self XVimTextViewDidChangeSelection:notification];
 }
 
-- (NSArray*)textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
+- (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
 {
-    return [self XVimTextView:textView 
-willChangeSelectionFromCharacterRanges:oldSelectedCharRanges 
-            toCharacterRanges:newSelectedCharRanges];
+    return [self XVimTextView:textView  willChangeSelectionFromCharacterRanges:oldSelectedCharRanges  toCharacterRanges:newSelectedCharRanges];
 }
 
 

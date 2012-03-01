@@ -74,24 +74,24 @@
     // Hook didAddSubview of DVTSourceTextScrollView
     [Hooker hookMethod:@selector(didAddSubview:) ofClass:NSClassFromString(@"DVTSourceTextScrollView") withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(didAddSubview:)) keepingOriginalWith:@selector(XVimDidAddSubview:)];
     
-//    Class delegate = NSClassFromString(@"IDESourceCodeEditor");
+    Class delegate = NSClassFromString(@"IDESourceCodeEditor");
+    // FIXME : Hook not working right now. Calling original method generate EXC_BAD_ACCESS!!!
 //    [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
 //               ofClass:delegate 
-//            withMethod:class_getClassMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
+//            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
 //   keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
-//    
-//    [Hooker hookMethod:@selector(textViewDidChangeSelection:) 
-//               ofClass:delegate 
-//            withMethod:class_getClassMethod([DVTSourceTextViewHook class], @selector(textViewDidChangeSelection:))
-//   keepingOriginalWith:@selector(XVimTextViewDidChangeSelection:)];
     
+    [Hooker hookMethod:@selector(textViewDidChangeSelection:) 
+               ofClass:delegate 
+            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textViewDidChangeSelection:))
+   keepingOriginalWith:@selector(XVimTextViewDidChangeSelection:)];
 }
 @end
 
 static TheHook* theHook = nil;
 
 @implementation XVim
-@synthesize tag,mode,cmdLine,sourceView;
+@synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 
 + (void) load { 
     // Entry Point of the Plugin.

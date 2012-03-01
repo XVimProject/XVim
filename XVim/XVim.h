@@ -42,6 +42,10 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @property(retain) XVimCommandLine* cmdLine;
 @property(retain) NSTextView* sourceView;
 
+// In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
+// Mark this property to YES before moving. And mark it to NO after moving.
+@property(assign) BOOL dontCheckNewline;
+
 - (void)commandModeWithFirstLetter:(NSString*)first;
 - (void)commandDetermined:(NSString*)command;
 - (void)commandCanceled;
