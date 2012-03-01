@@ -261,20 +261,22 @@
         }
     }
     else if ([c characterAtIndex:0] == '/' || [c characterAtIndex:0] == '?') {
-        if ([c characterAtIndex:0] == '?') {
+        // note: c is the whitespace trimmed of command.
+        // we want the non trimmed version (command) because leading/trailing
+        // whitespace is something should be part of the search string
+        if ([command characterAtIndex:0] == '?') {
             _searchBackword = YES;
         } else {
             _searchBackword = NO;
         }
-        if([c length] == 1) {
+        if([command length] == 1) {
             // in vi, if there's no search string. use the last one specified. like you do for 'n'
             // just set the direction of the search
             [self searchNext];
         }
-        else if([c length] > 1) {
+        else if([command length] > 1) {
             // Don't trim whitespace. that's valid search criteria. just move past the command letter
-            NSString *s = [c substringFromIndex:1];
-            TRACE_LOG(">>>> search string is '%@'", s);
+            NSString *s = [command substringFromIndex:1];
             [_lastSearchString setString: s];
             [self searchNext];
         }
