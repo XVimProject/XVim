@@ -14,6 +14,7 @@
 #import "XVimShiftEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
+#import "NSTextView+VimMotion.h"
 #import "XVim.h"
 
 @implementation XVimNormalEvaluator
@@ -210,9 +211,15 @@
 
 - (XVimEvaluator*)V:(id)arg{
     NSTextView* view = [self textView];
-    [view selectLine:self];
-    [self xvim].mode = MODE_VISUAL;
     NSRange r = [view selectedRange];
+
+    // Select the currnet line before entering XVimVisualEvalutor becuase its linewise visual mode.
+    // This is not really good implementation I feel.
+    // This selection should be done by XVimVisualEvaluator...
+    // We may need to prepare new initializer which can operate on the view when its initialized.
+    // Since such structure may be needed from other operations this should be implemented in XVimEvaluator (Base class) 
+    [view setSelectedRangeWithBoundsCheck:[view headOfLine] To:[view nextNewline]];
+    [self xvim].mode = MODE_VISUAL;
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_LINE initialSelection:r.location :(NSUInteger)r.location+r.length];
 }
 

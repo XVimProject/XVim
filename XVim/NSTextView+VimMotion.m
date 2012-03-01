@@ -282,11 +282,48 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     return 0;
 }
 
-- (NSUInteger)nextNewLine{
+
+
+// How I think newline as here...
+// "Newline" (which is CR or LF) is the last letter of a line.
+
+// This dose not care about whitespaces.
+- (NSUInteger)headOfLine{
     NSRange r = [self selectedRange];
+    NSUInteger prevNewline = [self prevNewline];
+    if( NSNotFound == prevNewline ){
+        return 0; // begining of document
+    }
+    return prevNewline+1;
+}
+
+// may retrun NSNotFound
+- (NSUInteger)prevNewline{
+    NSRange r = [self selectedRange];
+    if( r.location == 0 ){
+        return 0;
+    }
+    // if the current location is newline, skip it.
+    if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
+        r.location--;
+    }
+    NSRange prevNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, r.location)];
+    return prevNewline.location;
+    
+}
+
+// may retrun NSNotFound
+- (NSUInteger)nextNewline{
+    NSRange r = [self selectedRange];
+    if( r.location >= [self string].length-1 ){
+        return r.location;
+    }
+    // if the current location is newline, skip it.
+    if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
+        r.location++;
+    }
     NSRange nextNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:NSMakeRange(r.location, [self string].length-r.location)];
     return nextNewline.location;
-    
 }
 
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to{
