@@ -30,4 +30,8 @@
 
 // DVTSourceScrollTextView hooks
 + (void)didAddSubview:(NSView *)subview;
+
+// IDESourceCodeEditor (The delegate) hooks
+- (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges;
+- (void)textViewDidChangeSelection:(NSNotification *)notification;
 @end

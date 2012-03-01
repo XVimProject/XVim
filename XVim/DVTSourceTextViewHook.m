@@ -185,6 +185,18 @@ static NSMutableArray* queue;
     [self XVimDoCommandBySelector:aSelector];
 }
 
+- (void)textViewDidChangeSelection:(NSNotification*) notification
+{
+    [self XVimTextViewDidChangeSelection:notification];
+}
+
+- (NSArray*)textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
+{
+    return [self XVimTextView:textView 
+willChangeSelectionFromCharacterRanges:oldSelectedCharRanges 
+            toCharacterRanges:newSelectedCharRanges];
+}
+
 
 
 //Support Functions
