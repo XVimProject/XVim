@@ -223,9 +223,15 @@ static TheHook* theHook = nil;
             }
         }
         else if( [ex_command isEqualToString:@"w"] ){
-            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"s" charactersIgnoringModifiers:@"s" isARepeat:NO keyCode:1];
-            [[NSApplication sharedApplication] sendEvent:keyPress];
+            
+            [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+        } 
+        else if ([ex_command isEqualToString:@"wq"]) {
+            [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+            [NSApp terminate:self];
+        } 
+        else if ([ex_command isEqualToString:@"q"]) {
+            [NSApp terminate:self];
         }
         else if( [ex_command isEqualToString:@"bn"] ){
             // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
