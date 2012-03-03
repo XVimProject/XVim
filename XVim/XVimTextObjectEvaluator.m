@@ -9,6 +9,7 @@
 #import "XVimTextObjectEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimGEvaluator.h"
+#import "XVimLocalMarkEvaluator.h"
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"

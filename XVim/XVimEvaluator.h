@@ -69,15 +69,6 @@ typedef enum {
 @end
 
 
-// This evaluator is collecting a mark name as part of the 'm{mark-name-letter}' command
-@interface XVimLocalMarkEvaluator : XVimEvaluator{
-@private
-     XVimMarkOperator _markOperator;
-     XVim *_xvimTarget;
-}
-- (id)initWithMarkOperator:(XVimMarkOperator)markOperator xvimTarget:(XVim *)xvimTarget;
-@end
-
 
 
 
