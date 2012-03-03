@@ -6,12 +6,6 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-// Currently the navigation in VISUAL MODE is not corresponds to that of NORMAL MODE.
-// We may be able reuse NormalEvaluator as Super class of VisualEvaluator
-// (I have tried once but the problem was when we want to expand the selection range. I did not think well 
-// about the problem so it might not be a big problem.)
-// 
-
 #import "XVimVisualEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVim.h"
@@ -28,7 +22,6 @@
     }
     return self;
 }
-
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     METHOD_TRACE_LOG();
@@ -120,7 +113,8 @@
     return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:type{
+    //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
     _insertion = to;
     [self updateSelection];

@@ -8,11 +8,6 @@
 
 #import "XVim.h"
 
-
-// HOW TO INSTALL
-// Copy XVim.dylib to ~/Library/Application Support/Developer/Shared/Xcode/Plug-ins
-//                    (Make directory if it does not exist)
-
 // Xcode View hieralchy
 //
 //  IDESourceCodeEdiorContainerView
@@ -37,9 +32,8 @@
 #import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
 
-
 @implementation XVim
-@synthesize tag,mode,cmdLine,sourceView;
+@synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -49,37 +43,16 @@
     // what we are doing in these method hooks.
     
     [Logger defaultLogger].level = LogTrace;
-    
     TRACE_LOG(@"XVim loaded");
-    Class c = NSClassFromString(@"DVTSourceTextView");
     
-    // Hook initWithCoder:
-    [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
-    
-    // Hook initWithCoder:
-    [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
-    
-    // Hook viewDidMoveToSuperview
-    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(XVimViewDidMoveToSuperview)];
+    // Do the hooking after the App has finished launching,
+    // Otherwise, we may miss some classes.
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter addObserver: [XVim class]
+                                  selector: @selector( hook )
+                                   name: NSApplicationDidFinishLaunchingNotification
+                                 object: nil];
 
-    // Hook keyDown:
-    [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(keyDown:) ) keepingOriginalWith:@selector(XVimKeyDown:)];   
-
-    // Hook performKeyEquivalent:
-    [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(XVimPerformKeyEquivalent:)];
-    
-    // Hook drawInsertionPointInRect for Drawing Caret
-    [Hooker hookMethod:@selector(drawInsertionPointInRect:color:turnedOn:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawInsertionPointInRect:color:turnedOn:)) keepingOriginalWith:@selector(XVimDrawInsertionPointInRect:color:turnedOn:)];
-   
-    // Hook _drawInsertionPointInRect for Drawing Caret       
-    [Hooker hookMethod:@selector(_drawInsertionPointInRect:color:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(_drawInsertionPointInRect:color:)) keepingOriginalWith:@selector(_XVimDrawInsertionPointInRect:color:)];
-    
-    // Hook doCommandBySelector:
-    [Hooker hookMethod:@selector(doCommandBySelector:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(doCommandBySelector:)) keepingOriginalWith:@selector(XVimDoCommandBySelector:)];
-    
-    // Hook didAddSubview of DVTSourceTextScrollView
-    [Hooker hookMethod:@selector(didAddSubview:) ofClass:NSClassFromString(@"DVTSourceTextScrollView") withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(didAddSubview:)) keepingOriginalWith:@selector(XVimDidAddSubview:)];
- 
     //The following codes helps reverse engineering the instance methods behaviour.
     //All the instance methods of a class passed to registerTracing are logged when they are called.
     //Since all the method calls an object of the class are logged
@@ -93,10 +66,48 @@
     
 }
 
-+ (void)initialize
++ (void) hook
 {
-
-    return;
+    Class c = NSClassFromString(@"DVTSourceTextView");
+    
+    // Hook setSelectedRange:
+    [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
+    
+    // Hook initWithCoder:
+    [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
+    
+    // Hook viewDidMoveToSuperview
+    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(XVimViewDidMoveToSuperview)];
+    
+    // Hook keyDown:
+    [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(keyDown:) ) keepingOriginalWith:@selector(XVimKeyDown:)];   
+    
+    // Hook performKeyEquivalent:
+    [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(XVimPerformKeyEquivalent:)];
+    
+    // Hook drawInsertionPointInRect for Drawing Caret
+    [Hooker hookMethod:@selector(drawInsertionPointInRect:color:turnedOn:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawInsertionPointInRect:color:turnedOn:)) keepingOriginalWith:@selector(XVimDrawInsertionPointInRect:color:turnedOn:)];
+    
+    // Hook _drawInsertionPointInRect for Drawing Caret       
+    [Hooker hookMethod:@selector(_drawInsertionPointInRect:color:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(_drawInsertionPointInRect:color:)) keepingOriginalWith:@selector(_XVimDrawInsertionPointInRect:color:)];
+    
+    // Hook doCommandBySelector:
+    [Hooker hookMethod:@selector(doCommandBySelector:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(doCommandBySelector:)) keepingOriginalWith:@selector(XVimDoCommandBySelector:)];
+    
+    // Hook didAddSubview of DVTSourceTextScrollView
+    [Hooker hookMethod:@selector(didAddSubview:) ofClass:NSClassFromString(@"DVTSourceTextScrollView") withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(didAddSubview:)) keepingOriginalWith:@selector(XVimDidAddSubview:)];
+    
+    Class delegate = NSClassFromString(@"IDESourceCodeEditor");
+    // FIXME : Hook not working right now. Calling original method generate EXC_BAD_ACCESS!!!
+    //    [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
+    //               ofClass:delegate 
+    //            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
+    //   keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
+    
+    [Hooker hookMethod:@selector(textViewDidChangeSelection:) 
+               ofClass:delegate 
+            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textViewDidChangeSelection:))
+   keepingOriginalWith:@selector(XVimTextViewDidChangeSelection:)];
 }
 
 //////////////////////////////
@@ -189,9 +200,15 @@
             }
         }
         else if( [ex_command isEqualToString:@"w"] ){
-            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"s" charactersIgnoringModifiers:@"s" isARepeat:NO keyCode:1];
-            [[NSApplication sharedApplication] sendEvent:keyPress];
+            
+            [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+        } 
+        else if ([ex_command isEqualToString:@"wq"]) {
+            [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+            [NSApp terminate:self];
+        } 
+        else if ([ex_command isEqualToString:@"q"]) {
+            [NSApp terminate:self];
         }
         else if( [ex_command isEqualToString:@"bn"] ){
             // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...

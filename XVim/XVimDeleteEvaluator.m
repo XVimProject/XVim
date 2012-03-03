@@ -54,30 +54,49 @@
             [view moveBackward:self];
             start = [view selectedRange];
             end = begin;
-            return [self motionFixedFrom:start.location To:end.location];
+            return [self _motionFixedFrom:start.location To:end.location Type:LINEWISE];
         }
     }
-    
     [view moveToBeginningOfLine:self];
     start = [view selectedRange];
     for (int i = 1; i < _repeat; i++) {
         [view moveDown:self];
     }
-    [view moveToEndOfLine:self];
-    [view moveForward:self]; // include eol
+
     end = [view selectedRange];
-    if (end.location > max) {
-        end.location = max, end.length = 0;
-    }
-    if (start.location > max) {
-        start.location = max, start.length = 0;
-    }
+
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:start.location To:end.location];
+    return [self _motionFixedFrom:start.location To:end.location Type:LINEWISE];
 }
 
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+    TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
     NSTextView* view = [self textView];
+    if( from > to ){
+        NSUInteger tmp = from;
+        from = to;
+        to = tmp;
+    }
+    if( to != 0 && type == CHARACTERWISE_EXCLUSIVE){
+        to--;
+    }else if( type == LINEWISE ){
+        [view setSelectedRange:NSMakeRange(to,0)];
+        to = [view nextNewline];
+        if( NSNotFound == to ){
+            to = [view string].length-1;
+        }
+
+        NSRange r = [view selectedRange];
+        [view setSelectedRange:NSMakeRange(from,0)];
+        from = [view prevNewline];
+        [view setSelectedRange:r];
+        if( NSNotFound == from ){
+            from = 0;
+        }else{
+            from++;
+        }
+    }
+
     [view setSelectedRangeWithBoundsCheck:from To:to];
     [view cut:self];
     if (_insertModeAtCompletion == TRUE) {
