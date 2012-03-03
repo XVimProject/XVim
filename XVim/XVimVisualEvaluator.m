@@ -113,7 +113,8 @@
     return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:type{
+    //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
     _insertion = to;
     [self updateSelection];

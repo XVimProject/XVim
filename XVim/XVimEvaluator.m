@@ -368,9 +368,9 @@ static char* keynames[] = {
     return _repeat;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     if( nil != _motionEvaluator ){
-        return [_motionEvaluator motionFixedFrom:from To:to];
+        return [_motionEvaluator motionFixedFrom:from To:to Type:type];
     }
     return nil;
 }

@@ -8,11 +8,6 @@
 
 #import "XVim.h"
 
-
-// HOW TO INSTALL
-// Copy XVim.dylib to ~/Library/Application Support/Developer/Shared/Xcode/Plug-ins
-//                    (Make directory if it does not exist)
-
 // Xcode View hieralchy
 //
 //  IDESourceCodeEdiorContainerView
@@ -37,18 +32,46 @@
 #import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
 
-@interface TheHook : NSObject
-- (void) hook;
-@end
-@implementation TheHook
+@implementation XVim
+@synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 
-- (void) hook
++ (void) load { 
+    // Entry Point of the Plugin.
+    // Hook methods ( mainly of DVTSourceTextView" )
+    // The key method "initWithCoder:" and "keyDown:"
+    // See the implementation in "DVTSourceTextViewHook.m" to know
+    // what we are doing in these method hooks.
+    
+    [Logger defaultLogger].level = LogTrace;
+    TRACE_LOG(@"XVim loaded");
+    
+    // Do the hooking after the App has finished launching,
+    // Otherwise, we may miss some classes.
+    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
+    [notificationCenter addObserver: [XVim class]
+                                  selector: @selector( hook )
+                                   name: NSApplicationDidFinishLaunchingNotification
+                                 object: nil];
+
+    //The following codes helps reverse engineering the instance methods behaviour.
+    //All the instance methods of a class passed to registerTracing are logged when they are called.
+    //Since all the method calls an object of the class are logged
+    //it has impact on the performance.
+    //Comment out if you do not need to trace method calls of the specific classes or specify 
+    // a class name in which you are interested in.
+
+    //[Logger registerTracing:@"DVTSourceTextView"];
+    //[Logger registerTracing:@"DVTTextFinder"];
+    //[Logger registerTracing:@"DVTIncrementalFindBar"];
+    
+}
+
++ (void) hook
 {
     Class c = NSClassFromString(@"DVTSourceTextView");
     
     // Hook setSelectedRange:
     [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
-
     
     // Hook initWithCoder:
     [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
@@ -76,61 +99,15 @@
     
     Class delegate = NSClassFromString(@"IDESourceCodeEditor");
     // FIXME : Hook not working right now. Calling original method generate EXC_BAD_ACCESS!!!
-//    [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
-//               ofClass:delegate 
-//            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
-//   keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
+    //    [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
+    //               ofClass:delegate 
+    //            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
+    //   keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
     
     [Hooker hookMethod:@selector(textViewDidChangeSelection:) 
                ofClass:delegate 
             withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textViewDidChangeSelection:))
    keepingOriginalWith:@selector(XVimTextViewDidChangeSelection:)];
-}
-@end
-
-static TheHook* theHook = nil;
-
-@implementation XVim
-@synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
-
-+ (void) load { 
-    // Entry Point of the Plugin.
-    // Hook methods ( mainly of DVTSourceTextView" )
-    // The key method "initWithCoder:" and "keyDown:"
-    // See the implementation in "DVTSourceTextViewHook.m" to know
-    // what we are doing in these method hooks.
-    
-    [Logger defaultLogger].level = LogTrace;
-    TRACE_LOG(@"XVim loaded");
-    
-    // Do the hooking after the App has finished launching,
-    // Otherwise, we may miss some classes.
-    if (theHook == nil) {
-        theHook = [[TheHook alloc] init];
-        NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-        [notificationCenter addObserver: theHook
-                               selector: @selector( hook )
-                                   name: NSApplicationDidFinishLaunchingNotification
-                                 object: nil];
-    }
- 
-    //The following codes helps reverse engineering the instance methods behaviour.
-    //All the instance methods of a class passed to registerTracing are logged when they are called.
-    //Since all the method calls an object of the class are logged
-    //it has impact on the performance.
-    //Comment out if you do not need to trace method calls of the specific classes or specify 
-    // a class name in which you are interested in.
-
-    //[Logger registerTracing:@"DVTSourceTextView"];
-    //[Logger registerTracing:@"DVTTextFinder"];
-    //[Logger registerTracing:@"DVTIncrementalFindBar"];
-    
-}
-
-+ (void)initialize
-{
-
-    return;
 }
 
 //////////////////////////////

@@ -53,6 +53,20 @@
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
 }
 
+- (XVimEvaluator*)C_b:(id)arg{
+    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
+        [[self textView] pageUp:self];
+    }
+    return nil;
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
+        [[self textView] pageDown:self];
+    }
+    return nil;
+}
+
 - (XVimEvaluator*)d:(id)arg{
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:FALSE];
 }
@@ -65,8 +79,12 @@
     return nil;
 }
 
-
-
+- (XVimEvaluator*)C_f:(id)arg{
+    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
+        [[self textView] pageDown:self];
+    }
+    return nil;
+}
 
 - (XVimEvaluator*)i:(id)arg{
     // Go to insert 
@@ -201,6 +219,12 @@
     }
     return nil;
 }
+- (XVimEvaluator*)C_u:(id)arg{
+    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
+        [[self textView] pageUp:self];
+    }
+    return nil;
+}
 
 - (XVimEvaluator*)v:(id)arg{
     NSTextView* view = [self textView];
@@ -314,18 +338,18 @@
     
 }
 
+
 - (XVimEvaluator*)Left:(id)arg{
     return [self h:(id)arg];
     
 }
-
 - (XVimEvaluator*)Right:(id)arg{
     return [self l:(id)arg];
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     // in normal mode
-    // move the a cursor to end of motion
+    // move the a cursor to end of motion. We ignore the motion type.
     NSTextView* view = [self textView];
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];

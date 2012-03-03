@@ -63,9 +63,9 @@
     }
     if( result.location != NSNotFound ){
         TRACE_LOG(@"%d %d", original.location, result.location );
-        return [self motionFixedFrom:original.location To:result.location];
+        return [self _motionFixedFrom:original.location To:result.location Type:CHARACTERWISE_INCLUSIVE];
     }
     return nil;
 }
-
+    
 @end

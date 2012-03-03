@@ -301,13 +301,13 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 - (NSUInteger)prevNewline{
     NSRange r = [self selectedRange];
     if( r.location == 0 ){
-        return 0;
+        return NSNotFound;
     }
     // if the current location is newline, skip it.
     if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
         r.location--;
     }
-    NSRange prevNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, r.location)];
+    NSRange prevNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, r.location+1)];
     return prevNewline.location;
     
 }

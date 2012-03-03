@@ -8,12 +8,14 @@
 
 #import "XVimGEvaluator.h"
 #import "NSTextView+VimMotion.h"
+#import "XVimTextObjectEvaluator.h"
 #import "Logger.h"
 
 @implementation XVimGEvaluator
 - (XVimEvaluator*)g:(id)arg{
     METHOD_TRACE_LOG();
+    //TODO: Must deal numeric arg as linenumber
     NSTextView* view = [self textView];
-    return [self motionFixedFrom:[view selectedRange].location To:0];
+    return [self _motionFixedFrom:[view selectedRange].location To:0 Type:LINEWISE];
 }
 @end

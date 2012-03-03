@@ -25,27 +25,41 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return r;
 }
 
+// When the motion is fixed call "_motionFixed" not "motionFixed"
+// It automatically treat switching inclusive/exclusive motion by 'v' 
+
 @implementation XVimTextObjectEvaluator
 
 - (id)init
 {
     self = [super init];
     if (self) {
-        _motionFrom = 0;
-        _motionTo = 0;
+        _inverseMotionType = NO;
     }
     return self;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type{
+   NSTextView* view = [self textView];
     NSRange begin = [view selectedRange];
-    _motionFrom = begin.location;
-    _motionTo = [view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
-    return [self motionFixedFrom:_motionFrom To:_motionTo];
+    NSUInteger motionFrom = begin.location;
+    NSUInteger motionTo = [view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
+    return [self _motionFixedFrom:motionFrom To:motionTo Type:type];
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to{
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+    TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
+    if( _inverseMotionType ){
+        if ( type == CHARACTERWISE_EXCLUSIVE ){
+            type = CHARACTERWISE_INCLUSIVE;
+        }else if(type == CHARACTERWISE_INCLUSIVE){
+            type = CHARACTERWISE_EXCLUSIVE;
+        }
+   }    
+    return [self motionFixedFrom:from To:to Type:type];
+}
+
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
     return nil;
 }
 
@@ -54,19 +68,11 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 ///////////////////////////////////////////
 
 - (XVimEvaluator*)b:(id)arg{
-    return [self commonMotion:@selector(wordsBackward:)];
+    return [self commonMotion:@selector(wordsBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)B:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:)];
-}
-
-- (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:)];
-}
-
-- (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:)];
+    return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)f:(id)arg{
@@ -75,16 +81,13 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return eval;
 }
 
-// Should be moved to XVimTextObjectEvaluator
 - (XVimEvaluator*)F:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = NO;
     return eval;
 }
 
-- (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:)];
-}
+
 
 - (XVimEvaluator*)g:(id)arg{
     return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
@@ -92,34 +95,39 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 - (XVimEvaluator*)G:(id)arg{
     NSTextView* view = [self textView];
-    return [self motionFixedFrom:[view selectedRange].location To:[view string].length]; // Is this safe? Should it be [view string].length-1?
+    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length Type:LINEWISE]; // Is this safe? Should it be [view string].length-1?
 }
 - (XVimEvaluator*)h:(id)arg{
-    return [self commonMotion:@selector(prev:)];
+    return [self commonMotion:@selector(prev:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)j:(id)arg{
-    return [self commonMotion:@selector(nextLine:)];
+    return [self commonMotion:@selector(nextLine:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)k:(id)arg{
-    return [self commonMotion:@selector(prevLine:)];
+    return [self commonMotion:@selector(prevLine:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)l:(id)arg{
-    return [self commonMotion:@selector(next:)];
+    return [self commonMotion:@selector(next:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)C_u:(id)arg{
     return [self commonMotion:@selector(halfPageBackward:)];
 }
 
+- (XVimEvaluator*)v:(id)arg{
+    _inverseMotionType = !_inverseMotionType;
+    return self;
+}
+
 - (XVimEvaluator*)w:(id)arg{
-    return [self commonMotion:@selector(wordsForward:)];
+    return [self commonMotion:@selector(wordsForward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)W:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:)];
+    return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)NUM0:(id)arg{
@@ -129,7 +137,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     NSRange end = [view selectedRange];
     NSUInteger dest = [view selectedRange].location;
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:begin.location To:dest];
+    return [self _motionFixedFrom:begin.location To:dest Type:CHARACTERWISE_INCLUSIVE];
 }
 
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
@@ -161,7 +169,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     end = [view selectedRange];
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:begin.location To:end.location];
+    return [self _motionFixedFrom:begin.location To:end.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)DOLLAR:(id)arg{
@@ -172,7 +180,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     NSRange end = [view selectedRange];
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:begin.location To:end.location];
+    return [self _motionFixedFrom:begin.location To:end.location Type:CHARACTERWISE_INCLUSIVE];
 }
 
 - (XVimEvaluator*)PERCENT:(id)arg {
@@ -256,7 +264,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
         [[self xvim] ringBell];
     } else {
-        [self motionFixedFrom:at.location To:search.location];
+        [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
     }
     
     return self;
@@ -293,7 +301,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     end = [view selectedRange];
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:begin.location To:end.location];
+    return [self _motionFixedFrom:begin.location To:end.location Type:LINEWISE];
 }
 
 /* 
@@ -321,7 +329,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     end = [view selectedRange];
     [view setSelectedRange:begin];
-    return [self motionFixedFrom:begin.location To:end.location];
+    return [self _motionFixedFrom:begin.location To:end.location Type:LINEWISE];
 }
 
 
@@ -388,7 +396,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         paragraph_head = 0;
     }
     
-    return [self motionFixedFrom:begin.location To:paragraph_head];
+    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)RBRACE:(id)arg{ // }
@@ -429,7 +437,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         // end of document
         paragraph_head = s.length-1;
     }
-    return [self motionFixedFrom:begin.location To:paragraph_head];
+    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 
@@ -496,7 +504,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     
     if( NSNotFound != sentence_head  ){
-        return [self motionFixedFrom:begin.location To:sentence_head];
+        return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE];
     }else{
         // no movement
         return nil;
@@ -553,7 +561,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
         // end of document
         sentence_head = s.length-1;
     }
-    return [self motionFixedFrom:begin.location To:sentence_head];
+    return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE];
 }
 @end
 

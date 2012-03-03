@@ -6,6 +6,26 @@
 //  Copyright 2012 JugglerShu.Net. All rights reserved.
 //
 
+// Evaluator classes Hierarchy
+/*
+XVimEvaluator - Evaluator base
+|- XVimNumericEvaluator - Handles numeric input
+|- XVimTextObject - Handles motions (As I commented in the code, the name is not really proper)
+|- XVimNormalEvaluator - Handle normal mode. If XVimTextObject handled motion, this evaluator just move the cursor to the end point of the motion.
+ 
+And Most of the command which takes "Motion" as argument they are derived from XVimTextObject.
+
+XVimTextObject
+|- XVimVisualEvaluator - Handles Visual mode (Move cursor as per motion and expand the selection)
+|- XVimDeleteEvaluator - Handles 'd' command.
+
+... And so on.
+
+
+An evaluator which takes argument to determine the motion ( like 'f' ) I'm currently implementing 
+another structure. 
+(Current implementation of XVimSearchLine evaluator can not be used from like 'd' command )
+*/
 
 @class XVim;
 @class XVimTextObjectEvaluator;
@@ -46,7 +66,6 @@ typedef enum {
     NSUInteger _repeat;
 }
 - (id)initWithMotionEvaluator:(XVimTextObjectEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to;
 @end
 
 
