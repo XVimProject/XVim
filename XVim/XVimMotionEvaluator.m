@@ -1,12 +1,12 @@
 //
-//  XVimTextObjectEvaluator.m
+//  XVimMotionEvaluator.m
 //  XVim
 //
 //  Created by Shuichiro Suzuki on 2/25/12.
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimGEvaluator.h"
 #import "XVimLocalMarkEvaluator.h"
@@ -29,7 +29,7 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 // When the motion is fixed call "_motionFixed" not "motionFixed"
 // It automatically treat switching inclusive/exclusive motion by 'v' 
 
-@implementation XVimTextObjectEvaluator
+@implementation XVimMotionEvaluator
 
 - (id)init
 {

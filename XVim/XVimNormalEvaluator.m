@@ -24,7 +24,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Command which results in cursor motion should be implemented in XVimTextObjectEvaluator
+// Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a:(id)arg{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
@@ -123,7 +123,7 @@
     return nil;
 }
 
-// Should be moveed to XVimTextObjectEvaluator
+// Should be moveed to XVimMotionEvaluator
 - (XVimEvaluator*)m:(id)arg{
     // 'm{letter}' sets a local mark. 
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];

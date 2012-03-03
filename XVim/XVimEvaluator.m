@@ -7,7 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 #import "XVim.h"
@@ -289,7 +289,7 @@ static char* keynames[] = {
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
-- (id)initWithMotionEvaluator:(XVimTextObjectEvaluator*)evaluator withRepeat:(NSUInteger)repeat{
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat{
     self = [super init];
     if( self ){
         _repeat = repeat;

@@ -6,26 +6,20 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 
-@interface XVimYankEvaluator : XVimTextObjectEvaluator{
+@interface XVimYankEvaluator : XVimMotionEvaluator{
 @private
     NSUInteger _repeat;
 }
 - (id)initWithRepeat:(NSUInteger)repeat;
 @end
 
-
-
-
-// FIXME: Temprarily place these evaluator here
-//        Make file for these evaluators
-
 // Evaluates 'g' command
-@interface XVimgEvaluator : XVimTextObjectEvaluator{
+@interface XVimgEvaluator : XVimMotionEvaluator{
 }
 @end
 // Evaluates 'r' command
-@interface XVimrEvaluator : XVimTextObjectEvaluator{
+@interface XVimrEvaluator : XVimMotionEvaluator{
 }
 @end

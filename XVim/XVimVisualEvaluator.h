@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 
 typedef enum{
     MODE_CHARACTER, // for 'v'
@@ -14,7 +14,7 @@ typedef enum{
     MODE_BLOCK // for 'CTRL-V'. may be implemented later...
 }VISUAL_MODE;
 
-@interface XVimVisualEvaluator : XVimTextObjectEvaluator{
+@interface XVimVisualEvaluator : XVimMotionEvaluator{
     // _begin may be greater than _end ( in case of backward selection )
     NSUInteger _begin;
     NSUInteger _insertion;

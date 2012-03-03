@@ -28,7 +28,7 @@ another structure.
 */
 
 @class XVim;
-@class XVimTextObjectEvaluator;
+@class XVimMotionEvaluator;
 
 typedef enum {
   MARKOPERATOR_SET,
@@ -62,10 +62,10 @@ typedef enum {
 // When the subclass fix the motion it must call motionFixedFrom:To: method.
 @interface XVimMotionArgumentEvaluator : XVimEvaluator{
 @private
-    XVimTextObjectEvaluator* _motionEvaluator;
+    XVimMotionEvaluator* _motionEvaluator;
     NSUInteger _repeat;
 }
-- (id)initWithMotionEvaluator:(XVimTextObjectEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
 @end
 
 

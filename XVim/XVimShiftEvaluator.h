@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 
-@interface XVimShiftEvaluator : XVimTextObjectEvaluator{
+@interface XVimShiftEvaluator : XVimMotionEvaluator{
     NSUInteger _repeat;
 }
 @property BOOL unshift;
