@@ -1,4 +1,3 @@
-
 # Feature List
 
 Some commands here do not behave as original Vim or just lack its ability.
@@ -111,8 +110,8 @@ Regex is supporeted in search command but it is ICU regex and not Vim''s one.
 ---------|-----
   :w     | 
   :wq    | 
-  :run   | This is XVim original command to invoce XCodes 'run' command
-  :make  | This is XVim original command to invoce XCodes 'build' command
+  :run   | This is XVim original command to invoke XCodes 'run' command
+  :make  | This is XVim original command to invoke XCodes 'build' command
 
 
 ## Options
