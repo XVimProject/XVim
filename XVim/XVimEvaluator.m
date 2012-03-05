@@ -314,5 +314,12 @@ static char* keynames[] = {
     }
     return nil;
 }
+
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type{
+    if( nil != _motionEvaluator ){
+        return [_motionEvaluator commonMotion:motion Type:type];
+    }
+    return nil;
+}
 @end
 

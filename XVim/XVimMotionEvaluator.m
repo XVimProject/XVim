@@ -9,6 +9,7 @@
 #import "XVimMotionEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimGEvaluator.h"
+#import "XVimZEvaluator.h"
 #import "XVimLocalMarkEvaluator.h"
 #import "XVim.h"
 #import "Logger.h"
@@ -98,8 +99,13 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     NSTextView* view = [self textView];
     return [self _motionFixedFrom:[view selectedRange].location To:[view string].length Type:LINEWISE]; // Is this safe? Should it be [view string].length-1?
 }
+
 - (XVimEvaluator*)h:(id)arg{
     return [self commonMotion:@selector(prev:) Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)H:(id)arg{
+    return [self commonMotion:@selector(cursorTop:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)j:(id)arg{
@@ -112,6 +118,14 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 - (XVimEvaluator*)l:(id)arg{
     return [self commonMotion:@selector(next:) Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)L:(id)arg{
+    return [self commonMotion:@selector(cursorBottom:) Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)M:(id)arg{
+    return [self commonMotion:@selector(cursorCenter:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)C_u:(id)arg{
@@ -129,6 +143,10 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 
 - (XVimEvaluator*)W:(id)arg{
     return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)z:(id)arg{
+    return [[XVimZEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)NUM0:(id)arg{
