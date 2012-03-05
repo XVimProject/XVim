@@ -54,6 +54,19 @@
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
 }
 
+// 'C' works like 'D' except that once it's done deleting
+// it should go into insert mode
+- (XVimEvaluator*)C:(id)arg{
+    // TODO: handle numericArg
+    NSTextView* view = [self textView];
+    [view moveToEndOfLineAndModifySelection:self];
+    [view cut:self];
+
+    // Go to insert 
+    [self xvim].mode = MODE_INSERT;
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+}
+
 - (XVimEvaluator*)C_b:(id)arg{
     for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
         [[self textView] pageUp:self];
