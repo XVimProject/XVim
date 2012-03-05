@@ -258,6 +258,57 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     return dest;   
 }
 
+- (NSUInteger)scrollBottom:(NSNumber*)count{ // zb / z-
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSPoint bottom = NSMakePoint(0.0, -[[scrollView documentView] bounds].size.height);
+    [[scrollView contentView] scrollToPoint:bottom];
+    return [self selectedRange].location;
+}
+
+- (NSUInteger)scrollCenter:(NSNumber*)count{ // zz / z.
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSPoint center = NSMakePoint(0.0, [[scrollView documentView] bounds].size.height / 2);
+    [[scrollView contentView] scrollToPoint:center];
+    return [self selectedRange].location;
+}
+
+- (NSUInteger)scrollTop:(NSNumber*)count{ // zt / z<CR>
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSPoint top = NSMakePoint(0.0, [[scrollView documentView] bounds].size.height);
+    [[scrollView contentView] scrollToPoint:top];
+    return [self selectedRange].location;
+}
+
+- (NSUInteger)cursorBottom:(NSNumber*)count{ // L
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSPoint bottom = [[scrollView contentView] bounds].origin;
+    bottom.y += [[scrollView contentView] bounds].size.height;
+    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:bottom], 0 };
+    
+    [self setSelectedRange:range];
+    [self moveUp:self]; // moveUp because it is one past the bottom
+    return [self selectedRange].location;
+}
+
+- (NSUInteger)cursorCenter:(NSNumber*)count{ // M
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSPoint center = [[scrollView contentView] bounds].origin;
+    center.y += [[scrollView contentView] bounds].size.height / 2;
+    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:center], 0 };
+    
+    [self setSelectedRange:range];
+    return [self selectedRange].location;
+}
+
+- (NSUInteger)cursorTop:(NSNumber*)count{ // H
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSPoint top = [[scrollView contentView] bounds].origin;
+    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
+    
+    [self setSelectedRange:range];
+    return [self selectedRange].location;
+}
+
 - (NSUInteger)sentencesBackward:(NSNumber*)count{ //(
     return 0;
 }
