@@ -9,6 +9,7 @@
 
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
+#import "XVimLocalMarkEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimYankEvaluator.h"
 #import "XVimShiftEvaluator.h"
@@ -23,7 +24,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 
 
-// Command which results in cursor motion should be implemented in XVimTextObjectEvaluator
+// Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a:(id)arg{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
@@ -51,6 +52,19 @@
 // it should go you into insert mode
 - (XVimEvaluator*)c:(id)arg{
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
+}
+
+// 'C' works like 'D' except that once it's done deleting
+// it should go into insert mode
+- (XVimEvaluator*)C:(id)arg{
+    // TODO: handle numericArg
+    NSTextView* view = [self textView];
+    [view moveToEndOfLineAndModifySelection:self];
+    [view cut:self];
+
+    // Go to insert 
+    [self xvim].mode = MODE_INSERT;
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)C_b:(id)arg{
@@ -122,7 +136,7 @@
     return nil;
 }
 
-// Should be moveed to XVimTextObjectEvaluator
+// Should be moveed to XVimMotionEvaluator
 - (XVimEvaluator*)m:(id)arg{
     // 'm{letter}' sets a local mark. 
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];

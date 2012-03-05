@@ -7,7 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 
 @interface XVimSearchLineEvaluator : XVimMotionArgumentEvaluator{
 }

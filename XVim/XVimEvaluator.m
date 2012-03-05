@@ -7,7 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 #import "XVim.h"
@@ -233,66 +233,6 @@ static char* keynames[] = {
 @end
 
 #pragma mark VimLocalMarkEvaluator
-@implementation XVimLocalMarkEvaluator
-
-- (id)init
-{
-    return [self initWithMarkOperator:MARKOPERATOR_SET xvimTarget:nil];
-}
-
-- (id)initWithMarkOperator:(XVimMarkOperator)markOperator xvimTarget:(XVim *)xvimTarget{
-    self = [super init];
-    if (self) {
-        _markOperator = markOperator;
-        _xvimTarget = xvimTarget;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
-    if ([keyStr length] != 1) {
-        return nil;
-    }
-    unichar c = [keyStr characterAtIndex:0];
-    if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z'))) ) {
-        return nil;
-    }
-    // we have a legal mark letter/name 
-    if (_markOperator == MARKOPERATOR_SET) {
-        NSRange r = [[_xvimTarget sourceView] selectedRange];
-        NSValue *v =[NSValue valueWithRange:r];
-        [[_xvimTarget getLocalMarks] setValue:v forKey:keyStr];
-    }
-    else if (_markOperator == MARKOPERATOR_MOVETO || _markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
-        NSValue* v = [[_xvimTarget getLocalMarks] valueForKey:keyStr];
-        NSRange r = [v rangeValue];
-        if (v == nil) {
-            return nil;
-        }
-        NSTextView* view = [_xvimTarget sourceView];
-        NSString* s = [[view textStorage] string];
-        if (r.location > [s length]) {
-            // mark is past end of file do nothing
-            return nil;
-        }
-        
-        [view setSelectedRange:r];
-        if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
-            [view moveToBeginningOfLine:nil];
-            r = [view selectedRange];
-            for (NSUInteger idx = r.location; idx < s.length; idx++) {// moveto 1st non whitespace
-                if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]]) break;
-                [view moveRight:self];
-            }
-        }
-    }
-    else {
-    }
-    
-    return nil;
-}
-@end
 
 
 #pragma mark Numeric Evaluator
@@ -349,7 +289,7 @@ static char* keynames[] = {
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
-- (id)initWithMotionEvaluator:(XVimTextObjectEvaluator*)evaluator withRepeat:(NSUInteger)repeat{
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat{
     self = [super init];
     if( self ){
         _repeat = repeat;
@@ -371,6 +311,13 @@ static char* keynames[] = {
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     if( nil != _motionEvaluator ){
         return [_motionEvaluator motionFixedFrom:from To:to Type:type];
+    }
+    return nil;
+}
+
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type{
+    if( nil != _motionEvaluator ){
+        return [_motionEvaluator commonMotion:motion Type:type];
     }
     return nil;
 }

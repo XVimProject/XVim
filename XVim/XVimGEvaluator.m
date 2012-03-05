@@ -8,7 +8,7 @@
 
 #import "XVimGEvaluator.h"
 #import "NSTextView+VimMotion.h"
-#import "XVimTextObjectEvaluator.h"
+#import "XVimMotionEvaluator.h"
 #import "Logger.h"
 
 @implementation XVimGEvaluator
