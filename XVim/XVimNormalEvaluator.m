@@ -12,6 +12,7 @@
 #import "XVimLocalMarkEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimYankEvaluator.h"
+#import "XVimEqualEvaluator.h"
 #import "XVimShiftEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
@@ -310,6 +311,10 @@
 
 - (XVimEvaluator*)y:(id)arg{
     return [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
+}
+
+- (XVimEvaluator*)EQUAL:(id)arg{
+    return [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(id)arg{
