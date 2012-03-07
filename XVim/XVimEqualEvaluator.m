@@ -24,14 +24,6 @@
     return self;
 }
 
-+ (void)indent:(XVimEvaluator*)evaluator{
-    // TODO: Find the proper function call to do an indent instead of faking an NSEvent
-    NSTextView *view = [evaluator textView];
-    NSTimeInterval currentEventTime = 0.001 * AbsoluteToDuration(UpTime());
-    NSEvent *event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0, 0) modifierFlags:NSControlKeyMask timestamp:currentEventTime windowNumber:[[view window] windowNumber] context:[NSGraphicsContext currentContext] characters:@"i" charactersIgnoringModifiers:@"i" isARepeat:NO keyCode:'i'];
-    [[NSApplication sharedApplication] postEvent:event atStart:YES];
-}
-
 - (XVimEvaluator*)EQUAL:(id)arg{
     NSTextView *view = [self textView];
     NSRange begin = [view selectedRange];
@@ -47,7 +39,7 @@
     NSRange end = [view selectedRange];
     [view setSelectedRange:NSMakeRange(begin.location, end.location - begin.location)];
     
-    [XVimEqualEvaluator indent:self];
+    [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:nil];
     
     // set cursor back to original position
     [view setSelectedRange:begin];
@@ -83,10 +75,15 @@
         }
     }
     
-    // TODO: Preserve current cursor position. Currently cannot do this
-    // because indent fakes a key press which happens after this function returns.
+    NSRange begin = [view selectedRange];
     [view setSelectedRangeWithBoundsCheck:from To:to];
-    [XVimEqualEvaluator indent:self];
+    NSUInteger currentLength = [[view string] length] - 1;
+    
+    // Indent
+    [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:nil];
+    
+    begin.location -= currentLength - [[view string] length] + 1;
+    [view setSelectedRange:begin];
     return nil;
 }
 
