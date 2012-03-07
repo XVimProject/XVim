@@ -30,6 +30,7 @@
 		A2F4A34614F00D69006DA5A5 /* XVimSearchLineEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34514F00D69006DA5A5 /* XVimSearchLineEvaluator.m */; };
 		A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */; };
 		A5118D9F14FF64F000C6AFB2 /* Common.m in Sources */ = {isa = PBXBuildFile; fileRef = A5118D9E14FF64F000C6AFB2 /* Common.m */; };
+		F1C1E515150475ED0005C1CB /* XVimEqualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F1C1E514150475ED0005C1CB /* XVimEqualEvaluator.m */; };
 		F1F2426D15041A9B00F706A4 /* XVimZEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F1F2426C15041A9B00F706A4 /* XVimZEvaluator.m */; };
 /* End PBXBuildFile section */
 
@@ -93,6 +94,8 @@
 		A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotionEvaluator.m; path = XVim/XVimMotionEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A5118D9D14FF64F000C6AFB2 /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Common.h; path = XVim/Common.h; sourceTree = "<group>"; };
 		A5118D9E14FF64F000C6AFB2 /* Common.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Common.m; path = XVim/Common.m; sourceTree = "<group>"; };
+		F1C1E513150475ED0005C1CB /* XVimEqualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEqualEvaluator.h; path = XVim/XVimEqualEvaluator.h; sourceTree = SOURCE_ROOT; };
+		F1C1E514150475ED0005C1CB /* XVimEqualEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEqualEvaluator.m; path = XVim/XVimEqualEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F1F2426B15041A9B00F706A4 /* XVimZEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimZEvaluator.h; path = XVim/XVimZEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F1F2426C15041A9B00F706A4 /* XVimZEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimZEvaluator.m; path = XVim/XVimZEvaluator.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
@@ -193,6 +196,8 @@
 		A2F4A34014F00B35006DA5A5 /* Evaluators */ = {
 			isa = PBXGroup;
 			children = (
+				F1C1E513150475ED0005C1CB /* XVimEqualEvaluator.h */,
+				F1C1E514150475ED0005C1CB /* XVimEqualEvaluator.m */,
 				F1F2426B15041A9B00F706A4 /* XVimZEvaluator.h */,
 				F1F2426C15041A9B00F706A4 /* XVimZEvaluator.m */,
 				A2FF17CF1502B291003FE648 /* XVimMotionEvaluator.h */,
@@ -303,6 +308,7 @@
 				A298D44515026E63004B94A1 /* XVimLocalMarkEvaluator.m in Sources */,
 				A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */,
 				F1F2426D15041A9B00F706A4 /* XVimZEvaluator.m in Sources */,
+				F1C1E515150475ED0005C1CB /* XVimEqualEvaluator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

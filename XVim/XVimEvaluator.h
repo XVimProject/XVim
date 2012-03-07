@@ -36,6 +36,11 @@ typedef enum {
   MARKOPERATOR_MOVETOSTARTOFLINE
 } XVimMarkOperator;
 
+typedef enum _MOTION_TYPE{
+    CHARACTERWISE_INCLUSIVE,
+    CHARACTERWISE_EXCLUSIVE,
+    LINEWISE,
+}MOTION_TYPE;
 
 @interface XVimEvaluator : NSObject{
 @private
@@ -47,6 +52,8 @@ typedef enum {
 - (XVimEvaluator*)defaultNextEvaluator;
 - (NSTextView*)textView;
 - (XVim*)xvim;
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type;
 @end
 
 // This evaluator is waiting for number input.

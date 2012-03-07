@@ -10,6 +10,7 @@
 #import "NSTextView+VimMotion.h"
 #import "XVim.h"
 #import "Logger.h"
+#import "XVimEqualEvaluator.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -76,6 +77,12 @@
     [view copy:self];
     r.length = 0;
     [view setSelectedRange:r];
+    return nil;
+}
+
+- (XVimEvaluator*)EQUAL:(id)arg{
+    [self updateSelection];
+    [XVimEqualEvaluator indent:self];
     return nil;
 }
 

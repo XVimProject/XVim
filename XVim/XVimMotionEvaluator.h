@@ -16,12 +16,6 @@
 // When motion is generated motionFixedFrom:To:Type: method is called.
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
 
-typedef enum _MOTION_TYPE{
-    CHARACTERWISE_INCLUSIVE,
-    CHARACTERWISE_EXCLUSIVE,
-    LINEWISE,
-}MOTION_TYPE;
-
 @interface XVimMotionEvaluator : XVimNumericEvaluator{
     
 @private    

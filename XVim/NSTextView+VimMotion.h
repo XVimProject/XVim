@@ -9,5 +9,7 @@
 #import "NSTextView+VimMotion.h"
 
 @interface NSTextView (VimMotion)
-
+- (NSUInteger)nextNewline;
+- (NSUInteger)prevNewline;
+- (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
 @end
