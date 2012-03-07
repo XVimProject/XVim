@@ -39,7 +39,7 @@
     NSRange end = [view selectedRange];
     [view setSelectedRange:NSMakeRange(begin.location, end.location - begin.location)];
     
-    [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:nil];
+    [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:[view undoManager]];
     
     // set cursor back to original position
     [view setSelectedRange:begin];
@@ -80,7 +80,7 @@
     NSUInteger currentLength = [[view string] length] - 1;
     
     // Indent
-    [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:nil];
+    [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:[view undoManager]];
     
     begin.location -= currentLength - [[view string] length] + 1;
     [view setSelectedRange:begin];
