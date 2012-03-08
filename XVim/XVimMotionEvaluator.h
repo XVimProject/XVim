@@ -16,12 +16,19 @@
 // When motion is generated motionFixedFrom:To:Type: method is called.
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
 
+typedef enum _MOTION_TYPE{
+    CHARACTERWISE_INCLUSIVE,
+    CHARACTERWISE_EXCLUSIVE,
+    LINEWISE,
+}MOTION_TYPE;
+
 @interface XVimMotionEvaluator : XVimNumericEvaluator{
     
 @private    
     NSUInteger _motionFrom;
     NSUInteger _motionTo;
     BOOL _inverseMotionType; // switch inclusive/exclusive motion ( set to NO to use default motion type )
+
 }
 
 // Override this method to implement operations on motions.
@@ -29,7 +36,8 @@
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 
 
-
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
 @end
 
 

@@ -82,7 +82,8 @@
 
 - (XVimEvaluator*)EQUAL:(id)arg{
     [self updateSelection];
-    [XVimEqualEvaluator indent:self];
+    // Not implemented yet. Will share the code in the XVimEqualEvaluator
+    //[XVimEqualEvaluator indent:self];
     return nil;
 }
 
