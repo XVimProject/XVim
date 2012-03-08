@@ -24,7 +24,6 @@
 // Keep command implementation alphabetical order please(Except specical characters).  //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a:(id)arg{
@@ -68,20 +67,6 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)C_b:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageUp:self];
-    }
-    return nil;
-}
-
-- (XVimEvaluator*)C_d:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageDown:self];
-    }
-    return nil;
-}
-
 - (XVimEvaluator*)d:(id)arg{
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:FALSE];
 }
@@ -91,13 +76,6 @@
     NSTextView* view = [self textView];
     [view moveToEndOfLineAndModifySelection:self];
     [view cut:self];
-    return nil;
-}
-
-- (XVimEvaluator*)C_f:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageDown:self];
-    }
     return nil;
 }
 
@@ -141,16 +119,6 @@
 - (XVimEvaluator*)m:(id)arg{
     // 'm{letter}' sets a local mark. 
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
-}
-
-- (XVimEvaluator*)n:(id)arg{
-    [[self xvim] searchNext];
-    return nil;
-}
-
-- (XVimEvaluator*)N:(id)arg{
-    [[self xvim] searchPrevious];
-    return nil;
 }
 
 - (XVimEvaluator*)o:(id)arg{
@@ -231,12 +199,6 @@
     NSTextView* view = [self textView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] undo];
-    }
-    return nil;
-}
-- (XVimEvaluator*)C_u:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageUp:self];
     }
     return nil;
 }
@@ -346,24 +308,6 @@
 - (XVimEvaluator*)QUESTION:(id)arg{
     [[self xvim] commandModeWithFirstLetter:@"?"];
     return nil;
-}
-
-- (XVimEvaluator*)Up:(id)arg{
-    return [self k:(id)arg];
-}
-
-- (XVimEvaluator*)Down:(id)arg{
-    return [self j:(id)arg];
-    
-}
-
-
-- (XVimEvaluator*)Left:(id)arg{
-    return [self h:(id)arg];
-    
-}
-- (XVimEvaluator*)Right:(id)arg{
-    return [self l:(id)arg];
 }
 
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
