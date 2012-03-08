@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XVimCommandLine.h"
+#import "XVimRegister.h"
 @class XVimEvaluator;
 
 enum{
@@ -41,6 +42,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @property NSInteger mode;
 @property(retain) XVimCommandLine* cmdLine;
 @property(retain) NSTextView* sourceView;
+@property(readonly) NSArray* registers;
 
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
 // Mark this property to YES before moving. And mark it to NO after moving.
@@ -63,4 +65,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)ringBell;
 - (void)setNextSearchBaseLocation:(NSUInteger)location;
 - (NSUInteger)getNextSearchBaseLocation;
+- (void)playback:(NSString*)registerName;
+- (XVimRegister*)findRegister:(NSString*)name;
 @end
