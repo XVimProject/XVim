@@ -14,5 +14,8 @@
 
 @property (strong) NSMutableString *text;
 @property (readonly, strong) NSString *name;
+@property (readonly) BOOL isAlpha;
+@property (readonly) BOOL isNumeric;
+@property (readonly) BOOL isRepeat;
 
 @end

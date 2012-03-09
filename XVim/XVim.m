@@ -35,6 +35,7 @@
 @implementation XVim
 @synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 @synthesize registers = _registers;
+NSMutableSet *_recordingRegisters;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -193,6 +194,7 @@
          // additional "hidden" register to store text for '.' command
          [[XVimRegister alloc] initWithRegisterName:@"repeat"],
          nil];
+        _recordingRegisters = [[NSMutableSet alloc] initWithCapacity:_registers.count];
     }
     
     return self;
@@ -567,10 +569,15 @@
     return [self.registers objectAtIndex:index];
 }
 
-- (void)playback:(NSString*)registerName{
-    XVimRegister *xregister = [self findRegister:registerName];
-    if (xregister == nil) {
-        return;
-    }
+- (void)playbackRegister:(XVimRegister*)xregister{
 }
+
+- (void)recordIntoRegister:(XVimRegister*)xregister{
+    [_recordingRegisters addObject:xregister];
+}
+
+- (void)stopRecordingRegister:(XVimRegister*)xregister{
+    [_recordingRegisters removeObject:xregister];
+}
+
 @end

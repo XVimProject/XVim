@@ -320,4 +320,35 @@
     return nil;
 }
 
+// There are fewer invalid keys than valid ones so make a list of invalid keys
+NSArray *_invalidRepeatKeys;
+- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (_invalidRepeatKeys == nil){
+        _invalidRepeatKeys =
+        [[NSArray alloc] initWithObjects:
+         @"m",
+         @"C_r",
+         @"v",
+         @"V",
+         @"C_v",
+         @"COLON",
+         @"SLASH",
+         @"QUESTION",
+         nil];
+    }
+    if (xregister.isRepeat){
+        NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+        SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
+        if( [self respondsToSelector:handler] ){
+            if ([_invalidRepeatKeys containsObject:key] == NO){
+                return YES;
+            }
+        }
+    }
+    else if (xregister.isAlpha){
+        return YES;
+    }
+    return NO;
+}
+
 @end

@@ -26,4 +26,24 @@ NSString *_name;
     return self;
 }
 
+-(BOOL) isAlpha{
+    if (self.name.length != 1){
+        return NO;
+    }
+    unichar charcode = [self.name characterAtIndex:0];
+    return (65 <= charcode && charcode <= 90) || (97 <= charcode && charcode <= 122);
+}
+
+-(BOOL) isNumeric{
+    if (self.name.length != 1){
+        return NO;
+    }
+    unichar charcode = [self.name characterAtIndex:0];
+    return (48 <= charcode && charcode <= 57);
+}
+
+-(BOOL) isRepeat{
+    return self.name == @"repeat";
+}
+
 @end

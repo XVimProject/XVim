@@ -321,5 +321,9 @@ static char* keynames[] = {
     }
     return nil;
 }
+
+- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    return NO;
+}
 @end
 
