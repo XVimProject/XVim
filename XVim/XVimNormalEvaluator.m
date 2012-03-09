@@ -18,6 +18,7 @@
 #import "XVimInsertEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVim.h"
+#import "Logger.h"
 
 @implementation XVimNormalEvaluator
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -320,7 +321,8 @@
     return nil;
 }
 
-// There are fewer invalid keys than valid ones so make a list of invalid keys
+// There are fewer invalid keys than valid ones so make a list of invalid keys.
+// This can always be changed to a set of valid keys in the future if need be.
 NSArray *_invalidRepeatKeys;
 - (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
     if (_invalidRepeatKeys == nil){
@@ -328,6 +330,7 @@ NSArray *_invalidRepeatKeys;
         [[NSArray alloc] initWithObjects:
          @"m",
          @"C_r",
+         @"u",
          @"v",
          @"V",
          @"C_v",
@@ -339,13 +342,15 @@ NSArray *_invalidRepeatKeys;
     if (xregister.isRepeat){
         NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
         SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-        if( [self respondsToSelector:handler] ){
+        if( [self respondsToSelector:handler] && [[self superclass] instancesRespondToSelector:handler] == NO){
             if ([_invalidRepeatKeys containsObject:key] == NO){
+                TRACE_LOG(@"Recording: %@", key);
                 return YES;
             }
         }
     }
     else if (xregister.isAlpha){
+        TRACE_LOG(@"Recording: %@", [XVimEvaluator keyStringFromKeyEvent:event]);
         return YES;
     }
     return NO;

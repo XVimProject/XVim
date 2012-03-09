@@ -230,6 +230,10 @@ static char* keynames[] = {
     return _xvim;
 }
 
+- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    return NO;
+}
+
 @end
 
 #pragma mark VimLocalMarkEvaluator
@@ -320,10 +324,6 @@ static char* keynames[] = {
         return [_motionEvaluator commonMotion:motion Type:type];
     }
     return nil;
-}
-
-- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    return NO;
 }
 @end
 

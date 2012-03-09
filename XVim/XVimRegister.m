@@ -17,6 +17,10 @@ NSString *_name;
     return _name;
 }
 
+-(NSString*) description{
+    return [[NSString alloc] initWithFormat:@"\"%@: %@", self.name, self.text];
+}
+
 -(id) initWithRegisterName:(NSString*)registerName{
     self = [super init];
     if (self) {

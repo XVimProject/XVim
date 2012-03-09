@@ -194,7 +194,13 @@ NSMutableSet *_recordingRegisters;
          // additional "hidden" register to store text for '.' command
          [[XVimRegister alloc] initWithRegisterName:@"repeat"],
          nil];
-        _recordingRegisters = [[NSMutableSet alloc] initWithCapacity:_registers.count];
+        
+        // The following registers are recording from the start
+        _recordingRegisters =
+        [[NSMutableSet alloc]
+         initWithObjects:
+         [self findRegister:@"repeat"],
+         nil];
     }
     
     return self;
@@ -215,8 +221,13 @@ NSMutableSet *_recordingRegisters;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
+    [_recordingRegisters enumerateObjectsUsingBlock:^(XVimRegister *xregister, BOOL *stop){
+        if ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
+            [xregister.text appendString:[XVimEvaluator keyStringFromKeyEvent:event]];
+        }
+    }];
     if( nil == nextEvaluator ){
-        TRACE_LOG(@"\"repeat: %@ ", [self findRegister:@"repeat"].text);
+        TRACE_LOG(@"%@", [self findRegister:@"repeat"]);
         [_currentEvaluator release];
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
     }else{
