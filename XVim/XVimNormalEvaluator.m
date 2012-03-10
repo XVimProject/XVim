@@ -306,8 +306,9 @@
     return nil;
 }
 
-- (XVimEvaluator*)QUESTION:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"?"];
+- (XVimEvaluator*)DOT:(id)arg{
+    XVimRegister *repeatRegister = [[self xvim] findRegister:@"repeat"];
+    [[self xvim] playbackRegister:repeatRegister withRepeatCount:[self numericArg]];
     return nil;
 }
 
@@ -324,7 +325,7 @@
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
 // This can always be changed to a set of valid keys in the future if need be.
 NSArray *_invalidRepeatKeys;
-- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =
         [[NSArray alloc] initWithObjects:
@@ -335,8 +336,9 @@ NSArray *_invalidRepeatKeys;
          @"V",
          @"C_v",
          @"COLON",
-         @"SLASH",
+         @"DOT",
          @"QUESTION",
+         @"SLASH",
          nil];
     }
     if (xregister.isRepeat){
@@ -344,16 +346,11 @@ NSArray *_invalidRepeatKeys;
         SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
         if( [self respondsToSelector:handler] && [[self superclass] instancesRespondToSelector:handler] == NO){
             if ([_invalidRepeatKeys containsObject:key] == NO){
-                TRACE_LOG(@"Recording: %@", key);
-                return YES;
+                return REGISTER_REPLACE;
             }
         }
     }
-    else if (xregister.isAlpha){
-        TRACE_LOG(@"Recording: %@", [XVimEvaluator keyStringFromKeyEvent:event]);
-        return YES;
-    }
-    return NO;
+    return [super shouldRecordEvent:event inRegister:xregister];
 }
 
 @end

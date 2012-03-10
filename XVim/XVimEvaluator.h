@@ -27,8 +27,9 @@ another structure.
 (Current implementation of XVimSearchLine evaluator can not be used from like 'd' command )
 */
 
+#import "XVimRegister.h"
+
 @class XVim;
-@class XVimRegister;
 @class XVimMotionEvaluator;
 
 typedef enum {
@@ -55,7 +56,7 @@ typedef enum _MOTION_TYPE{
 - (XVim*)xvim;
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type;
-- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
 @end
 
 // This evaluator is waiting for number input.

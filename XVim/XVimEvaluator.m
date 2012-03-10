@@ -230,8 +230,11 @@ static char* keynames[] = {
     return _xvim;
 }
 
-- (BOOL)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    return NO;
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (xregister.isAlpha){
+        return REGISTER_APPEND;
+    }
+    return REGISTER_IGNORE;
 }
 
 @end

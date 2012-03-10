@@ -66,7 +66,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)setNextSearchBaseLocation:(NSUInteger)location;
 - (NSUInteger)getNextSearchBaseLocation;
 - (XVimRegister*)findRegister:(NSString*)name;
-- (void)playbackRegister:(XVimRegister*)xregister;
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
+- (void)playbackRegister:(XVimRegister*)xregister withCount:(NSUInteger)count;
 @end

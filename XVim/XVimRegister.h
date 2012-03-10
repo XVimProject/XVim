@@ -8,14 +8,25 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum {
+    REGISTER_IGNORE,
+    REGISTER_APPEND,
+    REGISTER_REPLACE
+} XVimRegisterOperation;
+
 @interface XVimRegister : NSObject
 
 -(id) initWithRegisterName:(NSString*)name;
 
-@property (strong) NSMutableString *text;
+-(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count;
+-(void) appendKeyEvent:(NSEvent*)event;
+-(void) clear;
+
+@property (readonly, strong) NSMutableString *text;
 @property (readonly, strong) NSString *name;
 @property (readonly) BOOL isAlpha;
 @property (readonly) BOOL isNumeric;
 @property (readonly) BOOL isRepeat;
+@property (readonly) NSUInteger keyCount;
 
 @end

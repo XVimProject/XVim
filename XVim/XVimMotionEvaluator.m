@@ -619,5 +619,15 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 - (XVimEvaluator*)Right:(id)arg{
     return [self l:(id)arg];
 }
+
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (xregister.isRepeat)
+    {
+        return (xregister.text.length == 1) ? REGISTER_APPEND : REGISTER_IGNORE;
+    }
+    
+    return [super shouldRecordEvent:event inRegister:xregister];
+}
+
 @end
 

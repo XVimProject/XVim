@@ -36,6 +36,7 @@
 @synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 @synthesize registers = _registers;
 NSMutableSet *_recordingRegisters;
+BOOL _playingRegisterBack;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -201,6 +202,8 @@ NSMutableSet *_recordingRegisters;
          initWithObjects:
          [self findRegister:@"repeat"],
          nil];
+        
+        _playingRegisterBack = NO;
     }
     
     return self;
@@ -221,11 +224,24 @@ NSMutableSet *_recordingRegisters;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
-    [_recordingRegisters enumerateObjectsUsingBlock:^(XVimRegister *xregister, BOOL *stop){
-        if ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
-            [xregister.text appendString:[XVimEvaluator keyStringFromKeyEvent:event]];
-        }
-    }];
+    if (_playingRegisterBack == NO){
+        [_recordingRegisters enumerateObjectsUsingBlock:^(XVimRegister *xregister, BOOL *stop){
+            switch ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
+                case REGISTER_APPEND:
+                    [xregister appendKeyEvent:event];
+                    break;
+                    
+                case REGISTER_REPLACE:
+                    [xregister clear];
+                    [xregister appendKeyEvent:event];
+                    break;
+                    
+                case REGISTER_IGNORE:
+                default:
+                    break;
+            }
+        }];
+    }
     if( nil == nextEvaluator ){
         TRACE_LOG(@"%@", [self findRegister:@"repeat"]);
         [_currentEvaluator release];
@@ -580,7 +596,10 @@ NSMutableSet *_recordingRegisters;
     return [self.registers objectAtIndex:index];
 }
 
-- (void)playbackRegister:(XVimRegister*)xregister{
+- (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
+    _playingRegisterBack = YES;
+    [xregister playback:[self sourceView] withRepeatCount:count];
+    _playingRegisterBack = NO;
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{
