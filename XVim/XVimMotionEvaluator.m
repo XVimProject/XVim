@@ -78,11 +78,21 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+    // Only considered a motion in visual mode
+    if ([[self xvim] mode] == MODE_VISUAL) {
+        return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    }
+    
+    return nil;
 }
 
 - (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    // Only considered a motion in visual mode
+    if ([[self xvim] mode] == MODE_VISUAL) {
+        return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    }
+    
+    return nil;
 }
 
 - (XVimEvaluator*)f:(id)arg{
@@ -98,7 +108,12 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    // Only considered a motion in visual mode
+    if ([[self xvim] mode] == MODE_VISUAL) {
+        return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    }
+    
+    return nil;
 }
 
 - (XVimEvaluator*)g:(id)arg{
@@ -149,7 +164,12 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
 }
 
 - (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+    // Only considered a motion in visual mode
+    if ([[self xvim] mode] == MODE_VISUAL) {
+        return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+    }
+    
+    return nil;
 }
 
 - (XVimEvaluator*)v:(id)arg{

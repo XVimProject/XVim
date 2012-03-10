@@ -49,6 +49,15 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
+- (XVimEvaluator*)C_b:(id)arg{
+    XVimEvaluator *eval = [super C_b:arg];
+    if (eval == nil){
+        return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+    }
+    
+    return eval;
+}
+
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
 - (XVimEvaluator*)c:(id)arg{
@@ -78,6 +87,24 @@
     [view moveToEndOfLineAndModifySelection:self];
     [view cut:self];
     return nil;
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    XVimEvaluator *eval = [super C_d:arg];
+    if (eval == nil){
+        return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    }
+    
+    return eval;
+}
+
+- (XVimEvaluator*)C_f:(id)arg{
+    XVimEvaluator *eval = [super C_f:arg];
+    if (eval == nil){
+        return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    }
+    
+    return eval;
 }
 
 - (XVimEvaluator*)i:(id)arg{
@@ -202,6 +229,15 @@
         [[view undoManager] undo];
     }
     return nil;
+}
+
+- (XVimEvaluator*)C_u:(id)arg{
+    XVimEvaluator *eval = [super C_u:arg];
+    if (eval == nil){
+        return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+    }
+    
+    return eval;
 }
 
 - (XVimEvaluator*)v:(id)arg{
