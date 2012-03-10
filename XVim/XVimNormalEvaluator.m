@@ -30,6 +30,8 @@
 - (XVimEvaluator*)a:(id)arg{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
     // next line. it appends to the current line
+    // A cursor should not be on the new line break letter in Vim(Except empty line).
+    // So the root solution is to prohibit a cursor be on the newline break letter.
     NSTextView* view = [self textView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
@@ -47,6 +49,11 @@
     [view moveToEndOfLine:self];
     [self xvim].mode=MODE_INSERT;
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+}
+
+// This is not motion but scroll. That's the reason the implementation is here.
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
 }
 
 // 'c' works like 'd' except that once it's done deleting
@@ -68,6 +75,11 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
+// This is not motion but scroll. That's the reason the implementation is here.
+- (XVimEvaluator*)C_d:(id)arg{
+    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+}
+
 - (XVimEvaluator*)d:(id)arg{
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:FALSE];
 }
@@ -78,6 +90,11 @@
     [view moveToEndOfLineAndModifySelection:self];
     [view cut:self];
     return nil;
+}
+
+// This is not motion but scroll. That's the reason the implementation is here.
+- (XVimEvaluator*)C_f:(id)arg{
+    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)i:(id)arg{
@@ -132,7 +149,7 @@
 
 - (XVimEvaluator*)O:(id)arg{
     NSTextView* view = [self textView];
-    if( [view _currentLineNumber] == 1 ){
+    if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
         [view moveToBeginningOfLine:self];
         [view insertNewline:self];
         [view moveUp:self];
@@ -202,6 +219,11 @@
         [[view undoManager] undo];
     }
     return nil;
+}
+
+// This is not motion but scroll. That's the reason the implementation is here.
+- (XVimEvaluator*)C_u:(id)arg{
+    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)v:(id)arg{

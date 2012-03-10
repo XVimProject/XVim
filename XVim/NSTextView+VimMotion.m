@@ -22,8 +22,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 + (NSArray*) wordDelimiterCharacterSets{
     if (XVimWordDelimiterCharacterSets == nil) {
-        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects:
-                                          [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
+        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects: [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
                                           [NSCharacterSet  characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_"],
                                           nil
                                           ];
