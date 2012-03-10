@@ -77,6 +77,14 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+}
+
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
@@ -89,7 +97,9 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return eval;
 }
 
-
+- (XVimEvaluator*)C_f:(id)arg{
+    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+}
 
 - (XVimEvaluator*)g:(id)arg{
     return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
@@ -128,8 +138,18 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self commonMotion:@selector(cursorCenter:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
+- (XVimEvaluator*)n:(id)arg{
+    [[self xvim] searchNext];
+    return nil;
+}
+
+- (XVimEvaluator*)N:(id)arg{
+    [[self xvim] searchPrevious];
+    return nil;
+}
+
 - (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:)];
+    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)v:(id)arg{
@@ -582,5 +602,32 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE];
 }
+
+- (XVimEvaluator*)Up:(id)arg{
+    return [self k:(id)arg];
+}
+
+- (XVimEvaluator*)Down:(id)arg{
+    return [self j:(id)arg];
+    
+}
+
+- (XVimEvaluator*)Left:(id)arg{
+    return [self h:(id)arg];
+    
+}
+- (XVimEvaluator*)Right:(id)arg{
+    return [self l:(id)arg];
+}
+
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (xregister.isRepeat)
+    {
+        return (xregister.text.length == 1) ? REGISTER_APPEND : REGISTER_IGNORE;
+    }
+    
+    return [super shouldRecordEvent:event inRegister:xregister];
+}
+
 @end
 

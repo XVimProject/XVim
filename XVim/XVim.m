@@ -34,6 +34,9 @@
 
 @implementation XVim
 @synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
+@synthesize registers = _registers;
+NSMutableSet *_recordingRegisters;
+BOOL _playingRegisterBack;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -127,9 +130,87 @@
         _errorBells = FALSE; // ring bell on input errors.
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
         _localMarks = [[NSMutableDictionary alloc] init];
+        // From the vim documentation:
+        // There are nine types of registers:
+        // *registers* *E354*
+        _registers =
+        [[NSArray alloc] initWithObjects:
+         // 1. The unnamed register ""
+         [[XVimRegister alloc] initWithRegisterName:@"\""],
+         // 2. 10 numbered registers "0 to "9 
+         [[XVimRegister alloc] initWithRegisterName:@"0"],
+         [[XVimRegister alloc] initWithRegisterName:@"1"],
+         [[XVimRegister alloc] initWithRegisterName:@"2"],
+         [[XVimRegister alloc] initWithRegisterName:@"3"],
+         [[XVimRegister alloc] initWithRegisterName:@"4"],
+         [[XVimRegister alloc] initWithRegisterName:@"5"],
+         [[XVimRegister alloc] initWithRegisterName:@"6"],
+         [[XVimRegister alloc] initWithRegisterName:@"7"],
+         [[XVimRegister alloc] initWithRegisterName:@"8"],
+         [[XVimRegister alloc] initWithRegisterName:@"9"],
+         // 3. The small delete register "-
+         [[XVimRegister alloc] initWithRegisterName:@"-"],
+         // 4. 26 named registers "a to "z or "A to "Z
+         [[XVimRegister alloc] initWithRegisterName:@"a"],
+         [[XVimRegister alloc] initWithRegisterName:@"b"],
+         [[XVimRegister alloc] initWithRegisterName:@"c"],
+         [[XVimRegister alloc] initWithRegisterName:@"d"],
+         [[XVimRegister alloc] initWithRegisterName:@"e"],
+         [[XVimRegister alloc] initWithRegisterName:@"f"],
+         [[XVimRegister alloc] initWithRegisterName:@"g"],
+         [[XVimRegister alloc] initWithRegisterName:@"h"],
+         [[XVimRegister alloc] initWithRegisterName:@"i"],
+         [[XVimRegister alloc] initWithRegisterName:@"j"],
+         [[XVimRegister alloc] initWithRegisterName:@"k"],
+         [[XVimRegister alloc] initWithRegisterName:@"l"],
+         [[XVimRegister alloc] initWithRegisterName:@"m"],
+         [[XVimRegister alloc] initWithRegisterName:@"n"],
+         [[XVimRegister alloc] initWithRegisterName:@"o"],
+         [[XVimRegister alloc] initWithRegisterName:@"p"],
+         [[XVimRegister alloc] initWithRegisterName:@"q"],
+         [[XVimRegister alloc] initWithRegisterName:@"r"],
+         [[XVimRegister alloc] initWithRegisterName:@"s"],
+         [[XVimRegister alloc] initWithRegisterName:@"t"],
+         [[XVimRegister alloc] initWithRegisterName:@"u"],
+         [[XVimRegister alloc] initWithRegisterName:@"v"],
+         [[XVimRegister alloc] initWithRegisterName:@"w"],
+         [[XVimRegister alloc] initWithRegisterName:@"x"],
+         [[XVimRegister alloc] initWithRegisterName:@"y"],
+         [[XVimRegister alloc] initWithRegisterName:@"z"],
+         // 5. four read-only registers ":, "., "% and "#
+         [[XVimRegister alloc] initWithRegisterName:@":"],
+         [[XVimRegister alloc] initWithRegisterName:@"."],
+         [[XVimRegister alloc] initWithRegisterName:@"%"],
+         [[XVimRegister alloc] initWithRegisterName:@"#"],
+         // 6. the expression register "=
+         [[XVimRegister alloc] initWithRegisterName:@"="],
+         // 7. The selection and drop registers "*, "+ and "~  
+         [[XVimRegister alloc] initWithRegisterName:@"*"],
+         [[XVimRegister alloc] initWithRegisterName:@"+"],
+         [[XVimRegister alloc] initWithRegisterName:@"~"],
+         // 8. The black hole register "_
+         [[XVimRegister alloc] initWithRegisterName:@"_"],
+         // 9. Last search pattern register "/
+         [[XVimRegister alloc] initWithRegisterName:@"/"],
+         // additional "hidden" register to store text for '.' command
+         [[XVimRegister alloc] initWithRegisterName:@"repeat"],
+         nil];
+        
+        // The following registers are recording from the start
+        _recordingRegisters =
+        [[NSMutableSet alloc]
+         initWithObjects:
+         [self findRegister:@"repeat"],
+         nil];
+        
+        _playingRegisterBack = NO;
     }
     
     return self;
+}
+
+-(NSArray*)registers{
+    return _registers;
 }
 
 -(void)dealloc{
@@ -142,8 +223,27 @@
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-    XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];     
+    XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
+    if (_playingRegisterBack == NO){
+        [_recordingRegisters enumerateObjectsUsingBlock:^(XVimRegister *xregister, BOOL *stop){
+            switch ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
+                case REGISTER_APPEND:
+                    [xregister appendKeyEvent:event];
+                    break;
+                    
+                case REGISTER_REPLACE:
+                    [xregister clear];
+                    [xregister appendKeyEvent:event];
+                    break;
+                    
+                case REGISTER_IGNORE:
+                default:
+                    break;
+            }
+        }];
+    }
     if( nil == nextEvaluator ){
+        TRACE_LOG(@"%@", [self findRegister:@"repeat"]);
         [_currentEvaluator release];
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
     }else{
@@ -485,6 +585,29 @@
 }
 - (NSUInteger)getNextSearchBaseLocation {
     return _nextSearchBaseLocation;
+}
+
+- (XVimRegister*)findRegister:(NSString*)name{
+    NSUInteger index = [self.registers indexOfObjectPassingTest:^(XVimRegister *xregister, NSUInteger index, BOOL *stop){
+        *stop = (xregister.name == name);
+        return *stop;
+    }];
+    
+    return [self.registers objectAtIndex:index];
+}
+
+- (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
+    _playingRegisterBack = YES;
+    [xregister playback:[self sourceView] withRepeatCount:count];
+    _playingRegisterBack = NO;
+}
+
+- (void)recordIntoRegister:(XVimRegister*)xregister{
+    [_recordingRegisters addObject:xregister];
+}
+
+- (void)stopRecordingRegister:(XVimRegister*)xregister{
+    [_recordingRegisters removeObject:xregister];
 }
 
 @end
