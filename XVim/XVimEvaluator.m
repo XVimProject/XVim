@@ -231,10 +231,10 @@ static char* keynames[] = {
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    if (xregister.isAlpha){
-        return REGISTER_APPEND;
+    if (xregister.isReadOnly){
+        return REGISTER_IGNORE;
     }
-    return REGISTER_IGNORE;
+    return REGISTER_APPEND;
 }
 
 @end

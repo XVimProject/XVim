@@ -10,15 +10,15 @@
 #import "XVimEvaluator.h"
 #import <CoreServices/CoreServices.h>
 
+@interface XVimRegister()
+    @property (strong) NSMutableArray *keyEvents;
+@end
+
 @implementation XVimRegister
 
-NSString *_name;
-NSMutableArray *_keyEvents;
 @synthesize text = _text;
-
--(NSString*) name{
-    return _name;
-}
+@synthesize name = _name;
+@synthesize keyEvents = _keyEvents;
 
 -(NSString*) description{
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.name, self.text];
@@ -28,8 +28,8 @@ NSMutableArray *_keyEvents;
     self = [super init];
     if (self) {
         _keyEvents = [[NSMutableArray alloc] init];
-        _text = [[NSMutableString alloc] initWithString:@""];
-        _name = [[NSString alloc] initWithString:registerName];
+        _text = [NSMutableString stringWithString:@""];
+        _name = [NSString stringWithString:registerName];
     }
     return self;
 }
@@ -52,6 +52,18 @@ NSMutableArray *_keyEvents;
 
 -(BOOL) isRepeat{
     return self.name == @"repeat";
+}
+
+-(BOOL) isReadOnly{
+    return self.name == @":" || self.name == @"." || self.name == @"%" || self.name == @"#" || self.isRepeat;
+}
+
+-(BOOL) isEqual:(id)object{
+    return [object isKindOfClass:[self class]] && [self hash] == [object hash];
+}
+
+-(NSUInteger) hash{
+    return [self.name hash];
 }
 
 -(NSUInteger) keyCount{
