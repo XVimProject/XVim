@@ -16,6 +16,7 @@
 #import "XVimShiftEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
+#import "XVimRegisterEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVim.h"
 #import "Logger.h"
@@ -196,6 +197,15 @@
     return nil;
 }
 
+- (XVimEvaluator*)q:(id)arg{
+    if ([self xvim].recordingRegister != nil){
+        [[self xvim] stopRecordingRegister:[self xvim].recordingRegister];
+        return nil;
+    }
+    
+    return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_RECORD andCount:[self numericArg]];
+}
+
 - (XVimEvaluator*)C_r:(id)arg{
     // Go to insert 
     NSTextView* view = [self textView];
@@ -298,6 +308,10 @@
     return [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
+- (XVimEvaluator*)AT:(id)arg{
+    return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_PLAYBACK andCount:[self numericArg]];
+}
+
 - (XVimEvaluator*)EQUAL:(id)arg{
     return [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
 }
@@ -352,19 +366,23 @@ NSArray *_invalidRepeatKeys;
         _invalidRepeatKeys =
         [[NSArray alloc] initWithObjects:
          @"m",
+         @"q",
          @"C_r",
          @"u",
          @"v",
          @"V",
          @"C_v",
+         @"AT",
          @"COLON",
          @"DOT",
          @"QUESTION",
          @"SLASH",
          nil];
     }
-    if (xregister.isRepeat){
-        NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+    NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+    if (key == @"q"){
+        return REGISTER_IGNORE;
+    }else if (xregister.isRepeat){
         SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
         if( [self respondsToSelector:handler] && [[self superclass] instancesRespondToSelector:handler] == NO){
             if ([_invalidRepeatKeys containsObject:key] == NO){
