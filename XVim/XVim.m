@@ -234,6 +234,7 @@
     return YES;
 }
 
+// Should move to separated file.
 - (void)commandDetermined:(NSString*)command{
     NSString* c = [command stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     NSTextView* srcView = [self superview]; // DVTTextSourceView

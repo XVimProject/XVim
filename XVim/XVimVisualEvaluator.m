@@ -35,6 +35,23 @@
     [self updateSelection];
     return self;
 }
+
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+}
+
+- (XVimEvaluator*)C_f:(id)arg{
+    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+}
+
+- (XVimEvaluator*)C_u:(id)arg{
+    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+}
+
 - (void)updateSelection{
     NSTextView* view = [self textView];
     if( _mode == MODE_CHARACTER ){
@@ -82,7 +99,8 @@
 
 - (XVimEvaluator*)EQUAL:(id)arg{
     [self updateSelection];
-    [XVimEqualEvaluator indent:self];
+    // Not implemented yet. Will share the code in the XVimEqualEvaluator
+    //[XVimEqualEvaluator indent:self];
     return nil;
 }
 
