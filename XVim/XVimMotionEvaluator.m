@@ -75,30 +75,6 @@
 - (XVimEvaluator*)B:(id)arg{
     return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
-
-/*
-// Since Ctrl-b, Ctrl-d is not "motion" but "scroll" 
-// they are implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
- 
-- (XVimEvaluator*)C_b:(id)arg{
-    // Only considered a motion in visual mode
-    if ([[self xvim] mode] == MODE_VISUAL) {
-        return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
-    }
-    
-    return nil;
-}
-
-- (XVimEvaluator*)C_d:(id)arg{
-    // Only considered a motion in visual mode
-    if ([[self xvim] mode] == MODE_VISUAL) {
-        return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
-    }
-    
-    return nil;
-}
-*/
-
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
@@ -110,19 +86,6 @@
     eval.forward = NO;
     return eval;
 }
-
-/*
- // Since Ctrl-f is not "motion" but "scroll" 
- // it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
-- (XVimEvaluator*)C_f:(id)arg{
-    // Only considered a motion in visual mode
-    if ([[self xvim] mode] == MODE_VISUAL) {
-        return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
-    }
-    
-    return nil;
-}
-*/
 
 - (XVimEvaluator*)g:(id)arg{
     return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
@@ -170,19 +133,6 @@
     [[self xvim] searchPrevious];
     return nil;
 }
-/*
-// Since Ctrl-u is not "motion" but "scroll" 
-// it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
- 
-- (XVimEvaluator*)C_u:(id)arg{
-    // Only considered a motion in visual mode
-    if ([[self xvim] mode] == MODE_VISUAL) {
-        return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
-    }
-    
-    return nil;
-}
-*/
 
 - (XVimEvaluator*)v:(id)arg{
     _inverseMotionType = !_inverseMotionType;
@@ -194,7 +144,7 @@
 }
 
 - (XVimEvaluator*)W:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(WORDSForward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)z:(id)arg{
@@ -335,7 +285,7 @@
         // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
         [[self xvim] ringBell];
     } else {
-        [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
+        return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
     }
     
     return self;
