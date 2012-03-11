@@ -33,6 +33,9 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
      BOOL _ignoreCase;
      BOOL _wrapScan;
      BOOL _errorBells;
+     NSMutableString* _lastReplacedString;
+     NSMutableString* _lastReplacementString;
+     NSUInteger _nextReplaceBaseLocation;
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
      NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location

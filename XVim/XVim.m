@@ -123,6 +123,8 @@ BOOL _playingRegisterBack;
         mode = MODE_NORMAL;
         tag = XVIM_TAG;
         _lastSearchString = [[NSMutableString alloc] init];
+        _lastReplacementString = [[NSMutableString alloc] init];
+        _lastReplacedString = [[NSMutableString alloc] init];
         _nextSearchBaseLocation = 0;
         _searchBackword = NO;
         _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
@@ -374,6 +376,54 @@ BOOL _playingRegisterBack;
             NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
             [[NSApplication sharedApplication] sendEvent:keyPress];
         }
+        else if( [ex_command hasPrefix:@"%s/"] ) {
+            // Split the string into the various components
+            NSString* replaced = @"";
+            NSString* replacement = @"";
+            char previous = 0;
+            int component = 0;
+            BOOL global = NO;
+            BOOL confirmation = NO;
+            if ([ex_command length] >= 3) {
+                for(int i=3;i<[ex_command length];++i) {
+                    char current = [ex_command characterAtIndex:i];
+                    if (current == '/' && previous != '\\') {
+                        component++;
+                    } else {
+                        if (component == 0) {
+                            replaced = [NSString stringWithFormat:@"%@%c",replaced,current];
+                        } else if (component == 1) {
+                            replacement = [NSString stringWithFormat:@"%@%c",replacement,current];
+                        } else {
+                            if (current == 'g') {
+                                global = YES;
+                            } else if (current == 'c') {
+                                confirmation = YES;
+                            } else {
+                                ERROR_LOG("Unknown replace option %c",current);
+                            }
+                        }
+                        previous = current;
+                    }
+                }
+                TRACE_LOG("replaced=%@",replaced);
+                TRACE_LOG("replacement=%@",replacement);
+            }
+            [_lastReplacedString setString:replaced];
+            [_lastReplacementString setString:replacement];
+            // Replace all the occurrences
+            _nextReplaceBaseLocation = 0;
+            int numReplacements = 0;
+            BOOL found;
+            do {
+                found = [self replaceForward];
+                if (found) {
+                    numReplacements++;
+                }
+            } while(found && global);
+            [self statusMessage:[NSString stringWithFormat:
+                                 @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
+        }
         else {
             TRACE_LOG("Don't recognize ex_command %@", ex_command);
         }
@@ -541,6 +591,60 @@ BOOL _playingRegisterBack;
     }
     return;
 }
+
+- (BOOL)replaceForward {
+    // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
+    // We use NSRegularExpression which does (if you tell it to)
+    
+    NSTextView* srcView = [self superview];
+    NSUInteger search_base = _nextReplaceBaseLocation;
+    search_base = [srcView selectedRange].location;
+    NSRange found = {NSNotFound, 0};
+    
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
+    if (_ignoreCase == TRUE) {
+        r_opts |= NSRegularExpressionCaseInsensitive;
+    }
+    
+    NSError *error = NULL;
+    NSRegularExpression *regex = [NSRegularExpression 
+                                  regularExpressionWithPattern:_lastReplacedString
+                                  options:r_opts
+                                  error:&error];
+    
+    if (error != nil) {
+        [self statusMessage:[NSString stringWithFormat:
+                             @"Cannot compile regular expression '%@'",_lastSearchString] ringBell:TRUE];
+        return NO;
+    }
+    
+    // search text beyond the search_base
+    if( [[srcView string] length]-1 > search_base){
+        found = [regex rangeOfFirstMatchInString:[srcView string] 
+                                         options:r_opts
+                                           range:NSMakeRange(search_base+1, [[srcView string] length] - search_base - 1)];
+    }
+    
+    if( found.location != NSNotFound ){
+        //Move cursor and show the found string
+        [srcView scrollRangeToVisible:found];
+        //[srcView showFindIndicatorForRange:found];
+        //[srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        
+        // ciao Marco come stai?
+        // Io Marco bene!
+        
+        // Replace the text
+        [[srcView textStorage] replaceCharactersInRange:found withString:_lastReplacementString];
+        
+        _nextReplaceBaseLocation = found.location + ((found.length==0)? 0: found.length-1);
+        return YES;
+    } else {
+        return NO;
+    }
+}
+
+
 
 - (void)commandCanceled{
     METHOD_TRACE_LOG();

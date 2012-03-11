@@ -11,6 +11,7 @@
 #import "XVimCommandLine.h"
 #import "XVim.h"
 #import <objc/runtime.h>
+
 @implementation DVTSourceTextViewHook
 
 static NSMutableArray* queue;
@@ -138,6 +139,14 @@ static NSMutableArray* queue;
 -  (void)keyDown:(NSEvent *)theEvent{
     XVim* xvim = [self viewWithTag:XVIM_TAG];
     if( nil == xvim ){
+        [self XVimKeyDown:theEvent];
+        return;
+    }
+    
+    // On some configuration when the " is opened, the string is still empty because the user
+    // needs to type the space button or any other character before the quote is made persistent
+    NSString* ignMod =  [theEvent charactersIgnoringModifiers];
+    if (ignMod == nil || [ignMod length] == 0) {
         [self XVimKeyDown:theEvent];
         return;
     }
