@@ -437,6 +437,10 @@
     if( pos == 0 ){
         return nil;
     }
+    if( pos == s.length )
+    {
+        pos = pos - 1;
+    }
     NSUInteger prevpos = pos - 1;
     NSUInteger paragraph_head = NSNotFound;
     int paragraph_found = 0;
