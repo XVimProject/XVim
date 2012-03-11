@@ -131,34 +131,6 @@ static NSMutableArray* queue;
     if( [[self window] firstResponder] != self){
         return NO;
     }
-    if( MODE_NORMAL == xvim.mode ){
-        switch(charcode){
-            case 'u':
-                if(theEvent.modifierFlags & NSControlKeyMask ){
-                    [self pageUp:self];
-                }
-                else{
-                    [[self undoManager] undo];
-                }
-                done = YES;
-                break;
-        }
-    }else   if( MODE_VISUAL == xvim.mode ){
-        switch(charcode){
-            case 'u':
-                if(theEvent.modifierFlags & NSControlKeyMask ){
-                    [self pageUpAndModifySelection:self];
-                }
-                else{
-                    [[self undoManager] undo];
-                }
-                done = YES;
-                break;
-        }
-    }
-    
-    if( done )
-        return YES;
     
     return [self XVimPerformKeyEquivalent:theEvent];
 }
