@@ -14,7 +14,7 @@ Download XVim_X.XX.pkg and install it. Do not change the install directory.
 Then restart XCode. That's it!
 
 
-From source code
+From Source Code
 -----------------
 
 Download source code and just build XVim.xcodeproj.
