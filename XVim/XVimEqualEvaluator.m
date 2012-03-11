@@ -9,7 +9,7 @@
 #import "XVimEqualEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVimMotionEvaluator.h"
-#import <CoreServices/CoreServices.h>
+#import "Logger.h"
 
 @implementation XVimEqualEvaluator
 - (id)init{
@@ -49,6 +49,7 @@
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+    TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
     NSTextView* view = [self textView];
     if( from > to ){
         NSUInteger tmp = from;

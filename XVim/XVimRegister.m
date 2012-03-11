@@ -91,7 +91,7 @@
             // Have to clone the event with a new time stamp in order to not confuse the app
             // otherwise it can cause a crash or simply ignore the repeat count. Unfortunately
             // it posts the events VERY SLOWLY. Need to find a better way to speed it up.
-            NSTimeInterval currentTime = 0.01 * AbsoluteToDuration(UpTime());
+            NSTimeInterval currentTime = 0.001 * AbsoluteToDuration(UpTime());
             NSEvent *clonedEvent = [NSEvent keyEventWithType:event.type location:event.locationInWindow modifierFlags:event.modifierFlags timestamp:currentTime  windowNumber:event.windowNumber context:event.context characters:event.characters charactersIgnoringModifiers:event.charactersIgnoringModifiers isARepeat:event.isARepeat keyCode:event.keyCode];
             [[NSApplication sharedApplication] postEvent:clonedEvent atStart:NO];
         }];
