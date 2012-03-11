@@ -7,15 +7,11 @@ XVim is a plugin for XCode to enable Vim keybindings in it.
 INSTALL
 =======
 
-From zip
+From Installer Package
 --------
 
-Download XVim.zip and extract it into followng direcotry.
-
-    $(HOME)/Library/Application Support/Developer/Shared/Xcode/Plug-ins
-
-Make the directory if you don't have one already.
-Then restart XCode
+Download XVim_X.XX.pkg and install it. Do not change the install directory.
+Then restart XCode. That's it!
 
 
 From source code
