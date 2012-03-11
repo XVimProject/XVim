@@ -266,7 +266,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 - (NSUInteger)scrollCenter:(NSNumber*)count{ // zz / z.
     NSScrollView *scrollView = [self enclosingScrollView];
-    NSPoint center = NSMakePoint(0.0, [[scrollView documentView] bounds].size.height / 2);
+    NSPoint center = NSMakePoint(0.0, 0.0f);
     [[scrollView contentView] scrollToPoint:center];
     return [self selectedRange].location;
 }
