@@ -434,7 +434,6 @@ BOOL isFuzzyWord(unichar ch) {
 
 // This dose not care about whitespaces.
 - (NSUInteger)headOfLine{
-    NSRange r = [self selectedRange];
     NSUInteger prevNewline = [self prevNewline];
     if( NSNotFound == prevNewline ){
         return 0; // begining of document
@@ -448,6 +447,13 @@ BOOL isFuzzyWord(unichar ch) {
     if( r.location == 0 ){
         return NSNotFound;
     }
+    if( r.location == [[self string] length] ){
+        if( isNewLine([[self string] characterAtIndex:r.location-1])){
+            return r.location-1;
+        }else{
+            r.location = r.location-1;
+        }
+    }
     // if the current location is newline, skip it.
     if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
         r.location--;
@@ -457,6 +463,27 @@ BOOL isFuzzyWord(unichar ch) {
     
 }
 
+- (NSUInteger)endOfLine{
+    NSRange r = [self selectedRange];
+    if( [[self string] length] == 0 ){
+        return 0;
+    }
+    
+    if( [[self string] length] == r.location ){
+        return r.location;
+    }
+    
+    if( [self isBlankLine:r.location] ){
+        return r.location;
+    }
+    NSUInteger nextNewline = [self nextNewline];
+    if( NSNotFound == nextNewline ){
+        nextNewline = [[self string] length]-1;
+    }else{
+        nextNewline--;
+    }
+    return nextNewline;
+}
 // may retrun NSNotFound
 - (NSUInteger)nextNewline{
     NSRange r = [self selectedRange];
