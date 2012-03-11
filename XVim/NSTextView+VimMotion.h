@@ -8,6 +8,11 @@
 
 #import "NSTextView+VimMotion.h"
 
+typedef enum{
+    LEFT_RIGHT_WRAP,
+    LEFT_RIGHT_NOWRAP
+} MOTION_OPTION;
+
 @interface NSTextView (VimMotion)
 - (NSUInteger)nextNewline;
 - (NSUInteger)prevNewline;
