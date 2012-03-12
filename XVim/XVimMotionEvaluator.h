@@ -36,11 +36,13 @@ typedef enum _MOTION_TYPE{
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 
 
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
+
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (NSUInteger)_linePrevForStorage:(NSString *)s location:(NSUInteger)location;
+- (NSUInteger)_linePrevForStorageN:(NSString *)s location:(NSUInteger)location count:(NSUInteger)count;
+- (NSUInteger)_lineNextForStorage:(NSString *)s location:(NSUInteger)location;
+- (NSUInteger)_lineNextForStorageN:(NSString *)s location:(NSUInteger)location count:(NSUInteger)count;
+- (NSUInteger)_moveToNoneWhiteForStorage:(NSString *)s location:(NSUInteger)location;
 @end
-
-
-
-    
 
