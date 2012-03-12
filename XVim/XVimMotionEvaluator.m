@@ -335,21 +335,75 @@
     return [self h:arg];
 }
 
+- (NSUInteger)_lineNextForStorage:(NSString *)s location:(NSUInteger)location {
+    while (location < s.length) {
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:location]]) {
+            if (location < s.length -1)
+                location++;
+            break;
+        }
+        location++;
+    }
+    return location;
+}
+- (NSUInteger)_lineNextForStorageN:(NSString *)s location:(NSUInteger)location count:(NSUInteger)count{
+    NSUInteger newlocation = location;
+    for (NSInteger i = 0; i < count; i++) {
+        newlocation = [self _lineNextForStorage:s location: newlocation];
+    }
+    return newlocation;
+}
+
+- (NSUInteger)_linePrevForStorage:(NSString *)s location:(NSUInteger)location {
+    if (location == 0) 
+        return 0;
+    NSUInteger l = location-1;
+    // go backwards to end of prev line
+    while(l > 0) {
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:l]])
+            break;
+        l--;
+    }
+    // go to start of current line
+    while(l > 0) {
+        if (![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:l-1]]) {
+            l--;
+        } else { 
+            break;
+        }
+    }
+    return l;
+}
+- (NSUInteger)_linePrevForStorageN:(NSString *)s location:(NSUInteger)location count:(NSUInteger)count{
+    NSUInteger newlocation = location;
+    for (NSInteger i = 0; i < count; i++) {
+        newlocation = [self _linePrevForStorage:s location: newlocation];
+    }
+    return newlocation;
+}
+
+- (NSUInteger)_moveToNonWhiteForStorage:(NSString *)s location:(NSUInteger)location {
+    // move to 1st non whitespace char, now that we are on the destination line
+    while (location < s.length) {
+        if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:location]])
+            break;
+        location++;
+    }
+    return location;
+}
+
 - (XVimEvaluator*)PLUS:(id)arg{
     NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
+    NSString* s = [[view textStorage] string];
     NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveDown:self];
-    }
-    [view moveToBeginningOfLine:self];
-    NSRange end = [view selectedRange];
-    // move to 1st non whitespace char, now that we are on the destination line
-    for (NSUInteger idx = end.location; idx < s.length; idx++) {
-        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
-            break;
-        [view moveRight:self];
-    }
+    NSRange end = begin; 
+    // In vi, when the view is wrapping a line we should go to the next storage line
+    // not the next view line
+    end.location = [self _lineNextForStorageN:s 
+        location:begin.location 
+        count:[self numericArg]];
+    end.location = [self _moveToNonWhiteForStorage:s location:end.location];
+    [view setSelectedRange:end];
     end = [view selectedRange];
     [view setSelectedRange:begin];
     return [self _motionFixedFrom:begin.location To:end.location Type:LINEWISE];
@@ -362,23 +416,15 @@
     return [self PLUS:arg];
 }
 
-
 - (XVimEvaluator*)MINUS:(id)arg{
+    // In vi, when the view is wrapping a line we should go to the prev storage line
+    // not the prev view line
     NSTextView* view = [self textView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveUp:self];
-        [view moveToBeginningOfLine:self];
-    }
-    NSRange end = [view selectedRange];
-    // move to 1st non whitespace char, now that we are on the destination line
-    for (NSUInteger idx = end.location; idx < s.length; idx++) {
-        if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
-            break;
-        [view moveRight:self];
-    }
-    end = [view selectedRange];
+    NSRange end = begin;
+    end.location = [self _linePrevForStorageN:s location:end.location count: [self numericArg]];
+    end.location = [self _moveToNonWhiteForStorage:s location:end.location];
     [view setSelectedRange:begin];
     return [self _motionFixedFrom:begin.location To:end.location Type:LINEWISE];
 }

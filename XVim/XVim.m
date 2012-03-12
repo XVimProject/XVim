@@ -379,7 +379,7 @@ BOOL _playingRegisterBack;
         }
     }
     else if ([c characterAtIndex:0] == '/' || [c characterAtIndex:0] == '?') {
-        // note: c is the whitespace trimmed of command.
+        // note: c is the whitespace trimmed version of command.
         // we want the non trimmed version (command) because leading/trailing
         // whitespace is something should be part of the search string
         if ([command characterAtIndex:0] == '?') {
@@ -393,7 +393,6 @@ BOOL _playingRegisterBack;
             [self searchNext];
         }
         else if([command length] > 1) {
-            // Don't trim whitespace. that's valid search criteria. just move past the command letter
             NSString *s = [command substringFromIndex:1];
             [_lastSearchString setString: s];
             [self searchNext];
