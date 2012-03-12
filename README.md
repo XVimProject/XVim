@@ -7,18 +7,14 @@ XVim is a plugin for XCode to enable Vim keybindings in it.
 INSTALL
 =======
 
-From zip
+From Installer Package
 --------
 
-Download XVim.zip and extract it into followng direcotry.
-
-    $(HOME)/Library/Application Support/Developer/Shared/Xcode/Plug-ins
-
-Make the directory if you don't have one already.
-Then restart XCode
+Download XVim_X.XX.pkg and install it. Do not change the install directory.
+Then restart XCode. That's it!
 
 
-From source code
+From Source Code
 -----------------
 
 Download source code and just build XVim.xcodeproj.
@@ -53,7 +49,7 @@ To reduce fee of trasfer please donate directly through Paypal donation site bel
 https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 Since no messages are sent to me(us) when you donate from above
-it is appreciated to write a message on [Message Board]( https://github.com/JugglerShu/XVim/wiki/Message-Board ).
+it is appreciated to write a message on [Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim ).
 It will really motivate me(us)!
 
 このプロジェクト、プラグインがよいと思われましたら寄付をいただけると非常にうれしいです。
@@ -63,4 +59,4 @@ It will really motivate me(us)!
 https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 この場合、こちらにメッセージなどが来ることはありませんので、
-メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Message-Board )にいただけると、開発のモチベーションにつながります。
+メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim )にいただけると、開発のモチベーションにつながります。

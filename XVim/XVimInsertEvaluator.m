@@ -69,4 +69,13 @@
     }
 }
 
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (xregister.isRepeat)
+    {
+        return REGISTER_APPEND;
+    }
+    
+    return [super shouldRecordEvent:event inRegister:xregister];
+}
+
 @end

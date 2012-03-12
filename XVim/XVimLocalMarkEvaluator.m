@@ -52,6 +52,9 @@
             return nil;
         }
         
+        // TODO:
+        // Marks are exclusive motion
+        // They have to call motionFixedFrom with MOTION_TYPE:CHARACTERWISE_EXCLUSIVE
         [view setSelectedRange:r];
         if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
             [view moveToBeginningOfLine:nil];

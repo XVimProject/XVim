@@ -1,3 +1,4 @@
+
 //
 //  NSTextView+VimMotion.m
 //  XVim
@@ -22,8 +23,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 + (NSArray*) wordDelimiterCharacterSets{
     if (XVimWordDelimiterCharacterSets == nil) {
-        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects:
-                                          [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
+        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects: [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
                                           [NSCharacterSet  characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_"],
                                           nil
                                           ];
@@ -41,26 +41,120 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     return cs_id;
 };
 
-- (NSUInteger)prev:(NSNumber*)count{ //h
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveLeft:self];
-    }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+/////////////////////////
+// support functions   //
+/////////////////////////
+BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
+BOOL isWhiteSpace(unichar ch) { return ch == ' ' || ch == '\t'; }
+BOOL isNewLine(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
+BOOL isNonAscii(unichar ch) { return ch > 128; }
+BOOL isAlpha(unichar ch) { 
+    return (ch >= 'A' && ch <= 'Z') ||
+    (ch >= 'a' && ch <= 'z') 
+#ifdef UNDERSCORE_IS_WORD
+    || ch == '_'
+#endif
+    ;
+}
+BOOL isDelimeter(unichar ch) {
+    return (ch >= '!' && ch <= '/') ||
+    (ch >= ':' && ch <= '@') ||
+    (ch >= '[' && ch <= '`' && ch != '_') ||
+    (ch >= '{' && ch <= '~');
+}
+BOOL isFuzzyWord(unichar ch) {
+    return (!isWhiteSpace(ch)) && (!isNewLine(ch));
 }
 
-- (NSUInteger)next:(NSNumber*)count{ //l
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveRight:self];
+- (BOOL) isBlankLine:(NSUInteger)index{
+    if( index == [[self string] length] || isNewLine([[self string] characterAtIndex:index])){
+        if( 0 == index || isNewLine([[self string] characterAtIndex:index-1]) ){
+            return YES;
+        }
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+    return NO;
+}
+
+/////////////
+// Motions //
+/////////////
+
+// This is tempral stub. Do not use this from new code.
+- (NSUInteger)prev:(NSNumber*)count{ //h
+    return [self prev:[self selectedRange].location count:count option:LEFT_RIGHT_NOWRAP];
+}
+
+- (NSUInteger)prev:(NSUInteger)begin count:(NSNumber*)count option:(MOTION_OPTION)opt{
+    if( 0 == begin ){
+        return 0;
+    }
+    
+    NSString* string = [self string];
+    NSUInteger pos = begin;
+    for (NSUInteger i = 0; i < [count unsignedIntValue] && pos != 0 ; i++)
+    {
+        //Try move to prev position and check if its valid position.
+        NSUInteger prev = pos-1; //This is the position where we are trying to move to.
+        // If the position is new line and its not wrapable we stop moving
+        if( opt == LEFT_RIGHT_NOWRAP && isNewLine([[self string] characterAtIndex:prev]) ){
+            break; // not update the position
+        }
+        
+        // If its wrapable, skip newline except its blankline
+        if (isNewLine([string characterAtIndex:prev])) {
+            if(![self isBlankLine:prev]) {
+                // skip the newline letter at the end of line
+                prev--;
+            }
+        }
+        
+        // Now the position can be move to the prev
+        pos = prev;
+    }   
+    return pos;
+}
+
+
+
+- (NSUInteger)next:(NSUInteger)begin count:(NSNumber*)count option:(MOTION_OPTION)opt{
+    if( begin == [[self string] length] )
+        return [[self string] length];
+    
+    NSString* string = [self string];
+    NSUInteger pos = begin;
+    // If the currenct cursor position is on a newline (blank line) and not wrappable never move the cursor
+    if( opt == LEFT_RIGHT_NOWRAP && [self isBlankLine:pos]){
+        return pos;
+    }
+    
+    for (NSUInteger i = 0; i < [count unsignedIntValue] && pos < [string length]; i++) 
+    {
+        NSUInteger next = pos + 1;
+        // If the next position is the end of docuement and current position is not a newline
+        // Never move a cursor to the end of document.
+        if( next == [string length] && !isNewLine([string characterAtIndex:pos]) ){
+            break;
+        }
+        
+        if( opt == LEFT_RIGHT_NOWRAP && isNewLine([[self string] characterAtIndex:next]) ){
+            break;
+        }
+        
+        // If the next position is newline and not a blankline skip it
+        if (isNewLine([string characterAtIndex:next])) {
+            if(![self isBlankLine:next]) {
+                // skip the newline letter at the end of line
+                next++;
+            }
+        }
+        pos = next;
+    }   
+    return pos;
+}
+
+// This is tempral stub. Do not use this from new code.
+- (NSUInteger)next:(NSNumber*)count{ //l
+    return [self next:[self selectedRange].location count:count option:LEFT_RIGHT_NOWRAP];
 }
 
 - (NSUInteger)prevLine:(NSNumber*)count{ //k
@@ -340,7 +434,6 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 // This dose not care about whitespaces.
 - (NSUInteger)headOfLine{
-    NSRange r = [self selectedRange];
     NSUInteger prevNewline = [self prevNewline];
     if( NSNotFound == prevNewline ){
         return 0; // begining of document
@@ -354,6 +447,13 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     if( r.location == 0 ){
         return NSNotFound;
     }
+    if( r.location == [[self string] length] ){
+        if( isNewLine([[self string] characterAtIndex:r.location-1])){
+            return r.location-1;
+        }else{
+            r.location = r.location-1;
+        }
+    }
     // if the current location is newline, skip it.
     if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
         r.location--;
@@ -363,6 +463,27 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     
 }
 
+- (NSUInteger)endOfLine{
+    NSRange r = [self selectedRange];
+    if( [[self string] length] == 0 ){
+        return 0;
+    }
+    
+    if( [[self string] length] == r.location ){
+        return r.location;
+    }
+    
+    if( [self isBlankLine:r.location] ){
+        return r.location;
+    }
+    NSUInteger nextNewline = [self nextNewline];
+    if( NSNotFound == nextNewline ){
+        nextNewline = [[self string] length]-1;
+    }else{
+        nextNewline--;
+    }
+    return nextNewline;
+}
 // may retrun NSNotFound
 - (NSUInteger)nextNewline{
     NSRange r = [self selectedRange];

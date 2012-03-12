@@ -27,6 +27,8 @@ another structure.
 (Current implementation of XVimSearchLine evaluator can not be used from like 'd' command )
 */
 
+#import "XVimRegister.h"
+
 @class XVim;
 @class XVimMotionEvaluator;
 
@@ -35,6 +37,7 @@ typedef enum {
   MARKOPERATOR_MOVETO,
   MARKOPERATOR_MOVETOSTARTOFLINE
 } XVimMarkOperator;
+
 
 
 @interface XVimEvaluator : NSObject{
@@ -47,6 +50,8 @@ typedef enum {
 - (XVimEvaluator*)defaultNextEvaluator;
 - (NSTextView*)textView;
 - (XVim*)xvim;
+
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
 @end
 
 // This evaluator is waiting for number input.

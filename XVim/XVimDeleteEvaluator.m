@@ -70,22 +70,40 @@
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
     NSTextView* view = [self textView];
+    NSString* string = [view string];
+    
+    if( [string length] == 0 )
+        return nil;
+    
     if( from > to ){
         NSUInteger tmp = from;
         from = to;
         to = tmp;
     }
+
     if( to != 0 && type == CHARACTERWISE_EXCLUSIVE){
         to--;
     }else if( type == LINEWISE ){
-        [view setSelectedRange:NSMakeRange(to,0)];
-        to = [view nextNewline];
-        if( NSNotFound == to ){
-            to = [view string].length-1;
+        if( [string length] == to && [string length] == from ){
+            // edge case:
+            // if repeat is only one and we are at the end of a file at an empty line
+            // delete the current line even though it's "behind us" (sort of)
+            // this is vi behavior.
+            if( 0 != [string length] ){
+                from--;
+                [view setSelectedRange:NSMakeRange(from, 1)];
+                [view cut:self];
+                return nil;
+            }
         }
-
+        [view setSelectedRange:NSMakeRange(to,0)];
+        if( !isNewLine([[view string] characterAtIndex:to])){
+            to = [view nextNewline];
+            if( NSNotFound == to ){
+                to = [view string].length-1;
+            }
+        }
         NSRange r = [view selectedRange];
         [view setSelectedRange:NSMakeRange(from,0)];
         from = [view prevNewline];

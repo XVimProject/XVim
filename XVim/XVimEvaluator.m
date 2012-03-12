@@ -230,6 +230,13 @@ static char* keynames[] = {
     return _xvim;
 }
 
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (xregister.isAlpha){
+        return REGISTER_APPEND;
+    }
+    return REGISTER_IGNORE;
+}
+
 @end
 
 #pragma mark VimLocalMarkEvaluator

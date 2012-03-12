@@ -12,23 +12,26 @@
 #import "XVimLocalMarkEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimYankEvaluator.h"
+#import "XVimEqualEvaluator.h"
 #import "XVimShiftEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVim.h"
+#import "Logger.h"
 
 @implementation XVimNormalEvaluator
 /////////////////////////////////////////////////////////////////////////////////////////
 // Keep command implementation alphabetical order please(Except specical characters).  //
 /////////////////////////////////////////////////////////////////////////////////////////
 
-
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a:(id)arg{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
     // next line. it appends to the current line
+    // A cursor should not be on the new line break letter in Vim(Except empty line).
+    // So the root solution is to prohibit a cursor be on the newline break letter.
     NSTextView* view = [self textView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
@@ -46,6 +49,11 @@
     [view moveToEndOfLine:self];
     [self xvim].mode=MODE_INSERT;
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+}
+
+// This is not motion but scroll. That's the reason the implementation is here.
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
 }
 
 // 'c' works like 'd' except that once it's done deleting
@@ -67,18 +75,9 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)C_b:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageUp:self];
-    }
-    return nil;
-}
-
+// This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageDown:self];
-    }
-    return nil;
+    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)d:(id)arg{
@@ -93,11 +92,9 @@
     return nil;
 }
 
+// This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageDown:self];
-    }
-    return nil;
+    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)i:(id)arg{
@@ -142,16 +139,6 @@
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
 }
 
-- (XVimEvaluator*)n:(id)arg{
-    [[self xvim] searchNext];
-    return nil;
-}
-
-- (XVimEvaluator*)N:(id)arg{
-    [[self xvim] searchPrevious];
-    return nil;
-}
-
 - (XVimEvaluator*)o:(id)arg{
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
@@ -162,7 +149,7 @@
 
 - (XVimEvaluator*)O:(id)arg{
     NSTextView* view = [self textView];
-    if( [view _currentLineNumber] == 1 ){
+    if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
         [view moveToBeginningOfLine:self];
         [view insertNewline:self];
         [view moveUp:self];
@@ -233,11 +220,10 @@
     }
     return nil;
 }
+
+// This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u:(id)arg{
-    for(NSUInteger i = 0 ; i < [self numericArg] ; i++ ){
-        [[self textView] pageUp:self];
-    }
-    return nil;
+    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
 }
 
 - (XVimEvaluator*)v:(id)arg{
@@ -256,7 +242,7 @@
     // This selection should be done by XVimVisualEvaluator...
     // We may need to prepare new initializer which can operate on the view when its initialized.
     // Since such structure may be needed from other operations this should be implemented in XVimEvaluator (Base class) 
-    [view setSelectedRangeWithBoundsCheck:[view headOfLine] To:[view nextNewline]];
+    [view setSelectedRangeWithBoundsCheck:[view headOfLine] To:[view endOfLine]];
     [self xvim].mode = MODE_VISUAL;
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_LINE initialSelection:r.location :(NSUInteger)r.location+r.length];
 }
@@ -312,6 +298,10 @@
     return [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
+- (XVimEvaluator*)EQUAL:(id)arg{
+    return [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
+}
+
 - (XVimEvaluator*)GREATERTHAN:(id)arg{
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithRepeat:[self numericArg]];
     eval.unshift = NO;
@@ -338,27 +328,10 @@
     return nil;
 }
 
-- (XVimEvaluator*)QUESTION:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"?"];
+- (XVimEvaluator*)DOT:(id)arg{
+    XVimRegister *repeatRegister = [[self xvim] findRegister:@"repeat"];
+    [[self xvim] playbackRegister:repeatRegister withRepeatCount:[self numericArg]];
     return nil;
-}
-
-- (XVimEvaluator*)Up:(id)arg{
-    return [self k:(id)arg];
-}
-
-- (XVimEvaluator*)Down:(id)arg{
-    return [self j:(id)arg];
-    
-}
-
-
-- (XVimEvaluator*)Left:(id)arg{
-    return [self h:(id)arg];
-    
-}
-- (XVimEvaluator*)Right:(id)arg{
-    return [self l:(id)arg];
 }
 
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
@@ -369,6 +342,37 @@
     [view setSelectedRange:r];
     [view scrollRangeToVisible:r];
     return nil;
+}
+
+// There are fewer invalid keys than valid ones so make a list of invalid keys.
+// This can always be changed to a set of valid keys in the future if need be.
+NSArray *_invalidRepeatKeys;
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (_invalidRepeatKeys == nil){
+        _invalidRepeatKeys =
+        [[NSArray alloc] initWithObjects:
+         @"m",
+         @"C_r",
+         @"u",
+         @"v",
+         @"V",
+         @"C_v",
+         @"COLON",
+         @"DOT",
+         @"QUESTION",
+         @"SLASH",
+         nil];
+    }
+    if (xregister.isRepeat){
+        NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+        SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
+        if( [self respondsToSelector:handler] && [[self superclass] instancesRespondToSelector:handler] == NO){
+            if ([_invalidRepeatKeys containsObject:key] == NO){
+                return REGISTER_REPLACE;
+            }
+        }
+    }
+    return [super shouldRecordEvent:event inRegister:xregister];
 }
 
 @end

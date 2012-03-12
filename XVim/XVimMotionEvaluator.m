@@ -15,20 +15,15 @@
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 
-static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
-    TRACE_LOG(@"pos1:%d  pos2:%d", pos1, pos2);
-    NSRange r;
-    if( pos1 < pos2 ){
-        r = NSMakeRange(pos1, pos2-pos1);
-    }else{
-        r = NSMakeRange(pos2, pos1-pos2);
-    }
-    TRACE_LOG(@"location:%d  length:%d", r.location, r.length);
-    return r;
-}
 
-// When the motion is fixed call "_motionFixed" not "motionFixed"
-// It automatically treat switching inclusive/exclusive motion by 'v' 
+////////////////////////////////
+// How to Implement Motion    //
+////////////////////////////////
+
+// On each key input calculate beginning and end of motion and call _motionFixedFrom:To:Type method (not motionFixedFrom:To:Type).
+// It automatically treat switching inclusive/exclusive motion by 'v'.
+// How the motion is treated depends on a subclass of the XVimMotionEvaluator.
+// For example, XVimDeleteEvaluator will delete the letters represented by motion.
 
 @implementation XVimMotionEvaluator
 
@@ -41,8 +36,10 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return self;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type{
-   NSTextView* view = [self textView];
+// This is helper method commonly used by many key event handlers.
+// You do not need to use this if this is not proper to express the motion.
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{
+    NSTextView* view = [self textView];
     NSRange begin = [view selectedRange];
     NSUInteger motionFrom = begin.location;
     NSUInteger motionTo = [view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
@@ -61,9 +58,11 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self motionFixedFrom:from To:to Type:type];
 }
 
+// Methods to override by subclass
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
     return nil;
 }
+
 
 ////////////KeyDown Handlers///////////////
 // Please keep it in alphabetical order ///
@@ -77,6 +76,19 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
+/*
+// Since Ctrl-b, Ctrl-d is not "motion" but "scroll" 
+// they are implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
+ 
+- (XVimEvaluator*)C_b:(id)arg{
+    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+}
+
+- (XVimEvaluator*)C_d:(id)arg{
+    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+}
+*/
+
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
@@ -89,7 +101,13 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return eval;
 }
 
-
+/*
+ // Since Ctrl-f is not "motion" but "scroll" 
+ // it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
+- (XVimEvaluator*)C_f:(id)arg{
+    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+}
+*/
 
 - (XVimEvaluator*)g:(id)arg{
     return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
@@ -128,9 +146,23 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     return [self commonMotion:@selector(cursorCenter:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
-- (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:)];
+- (XVimEvaluator*)n:(id)arg{
+    [[self xvim] searchNext];
+    return nil;
 }
+
+- (XVimEvaluator*)N:(id)arg{
+    [[self xvim] searchPrevious];
+    return nil;
+}
+/*
+// Since Ctrl-u is not "motion" but "scroll" 
+// it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
+ 
+- (XVimEvaluator*)C_u:(id)arg{
+    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+}
+*/
 
 - (XVimEvaluator*)v:(id)arg{
     _inverseMotionType = !_inverseMotionType;
@@ -582,5 +614,32 @@ static NSRange makeRangeFromLocations( NSUInteger pos1, NSUInteger pos2 ){
     }
     return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE];
 }
+
+- (XVimEvaluator*)Up:(id)arg{
+    return [self k:(id)arg];
+}
+
+- (XVimEvaluator*)Down:(id)arg{
+    return [self j:(id)arg];
+    
+}
+
+- (XVimEvaluator*)Left:(id)arg{
+    return [self h:(id)arg];
+    
+}
+- (XVimEvaluator*)Right:(id)arg{
+    return [self l:(id)arg];
+}
+
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    if (xregister.isRepeat)
+    {
+        return (xregister.text.length == 1) ? REGISTER_APPEND : REGISTER_IGNORE;
+    }
+    
+    return [super shouldRecordEvent:event inRegister:xregister];
+}
+
 @end
 
