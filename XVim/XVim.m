@@ -217,6 +217,8 @@ BOOL _playingRegisterBack;
 
 -(void)dealloc{
     [_lastSearchString release];
+    [_lastReplacedString release];
+    [_lastReplacementString release];
     [XVimNormalEvaluator release];
 }
 
@@ -630,9 +632,6 @@ BOOL _playingRegisterBack;
         [srcView scrollRangeToVisible:found];
         //[srcView showFindIndicatorForRange:found];
         //[srcView setSelectedRange:NSMakeRange(found.location, 0)];
-        
-        // ciao Marco come stai?
-        // Io Marco bene!
         
         // Replace the text
         [[srcView textStorage] replaceCharactersInRange:found withString:_lastReplacementString];
