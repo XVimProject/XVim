@@ -75,6 +75,15 @@
 - (XVimEvaluator*)B:(id)arg{
     return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
+
+- (XVimEvaluator*)e:(id)arg{
+    return [self commonMotion:@selector(endOfWordsForward:) Type:CHARACTERWISE_INCLUSIVE];
+}
+
+- (XVimEvaluator*)E:(id)arg{
+    return [self commonMotion:@selector(endOfWORDSForward:) Type:CHARACTERWISE_INCLUSIVE];
+}
+
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
@@ -284,11 +293,10 @@
     if (search.location == NSNotFound) {
         // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
         [[self xvim] ringBell];
-    } else {
-        return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
+        return self;
     }
-    
-    return self;
+        
+    return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
 }
 
 /* 

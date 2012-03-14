@@ -116,6 +116,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
         x = s.length-1;
     return x;    
 }
+
 - (NSUInteger)wordsForward:(NSNumber*)count{ //w
     METHOD_TRACE_LOG();
     NSRange r = [self selectedRange];
@@ -124,7 +125,6 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     }
     return r.location;
 }
-
 
 - (NSUInteger)WORDSForward:(NSNumber*)count{ //W
     // sample impl
@@ -136,14 +136,44 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     [self setSelectedRange:original];
     return dest;
 }
-
+  
+- (NSUInteger)endOfWordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
+    NSString *s = [[self textStorage] string];
+    if (begin + 1 >= s.length) {
+        return begin;
+    }
+    
+    // Start search from the next character
+    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin + 1]];
+    for (NSUInteger x = begin; x + 1 < s.length; ++x) {
+        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x + 1]];
+        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
+        if (wholeWord && nextId == 0 && curId != 0) {
+            return x;
+        } else if (!wholeWord && curId != 0 && curId != nextId) {
+            return x;
+        }
+        
+        curId = nextId;
+    }
+    return s.length - 1;
+}
 
 - (NSUInteger)endOfWordsForward:(NSNumber*)count{ //e
-    return 0;
+    METHOD_TRACE_LOG();
+    NSRange r = [self selectedRange];
+    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
+        r.location = [self endOfWordForward:r.location WholeWord:NO];
+    }
+    return r.location;
 }
 
 - (NSUInteger)endOfWORDSForward:(NSNumber*)count{ //E
-    return 0;
+    NSRange r = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        r.location = [self endOfWordForward:r.location WholeWord:YES];
+    }
+    return r.location;
 }
 
 - (NSUInteger)wordBackward:(NSUInteger)begin{

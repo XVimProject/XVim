@@ -40,10 +40,9 @@
     [view moveToEndOfLine:self];
     [view moveForward:self]; // include eol
     NSRange end = [view selectedRange];
-    NSUInteger max = [[[self textView] string] length] - 1;
     // set cursor back to original position
     [view setSelectedRange:begin];
-    return [self _motionFixedFrom:start.location To:end.location>max Type:LINEWISE];
+    return [self _motionFixedFrom:start.location To:end.location Type:LINEWISE];
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
