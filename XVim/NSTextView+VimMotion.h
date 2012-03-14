@@ -9,6 +9,7 @@
 #import "NSTextView+VimMotion.h"
 
 typedef enum{
+    MOTION_OPTION_NONE,
     LEFT_RIGHT_WRAP,
     LEFT_RIGHT_NOWRAP
 } MOTION_OPTION;

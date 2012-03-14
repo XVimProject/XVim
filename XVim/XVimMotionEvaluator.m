@@ -14,6 +14,7 @@
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
+#import "NSTextView+VimMotion.h"
 
 
 ////////////////////////////////
@@ -119,7 +120,9 @@
 }
 
 - (XVimEvaluator*)h:(id)arg{
-    return [self commonMotion:@selector(prev:) Type:CHARACTERWISE_EXCLUSIVE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] prev:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)H:(id)arg{
@@ -127,15 +130,23 @@
 }
 
 - (XVimEvaluator*)j:(id)arg{
-    return [self commonMotion:@selector(nextLine:) Type:LINEWISE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger column = [[self textView] columnNumber:from]; // TODO: Keep column somewhere else
+    NSUInteger to = [[self textView] nextLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)k:(id)arg{
-    return [self commonMotion:@selector(prevLine:) Type:LINEWISE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger column = [[self textView] columnNumber:from]; // TODO: Keep column somewhere else
+    NSUInteger to = [[self textView] prevLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)l:(id)arg{
-    return [self commonMotion:@selector(next:) Type:CHARACTERWISE_EXCLUSIVE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] next:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)L:(id)arg{
@@ -182,13 +193,12 @@
 }
 
 - (XVimEvaluator*)NUM0:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    [view moveToBeginningOfLine:self];
-    NSRange end = [view selectedRange];
-    NSUInteger dest = [view selectedRange].location;
-    [view setSelectedRange:begin];
-    return [self _motionFixedFrom:begin.location To:dest Type:CHARACTERWISE_INCLUSIVE];
+    NSRange begin = [[self textView] selectedRange];
+    NSUInteger end = [[self textView] headOfLine:begin.location];
+    if( NSNotFound == end ){
+        return nil;
+    }
+    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE];
 }
 
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
@@ -224,14 +234,12 @@
 }
 
 - (XVimEvaluator*)DOLLAR:(id)arg{
-    NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view moveToEndOfLine:self];
+    NSRange begin = [[self textView] selectedRange];
+    NSUInteger end = [[self textView] endOfLine:begin.location];
+    if( NSNotFound == end ){
+        return nil;
     }
-    NSRange end = [view selectedRange];
-    [view setSelectedRange:begin];
-    return [self _motionFixedFrom:begin.location To:end.location Type:CHARACTERWISE_INCLUSIVE];
+    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE];
 }
 
 - (XVimEvaluator*)PERCENT:(id)arg {

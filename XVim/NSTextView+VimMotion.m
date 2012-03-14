@@ -17,6 +17,26 @@
 // They also have some support methods for Vim motions such as obtaining next newline break.
 //
 
+////////////////////////
+// Terms using here   //
+////////////////////////
+
+     // Let me know if terms are confusing espcially if its different from Vim's terms.
+/**
+ * "Character"
+ * Characgter is a one unichar value. (any value including tabs,spaces)
+ *
+ * "EOF"
+ * EOF is the position at the end of document(text).
+ * If we have NSTextView with string "abc" the EOF is just after the 'c'.
+ * The index of EOF is 3 in this case.
+ * What we have to think about is a cursor can be on the EOF(when the previous letter is newline) but characterAtIndex: with index of EOF cause a exception.
+ * We have to be careful about it when calculate and find the position of some motions.
+ *
+ * "Newline"
+ * Newline is defined as "unichar determined by isNewLine function"
+ **/
+
 static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 @implementation NSTextView (VimMotion)
@@ -40,6 +60,8 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
     }
     return cs_id;
 };
+
+
 
 /////////////////////////
 // support functions   //
@@ -66,7 +88,52 @@ BOOL isFuzzyWord(unichar ch) {
     return (!isWhiteSpace(ch)) && (!isNewLine(ch));
 }
 
+/////////////////////////
+// support methods     //
+/////////////////////////
+
+// Most of the support methods take index as current interest position and index can be at EOF
+
+// The following macros asserts the range of index.
+// WITH_EOF permits the index at EOF position.
+// WITHOUT_EOF doesn't permit the index at EOF position.
+#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length], @"index can not exceed the length of string" )
+#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length], @"index can not exceed the length of string - 1" )
+
+// Some methods assume that "index" is at valid cursor position in Normal mode.
+// See isValidCursorPosition's description the condition of the valid cursor position.
+#define ASSERT_VALID_CURSOR_POS(x) NSAssert( [self isValidCursorPosition:x], @"index can not be invalid cursor position" )
+
+
+/**
+ * Determine if the position specified with "index" is EOF.
+ **/
+- (BOOL) isEOF:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return [[self string] length] == index;
+}
+
+/**
+ * Determine if the position specified with "index" is newline.
+ **/
+- (BOOL) isNewLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( index == [[self string] length] ){
+        return NO; // EOF is not a newline
+    }
+    return isNewLine([[self string] characterAtIndex:index]);
+}
+
+/**
+ * Determine if the position specified with "index" is blankline.
+ * Blankline is one of them
+ *   - Newline after Newline. Ex. Second '\n' in "abc\n\nabc" is a blankline. First one is not.  
+ *   - Newline at begining of the document.
+ *   - EOF after Newline. Ex. The index 4 of "abc\n" is blankline. Pay attension that index 4 is exceed the string length. But the cursor can be there.
+ *   - EOF of 0 sized document.
+ **/
 - (BOOL) isBlankLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
     if( index == [[self string] length] || isNewLine([[self string] characterAtIndex:index])){
         if( 0 == index || isNewLine([[self string] characterAtIndex:index-1]) ){
             return YES;
@@ -75,23 +142,174 @@ BOOL isFuzzyWord(unichar ch) {
     return NO;
 }
 
+/**
+ * Determine if the position specified with "index" is valid cursor position in normal mode.
+ * Valid position is followings
+ *   - Non newline characters.
+ *   - Blankline( including EOF after newline )
+ **/
+- (BOOL) isValidCursorPosition:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [self isBlankLine:index] ){
+        return YES;
+    }
+    // "index" in not a blankline.
+    // Then the EOF is not a valid cursor position.
+    if( index == [[self string] length] ){
+        return NO;
+    }
+    
+    // index is never the position of EOF. We can call isNewLine with index.
+    if( ![self isNewLine:index]){
+        return YES;
+    }
+    
+    return NO;
+}
+
+/**
+ * Returns position of the first newline when searching backwards from "index"
+ * Searching starts from position "index"-1. The position index is not included to search newline.
+ * Returns NSNotFound if no newline found.
+ **/
+- (NSUInteger)prevNewLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( 0 == index ){ //Nothing to search
+        return NSNotFound;
+    }
+    for(NSUInteger i = index-1; ; i-- ){
+        if( [self isNewLine:i] ){
+            return i;
+        }
+        if( 0 == i ){
+            break;
+        }
+    }
+    return NSNotFound;
+}
+
+- (void)adjastCursorPosition{
+    // If the current cursor position is not valid for normal mode move it.
+    if( ![self isValidCursorPosition:[self selectedRange].location] ){
+        // Here current cursor position is never at 0. We can substract 1.
+        [self setSelectedRange:NSMakeRange([self selectedRange].location-1,0)];
+    }
+    return;
+}
+/**
+ * Returns position of the head of line of the current line specified by index.
+ * Head of line is one of them which is found first when searching backwords from "index".
+ *    - Character just after newline
+ *    - Character at the head of document
+ * If the size of document is 0 it does not have any head of line.
+ * Blankline does NOT have headOfLine.
+ * Searching starts from position "index". So the "index" could be a head of line.
+ **/
+- (NSUInteger)headOfLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [[self string] length] == 0 ){
+        return NSNotFound;
+    }
+    if( [self isBlankLine:index] ){
+        return NSNotFound;
+    }
+    NSUInteger prevNewline = [self prevNewLine:index];
+    if( NSNotFound == prevNewline ){
+        return 0; // head of line is character at head of document since its not empty document.
+    }
+    
+    return prevNewline+1; // Then this is the head of line
+}
+
+/**
+ * Returns position of the first newline when searching forwards from "index"
+ * Searching starts from position "index"+1. The position index is not included to search newline.
+ * Returns NSNotFound if no newline is found.
+ **/
+- (NSUInteger)nextNewLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSUInteger length = [[self string] length];
+    if( length == 0 ){
+        return NSNotFound; // Nothing to search
+    }
+    
+    if( index >= length - 1 ){
+        return NSNotFound;
+    }
+    
+    for( NSUInteger i = index+1; i < length ; i++ ){
+        if( [self isNewLine:i] ){
+            return i;
+        }
+    }
+    return NSNotFound;
+}
+
+/**
+ * Returns position of the end of line when the cursor is at "index"
+ * End of line is one of following which is found first when searching forwords from "index".
+ *    - Character just before newline if its not newlin
+ *    - Character just before EOF if its not newline 
+ * Blankline does not have end of line.
+ * Searching starts from position "index". So the "index" could be an end of line.
+ **/
+- (NSUInteger)endOfLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    ASSERT_VALID_CURSOR_POS(index);
+    if( [self isBlankLine:index] ){
+        return NSNotFound;
+    }
+    NSUInteger nextNewLine = [self nextNewLine:index];
+    if(NSNotFound == nextNewLine){
+        return [[self string] length]-1;//just before EOF
+    }
+    return nextNewLine-1;
+}
+
+// Obsolete
+- (NSUInteger)headOfLine{
+    return [self headOfLine:[self selectedRange].location];
+}
+
+// Obsolete
+- (NSUInteger)prevNewline{
+    return [self prevNewLine:[self selectedRange].location];
+}
+
+// Obsolete
+- (NSUInteger)endOfLine{
+    return [self endOfLine:[self selectedRange].location];
+}
+
+// Obsolete
+- (NSUInteger)nextNewline{
+    return [self nextNewLine:[self selectedRange].location];
+}
+
+/**
+ * Returns column number of the position "index"
+ **/
+- (NSUInteger)columnNumber:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSUInteger head = [self headOfLine:index];
+    if( NSNotFound == head ){
+        return 0; // This is balnkline
+    }
+    return index-head;
+}
 /////////////
 // Motions //
 /////////////
 
-// This is tempral stub. Do not use this from new code.
-- (NSUInteger)prev:(NSNumber*)count{ //h
-    return [self prev:[self selectedRange].location count:count option:LEFT_RIGHT_NOWRAP];
-}
 
-- (NSUInteger)prev:(NSUInteger)begin count:(NSNumber*)count option:(MOTION_OPTION)opt{
+- (NSUInteger)prev:(NSUInteger)begin count:(NSUInteger)count option:(MOTION_OPTION)opt{
     if( 0 == begin ){
         return 0;
     }
     
     NSString* string = [self string];
     NSUInteger pos = begin;
-    for (NSUInteger i = 0; i < [count unsignedIntValue] && pos != 0 ; i++)
+    for (NSUInteger i = 0; i < count && pos != 0 ; i++)
     {
         //Try move to prev position and check if its valid position.
         NSUInteger prev = pos-1; //This is the position where we are trying to move to.
@@ -114,9 +332,13 @@ BOOL isFuzzyWord(unichar ch) {
     return pos;
 }
 
+// Obsolete
+- (NSUInteger)prev:(NSNumber*)count{ //h
+    return [self prev:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
+}
 
 
-- (NSUInteger)next:(NSUInteger)begin count:(NSNumber*)count option:(MOTION_OPTION)opt{
+- (NSUInteger)next:(NSUInteger)begin count:(NSUInteger)count option:(MOTION_OPTION)opt{
     if( begin == [[self string] length] )
         return [[self string] length];
     
@@ -127,7 +349,7 @@ BOOL isFuzzyWord(unichar ch) {
         return pos;
     }
     
-    for (NSUInteger i = 0; i < [count unsignedIntValue] && pos < [string length]; i++) 
+    for (NSUInteger i = 0; i < count && pos < [string length]; i++) 
     {
         NSUInteger next = pos + 1;
         // If the next position is the end of docuement and current position is not a newline
@@ -152,31 +374,81 @@ BOOL isFuzzyWord(unichar ch) {
     return pos;
 }
 
-// This is tempral stub. Do not use this from new code.
+// Obsolete
 - (NSUInteger)next:(NSNumber*)count{ //l
-    return [self next:[self selectedRange].location count:count option:LEFT_RIGHT_NOWRAP];
+    return [self next:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
 }
 
-- (NSUInteger)prevLine:(NSNumber*)count{ //k
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveUp:self];
+/**
+ * Returns the position when a cursor goes to upper line.
+ * @param index the position of the cursor
+ * @param column the position of the column
+ * @param count number of repeat
+ * @param opt currntly nothing is supported
+ *
+ * "column" may be greater then number of characters in the current line.
+ * Assume that you have following text.
+ *     abcd
+ *     ef
+ *     12345678
+ * When a cursor at character "4" goes up cursor will go at "f".
+ * When a cursor goes up agein it should got at d. (This is default Vim motion)
+ * To keep the column position you have to specifi the "column" argument.
+ **/
+- (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [[self string] length] == 0 ){
+        return 0;
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+    
+    NSUInteger pos = index;
+    for(NSUInteger i = 0; i < count; i++ ){
+        pos = [self prevNewLine:pos];
+        if( NSNotFound == pos ){
+            pos = 0;
+            break;
+        }
+    }
+    NSUInteger head = [self headOfLine:pos];
+    if( NSNotFound == head ){
+        return pos;
+    }
+    NSUInteger end = [self endOfLine:head];
+    NSAssert( end != NSNotFound, @"End can not be NSNotFound here" );
+    if( head+column > end ){
+        return end;
+    }
+    return head+column;
 }
 
-- (NSUInteger)nextLine:(NSNumber*)count{ //j
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveDown:self];
+/**
+ * See prevLine's description for meaning of arguments
+ **/
+- (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [[self string] length] == 0 ){
+        return 0;
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+    if( [self isEOF:index] ){
+        return index;
+    }
+    NSUInteger pos = index;
+    for(NSUInteger i = 0; i < count; i++ ){
+        NSUInteger next = [self nextNewLine:pos];
+        if( NSNotFound == next){
+            break;
+        }
+        pos = next;
+    }
+    pos++;
+    NSUInteger end = [self endOfLine:pos];
+    if( NSNotFound == end ){
+        return pos;
+    }
+    if( pos+column > end ){
+        return end;
+    }
+    return pos+column;
 }
 
 - (NSUInteger)wordForward:(NSUInteger)begin{
@@ -429,74 +701,6 @@ BOOL isFuzzyWord(unichar ch) {
 
 
 
-// How I think newline as here...
-// "Newline" (which is CR or LF) is the last letter of a line.
-
-// This dose not care about whitespaces.
-- (NSUInteger)headOfLine{
-    NSUInteger prevNewline = [self prevNewline];
-    if( NSNotFound == prevNewline ){
-        return 0; // begining of document
-    }
-    return prevNewline+1;
-}
-
-// may retrun NSNotFound
-- (NSUInteger)prevNewline{
-    NSRange r = [self selectedRange];
-    if( r.location == 0 ){
-        return NSNotFound;
-    }
-    if( r.location == [[self string] length] ){
-        if( isNewLine([[self string] characterAtIndex:r.location-1])){
-            return r.location-1;
-        }else{
-            r.location = r.location-1;
-        }
-    }
-    // if the current location is newline, skip it.
-    if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
-        r.location--;
-    }
-    NSRange prevNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, r.location+1)];
-    return prevNewline.location;
-    
-}
-
-- (NSUInteger)endOfLine{
-    NSRange r = [self selectedRange];
-    if( [[self string] length] == 0 ){
-        return 0;
-    }
-    
-    if( [[self string] length] == r.location ){
-        return r.location;
-    }
-    
-    if( [self isBlankLine:r.location] ){
-        return r.location;
-    }
-    NSUInteger nextNewline = [self nextNewline];
-    if( NSNotFound == nextNewline ){
-        nextNewline = [[self string] length]-1;
-    }else{
-        nextNewline--;
-    }
-    return nextNewline;
-}
-// may retrun NSNotFound
-- (NSUInteger)nextNewline{
-    NSRange r = [self selectedRange];
-    if( r.location >= [self string].length-1 ){
-        return r.location;
-    }
-    // if the current location is newline, skip it.
-    if( [[NSCharacterSet newlineCharacterSet] characterIsMember:[[self string] characterAtIndex:r.location]] ){
-        r.location++;
-    }
-    NSRange nextNewline = [[self string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:NSMakeRange(r.location, [self string].length-r.location)];
-    return nextNewline.location;
-}
 
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to{
     if( [self string].length == 0 ){
