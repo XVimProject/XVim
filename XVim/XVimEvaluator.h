@@ -38,18 +38,13 @@ typedef enum {
   MARKOPERATOR_MOVETOSTARTOFLINE
 } XVimMarkOperator;
 
-
-
-@interface XVimEvaluator : NSObject{
-@private
-    NSTextView* _textView;
-    XVim* _xvim;
-}
+@interface XVimEvaluator : NSObject
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event;
 - (XVimEvaluator*)eval:(NSEvent*) event ofXVim:(XVim*)xvim;
 - (XVimEvaluator*)defaultNextEvaluator;
-- (NSTextView*)textView;
-- (XVim*)xvim;
+// Made into a property so it can be set 
+@property (weak) XVim *xvim;
+@property (readonly) NSTextView *textView;
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
 @end

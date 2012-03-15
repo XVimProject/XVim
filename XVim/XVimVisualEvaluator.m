@@ -11,6 +11,8 @@
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimEqualEvaluator.h"
+#import "XVimDeleteEvaluator.h"
+#import "XVimYankEvaluator.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -85,28 +87,46 @@
     [view scrollRangeToVisible:NSMakeRange(_insertion,0)];
 }
 
+- (XVimEvaluator*)c:(id)arg{
+    [self updateSelection];
+    XVimDeleteEvaluator *evaluator =
+    [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:YES];
+    
+    // Need to set this explicitly because it is not in the constructor.
+    // Maybe the constructors should be refactored to include it?
+    evaluator.xvim = self.xvim;
+    return [evaluator motionFixedFrom:_begin To:_insertion Type:CHARACTERWISE_INCLUSIVE];
+}
+
 - (XVimEvaluator*)d:(id)arg{
     [self updateSelection];
-    NSTextView* view = [self textView];
-    [view cut:self];
-    return nil;
+    XVimDeleteEvaluator *evaluator =
+    [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:NO];
+    
+    // Need to set this explicitly because it is not in the constructor.
+    // Maybe the constructors should be refactored to include it?
+    evaluator.xvim = self.xvim;
+    return [evaluator motionFixedFrom:_begin To:_insertion Type:CHARACTERWISE_INCLUSIVE];
 }
 
 - (XVimEvaluator*)y:(id)arg{
     [self updateSelection];
-    NSTextView* view = [self textView];
-    NSRange r = [view selectedRange];
-    [view copy:self];
-    r.length = 0;
-    [view setSelectedRange:r];
-    return nil;
+    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
+    
+    // Need to set this explicitly because it is not in the constructor.
+    // Maybe the constructors should be refactored to include it?
+    evaluator.xvim = self.xvim;
+    return [evaluator motionFixedFrom:_begin To:_insertion Type:CHARACTERWISE_INCLUSIVE];
 }
 
 - (XVimEvaluator*)EQUAL:(id)arg{
     [self updateSelection];
-    // Not implemented yet. Will share the code in the XVimEqualEvaluator
-    //[XVimEqualEvaluator indent:self];
-    return nil;
+    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
+    
+    // Need to set this explicitly because it is not in the constructor.
+    // Maybe the constructors should be refactored to include it?
+    evaluator.xvim = self.xvim;
+    return [evaluator motionFixedFrom:_begin To:_insertion Type:CHARACTERWISE_INCLUSIVE];
 }
 
 

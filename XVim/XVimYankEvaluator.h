@@ -14,12 +14,3 @@
 }
 - (id)initWithRepeat:(NSUInteger)repeat;
 @end
-
-// Evaluates 'g' command
-@interface XVimgEvaluator : XVimMotionEvaluator{
-}
-@end
-// Evaluates 'r' command
-@interface XVimrEvaluator : XVimMotionEvaluator{
-}
-@end

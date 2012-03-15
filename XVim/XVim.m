@@ -32,11 +32,15 @@
 #import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
 
+@interface XVim()
+- (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
+@end
+
 @implementation XVim
 @synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 @synthesize registers = _registers;
-NSMutableSet *_recordingRegisters;
-BOOL _playingRegisterBack;
+@synthesize recordingRegister = _recordingRegister;
+@synthesize isPlayingRegisterBack = _isPlayingRegisterBack;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -136,7 +140,7 @@ BOOL _playingRegisterBack;
         // There are nine types of registers:
         // *registers* *E354*
         _registers =
-        [[NSArray alloc] initWithObjects:
+        [[NSSet alloc] initWithObjects:
          // 1. The unnamed register ""
          [[XVimRegister alloc] initWithRegisterName:@"\""],
          // 2. 10 numbered registers "0 to "9 
@@ -198,21 +202,11 @@ BOOL _playingRegisterBack;
          [[XVimRegister alloc] initWithRegisterName:@"repeat"],
          nil];
         
-        // The following registers are recording from the start
-        _recordingRegisters =
-        [[NSMutableSet alloc]
-         initWithObjects:
-         [self findRegister:@"repeat"],
-         nil];
-        
-        _playingRegisterBack = NO;
+        _recordingRegister = nil;
+        _isPlayingRegisterBack = NO;
     }
     
     return self;
-}
-
--(NSArray*)registers{
-    return _registers;
 }
 
 -(void)dealloc{
@@ -228,26 +222,11 @@ BOOL _playingRegisterBack;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
-    if (_playingRegisterBack == NO){
-        [_recordingRegisters enumerateObjectsUsingBlock:^(XVimRegister *xregister, BOOL *stop){
-            switch ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
-                case REGISTER_APPEND:
-                    [xregister appendKeyEvent:event];
-                    break;
-                    
-                case REGISTER_REPLACE:
-                    [xregister clear];
-                    [xregister appendKeyEvent:event];
-                    break;
-                    
-                case REGISTER_IGNORE:
-                default:
-                    break;
-            }
-        }];
+    if (_isPlayingRegisterBack == NO){
+        [self recordEvent:event intoRegister:_recordingRegister];
+        [self recordEvent:event intoRegister:[self findRegister:@"repeat"]];
     }
     if( nil == nextEvaluator ){
-        TRACE_LOG(@"%@", [self findRegister:@"repeat"]);
         [_currentEvaluator release];
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
     }else{
@@ -377,6 +356,9 @@ BOOL _playingRegisterBack;
             NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
             NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
             [[NSApplication sharedApplication] sendEvent:keyPress];
+        }
+        else if( [ex_command isEqualToString:@"reg"] ){
+            TRACE_LOG(@"registers: %@", self.registers);
         }
         else if( [ex_command hasPrefix:@"%s/"] ) {
             // Split the string into the various components
@@ -691,26 +673,49 @@ BOOL _playingRegisterBack;
 }
 
 - (XVimRegister*)findRegister:(NSString*)name{
-    NSUInteger index = [self.registers indexOfObjectPassingTest:^(XVimRegister *xregister, NSUInteger index, BOOL *stop){
-        *stop = (xregister.name == name);
-        return *stop;
-    }];
-    
-    return [self.registers objectAtIndex:index];
+    return [self.registers member:[[XVimRegister alloc] initWithRegisterName:name]];
 }
 
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
-    _playingRegisterBack = YES;
+    _isPlayingRegisterBack = YES;
     [xregister playback:[self sourceView] withRepeatCount:count];
-    _playingRegisterBack = NO;
+    _isPlayingRegisterBack = NO;
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{
-    [_recordingRegisters addObject:xregister];
+    if (_recordingRegister == nil){
+        _recordingRegister = xregister;
+        // when you record into a register you clear out any previous recording
+        // unless it was capitalized
+        [_recordingRegister clear];
+    }else{        
+        [self ringBell];
+    }
 }
 
 - (void)stopRecordingRegister:(XVimRegister*)xregister{
-    [_recordingRegisters removeObject:xregister];
+    if (_recordingRegister == nil){
+        [self ringBell];
+    }else{
+        _recordingRegister = nil;
+    }
+}
+
+- (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister{
+    switch ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
+        case REGISTER_APPEND:
+            [xregister appendKeyEvent:event];
+            break;
+            
+        case REGISTER_REPLACE:
+            [xregister clear];
+            [xregister appendKeyEvent:event];
+            break;
+            
+        case REGISTER_IGNORE:
+        default:
+            break;
+    }
 }
 
 @end

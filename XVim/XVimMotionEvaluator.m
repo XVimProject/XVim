@@ -84,11 +84,16 @@
 - (XVimEvaluator*)C_b:(id)arg{
     return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
 }
-
-- (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
-}
+ 
 */
+
+- (XVimEvaluator*)e:(id)arg{
+    return [self commonMotion:@selector(endOfWordsForward:) Type:CHARACTERWISE_INCLUSIVE];
+}
+
+- (XVimEvaluator*)E:(id)arg{
+    return [self commonMotion:@selector(endOfWORDSForward:) Type:CHARACTERWISE_INCLUSIVE];
+}
 
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
@@ -185,7 +190,7 @@
 }
 
 - (XVimEvaluator*)W:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(WORDSForward:) Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)z:(id)arg{
@@ -212,7 +217,6 @@
 - (XVimEvaluator*)BACKQUOTE:(id)arg{
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETO xvimTarget:[self xvim]];
 }
-
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
 // Note: CARET always moves to start of the current line ignoring any numericArg.
@@ -322,11 +326,10 @@
     if (search.location == NSNotFound) {
         // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
         [[self xvim] ringBell];
-    } else {
-        [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
+        return self;
     }
-    
-    return self;
+        
+    return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
 }
 
 /* 
@@ -470,6 +473,10 @@
     NSUInteger pos = begin.location;
     if( pos == 0 ){
         return nil;
+    }
+    if( pos == s.length )
+    {
+        pos = pos - 1;
     }
     NSUInteger prevpos = pos - 1;
     NSUInteger paragraph_head = NSNotFound;

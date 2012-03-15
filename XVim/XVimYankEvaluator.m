@@ -7,6 +7,7 @@
 //
 
 #import "XVimYankEvaluator.h"
+#import "Logger.h"
 
 @implementation XVimYankEvaluator
 
@@ -39,17 +40,17 @@
     [view moveToEndOfLine:self];
     [view moveForward:self]; // include eol
     NSRange end = [view selectedRange];
-    NSUInteger max = [[[self textView] string] length] - 1;
     // set cursor back to original position
     [view setSelectedRange:begin];
-    return [self _motionFixedFrom:start.location To:end.location>max?max:end.location Type:LINEWISE];
+    return [self _motionFixedFrom:start.location To:end.location Type:LINEWISE];
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+    TRACE_LOG(@"from: %d to: %d", from, to);
     //TODO: handle type 
     NSTextView* view = [self textView];
     NSRange r = [view selectedRange];
-    [view setSelectedRange:NSMakeRange(from, to-from)];
+    [view setSelectedRangeWithBoundsCheck:from To:to];
     [view copy:self];
     [view setSelectedRange:r];
     return nil;

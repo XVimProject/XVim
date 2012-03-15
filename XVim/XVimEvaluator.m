@@ -146,6 +146,9 @@ static char* keynames[] = {
 
 #pragma mark XVimEvaluator
 @implementation XVimEvaluator
+
+@synthesize xvim = _xvim;
+
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event{
     // S- Shift
     // C- Control
@@ -199,7 +202,7 @@ static char* keynames[] = {
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     // This is default implementation of evaluator.
-    _xvim = xvim; // weak reference
+    self.xvim = xvim; // weak reference
     
     // Only keyDown event supporsed to be passed here.
     NSString* key = [XVimEvaluator keyStringFromKeyEvent:event];
@@ -223,18 +226,14 @@ static char* keynames[] = {
 }
 
 - (NSTextView*)textView{
-    return [_xvim sourceView];
-}
-
-- (XVim*)xvim{
-    return _xvim;
+    return [self.xvim sourceView];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    if (xregister.isAlpha){
-        return REGISTER_APPEND;
+    if (xregister.isReadOnly){
+        return REGISTER_IGNORE;
     }
-    return REGISTER_IGNORE;
+    return REGISTER_APPEND;
 }
 
 @end

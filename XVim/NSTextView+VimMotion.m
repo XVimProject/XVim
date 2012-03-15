@@ -451,66 +451,82 @@ BOOL isFuzzyWord(unichar ch) {
     return pos+column;
 }
 
-- (NSUInteger)wordForward:(NSUInteger)begin{
-    NSRange rr = NSMakeRange(begin, 0);
-    NSRange save = rr;
-    NSString *s = [[self textStorage] string];
-    NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:save.location]];
-    NSUInteger x;
-    for (x = save.location+1; x < s.length; x++) {
-        NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-        if (xid != start_cs_id)
-            break;
+- (NSUInteger)wordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
+   NSString *s = [[self textStorage] string];
+    if (begin + 1 >= s.length) {
+        return begin;
     }
-    if (x >= s.length) { // hit end
-        x = s.length-1;
-        return x;
+    
+    // Start search from the next character
+    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin]];
+    for (NSUInteger x = begin; x < s.length; ++x) {
+        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x]];
+        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
+        if (wholeWord && nextId != 0 && curId == 0) {
+            return x;
+        } else if (!wholeWord && nextId != 0 && curId != nextId) {
+            return x;
+        }
+        
+        curId = nextId;
     }
-    if (start_cs_id == 0) {// started in whitespace so we are done
-        return x;
-    }
-    // did not start in whitespace if now we are in in non-whitespace we are done
-    NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-    if (cs_id_2 != 0) {
-        return x;
-    }
-    // moved out of word into whitespace, move past whitespace
-    for (; x < s.length; x++) {
-        if ([self wordCharSetIdForChar:[s characterAtIndex:x]] != cs_id_2)
-            break;
-    }
-    if (x >= s.length)
-        x = s.length-1;
-    return x;    
+    return s.length - 1;
 }
+
 - (NSUInteger)wordsForward:(NSNumber*)count{ //w
     METHOD_TRACE_LOG();
     NSRange r = [self selectedRange];
     for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
-        r.location = [self wordForward:r.location];
+        r.location = [self wordForward:r.location WholeWord:NO];
     }
     return r.location;
 }
 
-
 - (NSUInteger)WORDSForward:(NSNumber*)count{ //W
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveWordForward:self];
+    NSRange r = [self selectedRange];
+    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
+        r.location = [self wordForward:r.location WholeWord:YES];
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
+    return r.location;
+}
+  
+- (NSUInteger)endOfWordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
+    NSString *s = [[self textStorage] string];
+    if (begin + 1 >= s.length) {
+        return begin;
+    }
+    
+    // Start search from the next character
+    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin + 1]];
+    for (NSUInteger x = begin; x + 1 < s.length; ++x) {
+        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x + 1]];
+        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
+        if (wholeWord && nextId == 0 && curId != 0) {
+            return x;
+        } else if (!wholeWord && curId != 0 && curId != nextId) {
+            return x;
+        }
+        
+        curId = nextId;
+    }
+    return s.length - 1;
 }
 
-
 - (NSUInteger)endOfWordsForward:(NSNumber*)count{ //e
-    return 0;
+    METHOD_TRACE_LOG();
+    NSRange r = [self selectedRange];
+    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
+        r.location = [self endOfWordForward:r.location WholeWord:NO];
+    }
+    return r.location;
 }
 
 - (NSUInteger)endOfWORDSForward:(NSNumber*)count{ //E
-    return 0;
+    NSRange r = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        r.location = [self endOfWordForward:r.location WholeWord:YES];
+    }
+    return r.location;
 }
 
 - (NSUInteger)wordBackward:(NSUInteger)begin{
@@ -633,7 +649,7 @@ BOOL isFuzzyWord(unichar ch) {
 
 - (NSUInteger)scrollCenter:(NSNumber*)count{ // zz / z.
     NSScrollView *scrollView = [self enclosingScrollView];
-    NSPoint center = NSMakePoint(0.0, [[scrollView documentView] bounds].size.height / 2);
+    NSPoint center = NSMakePoint(0.0, 0.0f);
     [[scrollView contentView] scrollToPoint:center];
     return [self selectedRange].location;
 }

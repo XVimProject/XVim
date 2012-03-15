@@ -10,15 +10,15 @@
 #import "XVimEvaluator.h"
 #import <CoreServices/CoreServices.h>
 
+@interface XVimRegister()
+    @property (strong) NSMutableArray *keyEvents;
+@end
+
 @implementation XVimRegister
 
-NSString *_name;
-NSMutableArray *_keyEvents;
 @synthesize text = _text;
-
--(NSString*) name{
-    return _name;
-}
+@synthesize name = _name;
+@synthesize keyEvents = _keyEvents;
 
 -(NSString*) description{
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.name, self.text];
@@ -28,8 +28,8 @@ NSMutableArray *_keyEvents;
     self = [super init];
     if (self) {
         _keyEvents = [[NSMutableArray alloc] init];
-        _text = [[NSMutableString alloc] initWithString:@""];
-        _name = [[NSString alloc] initWithString:registerName];
+        _text = [NSMutableString stringWithString:@""];
+        _name = [NSString stringWithString:registerName];
     }
     return self;
 }
@@ -52,6 +52,18 @@ NSMutableArray *_keyEvents;
 
 -(BOOL) isRepeat{
     return self.name == @"repeat";
+}
+
+-(BOOL) isReadOnly{
+    return self.name == @":" || self.name == @"." || self.name == @"%" || self.name == @"#" || self.isRepeat;
+}
+
+-(BOOL) isEqual:(id)object{
+    return [object isKindOfClass:[self class]] && [self hash] == [object hash];
+}
+
+-(NSUInteger) hash{
+    return [self.name hash];
 }
 
 -(NSUInteger) keyCount{
@@ -79,7 +91,7 @@ NSMutableArray *_keyEvents;
             // Have to clone the event with a new time stamp in order to not confuse the app
             // otherwise it can cause a crash or simply ignore the repeat count. Unfortunately
             // it posts the events VERY SLOWLY. Need to find a better way to speed it up.
-            NSTimeInterval currentTime = 0.01 * AbsoluteToDuration(UpTime());
+            NSTimeInterval currentTime = 0.001 * AbsoluteToDuration(UpTime());
             NSEvent *clonedEvent = [NSEvent keyEventWithType:event.type location:event.locationInWindow modifierFlags:event.modifierFlags timestamp:currentTime  windowNumber:event.windowNumber context:event.context characters:event.characters charactersIgnoringModifiers:event.charactersIgnoringModifiers isARepeat:event.isARepeat keyCode:event.keyCode];
             [[NSApplication sharedApplication] postEvent:clonedEvent atStart:NO];
         }];
