@@ -188,7 +188,10 @@ BOOL isFuzzyWord(unichar ch) {
     return NSNotFound;
 }
 
-- (void)adjastCursorPosition{
+/**
+ * Adjust cursor position if the position is not valid as normal mode cursor position
+ **/
+- (void)adjustCursorPosition{
     // If the current cursor position is not valid for normal mode move it.
     if( ![self isValidCursorPosition:[self selectedRange].location] ){
         // Here current cursor position is never at 0. We can substract 1.
@@ -196,6 +199,7 @@ BOOL isFuzzyWord(unichar ch) {
     }
     return;
 }
+
 /**
  * Returns position of the head of line of the current line specified by index.
  * Head of line is one of them which is found first when searching backwords from "index".
@@ -302,13 +306,14 @@ BOOL isFuzzyWord(unichar ch) {
 /////////////
 
 
-- (NSUInteger)prev:(NSUInteger)begin count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    if( 0 == begin ){
+- (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_CURSOR_POS(index);
+    if( 0 == index){
         return 0;
     }
     
     NSString* string = [self string];
-    NSUInteger pos = begin;
+    NSUInteger pos = index;
     for (NSUInteger i = 0; i < count && pos != 0 ; i++)
     {
         //Try move to prev position and check if its valid position.
@@ -332,18 +337,15 @@ BOOL isFuzzyWord(unichar ch) {
     return pos;
 }
 
-// Obsolete
-- (NSUInteger)prev:(NSNumber*)count{ //h
-    return [self prev:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
-}
 
 
-- (NSUInteger)next:(NSUInteger)begin count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    if( begin == [[self string] length] )
+
+- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    if( index == [[self string] length] )
         return [[self string] length];
     
     NSString* string = [self string];
-    NSUInteger pos = begin;
+    NSUInteger pos = index;
     // If the currenct cursor position is on a newline (blank line) and not wrappable never move the cursor
     if( opt == LEFT_RIGHT_NOWRAP && [self isBlankLine:pos]){
         return pos;
@@ -374,6 +376,10 @@ BOOL isFuzzyWord(unichar ch) {
     return pos;
 }
 
+// Obsolete
+- (NSUInteger)prev:(NSNumber*)count{ //h
+    return [self prev:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
+}
 // Obsolete
 - (NSUInteger)next:(NSNumber*)count{ //l
     return [self next:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
