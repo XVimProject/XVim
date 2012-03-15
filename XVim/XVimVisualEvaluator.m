@@ -27,15 +27,9 @@
 }
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    METHOD_TRACE_LOG();
     NSTextView* v = [xvim sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     return [super eval:event ofXVim:xvim];
-}
-
-- (XVimEvaluator*)defaultNextEvaluator{
-    [self updateSelection];
-    return self;
 }
 
 - (XVimEvaluator*)C_b:(id)arg{
@@ -63,23 +57,34 @@
         NSUInteger begin,end;
         if( _begin < _insertion ){
             [view setSelectedRange:NSMakeRange(_begin,0)];
-            [view moveToBeginningOfLine:self];
-            begin = [view selectedRange].location;
+            begin = [view headOfLine];
             [view setSelectedRange:NSMakeRange(_insertion,0)];
-            [view moveToEndOfLine:self];
-            end = [view selectedRange].location;
+            if( _insertion != [[view string] length] && !isNewLine( [[view string] characterAtIndex:_insertion]) ){
+                end = [view nextNewline];
+                if( end == NSNotFound ){
+                    end = [view endOfLine];
+                }
+            }else{
+                end = _insertion;
+            }
         }else{
             [view setSelectedRange:NSMakeRange(_insertion,0)];
-            [view moveToBeginningOfLine:self];
-            begin = [view selectedRange].location;
+            begin = [view headOfLine];
             [view setSelectedRange:NSMakeRange(_begin,0)];
-            [view moveToEndOfLine:self];
-            end = [view selectedRange].location;
+            if( _begin != [[view string] length] && !isNewLine( [[view string] characterAtIndex:_begin]) ){
+                end = [view nextNewline];
+                if( end == NSNotFound ){
+                    end = [view endOfLine];
+                }
+            }else{
+                end = _begin;
+            }
         }
-        [view setSelectedRange:NSMakeRange(begin,end-begin)];
+        [view setSelectedRangeWithBoundsCheck:begin To:end];
     }else if( _mode == MODE_BLOCK){
         // later
     }
+    [view scrollRangeToVisible:NSMakeRange(_insertion,0)];
 }
 
 - (XVimEvaluator*)c:(id)arg{
@@ -124,6 +129,7 @@
     return [evaluator motionFixedFrom:_begin To:_insertion Type:CHARACTERWISE_INCLUSIVE];
 }
 
+
 - (XVimEvaluator*)ESC:(id)arg{
     [self xvim].mode = MODE_NORMAL;
     [[self textView] setSelectedRange:NSMakeRange(_begin, 0)];
@@ -144,6 +150,7 @@
     return nil;
 }
 
+
 - (XVimEvaluator*)LESSTHAN:(id)arg{
     [self updateSelection];
     NSTextView* view = [self textView];
@@ -157,8 +164,7 @@
     [self xvim].mode = MODE_NORMAL;
     return nil;
 }
-
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:type{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
     _insertion = to;

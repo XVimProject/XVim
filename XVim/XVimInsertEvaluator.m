@@ -7,6 +7,7 @@
 //
 
 #import "XVimInsertEvaluator.h"
+#import "NSTextView+VimMotion.h"
 #import "Xvim.h"
 
 @implementation XVimInsertEvaluator
@@ -46,6 +47,7 @@
             }
         }
         xvim.mode = MODE_NORMAL;
+        [[xvim sourceView] adjastCursorPosition];
         return nil;
     }    
     
