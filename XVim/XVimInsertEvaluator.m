@@ -47,7 +47,7 @@
             }
         }
         xvim.mode = MODE_NORMAL;
-        [[xvim sourceView] adjutCursorPosition];
+        [[xvim sourceView] adjustCursorPosition];
         return nil;
     }    
     
