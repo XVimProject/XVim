@@ -19,6 +19,7 @@
 @synthesize text = _text;
 @synthesize name = _name;
 @synthesize keyEvents = _keyEvents;
+@synthesize nonNumericKeyCount = _nonNumericKeyCount;
 
 -(NSString*) description{
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.name, self.text];
@@ -30,6 +31,7 @@
         _keyEvents = [[NSMutableArray alloc] init];
         _text = [NSMutableString stringWithString:@""];
         _name = [NSString stringWithString:registerName];
+        _nonNumericKeyCount = 0;
     }
     return self;
 }
@@ -70,7 +72,16 @@
     return _keyEvents.count;
 }
 
+-(NSUInteger) numericKeyCount{
+    return self.keyCount - self.nonNumericKeyCount;
+}
+
+-(NSUInteger) nonNumericKeyCount{
+    return _nonNumericKeyCount;
+}
+
 -(void) clear{
+    _nonNumericKeyCount = 0;
     [self.text setString:@""];
     [_keyEvents removeAllObjects];
 }
@@ -81,6 +92,9 @@
         [self.text appendString:[NSString stringWithFormat:@"<%@>", key]];
     }else{
         [self.text appendString:key];
+    }
+    if ([key hasPrefix:@"NUM"] == NO){
+        ++_nonNumericKeyCount;
     }
     [_keyEvents addObject:event];
 }

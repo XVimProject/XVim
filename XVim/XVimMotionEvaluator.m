@@ -694,9 +694,16 @@
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    if (xregister.isRepeat)
-    {
-        return (xregister.text.length == 1) ? REGISTER_APPEND : REGISTER_IGNORE;
+    if (xregister.isRepeat){
+        if (xregister.nonNumericKeyCount == 1){
+            NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+            SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
+            if([[self class] instancesRespondToSelector:handler] || [key hasPrefix:@"NUM"]){
+                return REGISTER_APPEND;
+            }
+        }
+
+        return REGISTER_IGNORE;
     }
     
     return [super shouldRecordEvent:event inRegister:xregister];

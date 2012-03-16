@@ -29,5 +29,7 @@ typedef enum {
 @property (readonly) BOOL isRepeat;
 @property (readonly) BOOL isReadOnly;
 @property (readonly) NSUInteger keyCount;
+@property (readonly) NSUInteger numericKeyCount;
+@property (readonly) NSUInteger nonNumericKeyCount;
 
 @end
