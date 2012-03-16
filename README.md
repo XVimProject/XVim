@@ -60,3 +60,14 @@ https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 この場合、こちらにメッセージなどが来ることはありませんので、
 メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim )にいただけると、開発のモチベーションにつながります。
+
+
+Contributers
+============
+ - JugglerShu
+ - mike-hoegeman
+ - dojoteef
+ - WarWithinMe
+ - jmarcog
+
+
