@@ -694,6 +694,7 @@ BOOL isFuzzyWord(unichar ch) {
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
     
     [self setSelectedRange:range];
+    [self moveDown:self]; // moveDown because it is one past the top
     return [self selectedRange].location;
 }
 
