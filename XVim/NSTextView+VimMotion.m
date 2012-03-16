@@ -114,6 +114,14 @@ BOOL isFuzzyWord(unichar ch) {
 }
 
 /**
+ * Determine if the position specified with "index" is EOL.
+ **/
+- (BOOL) isEOL:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return [self isEOF:index] == NO && [self isNewLine:index] == NO && [self isNewLine:index+1];
+}
+
+/**
  * Determine if the position specified with "index" is newline.
  **/
 - (BOOL) isNewLine:(NSUInteger)index{
@@ -439,12 +447,14 @@ BOOL isFuzzyWord(unichar ch) {
         return index;
     }
     NSUInteger pos = index;
-    for(NSUInteger i = 0; i < count; i++ ){
-        NSUInteger next = [self nextNewLine:pos];
-        if( NSNotFound == next){
-            break;
+    if ([self isBlankLine:pos] == NO){
+        for(NSUInteger i = 0; i < count; i++ ){
+            NSUInteger next = [self nextNewLine:pos];
+            if( NSNotFound == next){
+                break;
+            }
+            pos = next;
         }
-        pos = next;
     }
     pos++;
     NSUInteger end = [self endOfLine:pos];
