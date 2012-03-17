@@ -63,17 +63,26 @@
     return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
 }
 
-// 'C' works like 'D' except that once it's done deleting
+// 'C' works similar to 'D' except that once it's done deleting
 // it should go into insert mode
 - (XVimEvaluator*)C:(id)arg{
-    // TODO: handle numericArg
     NSTextView* view = [self textView];
-    [view moveToEndOfLineAndModifySelection:self];
+    NSRange range = [view selectedRange];
+    NSUInteger count = [self numericArg];
+    NSUInteger to = range.location;
+    NSUInteger column = [view columnNumber:to];
+    to = [view nextLine:range.location column:column count:count-1 option:MOTION_OPTION_NONE];
+    to = [view endOfLine:to];
+    
+    // endOfLine: moves to the last character, so we need to delete the next character
+    range.length = to - range.location + 1;
+    
+    [view setSelectedRange:range];
     [view cut:self];
-
+    
     // Go to insert 
     [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:1];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -86,10 +95,32 @@
 }
 
 - (XVimEvaluator*)D:(id)arg{
-    // TODO: handle numericArg
     NSTextView* view = [self textView];
-    [view moveToEndOfLineAndModifySelection:self];
+    NSRange range = [view selectedRange];
+    NSUInteger count = [self numericArg];
+    NSString *text = [view string];
+    NSUInteger to = range.location;
+    for (; to < text.length && count > 0; ++to) {
+        if (isNewLine([text characterAtIndex:to])) {
+            --count;
+        }
+    }
+    NSUInteger from = range.location;
+    NSUInteger head = [view headOfLine:range.location];
+    for (; from >= head; --from){
+        if (isNewLine([text characterAtIndex:from-1])){
+            --from;
+            break;
+        }
+        if (!isWhiteSpace([text characterAtIndex:from-1])){
+            break;
+        }
+    }
+    
+    NSUInteger length = to - from - 1;
+    [view setSelectedRange:NSMakeRange(from, length)];
     [view cut:self];
+    [view setSelectedRange:NSMakeRange(range.location, 0)];
     return nil;
 }
 
@@ -225,9 +256,13 @@
 - (XVimEvaluator*)u:(id)arg{
     // Go to insert
     NSTextView* view = [self textView];
+    NSRange r = [view selectedRange];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] undo];
     }
+
+    // Undo should not keep anything selected
+    [view setSelectedRange:NSMakeRange(r.location, 0)];
     return nil;
 }
 

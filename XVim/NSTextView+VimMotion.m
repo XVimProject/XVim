@@ -141,6 +141,18 @@ BOOL isFuzzyWord(unichar ch) {
 }
 
 /**
+ * Determine if the position specified with "index" is newline.
+ **/
+- (BOOL) isWhiteSpace:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( index == [[self string] length] ){
+        return NO; // EOF is not whitespace
+    }
+    
+    return isWhiteSpace([[self string] characterAtIndex:index]);
+}
+
+/**
  * Determine if the position specified with "index" is blankline.
  * Blankline is one of them
  *   - Newline after Newline. Ex. Second '\n' in "abc\n\nabc" is a blankline. First one is not.  
