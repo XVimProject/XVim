@@ -220,6 +220,14 @@
     return _localMarks;
 }
 
+- (NSString*)string{
+    return [[self sourceView] string];
+}
+
+- (NSRange)selectedRange{
+    return [[self sourceView] selectedRange];
+}
+
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
     if (_isPlayingRegisterBack == NO){

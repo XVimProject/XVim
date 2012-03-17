@@ -118,12 +118,9 @@
     [view setSelectedRangeWithBoundsCheck:from To:to];
     [view cut:self];
     if (_insertModeAtCompletion == TRUE) {
-        // Go to insert 
-        [self xvim].mode = MODE_INSERT;
-        
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
-        return [[XVimInsertEvaluator alloc] initWithRepeat:1];
+				return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
     }
     return nil;
 }

@@ -46,6 +46,7 @@ typedef enum {
 @property (weak) XVim *xvim;
 @property (readonly) NSTextView *textView;
 
+- (id)initWithXVim:(XVim*)xvim;
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
 @end
 
@@ -67,9 +68,3 @@ typedef enum {
 }
 - (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
 @end
-
-
-
-
-
-

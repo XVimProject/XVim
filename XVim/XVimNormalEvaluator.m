@@ -38,18 +38,16 @@
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
     if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
-        [self xvim].mode = MODE_INSERT;
-        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
     } 
     [view moveForward:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)A:(id)arg{
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
-    [self xvim].mode=MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -85,8 +83,7 @@
     [view cut:self];
     
     // Go to insert 
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:1];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -147,14 +144,13 @@
 
 - (XVimEvaluator*)i:(id)arg{
     // Go to insert 
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)I:(id)arg{
     NSTextView* view = [self textView];
     [view moveToBeginningOfLine:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+		return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 // For 'J' (join line) bring the line up from below. all leading whitespac 
@@ -191,8 +187,7 @@
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
     [view insertNewline:self];
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)O:(id)arg{
@@ -207,8 +202,7 @@
         [view moveToEndOfLine:self];
         [view insertNewline:self];
     }
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)p:(id)arg{
@@ -265,8 +259,7 @@
 - (XVimEvaluator*)r:(id)arg{
     NSTextView* view = [self textView];
     [view moveForwardAndModifySelection:self];
-    [self xvim].mode = MODE_INSERT;
-    return [[XVimInsertEvaluator alloc] initOneCharMode:TRUE withRepeat:1];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:TRUE withRepeat:1 ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)u:(id)arg{

@@ -149,6 +149,14 @@ static char* keynames[] = {
 
 @synthesize xvim = _xvim;
 
+- (id)initWithXVim:(XVim*)xvim{
+    self = [super init];
+    if (self){
+        _xvim = xvim;
+    }
+    return self;
+}
+
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event{
     // S- Shift
     // C- Control
