@@ -126,15 +126,17 @@
     }
     
     NSUInteger length = to - from - 1;
-    [view setSelectedRange:NSMakeRange(from, length)];
-    [view cut:self];
-    
-    // Bounds check
-    if (length > 0 && from == range.location && ![view isBlankLine:from]){
-        --range.location;
+    if (length > 0){
+        [view setSelectedRange:NSMakeRange(from, length)];
+        [view cut:self];
+        
+        // Bounds check
+        if (from == range.location && ![view isBlankLine:from]){
+            --range.location;
+        }
+        
+        [view setSelectedRange:NSMakeRange(range.location, 0)];
     }
-    
-    [view setSelectedRange:NSMakeRange(range.location, 0)];
     return nil;
 }
 
