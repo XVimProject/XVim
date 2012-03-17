@@ -241,7 +241,7 @@
 // Should move to separated file.
 - (void)commandDetermined:(NSString*)command{
     NSString* c = [command stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    NSTextView* srcView = [self superview]; // DVTTextSourceView
+    NSTextView* srcView = (NSTextView*)[self superview]; // DVTTextSourceView
     TRACE_LOG(@"command : %@", c);
     if( [c length] == 0 ){
         // Something wrong
@@ -346,6 +346,10 @@
         }
         else if( [ex_command hasPrefix:@"!"] ){
             
+        }
+        else if( [ex_command isEqualToString:@"debug"] ){
+           // Place Any debugging purpose process...
+            [[self superview] setSelectedRange:NSMakeRange([[[self superview] string] length], 0)];
         }
         else if( [ex_command isEqualToString:@"make"] ){
             NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];

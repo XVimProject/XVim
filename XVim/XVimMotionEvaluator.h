@@ -28,21 +28,15 @@ typedef enum _MOTION_TYPE{
     NSUInteger _motionFrom;
     NSUInteger _motionTo;
     BOOL _inverseMotionType; // switch inclusive/exclusive motion ( set to NO to use default motion type )
-
 }
 
 // Override this method to implement operations on motions.
-// THere could be from < to (This means backwards motion)
+// There could be from < to (This means backwards motion)
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 
 
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
-- (NSUInteger)_linePrevForStorage:(NSString *)s location:(NSUInteger)location;
-- (NSUInteger)_linePrevForStorageN:(NSString *)s location:(NSUInteger)location count:(NSUInteger)count;
-- (NSUInteger)_lineNextForStorage:(NSString *)s location:(NSUInteger)location;
-- (NSUInteger)_lineNextForStorageN:(NSString *)s location:(NSUInteger)location count:(NSUInteger)count;
-- (NSUInteger)_moveToNoneWhiteForStorage:(NSString *)s location:(NSUInteger)location;
 @end
 

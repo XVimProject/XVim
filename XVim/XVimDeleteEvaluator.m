@@ -126,14 +126,14 @@
         }
         [view setSelectedRange:NSMakeRange(to,0)];
         if( !isNewLine([[view string] characterAtIndex:to])){
-            to = [view nextNewline];
+            to = [view nextNewLine:to];
             if( NSNotFound == to ){
                 to = [view string].length-1;
             }
         }
         NSRange r = [view selectedRange];
         [view setSelectedRange:NSMakeRange(from,0)];
-        from = [view prevNewline];
+        from = [view prevNewLine:from];
         [view setSelectedRange:r];
         if( NSNotFound == from ){
             from = 0;

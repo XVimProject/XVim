@@ -1,4 +1,3 @@
-
 //
 //  NSTextView+VimMotion.m
 //  XVim
@@ -81,7 +80,7 @@ BOOL isAlpha(unichar ch) {
     return (ch >= 'A' && ch <= 'Z') ||
     (ch >= 'a' && ch <= 'z') 
 #ifdef UNDERSCORE_IS_WORD
-    || ch == '_'
+    r| ch == '_'
 #endif
     ;
 }
@@ -294,21 +293,25 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
 // Obsolete
 - (NSUInteger)headOfLine{
+    NSAssert(NO, @"Obsolete");//
     return [self headOfLine:[self selectedRange].location];
 }
 
 // Obsolete
 - (NSUInteger)prevNewline{
+    NSAssert(NO, @"Obsolete");//
     return [self prevNewLine:[self selectedRange].location];
 }
 
 // Obsolete
 - (NSUInteger)endOfLine{
+    NSAssert(NO, @"Obsolete");//
     return [self endOfLine:[self selectedRange].location];
 }
 
 // Obsolete
 - (NSUInteger)nextNewline{
+    NSAssert(NO, @"Obsolete");//
     return [self nextNewLine:[self selectedRange].location];
 }
 
@@ -322,6 +325,25 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         return 0; // This is balnkline
     }
     return index-head;
+}
+
+- (NSUInteger)nextNonBlankInALine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    // move to 1st non whitespace char, now that we are on the destination line
+    while (index < [[self string] length]) {
+        if( [self isNewLine:index] ){
+            return NSNotFound; // Characters left in a line is whitespaces
+        }
+        if ( !isWhiteSpace([[self string] characterAtIndex:index])){
+            break;
+        }
+        index++;
+    }
+    
+    if( [self isEOF:index]){
+        return NSNotFound;
+    }
+    return index;
 }
 
 
@@ -359,7 +381,6 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     }   
     return pos;
 }
-
 
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     if( index == [[self string] length] )
@@ -399,10 +420,12 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
 // Obsolete
 - (NSUInteger)prev:(NSNumber*)count{ //h
+    NSAssert(NO, @"Obsolete");//
     return [self prev:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
 }
 // Obsolete
 - (NSUInteger)next:(NSNumber*)count{ //l
+    NSAssert(NO, @"Obsolete");//
     return [self next:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
 }
 
@@ -436,6 +459,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
             break;
         }
     }
+
     NSUInteger head = [self headOfLine:pos];
     if( NSNotFound == head ){
         return pos;
@@ -636,7 +660,6 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return x;   
 }
 
-
 - (NSUInteger)wordsBackward:(NSNumber*)count{ //b
     NSRange r = [self selectedRange];
     for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
@@ -655,6 +678,13 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     [self setSelectedRange:original];
     return dest;
 }
+
+
+
+
+////////////////
+// Scrolling  //
+////////////////
 
 - (NSUInteger)halfPageForward:(NSNumber*)count{ // C-d
     // sample impl
@@ -775,9 +805,9 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return 0;
 }
 
-
-
-
+////////////////
+// Selection  //
+////////////////
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to{
     if( [self string].length == 0 ){
         // nothing to do;
@@ -790,11 +820,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     
     [self setSelectedRange:NSMakeRange(to,0)];
 }
+
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to{
     // This is inclusive selection, which means the letter at "from" and "to" is included in the result of selction.
     // You can not use this method to move cursor since this method select 1 letter at leaset.
-    ASSERT_VALID_RANGE_WITH_EOF(from);
-    ASSERT_VALID_RANGE_WITH_EOF(to);
     if( from > to ){
         NSUInteger tmp = from;
         from = to;
