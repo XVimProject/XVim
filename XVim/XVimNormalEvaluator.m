@@ -72,10 +72,14 @@
     NSUInteger to = range.location;
     NSUInteger column = [view columnNumber:to];
     to = [view nextLine:range.location column:column count:count-1 option:MOTION_OPTION_NONE];
-    to = [view endOfLine:to];
+    
+    NSUInteger eol = [view endOfLine:to];
+    if (eol != NSNotFound){
+        to = eol + 1;
+    }
     
     // endOfLine: moves to the last character, so we need to delete the next character
-    range.length = to - range.location + 1;
+    range.length = to - range.location;
     
     [view setSelectedRange:range];
     [view cut:self];

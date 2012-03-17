@@ -121,7 +121,7 @@
 
 - (XVimEvaluator*)G:(id)arg{
     NSTextView* view = [self textView];
-    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length Type:LINEWISE]; // Is this safe? Should it be [view string].length-1?
+    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length-1 Type:LINEWISE];
 }
 
 - (XVimEvaluator*)h:(id)arg{

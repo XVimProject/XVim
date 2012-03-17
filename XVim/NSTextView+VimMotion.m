@@ -460,11 +460,15 @@ BOOL isFuzzyWord(unichar ch) {
 - (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     
+    if (count == 0){
+        return index;
+    }
+    
     // Search and count newlines.
     if( [self isBlankLine:index] ){
         count--; // Current position must be counted as newline in this case
     }
-    
+
     // Move position along with newlines
     NSUInteger pos = index;
     if ([self isBlankLine:pos] == NO){
