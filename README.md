@@ -20,7 +20,13 @@ From Source Code
 Download source code and just build XVim.xcodeproj.
 It automatically build the plugin and installs into the proper directory.
 
+Unisntall
+=============
+Delete following directory
 
+    $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
+
+    
 Contoributions
 ==============
 Any suggestions,bug reports or feature requests are welcome.
