@@ -28,6 +28,8 @@ BOOL isWhiteSpace(unichar ch);
 BOOL isNonAscii(unichar ch);
 BOOL isNewLine(unichar ch);
 BOOL isFuzzyWord(unichar ch);
+BOOL isNonBlank(unichar ch);
+BOOL isKeyword(unichar ch);
 
 @interface NSTextView (VimMotion)
 // Support Methods
