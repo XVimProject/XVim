@@ -105,25 +105,35 @@
     NSString *text = [view string];
     NSUInteger to = range.location;
     for (; to < text.length && count > 0; ++to) {
-        if (isNewLine([text characterAtIndex:to])) {
+        unichar c = [text characterAtIndex:to];
+        if (isNewLine(c)) {
             --count;
         }
     }
     NSUInteger from = range.location;
     NSUInteger head = [view headOfLine:range.location];
-    for (; from >= head; --from){
-        if (isNewLine([text characterAtIndex:from-1])){
-            --from;
-            break;
-        }
-        if (!isWhiteSpace([text characterAtIndex:from-1])){
-            break;
+    if ([self numericArg] > 1 && !isWhiteSpace([text characterAtIndex:from])){
+        for (; from >= head; --from){
+            unichar c = [text characterAtIndex:from-1];
+            if (isNewLine(c)){
+                --from;
+                break;
+            }
+            if (!isWhiteSpace(c)){
+                break;
+            }
         }
     }
     
     NSUInteger length = to - from - 1;
     [view setSelectedRange:NSMakeRange(from, length)];
     [view cut:self];
+    
+    // Bounds check
+    if (length > 0 && from == range.location && ![view isBlankLine:from]){
+        --range.location;
+    }
+    
     [view setSelectedRange:NSMakeRange(range.location, 0)];
     return nil;
 }
