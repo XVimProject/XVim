@@ -114,6 +114,14 @@ BOOL isFuzzyWord(unichar ch) {
 }
 
 /**
+ * Determine if the posiion is latt character
+ **/
+- (BOOL) isLastCharacter:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return [[self string] length]-1 == index;
+}
+
+/**
  * Determine if the position specified with "index" is EOL.
  **/
 - (BOOL) isEOL:(NSUInteger)index{
@@ -309,11 +317,12 @@ BOOL isFuzzyWord(unichar ch) {
     }
     return index-head;
 }
+
+
+
 /////////////
 // Motions //
 /////////////
-
-
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_CURSOR_POS(index);
     if( 0 == index){
@@ -344,8 +353,6 @@ BOOL isFuzzyWord(unichar ch) {
     }   
     return pos;
 }
-
-
 
 
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
@@ -440,12 +447,13 @@ BOOL isFuzzyWord(unichar ch) {
  **/
 - (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [[self string] length] == 0 ){
-        return 0;
+    
+    // Search and count newlines.
+    if( [self isBlankLine:index] ){
+        count--; // Current position must be counted as newline in this case
     }
-    if( [self isEOF:index] ){
-        return index;
-    }
+    
+    // Move position along with newlines
     NSUInteger pos = index;
     if ([self isBlankLine:pos] == NO){
         for(NSUInteger i = 0; i < count; i++ ){
@@ -456,15 +464,55 @@ BOOL isFuzzyWord(unichar ch) {
             pos = next;
         }
     }
-    pos++;
-    NSUInteger end = [self endOfLine:pos];
-    if( NSNotFound == end ){
-        return pos;
+    
+    // If "pos" is not on a newline here it means no newline is found and "pos == index".
+    
+    if( [self isNewLine:pos] ){
+        // This is the case any newline was found.
+        // pos is on a newline. The next line is the target line.
+        // There is at least 1 more range available.
+        pos++;
+        NSUInteger end = [self endOfLine:pos];
+        if( NSNotFound != end ){
+            // adjust column position
+            if( pos+column > end ){
+                pos = end;
+            }else{
+                pos = pos + column;
+            }
+        }
+        // If "end == NSNotFound" the current line is blankline
     }
-    if( pos+column > end ){
-        return end;
-    }
-    return pos+column;
+    return pos; 
+}
+
+
+/**
+ * Returns position of next head of word.
+ * 
+ From Vim help: word and WORD
+ *word*
+ A word consists of a sequence of letters, digits and underscores, or a 
+ sequence of other non-blank characters, separated with white space (spaces, 
+ tabs, <EOL>).  This can be changed with the 'iskeyword' option.  An empty line 
+ is also considered to be a word. 
+ 
+ *WORD* 
+ A WORD consists of a sequence of non-blank characters, separated with white 
+ space.  An empty line is also considered to be a WORD. 
+ 
+ Special case: "cw" and "cW" are treated like "ce" and "cE" if the cursor is 
+ on a non-blank.  This is because "cw" is interpreted as change-word, and a 
+ word does not include the following white space.  
+ Another special case: When using the "w" motion in combination with an 
+ operator and the last word moved over is at the end of a line, the end of 
+ that word becomes the end of the operated text, not the first word in the 
+ next line. 
+ **/
+- (NSUInteger)nextHeadOfWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    // Not implemented yet
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return index;
 }
 
 - (NSUInteger)wordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{

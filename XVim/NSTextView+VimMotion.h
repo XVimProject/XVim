@@ -11,7 +11,10 @@
 typedef enum{
     MOTION_OPTION_NONE,
     LEFT_RIGHT_WRAP,
-    LEFT_RIGHT_NOWRAP
+    LEFT_RIGHT_NOWRAP,
+    CHANGE_WORD_OPERATION, // Special case for 'cw' 'Cw'
+    DELETE_WORD_OPERATION // Special case for 'dw' 'Dw' 
+    
 } MOTION_OPTION;
 
 BOOL isDigit(unichar ch);
