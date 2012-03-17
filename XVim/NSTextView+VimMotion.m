@@ -71,7 +71,7 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 /////////////////////////
 // support functions   //
 /////////////////////////
-#define UNSERSCORE_IS_WORD
+#define UNDERSCORE_IS_WORD
 BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
 BOOL isWhiteSpace(unichar ch) { return ch == ' ' || ch == '\t'; }
 BOOL isNewLine(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
@@ -80,7 +80,7 @@ BOOL isAlpha(unichar ch) {
     return (ch >= 'A' && ch <= 'Z') ||
     (ch >= 'a' && ch <= 'z') 
 #ifdef UNDERSCORE_IS_WORD
-    r| ch == '_'
+    || ch == '_'
 #endif
     ;
 }
