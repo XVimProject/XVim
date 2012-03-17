@@ -6,10 +6,11 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimMotionEvaluator.h"
+
+#import "XVimOperatorEvaluator.h"
 
 // Handles input after 'd' or 'c'
-@interface XVimDeleteEvaluator : XVimMotionEvaluator{
+@interface XVimDeleteEvaluator : XVimOperatorEvaluator{
 @private
     BOOL _insertModeAtCompletion;
     NSUInteger _repeat;

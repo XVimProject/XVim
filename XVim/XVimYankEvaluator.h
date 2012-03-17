@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimMotionEvaluator.h"
+#import "XVimOperatorEvaluator.h"
 
-@interface XVimYankEvaluator : XVimMotionEvaluator{
+@interface XVimYankEvaluator : XVimOperatorEvaluator{
 @private
     NSUInteger _repeat;
 }

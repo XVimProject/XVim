@@ -4,7 +4,7 @@
 //  XVim
 //
 //  Created by Shuichiro Suzuki on 2/25/12.
-//  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
+//  Copyright (c) 2012 JugglerShu.Net. All 
 //
 
 #import "NSTextView+VimMotion.h"
@@ -40,6 +40,12 @@
 static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 @implementation NSTextView (VimMotion)
+/////////////////////
+// Character set   //
+/////////////////////
+
+#define CHARSET_ID_WHITESPACE 0
+#define CHARSET_ID_KEYWORD 1 // This is named after 'iskeyword' in Vim
 
 + (NSArray*) wordDelimiterCharacterSets{
     if (XVimWordDelimiterCharacterSets == nil) {
@@ -66,10 +72,11 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 /////////////////////////
 // support functions   //
 /////////////////////////
+#define UNSERSCORE_IS_WORD
 BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
 BOOL isWhiteSpace(unichar ch) { return ch == ' ' || ch == '\t'; }
 BOOL isNewLine(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
-BOOL isNonAscii(unichar ch) { return ch > 128; }
+BOOL isNonAscii(unichar ch) { return ch > 128; } // is this not ch >= 128 ? (JugglerShu)
 BOOL isAlpha(unichar ch) { 
     return (ch >= 'A' && ch <= 'Z') ||
     (ch >= 'a' && ch <= 'z') 
@@ -87,6 +94,13 @@ BOOL isDelimeter(unichar ch) {
 BOOL isFuzzyWord(unichar ch) {
     return (!isWhiteSpace(ch)) && (!isNewLine(ch));
 }
+BOOL isNonBlank(unichar ch) {
+    return (!isWhiteSpace(ch)) && (!isNewLine(ch));
+}
+BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined fo 1 byte char
+    return isDigit(ch) || isAlpha(ch)  || ch >= 192;
+}
+
 
 /////////////////////////
 // support methods     //
@@ -477,9 +491,7 @@ BOOL isFuzzyWord(unichar ch) {
 }
 
 
-/**
- * Returns position of next head of word.
- * 
+/** 
  From Vim help: word and WORD
  *word*
  A word consists of a sequence of letters, digits and underscores, or a 
@@ -499,89 +511,82 @@ BOOL isFuzzyWord(unichar ch) {
  that word becomes the end of the operated text, not the first word in the 
  next line. 
  **/
-- (NSUInteger)nextHeadOfWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    // Not implemented yet
+
+/**
+ * Returns position of next head of word.
+ * @param index
+ * @param count
+ * @param option MOTION_OPTION_NONE or BIGWORD
+ * @param info This is used with special cases explaind above such as 'cw' or 'w' crossing over the newline.
+ **/
+- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    return index;
-}
-
-- (NSUInteger)wordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
-   NSString *s = [[self textStorage] string];
-    if (begin + 1 >= s.length) {
-        return begin;
+    NSAssert(nil != info, @"Specify info");
+    
+    NSInteger pos = index;
+    info->isFirstWordInALine = NO;
+    info->lastEndOfLine = index;
+    info->lastEndOfWord = index;
+    
+    if( [self isEOF:index] ){
+        return index;
     }
     
-    // Start search from the next character
-    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin]];
-    for (NSUInteger x = begin; x < s.length; ++x) {
-        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
-        if (wholeWord && nextId != 0 && curId == 0) {
-            return x;
-        } else if (!wholeWord && nextId != 0 && curId != nextId) {
-            return x;
+    BOOL newLineStarts = NO;
+    NSString* str = [self string];
+    unichar lastChar= [str characterAtIndex:index];
+    for(NSUInteger i = index+1 ; i <= [[self string] length]; i++ ){
+        // Each time we encounter new word decrement "counter".
+        // Remember blankline is a word
+        
+        unichar curChar;
+        if( ![self isEOF:i] ){
+            curChar = [str characterAtIndex:i];
+        } 
+        
+        // End of line is one of following 2 cases. We must keep this to operate 'word' special case.
+        //    - Last character of Non-Blankline
+        //    - First character of Blankline 
+        if(  [self isEOF:i] ||  (isNewLine(curChar) && ![self isBlankLine:i] ) || [self isBlankLine:i-1] ){
+            info->lastEndOfLine = i - 1;
         }
         
-        curId = nextId;
-    }
-    return s.length - 1;
-}
-
-- (NSUInteger)wordsForward:(NSNumber*)count{ //w
-    METHOD_TRACE_LOG();
-    NSRange r = [self selectedRange];
-    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
-        r.location = [self wordForward:r.location WholeWord:NO];
-    }
-    return r.location;
-}
-
-- (NSUInteger)WORDSForward:(NSNumber*)count{ //W
-    NSRange r = [self selectedRange];
-    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
-        r.location = [self wordForward:r.location WholeWord:YES];
-    }
-    return r.location;
-}
-  
-- (NSUInteger)endOfWordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
-    NSString *s = [[self textStorage] string];
-    if (begin + 1 >= s.length) {
-        return begin;
-    }
-    
-    // Start search from the next character
-    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin + 1]];
-    for (NSUInteger x = begin; x + 1 < s.length; ++x) {
-        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x + 1]];
-        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
-        if (wholeWord && nextId == 0 && curId != 0) {
-            return x;
-        } else if (!wholeWord && curId != 0 && curId != nextId) {
-            return x;
+        if( isNewLine(lastChar) ){
+            newLineStarts = TRUE;
+        }
+        // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
+        //    - Any and EOF
+        //    - Whitespace(including newline) and Non-Blank
+        //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
+        //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
+        //    - newline and newline(blankline) 
+        if( ( [self isEOF:i] ) ||
+           ((isWhiteSpace(lastChar) || isNewLine(lastChar)) && isNonBlank(curChar))   ||
+           ( opt != BIGWORD && isKeyword(lastChar) && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(curChar))   ||
+           ( opt != BIGWORD && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(curChar) && isKeyword(curChar) )  ||
+           ( isNewLine(lastChar) && [self isBlankLine:i] ) 
+           ){
+            count--; 
+            if( newLineStarts ){
+                info->isFirstWordInALine = YES;
+                newLineStarts = NO;
+            }else{
+                info->isFirstWordInALine = NO;
+            }
+        }else if( isNonBlank(lastChar) && (isWhiteSpace(curChar) || isNewLine(curChar) ) ){
+            info->lastEndOfWord = i - 1;
         }
         
-        curId = nextId;
+        lastChar = curChar;
+        if( 0 == count ){
+            pos = i;
+            break;
+        }
     }
-    return s.length - 1;
+    return pos;
 }
 
-- (NSUInteger)endOfWordsForward:(NSNumber*)count{ //e
-    METHOD_TRACE_LOG();
-    NSRange r = [self selectedRange];
-    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
-        r.location = [self endOfWordForward:r.location WholeWord:NO];
-    }
-    return r.location;
-}
 
-- (NSUInteger)endOfWORDSForward:(NSNumber*)count{ //E
-    NSRange r = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        r.location = [self endOfWordForward:r.location WholeWord:YES];
-    }
-    return r.location;
-}
 
 - (NSUInteger)wordBackward:(NSUInteger)begin{
     // summary --
@@ -630,6 +635,7 @@ BOOL isFuzzyWord(unichar ch) {
     }
     return x;   
 }
+
 
 - (NSUInteger)wordsBackward:(NSNumber*)count{ //b
     NSRange r = [self selectedRange];
@@ -787,6 +793,8 @@ BOOL isFuzzyWord(unichar ch) {
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to{
     // This is inclusive selection, which means the letter at "from" and "to" is included in the result of selction.
     // You can not use this method to move cursor since this method select 1 letter at leaset.
+    ASSERT_VALID_RANGE_WITH_EOF(from);
+    ASSERT_VALID_RANGE_WITH_EOF(to);
     if( from > to ){
         NSUInteger tmp = from;
         from = to;
@@ -799,11 +807,10 @@ BOOL isFuzzyWord(unichar ch) {
     }
     
     if( from >= [self string].length ){
-        // end of document
-        from = [self string].length -1;
-        to = [self string].length -1;
+        [self setSelectedRange:NSMakeRange([[self string] length], 0)]; 
         return;
     }
+    
     if( to >= [self string].length ){
         to = [self string].length - 1;
     }

@@ -69,6 +69,33 @@
     return [self _motionFixedFrom:start.location To:end.location Type:LINEWISE];
 }
 
+
+
+- (XVimEvaluator*)w:(id)arg{
+    if( _insertModeAtCompletion ){ 
+        // cw is special case of word motion
+        XVimWordInfo info;
+        NSUInteger from = [[self textView] selectedRange].location;
+        [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+        return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];
+    }else{
+        return [super w:arg];
+    }
+}
+
+- (XVimEvaluator*)W:(id)arg{
+    if( _insertModeAtCompletion ){ 
+        // cw is special case of word motion
+        XVimWordInfo info;
+        NSUInteger from = [[self textView] selectedRange].location;
+        [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+        return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];
+    }else{
+        return [super W:arg];
+    }
+}
+
+
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     NSTextView* view = [self textView];
     NSString* string = [view string];
@@ -115,8 +142,10 @@
         }
     }
 
-    [view setSelectedRangeWithBoundsCheck:from To:to];
-    [view cut:self];
+    if( ![view isEOF:from] ){
+        [view setSelectedRangeWithBoundsCheck:from To:to];
+        [view cut:self];
+    }
     if (_insertModeAtCompletion == TRUE) {
         // Go to insert 
         [self xvim].mode = MODE_INSERT;

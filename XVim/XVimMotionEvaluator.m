@@ -186,11 +186,17 @@
 }
 
 - (XVimEvaluator*)w:(id)arg{
-    return [self commonMotion:@selector(wordsForward:) Type:CHARACTERWISE_EXCLUSIVE];
+    XVimWordInfo info;
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:&info];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)W:(id)arg{
-    return [self commonMotion:@selector(WORDSForward:) Type:CHARACTERWISE_EXCLUSIVE];
+    XVimWordInfo info;
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:&info];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)z:(id)arg{
