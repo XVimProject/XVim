@@ -23,7 +23,8 @@ It automatically build the plugin and installs into the proper directory.
 Unisntall
 =============
 Delete following directory
-    Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
+
+    $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
     
 Contoributions
