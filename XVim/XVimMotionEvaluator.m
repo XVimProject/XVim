@@ -122,7 +122,7 @@
 
 - (XVimEvaluator*)G:(id)arg{
     NSTextView* view = [self textView];
-    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length Type:LINEWISE]; // Is this safe? Should it be [view string].length-1?
+    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length-1 Type:LINEWISE];
 }
 
 - (XVimEvaluator*)h:(id)arg{
@@ -633,9 +633,16 @@
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    if (xregister.isRepeat)
-    {
-        return (xregister.text.length == 1) ? REGISTER_APPEND : REGISTER_IGNORE;
+    if (xregister.isRepeat){
+        if (xregister.nonNumericKeyCount == 1){
+            NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+            SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
+            if([[self class] instancesRespondToSelector:handler] || [key hasPrefix:@"NUM"]){
+                return REGISTER_APPEND;
+            }
+        }
+
+        return REGISTER_IGNORE;
     }
     
     return [super shouldRecordEvent:event inRegister:xregister];

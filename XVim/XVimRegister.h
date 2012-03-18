@@ -20,6 +20,7 @@ typedef enum {
 
 -(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count;
 -(void) appendKeyEvent:(NSEvent*)event;
+-(void) appendText:(NSString*)text;
 -(void) clear;
 
 @property (readonly, strong) NSMutableString *text;
@@ -29,5 +30,7 @@ typedef enum {
 @property (readonly) BOOL isRepeat;
 @property (readonly) BOOL isReadOnly;
 @property (readonly) NSUInteger keyCount;
+@property (readonly) NSUInteger numericKeyCount;
+@property (readonly) NSUInteger nonNumericKeyCount;
 
 @end

@@ -52,11 +52,9 @@
     NSRange r = [view selectedRange];
     [view setSelectedRangeWithBoundsCheck:from To:to];
     [view copy:self];
-    [view setSelectedRange:r];
+    [view setSelectedRange:NSMakeRange(r.location, 0)];
     return nil;
 }
 
 
 @end
-
-

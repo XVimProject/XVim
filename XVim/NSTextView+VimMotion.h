@@ -34,8 +34,10 @@ BOOL isKeyword(unichar ch);
 @interface NSTextView (VimMotion)
 // Support Methods
 - (BOOL) isEOF:(NSUInteger)index;
+- (BOOL) isEOL:(NSUInteger)index;
 - (BOOL) isNewLine:(NSUInteger)index;
 - (BOOL) isBlankLine:(NSUInteger)index;
+- (BOOL) isWhiteSpace:(NSUInteger)index;
 - (BOOL) isValidCursorPosition:(NSUInteger)index;
 - (NSUInteger)headOfLine:(NSUInteger)index;
 - (NSUInteger)nextNewLine:(NSUInteger)index;
@@ -54,3 +56,4 @@ BOOL isKeyword(unichar ch);
     
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
 @end
+

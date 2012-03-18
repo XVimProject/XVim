@@ -53,6 +53,8 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 // Mark this property to YES before moving. And mark it to NO after moving.
 @property(assign) BOOL dontCheckNewline;
 
+- (NSString*)string;
+- (NSRange)selectedRange;
 - (void)commandModeWithFirstLetter:(NSString*)first;
 - (void)commandDetermined:(NSString*)command;
 - (void)commandCanceled;

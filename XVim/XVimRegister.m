@@ -11,14 +11,15 @@
 #import <CoreServices/CoreServices.h>
 
 @interface XVimRegister()
-    @property (strong) NSMutableArray *keyEvents;
+    @property (strong) NSMutableArray *keyEventsAndInsertedText;
 @end
 
 @implementation XVimRegister
 
 @synthesize text = _text;
 @synthesize name = _name;
-@synthesize keyEvents = _keyEvents;
+@synthesize keyEventsAndInsertedText = _keyEventsAndInsertedText;
+@synthesize nonNumericKeyCount = _nonNumericKeyCount;
 
 -(NSString*) description{
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.name, self.text];
@@ -27,9 +28,10 @@
 -(id) initWithRegisterName:(NSString*)registerName{
     self = [super init];
     if (self) {
-        _keyEvents = [[NSMutableArray alloc] init];
+        _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
         _text = [NSMutableString stringWithString:@""];
         _name = [NSString stringWithString:registerName];
+        _nonNumericKeyCount = 0;
     }
     return self;
 }
@@ -67,12 +69,21 @@
 }
 
 -(NSUInteger) keyCount{
-    return _keyEvents.count;
+    return self.keyEventsAndInsertedText.count;
+}
+
+-(NSUInteger) numericKeyCount{
+    return self.keyCount - self.nonNumericKeyCount;
+}
+
+-(NSUInteger) nonNumericKeyCount{
+    return _nonNumericKeyCount;
 }
 
 -(void) clear{
+    _nonNumericKeyCount = 0;
     [self.text setString:@""];
-    [_keyEvents removeAllObjects];
+    [self.keyEventsAndInsertedText removeAllObjects];
 }
 
 -(void) appendKeyEvent:(NSEvent*)event{
@@ -82,18 +93,26 @@
     }else{
         [self.text appendString:key];
     }
-    [_keyEvents addObject:event];
+    if ([key hasPrefix:@"NUM"] == NO){
+        ++_nonNumericKeyCount;
+    }
+    [self.keyEventsAndInsertedText addObject:event];
+}
+
+-(void) appendText:(NSString*)text{
+    [self.text appendString:text];
+    [self.keyEventsAndInsertedText addObject:text];
 }
 
 -(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count{
     for (NSUInteger i = 0; i < count; ++i) {
-        [_keyEvents enumerateObjectsUsingBlock:^(NSEvent *event, NSUInteger index, BOOL *stop){        
-            // Have to clone the event with a new time stamp in order to not confuse the app
-            // otherwise it can cause a crash or simply ignore the repeat count. Unfortunately
-            // it posts the events VERY SLOWLY. Need to find a better way to speed it up.
-            NSTimeInterval currentTime = 0.001 * AbsoluteToDuration(UpTime());
-            NSEvent *clonedEvent = [NSEvent keyEventWithType:event.type location:event.locationInWindow modifierFlags:event.modifierFlags timestamp:currentTime  windowNumber:event.windowNumber context:event.context characters:event.characters charactersIgnoringModifiers:event.charactersIgnoringModifiers isARepeat:event.isARepeat keyCode:event.keyCode];
-            [[NSApplication sharedApplication] postEvent:clonedEvent atStart:NO];
+        [self.keyEventsAndInsertedText enumerateObjectsUsingBlock:^(id eventOrText, NSUInteger index, BOOL *stop){        
+            if ([eventOrText isKindOfClass:[NSEvent class]]){
+                // Send the keyDown event directly to the view
+                [view keyDown:eventOrText];
+            }else if([eventOrText isKindOfClass:[NSString class]]){
+                [view insertText:eventOrText];
+            }
         }];
     }
 }

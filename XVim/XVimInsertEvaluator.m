@@ -9,20 +9,26 @@
 #import "XVimInsertEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "Xvim.h"
+#import "Logger.h"
+
+@interface XVimInsertEvaluator()
+    @property (nonatomic) NSRange startRange;
+@end
 
 @implementation XVimInsertEvaluator
-- (id)init
-{
-    return [self initWithRepeat:1];
+
+@synthesize startRange = _startRange;
+
+- (id)initWithRepeat:(NSUInteger)repeat ofXVim:(XVim *)xvim{
+    return [self initOneCharMode:FALSE withRepeat:repeat ofXVim:xvim];
 }
 
-- (id)initWithRepeat:(NSUInteger)repeat{
-    return [self initOneCharMode:FALSE withRepeat:repeat];
-}
-
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat{
-    self = [super init];
+- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat ofXVim:(XVim *)xvim{
+    self = [super initWithXVim:xvim];
     if (self) {
+        _startRange = [xvim selectedRange];
+        xvim.mode = MODE_INSERT;
+        
         _repeat = repeat;
         _oneCharMode = oneCharMode;
         _insertedEvents = [[NSMutableArray alloc] init];
@@ -36,6 +42,10 @@
     [super dealloc];
 }
 
+- (void)recordText:(NSString*)text intoRegister:(XVimRegister*)xregister{
+    [xregister appendText:text];
+}
+
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
     if( [keyStr isEqualToString:@"ESC"] || [keyStr isEqualToString:@"C_LSQUAREBRACKET"] || [keyStr isEqualToString:@"C_c"]){
@@ -46,6 +56,19 @@
                 }
             }
         }
+        
+        if ([xvim isPlayingRegisterBack] == NO){
+            NSRange endRange = [xvim selectedRange];
+            NSRange textRange = NSMakeRange(self.startRange.location,
+                                            endRange.location - self.startRange.location);
+            TRACE_LOG(@"textRange %d %d", textRange.location, textRange.length);
+            
+            NSString *text = [xvim string];
+            NSString *insertedText = [text substringWithRange:textRange];
+            [self recordText:insertedText intoRegister:[xvim findRegister:@"repeat"]];
+            [self recordText:insertedText intoRegister:xvim.recordingRegister];
+        }
+        
         xvim.mode = MODE_NORMAL;
         [[xvim sourceView] adjustCursorPosition];
         return nil;
@@ -72,12 +95,13 @@
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    if (xregister.isRepeat)
-    {
+    // Do not record key strokes for insert. Instead we will directly append the inserted text into the register.
+    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
+    if([keyStr isEqualToString:@"ESC"] || [keyStr isEqualToString:@"C_LSQUAREBRACKET"] || [keyStr isEqualToString:@"C_c"]){
         return REGISTER_APPEND;
     }
     
-    return [super shouldRecordEvent:event inRegister:xregister];
+    return REGISTER_IGNORE;
 }
 
 @end

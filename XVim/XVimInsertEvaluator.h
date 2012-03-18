@@ -15,6 +15,6 @@
     BOOL _oneCharMode;
 }
 
-- (id)initWithRepeat:(NSUInteger)repeat;
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat;
+- (id)initWithRepeat:(NSUInteger)repeat ofXVim:(XVim*)xvim;
+- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat ofXVim:(XVim*)xvim;
 @end

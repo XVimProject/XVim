@@ -76,8 +76,16 @@
         // cw is special case of word motion
         XVimWordInfo info;
         NSUInteger from = [[self textView] selectedRange].location;
-        [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
-        return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];
+        NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+        if( info.isFirstWordInALine ){
+            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+        }else{
+            if( info.lastEndOfWord != NSNotFound){
+                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+            }else{
+                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+            }
+        }
     }else{
         return [super w:arg];
     }
@@ -88,8 +96,12 @@
         // cw is special case of word motion
         XVimWordInfo info;
         NSUInteger from = [[self textView] selectedRange].location;
-        [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
-        return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];
+        NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+        if( info.lastEndOfWord != NSNotFound){
+            return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+        }else{
+            return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+        }
     }else{
         return [super W:arg];
     }
@@ -147,11 +159,12 @@
         [view cut:self];
     }
     if (_insertModeAtCompletion == TRUE) {
-        // Go to insert 
-        [self xvim].mode = MODE_INSERT;
-        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+        // Do not repeat the insert, that is how vim works so for
+        // example 'c3wWord<ESC>' results in Word not WordWordWord
+				return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
     }
     return nil;
 }
 
 @end
+

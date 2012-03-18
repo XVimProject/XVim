@@ -135,6 +135,14 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
+ * Determine if the position specified with "index" is EOL.
+ **/
+- (BOOL) isEOL:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return [self isEOF:index] == NO && [self isNewLine:index] == NO && [self isNewLine:index+1];
+}
+
+/**
  * Determine if the position specified with "index" is newline.
  **/
 - (BOOL) isNewLine:(NSUInteger)index{
@@ -143,6 +151,18 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         return NO; // EOF is not a newline
     }
     return isNewLine([[self string] characterAtIndex:index]);
+}
+
+/**
+ * Determine if the position specified with "index" is newline.
+ **/
+- (BOOL) isWhiteSpace:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( index == [[self string] length] ){
+        return NO; // EOF is not whitespace
+    }
+    
+    return isWhiteSpace([[self string] characterAtIndex:index]);
 }
 
 /**
@@ -347,7 +367,6 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 
-
 /////////////
 // Motions //
 /////////////
@@ -478,19 +497,25 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 - (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     
+    if (count == 0){
+        return index;
+    }
+    
     // Search and count newlines.
     if( [self isBlankLine:index] ){
         count--; // Current position must be counted as newline in this case
     }
-    
+
     // Move position along with newlines
     NSUInteger pos = index;
-    for(NSUInteger i = 0; i < count; i++ ){
-        NSUInteger next = [self nextNewLine:pos];
-        if( NSNotFound == next){
-            break;
+    if ([self isBlankLine:pos] == NO){
+        for(NSUInteger i = 0; i < count; i++ ){
+            NSUInteger next = [self nextNewLine:pos];
+            if( NSNotFound == next){
+                break;
+            }
+            pos = next;
         }
-        pos = next;
     }
     
     // If "pos" is not on a newline here it means no newline is found and "pos == index".
@@ -549,8 +574,8 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     
     NSInteger pos = index;
     info->isFirstWordInALine = NO;
-    info->lastEndOfLine = index;
-    info->lastEndOfWord = index;
+    info->lastEndOfLine = NSNotFound;
+    info->lastEndOfWord = NSNotFound;
     
     if( [self isEOF:index] ){
         return index;
@@ -575,6 +600,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
             info->lastEndOfLine = i - 1;
         }
         
+        if( [self isEOF:i] || (isNonBlank(lastChar) && isWhiteSpace(curChar) ) ){
+            info->lastEndOfWord = i - 1;
+        }
+        
         if( isNewLine(lastChar) ){
             newLineStarts = TRUE;
         }
@@ -597,10 +626,8 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
             }else{
                 info->isFirstWordInALine = NO;
             }
-        }else if( isNonBlank(lastChar) && (isWhiteSpace(curChar) || isNewLine(curChar) ) ){
-            info->lastEndOfWord = i - 1;
         }
-        
+     
         lastChar = curChar;
         if( 0 == count ){
             pos = i;
@@ -778,6 +805,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
     
     [self setSelectedRange:range];
+    [self moveDown:self]; // moveDown because it is one past the top
     return [self selectedRange].location;
 }
 
