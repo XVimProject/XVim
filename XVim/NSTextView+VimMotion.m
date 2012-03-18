@@ -508,14 +508,12 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
     // Move position along with newlines
     NSUInteger pos = index;
-    if ([self isBlankLine:pos] == NO){
-        for(NSUInteger i = 0; i < count; i++ ){
-            NSUInteger next = [self nextNewLine:pos];
-            if( NSNotFound == next){
-                break;
-            }
-            pos = next;
+    for(NSUInteger i = 0; i < count; i++ ){
+        NSUInteger next = [self nextNewLine:pos];
+        if( NSNotFound == next){
+            break;
         }
+        pos = next;
     }
     
     // If "pos" is not on a newline here it means no newline is found and "pos == index".
