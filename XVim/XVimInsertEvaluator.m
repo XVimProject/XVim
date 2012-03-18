@@ -59,15 +59,18 @@
         
         if ([xvim isPlayingRegisterBack] == NO){
             NSRange endRange = [xvim selectedRange];
-            NSRange textRange = NSMakeRange(self.startRange.location,
-                                            endRange.location - self.startRange.location);
-            TRACE_LOG(@"textRange %d %d", textRange.location, textRange.length);
-            
-            NSString *text = [xvim string];
-            NSString *insertedText = [text substringWithRange:textRange];
-            [self recordText:insertedText intoRegister:[xvim findRegister:@"repeat"]];
-            [self recordText:insertedText intoRegister:xvim.recordingRegister];
+            // Temorarily this is enalbed only when start location is less than end location.
+            if( endRange.location > self.startRange.location ){
+                NSRange textRange = NSMakeRange(self.startRange.location, endRange.location - self.startRange.location);
+                TRACE_LOG(@"textRange %d %d", textRange.location, textRange.length);
+                
+                NSString *text = [xvim string];
+                NSString *insertedText = [text substringWithRange:textRange];
+                [self recordText:insertedText intoRegister:[xvim findRegister:@"repeat"]];
+                [self recordText:insertedText intoRegister:xvim.recordingRegister];
+            }        
         }
+        
         
         xvim.mode = MODE_NORMAL;
         return nil;
