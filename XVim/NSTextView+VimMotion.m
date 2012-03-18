@@ -706,6 +706,44 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
 
 
+- (NSUInteger)endOfWordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
+    NSString *s = [[self textStorage] string];
+    if (begin + 1 >= s.length) {
+        return begin;
+    }
+    
+    // Start search from the next character
+    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin + 1]];
+    for (NSUInteger x = begin; x + 1 < s.length; ++x) {
+        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x + 1]];
+        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
+        if (wholeWord && nextId == 0 && curId != 0) {
+            return x;
+        } else if (!wholeWord && curId != 0 && curId != nextId) {
+            return x;
+        }
+        
+        curId = nextId;
+    }
+    return s.length - 1;
+}
+
+- (NSUInteger)endOfWordsForward:(NSNumber*)count{ //e
+    METHOD_TRACE_LOG();
+    NSRange r = [self selectedRange];
+    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
+        r.location = [self endOfWordForward:r.location WholeWord:NO];
+    }
+    return r.location;
+}
+
+- (NSUInteger)endOfWORDSForward:(NSNumber*)count{ //E
+    NSRange r = [self selectedRange];
+    for( int i = 0 ; i < [count intValue]; i++ ){
+        r.location = [self endOfWordForward:r.location WholeWord:YES];
+    }
+    return r.location;
+}
 
 ////////////////
 // Scrolling  //
