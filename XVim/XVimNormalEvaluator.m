@@ -22,6 +22,12 @@
 #import "Logger.h"
 
 @implementation XVimNormalEvaluator
+
+- (XVIM_MODE)becameHandler:(XVim*)xvim{
+    [[xvim sourceView] adjustCursorPosition];
+    return MODE_NORMAL;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////
 // Keep command implementation alphabetical order please(Except specical characters).  //
 /////////////////////////////////////////////////////////////////////////////////////////

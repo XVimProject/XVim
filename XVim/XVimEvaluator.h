@@ -28,8 +28,8 @@ another structure.
 */
 
 #import "XVimRegister.h"
+#import "XVim.h"
 
-@class XVim;
 @class XVimMotionEvaluator;
 
 typedef enum {
@@ -48,6 +48,7 @@ typedef enum {
 
 - (id)initWithXVim:(XVim*)xvim;
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
+- (XVIM_MODE)becameHandler:(XVim*)xvim;
 @end
 
 // This evaluator is waiting for number input.

@@ -11,12 +11,12 @@
 #import "XVimRegister.h"
 @class XVimEvaluator;
 
-enum{
+typedef enum{
     MODE_NORMAL,
     MODE_CMDLINE,
     MODE_INSERT,
     MODE_VISUAL
-};
+}XVIM_MODE;
 
 
 static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT", 

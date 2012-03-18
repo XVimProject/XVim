@@ -149,6 +149,10 @@ static char* keynames[] = {
 
 @synthesize xvim = _xvim;
 
+- (XVIM_MODE)becameHandler:(XVim*)xvim{
+    
+}
+
 - (id)initWithXVim:(XVim*)xvim{
     self = [super init];
     if (self){

@@ -240,6 +240,7 @@
     }else{
         _currentEvaluator = nextEvaluator;
     }
+    [_currentEvaluator becameHandler:self];
     NSRange r = [[self sourceView] selectedRange];
     TRACE_LOG(@"SelectedRange: loc:%d len:%d", r.location, r.length);
     [self.cmdLine setNeedsDisplay:YES];

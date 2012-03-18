@@ -43,7 +43,8 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)nextNewLine:(NSUInteger)index;
 - (NSUInteger)endOfLine:(NSUInteger)index;
 - (NSUInteger)columnNumber:(NSUInteger)index;
-
+- (void)adjustCursorPosition;
+    
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
