@@ -97,10 +97,14 @@
         XVimWordInfo info;
         NSUInteger from = [[self textView] selectedRange].location;
         NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
-        if( info.lastEndOfWord != NSNotFound){
-            return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+        if( info.isFirstWordInALine ){
+            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
         }else{
-            return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+            if( info.lastEndOfWord != NSNotFound){
+                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+            }else{
+                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+            }
         }
     }else{
         return [super W:arg];
