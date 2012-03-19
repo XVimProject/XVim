@@ -269,14 +269,13 @@
 }
 
 - (XVimEvaluator*)u:(id)arg{
-    // Go to insert
     NSTextView* view = [self textView];
-    NSRange r = [view selectedRange];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] undo];
     }
 
     // Undo should not keep anything selected
+    NSRange r = [view selectedRange];
     [view setSelectedRange:NSMakeRange(r.location, 0)];
     return nil;
 }
