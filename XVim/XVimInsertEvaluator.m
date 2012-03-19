@@ -46,11 +46,6 @@
 }
 
 - (NSString*)getInsertedText{
-    // Don't store text if playing back a register
-    if ([self.xvim isPlayingRegisterBack]){
-        return @"";
-    }
-    
     NSRange endRange = [self.xvim selectedRange];
     NSRange textRange;
     if (endRange.location > self.startRange.location){
@@ -86,28 +81,28 @@
         // Store off any needed text
         [self recordTextIntoRegister:xvim.recordingRegister];
         [self recordTextIntoRegister:[xvim findRegister:@"repeat"]];
-       
+        
         xvim.mode = MODE_NORMAL;
         return nil;
     }else if ([self.movementKeys containsObject:keyStr]){
-       _insertedEventsAbort = YES;
+        _insertedEventsAbort = YES;
         if (self.movementKeyPressed == NO){
             self.movementKeyPressed = YES;
-
+            
             // Store off any needed text
             [self recordTextIntoRegister:xvim.recordingRegister];
         }
-    }else if(self.movementKeyPressed){
-        // Store off any needed text
-        [self recordTextIntoRegister:xvim.recordingRegister];
 
         // Store off the new start range
         self.startRange = [self.xvim selectedRange];
-        
+    }else if(self.movementKeyPressed){
         // Flag movement key as not pressed until the next movement key is pressed
         self.movementKeyPressed = NO;
+
+        // Store off the new start range
+        self.startRange = [self.xvim selectedRange];
     }
-   
+
     if (_oneCharMode == TRUE) {
         NSRange save = [[xvim sourceView] selectedRange];
         [[xvim sourceView] XVimKeyDown:event];

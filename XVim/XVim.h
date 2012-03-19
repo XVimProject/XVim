@@ -46,7 +46,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @property(retain) XVimCommandLine* cmdLine;
 @property(retain) NSTextView* sourceView;
 @property(strong, readonly) NSSet* registers;
-@property(readonly) BOOL isPlayingRegisterBack;
 @property(weak, readonly) XVimRegister *recordingRegister;
 
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.

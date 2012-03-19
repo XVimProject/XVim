@@ -40,7 +40,6 @@
 @synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 @synthesize registers = _registers;
 @synthesize recordingRegister = _recordingRegister;
-@synthesize isPlayingRegisterBack = _isPlayingRegisterBack;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -203,7 +202,6 @@
          nil];
         
         _recordingRegister = nil;
-        _isPlayingRegisterBack = NO;
     }
     
     return self;
@@ -230,11 +228,8 @@
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
-    if (_isPlayingRegisterBack == NO){
-        [self recordEvent:event intoRegister:_recordingRegister];
-        [self recordEvent:event intoRegister:[self findRegister:@"repeat"]];
-    }
-    
+    [self recordEvent:event intoRegister:_recordingRegister];
+    [self recordEvent:event intoRegister:[self findRegister:@"repeat"]];
     if( nil == nextEvaluator ){
         nextEvaluator = [[XVimNormalEvaluator alloc] init];
     }
@@ -687,9 +682,7 @@
 }
 
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
-    _isPlayingRegisterBack = YES;
     [xregister playback:[self sourceView] withRepeatCount:count];
-    _isPlayingRegisterBack = NO;
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{

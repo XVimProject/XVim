@@ -7,6 +7,7 @@
 //
 
 #import "XVimMotionEvaluator.h"
+#import "XVimRegister.h"
 
 // This evaluates events in Normal (COMMAND) mode
 // This is the root evaluator.
@@ -14,4 +15,5 @@
 // If XVimMotionEvaluator returns valid range object
 // move the cusor to the position
 @interface XVimNormalEvaluator : XVimMotionEvaluator
+-(id)initWithRegister:(XVimRegister*)xregister andPlaybackCount:(NSUInteger)count;
 @end
