@@ -214,6 +214,9 @@
 - (XVimEvaluator*)p:(id)arg{
     // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
     // the line boundary and then paste the data in.
+    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
+    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
+    
     // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
     // because dw is not working quite right it seems
     NSTextView* view = [self textView];
