@@ -234,15 +234,17 @@
         [self recordEvent:event intoRegister:_recordingRegister];
         [self recordEvent:event intoRegister:[self findRegister:@"repeat"]];
     }
+    
     if( nil == nextEvaluator ){
+        nextEvaluator = [[XVimNormalEvaluator alloc] init];
+    }
+    
+    if( _currentEvaluator != nextEvaluator ){
+        [nextEvaluator becameHandler:self];
         [_currentEvaluator release];
-        _currentEvaluator = [[XVimNormalEvaluator alloc] init];
-    }else{
         _currentEvaluator = nextEvaluator;
     }
-    [_currentEvaluator becameHandler:self];
-    NSRange r = [[self sourceView] selectedRange];
-    TRACE_LOG(@"SelectedRange: loc:%d len:%d", r.location, r.length);
+    
     [self.cmdLine setNeedsDisplay:YES];
     return YES;
 }

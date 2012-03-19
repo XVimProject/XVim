@@ -290,6 +290,24 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return NSNotFound;
 }
 
+
+/**
+ * Returns position of the tail of current line. 
+ * Tail of line is one of followings
+ *    - Newline character at the end of a line.
+ *    - EOF of the last line of the document.
+ * Blankline also has tail of line.
+ **/
+- (NSUInteger)tailOfLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    for( NSUInteger i = index; i < [[self string] length]; i++ ){
+        if( [self isNewLine:i] ){
+            return i;
+        }
+    }
+    return [[self string] length]; //EOF
+}
+
 /**
  * Returns position of the end of line when the cursor is at "index"
  * End of line is one of following which is found first when searching forwords from "index".
