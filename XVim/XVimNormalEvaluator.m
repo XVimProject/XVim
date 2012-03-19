@@ -43,7 +43,7 @@
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
-    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
+    if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
         return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
     } 
     [view moveForward:self];
@@ -257,11 +257,13 @@
 }
 
 - (XVimEvaluator*)C_r:(id)arg{
-    // Go to insert 
     NSTextView* view = [self textView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] redo];
     }
+    // Redo should not keep anything selected
+    NSRange r = [view selectedRange];
+    [view setSelectedRange:NSMakeRange(r.location, 0)];
     return nil;
 }
 
