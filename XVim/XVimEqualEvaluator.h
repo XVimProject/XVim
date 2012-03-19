@@ -13,5 +13,4 @@
     NSUInteger _repeat;
 }
 - (id)initWithRepeat:(NSUInteger)repeat;
-+ (XVimEvaluator*)indent:(XVimEvaluator*)evaluator;
 @end
