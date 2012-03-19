@@ -7,6 +7,7 @@
 //
 
 #import "XVimShiftEvaluator.h"
+#import "NSTextView+VimMotion.h"
 
 @implementation XVimShiftEvaluator
 @synthesize unshift;
@@ -22,7 +23,8 @@
 - (XVimEvaluator*)GREATERTHAN:(id)arg{
     if( !unshift ){
         NSTextView* view = [self textView];
-        [view shiftRight:self];
+        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
+        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
     }
     return nil;
 }
@@ -31,8 +33,21 @@
     //unshift
     if( unshift ){
         NSTextView* view = [self textView];
-        [view shiftLeft:self];
+        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
+        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
     }
+    return nil;
+}
+
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+    NSTextView* view = [self textView];
+    [self selectOperationTargetFrom:from To:to Type:type];
+    if( unshift ){
+        [view shiftLeft:self];
+    }else{
+        [view shiftRight:self];
+    }
+    [view setSelectedRange:NSMakeRange([view selectedRange].location, 0)];
     return nil;
 }
 @end
