@@ -39,7 +39,6 @@
     [view copy:self];
     // Indent
     [[view textStorage] indentCharacterRange: [view selectedRange] undoManager:[view undoManager]];
-    
     [view setSelectedRange:NSMakeRange(from<to?from:to, 0)];
     return nil;
 }
