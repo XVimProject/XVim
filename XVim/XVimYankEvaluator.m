@@ -28,34 +28,20 @@
 - (XVimEvaluator*)y:(id)arg{
     // 'yy' should obey the repeat specifier 
     // e.g., '3yy' should yank/copy the current line and the two lines below it
-    
     if (_repeat < 1) 
         return nil;
+    
     NSTextView* view = [self textView];
-    NSRange begin = [view selectedRange];
-    [view moveToBeginningOfLine:self];
-    NSRange start = [view selectedRange];
-    for (int i = 1; i < _repeat; i++) {
-        [view moveDown:self];
-    }
-    [view moveToEndOfLine:self];
-    [view moveForward:self]; // include eol
-    NSRange end = [view selectedRange];
-    // set cursor back to original position
-    [view setSelectedRange:begin];
-    return [self _motionFixedFrom:start.location To:end.location Type:LINEWISE];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    TRACE_LOG(@"from: %d to: %d", from, to);
-    //TODO: handle type 
     NSTextView* view = [self textView];
-    NSRange r = [view selectedRange];
-    [view setSelectedRangeWithBoundsCheck:from To:to];
+    [self selectOperationTargetFrom:from To:to Type:type];
     [view copy:self];
-    [view setSelectedRange:NSMakeRange(r.location, 0)];
+    [view setSelectedRange:NSMakeRange(from, 0)];
     return nil;
 }
-
 
 @end
