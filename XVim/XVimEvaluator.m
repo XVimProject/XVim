@@ -150,7 +150,7 @@ static char* keynames[] = {
 @synthesize xvim = _xvim;
 
 - (XVIM_MODE)becameHandler:(XVim*)xvim{
-    
+    return MODE_NORMAL;
 }
 
 - (id)initWithXVim:(XVim*)xvim{
@@ -307,23 +307,20 @@ static char* keynames[] = {
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat{
+@synthesize repeat;
+
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
     self = [super init];
     if( self ){
-        _repeat = repeat;
+        repeat = rep;
         _motionEvaluator = [evaluator retain];
     }
     return self;
 }
 
-
 - (void)dealloc{
     [_motionEvaluator release];
     [super dealloc];
-}
-
-- (NSUInteger)repeat{
-    return _repeat;
 }
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{

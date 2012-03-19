@@ -127,7 +127,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
- * Determine if the posiion is latt character
+ * Determine if the posiion is last character of the document
  **/
 - (BOOL) isLastCharacter:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);

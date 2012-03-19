@@ -41,6 +41,7 @@ BOOL isKeyword(unichar ch);
 - (BOOL) isValidCursorPosition:(NSUInteger)index;
 - (NSUInteger)headOfLine:(NSUInteger)index;
 - (NSUInteger)nextNewLine:(NSUInteger)index;
+- (NSUInteger)prevNewLine:(NSUInteger)index;
 - (NSUInteger)tailOfLine:(NSUInteger)index;
 - (NSUInteger)endOfLine:(NSUInteger)index;
 - (NSUInteger)columnNumber:(NSUInteger)index;

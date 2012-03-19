@@ -14,5 +14,6 @@
 // See ':help word' in Vim for the difference.
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
-
+- (XVimEvaluator*)w:(id)arg;
+- (XVimEvaluator*)W:(id)arg;
 @end

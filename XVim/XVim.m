@@ -657,18 +657,13 @@
     return MODE_STRINGS[self.mode];
 }
 
-- (NSRange)wordForward:(NSTextView *)view begin:(NSRange)begin{
-   // question: this produces a warning because it does not return anything. what should it return ?
-}
-
-
-
 - (void)ringBell {
     if (_errorBells) {
         NSBeep();
     }
     return;
 }
+
 - (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell {
     // right now we ERROR_LOG the message
     // it should go into the status area before the MODE word and get cleared next time 

@@ -65,9 +65,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (NSString*)modeName;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (NSMutableDictionary *)getLocalMarks;
-- (NSInteger)wordCharSetIdForChar:(unichar)c;
-- (NSRange)wordForward:(NSTextView *)view begin:(NSRange)at;
-- (NSRange)wordBackward:(NSTextView *)view begin:(NSRange)at;
 - (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)ringBell;
 - (void)setNextSearchBaseLocation:(NSUInteger)location;

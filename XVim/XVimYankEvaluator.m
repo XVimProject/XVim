@@ -7,6 +7,7 @@
 //
 
 #import "XVimYankEvaluator.h"
+#import "NSTextView+VimMotion.h"
 #import "Logger.h"
 
 @implementation XVimYankEvaluator

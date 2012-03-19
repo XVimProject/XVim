@@ -65,7 +65,7 @@ typedef enum {
 @interface XVimMotionArgumentEvaluator : XVimEvaluator{
 @private
     XVimMotionEvaluator* _motionEvaluator;
-    NSUInteger _repeat;
 }
+@property (readonly) NSUInteger repeat;
 - (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
 @end
