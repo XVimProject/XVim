@@ -11,13 +11,15 @@
 #import <CoreServices/CoreServices.h>
 
 @interface XVimRegister()
-    @property (strong) NSMutableArray *keyEventsAndInsertedText;
+@property (readwrite) BOOL isPlayingBack;
+@property (strong) NSMutableArray *keyEventsAndInsertedText;
 @end
 
 @implementation XVimRegister
 
 @synthesize text = _text;
 @synthesize name = _name;
+@synthesize isPlayingBack = _isPlayingBack;
 @synthesize keyEventsAndInsertedText = _keyEventsAndInsertedText;
 @synthesize nonNumericKeyCount = _nonNumericKeyCount;
 
@@ -32,6 +34,7 @@
         _text = [NSMutableString stringWithString:@""];
         _name = [NSString stringWithString:registerName];
         _nonNumericKeyCount = 0;
+        _isPlayingBack = NO;
     }
     return self;
 }
@@ -81,12 +84,20 @@
 }
 
 -(void) clear{
+    if (self.isPlayingBack){
+        return;
+    }
+
     _nonNumericKeyCount = 0;
     [self.text setString:@""];
     [self.keyEventsAndInsertedText removeAllObjects];
 }
 
 -(void) appendKeyEvent:(NSEvent*)event{
+    if (self.isPlayingBack){
+        return;
+    }
+
     NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
     if (key.length > 1){
         [self.text appendString:[NSString stringWithFormat:@"<%@>", key]];
@@ -100,11 +111,16 @@
 }
 
 -(void) appendText:(NSString*)text{
+    if (self.isPlayingBack){
+        return;
+    }
+
     [self.text appendString:text];
     [self.keyEventsAndInsertedText addObject:text];
 }
 
 -(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count{
+    self.isPlayingBack = YES;
     for (NSUInteger i = 0; i < count; ++i) {
         [self.keyEventsAndInsertedText enumerateObjectsUsingBlock:^(id eventOrText, NSUInteger index, BOOL *stop){        
             if ([eventOrText isKindOfClass:[NSEvent class]]){
@@ -115,6 +131,7 @@
             }
         }];
     }
+    self.isPlayingBack = NO;
 }
 
 @end

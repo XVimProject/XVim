@@ -7,6 +7,7 @@
 //
 
 #import "XVimRegisterEvaluator.h"
+#import "XVimNormalEvaluator.h"
 #import "XVimRegister.h"
 #import "XVim.h"
 #import "Logger.h"
@@ -37,8 +38,9 @@ XVimRegisterEvalMode _mode;
         }
     } else if(_mode == REGISTER_EVAL_MODE_PLAYBACK){
         TRACE_LOG(@"handling playback key %@", keyStr);
-        [xvim playbackRegister:xregister withRepeatCount:_count];
+        return [[XVimNormalEvaluator alloc] initWithRegister:xregister andPlaybackCount:_count];
     }
+
     return nil;
 }
 

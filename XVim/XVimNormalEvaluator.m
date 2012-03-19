@@ -21,10 +21,33 @@
 #import "XVim.h"
 #import "Logger.h"
 
+@interface XVimNormalEvaluator()
+@property (readwrite) NSUInteger playbackCount;
+@property (nonatomic, weak) XVimRegister *playbackRegister;
+@end
+
 @implementation XVimNormalEvaluator
+
+@synthesize playbackCount = _playbackCount;
+@synthesize playbackRegister = _playbackRegister;
+
+-(id)initWithRegister:(XVimRegister*)xregister andPlaybackCount:(NSUInteger)count{
+    self = [super init];
+    if (self){
+        _playbackCount = count;
+        _playbackRegister = xregister;
+    }
+    return self;
+}
 
 - (XVIM_MODE)becameHandler:(XVim*)xvim{
     [[xvim sourceView] adjustCursorPosition];
+    if (self.playbackRegister) {
+        [self.playbackRegister playback:[xvim sourceView] withRepeatCount:self.playbackCount];
+        
+        // Clear the playback register now that we have finished playing it back
+        self.playbackRegister = nil;
+    }
     return MODE_NORMAL;
 }
 
