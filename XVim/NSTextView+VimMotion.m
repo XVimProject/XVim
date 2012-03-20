@@ -33,7 +33,26 @@
  * We have to be careful about it when calculate and find the position of some motions.
  *
  * "Newline"
- * Newline is defined as "unichar determined by isNewLine function"
+ * Newline is defined as "unichar determined by isNewLine function". Usually "\n" or "\r".
+ *
+ * "Line"
+ * Line is a sequence of characters terminated by newline or EOF. "Line" includes the lsst newline character.
+ *
+ * "Blankline"
+ * Blankline is a line which as only newline. In other words, newline character after newline character.
+ *
+ * "End of Line(EOL)"
+ * End of line the is last character of a line excluding newline character.
+ * This means that blankline does NOT have an end of line.
+ *
+ * "Tail of Line"
+ * Tail of Line is newline or EOF character at the end of a line.
+ *
+ * "Head of Line"
+ * Head of line is the first character of a line excluding newline character.
+ * This means that blankline does NOT have a head of line.
+ *
+ *
  **/
 
 static NSArray* XVimWordDelimiterCharacterSets = nil;
