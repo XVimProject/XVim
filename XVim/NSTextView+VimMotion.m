@@ -654,75 +654,44 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 
-
-- (NSUInteger)wordBackward:(NSUInteger)begin{
-    // summary --
-    // if we are on a boundary start on prev char
-    // move back to start of 1st span
-    // if 1st span was not whitespace we are done
-    // if it was then move back one char and then move to start of 2nd span
-    NSRange rr = NSMakeRange(begin,0);
-    NSRange save = rr;
-    NSString *s = [[self textStorage] string];
-    if (save.location == 0) {
-        return save.location;
-    }
-    // if we are on a boundary start on prev char
-    NSUInteger x = save.location;
-    NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-    NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x-1]];
-    if (start_cs_id != cs_id_2) {
-        start_cs_id = cs_id_2;
-        x--;
-    }
-    // move back to start of current span
-    for (; x > 0; x--) { 
-        NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-        if (xid != start_cs_id) {
-            x++;
+- (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( 1 >= index)
+        return 0;
+    
+    NSUInteger pos = index-1;
+    unichar lastChar= [[self string] characterAtIndex:pos];
+    for(NSUInteger i = pos-1 ; i >= 0; i-- ){
+        // Each time we encounter head of a word decrement "counter".
+        // Remember blankline is a word
+        
+        unichar curChar = [[self string] characterAtIndex:i];
+        // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
+        //    - Whitespace(including newline) and Non-Blank
+        //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
+        //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
+        //    - newline and newline(blankline) 
+        if( 
+           ((isWhiteSpace(curChar) || isNewLine(curChar)) && isNonBlank(lastChar))   ||
+           ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(lastChar))   ||
+           ( opt != BIGWORD && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(lastChar) && isKeyword(lastChar) )  ||
+           ( isNewLine(curChar) && [self isBlankLine:i+1] ) 
+           ){
+            count--; 
+        }
+        
+        lastChar = curChar;
+        if( 0 == count ){
+            pos = i+1;
+            break;
+        }
+        if( 0 == i ){
+            pos = 0;
             break;
         }
     }
-    // if 1st span was not whitespace we are done
-    if (start_cs_id != 0) {
-        return x;
-    }
-    // move back one char
-    x--;
-    if (x == 0) { // start of file. done
-        return x;
-    }
-    //  move to start of 2nd span
-    cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x]];
-    for (; x > 0; x--) {
-        if ([self wordCharSetIdForChar:[s characterAtIndex:x]] != cs_id_2) {
-            x++;
-            break;
-        }
-    }
-    return x;   
+    return pos;
 }
-
-- (NSUInteger)wordsBackward:(NSNumber*)count{ //b
-    NSRange r = [self selectedRange];
-    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
-        r.location = [self wordBackward:r.location];
-    }
-    return r.location;
-}
-
-- (NSUInteger)WORDSBackward:(NSNumber*)count{ //B
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self moveWordBackward:self];
-    }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;
-}
-
-
 
 - (NSUInteger)endOfWordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
     NSString *s = [[self textStorage] string];

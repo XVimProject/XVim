@@ -71,11 +71,15 @@
 ///////////////////////////////////////////
 
 - (XVimEvaluator*)b:(id)arg{
-    return [self commonMotion:@selector(wordsBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)B:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] wordsBackward:from count:[self numericArg] option:BIGWORD];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 /*
