@@ -414,6 +414,11 @@
     return nil;
 }
 
+- (XVimEvaluator*)QUESTION:(id)arg{
+    [[self xvim] commandModeWithFirstLetter:@"?"];
+    return nil;
+}
+
 - (XVimEvaluator*)DOT:(id)arg{
     XVimRegister *repeatRegister = [[self xvim] findRegister:@"repeat"];
     [[self xvim] playbackRegister:repeatRegister withRepeatCount:[self numericArg]];
