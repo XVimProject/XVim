@@ -177,9 +177,13 @@
 }
 
 - (XVimEvaluator*)I:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveToBeginningOfLine:self];
-		return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    NSRange range = [[self textView] selectedRange];
+    NSUInteger head = [[self textView] headOfLineWithoutSpaces:range.location];
+    if( NSNotFound == head ){
+        return nil;
+    }
+    [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
 // For 'J' (join line) bring the line up from below. all leading whitespac 

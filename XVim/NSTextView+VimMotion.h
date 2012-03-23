@@ -40,6 +40,7 @@ BOOL isKeyword(unichar ch);
 - (BOOL) isWhiteSpace:(NSUInteger)index;
 - (BOOL) isValidCursorPosition:(NSUInteger)index;
 - (NSUInteger)headOfLine:(NSUInteger)index;
+- (NSUInteger)headOfLineWithoutSpaces:(NSUInteger)index;
 - (NSUInteger)nextNewLine:(NSUInteger)index;
 - (NSUInteger)prevNewLine:(NSUInteger)index;
 - (NSUInteger)tailOfLine:(NSUInteger)index;

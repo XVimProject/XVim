@@ -267,6 +267,24 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
+ * Returns position of the first non-whitespace character past the head of line of the
+ * current line specified by index.
+ **/
+- (NSUInteger)headOfLineWithoutSpaces:(NSUInteger)index {
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSUInteger head = [self headOfLine:index];
+    if( NSNotFound == head ){
+        head = index;
+    }
+    NSUInteger head_wo_space = [self nextNonBlankInALine:head];
+    if( NSNotFound != head_wo_space ){
+        head = head_wo_space;
+    }
+
+    return head;
+}
+
+/**
  * Returns position of the first newline when searching forwards from "index"
  * Searching starts from position "index"+1. The position index is not included to search newline.
  * Returns NSNotFound if no newline is found.
