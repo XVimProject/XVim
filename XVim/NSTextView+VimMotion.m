@@ -667,14 +667,21 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     if (save.location == 0) {
         return save.location;
     }
-    // if we are on a boundary start on prev char
+
+    // if we are past the end, start at the end
     NSUInteger x = save.location;
+    if (x >= s.length) {
+        x = s.length - 1;
+    }
+
+    // if we are on a boundary start on prev char
     NSInteger start_cs_id = [self wordCharSetIdForChar:[s characterAtIndex:x]];
     NSInteger cs_id_2 = [self wordCharSetIdForChar:[s characterAtIndex:x-1]];
     if (start_cs_id != cs_id_2) {
         start_cs_id = cs_id_2;
         x--;
     }
+
     // move back to start of current span
     for (; x > 0; x--) { 
         NSInteger xid = [self wordCharSetIdForChar:[s characterAtIndex:x]];
