@@ -199,7 +199,8 @@
         [view moveToEndOfLine:self]; // move to eol
         [view deleteForward:self];
         NSRange at = [view selectedRange];
-        [[view textStorage] replaceCharactersInRange:at withString:@" "];
+        //[[view textStorage] replaceCharactersInRange:at withString:@" "];
+        [view insertText:@" "];
         while (TRUE) { // delete any leading whitespace from lower line
             if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
                 break;
