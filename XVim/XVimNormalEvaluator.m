@@ -409,13 +409,13 @@
     return nil;
 }
 
-- (XVimEvaluator*)SLASH:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"/"];
+- (XVimEvaluator*)QUESTION:(id)arg{
+    [[self xvim] commandModeWithFirstLetter:@"?"];
     return nil;
 }
 
-- (XVimEvaluator*)QUESTION:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"?"];
+- (XVimEvaluator*)SLASH:(id)arg{
+    [[self xvim] commandModeWithFirstLetter:@"/"];
     return nil;
 }
 
