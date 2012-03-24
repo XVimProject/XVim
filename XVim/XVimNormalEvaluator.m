@@ -66,6 +66,7 @@
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
         return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
     } 
@@ -77,6 +78,7 @@
     NSTextView* view = [self textView];
     NSRange r = [view selectedRange];
     NSUInteger end = [view tailOfLine:r.location];
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     [view setSelectedRange:NSMakeRange(end,0)];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
@@ -214,12 +216,14 @@
   }
 
 // Should be moveed to XVimMotionEvaluator
+
  - (XVimEvaluator*)m:(id)arg{
-    // 'm{letter}' sets a local mark. 
+    // 'm{letter}' sets a local mark.
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
 }
 
 - (XVimEvaluator*)o:(id)arg{
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
     [view insertNewline:self];
@@ -227,6 +231,7 @@
 }
 
 - (XVimEvaluator*)O:(id)arg{
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     NSTextView* view = [self textView];
     if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
         [view moveToBeginningOfLine:self];
