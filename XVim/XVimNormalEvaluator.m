@@ -180,7 +180,7 @@
     NSRange range = [[self textView] selectedRange];
     NSUInteger head = [[self textView] headOfLineWithoutSpaces:range.location];
     if( NSNotFound == head ){
-        return nil;
+        return [self A:arg]; // If its blankline or has only whitespaces'I' works line 'A'
     }
     [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];

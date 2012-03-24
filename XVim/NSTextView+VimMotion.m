@@ -293,14 +293,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSUInteger head = [self headOfLine:index];
     if( NSNotFound == head ){
-        head = index;
+        return NSNotFound;  
     }
     NSUInteger head_wo_space = [self nextNonBlankInALine:head];
-    if( NSNotFound != head_wo_space ){
-        head = head_wo_space;
-    }
-
-    return head;
+    return head_wo_space;
 }
 
 /**
@@ -402,9 +398,16 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return index-head;
 }
 
+/**
+ * Returns next non-blank character position after the position "index" in a current line.
+ * If there is no non-blank character or the line is a blank line
+ * this returns NSNotFound.
+ *
+ * NOTE: This searches non blank characters from "index" and NOT "index+1"
+ *       If the character at "index" is non blank this returns "index" itself
+ **/ 
 - (NSUInteger)nextNonBlankInALine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    // move to 1st non whitespace char, now that we are on the destination line
     while (index < [[self string] length]) {
         if( [self isNewLine:index] ){
             return NSNotFound; // Characters left in a line is whitespaces
