@@ -235,13 +235,9 @@
 - (XVimEvaluator*)CARET:(id)arg{
     NSTextView* view = [self textView];
     NSRange r = [view selectedRange];
-    NSUInteger head = [view headOfLine:r.location];
+    NSUInteger head = [view headOfLineWithoutSpaces:r.location];
     if( NSNotFound == head ){
         head = r.location;
-    }
-    NSUInteger head_wo_space = [view nextNonBlankInALine:head];
-    if( NSNotFound != head_wo_space ){
-        head = head_wo_space;
     }
     return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE];
 }
