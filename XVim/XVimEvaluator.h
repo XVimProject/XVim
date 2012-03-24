@@ -56,6 +56,8 @@ typedef enum {
     NSUInteger _numericArg;
     BOOL _numericMode;
 }
+@property BOOL numericMode;
+@property NSUInteger numericArg;
 - (NSUInteger)numericArg;
 - (void)resetNumericArg;
 @end

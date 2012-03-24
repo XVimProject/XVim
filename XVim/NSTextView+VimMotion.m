@@ -772,6 +772,36 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return r.location;
 }
 
+
+
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
+    NSAssert(0 != num, @"line number starts from 1");
+    
+    // Premitive search to find line number
+    // TODO: we may need to keep track line number and position by hooking insertText: method.
+    NSUInteger pos = 0;
+    num--; // line number starts from 1
+    while( pos < [[self string] length] && num != 0){ 
+        if( [self isNewLine:pos] ){
+            num--;
+        }
+        pos++;
+    }
+    
+    // pos is at the line number "num" and column 0
+    NSUInteger end = [self endOfLine:pos];
+    if( NSNotFound == end ){
+        return pos;
+    }
+    
+    // check if there is enough columns at the current line
+    if( end - pos >= column ){
+        return pos + column;
+    }else{
+        return end;
+    }
+    
+}
 ////////////////
 // Scrolling  //
 ////////////////

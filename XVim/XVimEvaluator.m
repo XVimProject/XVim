@@ -256,12 +256,13 @@ static char* keynames[] = {
 #pragma mark Numeric Evaluator
 
 @implementation XVimNumericEvaluator
+@synthesize numericMode,numericArg;
 - (id)init
 {
     self = [super init];
     if (self) {
-        _numericArg = 1;
-        _numericMode = NO;
+        self.numericArg = 1;
+        self.numericMode = NO;
     }
     return self;
 }
@@ -269,11 +270,11 @@ static char* keynames[] = {
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
     if( [keyStr hasPrefix:@"NUM"] ){
-        if( _numericMode ){
+        if( self.numericMode ){
             NSString* numStr = [keyStr substringFromIndex:3];
             NSInteger n = [numStr integerValue]; 
-            _numericArg*=10; //FIXME: consider integer overflow
-            _numericArg+=n;
+            self.numericArg*=10; //FIXME: consider integer overflow
+            self.numericArg+=n;
             return self;
         }
         else{
@@ -283,8 +284,8 @@ static char* keynames[] = {
             }else{
                 NSString* numStr = [keyStr substringFromIndex:3];
                 NSInteger n = [numStr integerValue]; 
-                _numericArg=n;
-                _numericMode=YES;
+                self.numericArg=n;
+                self.numericMode=YES;
                 return self;
             }
         }
@@ -293,13 +294,9 @@ static char* keynames[] = {
     return [super eval:event ofXVim:xvim];
 }
 
-- (NSUInteger)numericArg{
-    return _numericArg;
-}
-
 - (void)resetNumericArg{
-    _numericArg = 1;
-    _numericMode = NO;
+    self.numericArg = 1;
+    self.numericMode = NO;
 }
 @end
 
