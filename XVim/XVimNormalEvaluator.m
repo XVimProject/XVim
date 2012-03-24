@@ -75,7 +75,9 @@
 
 - (XVimEvaluator*)A:(id)arg{
     NSTextView* view = [self textView];
-    [view moveToEndOfLine:self];
+    NSRange r = [view selectedRange];
+    NSUInteger end = [view tailOfLine:r.location];
+    [view setSelectedRange:NSMakeRange(end,0)];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
@@ -209,10 +211,10 @@
         [view setSelectedRange:r];
     }
     return nil;
-}
+  }
 
 // Should be moveed to XVimMotionEvaluator
-- (XVimEvaluator*)m:(id)arg{
+ - (XVimEvaluator*)m:(id)arg{
     // 'm{letter}' sets a local mark. 
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
 }
