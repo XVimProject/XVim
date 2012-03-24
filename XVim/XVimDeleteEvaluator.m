@@ -28,7 +28,25 @@
     return self;
 }
 
+- (XVimEvaluator*)c:(id)arg{
+    if( !_insertModeAtCompletion ){
+        return nil;  // 'dc' does nothing
+    }
+    // 'cc' should obey the repeat specifier
+    // '3cc' should delete/cut the current line and the 2 lines below it
+    
+    if (_repeat < 1) 
+        return nil;
+    
+    NSTextView* view = [self textView];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+}
+
 - (XVimEvaluator*)d:(id)arg{
+    if( _insertModeAtCompletion ){
+        return nil;  // 'cd' does nothing
+    }
     // 'dd' should obey the repeat specifier
     // '3dd' should delete/cut the current line and the 2 lines below it
     
@@ -104,6 +122,20 @@
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
+        if( type == LINEWISE ){
+            // 'cc' deletes the lines but need to keep the last newline.
+            // So insertNewline as 'O' does before entering insert mode
+            if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
+                [view moveToBeginningOfLine:self];
+                [view insertNewline:self];
+                [view moveUp:self];
+            }
+            else {
+                [view moveUp:self];
+                [view moveToEndOfLine:self];
+                [view insertNewline:self];
+            }
+        }
         return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
     }
     return nil;
