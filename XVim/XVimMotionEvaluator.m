@@ -71,11 +71,15 @@
 ///////////////////////////////////////////
 
 - (XVimEvaluator*)b:(id)arg{
-    return [self commonMotion:@selector(wordsBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)B:(id)arg{
-    return [self commonMotion:@selector(WORDSBackward:) Type:CHARACTERWISE_EXCLUSIVE];
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSUInteger to = [[self textView] wordsBackward:from count:[self numericArg] option:BIGWORD];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 /*
@@ -122,7 +126,16 @@
 
 - (XVimEvaluator*)G:(id)arg{
     NSTextView* view = [self textView];
-    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length-1 Type:LINEWISE];
+    NSUInteger end;
+    if( [self numericMode] ){
+        end = [view positionAtLineNumber:[self numericArg] column:0];
+    }else{
+        end = [view headOfLine:[[view string] length]];
+        if( NSNotFound == end ){
+            end = [[view string] length];
+        }
+    }
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
 
 - (XVimEvaluator*)h:(id)arg{
@@ -231,13 +244,9 @@
 - (XVimEvaluator*)CARET:(id)arg{
     NSTextView* view = [self textView];
     NSRange r = [view selectedRange];
-    NSUInteger head = [view headOfLine:r.location];
+    NSUInteger head = [view headOfLineWithoutSpaces:r.location];
     if( NSNotFound == head ){
         head = r.location;
-    }
-    NSUInteger head_wo_space = [view nextNonBlankInALine:head];
-    if( NSNotFound != head_wo_space ){
-        head = head_wo_space;
     }
     return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE];
 }

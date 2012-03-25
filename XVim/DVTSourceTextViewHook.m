@@ -7,6 +7,7 @@
 //
 
 #import "DVTSourceTextViewHook.h"
+#import "NSTextView+VimMotion.h"
 #import "Logger.h"
 #import "XVimCommandLine.h"
 #import "XVim.h"
@@ -174,10 +175,25 @@ static NSMutableArray* queue;
 
 - (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
 {
-    return [self XVimTextView:textView  willChangeSelectionFromCharacterRanges:oldSelectedCharRanges  toCharacterRanges:newSelectedCharRanges];
+    // It seems that original IDESourceCodeEditor does not implement this delegate method.
+    // So if we try to call original method it causes exception.
+    
+    // What we do here is to restrict cursor position when its not insert mode
+    NSTextView* view = textView; // DVTSourceTextView
+    
+    XVim* xvim = [view viewWithTag:XVIM_TAG];
+    if( nil != view ){
+        if( xvim.mode != MODE_INSERT ){
+            NSRange r = [[newSelectedCharRanges objectAtIndex:0] rangeValue];
+            if( ![view isValidCursorPosition:r.location] ){
+                NSValue* val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length+1)];
+                NSMutableArray* ary = [NSMutableArray arrayWithObject:val];
+                return [ary arrayByAddingObjectsFromArray:[newSelectedCharRanges subarrayWithRange:NSMakeRange(1, [newSelectedCharRanges count]-1)]];
+            }
+        }
+    }
+    return newSelectedCharRanges;
 }
-
-
 
 //Support Functions
 

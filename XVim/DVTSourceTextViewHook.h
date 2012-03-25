@@ -33,5 +33,6 @@
 
 // IDESourceCodeEditor (The delegate) hooks
 - (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges;
+- (NSRange) XVimTextView:(NSTextView *)textView willChangeSelectionFromCharacterRange:(NSRange)oldSelectedCharRange toCharacterRange:(NSRange)newSelectedCharRange;
 - (void)textViewDidChangeSelection:(NSNotification *)notification;
 @end
