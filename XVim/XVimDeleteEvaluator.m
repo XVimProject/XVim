@@ -82,6 +82,70 @@
     }
 }
 
+- (XVimEvaluator*)j:(id)arg{
+    NSTextView *view = [self textView];
+    NSUInteger from = [view selectedRange].location;
+    NSUInteger headOfLine = [view headOfLine:from];
+    if (headOfLine != NSNotFound){
+        from = headOfLine;
+    }
+
+    NSUInteger to = from;
+    NSUInteger start = headOfLine == NSNotFound ? 1 : 0;
+    for (NSUInteger i = start; i < [self numericArg]; ++i){
+        to = [view nextNewLine:to];
+    }
+
+    NSUInteger endOfLine = [view endOfLine:++to];
+    if (endOfLine != NSNotFound){
+        to = endOfLine;
+    }
+
+    MOTION_TYPE motion;
+    if (_insertModeAtCompletion) {
+        if ([view isBlankLine:to]) {
+            motion = CHARACTERWISE_EXCLUSIVE;
+        }else{
+            motion = CHARACTERWISE_INCLUSIVE;
+        }
+    }else{
+        motion = LINEWISE;   
+    }
+
+    return [self _motionFixedFrom:from To:to Type:motion];
+}
+
+- (XVimEvaluator*)k:(id)arg{
+    NSTextView *view = [self textView];
+    NSUInteger to = [view selectedRange].location;
+    NSUInteger endOfLine = [view endOfLine:to];
+    if (endOfLine != NSNotFound){
+        to = endOfLine;
+    }
+
+    NSUInteger from = to;
+    for (NSUInteger i = 0; i < [self numericArg]; ++i){
+        from = [view prevNewLine:from];
+    }
+
+    NSUInteger headOfLine = [view headOfLine:from];
+    if (headOfLine != NSNotFound) {
+        from = headOfLine;
+    }
+
+    MOTION_TYPE motion;
+    if (_insertModeAtCompletion) {
+        if ([view isBlankLine:to]) {
+            motion = CHARACTERWISE_EXCLUSIVE;
+        }else{
+            motion = CHARACTERWISE_INCLUSIVE;
+        }
+    }else{
+        motion = LINEWISE;   
+    }
+
+    return [self _motionFixedFrom:from To:to Type:motion];
+}
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     NSTextView* view = [self textView];
