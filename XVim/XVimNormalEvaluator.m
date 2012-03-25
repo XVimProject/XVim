@@ -439,7 +439,27 @@
     NSTextView* view = [self textView];
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
-    [view scrollRangeToVisible:r];
+
+    NSScrollView *scrollView = [view enclosingScrollView];
+    NSTextContainer *container = [view textContainer];
+    NSRect glyphRect = [[view layoutManager] boundingRectForGlyphRange:r inTextContainer:container];
+    CGFloat glyphBottom = NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f;
+    CGFloat glyphTop = NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f;
+    TRACE_LOG(@"glyphBottom: %f glyphTop: %f", glyphBottom, glyphTop);
+
+    NSRect contentRect = [[scrollView contentView] bounds];
+    CGFloat viewTop = contentRect.origin.y;
+    CGFloat viewBottom = contentRect.origin.y + NSHeight(contentRect);
+    TRACE_LOG(@"viewBottom: %f viewTop: %f", viewBottom, viewTop);
+
+    if (glyphTop < viewTop){
+        [[scrollView  contentView] scrollToPoint:NSMakePoint(0.0f, glyphTop)];
+        TRACE_LOG(@"scrolling up to %f", glyphTop);
+    }else if (glyphBottom > viewBottom){
+        [[scrollView contentView] scrollToPoint:NSMakePoint(0.0f, glyphBottom - NSHeight(contentRect))];
+        TRACE_LOG(@"scrolling down to %f", glyphBottom - NSHeight(contentRect));
+    }
+    [scrollView reflectScrolledClipView:[scrollView contentView]];
     return nil;
 }
 
