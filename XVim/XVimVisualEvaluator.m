@@ -124,6 +124,26 @@
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE];
 }
 
+
+- (XVimEvaluator*)D:(id)arg{
+    [self updateSelection];
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:NO];
+    
+    // Need to set this explicitly because it is not in the constructor.
+    // Maybe the constructors should be refactored to include it?
+    evaluator.xvim = self.xvim;
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE];
+    
+}
+
+- (XVimEvaluator*)x:(id)arg{
+    return [self d:arg];
+}
+
+- (XVimEvaluator*)X:(id)arg{
+    return [self D:arg];
+}
+
 - (XVimEvaluator*)y:(id)arg{
     [self updateSelection];
     XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];

@@ -31,6 +31,7 @@
 #import "DVTSourceTextViewHook.h"
 #import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
+#import "NSTextView+VimMotion.h"
 
 @interface XVim()
 - (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
@@ -104,11 +105,10 @@
     [Hooker hookMethod:@selector(didAddSubview:) ofClass:NSClassFromString(@"DVTSourceTextScrollView") withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(didAddSubview:)) keepingOriginalWith:@selector(XVimDidAddSubview:)];
     
     Class delegate = NSClassFromString(@"IDESourceCodeEditor");
-    // FIXME : Hook not working right now. Calling original method generate EXC_BAD_ACCESS!!!
-    //    [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
-    //               ofClass:delegate 
-    //            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
-    //   keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
+        [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
+                   ofClass:delegate 
+                withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
+       keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
     
     [Hooker hookMethod:@selector(textViewDidChangeSelection:) 
                ofClass:delegate 
@@ -273,21 +273,15 @@
             TRACE_LOG("go to line CMD line no = %d", scanned_int_arg);
             id mvid = nil; //seems to be ok to use nil for this for the movement calls we are doing
             if (scanned_int_arg > 0) {
-                [srcView moveToBeginningOfDocument:mvid];
-                // move to line 'scanned_int_arg'
-                for( int i = 1; i < scanned_int_arg; i++ ){ // TODO: there is probabaly a more efficient way to do this
-                    [srcView moveDown:mvid]; 
+                NSUInteger pos = [srcView positionAtLineNumber:scanned_int_arg column:0];
+                NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
+                if( NSNotFound == pos_wo_space ){
+                    pos_wo_space = pos;
                 }
-                // move to first non whitespace char in line
-                [srcView moveToBeginningOfLine:mvid];
-                NSMutableString* s = [[srcView textStorage] mutableString];
-                NSRange end = [srcView selectedRange];
-                for (NSUInteger idx = end.location; idx < s.length; idx++) {
-                    if (![(NSCharacterSet *)[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:idx]])
-                        break;
-                    [srcView moveRight:mvid];
-                }
+                [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
+                [srcView scrollRangeToVisible:NSMakeRange(pos_wo_space,0)];
             }
+            // TODO: This command must be treated as motion.
         }
         else if( [ex_command isEqualToString:@"w"] ){
             

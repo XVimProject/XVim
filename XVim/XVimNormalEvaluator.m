@@ -66,6 +66,7 @@
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
         return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
     } 
@@ -75,7 +76,10 @@
 
 - (XVimEvaluator*)A:(id)arg{
     NSTextView* view = [self textView];
-    [view moveToEndOfLine:self];
+    NSRange r = [view selectedRange];
+    NSUInteger end = [view tailOfLine:r.location];
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
+    [view setSelectedRange:NSMakeRange(end,0)];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
 
@@ -180,7 +184,7 @@
     NSRange range = [[self textView] selectedRange];
     NSUInteger head = [[self textView] headOfLineWithoutSpaces:range.location];
     if( NSNotFound == head ){
-        return nil;
+        return [self A:arg]; // If its blankline or has only whitespaces'I' works line 'A'
     }
     [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
@@ -199,7 +203,8 @@
         [view moveToEndOfLine:self]; // move to eol
         [view deleteForward:self];
         NSRange at = [view selectedRange];
-        [[view textStorage] replaceCharactersInRange:at withString:@" "];
+        //[[view textStorage] replaceCharactersInRange:at withString:@" "];
+        [view insertText:@" "];
         while (TRUE) { // delete any leading whitespace from lower line
             if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
                 break;
@@ -208,15 +213,17 @@
         [view setSelectedRange:r];
     }
     return nil;
-}
+  }
 
 // Should be moveed to XVimMotionEvaluator
-- (XVimEvaluator*)m:(id)arg{
-    // 'm{letter}' sets a local mark. 
+
+ - (XVimEvaluator*)m:(id)arg{
+    // 'm{letter}' sets a local mark.
     return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
 }
 
 - (XVimEvaluator*)o:(id)arg{
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
     [view insertNewline:self];
@@ -224,6 +231,7 @@
 }
 
 - (XVimEvaluator*)O:(id)arg{
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     NSTextView* view = [self textView];
     if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
         [view moveToBeginningOfLine:self];

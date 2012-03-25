@@ -126,7 +126,16 @@
 
 - (XVimEvaluator*)G:(id)arg{
     NSTextView* view = [self textView];
-    return [self _motionFixedFrom:[view selectedRange].location To:[view string].length-1 Type:LINEWISE];
+    NSUInteger end;
+    if( [self numericMode] ){
+        end = [view positionAtLineNumber:[self numericArg] column:0];
+    }else{
+        end = [view headOfLine:[[view string] length]];
+        if( NSNotFound == end ){
+            end = [[view string] length];
+        }
+    }
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
 
 - (XVimEvaluator*)h:(id)arg{
