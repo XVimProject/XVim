@@ -186,7 +186,12 @@ static NSMutableArray* queue;
         if( xvim.mode != MODE_INSERT ){
             NSRange r = [[newSelectedCharRanges objectAtIndex:0] rangeValue];
             if( ![view isValidCursorPosition:r.location] ){
-                NSValue* val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length+1)];
+                NSValue* val;
+                if( r.length != 0 ){
+                    val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length+1)];
+                }else{
+                    val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length)]; // same as (r.locatio-1, 0)
+                }
                 NSMutableArray* ary = [NSMutableArray arrayWithObject:val];
                 return [ary arrayByAddingObjectsFromArray:[newSelectedCharRanges subarrayWithRange:NSMakeRange(1, [newSelectedCharRanges count]-1)]];
             }

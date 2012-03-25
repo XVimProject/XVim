@@ -856,6 +856,9 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint bottom = NSMakePoint(0.0f, NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f);
     bottom.y -= NSHeight([[scrollView contentView] bounds]);
+    if( bottom.y < 0.0 ){
+        bottom.y = 0.0;
+    }
     [[scrollView contentView] scrollToPoint:bottom];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
     return [self selectedRange].location;
