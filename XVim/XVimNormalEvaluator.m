@@ -362,7 +362,7 @@
         }
         [view moveForwardAndModifySelection:self];
     }
-    [view delete:self];
+    [view cut:self];
     return nil;
 }
 
@@ -380,7 +380,7 @@
             break;
         [view moveBackwardAndModifySelection:self]; 
     }
-    [view delete:self];
+    [view cut:self];
     return nil;
 }
 
@@ -407,6 +407,11 @@
     eval.unshift = YES;
     return eval;
     
+}
+
+- (XVimEvaluator*)HT:(id)arg{
+    [[[self xvim] sourceView] selectNextPlaceholder:self];
+    return nil;
 }
 
 - (XVimEvaluator*)COLON:(id)arg{
