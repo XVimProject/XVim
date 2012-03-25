@@ -815,7 +815,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     NSScrollView *scrollView = [self enclosingScrollView];
     NSTextContainer *container = [self textContainer];
     NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint bottom = NSMakePoint(0.0f, NSMidY(glyphRect) + NSHeight(glyphRect));
+    NSPoint bottom = NSMakePoint(0.0f, NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f);
     bottom.y -= NSHeight([[scrollView contentView] bounds]);
     [[scrollView contentView] scrollToPoint:bottom];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
@@ -826,7 +826,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     NSScrollView *scrollView = [self enclosingScrollView];
     NSTextContainer *container = [self textContainer];
     NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint center = NSMakePoint(0.0f, NSMidY(glyphRect));
+    NSPoint center = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
     center.y -= NSHeight([[scrollView contentView] bounds]) / 2.0f;
     [[scrollView contentView] scrollToPoint:center];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
@@ -837,7 +837,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     NSScrollView *scrollView = [self enclosingScrollView];
     NSTextContainer *container = [self textContainer];
     NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint top = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect));
+    NSPoint top = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
     [[scrollView contentView] scrollToPoint:top];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
     return [self selectedRange].location;
@@ -845,12 +845,13 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
 - (NSUInteger)cursorBottom:(NSNumber*)count{ // L
     NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint bottom = [[scrollView contentView] bounds].origin;
-    bottom.y += [[scrollView contentView] bounds].size.height;
+    bottom.y += [[scrollView contentView] bounds].size.height - NSHeight(glyphRect) / 2.0f;
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:bottom], 0 };
     
     [self setSelectedRange:range];
-    [self moveUp:self]; // moveUp because it is one past the bottom
     return [self selectedRange].location;
 }
 
@@ -866,11 +867,13 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
 - (NSUInteger)cursorTop:(NSNumber*)count{ // H
     NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint top = [[scrollView contentView] bounds].origin;
+    top.y += NSHeight(glyphRect) / 2.0f;
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
     
     [self setSelectedRange:range];
-    [self moveDown:self]; // moveUp because it is one past the bottom
     return [self selectedRange].location;
 }
 
