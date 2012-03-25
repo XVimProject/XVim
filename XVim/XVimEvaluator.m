@@ -248,6 +248,12 @@ static char* keynames[] = {
     return REGISTER_APPEND;
 }
 
+- (XVimEvaluator*)D_d:(id)arg{
+    // This is for debugging purpose.
+    // Write any debugging process to confirme some behaviour.
+    
+    return nil;
+}
 @end
 
 #pragma mark VimLocalMarkEvaluator
