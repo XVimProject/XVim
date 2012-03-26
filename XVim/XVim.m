@@ -279,7 +279,7 @@
                     pos_wo_space = pos;
                 }
                 [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-                [srcView scrollRangeToVisible:NSMakeRange(pos_wo_space,0)];
+                [srcView scrollToCursor];
             }
             // TODO: This command must be treated as motion.
         }
@@ -484,9 +484,9 @@
     }
     if( found.location != NSNotFound ){
         //Move cursor and show the found string
-        [srcView scrollRangeToVisible:found];
-        [srcView showFindIndicatorForRange:found];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
         // note: make sure this stays *after* setSelectedRange which also updates 
         // _nextSearchBaseLocation as a side effect
         [self setNextSearchBaseLocation:found.location + ((found.length==0)? 0: found.length-1)];
@@ -548,9 +548,9 @@
     }
     if (found.location != NSNotFound) {
         // Move cursor and show the found string
-        [srcView scrollRangeToVisible:found];
-        [srcView showFindIndicatorForRange:found];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
         // note: make sure this stays *after* setSelectedRange which also updates 
         // _nextSearchBaseLocation as a side effect
         [self setNextSearchBaseLocation:found.location]; // demonstrative. not really needed

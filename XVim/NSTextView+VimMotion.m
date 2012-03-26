@@ -1004,10 +1004,18 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     TRACE_LOG(@"viewBottom: %f viewTop: %f", viewBottom, viewTop);
     
     if (glyphTop < viewTop){
-        scrollPoint.y = glyphTop;
+        if (viewTop - glyphTop > NSHeight(contentRect)){
+            scrollPoint.y = glyphBottom - NSHeight(contentRect) / 2.0f;
+        }else{
+            scrollPoint.y = glyphTop;
+        }
         TRACE_LOG(@"scrolling up to %f", scrollPoint.y);
     }else if (glyphBottom > viewBottom){
-        scrollPoint.y = glyphBottom - NSHeight(contentRect);
+        if (glyphBottom - viewBottom > NSHeight(contentRect)) {
+            scrollPoint.y = glyphBottom - NSHeight(contentRect) / 2.0f;
+        }else{
+            scrollPoint.y = glyphBottom - NSHeight(contentRect);
+        }
         TRACE_LOG(@"scrolling down to %f", scrollPoint.y);
     }
     
