@@ -103,25 +103,34 @@
     NSUInteger to = range.location;
     NSUInteger column = [view columnNumber:to];
     to = [view nextLine:range.location column:column count:count-1 option:MOTION_OPTION_NONE];
-    
     NSUInteger eol = [view endOfLine:to];
-    if (eol != NSNotFound){
-        to = eol + 1;
+    
+    if (eol == NSNotFound && to != range.location){
+        // This is blank line.
+        // If the start and end point is not the same, the end position is before the blank line.
+        eol = to-1;
     }
     
-    // endOfLine: moves to the last character, so we need to delete the next character
-    range.length = to - range.location;
-    
-    [view setSelectedRange:range];
-    [view cut:self];
+    if( eol != NSNotFound ){
+        [view setSelectedRangeWithBoundsCheck:range.location To:eol];
+        if( ![view isEOF:range.location] ){
+            [view cut:self]; // cut with selection with {EOF,0} cause exception. This is a little strange since  setSelectedRange with {EOF,0} does not cause any exception...
+        }
+    }
     
     // Go to insert 
+    NSUInteger end = [view tailOfLine:[view selectedRange].location];
+    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
+    [self xvim].mode = MODE_INSERT;
+    [view setSelectedRange:NSMakeRange(end,0)];
     return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] halfPageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 - (XVimEvaluator*)d:(id)arg{
@@ -258,9 +267,18 @@
     NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
     unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
     if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        [view moveToEndOfLine:self];
+        NSUInteger newline = [view nextNewLine:[view selectedRange].location];
+        if( NSNotFound == newline ){
+            // add newline at EOF
+            [view setSelectedRange:NSMakeRange([[view string]length], 0)];
+            [view insertNewline:self];
+        }else{
+            [view setSelectedRange:NSMakeRange(newline+1, 0)];
+        }
+    }else{
+        [view moveForward:self];
     }
-    [view moveForward:self];
+    
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
     }
@@ -322,7 +340,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 - (XVimEvaluator*)v:(id)arg{
