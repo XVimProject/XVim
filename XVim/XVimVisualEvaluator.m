@@ -91,16 +91,15 @@
 }
 
 - (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    _insertion = [[self textView] halfPageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
 - (XVimEvaluator*)C_f:(id)arg{
     return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
 }
 
-- (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
-}
 
 - (XVimEvaluator*)c:(id)arg{
     [self updateSelection];
@@ -134,6 +133,12 @@
     evaluator.xvim = self.xvim;
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE];
     
+}
+
+- (XVimEvaluator*)C_u:(id)arg{
+    _insertion = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
 - (XVimEvaluator*)x:(id)arg{

@@ -128,7 +128,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] halfPageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 - (XVimEvaluator*)d:(id)arg{
@@ -329,7 +331,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 - (XVimEvaluator*)v:(id)arg{

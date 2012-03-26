@@ -61,5 +61,9 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)nextNonBlankInALine:(NSUInteger)index;
     
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
+
+
+// To avoid compiler warning and errors
+- (NSRange)lineNumberRangeForBoundingRect:(CGRect)arg1; // This is a method DVTSourceTextView impelment. This may need to move somewhere else since this is "NSTextView" + VimMotion.h
 @end
 

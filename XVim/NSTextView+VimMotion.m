@@ -805,27 +805,87 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 ////////////////
 // Scrolling  //
 ////////////////
+#define XVimAddPoint(a,b) NSMakePoint(a.x+b.x,a.y+b.y)  // Is there such macro in Cocoa?
+#define XVimSubPoint(a,b) NSMakePoint(a.x-b.x,a.y-b.y)  // Is there such macro in Cocoa?
 
-- (NSUInteger)halfPageForward:(NSNumber*)count{ // C-d
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self pageDown:self];
+- (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count{ // C-d
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    
+    NSRect visibleRect = [scrollView contentView].bounds;
+    CGFloat halfSize = visibleRect.size.height/2.0f;
+    
+    CGFloat scrollSize = halfSize*count;
+    NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + scrollSize ); // This may beyond the end of document (intentionally)
+    
+    // Cursor position relative to left-top origin shold be kept after scroll ( Exception is when it scrolls beyond the end of document)
+    NSRect currentInsertionRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
+    NSPoint relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
+    
+    // Cursor Position after scroll
+    NSPoint cursorAfterScroll = XVimAddPoint(scrollPoint,relativeInsertionPoint);
+    
+    // Nearest character index to the cursor position after scroll
+    NSUInteger cursorIndexAfterScroll= [[self layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
+    // We do not want to change the insert point relative position from top of visible rect
+    // We have to calc the distance between insertion point befor/after scrolling to keep the position.
+    NSRect insertionRectAfterScroll = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
+    NSPoint relativeInsertionPointAfterScroll = XVimSubPoint(insertionRectAfterScroll.origin, scrollPoint);
+    CGFloat heightDiff = relativeInsertionPointAfterScroll.y - relativeInsertionPoint.y;
+    scrollPoint.y += heightDiff;
+    // Prohibit scroll beyond the end of document
+    if( scrollPoint.y > [[scrollView documentView] frame].size.height - visibleRect.size.height ){
+        scrollPoint.y = [[scrollView documentView] frame].size.height - visibleRect.size.height ;
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;   
+    [[scrollView contentView] scrollToPoint:scrollPoint];
+    [scrollView reflectScrolledClipView:[scrollView contentView]];
+    
+    // half page down returns first character of the line
+    NSUInteger head = [self headOfLine:cursorIndexAfterScroll];
+    if( NSNotFound == head ){
+        head = cursorIndexAfterScroll;
+    }
+    return head;   
 }
 
-- (NSUInteger)halfPageBackward:(NSNumber*)count{ // C-u
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        [self pageUp:self];
+- (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count{ // C-u
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    
+    NSRect visibleRect = [scrollView contentView].bounds;
+    CGFloat halfSize = visibleRect.size.height/2.0f;
+    
+    CGFloat scrollSize = halfSize*count;
+    NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y - scrollSize ); // This may beyond the head of document (intentionally)
+    
+    // Cursor position relative to visible rect origin should be kept after scroll ( Exception is when it scrolls beyond the end of document)
+    NSRect currentInsertionRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
+    NSPoint relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
+    
+    // Cursor Position after scroll
+    NSPoint cursorAfterScroll = XVimAddPoint(scrollPoint,relativeInsertionPoint);
+    
+    // Nearest character index to the cursor position after scroll
+    NSUInteger cursorIndexAfterScroll= [[self layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
+    // We do not want to change the insert point relative position from top of visible rect
+    // We have to calc the distance between insertion point befor/after scrolling to keep the position.
+    NSRect insertionRectAfterScroll = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
+    NSPoint relativeInsertionPointAfterScroll = XVimSubPoint(insertionRectAfterScroll.origin, scrollPoint);
+    CGFloat heightDiff = relativeInsertionPointAfterScroll.y - relativeInsertionPoint.y;
+    scrollPoint.y += heightDiff;
+    // Prohibit scroll beyond the head of document
+    if( scrollPoint.y < 0.0 ){
+        scrollPoint.y = 0.0;
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;   
+    [[scrollView contentView] scrollToPoint:scrollPoint];
+    [scrollView reflectScrolledClipView:[scrollView contentView]];
+    
+    // half page down returns first character of the line
+    NSUInteger head = [self headOfLine:cursorIndexAfterScroll];
+    if( NSNotFound == head ){
+        head = cursorIndexAfterScroll;
+    }
+    return head;   
 }
 
 - (NSUInteger)pageForward:(NSNumber*)count{ // C-f
