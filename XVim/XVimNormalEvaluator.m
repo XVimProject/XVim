@@ -1,3 +1,4 @@
+
 //
 //  XVimNormalEvaluator.m
 //  XVim
@@ -207,20 +208,36 @@
     NSUInteger repeat = [self numericArg];
     //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
+    BOOL addSpace = YES;
     for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        NSUInteger nextnewline = [view nextNewLine:r.location];
+        if( [view isBlankLine:r.location] ){
+            [view deleteForward:self];
+            continue;
+        }
+        
+        if( [view isWhiteSpace:[view endOfLine:r.location]] ){
+            // since the line is not empty, we do not need to check if its NSNotFound
+            addSpace = NO;
+        }
+        
+        NSUInteger nextnewline;
+        nextnewline = [view nextNewLine:r.location];
         if( NSNotFound == nextnewline ){
             // Nothing to do
             break;
         }
+        
         [view setSelectedRange:NSMakeRange(nextnewline,0)];
         [view deleteForward:self];
-        NSRange cursorAfterConcatenate = [view selectedRange];
-        [view insertText:@" "];
+        NSRange cursorAfterConcatenate = [view selectedRange]; // After concatenate, the cursor position get back to this pos.
+        if( addSpace ){
+            [view insertText:@" "];
+        }
         NSUInteger curLocation = [view selectedRange].location;
+        
         NSUInteger nonblank = [view nextNonBlankInALine:[view selectedRange].location];
         if( NSNotFound == nonblank ){
-            if( ![view isNewLine:curLocation] ){
+            if( ![view isNewLine:curLocation] && [view isEOF:curLocation]){
                 [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]-1];
                 [view delete:self];
             }else{
@@ -533,4 +550,4 @@ NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:event inRegister:xregister];
 }
 
-@end 
+@end
