@@ -271,45 +271,54 @@
         [[self xvim] ringBell];
         return self;
     }
-    at.length = 1;
-    
-    NSString* start_with = [s substringWithRange:at];
+    NSUInteger eol = [view endOfLine:at.location];
+    if (eol == NSNotFound){
+        at.length = 1;
+    }else{
+        at.length = eol - at.location + 1;
+    }
+
+    NSString* search_string = [s substringWithRange:at];
+    NSString* start_with;
     NSString* look_for;
-    
-    // note: these two much match up with regards to character order
-    NSString* open_chars = @"{[(<";
-    NSString* close_chars = @"}])>";
-    
+
+    // note: these two must match up with regards to character order
+    NSString *open_chars = @"{[(";
+    NSString *close_chars = @"}])";
+    NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:[open_chars stringByAppendingString:close_chars]];
+
     NSInteger direction = 0;
-    NSRange search = [open_chars rangeOfString:start_with];
+    NSUInteger start_location = 0;
+    NSRange search = [search_string rangeOfCharacterFromSet:charset];
     if (search.location != NSNotFound) {
-        direction = 1;
-        look_for = [close_chars substringWithRange:search];
-    }
-    if (direction == 0) {
-        search = [close_chars rangeOfString:start_with];
-        if (search.location != NSNotFound) {
+        start_location = at.location + search.location;
+        start_with = [search_string substringWithRange:search];
+        NSRange search = [open_chars rangeOfString:start_with];
+        if (search.location == NSNotFound){
             direction = -1;
+            search = [close_chars rangeOfString:start_with];
             look_for = [open_chars substringWithRange:search];
+        }else{
+            direction = 1;
+            look_for = [close_chars substringWithRange:search];
         }
-    }
-    if (direction == 0) {
+    }else{
         // src is not an open or close char
         // vim does not produce an error msg for this so we won't either i guess
         // [[self xvim] statusMessage:@"Not a match character" :ringBell TRUE]
         [[self xvim] ringBell];
         return self;
     }
-    
+
     unichar start_with_c = [start_with characterAtIndex:0];
     unichar look_for_c = [look_for characterAtIndex:0];
     NSInteger nest_level = 0;
-    
+
     search.location = NSNotFound;
     search.length = 0;
-    
+
     if (direction > 0) {
-        for(NSUInteger x=at.location; x < s.length; x++) {
+        for(NSUInteger x=start_location; x < s.length; x++) {
             if ([s characterAtIndex:x] == look_for_c) {
                 nest_level--;
                 if (nest_level == 0) { // found match at proper level
@@ -321,7 +330,7 @@
             }
         }
     } else {
-        for(NSUInteger x=at.location; ; x--) {
+        for(NSUInteger x=start_location; ; x--) {
             if ([s characterAtIndex:x] == look_for_c) {
                 nest_level--;
                 if (nest_level == 0) { // found match at proper level
@@ -336,13 +345,13 @@
             }
         }
     }
-    
+
     if (search.location == NSNotFound) {
         // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
         [[self xvim] ringBell];
         return self;
     }
-        
+
     return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
 }
 
