@@ -204,25 +204,40 @@
 // between the joined lines
 - (XVimEvaluator*)J:(id)arg{
     NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
     NSUInteger repeat = [self numericArg];
     //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
     for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        [view moveToEndOfLine:self]; // move to eol
-        [view deleteForward:self];
-        NSRange at = [view selectedRange];
-        //[[view textStorage] replaceCharactersInRange:at withString:@" "];
-        [view insertText:@" "];
-        while (TRUE) { // delete any leading whitespace from lower line
-            if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
-                break;
-            [view deleteForward:self];
+        NSUInteger nextnewline = [view nextNewLine:r.location];
+        if( NSNotFound == nextnewline ){
+            // Nothing to do
+            break;
         }
-        [view setSelectedRange:r];
+        [view setSelectedRange:NSMakeRange(nextnewline,0)];
+        [view deleteForward:self];
+        NSRange cursorAfterConcatenate = [view selectedRange];
+        [view insertText:@" "];
+        NSUInteger curLocation = [view selectedRange].location;
+        NSUInteger nonblank = [view nextNonBlankInALine:[view selectedRange].location];
+        if( NSNotFound == nonblank ){
+            if( ![view isNewLine:curLocation] ){
+                [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]-1];
+                [view delete:self];
+            }else{
+                // Blank line. Nothing todo
+            }
+        }else{
+            if( curLocation != nonblank ){
+                [view setSelectedRangeWithBoundsCheck:[view selectedRange].location To:nonblank-1];
+                [view delete:self];
+            }else{
+                // No white spaces in next line.
+            }
+        }
+        [view setSelectedRange:cursorAfterConcatenate];
     }
     return nil;
-  }
+}
 
 // Should be moveed to XVimMotionEvaluator
 
@@ -518,4 +533,4 @@ NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:event inRegister:xregister];
 }
 
-@end
+@end 
