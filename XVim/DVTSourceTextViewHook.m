@@ -179,6 +179,7 @@ static NSMutableArray* queue;
     // So if we try to call original method it causes exception.
     
     // What we do here is to restrict cursor position when its not insert mode
+    /*
     NSTextView* view = textView; // DVTSourceTextView
     
     XVim* xvim = [view viewWithTag:XVIM_TAG];
@@ -197,6 +198,7 @@ static NSMutableArray* queue;
             }
         }
     }
+     */
     return newSelectedCharRanges;
 }
 
