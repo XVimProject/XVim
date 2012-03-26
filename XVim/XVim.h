@@ -43,6 +43,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 
 @property NSInteger tag;
 @property NSInteger mode;
+@property BOOL handlingMouseClick;
 @property(retain) XVimCommandLine* cmdLine;
 @property(retain) NSTextView* sourceView;
 @property(strong, readonly) NSSet* registers;
