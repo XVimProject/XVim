@@ -297,7 +297,9 @@ static char* keynames[] = {
         }
     }
     
-    return [super eval:event ofXVim:xvim];
+    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
+    [self resetNumericArg]; // Reset the numeric arg after evaluating an event
+    return nextEvaluator;
 }
 
 - (void)resetNumericArg{

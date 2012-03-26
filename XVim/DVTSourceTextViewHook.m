@@ -47,6 +47,18 @@ static NSMutableArray* queue;
     return;
 }
 
+- (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
+    NSRange newCharRange = charRange;
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    if( xvim.handlingMouseClick && ![self isValidCursorPosition:charRange.location] ){
+        newCharRange.location = charRange.location - 1;
+    }
+    
+    // Call original method
+    [self XVimSetSelectedRange:newCharRange affinity:affinity stillSelecting:flag];
+    return;
+}
+
 - (id)initWithCoder:(NSCoder *)aDecoder{
     // New DVTSourceTextView is being created. (Remember that "self" is DVTSourceTextView object since this is hooked method )
     // What we do here is to create XVim object
@@ -163,6 +175,35 @@ static NSMutableArray* queue;
     return;
 }
 
+-  (void)mouseDown:(NSEvent *)theEvent{
+    TRACE_LOG(@"got a mouseDown:");
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    if( nil == xvim ){
+        [self XVimMouseDown:theEvent];
+        return;
+    }
+    
+    // Call Original mouseDown:
+    xvim.handlingMouseClick = YES;
+    [self XVimMouseDown:theEvent]; // this loops until it gets a mouse up
+    xvim.handlingMouseClick = NO;
+    return;
+}
+
+-  (void)mouseUp:(NSEvent *)theEvent{
+    TRACE_LOG(@"got a mouseUp:");
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    if( nil == xvim ){
+        [self XVimMouseUp:theEvent];
+        return;
+    }
+
+    // Call Original mouseDown:
+    xvim.handlingMouseClick = NO;
+    [self XVimMouseUp:theEvent];
+    return;
+}
+    
 - (void)doCommandBySelector:(SEL)aSelector{
     TRACE_LOG(@"SELECTOR : ", NSStringFromSelector(aSelector));
     [self XVimDoCommandBySelector:aSelector];
@@ -209,8 +250,5 @@ static NSMutableArray* queue;
     r.length = 0;
     [view setSelectedRange:r];
 }
-
-
-
 
 @end
