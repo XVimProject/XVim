@@ -300,6 +300,27 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
+ * Returns position of the first non-blank character at the line specified by index
+ * If its blank line it retuns position of newline character
+ * If its a line with only white spaces it returns end of line.
+ * This NEVER returns NSNotFound.
+ **/
+- (NSUInteger)firstNonBlankInALine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [self isBlankLine:index] ){
+        return index;
+    }
+    NSUInteger head = [self headOfLine:index];
+    NSUInteger end = [self endOfLine:head];
+    NSUInteger head_wo_space = [self headOfLineWithoutSpaces:head];
+    if( NSNotFound == head_wo_space ){
+        return end;
+    }else{
+        return head_wo_space;
+    }
+}
+
+/**
  * Returns position of the first newline when searching forwards from "index"
  * Searching starts from position "index"+1. The position index is not included to search newline.
  * Returns NSNotFound if no newline is found.
@@ -841,11 +862,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     [scrollView reflectScrolledClipView:[scrollView contentView]];
     
     // half page down returns first character of the line
-    NSUInteger head = [self headOfLine:cursorIndexAfterScroll];
-    if( NSNotFound == head ){
-        head = cursorIndexAfterScroll;
-    }
-    return head;   
+    return [self firstNonBlankInALine:cursorIndexAfterScroll];
 }
 
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count{ // C-u
@@ -881,33 +898,33 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     [scrollView reflectScrolledClipView:[scrollView contentView]];
     
     // half page down returns first character of the line
-    NSUInteger head = [self headOfLine:cursorIndexAfterScroll];
-    if( NSNotFound == head ){
-        head = cursorIndexAfterScroll;
-    }
-    return head;   
+    return [self firstNonBlankInALine:cursorIndexAfterScroll];
 }
 
-- (NSUInteger)pageForward:(NSNumber*)count{ // C-f
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
+- (NSUInteger)pageForward:(NSUInteger)index count:(NSUInteger)count{ // C-f
+    // FIXME: This category methods MUST NOT call setSelectedRange.
+    //        Just calculate the position where the cursor should be.
+    [self setSelectedRange:NSMakeRange(index,0)];
+    
+    for( int i = 0 ; i < count; i++ ){
         [self pageDown:self];
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;   
+    // Find first non blank character at the line
+    // If there is not the end of line is the target position
+    return [self firstNonBlankInALine:[self selectedRange].location];
 }
 
-- (NSUInteger)pageBackward:(NSNumber*)count{ // C-b
-    // sample impl
-    NSRange original = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
+- (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count{ // C-f
+    // FIXME: This category methods MUST NOT call setSelectedRange.
+    //        Just calculate the position where the cursor should be.
+    [self setSelectedRange:NSMakeRange(index,0)];
+    
+    for( int i = 0 ; i < count; i++ ){
         [self pageUp:self];
     }
-    NSUInteger dest = [self selectedRange].location;
-    [self setSelectedRange:original];
-    return dest;   
+    // Find first non blank character at the line
+    // If there is not the end of line is the target position
+    return [self firstNonBlankInALine:[self selectedRange].location];
 }
 
 - (NSUInteger)scrollBottom:(NSNumber*)count{ // zb / z-

@@ -1,3 +1,4 @@
+
 //
 //  XVimNormalEvaluator.m
 //  XVim
@@ -85,7 +86,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] pageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 // 'c' works like 'd' except that once it's done deleting
@@ -181,7 +184,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] pageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 - (XVimEvaluator*)i:(id)arg{
@@ -204,25 +209,56 @@
 // between the joined lines
 - (XVimEvaluator*)J:(id)arg{
     NSTextView* view = [self textView];
-    NSMutableString* s = [[view textStorage] mutableString];
     NSUInteger repeat = [self numericArg];
     //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
+    BOOL addSpace = YES;
     for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        [view moveToEndOfLine:self]; // move to eol
-        [view deleteForward:self];
-        NSRange at = [view selectedRange];
-        //[[view textStorage] replaceCharactersInRange:at withString:@" "];
-        [view insertText:@" "];
-        while (TRUE) { // delete any leading whitespace from lower line
-            if (![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:at.location+1]])
-                break;
+        if( [view isBlankLine:r.location] ){
             [view deleteForward:self];
+            continue;
         }
-        [view setSelectedRange:r];
+        
+        if( [view isWhiteSpace:[view endOfLine:r.location]] ){
+            // since the line is not empty, we do not need to check if its NSNotFound
+            addSpace = NO;
+        }
+        
+        NSUInteger nextnewline;
+        nextnewline = [view nextNewLine:r.location];
+        if( NSNotFound == nextnewline ){
+            // Nothing to do
+            break;
+        }
+        
+        [view setSelectedRange:NSMakeRange(nextnewline,0)];
+        [view deleteForward:self];
+        NSRange cursorAfterConcatenate = [view selectedRange]; // After concatenate, the cursor position get back to this pos.
+        if( addSpace ){
+            [view insertText:@" "];
+        }
+        NSUInteger curLocation = [view selectedRange].location;
+        
+        NSUInteger nonblank = [view nextNonBlankInALine:[view selectedRange].location];
+        if( NSNotFound == nonblank ){
+            if( ![view isNewLine:curLocation] && [view isEOF:curLocation]){
+                [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]-1];
+                [view delete:self];
+            }else{
+                // Blank line. Nothing todo
+            }
+        }else{
+            if( curLocation != nonblank ){
+                [view setSelectedRangeWithBoundsCheck:[view selectedRange].location To:nonblank-1];
+                [view delete:self];
+            }else{
+                // No white spaces in next line.
+            }
+        }
+        [view setSelectedRange:cursorAfterConcatenate];
     }
     return nil;
-  }
+}
 
 // Should be moveed to XVimMotionEvaluator
 

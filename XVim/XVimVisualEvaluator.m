@@ -87,7 +87,9 @@
 }
 
 - (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+    _insertion = [[self textView] pageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
 - (XVimEvaluator*)C_d:(id)arg{
@@ -97,7 +99,9 @@
 }
 
 - (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    _insertion = [[self textView] pageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
 
