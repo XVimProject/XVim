@@ -57,7 +57,9 @@
     NSTextView* v = [xvim sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
-    return [super eval:event ofXVim:xvim];
+    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
+    [self updateSelection];
+    return nextEvaluator;
 }
 
 
