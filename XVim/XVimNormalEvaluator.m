@@ -512,6 +512,7 @@
         TRACE_LOG(@"scrolling down to %f", glyphBottom - NSHeight(contentRect));
     }
     [scrollView reflectScrolledClipView:[scrollView contentView]];
+    [view scrollRangeToVisible:[view selectedRange]];
     return nil;
 }
 
