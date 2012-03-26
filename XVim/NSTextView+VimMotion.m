@@ -948,6 +948,59 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return [self selectedRange].location;
 }
 
+- (void)scrollToCursor{
+    // This is not quite like vim because vim makes a distinction between the selected range
+    // and the cursor position. If you go into visual mode and press 'b' the cursor is at the
+    // front of the range, but if you are in visual mode and press 'w' the cursor is at the
+    // end of the range. The following assumes the cursor is always at the front of the range.
+    // We can fix this up later once we divorce the cursor position from the selected range.
+    NSRange glyphRange = [self selectedRange];
+    glyphRange.length = [self isBlankLine:glyphRange.location] ? 0 : 1;
+    
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:glyphRange inTextContainer:container];
+    CGFloat glyphLeft = NSMidX(glyphRect) - NSWidth(glyphRect) / 2.0f;
+    CGFloat glyphRight = NSMidX(glyphRect) + NSWidth(glyphRect) / 2.0f;
+    TRACE_LOG(@"glyphLeft: %f glyphRight: %f", glyphLeft, glyphRight);
+    
+    NSRect contentRect = [[scrollView contentView] bounds];
+    CGFloat viewLeft = contentRect.origin.x;
+    CGFloat viewRight = contentRect.origin.x + NSWidth(contentRect);
+    TRACE_LOG(@"viewLeft: %f viewRight: %f", viewLeft, viewRight);
+    
+    NSPoint scrollPoint = contentRect.origin;
+    if (glyphRight > viewRight){
+        scrollPoint.x = glyphLeft - NSWidth(contentRect) / 2.0f;
+        TRACE_LOG(@"scrolling right to %f", scrollPoint.x);
+    }else if (glyphLeft < viewLeft){
+        scrollPoint.x = glyphRight - NSWidth(contentRect) / 2.0f;
+        TRACE_LOG(@"scrolling left to %f", scrollPoint.x);
+    }
+    
+    CGFloat glyphBottom = NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f;
+    CGFloat glyphTop = NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f;
+    TRACE_LOG(@"glyphBottom: %f glyphTop: %f", glyphBottom, glyphTop);
+    
+    CGFloat viewTop = contentRect.origin.y;
+    CGFloat viewBottom = contentRect.origin.y + NSHeight(contentRect);
+    TRACE_LOG(@"viewBottom: %f viewTop: %f", viewBottom, viewTop);
+    
+    if (glyphTop < viewTop){
+        scrollPoint.y = glyphTop;
+        TRACE_LOG(@"scrolling up to %f", scrollPoint.y);
+    }else if (glyphBottom > viewBottom){
+        scrollPoint.y = glyphBottom - NSHeight(contentRect);
+        TRACE_LOG(@"scrolling down to %f", scrollPoint.y);
+    }
+    
+    scrollPoint.x = MAX(0, scrollPoint.x);
+    scrollPoint.y = MAX(0, scrollPoint.y);
+
+    [[scrollView  contentView] scrollToPoint:scrollPoint];
+    [scrollView reflectScrolledClipView:[scrollView contentView]];
+}
+
 - (NSUInteger)cursorBottom:(NSNumber*)count{ // L
     NSScrollView *scrollView = [self enclosingScrollView];
     NSTextContainer *container = [self textContainer];
