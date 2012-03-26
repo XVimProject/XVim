@@ -86,7 +86,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] pageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 // 'c' works like 'd' except that once it's done deleting
@@ -182,7 +184,9 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    NSUInteger next = [[self textView] pageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+    return nil;
 }
 
 - (XVimEvaluator*)i:(id)arg{
