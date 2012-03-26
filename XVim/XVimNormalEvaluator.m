@@ -267,9 +267,18 @@
     NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
     unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
     if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        [view moveToEndOfLine:self];
+        NSUInteger newline = [view nextNewLine:[view selectedRange].location];
+        if( NSNotFound == newline ){
+            // add newline at EOF
+            [view setSelectedRange:NSMakeRange([[view string]length], 0)];
+            [view insertNewline:self];
+        }else{
+            [view setSelectedRange:NSMakeRange(newline+1, 0)];
+        }
+    }else{
+        [view moveForward:self];
     }
-    [view moveForward:self];
+    
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
     }
