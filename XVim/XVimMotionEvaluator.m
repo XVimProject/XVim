@@ -670,7 +670,13 @@
     if (location == NSNotFound){
         [[self xvim] ringBell];
     }else{
-        [view setSelectedRange:NSMakeRange(location, 0)];
+        // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
+        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
+        if( ![[self xvim] shouldSearchCharacterBackward]  ){
+            // If the last search was forward "comma" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
+            type = CHARACTERWISE_EXCLUSIVE;
+        }
+        [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
 
     return nil;
@@ -697,7 +703,13 @@
     if (location == NSNotFound){
         [[self xvim] ringBell];
     }else{
-        [view setSelectedRange:NSMakeRange(location, 0)];
+        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
+        // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
+        if( [[self xvim] shouldSearchCharacterBackward]  ){
+            // If the last search was backward "semicolon" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
+            type = CHARACTERWISE_EXCLUSIVE;
+        }
+        [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
     return nil;
 }

@@ -39,7 +39,12 @@
     if (location == NSNotFound) {
         [xvim ringBell];
     }else{
-        [view setSelectedRange:NSMakeRange(location, 0)];
+        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
+        if( !_forward ){
+            // If the last search was forward "semicolon" is forward search and this is the case its CHARACTERWISE_EXCLUSIVE
+            type = CHARACTERWISE_EXCLUSIVE;
+        }
+        [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
 
     return nil;
