@@ -38,7 +38,8 @@
 @end
 
 @implementation XVim
-@synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
+@synthesize tag,cmdLine,sourceView, dontCheckNewline;
+@synthesize mode = _mode;
 @synthesize registers = _registers;
 @synthesize recordingRegister = _recordingRegister;
 @synthesize handlingMouseClick = _handlingMouseClick;
@@ -99,8 +100,14 @@
     // Hook mouseUp:
     [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseUp:) ) keepingOriginalWith:@selector(XVimMouseUp:)];    
 
+    // Hook drawRect:
+    [Hooker hookMethod:@selector(drawRect:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawRect:)) keepingOriginalWith:@selector(XVimDrawRect:)];
+    
     // Hook performKeyEquivalent:
     [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(XVimPerformKeyEquivalent:)];
+    
+    // Hook shouldDrawInsertionPoint for Drawing Caret
+    [Hooker hookMethod:@selector(shouldDrawInsertionPoint) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(shouldDrawInsertionPoint)) keepingOriginalWith:@selector(XVimShouldDrawInsertionPoint)];
     
     // Hook drawInsertionPointInRect for Drawing Caret
     [Hooker hookMethod:@selector(drawInsertionPointInRect:color:turnedOn:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawInsertionPointInRect:color:turnedOn:)) keepingOriginalWith:@selector(XVimDrawInsertionPointInRect:color:turnedOn:)];
@@ -133,7 +140,7 @@
 - (id) initWithFrame:(NSRect)frameRect{
     self = [super initWithFrame:frameRect];
     if (self) {
-        mode = MODE_NORMAL;
+        _mode = MODE_NORMAL;
         tag = XVIM_TAG;
         _lastSearchString = [[NSMutableString alloc] init];
         _lastReplacementString = [[NSMutableString alloc] init];
@@ -225,6 +232,14 @@
     [XVimNormalEvaluator release];
 }
 
+- (void)setMode:(NSInteger)mode{
+    _mode = mode;
+}
+
+- (XVimEvaluator*)currentEvaluator{
+    return _currentEvaluator;
+}
+
 - (NSMutableDictionary *)getLocalMarks{
     return _localMarks;
 }
@@ -246,7 +261,14 @@
     }
     
     if( _currentEvaluator != nextEvaluator ){
-        [nextEvaluator becameHandler:self];
+        XVIM_MODE newMode = [nextEvaluator becameHandler:self];
+        
+        // Special case for cmdline mode. I don't like this, but
+        // don't have time to refactor cmdline mode.
+        if (_mode != MODE_CMDLINE){
+            _mode = newMode;
+        }
+
         [_currentEvaluator release];
         _currentEvaluator = nextEvaluator;
     }
@@ -449,7 +471,7 @@
     }
     
     [[self window] makeFirstResponder:srcView]; // Since XVim is a subview of DVTSourceTextView;
-    mode = MODE_NORMAL;
+    self.mode = MODE_NORMAL;
 }
 
 - (void)searchForward {
@@ -643,13 +665,13 @@
 
 - (void)commandCanceled{
     METHOD_TRACE_LOG();
-    mode = MODE_NORMAL;
+    self.mode = MODE_NORMAL;
     [[self window] makeFirstResponder:[self superview]]; // Since XVim is a subview of DVTSourceTextView;
 }
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
-    mode = MODE_CMDLINE;
-    [self cmdLine].mode = MODE_STRINGS[mode];
+    self.mode = MODE_CMDLINE;
+    [self cmdLine].mode = MODE_STRINGS[self.mode];
     [[self cmdLine] setFocusOnCommandWithFirstLetter:first];
 }
 

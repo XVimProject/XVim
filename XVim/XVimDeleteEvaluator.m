@@ -180,9 +180,6 @@
         return nil;
     }
     
-    if(_insertModeAtCompletion == TRUE ){
-        self.xvim.mode = MODE_INSERT;
-    }
     [self selectOperationTargetFrom:from To:to Type:type];
     [view cut:self];
     

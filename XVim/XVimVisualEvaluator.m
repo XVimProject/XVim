@@ -13,6 +13,10 @@
 
 @implementation XVimVisualEvaluator 
 
+- (NSUInteger)insertionPoint{
+    return _insertion;
+}
+
 - (id)initWithMode:(VISUAL_MODE)mode{ 
     self = [super init];
     if (self) {
@@ -58,10 +62,11 @@
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
-    [self updateSelection];
+    if (nextEvaluator == self){
+        [self updateSelection];   
+    }
     return nextEvaluator;
 }
-
 
 
 - (void)updateSelection{
@@ -147,6 +152,18 @@
     return self;
 }
 
+- (XVimEvaluator*)v:(id)arg{
+    _mode = MODE_CHARACTER;
+    [self updateSelection];
+    return self;
+}
+
+- (XVimEvaluator*)V:(id)arg{
+    _mode = MODE_LINE;
+    [self updateSelection];
+    return self;
+}
+
 - (XVimEvaluator*)x:(id)arg{
     return [self d:arg];
 }
@@ -177,7 +194,6 @@
 
 
 - (XVimEvaluator*)ESC:(id)arg{
-    [self xvim].mode = MODE_NORMAL;
     [[self textView] setSelectedRange:NSMakeRange(_insertion, 0)];
     return nil;
 }
@@ -191,8 +207,6 @@
     NSRange r = [[self textView] selectedRange];
     r.length = 0;
     [view setSelectedRange:r];
-    [self resetNumericArg];
-    [self xvim].mode = MODE_NORMAL;
     return nil;
 }
 
@@ -206,8 +220,6 @@
     NSRange r = [[self textView] selectedRange];
     r.length = 0;
     [view setSelectedRange:r];
-    [self resetNumericArg];
-    [self xvim].mode = MODE_NORMAL;
     return nil;
 }
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
