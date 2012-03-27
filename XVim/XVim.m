@@ -35,6 +35,7 @@
 
 @interface XVim()
 - (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
+@property (strong) NSString *searchCharacter;
 @end
 
 @implementation XVim
@@ -43,6 +44,9 @@
 @synthesize registers = _registers;
 @synthesize recordingRegister = _recordingRegister;
 @synthesize handlingMouseClick = _handlingMouseClick;
+@synthesize searchCharacter = _searchCharacter;
+@synthesize shouldSearchCharacterBackward = _shouldSearchCharacterBackward;
+@synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -220,6 +224,10 @@
         
         _recordingRegister = nil;
         _handlingMouseClick = NO;
+        
+        _searchCharacter = @"";
+        _shouldSearchCharacterBackward = NO;
+        _shouldSearchPreviousCharacter = NO;
     }
     
     return self;
@@ -610,6 +618,88 @@
         [self searchBackward];
     }
     return;
+}
+
+- (void)setSearchCharacter:(NSString*)searchChar backward:(BOOL)backward previous:(BOOL)previous{
+    self.searchCharacter = searchChar;
+    _shouldSearchCharacterBackward = backward;
+    _shouldSearchPreviousCharacter = previous;
+}
+
+- (NSUInteger)searchCharacterBackward:(NSUInteger)start{
+    NSTextView *view = [self superview];
+    NSString* s = [[view textStorage] string];
+    NSRange at = NSMakeRange(start, 0); 
+    if (at.location >= s.length-1) {
+        return NSNotFound;
+    }
+
+    NSUInteger hol = [view headOfLine:at.location];
+    if (hol == NSNotFound){
+        return NSNotFound;
+    }
+
+    at.length = at.location - hol;
+    at.location = hol;
+    
+    NSString* search_string = [s substringWithRange:at];
+    NSRange found = [search_string rangeOfString:self.searchCharacter options:NSBackwardsSearch];
+    if (found.location == NSNotFound){
+        return NSNotFound;
+    }
+
+    NSUInteger location = at.location + found.location;
+    if (self.shouldSearchPreviousCharacter){
+        location += 1;
+    }
+    
+    return location;
+}
+
+- (NSUInteger)searchCharacterForward:(NSUInteger)start{
+    NSTextView *view = [self superview];
+    NSString* s = [[view textStorage] string];
+    NSRange at = NSMakeRange(start, 0); 
+    if (at.location >= s.length-1) {
+        return NSNotFound;
+    }
+    
+    NSUInteger eol = [view endOfLine:at.location];
+    if (eol == NSNotFound){
+        return NSNotFound;
+    }
+
+    at.length = eol - at.location;
+    if (at.location != eol) at.location += 1;
+    
+    NSString* search_string = [s substringWithRange:at];
+    NSRange found = [search_string rangeOfString:self.searchCharacter];
+    if (found.location == NSNotFound){
+        return NSNotFound;
+    }
+
+    NSUInteger location = at.location + found.location;
+    if (self.shouldSearchPreviousCharacter){
+        location -= 1;
+    }
+    
+    return location;
+}
+
+- (NSUInteger)searchCharacterNext:(NSUInteger)start{
+    if(self.shouldSearchCharacterBackward){
+        return [self searchCharacterBackward:start];
+    }else{
+        return [self searchCharacterForward:start];
+    }
+}
+
+- (NSUInteger)searchCharacterPrevious:(NSUInteger)start{
+    if(self.shouldSearchCharacterBackward){
+        return [self searchCharacterForward:start];
+    }else{
+        return [self searchCharacterBackward:start];
+    }
 }
 
 - (BOOL)replaceForward {
