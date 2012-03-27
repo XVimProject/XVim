@@ -67,7 +67,6 @@
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
-    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
         return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
     } 
@@ -79,7 +78,6 @@
     NSTextView* view = [self textView];
     NSRange r = [view selectedRange];
     NSUInteger end = [view tailOfLine:r.location];
-    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     [view setSelectedRange:NSMakeRange(end,0)];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
 }
@@ -123,8 +121,6 @@
     
     // Go to insert 
     NSUInteger end = [view tailOfLine:[view selectedRange].location];
-    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
-    [self xvim].mode = MODE_INSERT;
     [view setSelectedRange:NSMakeRange(end,0)];
     return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
 }
@@ -268,7 +264,6 @@
 }
 
 - (XVimEvaluator*)o:(id)arg{
-    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
     [view insertNewline:self];
@@ -276,7 +271,6 @@
 }
 
 - (XVimEvaluator*)O:(id)arg{
-    [self xvim].mode = MODE_INSERT; // This is necessary because setSelectedRange on newline is not permitted other than insert mode
     NSTextView* view = [self textView];
     if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
         [view moveToBeginningOfLine:self];
@@ -357,9 +351,15 @@
 }
 
 - (XVimEvaluator*)r:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveForwardAndModifySelection:self];
-    return [[XVimInsertEvaluator alloc] initOneCharMode:TRUE withRepeat:1 ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:YES withRepeat:[self numericArg] ofXVim:self.xvim];
+}
+
+- (XVimEvaluator*)s:(id)arg{
+    NSTextView *view = [self textView];
+    NSRange r = [view selectedRange];
+    [view setSelectedRange:NSMakeRange(r.location, [self numericArg])];
+    [view cut:self];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1 ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)u:(id)arg{
@@ -382,14 +382,10 @@
 }
 
 - (XVimEvaluator*)v:(id)arg{
-    [self xvim].mode = MODE_VISUAL;
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER];
 }
 
 - (XVimEvaluator*)V:(id)arg{
-    // Select the currnet line before entering XVimVisualEvalutor becuase its linewise visual mode.
-    // This is not really good implementation I feel.
-    [self xvim].mode = MODE_VISUAL;
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_LINE]; 
 }
 

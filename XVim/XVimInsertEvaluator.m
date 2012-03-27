@@ -33,7 +33,6 @@
     self = [super initWithXVim:xvim];
     if (self) {
         _startRange = [xvim selectedRange];
-        xvim.mode = MODE_INSERT;
         
         _repeat = repeat;
         _oneCharMode = oneCharMode;
@@ -43,6 +42,10 @@
         _movementKeys = [NSArray arrayWithObjects:@"Up", @"Down", @"Left", @"Right", nil];
     }
     return self;
+}
+
+- (XVIM_MODE)becameHandler:(XVim *)xvim{
+    return MODE_INSERT;
 }
 
 - (NSString*)getInsertedText{
@@ -83,7 +86,6 @@
         [self recordTextIntoRegister:[xvim findRegister:@"repeat"]];
         [[[xvim sourceView] completionController] hideCompletions];
 
-        xvim.mode = MODE_NORMAL;
         return nil;
     }else if ([self.movementKeys containsObject:keyStr]){
         _insertedEventsAbort = YES;
@@ -106,8 +108,14 @@
 
     if (_oneCharMode == TRUE) {
         NSRange save = [[xvim sourceView] selectedRange];
-        [[xvim sourceView] XVimKeyDown:event];
-        xvim.mode = MODE_NORMAL;
+        for (NSUInteger i = 0; i < _repeat; ++i) {
+            [[xvim sourceView] deleteForward:self];
+            [[xvim sourceView] XVimKeyDown:event];
+
+            save.location += 1;
+            [[xvim sourceView] setSelectedRange:save];
+        }
+        save.location -= 1;
         [[xvim sourceView] setSelectedRange:save];
         return nil;
     } else {

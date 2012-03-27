@@ -9,6 +9,7 @@
 #import "DVTSourceTextViewHook.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "XVimEvaluator.h"
 #import "XVimCommandLine.h"
 #import "XVim.h"
 #import <objc/runtime.h>
@@ -102,10 +103,28 @@ static NSMutableArray* queue;
     }
 }
 
+- (void)drawRect:(NSRect)dirtyRect{
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    [self XVimDrawRect:dirtyRect];
+    
+    if (MODE_VISUAL == xvim.mode){
+        int glyphIndex = xvim.currentEvaluator.insertionPoint;
+        NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[self textContainer]];
+        
+        [[[self insertionPointColor] colorWithAlphaComponent:0.5] set];
+        NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
+    }
+}
+
+- (BOOL)shouldDrawInsertionPoint{
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    return (MODE_VISUAL != xvim.mode);
+}
+
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
     XVim* xvim = [self viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == xvim.mode ){
+    if(MODE_INSERT == xvim.mode){
         [self _XVimDrawInsertionPointInRect:aRect color:aColor];
     }else{
         [self drawInsertionPointInRect:aRect color:aColor turnedOn:YES];
@@ -115,7 +134,7 @@ static NSMutableArray* queue;
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
     XVim* xvim = [self viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == xvim.mode ){
+    if(MODE_INSERT == xvim.mode){
         [self XVimDrawInsertionPointInRect:rect color:color turnedOn:flag];
     }
     else{

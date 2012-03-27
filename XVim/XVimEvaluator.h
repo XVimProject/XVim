@@ -45,6 +45,7 @@ typedef enum {
 // Made into a property so it can be set 
 @property (weak) XVim *xvim;
 @property (readonly) NSTextView *textView;
+@property (readonly) NSUInteger insertionPoint;
 
 - (id)initWithXVim:(XVim*)xvim;
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;

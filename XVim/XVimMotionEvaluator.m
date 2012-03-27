@@ -103,12 +103,14 @@
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
+    eval.previous = NO;
     return eval;
 }
 
 - (XVimEvaluator*)F:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = NO;
+    eval.previous = NO;
     return eval;
 }
 
@@ -193,6 +195,20 @@
     return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
 }
 */
+
+- (XVimEvaluator*)t:(id)arg{
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    eval.forward = YES;
+    eval.previous = YES;
+    return eval;
+}
+
+- (XVimEvaluator*)T:(id)arg{
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    eval.forward = NO;
+    eval.previous = YES;
+    return eval;
+}
 
 - (XVimEvaluator*)v:(id)arg{
     _inverseMotionType = !_inverseMotionType;
@@ -631,6 +647,59 @@
         sentence_head = s.length-1;
     }
     return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)COMMA:(id)arg{
+    NSTextView *view = [self textView];
+    NSUInteger location = [view selectedRange].location;
+    for (NSUInteger i = 0;;){
+        location = [[self xvim] searchCharacterPrevious:location];
+        if (location == NSNotFound || ++i >= [self numericArg]){
+            break;
+        }
+        
+        if ([[self xvim] shouldSearchPreviousCharacter]){
+            if ([[self xvim] shouldSearchCharacterBackward]){
+                location +=1;
+            }else{
+                location -= 1;
+            }
+        }
+    }
+    
+    if (location == NSNotFound){
+        [[self xvim] ringBell];
+    }else{
+        [view setSelectedRange:NSMakeRange(location, 0)];
+    }
+
+    return nil;
+}
+
+- (XVimEvaluator*)SEMICOLON:(id)arg{
+    NSTextView *view = [self textView];
+    NSUInteger location = [view selectedRange].location;
+    for (NSUInteger i = 0;;){
+        location = [[self xvim] searchCharacterNext:location];
+        if (location == NSNotFound || ++i >= [self numericArg]){
+            break;
+        }
+        
+        if ([[self xvim] shouldSearchPreviousCharacter]){
+            if ([[self xvim] shouldSearchCharacterBackward]){
+                location -= 1;
+            }else{
+                location +=1;
+            }
+        }
+    }
+    
+    if (location == NSNotFound){
+        [[self xvim] ringBell];
+    }else{
+        [view setSelectedRange:NSMakeRange(location, 0)];
+    }
+    return nil;
 }
 
 - (XVimEvaluator*)Up:(id)arg{

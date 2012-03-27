@@ -149,6 +149,10 @@ static char* keynames[] = {
 
 @synthesize xvim = _xvim;
 
+- (NSUInteger)insertionPoint{
+    return [[self textView] selectedRange].location;
+}
+
 - (XVIM_MODE)becameHandler:(XVim*)xvim{
     return MODE_NORMAL;
 }

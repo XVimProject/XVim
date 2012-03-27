@@ -42,12 +42,15 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 }
 
 @property NSInteger tag;
-@property NSInteger mode;
+@property (readonly) NSInteger mode;
 @property BOOL handlingMouseClick;
 @property(retain) XVimCommandLine* cmdLine;
 @property(retain) NSTextView* sourceView;
 @property(strong, readonly) NSSet* registers;
 @property(weak, readonly) XVimRegister *recordingRegister;
+@property(readonly) XVimEvaluator *currentEvaluator;
+@property(readonly) BOOL shouldSearchCharacterBackward;
+@property(readonly) BOOL shouldSearchPreviousCharacter;
 
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
 // Mark this property to YES before moving. And mark it to NO after moving.
@@ -62,6 +65,9 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)searchPrevious;
 - (void)searchForward;
 - (void)searchBackward;
+- (NSUInteger)searchCharacterNext:(NSUInteger)start;
+- (NSUInteger)searchCharacterPrevious:(NSUInteger)start;
+- (void)setSearchCharacter:(NSString*)searchChar backward:(BOOL)backward previous:(BOOL)previous;
 - (NSString*)modeName;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (NSMutableDictionary *)getLocalMarks;
