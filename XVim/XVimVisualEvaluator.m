@@ -154,12 +154,20 @@
 }
 
 - (XVimEvaluator*)v:(id)arg{
+    if( _mode == MODE_CHARACTER ){
+        // go to normal mode
+        return  [self ESC:arg];
+    }
     _mode = MODE_CHARACTER;
     [self updateSelection];
     return self;
 }
 
 - (XVimEvaluator*)V:(id)arg{
+    if( MODE_LINE == _mode ){
+        // go to normal mode
+        return  [self ESC:arg];
+    }
     _mode = MODE_LINE;
     [self updateSelection];
     return self;
