@@ -108,7 +108,14 @@
 
     if (_oneCharMode == TRUE) {
         NSRange save = [[xvim sourceView] selectedRange];
-        [[xvim sourceView] XVimKeyDown:event];
+        for (NSUInteger i = 0; i < _repeat; ++i) {
+            [[xvim sourceView] deleteForward:self];
+            [[xvim sourceView] XVimKeyDown:event];
+
+            save.location += 1;
+            [[xvim sourceView] setSelectedRange:save];
+        }
+        save.location -= 1;
         [[xvim sourceView] setSelectedRange:save];
         return nil;
     } else {

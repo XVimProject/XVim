@@ -351,9 +351,15 @@
 }
 
 - (XVimEvaluator*)r:(id)arg{
-    NSTextView* view = [self textView];
-    [view moveForwardAndModifySelection:self];
-    return [[XVimInsertEvaluator alloc] initOneCharMode:TRUE withRepeat:1 ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:YES withRepeat:[self numericArg] ofXVim:self.xvim];
+}
+
+- (XVimEvaluator*)s:(id)arg{
+    NSTextView *view = [self textView];
+    NSRange r = [view selectedRange];
+    [view setSelectedRange:NSMakeRange(r.location, [self numericArg])];
+    [view cut:self];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1 ofXVim:self.xvim];
 }
 
 - (XVimEvaluator*)u:(id)arg{
