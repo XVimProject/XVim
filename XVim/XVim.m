@@ -41,6 +41,7 @@
 @synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
 @synthesize registers = _registers;
 @synthesize recordingRegister = _recordingRegister;
+@synthesize handlingMouseClick = _handlingMouseClick;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -80,6 +81,9 @@
     // Hook setSelectedRange:
     [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
     
+    // Hook setSelectedRange:affinity:stillSelecting:
+    [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:affinity:stillSelecting:)];
+    
     // Hook initWithCoder:
     [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
     
@@ -89,6 +93,12 @@
     // Hook keyDown:
     [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(keyDown:) ) keepingOriginalWith:@selector(XVimKeyDown:)];   
     
+    // Hook mouseDown:
+    [Hooker hookMethod:@selector(mouseDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseDown:) ) keepingOriginalWith:@selector(XVimMouseDown:)];
+
+    // Hook mouseUp:
+    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseUp:) ) keepingOriginalWith:@selector(XVimMouseUp:)];    
+
     // Hook performKeyEquivalent:
     [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(XVimPerformKeyEquivalent:)];
     
@@ -202,6 +212,7 @@
          nil];
         
         _recordingRegister = nil;
+        _handlingMouseClick = NO;
     }
     
     return self;
@@ -279,7 +290,7 @@
                     pos_wo_space = pos;
                 }
                 [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-                [srcView scrollRangeToVisible:NSMakeRange(pos_wo_space,0)];
+                [srcView scrollToCursor];
             }
             // TODO: This command must be treated as motion.
         }
@@ -484,9 +495,9 @@
     }
     if( found.location != NSNotFound ){
         //Move cursor and show the found string
-        [srcView scrollRangeToVisible:found];
-        [srcView showFindIndicatorForRange:found];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
         // note: make sure this stays *after* setSelectedRange which also updates 
         // _nextSearchBaseLocation as a side effect
         [self setNextSearchBaseLocation:found.location + ((found.length==0)? 0: found.length-1)];
@@ -548,9 +559,9 @@
     }
     if (found.location != NSNotFound) {
         // Move cursor and show the found string
-        [srcView scrollRangeToVisible:found];
-        [srcView showFindIndicatorForRange:found];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
         // note: make sure this stays *after* setSelectedRange which also updates 
         // _nextSearchBaseLocation as a side effect
         [self setNextSearchBaseLocation:found.location]; // demonstrative. not really needed

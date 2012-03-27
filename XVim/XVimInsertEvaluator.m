@@ -77,11 +77,12 @@
                 [[xvim sourceView] insertText:text];
             }
         }
-        
+
         // Store off any needed text
         [self recordTextIntoRegister:xvim.recordingRegister];
         [self recordTextIntoRegister:[xvim findRegister:@"repeat"]];
-        
+        [[[xvim sourceView] completionController] hideCompletions];
+
         xvim.mode = MODE_NORMAL;
         return nil;
     }else if ([self.movementKeys containsObject:keyStr]){

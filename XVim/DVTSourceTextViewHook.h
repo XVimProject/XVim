@@ -19,7 +19,10 @@
 
 
 // DVTSourceTextView hooks
+- (void)mouseUp:(NSEvent *)theEvent;
+- (void)mouseDown:(NSEvent *)theEvent;
 - (void)setSelectedRange:(NSRange)charRange;
+- (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)stillSelectingFlag;
 - (id)initWithCoder:(NSCoder *)aDecoder;
 - (void)viewDidMoveToSuperview;
 - (void)insertText:(NSString *)str;
