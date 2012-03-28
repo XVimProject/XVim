@@ -91,6 +91,7 @@
     }
     [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end];
     [view scrollRangeToVisible:NSMakeRange(_insertion,0)];
+    //[view scrollToCursor]; // This does not currently work. If the method implemented correctly( handles the selected range properly) this can be commented in.
 }
 
 - (XVimEvaluator*)C_b:(id)arg{
@@ -153,12 +154,20 @@
 }
 
 - (XVimEvaluator*)v:(id)arg{
+    if( _mode == MODE_CHARACTER ){
+        // go to normal mode
+        return  [self ESC:arg];
+    }
     _mode = MODE_CHARACTER;
     [self updateSelection];
     return self;
 }
 
 - (XVimEvaluator*)V:(id)arg{
+    if( MODE_LINE == _mode ){
+        // go to normal mode
+        return  [self ESC:arg];
+    }
     _mode = MODE_LINE;
     [self updateSelection];
     return self;
