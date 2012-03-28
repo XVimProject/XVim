@@ -42,6 +42,7 @@
 }
 
 - (XVIM_MODE)becameHandler:(XVim*)xvim{
+    self.xvim = xvim;
     [[xvim sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
         [self.playbackRegister playback:[xvim sourceView] withRepeatCount:self.playbackCount];
@@ -68,10 +69,10 @@
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
     if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
-        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+        return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
     } 
     [view moveForward:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)A:(id)arg{
@@ -79,7 +80,7 @@
     NSRange r = [view selectedRange];
     NSUInteger end = [view tailOfLine:r.location];
     [view setSelectedRange:NSMakeRange(end,0)];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -122,7 +123,7 @@
     // Go to insert 
     NSUInteger end = [view tailOfLine:[view selectedRange].location];
     [view setSelectedRange:NSMakeRange(end,0)];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:1];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -187,7 +188,7 @@
 
 - (XVimEvaluator*)i:(id)arg{
     // Go to insert 
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)I:(id)arg{
@@ -197,7 +198,7 @@
         return [self A:arg]; // If its blankline or has only whitespaces'I' works line 'A'
     }
     [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 // For 'J' (join line) bring the line up from below. all leading whitespac 
@@ -267,7 +268,7 @@
     NSTextView* view = [self textView];
     [view moveToEndOfLine:self];
     [view insertNewline:self];
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)O:(id)arg{
@@ -282,7 +283,7 @@
         [view moveToEndOfLine:self];
         [view insertNewline:self];
     }
-    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)p:(id)arg{
@@ -351,7 +352,7 @@
 }
 
 - (XVimEvaluator*)r:(id)arg{
-    return [[XVimInsertEvaluator alloc] initOneCharMode:YES withRepeat:[self numericArg] ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:YES withRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)s:(id)arg{
@@ -359,7 +360,7 @@
     NSRange r = [view selectedRange];
     [view setSelectedRange:NSMakeRange(r.location, [self numericArg])];
     [view cut:self];
-    return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1 ofXVim:self.xvim];
+    return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1];
 }
 
 - (XVimEvaluator*)u:(id)arg{

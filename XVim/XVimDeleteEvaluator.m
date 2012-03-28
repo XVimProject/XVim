@@ -200,7 +200,7 @@
                 [view insertNewline:self];
             }
         }
-        return [[XVimInsertEvaluator alloc] initWithRepeat:1 ofXVim:self.xvim];
+        return [[XVimInsertEvaluator alloc] initWithRepeat:1];
     }
     return nil;
 }

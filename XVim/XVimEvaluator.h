@@ -47,7 +47,6 @@ typedef enum {
 @property (readonly) NSTextView *textView;
 @property (readonly) NSUInteger insertionPoint;
 
-- (id)initWithXVim:(XVim*)xvim;
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
 - (XVIM_MODE)becameHandler:(XVim*)xvim;
 @end
