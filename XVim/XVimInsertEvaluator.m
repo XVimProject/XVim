@@ -25,15 +25,13 @@
 @synthesize movementKeys = _movementKeys;
 @synthesize movementKeyPressed = _movementKeyPressed;
 
-- (id)initWithRepeat:(NSUInteger)repeat ofXVim:(XVim *)xvim{
-    return [self initOneCharMode:FALSE withRepeat:repeat ofXVim:xvim];
+- (id)initWithRepeat:(NSUInteger)repeat{
+    return [self initOneCharMode:FALSE withRepeat:repeat];
 }
 
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat ofXVim:(XVim *)xvim{
-    self = [super initWithXVim:xvim];
+- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat{
+    self = [super init];
     if (self) {
-        _startRange = [xvim selectedRange];
-        
         _repeat = repeat;
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
@@ -45,6 +43,8 @@
 }
 
 - (XVIM_MODE)becameHandler:(XVim *)xvim{
+    self.xvim = xvim;
+    self.startRange = [xvim selectedRange];
     return MODE_INSERT;
 }
 

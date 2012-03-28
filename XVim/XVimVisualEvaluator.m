@@ -37,6 +37,7 @@
 }
 
 - (XVIM_MODE)becameHandler:(XVim *)xvim{
+    self.xvim = xvim;
     NSTextView* view = [xvim sourceView];
     NSRange cur = [view selectedRange];
     _begin = cur.location;
@@ -90,8 +91,7 @@
         // later
     }
     [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end];
-    [view scrollRangeToVisible:NSMakeRange(_insertion,0)];
-    //[view scrollToCursor]; // This does not currently work. If the method implemented correctly( handles the selected range properly) this can be commented in.
+    [view scrollToCursor];
 }
 
 - (XVimEvaluator*)C_b:(id)arg{

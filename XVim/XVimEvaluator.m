@@ -150,19 +150,13 @@ static char* keynames[] = {
 @synthesize xvim = _xvim;
 
 - (NSUInteger)insertionPoint{
-    return [[self textView] selectedRange].location;
+    NSRange range = [[self textView] selectedRange];
+    return range.location + range.length;
 }
 
 - (XVIM_MODE)becameHandler:(XVim*)xvim{
+    self.xvim = xvim;
     return MODE_NORMAL;
-}
-
-- (id)initWithXVim:(XVim*)xvim{
-    self = [super init];
-    if (self){
-        _xvim = xvim;
-    }
-    return self;
 }
 
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event{
@@ -218,8 +212,6 @@ static char* keynames[] = {
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     // This is default implementation of evaluator.
-    self.xvim = xvim; // weak reference
-    
     // Only keyDown event supporsed to be passed here.
     NSString* key = [XVimEvaluator keyStringFromKeyEvent:event];
     

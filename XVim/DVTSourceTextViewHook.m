@@ -51,7 +51,7 @@ static NSMutableArray* queue;
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
     NSRange newCharRange = charRange;
     XVim* xvim = [self viewWithTag:XVIM_TAG];
-    if( xvim.handlingMouseClick && ![self isValidCursorPosition:charRange.location] ){
+    if( xvim.handlingMouseClick && xvim.mode != MODE_INSERT && ![self isValidCursorPosition:charRange.location] ){
         newCharRange.location = charRange.location - 1;
     }
     
