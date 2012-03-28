@@ -44,7 +44,7 @@
             // If the last search was forward "semicolon" is forward search and this is the case its CHARACTERWISE_EXCLUSIVE
             type = CHARACTERWISE_EXCLUSIVE;
         }
-        [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
 
     return nil;

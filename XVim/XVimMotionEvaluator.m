@@ -676,7 +676,7 @@
             // If the last search was forward "comma" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
             type = CHARACTERWISE_EXCLUSIVE;
         }
-        [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
 
     return nil;
@@ -709,7 +709,7 @@
             // If the last search was backward "semicolon" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
             type = CHARACTERWISE_EXCLUSIVE;
         }
-        [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
     return nil;
 }
