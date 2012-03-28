@@ -1,4 +1,3 @@
-
 //
 //  XVimNormalEvaluator.m
 //  XVim
@@ -266,22 +265,29 @@
 
 - (XVimEvaluator*)o:(id)arg{
     NSTextView* view = [self textView];
-    [view moveToEndOfLine:self];
+    NSUInteger l = [view selectedRange].location;
+    NSUInteger tail = [view tailOfLine:l];
+    [view setSelectedRange:NSMakeRange(tail,0)];
     [view insertNewline:self];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)O:(id)arg{
     NSTextView* view = [self textView];
-    if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
-        [view moveToBeginningOfLine:self];
-        [view insertNewline:self];
-        [view moveUp:self];
+    NSUInteger l = [view selectedRange].location;
+    NSUInteger head = [view headOfLine:l];
+    if( NSNotFound == head ){
+        head = l;
     }
-    else {
-        [view moveUp:self];
-        [view moveToEndOfLine:self];
+    if( 0 != head ){
+        [view setSelectedRange:NSMakeRange(head-1,0)];
         [view insertNewline:self];
+    }else{
+        
+        [view setSelectedRange:NSMakeRange(head,0)];
+        [view insertNewline:self];
+        NSUInteger prev = [view prevLine:[view selectedRange].location column:0 count:1 option:MOTION_OPTION_NONE];
+        [view setSelectedRange:NSMakeRange(prev,0)];
     }
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
@@ -323,7 +329,10 @@
     NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
     unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
     if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        [view moveToBeginningOfLine:self];
+        NSUInteger b = [view headOfLine:[view selectedRange].location];
+        if( NSNotFound != b ){
+            [view setSelectedRange:NSMakeRange(b,0)];
+        }
     }
     for(NSUInteger i = 0; i < [self numericArg]; i++ ){
         [view paste:self];
@@ -535,5 +544,6 @@ NSArray *_invalidRepeatKeys;
     }
     return [super shouldRecordEvent:event inRegister:xregister];
 }
+
 
 @end
