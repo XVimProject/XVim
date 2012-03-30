@@ -9,6 +9,7 @@
 #import "DVTSourceTextViewHook.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "XVimEvaluator.h"
 #import "XVimCommandLine.h"
 #import "XVim.h"
 #import <objc/runtime.h>
@@ -44,6 +45,18 @@ static NSMutableArray* queue;
     [self XVimSetSelectedRange:charRange];
     XVim* xvim = [self viewWithTag:XVIM_TAG];
     [xvim setNextSearchBaseLocation: charRange.location];
+    return;
+}
+
+- (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
+    NSRange newCharRange = charRange;
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    if( xvim.handlingMouseClick && xvim.mode != MODE_INSERT && ![self isValidCursorPosition:charRange.location] ){
+        newCharRange.location = charRange.location - 1;
+    }
+    
+    // Call original method
+    [self XVimSetSelectedRange:newCharRange affinity:affinity stillSelecting:flag];
     return;
 }
 
@@ -90,10 +103,28 @@ static NSMutableArray* queue;
     }
 }
 
+- (void)drawRect:(NSRect)dirtyRect{
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    [self XVimDrawRect:dirtyRect];
+    
+    if (MODE_VISUAL == xvim.mode){
+        int glyphIndex = xvim.currentEvaluator.insertionPoint;
+        NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[self textContainer]];
+        
+        [[[self insertionPointColor] colorWithAlphaComponent:0.5] set];
+        NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
+    }
+}
+
+- (BOOL)shouldDrawInsertionPoint{
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    return (MODE_VISUAL != xvim.mode);
+}
+
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
     XVim* xvim = [self viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == xvim.mode ){
+    if(MODE_INSERT == xvim.mode){
         [self _XVimDrawInsertionPointInRect:aRect color:aColor];
     }else{
         [self drawInsertionPointInRect:aRect color:aColor turnedOn:YES];
@@ -103,7 +134,7 @@ static NSMutableArray* queue;
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
     XVim* xvim = [self viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == xvim.mode ){
+    if(MODE_INSERT == xvim.mode){
         [self XVimDrawInsertionPointInRect:rect color:color turnedOn:flag];
     }
     else{
@@ -163,6 +194,35 @@ static NSMutableArray* queue;
     return;
 }
 
+-  (void)mouseDown:(NSEvent *)theEvent{
+    TRACE_LOG(@"got a mouseDown:");
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    if( nil == xvim ){
+        [self XVimMouseDown:theEvent];
+        return;
+    }
+    
+    // Call Original mouseDown:
+    xvim.handlingMouseClick = YES;
+    [self XVimMouseDown:theEvent]; // this loops until it gets a mouse up
+    xvim.handlingMouseClick = NO;
+    return;
+}
+
+-  (void)mouseUp:(NSEvent *)theEvent{
+    TRACE_LOG(@"got a mouseUp:");
+    XVim* xvim = [self viewWithTag:XVIM_TAG];
+    if( nil == xvim ){
+        [self XVimMouseUp:theEvent];
+        return;
+    }
+
+    // Call Original mouseDown:
+    xvim.handlingMouseClick = NO;
+    [self XVimMouseUp:theEvent];
+    return;
+}
+    
 - (void)doCommandBySelector:(SEL)aSelector{
     TRACE_LOG(@"SELECTOR : ", NSStringFromSelector(aSelector));
     [self XVimDoCommandBySelector:aSelector];
@@ -179,6 +239,7 @@ static NSMutableArray* queue;
     // So if we try to call original method it causes exception.
     
     // What we do here is to restrict cursor position when its not insert mode
+    /*
     NSTextView* view = textView; // DVTSourceTextView
     
     XVim* xvim = [view viewWithTag:XVIM_TAG];
@@ -186,12 +247,18 @@ static NSMutableArray* queue;
         if( xvim.mode != MODE_INSERT ){
             NSRange r = [[newSelectedCharRanges objectAtIndex:0] rangeValue];
             if( ![view isValidCursorPosition:r.location] ){
-                NSValue* val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length+1)];
+                NSValue* val;
+                if( r.length != 0 ){
+                    val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length+1)];
+                }else{
+                    val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length)]; // same as (r.locatio-1, 0)
+                }
                 NSMutableArray* ary = [NSMutableArray arrayWithObject:val];
                 return [ary arrayByAddingObjectsFromArray:[newSelectedCharRanges subarrayWithRange:NSMakeRange(1, [newSelectedCharRanges count]-1)]];
             }
         }
     }
+     */
     return newSelectedCharRanges;
 }
 
@@ -202,8 +269,5 @@ static NSMutableArray* queue;
     r.length = 0;
     [view setSelectedRange:r];
 }
-
-
-
 
 @end

@@ -160,8 +160,6 @@
     METHOD_TRACE_LOG();  
     _command.stringValue = @"";
     [_command setEditable:NO];
-    ((XVim*)xvim).mode = MODE_NORMAL;
-    
 }
 
 - (void)controlTextDidBeginEditing:(NSNotification *)aNotification{

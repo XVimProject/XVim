@@ -22,6 +22,7 @@ typedef enum{
     NSUInteger _selection_end;  // End of selection (This is differ from _insertion when its MODE_LINE)
     VISUAL_MODE _mode;
 }
+@property (readonly) NSUInteger insertionPoint;
 - (id)initWithMode:(VISUAL_MODE)mode;
 - (void)updateSelection;
 @end

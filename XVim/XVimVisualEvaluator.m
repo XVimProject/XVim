@@ -13,6 +13,10 @@
 
 @implementation XVimVisualEvaluator 
 
+- (NSUInteger)insertionPoint{
+    return _insertion;
+}
+
 - (id)initWithMode:(VISUAL_MODE)mode{ 
     self = [super init];
     if (self) {
@@ -33,6 +37,7 @@
 }
 
 - (XVIM_MODE)becameHandler:(XVim *)xvim{
+    self.xvim = xvim;
     NSTextView* view = [xvim sourceView];
     NSRange cur = [view selectedRange];
     _begin = cur.location;
@@ -57,9 +62,12 @@
     NSTextView* v = [xvim sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
-    return [super eval:event ofXVim:xvim];
+    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
+    if (nextEvaluator == self){
+        [self updateSelection];   
+    }
+    return nextEvaluator;
 }
-
 
 
 - (void)updateSelection{
@@ -83,24 +91,27 @@
         // later
     }
     [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end];
-    [view scrollRangeToVisible:NSMakeRange(_insertion,0)];
+    [view scrollToCursor];
 }
 
 - (XVimEvaluator*)C_b:(id)arg{
-    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
+    _insertion = [[self textView] pageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
 - (XVimEvaluator*)C_d:(id)arg{
-    return [self commonMotion:@selector(halfPageForward:) Type:LINEWISE];
+    _insertion = [[self textView] halfPageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
 - (XVimEvaluator*)C_f:(id)arg{
-    return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
+    _insertion = [[self textView] pageForward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
 }
 
-- (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
-}
 
 - (XVimEvaluator*)c:(id)arg{
     [self updateSelection];
@@ -136,6 +147,32 @@
     
 }
 
+- (XVimEvaluator*)C_u:(id)arg{
+    _insertion = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
+    [self updateSelection];
+    return self;
+}
+
+- (XVimEvaluator*)v:(id)arg{
+    if( _mode == MODE_CHARACTER ){
+        // go to normal mode
+        return  [self ESC:arg];
+    }
+    _mode = MODE_CHARACTER;
+    [self updateSelection];
+    return self;
+}
+
+- (XVimEvaluator*)V:(id)arg{
+    if( MODE_LINE == _mode ){
+        // go to normal mode
+        return  [self ESC:arg];
+    }
+    _mode = MODE_LINE;
+    [self updateSelection];
+    return self;
+}
+
 - (XVimEvaluator*)x:(id)arg{
     return [self d:arg];
 }
@@ -166,7 +203,6 @@
 
 
 - (XVimEvaluator*)ESC:(id)arg{
-    [self xvim].mode = MODE_NORMAL;
     [[self textView] setSelectedRange:NSMakeRange(_insertion, 0)];
     return nil;
 }
@@ -180,8 +216,6 @@
     NSRange r = [[self textView] selectedRange];
     r.length = 0;
     [view setSelectedRange:r];
-    [self resetNumericArg];
-    [self xvim].mode = MODE_NORMAL;
     return nil;
 }
 
@@ -195,8 +229,6 @@
     NSRange r = [[self textView] selectedRange];
     r.length = 0;
     [view setSelectedRange:r];
-    [self resetNumericArg];
-    [self xvim].mode = MODE_NORMAL;
     return nil;
 }
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{

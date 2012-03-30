@@ -25,16 +25,13 @@
 @synthesize movementKeys = _movementKeys;
 @synthesize movementKeyPressed = _movementKeyPressed;
 
-- (id)initWithRepeat:(NSUInteger)repeat ofXVim:(XVim *)xvim{
-    return [self initOneCharMode:FALSE withRepeat:repeat ofXVim:xvim];
+- (id)initWithRepeat:(NSUInteger)repeat{
+    return [self initOneCharMode:FALSE withRepeat:repeat];
 }
 
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat ofXVim:(XVim *)xvim{
-    self = [super initWithXVim:xvim];
+- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat{
+    self = [super init];
     if (self) {
-        _startRange = [xvim selectedRange];
-        xvim.mode = MODE_INSERT;
-        
         _repeat = repeat;
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
@@ -43,6 +40,12 @@
         _movementKeys = [NSArray arrayWithObjects:@"Up", @"Down", @"Left", @"Right", nil];
     }
     return self;
+}
+
+- (XVIM_MODE)becameHandler:(XVim *)xvim{
+    self.xvim = xvim;
+    self.startRange = [xvim selectedRange];
+    return MODE_INSERT;
 }
 
 - (NSString*)getInsertedText{
@@ -77,12 +80,12 @@
                 [[xvim sourceView] insertText:text];
             }
         }
-        
+
         // Store off any needed text
         [self recordTextIntoRegister:xvim.recordingRegister];
         [self recordTextIntoRegister:[xvim findRegister:@"repeat"]];
-        
-        xvim.mode = MODE_NORMAL;
+        [[[xvim sourceView] completionController] hideCompletions];
+
         return nil;
     }else if ([self.movementKeys containsObject:keyStr]){
         _insertedEventsAbort = YES;
@@ -105,8 +108,14 @@
 
     if (_oneCharMode == TRUE) {
         NSRange save = [[xvim sourceView] selectedRange];
-        [[xvim sourceView] XVimKeyDown:event];
-        xvim.mode = MODE_NORMAL;
+        for (NSUInteger i = 0; i < _repeat; ++i) {
+            [[xvim sourceView] deleteForward:self];
+            [[xvim sourceView] XVimKeyDown:event];
+
+            save.location += 1;
+            [[xvim sourceView] setSelectedRange:save];
+        }
+        save.location -= 1;
         [[xvim sourceView] setSelectedRange:save];
         return nil;
     } else {

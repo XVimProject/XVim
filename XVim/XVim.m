@@ -35,12 +35,18 @@
 
 @interface XVim()
 - (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
+@property (strong) NSString *searchCharacter;
 @end
 
 @implementation XVim
-@synthesize tag,mode,cmdLine,sourceView, dontCheckNewline;
+@synthesize tag,cmdLine,sourceView, dontCheckNewline;
+@synthesize mode = _mode;
 @synthesize registers = _registers;
 @synthesize recordingRegister = _recordingRegister;
+@synthesize handlingMouseClick = _handlingMouseClick;
+@synthesize searchCharacter = _searchCharacter;
+@synthesize shouldSearchCharacterBackward = _shouldSearchCharacterBackward;
+@synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -80,6 +86,9 @@
     // Hook setSelectedRange:
     [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
     
+    // Hook setSelectedRange:affinity:stillSelecting:
+    [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:affinity:stillSelecting:)];
+    
     // Hook initWithCoder:
     [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
     
@@ -89,8 +98,20 @@
     // Hook keyDown:
     [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(keyDown:) ) keepingOriginalWith:@selector(XVimKeyDown:)];   
     
+    // Hook mouseDown:
+    [Hooker hookMethod:@selector(mouseDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseDown:) ) keepingOriginalWith:@selector(XVimMouseDown:)];
+
+    // Hook mouseUp:
+    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseUp:) ) keepingOriginalWith:@selector(XVimMouseUp:)];    
+
+    // Hook drawRect:
+    [Hooker hookMethod:@selector(drawRect:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawRect:)) keepingOriginalWith:@selector(XVimDrawRect:)];
+    
     // Hook performKeyEquivalent:
     [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(XVimPerformKeyEquivalent:)];
+    
+    // Hook shouldDrawInsertionPoint for Drawing Caret
+    [Hooker hookMethod:@selector(shouldDrawInsertionPoint) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(shouldDrawInsertionPoint)) keepingOriginalWith:@selector(XVimShouldDrawInsertionPoint)];
     
     // Hook drawInsertionPointInRect for Drawing Caret
     [Hooker hookMethod:@selector(drawInsertionPointInRect:color:turnedOn:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawInsertionPointInRect:color:turnedOn:)) keepingOriginalWith:@selector(XVimDrawInsertionPointInRect:color:turnedOn:)];
@@ -123,7 +144,7 @@
 - (id) initWithFrame:(NSRect)frameRect{
     self = [super initWithFrame:frameRect];
     if (self) {
-        mode = MODE_NORMAL;
+        _mode = MODE_NORMAL;
         tag = XVIM_TAG;
         _lastSearchString = [[NSMutableString alloc] init];
         _lastReplacementString = [[NSMutableString alloc] init];
@@ -202,6 +223,11 @@
          nil];
         
         _recordingRegister = nil;
+        _handlingMouseClick = NO;
+        
+        _searchCharacter = @"";
+        _shouldSearchCharacterBackward = NO;
+        _shouldSearchPreviousCharacter = NO;
     }
     
     return self;
@@ -212,6 +238,14 @@
     [_lastReplacedString release];
     [_lastReplacementString release];
     [XVimNormalEvaluator release];
+}
+
+- (void)setMode:(NSInteger)mode{
+    _mode = mode;
+}
+
+- (XVimEvaluator*)currentEvaluator{
+    return _currentEvaluator;
 }
 
 - (NSMutableDictionary *)getLocalMarks{
@@ -235,7 +269,14 @@
     }
     
     if( _currentEvaluator != nextEvaluator ){
-        [nextEvaluator becameHandler:self];
+        XVIM_MODE newMode = [nextEvaluator becameHandler:self];
+        
+        // Special case for cmdline mode. I don't like this, but
+        // don't have time to refactor cmdline mode.
+        if (_mode != MODE_CMDLINE){
+            _mode = newMode;
+        }
+
         [_currentEvaluator release];
         _currentEvaluator = nextEvaluator;
     }
@@ -279,7 +320,7 @@
                     pos_wo_space = pos;
                 }
                 [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-                [srcView scrollRangeToVisible:NSMakeRange(pos_wo_space,0)];
+                [srcView scrollToCursor];
             }
             // TODO: This command must be treated as motion.
         }
@@ -438,7 +479,7 @@
     }
     
     [[self window] makeFirstResponder:srcView]; // Since XVim is a subview of DVTSourceTextView;
-    mode = MODE_NORMAL;
+    self.mode = MODE_NORMAL;
 }
 
 - (void)searchForward {
@@ -484,9 +525,9 @@
     }
     if( found.location != NSNotFound ){
         //Move cursor and show the found string
-        [srcView scrollRangeToVisible:found];
-        [srcView showFindIndicatorForRange:found];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
         // note: make sure this stays *after* setSelectedRange which also updates 
         // _nextSearchBaseLocation as a side effect
         [self setNextSearchBaseLocation:found.location + ((found.length==0)? 0: found.length-1)];
@@ -548,9 +589,9 @@
     }
     if (found.location != NSNotFound) {
         // Move cursor and show the found string
-        [srcView scrollRangeToVisible:found];
-        [srcView showFindIndicatorForRange:found];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
         // note: make sure this stays *after* setSelectedRange which also updates 
         // _nextSearchBaseLocation as a side effect
         [self setNextSearchBaseLocation:found.location]; // demonstrative. not really needed
@@ -577,6 +618,88 @@
         [self searchBackward];
     }
     return;
+}
+
+- (void)setSearchCharacter:(NSString*)searchChar backward:(BOOL)backward previous:(BOOL)previous{
+    self.searchCharacter = searchChar;
+    _shouldSearchCharacterBackward = backward;
+    _shouldSearchPreviousCharacter = previous;
+}
+
+- (NSUInteger)searchCharacterBackward:(NSUInteger)start{
+    NSTextView *view = [self superview];
+    NSString* s = [[view textStorage] string];
+    NSRange at = NSMakeRange(start, 0); 
+    if (at.location >= s.length-1) {
+        return NSNotFound;
+    }
+
+    NSUInteger hol = [view headOfLine:at.location];
+    if (hol == NSNotFound){
+        return NSNotFound;
+    }
+
+    at.length = at.location - hol;
+    at.location = hol;
+    
+    NSString* search_string = [s substringWithRange:at];
+    NSRange found = [search_string rangeOfString:self.searchCharacter options:NSBackwardsSearch];
+    if (found.location == NSNotFound){
+        return NSNotFound;
+    }
+
+    NSUInteger location = at.location + found.location;
+    if (self.shouldSearchPreviousCharacter){
+        location += 1;
+    }
+    
+    return location;
+}
+
+- (NSUInteger)searchCharacterForward:(NSUInteger)start{
+    NSTextView *view = [self superview];
+    NSString* s = [[view textStorage] string];
+    NSRange at = NSMakeRange(start, 0); 
+    if (at.location >= s.length-1) {
+        return NSNotFound;
+    }
+    
+    NSUInteger eol = [view endOfLine:at.location];
+    if (eol == NSNotFound){
+        return NSNotFound;
+    }
+
+    at.length = eol - at.location;
+    if (at.location != eol) at.location += 1;
+    
+    NSString* search_string = [s substringWithRange:at];
+    NSRange found = [search_string rangeOfString:self.searchCharacter];
+    if (found.location == NSNotFound){
+        return NSNotFound;
+    }
+
+    NSUInteger location = at.location + found.location;
+    if (self.shouldSearchPreviousCharacter){
+        location -= 1;
+    }
+    
+    return location;
+}
+
+- (NSUInteger)searchCharacterNext:(NSUInteger)start{
+    if(self.shouldSearchCharacterBackward){
+        return [self searchCharacterBackward:start];
+    }else{
+        return [self searchCharacterForward:start];
+    }
+}
+
+- (NSUInteger)searchCharacterPrevious:(NSUInteger)start{
+    if(self.shouldSearchCharacterBackward){
+        return [self searchCharacterForward:start];
+    }else{
+        return [self searchCharacterBackward:start];
+    }
 }
 
 - (BOOL)replaceForward {
@@ -632,13 +755,13 @@
 
 - (void)commandCanceled{
     METHOD_TRACE_LOG();
-    mode = MODE_NORMAL;
+    self.mode = MODE_NORMAL;
     [[self window] makeFirstResponder:[self superview]]; // Since XVim is a subview of DVTSourceTextView;
 }
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
-    mode = MODE_CMDLINE;
-    [self cmdLine].mode = MODE_STRINGS[mode];
+    self.mode = MODE_CMDLINE;
+    [self cmdLine].mode = MODE_STRINGS[self.mode];
     [[self cmdLine] setFocusOnCommandWithFirstLetter:first];
 }
 

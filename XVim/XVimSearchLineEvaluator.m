@@ -12,59 +12,41 @@
 
 // Search Line 
 @implementation XVimSearchLineEvaluator
-@synthesize forward;
+@synthesize forward = _forward;
+@synthesize previous = _previous;
 
 - (XVimEvaluator*)eval:(NSEvent *)event ofXVim:(XVim *)xvim{
-    unichar searchChar = [[event characters] characterAtIndex:0];
-    NSTextView* view = [xvim sourceView];
-    NSRange original = [view selectedRange];
-    NSString* source = [view string];
-    NSRange result = NSMakeRange(NSNotFound, 0);
-    NSUInteger num = [self repeat];
-    if( forward ){
-        // Get the position of the newlinebreak
-        NSRange nextNewline = [source rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:NSMakeRange(original.location, source.length-original.location)];
-        if( nextNewline.location == NSNotFound ){
-            nextNewline.location = source.length;
+    NSString *searchChar = [[event characters] substringWithRange:NSMakeRange(0, 1)];
+    [xvim setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
+
+    NSTextView *view = [xvim superview];
+    NSUInteger location = [view selectedRange].location;
+    for (NSUInteger i = 0;;){
+        location = [xvim searchCharacterNext:location];
+        if (location == NSNotFound || ++i >= self.repeat){
+            break;
         }
-        // find the char forwards for "num" times
-        for( NSUInteger i = original.location+1; i < nextNewline.location; i++ ){
-            if( [source characterAtIndex:i] == searchChar ){
-                num--;
-                if( 0 == num ){
-                    result.location = i;
-                    break;
-                }
+
+        if (self.previous){
+            if (self.forward){
+                location += 1;
+            }else{
+                location -=1;
             }
         }
     }
-    else{
-        // Get the position of the prev newlinebreak
-        if( 0 == original.location )
-            return nil;
-        
-        NSRange prevNewLine= [source rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:NSBackwardsSearch range:NSMakeRange(0, original.location)];
-        if( prevNewLine.location == NSNotFound ){
-            prevNewLine.location = 0;
+
+    if (location == NSNotFound) {
+        [xvim ringBell];
+    }else{
+        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
+        if( !_forward ){
+            // If the last search was forward "semicolon" is forward search and this is the case its CHARACTERWISE_EXCLUSIVE
+            type = CHARACTERWISE_EXCLUSIVE;
         }
-        // find the char backwards for "num" times
-        for( NSUInteger i = original.location-1; i >= prevNewLine.location; i-- ){
-            if( [source characterAtIndex:i] == searchChar ){
-                num--;
-                if( 0 == num ){
-                    result.location = i;
-                    break;
-                }
-            }
-            if( 0 == i ){
-                break; // since i is unsigned, we need this.
-            }
-        }
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
-    if( result.location != NSNotFound ){
-        TRACE_LOG(@"%d %d", original.location, result.location );
-        return [self _motionFixedFrom:original.location To:result.location Type:CHARACTERWISE_INCLUSIVE];
-    }
+
     return nil;
 }
     

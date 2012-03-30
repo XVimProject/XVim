@@ -41,13 +41,17 @@ BOOL isKeyword(unichar ch);
 - (BOOL) isValidCursorPosition:(NSUInteger)index;
 - (NSUInteger)headOfLine:(NSUInteger)index;
 - (NSUInteger)headOfLineWithoutSpaces:(NSUInteger)index;
+- (NSUInteger)firstNonBlankInALine:(NSUInteger)index;
 - (NSUInteger)nextNewLine:(NSUInteger)index;
 - (NSUInteger)prevNewLine:(NSUInteger)index;
 - (NSUInteger)tailOfLine:(NSUInteger)index;
 - (NSUInteger)endOfLine:(NSUInteger)index;
 - (NSUInteger)columnNumber:(NSUInteger)index;
+- (void)scrollToCursor;
 - (void)adjustCursorPosition;
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
+- (NSUInteger)nextNonBlankInALine:(NSUInteger)index;
+
     
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
@@ -58,8 +62,15 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info;
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
-- (NSUInteger)nextNonBlankInALine:(NSUInteger)index;
     
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
+
+
+// Scrolls
+- (NSUInteger)pageForward:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
+    
 @end
 

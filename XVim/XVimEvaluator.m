@@ -149,16 +149,14 @@ static char* keynames[] = {
 
 @synthesize xvim = _xvim;
 
-- (XVIM_MODE)becameHandler:(XVim*)xvim{
-    return MODE_NORMAL;
+- (NSUInteger)insertionPoint{
+    NSRange range = [[self textView] selectedRange];
+    return range.location + range.length;
 }
 
-- (id)initWithXVim:(XVim*)xvim{
-    self = [super init];
-    if (self){
-        _xvim = xvim;
-    }
-    return self;
+- (XVIM_MODE)becameHandler:(XVim*)xvim{
+    self.xvim = xvim;
+    return MODE_NORMAL;
 }
 
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event{
@@ -214,8 +212,6 @@ static char* keynames[] = {
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     // This is default implementation of evaluator.
-    self.xvim = xvim; // weak reference
-    
     // Only keyDown event supporsed to be passed here.
     NSString* key = [XVimEvaluator keyStringFromKeyEvent:event];
     
@@ -248,6 +244,12 @@ static char* keynames[] = {
     return REGISTER_APPEND;
 }
 
+- (XVimEvaluator*)D_d:(id)arg{
+    // This is for debugging purpose.
+    // Write any debugging process to confirme some behaviour.
+    
+    return nil;
+}
 @end
 
 #pragma mark VimLocalMarkEvaluator
@@ -291,7 +293,9 @@ static char* keynames[] = {
         }
     }
     
-    return [super eval:event ofXVim:xvim];
+    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
+    [self resetNumericArg]; // Reset the numeric arg after evaluating an event
+    return nextEvaluator;
 }
 
 - (void)resetNumericArg{

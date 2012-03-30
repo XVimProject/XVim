@@ -103,12 +103,14 @@
 - (XVimEvaluator*)f:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
+    eval.previous = NO;
     return eval;
 }
 
 - (XVimEvaluator*)F:(id)arg{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = NO;
+    eval.previous = NO;
     return eval;
 }
 
@@ -194,6 +196,20 @@
 }
 */
 
+- (XVimEvaluator*)t:(id)arg{
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    eval.forward = YES;
+    eval.previous = YES;
+    return eval;
+}
+
+- (XVimEvaluator*)T:(id)arg{
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    eval.forward = NO;
+    eval.previous = YES;
+    return eval;
+}
+
 - (XVimEvaluator*)v:(id)arg{
     _inverseMotionType = !_inverseMotionType;
     return self;
@@ -271,45 +287,54 @@
         [[self xvim] ringBell];
         return self;
     }
-    at.length = 1;
-    
-    NSString* start_with = [s substringWithRange:at];
+    NSUInteger eol = [view endOfLine:at.location];
+    if (eol == NSNotFound){
+        at.length = 1;
+    }else{
+        at.length = eol - at.location + 1;
+    }
+
+    NSString* search_string = [s substringWithRange:at];
+    NSString* start_with;
     NSString* look_for;
-    
-    // note: these two much match up with regards to character order
-    NSString* open_chars = @"{[(<";
-    NSString* close_chars = @"}])>";
-    
+
+    // note: these two must match up with regards to character order
+    NSString *open_chars = @"{[(";
+    NSString *close_chars = @"}])";
+    NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:[open_chars stringByAppendingString:close_chars]];
+
     NSInteger direction = 0;
-    NSRange search = [open_chars rangeOfString:start_with];
+    NSUInteger start_location = 0;
+    NSRange search = [search_string rangeOfCharacterFromSet:charset];
     if (search.location != NSNotFound) {
-        direction = 1;
-        look_for = [close_chars substringWithRange:search];
-    }
-    if (direction == 0) {
-        search = [close_chars rangeOfString:start_with];
-        if (search.location != NSNotFound) {
+        start_location = at.location + search.location;
+        start_with = [search_string substringWithRange:search];
+        NSRange search = [open_chars rangeOfString:start_with];
+        if (search.location == NSNotFound){
             direction = -1;
+            search = [close_chars rangeOfString:start_with];
             look_for = [open_chars substringWithRange:search];
+        }else{
+            direction = 1;
+            look_for = [close_chars substringWithRange:search];
         }
-    }
-    if (direction == 0) {
+    }else{
         // src is not an open or close char
         // vim does not produce an error msg for this so we won't either i guess
         // [[self xvim] statusMessage:@"Not a match character" :ringBell TRUE]
         [[self xvim] ringBell];
         return self;
     }
-    
+
     unichar start_with_c = [start_with characterAtIndex:0];
     unichar look_for_c = [look_for characterAtIndex:0];
     NSInteger nest_level = 0;
-    
+
     search.location = NSNotFound;
     search.length = 0;
-    
+
     if (direction > 0) {
-        for(NSUInteger x=at.location; x < s.length; x++) {
+        for(NSUInteger x=start_location; x < s.length; x++) {
             if ([s characterAtIndex:x] == look_for_c) {
                 nest_level--;
                 if (nest_level == 0) { // found match at proper level
@@ -321,7 +346,7 @@
             }
         }
     } else {
-        for(NSUInteger x=at.location; ; x--) {
+        for(NSUInteger x=start_location; ; x--) {
             if ([s characterAtIndex:x] == look_for_c) {
                 nest_level--;
                 if (nest_level == 0) { // found match at proper level
@@ -336,13 +361,13 @@
             }
         }
     }
-    
+
     if (search.location == NSNotFound) {
         // [[self xvim] statusMessage:@"leveled match not found" :ringBell TRUE]
         [[self xvim] ringBell];
         return self;
     }
-        
+
     return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE];
 }
 
@@ -622,6 +647,71 @@
         sentence_head = s.length-1;
     }
     return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)COMMA:(id)arg{
+    NSTextView *view = [self textView];
+    NSUInteger location = [view selectedRange].location;
+    for (NSUInteger i = 0;;){
+        location = [[self xvim] searchCharacterPrevious:location];
+        if (location == NSNotFound || ++i >= [self numericArg]){
+            break;
+        }
+        
+        if ([[self xvim] shouldSearchPreviousCharacter]){
+            if ([[self xvim] shouldSearchCharacterBackward]){
+                location +=1;
+            }else{
+                location -= 1;
+            }
+        }
+    }
+    
+    if (location == NSNotFound){
+        [[self xvim] ringBell];
+    }else{
+        // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
+        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
+        if( ![[self xvim] shouldSearchCharacterBackward]  ){
+            // If the last search was forward "comma" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
+            type = CHARACTERWISE_EXCLUSIVE;
+        }
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+    }
+
+    return nil;
+}
+
+- (XVimEvaluator*)SEMICOLON:(id)arg{
+    NSTextView *view = [self textView];
+    NSUInteger location = [view selectedRange].location;
+    for (NSUInteger i = 0;;){
+        location = [[self xvim] searchCharacterNext:location];
+        if (location == NSNotFound || ++i >= [self numericArg]){
+            break;
+        }
+        
+        if ([[self xvim] shouldSearchPreviousCharacter]){
+            if ([[self xvim] shouldSearchCharacterBackward]){
+                location -= 1;
+            }else{
+                location +=1;
+            }
+        }
+    }
+    
+    if (location == NSNotFound){
+        [[self xvim] ringBell];
+    }else{
+        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
+        // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
+        if( [[self xvim] shouldSearchCharacterBackward]  ){
+            // If the last search was backward "semicolon" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
+            type = CHARACTERWISE_EXCLUSIVE;
+        }
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+    }
+    return nil;
 }
 
 - (XVimEvaluator*)Up:(id)arg{
