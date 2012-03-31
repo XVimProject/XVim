@@ -187,12 +187,13 @@
     [[self xvim] searchPrevious];
     return nil;
 }
+
 /*
 // Since Ctrl-u is not "motion" but "scroll" 
 // it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
  
 - (XVimEvaluator*)C_u:(id)arg{
-    return [self commonMotion:@selector(halfPageBackward:) Type:LINEWISE];
+    // This should not be implemneted here
 }
 */
 

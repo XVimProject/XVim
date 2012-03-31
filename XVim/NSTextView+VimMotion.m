@@ -18,44 +18,6 @@
 // They also have some support methods for Vim motions such as obtaining next newline break.
 //
 
-////////////////////////
-// Terms using here   //
-////////////////////////
-
-     // Let me know if terms are confusing espcially if its different from Vim's terms.
-/**
- * "Character"
- * Characgter is a one unichar value. (any value including tabs,spaces)
- *
- * "EOF"
- * EOF is the position at the end of document(text).
- * If we have NSTextView with string "abc" the EOF is just after the 'c'.
- * The index of EOF is 3 in this case.
- * What we have to think about is a cursor can be on the EOF(when the previous letter is newline) but characterAtIndex: with index of EOF cause a exception.
- * We have to be careful about it when calculate and find the position of some motions.
- *
- * "Newline"
- * Newline is defined as "unichar determined by isNewLine function". Usually "\n" or "\r".
- *
- * "Line"
- * Line is a sequence of characters terminated by newline or EOF. "Line" includes the lsst newline character.
- *
- * "Blankline"
- * Blankline is a line which as only newline. In other words, newline character after newline character.
- *
- * "End of Line(EOL)"
- * End of line the is last character of a line excluding newline character.
- * This means that blankline does NOT have an end of line.
- *
- * "Tail of Line"
- * Tail of Line is newline or EOF character at the end of a line.
- *
- * "Head of Line"
- * Head of line is the first character of a line excluding newline character.
- * This means that blankline does NOT have a head of line.
- *
- *
- **/
 
 static NSArray* XVimWordDelimiterCharacterSets = nil;
 
@@ -92,18 +54,12 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 /////////////////////////
 // support functions   //
 /////////////////////////
-#define UNDERSCORE_IS_WORD
 BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
 BOOL isWhiteSpace(unichar ch) { return ch == ' ' || ch == '\t'; }
 BOOL isNewLine(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
 BOOL isNonAscii(unichar ch) { return ch > 128; } // is this not ch >= 128 ? (JugglerShu)
 BOOL isAlpha(unichar ch) { 
-    return (ch >= 'A' && ch <= 'Z') ||
-    (ch >= 'a' && ch <= 'z') 
-#ifdef UNDERSCORE_IS_WORD
-    || ch == '_'
-#endif
-    ;
+    return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_';
 }
 BOOL isDelimeter(unichar ch) {
     return (ch >= '!' && ch <= '/') ||
@@ -117,7 +73,7 @@ BOOL isFuzzyWord(unichar ch) {
 BOOL isNonBlank(unichar ch) {
     return (!isWhiteSpace(ch)) && (!isNewLine(ch));
 }
-BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined fo 1 byte char
+BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined for 1 byte char
     return isDigit(ch) || isAlpha(ch)  || ch >= 192;
 }
 
@@ -127,7 +83,6 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 /////////////////////////
 
 // Most of the support methods take index as current interest position and index can be at EOF
-
 // The following macros asserts the range of index.
 // WITH_EOF permits the index at EOF position.
 // WITHOUT_EOF doesn't permit the index at EOF position.
@@ -175,7 +130,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
- * Determine if the position specified with "index" is newline.
+ * Determine if the position specified with "index" is white space.
  **/
 - (BOOL) isWhiteSpace:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
@@ -191,7 +146,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
  * Blankline is one of them
  *   - Newline after Newline. Ex. Second '\n' in "abc\n\nabc" is a blankline. First one is not.  
  *   - Newline at begining of the document.
- *   - EOF after Newline. Ex. The index 4 of "abc\n" is blankline. Pay attension that index 4 is exceed the string length. But the cursor can be there.
+ *   - EOF after Newline. Ex. The index 4 of "abc\n" is blankline. Note that index 4 is exceed the string length. But the cursor can be there.
  *   - EOF of 0 sized document.
  **/
 - (BOOL) isBlankLine:(NSUInteger)index{
@@ -230,9 +185,70 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
- * Returns position of the first newline when searching backwards from "index"
+ * Adjust cursor position if the position is not valid as normal mode cursor position
+ * This method may changes selected range of the view.
+ **/
+- (void)adjustCursorPosition{
+    // If the current cursor position is not valid for normal mode move it.
+    if( ![self isValidCursorPosition:[self selectedRange].location] ){
+        // Here current cursor position is never at 0. We can substract 1.
+        [self setSelectedRange:NSMakeRange([self selectedRange].location-1,0)];
+    }
+    return;
+}
+
+/**
+ * Returns next non-blank character position after the position "index" in a current line.
+ * If no non-blank character is found or the line is a blank line this returns NSNotFound.
+ * NOTE: This searches non blank characters from "index" and NOT "index+1"
+ *       If the character at "index" is non blank this returns "index" itself
+ **/ 
+- (NSUInteger)nextNonBlankInALine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    while (index < [[self string] length]) {
+        if( [self isNewLine:index] ){
+            return NSNotFound; // Characters left in a line is whitespaces
+        }
+        if ( !isWhiteSpace([[self string] characterAtIndex:index])){
+            break;
+        }
+        index++;
+    }
+    
+    if( [self isEOF:index]){
+        return NSNotFound;
+    }
+    return index;
+}
+
+/**
+ * Returns position of the first newline character when searching forwards from "index+1"
+ * Searching starts from position "index"+1. The position index is not included to search newline.
+ * Returns NSNotFound if no newline character is found.
+ **/
+- (NSUInteger)nextNewLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSUInteger length = [[self string] length];
+    if( length == 0 ){
+        return NSNotFound; // Nothing to search
+    }
+    
+    if( index >= length - 1 ){
+        return NSNotFound;
+    }
+    
+    for( NSUInteger i = index+1; i < length ; i++ ){
+        if( [self isNewLine:i] ){
+            return i;
+        }
+    }
+    return NSNotFound;
+}
+
+/**
+ * Returns position of the first newline character when searching backwards from "index-1"
  * Searching starts from position "index"-1. The position index is not included to search newline.
- * Returns NSNotFound if no newline found.
+ * Returns NSNotFound if no newline characer is found.
  **/
 - (NSUInteger)prevNewLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
@@ -251,25 +267,13 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
- * Adjust cursor position if the position is not valid as normal mode cursor position
- **/
-- (void)adjustCursorPosition{
-    // If the current cursor position is not valid for normal mode move it.
-    if( ![self isValidCursorPosition:[self selectedRange].location] ){
-        // Here current cursor position is never at 0. We can substract 1.
-        [self setSelectedRange:NSMakeRange([self selectedRange].location-1,0)];
-    }
-    return;
-}
-
-/**
  * Returns position of the head of line of the current line specified by index.
  * Head of line is one of them which is found first when searching backwords from "index".
  *    - Character just after newline
  *    - Character at the head of document
  * If the size of document is 0 it does not have any head of line.
- * Blankline does NOT have headOfLine.
- * Searching starts from position "index". So the "index" could be a head of line.
+ * Blankline does NOT have headOfLine. So EOF is NEVER head of line.
+ * Searching starts from position "index". So the "index" could be a head of line and may be returned.
  **/
 - (NSUInteger)headOfLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
@@ -290,6 +294,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 /**
  * Returns position of the first non-whitespace character past the head of line of the
  * current line specified by index.
+ * If there is no head of line it returns NSNotFound
  **/
 - (NSUInteger)headOfLineWithoutSpaces:(NSUInteger)index {
     ASSERT_VALID_RANGE_WITH_EOF(index);
@@ -321,31 +326,6 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         return head_wo_space;
     }
 }
-
-/**
- * Returns position of the first newline when searching forwards from "index"
- * Searching starts from position "index"+1. The position index is not included to search newline.
- * Returns NSNotFound if no newline is found.
- **/
-- (NSUInteger)nextNewLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    NSUInteger length = [[self string] length];
-    if( length == 0 ){
-        return NSNotFound; // Nothing to search
-    }
-    
-    if( index >= length - 1 ){
-        return NSNotFound;
-    }
-    
-    for( NSUInteger i = index+1; i < length ; i++ ){
-        if( [self isNewLine:i] ){
-            return i;
-        }
-    }
-    return NSNotFound;
-}
-
 
 /**
  * Returns position of the tail of current line. 
@@ -385,32 +365,9 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return nextNewLine-1;
 }
 
-// Obsolete
-- (NSUInteger)headOfLine{
-    NSAssert(NO, @"Obsolete");//
-    return [self headOfLine:[self selectedRange].location];
-}
-
-// Obsolete
-- (NSUInteger)prevNewline{
-    NSAssert(NO, @"Obsolete");//
-    return [self prevNewLine:[self selectedRange].location];
-}
-
-// Obsolete
-- (NSUInteger)endOfLine{
-    NSAssert(NO, @"Obsolete");//
-    return [self endOfLine:[self selectedRange].location];
-}
-
-// Obsolete
-- (NSUInteger)nextNewline{
-    NSAssert(NO, @"Obsolete");//
-    return [self nextNewLine:[self selectedRange].location];
-}
-
 /**
  * Returns column number of the position "index"
+ * Column number starts from 0
  **/
 - (NSUInteger)columnNumber:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
@@ -422,31 +379,76 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
- * Returns next non-blank character position after the position "index" in a current line.
- * If there is no non-blank character or the line is a blank line
- * this returns NSNotFound.
- *
- * NOTE: This searches non blank characters from "index" and NOT "index+1"
- *       If the character at "index" is non blank this returns "index" itself
- **/ 
-- (NSUInteger)nextNonBlankInALine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    while (index < [[self string] length]) {
-        if( [self isNewLine:index] ){
-            return NSNotFound; // Characters left in a line is whitespaces
+ * Returns position at line number "num" and column number "column"
+ * If the "column" exceeds the end of line it returns position of  the end of line.
+ * Line number starts from 1.
+ **/
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
+    NSAssert(0 != num, @"line number starts from 1");
+    
+    // Premitive search to find line number
+    // TODO: we may need to keep track line number and position by hooking insertText: method.
+    NSUInteger pos = 0;
+    num--; // line number starts from 1
+    while( pos < [[self string] length] && num != 0){ 
+        if( [self isNewLine:pos] ){
+            num--;
         }
-        if ( !isWhiteSpace([[self string] characterAtIndex:index])){
-            break;
-        }
-        index++;
+        pos++;
     }
     
-    if( [self isEOF:index]){
-        return NSNotFound;
+    // pos is at the line number "num" and column 0
+    NSUInteger end = [self endOfLine:pos];
+    if( NSNotFound == end ){
+        return pos;
     }
-    return index;
+    
+    // check if there is enough columns at the current line
+    if( end - pos >= column ){
+        return pos + column;
+    }else{
+        return end;
+    }
+    
 }
 
+
+////////////////
+// Selection  //
+////////////////
+- (void)moveCursorWithBoundsCheck:(NSUInteger)to{
+    if( to > [self string].length ){
+        to = [self string].length;
+    }    
+    
+    [self setSelectedRange:NSMakeRange(to,0)];
+}
+
+- (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to{
+    // This is inclusive selection, which means the letter at "from" and "to" is included in the result of selction.
+    // You can not use this method to move cursor since this method select 1 letter at leaset.
+    if( from > to ){
+        NSUInteger tmp = from;
+        from = to;
+        to = tmp;
+    }    
+    
+    if( [self string].length == 0 ){
+        // nothing to do;
+        return;
+    }
+    
+    if( from >= [self string].length ){
+        [self setSelectedRange:NSMakeRange([[self string] length], 0)]; 
+        return;
+    }
+    
+    if( to >= [self string].length ){
+        to = [self string].length - 1;
+    }
+    
+    [self setSelectedRange:NSMakeRange(from, to-from+1)];
+}
 
 /////////////
 // Motions //
@@ -518,16 +520,6 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return pos;
 }
 
-// Obsolete
-- (NSUInteger)prev:(NSNumber*)count{ //h
-    NSAssert(NO, @"Obsolete");//
-    return [self prev:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
-}
-// Obsolete
-- (NSUInteger)next:(NSNumber*)count{ //l
-    NSAssert(NO, @"Obsolete");//
-    return [self next:[self selectedRange].location count:[count unsignedIntValue] option:LEFT_RIGHT_NOWRAP];
-}
 
 /**
  * Returns the position when a cursor goes to upper line.
@@ -795,36 +787,31 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return r.location;
 }
 
-
-
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
-    NSAssert(0 != num, @"line number starts from 1");
-    
-    // Premitive search to find line number
-    // TODO: we may need to keep track line number and position by hooking insertText: method.
-    NSUInteger pos = 0;
-    num--; // line number starts from 1
-    while( pos < [[self string] length] && num != 0){ 
-        if( [self isNewLine:pos] ){
-            num--;
-        }
-        pos++;
-    }
-    
-    // pos is at the line number "num" and column 0
-    NSUInteger end = [self endOfLine:pos];
-    if( NSNotFound == end ){
-        return pos;
-    }
-    
-    // check if there is enough columns at the current line
-    if( end - pos >= column ){
-        return pos + column;
-    }else{
-        return end;
-    }
-    
+- (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+    return 0;
 }
+
+- (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+    return 0;
+}
+
+- (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+    return 0;
+}
+
+- (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+    return 0;
+}
+
+- (NSUInteger)sectionsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+    return 0;
+}
+
+- (NSUInteger)sectionsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+    return 0;
+}
+
+
 ////////////////
 // Scrolling  //
 ////////////////
@@ -1058,69 +1045,4 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return [self selectedRange].location;
 }
 
-- (NSUInteger)sentencesBackward:(NSNumber*)count{ //(
-    return 0;
-}
-
-- (NSUInteger)sentencesForward:(NSNumber*)count{ //)
-    return 0;
-}
-
-- (NSUInteger)pragraphsBackward:(NSNumber*)count{ //{
-    return 0;
-}
-
-- (NSUInteger)pragraphsForward:(NSNumber*)count{ //{
-    return 0;
-}
-
-- (NSUInteger)sectionsBackward:(NSNumber*)count{ //[[
-    return 0;
-}
-
-- (NSUInteger)sectionsForward:(NSNumber*)count{ //]]
-    return 0;
-}
-
-////////////////
-// Selection  //
-////////////////
-- (void)moveCursorWithBoundsCheck:(NSUInteger)to{
-    if( [self string].length == 0 ){
-        // nothing to do;
-        return;
-    }
-    
-    if( to >= [self string].length ){
-        to = [self string].length - 1;
-    }    
-    
-    [self setSelectedRange:NSMakeRange(to,0)];
-}
-
-- (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to{
-    // This is inclusive selection, which means the letter at "from" and "to" is included in the result of selction.
-    // You can not use this method to move cursor since this method select 1 letter at leaset.
-    if( from > to ){
-        NSUInteger tmp = from;
-        from = to;
-        to = tmp;
-    }    
-    
-    if( [self string].length == 0 ){
-        // nothing to do;
-        return;
-    }
-    
-    if( from >= [self string].length ){
-        [self setSelectedRange:NSMakeRange([[self string] length], 0)]; 
-        return;
-    }
-    
-    if( to >= [self string].length ){
-        to = [self string].length - 1;
-    }
-    
-    [self setSelectedRange:NSMakeRange(from, to-from+1)];
-}
 @end
