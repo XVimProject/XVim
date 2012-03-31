@@ -10,6 +10,9 @@
 #import "XVimCommandField.h"
 #import "Logger.h"
 #import "XVim.h"
+#import "DVTSourceTextView.h"
+#import "DVTFoldingTextStorage.h"
+#import "DVTFontAndColorsTheme.h"
 
 #define STATUS_BAR_HEIGHT 18
 
@@ -100,13 +103,14 @@
 }
 
 - (void)viewWillDraw{
-    [self layoutDVTSourceTextScrollViewSubviews:[self superview]];
+    [self layoutDVTSourceTextScrollViewSubviews:(NSScrollView*)[self superview]];
     [super viewWillDraw];
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
     [_status setStringValue:[xvim modeName]];
-    id fontAndColors = [[[xvim sourceView] textStorage] fontAndColorTheme];
+	DVTSourceTextView *view = [xvim sourceView];
+    DVTFontAndColorsTheme* fontAndColors = [[view textStorage] fontAndColorTheme];
     
     NSColor* color;
     if( [_command.stringValue isEqualToString:@""] ){

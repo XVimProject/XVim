@@ -10,6 +10,7 @@
 #import "XVimEqualEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimYankEvaluator.h"
+#import "DVTSourceTextView.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -38,7 +39,7 @@
 
 - (XVIM_MODE)becameHandler:(XVim *)xvim{
     self.xvim = xvim;
-    NSTextView* view = [xvim sourceView];
+    DVTSourceTextView* view = (DVTSourceTextView*)[xvim sourceView];
     NSRange cur = [view selectedRange];
     _begin = cur.location;
     _insertion = cur.location + cur.length;
@@ -59,7 +60,7 @@
 }
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    NSTextView* v = [xvim sourceView];
+    DVTSourceTextView* v = [xvim sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
@@ -209,7 +210,7 @@
 
 - (XVimEvaluator*)GREATERTHAN:(id)arg{
     [self updateSelection];
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = (DVTSourceTextView*)[self textView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftRight:self];
     }
@@ -222,7 +223,7 @@
 
 - (XVimEvaluator*)LESSTHAN:(id)arg{
     [self updateSelection];
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = [self textView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftLeft:self];
     }

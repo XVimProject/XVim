@@ -33,7 +33,7 @@
     IMP origImp_stret = class_getMethodImplementation_stret(cls, sel);
     class_replaceMethod(cls, sel, method_getImplementation(newMethod), method_getTypeEncoding(origMethod));
     // origImpはnilが帰る可能性がある。（サブクラスがそのメソッドを持たない場合） origImp_stretをselOriginalで呼び出せるようにする
-    //NSTextViewの実装をXVimKeyDown:で呼び出せるようにしておく（keyDownをフックしたときに、転送できるように）
+    //NSTextViewの実装をkeyDown_:で呼び出せるようにしておく（keyDownをフックしたときに、転送できるように）
     class_addMethod(cls, selOriginal, origImp_stret, method_getTypeEncoding(origMethod));
 }
 @end

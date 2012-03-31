@@ -15,7 +15,7 @@
 - (XVimEvaluator*)g:(id)arg{
     METHOD_TRACE_LOG();
     //TODO: Must deal numeric arg as linenumber
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = [self textView];
     NSUInteger location = [view nextLine:0 column:0 count:self.repeat - 1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE];
 }

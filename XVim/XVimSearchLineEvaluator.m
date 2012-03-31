@@ -7,6 +7,7 @@
 //
 
 #import "XVimSearchLineEvaluator.h"
+#import "XVimMotionEvaluator.h"
 #import "XVim.h"
 #import "Logger.h"
 
@@ -19,7 +20,7 @@
     NSString *searchChar = [[event characters] substringWithRange:NSMakeRange(0, 1)];
     [xvim setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
 
-    NSTextView *view = [xvim superview];
+    NSTextView *view = (NSTextView*)[xvim superview];
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
         location = [xvim searchCharacterNext:location];

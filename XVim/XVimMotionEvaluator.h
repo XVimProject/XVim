@@ -7,6 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
+#import "XVimNumericEvaluator.h"
 
 
 // This evaluator handles motions.
@@ -22,7 +23,7 @@ typedef enum _MOTION_TYPE{
     LINEWISE,
 }MOTION_TYPE;
 
-@interface XVimMotionEvaluator : XVimNumericEvaluator{
+@interface XVimMotionEvaluator : XVimNumericEvaluator {
     
 @private    
     NSUInteger _motionFrom;

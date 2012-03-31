@@ -18,7 +18,7 @@
         to = tmp;
     }
     
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = [self textView];
     if( type == CHARACTERWISE_EXCLUSIVE ){
         to--;
     }else if( type == CHARACTERWISE_INCLUSIVE ){

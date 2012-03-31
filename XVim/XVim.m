@@ -28,7 +28,9 @@
 
 #import "Logger.h"
 #import "Hooker.h"
-#import "DVTSourceTextViewHook.h"
+#import "DVTSourceTextView.h"
+#import "XVimSourceTextView.h"
+#import "XVimSourceCodeEditor.h"
 #import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
 #import "NSTextView+VimMotion.h"
@@ -81,60 +83,8 @@
 
 + (void) hook
 {
-    Class c = NSClassFromString(@"DVTSourceTextView");
-    
-    // Hook setSelectedRange:
-    [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:)];
-    
-    // Hook setSelectedRange:affinity:stillSelecting:
-    [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(XVimSetSelectedRange:affinity:stillSelecting:)];
-    
-    // Hook initWithCoder:
-    [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(XVimInitWithCoder:)];
-    
-    // Hook viewDidMoveToSuperview
-    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(XVimViewDidMoveToSuperview)];
-    
-    // Hook keyDown:
-    [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(keyDown:) ) keepingOriginalWith:@selector(XVimKeyDown:)];   
-    
-    // Hook mouseDown:
-    [Hooker hookMethod:@selector(mouseDown:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseDown:) ) keepingOriginalWith:@selector(XVimMouseDown:)];
-
-    // Hook mouseUp:
-    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(mouseUp:) ) keepingOriginalWith:@selector(XVimMouseUp:)];    
-
-    // Hook drawRect:
-    [Hooker hookMethod:@selector(drawRect:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawRect:)) keepingOriginalWith:@selector(XVimDrawRect:)];
-    
-    // Hook performKeyEquivalent:
-    [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(XVimPerformKeyEquivalent:)];
-    
-    // Hook shouldDrawInsertionPoint for Drawing Caret
-    [Hooker hookMethod:@selector(shouldDrawInsertionPoint) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(shouldDrawInsertionPoint)) keepingOriginalWith:@selector(XVimShouldDrawInsertionPoint)];
-    
-    // Hook drawInsertionPointInRect for Drawing Caret
-    [Hooker hookMethod:@selector(drawInsertionPointInRect:color:turnedOn:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(drawInsertionPointInRect:color:turnedOn:)) keepingOriginalWith:@selector(XVimDrawInsertionPointInRect:color:turnedOn:)];
-    
-    // Hook _drawInsertionPointInRect for Drawing Caret       
-    [Hooker hookMethod:@selector(_drawInsertionPointInRect:color:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(_drawInsertionPointInRect:color:)) keepingOriginalWith:@selector(_XVimDrawInsertionPointInRect:color:)];
-    
-    // Hook doCommandBySelector:
-    [Hooker hookMethod:@selector(doCommandBySelector:) ofClass:c withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(doCommandBySelector:)) keepingOriginalWith:@selector(XVimDoCommandBySelector:)];
-    
-    // Hook didAddSubview of DVTSourceTextScrollView
-    [Hooker hookMethod:@selector(didAddSubview:) ofClass:NSClassFromString(@"DVTSourceTextScrollView") withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(didAddSubview:)) keepingOriginalWith:@selector(XVimDidAddSubview:)];
-    
-    Class delegate = NSClassFromString(@"IDESourceCodeEditor");
-        [Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
-                   ofClass:delegate 
-                withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
-       keepingOriginalWith:@selector(XVimTextView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
-    
-    [Hooker hookMethod:@selector(textViewDidChangeSelection:) 
-               ofClass:delegate 
-            withMethod:class_getInstanceMethod([DVTSourceTextViewHook class], @selector(textViewDidChangeSelection:))
-   keepingOriginalWith:@selector(XVimTextViewDidChangeSelection:)];
+	[XVimSourceTextView hook];
+	[XVimSourceCodeEditor hook];
 }
 
 //////////////////////////////
@@ -238,6 +188,7 @@
     [_lastReplacedString release];
     [_lastReplacementString release];
     [XVimNormalEvaluator release];
+	[super dealloc];
 }
 
 - (void)setMode:(NSInteger)mode{
@@ -288,7 +239,7 @@
 // Should move to separated file.
 - (void)commandDetermined:(NSString*)command{
     NSString* c = [command stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    NSTextView* srcView = (NSTextView*)[self superview]; // DVTTextSourceView
+    DVTSourceTextView* srcView = (DVTSourceTextView*)[self superview]; // DVTTextSourceView
     TRACE_LOG(@"command : %@", c);
     if( [c length] == 0 ){
         // Something wrong
@@ -312,7 +263,6 @@
         if ((words_count == 1) && [[NSScanner scannerWithString:[words objectAtIndex:0]] scanInt:&scanned_int_arg]) {
             // single arg that's a parsable int, go to line in scanned_int
             TRACE_LOG("go to line CMD line no = %d", scanned_int_arg);
-            id mvid = nil; //seems to be ok to use nil for this for the movement calls we are doing
             if (scanned_int_arg > 0) {
                 NSUInteger pos = [srcView positionAtLineNumber:scanned_int_arg column:0];
                 NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
@@ -390,7 +340,8 @@
         }
         else if( [ex_command isEqualToString:@"debug"] ){
            // Place Any debugging purpose process...
-            [[self superview] setSelectedRange:NSMakeRange([[[self superview] string] length], 0)];
+			DVTSourceTextView* parentView = (DVTSourceTextView*)[self superview];
+            [parentView setSelectedRange:NSMakeRange([[parentView string] length], 0)];
         }
         else if( [ex_command isEqualToString:@"make"] ){
             NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
@@ -486,7 +437,7 @@
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
     
-    NSTextView* srcView = [self superview];
+    NSTextView* srcView = (NSTextView*)[self superview];
     NSUInteger search_base = [self getNextSearchBaseLocation];
     search_base = [srcView selectedRange].location;
     NSRange found = {NSNotFound, 0};
@@ -543,7 +494,7 @@
     // What we do instead is a search for all occurences and then
     // use the range of the last match. Not very efficient, but i don't think
     // optimization is warranted until slowness is experienced at the user level.
-    NSTextView* srcView = [self superview];
+    NSTextView* srcView = (NSTextView*)[self superview];
     NSUInteger search_base = [self getNextSearchBaseLocation];
     search_base = [srcView selectedRange].location;
     NSRange found = {NSNotFound, 0};
@@ -627,7 +578,7 @@
 }
 
 - (NSUInteger)searchCharacterBackward:(NSUInteger)start{
-    NSTextView *view = [self superview];
+    NSTextView *view = (NSTextView*)[self superview];
     NSString* s = [[view textStorage] string];
     NSRange at = NSMakeRange(start, 0); 
     if (at.location >= s.length-1) {
@@ -657,7 +608,7 @@
 }
 
 - (NSUInteger)searchCharacterForward:(NSUInteger)start{
-    NSTextView *view = [self superview];
+    NSTextView *view = (NSTextView*)[self superview];
     NSString* s = [[view textStorage] string];
     NSRange at = NSMakeRange(start, 0); 
     if (at.location >= s.length-1) {
@@ -706,7 +657,7 @@
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
     
-    NSTextView* srcView = [self superview];
+    NSTextView* srcView = (NSTextView*)[self superview];
     NSUInteger search_base = _nextReplaceBaseLocation;
     search_base = [srcView selectedRange].location;
     NSRange found = {NSNotFound, 0};

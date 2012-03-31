@@ -10,6 +10,8 @@
 #import "NSTextView+VimMotion.h"
 #import "Xvim.h"
 #import "Logger.h"
+#import "DVTSourceTextView.h"
+#import "DVTCompletionController.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -110,7 +112,7 @@
         NSRange save = [[xvim sourceView] selectedRange];
         for (NSUInteger i = 0; i < _repeat; ++i) {
             [[xvim sourceView] deleteForward:self];
-            [[xvim sourceView] XVimKeyDown:event];
+            [[xvim sourceView] keyDown_:event];
 
             save.location += 1;
             [[xvim sourceView] setSelectedRange:save];
@@ -119,7 +121,7 @@
         [[xvim sourceView] setSelectedRange:save];
         return nil;
     } else {
-        [[xvim sourceView] XVimKeyDown:event];
+        [[xvim sourceView] keyDown_:event];
         return self;
     }
 }
