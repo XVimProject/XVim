@@ -301,16 +301,21 @@
     // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
     // because dw is not working quite right it seems
     NSTextView* view = [self textView];
+    NSUInteger loc = [view selectedRange].location;
     NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
     unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
     if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        NSUInteger newline = [view nextNewLine:[view selectedRange].location];
-        if( NSNotFound == newline ){
-            // add newline at EOF
-            [view setSelectedRange:NSMakeRange([[view string]length], 0)];
-            [view insertNewline:self];
+        if( [view isBlankLine:loc] && ![view isEOF:loc]){
+            [view setSelectedRange:NSMakeRange(loc+1,0)];
         }else{
-            [view setSelectedRange:NSMakeRange(newline+1, 0)];
+            NSUInteger newline = [view nextNewLine:loc];
+            if( NSNotFound == newline ){
+                // add newline at EOF
+                [view setSelectedRange:NSMakeRange([[view string]length], 0)];
+                [view insertNewline:self];
+            }else{
+                [view setSelectedRange:NSMakeRange(newline+1, 0)];
+            }
         }
     }else{
         [view moveForward:self];
