@@ -8,23 +8,31 @@
 
 // Evaluator classes Hierarchy
 /*
-XVimEvaluator - Evaluator base
-|- XVimNumericEvaluator - Handles numeric input
-|- XVimTextObject - Handles motions (As I commented in the code, the name is not really proper)
-|- XVimNormalEvaluator - Handle normal mode. If XVimTextObject handled motion, this evaluator just move the cursor to the end point of the motion.
+XVimEvaluators and its subclasses are the class to handle keyboad input.
+Upper class of these evaluator hierarchy implement common process of keyboard input.
+For example "motions" such as 'w','b' are handled by XVimMotionEvaluator and this is common parent class for a class
+which needs to take a motions as operations. XVimDeleteEvaluator is one of the subclass of XVimMotionEvaluator ( its direct parent is XVimOperatorEvaluator ).
  
-And Most of the command which takes "Motion" as argument they are derived from XVimTextObject.
+XVimEvaluator - Evaluator base
+|- XVimMotionArgumentEvaluator 
+|- XVimNumericEvaluator - Handles numeric input
+     |- XVimMotionEvaluator- Handles motions
+          |- XVimNormalEvaluator - Handle normal mode. If XVimTextObject handled motion, this evaluator just move the cursor to the end point of the motion.
+ 
+And Most of the command which takes "Motion" as argument they are derived from XVimMotionEvaluator.
 
-XVimTextObject
-|- XVimVisualEvaluator - Handles Visual mode (Move cursor as per motion and expand the selection)
-|- XVimDeleteEvaluator - Handles 'd' command.
-
+XVimMotionEvaluator
+|- XVimOperatorEvaluator
+|    |- XVimVisualEvaluator - Handles Visual mode (Move cursor as per motion and expand the selection)
+|    |- XVimDeleteEvaluator - Handles 'd' and 'c' command.
+|    .... and so on. 
+|
+|- XVimNormalEvaluator
+|- XVimVisualEvaluator
 ... And so on.
 
+An evaluator which takes argument to determine the motion ( like 'f' ) use XVimMotionArgumentEvaluator as its parent class.
 
-An evaluator which takes argument to determine the motion ( like 'f' ) I'm currently implementing 
-another structure. 
-(Current implementation of XVimSearchLine evaluator can not be used from like 'd' command )
 */
 
 #import "XVimRegister.h"

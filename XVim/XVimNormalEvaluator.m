@@ -60,7 +60,7 @@
 
 - (XVimEvaluator*)a:(id)arg{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
-    // next line. it appends to the current line
+   // next line. it appends to the current line
     // A cursor should not be on the new line break letter in Vim(Except empty line).
     // So the root solution is to prohibit a cursor be on the newline break letter.
     NSTextView* view = [self textView];
