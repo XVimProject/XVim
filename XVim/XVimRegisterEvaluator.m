@@ -9,6 +9,7 @@
 #import "XVimRegisterEvaluator.h"
 #import "XVimNormalEvaluator.h"
 #import "XVimRegister.h"
+#import "XVimKeyStroke.h"
 #import "XVim.h"
 #import "Logger.h"
 
@@ -26,8 +27,8 @@ XVimRegisterEvalMode _mode;
     return self;
 }
 
-- (XVimEvaluator*)eval:(NSEvent*) event ofXVim:(XVim*)xvim{
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+    NSString* keyStr = [keyStroke toSelectorString];
     XVimRegister *xregister = [xvim findRegister:keyStr];
     if (_mode == REGISTER_EVAL_MODE_RECORD){
         if (xregister.isReadOnly == NO){
@@ -42,7 +43,7 @@ XVimRegisterEvalMode _mode;
     return nil;
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     return REGISTER_IGNORE;
 }
 

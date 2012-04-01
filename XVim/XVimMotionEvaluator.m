@@ -11,6 +11,7 @@
 #import "XVimGEvaluator.h"
 #import "XVimZEvaluator.h"
 #import "XVimLocalMarkEvaluator.h"
+#import "XVimKeyStroke.h"
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
@@ -480,7 +481,7 @@
 /* 
  * Space acts like 'l' in vi. moves  cursor forward
  */
-- (XVimEvaluator*)SP:(id)arg{
+- (XVimEvaluator*)SPACE:(id)arg{
     return [self l:arg];
 }
 
@@ -836,12 +837,11 @@
     return [self l:(id)arg];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if (xregister.isRepeat){
         if (xregister.nonNumericKeyCount == 1){
-            NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
-            SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-            if([[XVimMotionEvaluator class] instancesRespondToSelector:handler] || [key hasPrefix:@"NUM"]){
+            NSString *key = [keyStroke toSelectorString];
+            if([keyStroke classResponds:[XVimMotionEvaluator class]] || [key hasPrefix:@"NUM"]){
                 return REGISTER_APPEND;
             }
         }
@@ -849,7 +849,7 @@
         return REGISTER_IGNORE;
     }
     
-    return [super shouldRecordEvent:event inRegister:xregister];
+    return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
 @end

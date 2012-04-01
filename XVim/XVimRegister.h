@@ -14,12 +14,14 @@ typedef enum {
     REGISTER_REPLACE
 } XVimRegisterOperation;
 
+@class XVimKeyStroke;
+
 @interface XVimRegister : NSObject
 
 -(id) initWithRegisterName:(NSString*)name;
 
 -(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count;
--(void) appendKeyEvent:(NSEvent*)event;
+-(void) appendKeyEvent:(XVimKeyStroke*)keyStroke;
 -(void) appendText:(NSString*)text;
 -(void) clear;
 
