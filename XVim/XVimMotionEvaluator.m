@@ -93,11 +93,50 @@
 */
 
 - (XVimEvaluator*)e:(id)arg{
-    return [self commonMotion:@selector(endOfWordsForward:) Type:CHARACTERWISE_INCLUSIVE];
+    NSUInteger realCount = [self numericArg];
+
+    XVimWordInfo info;
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSString *string = [[self textView] string];
+    if (from + 1 < [string length] && from > 0){
+        unichar lastChar = [[[self textView] string] characterAtIndex:from-1];
+        unichar curChar = [[[self textView] string] characterAtIndex:from];
+        unichar nextChar = [[[self textView] string] characterAtIndex:from+1];
+        if( [[self textView] isBlankLine:from] || (isNonBlank(curChar) != isNonBlank(nextChar)) || (isKeyword(curChar) != isKeyword(nextChar)) || (isWhiteSpace(curChar) && isWhiteSpace(nextChar))){
+            // Increase count by one such that the last end of word is properly set
+            realCount += 1;
+        }
+    }
+    NSUInteger to = [[self textView] wordsForward:from count:realCount option:MOTION_OPTION_NONE info:&info];
+    if (info.isFirstWordInALine){
+        to = info.lastEndOfLine;
+    }else if( info.lastEndOfWord != NSNotFound){
+        to = info.lastEndOfWord;
+    }
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE];
 }
 
 - (XVimEvaluator*)E:(id)arg{
-    return [self commonMotion:@selector(endOfWORDSForward:) Type:CHARACTERWISE_INCLUSIVE];
+    NSUInteger realCount = [self numericArg];
+    
+    XVimWordInfo info;
+    NSUInteger from = [[self textView] selectedRange].location;
+    NSString *string = [[self textView] string];
+    if (from + 1 < [string length]){
+        unichar curChar = [[[self textView] string] characterAtIndex:from];
+        unichar nextChar = [[[self textView] string] characterAtIndex:from+1];
+        if (!isNonBlank(curChar) || !isNonBlank(nextChar)){
+            // Increase count by one such that the last end of word is properly set
+            realCount += 1;
+        }
+    }
+    NSUInteger to = [[self textView] wordsForward:from count:realCount option:BIGWORD info:&info];
+    if (info.isFirstWordInALine){
+        to = info.lastEndOfLine;
+    }else if( info.lastEndOfWord != NSNotFound){
+        to = info.lastEndOfWord;
+    }
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE];
 }
 
 - (XVimEvaluator*)f:(id)arg{
@@ -241,6 +280,70 @@
         return nil;
     }
     return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE];
+}
+
+- (XVimEvaluator*)ASTERISK:(id)arg{
+    NSTextView *view = [self textView];
+
+    NSRange begin = [view selectedRange];
+    NSString *string = [view string];
+    NSUInteger searchStart = begin.location;
+    NSUInteger firstNonBlank = NSNotFound;
+    while (![view isEOF:searchStart]) {
+        unichar curChar = [string characterAtIndex:searchStart];
+        if (isNewLine(curChar)){
+            searchStart = NSNotFound;
+            break;
+        }
+
+        if (isKeyword(curChar)){
+            break;
+        }
+
+        if (isNonBlank(curChar) && firstNonBlank == NSNotFound){
+            firstNonBlank = searchStart;
+        }
+
+        ++searchStart;
+    }
+
+    if (searchStart == NSNotFound){
+        searchStart = firstNonBlank;
+    }
+
+    if (searchStart == NSNotFound){
+        [self.xvim ringBell];
+        return nil;
+    }
+
+    XVimWordInfo info;
+    NSUInteger wordStart = searchStart;
+    if (wordStart > 0){
+        unichar curChar = [string characterAtIndex:wordStart];
+        unichar lastChar = [string characterAtIndex:wordStart-1];
+        if ((isKeyword(curChar) && isKeyword(lastChar)) ||
+            (!isKeyword(curChar) && isNonBlank(curChar) && !isKeyword(lastChar) && isNonBlank(lastChar))){
+            wordStart = [view wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
+        }
+    }
+
+    NSUInteger wordEnd = [view wordsForward:wordStart count:1 option:LEFT_RIGHT_NOWRAP info:&info];
+    if (info.lastEndOfWord != NSNotFound){
+        wordEnd = info.lastEndOfWord;
+    }
+
+    // Search for the word
+    NSRange wordRange = NSMakeRange(wordStart, wordEnd - wordStart + 1);
+    NSString *searchWord = [[view string] substringWithRange:wordRange];
+    NSString *escapedSearchWord = [NSRegularExpression escapedPatternForString:searchWord];
+    [self.xvim commandDetermined:[@"/" stringByAppendingString:escapedSearchWord]];
+
+    if (searchStart != begin.location){
+        [[self xvim] searchNext];
+    }
+
+    NSRange end = [view selectedRange];
+    return [self motionFixedFrom:begin.location To:end.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
