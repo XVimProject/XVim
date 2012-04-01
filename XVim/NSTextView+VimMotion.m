@@ -19,8 +19,6 @@
 //
 
 
-static NSArray* XVimWordDelimiterCharacterSets = nil;
-
 @implementation NSTextView (VimMotion)
 /////////////////////
 // Character set   //
@@ -28,28 +26,6 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 #define CHARSET_ID_WHITESPACE 0
 #define CHARSET_ID_KEYWORD 1 // This is named after 'iskeyword' in Vim
-
-+ (NSArray*) wordDelimiterCharacterSets{
-    if (XVimWordDelimiterCharacterSets == nil) {
-        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects: [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
-                                          [NSCharacterSet  characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_"],
-                                          nil
-                                          ];
-    }    
-    return XVimWordDelimiterCharacterSets;
-}
-
-- (NSInteger)wordCharSetIdForChar:(unichar)c {
-    NSInteger cs_id=0;
-    for (NSCharacterSet* cs in [NSTextView wordDelimiterCharacterSets]) {
-        if ([cs characterIsMember:c])
-            break;
-        cs_id++;
-    }
-    return cs_id;
-};
-
-
 
 /////////////////////////
 // support functions   //
