@@ -274,8 +274,8 @@
         
         // Special case for cmdline mode. I don't like this, but
         // don't have time to refactor cmdline mode.
-        if (_mode != MODE_CMDLINE){
-            _mode = newMode;
+        if (self.mode != MODE_CMDLINE){
+            self.mode = newMode;
         }
 
         [_currentEvaluator release];
@@ -762,8 +762,8 @@
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
     self.mode = MODE_CMDLINE;
-    [self cmdLine].mode = MODE_STRINGS[self.mode];
-    [[self cmdLine] setFocusOnCommandWithFirstLetter:first];
+    self.cmdLine.mode = MODE_STRINGS[self.mode];
+    [self.cmdLine setFocusOnCommandWithFirstLetter:first];
 }
 
 - (NSString*)modeName{
@@ -806,6 +806,7 @@
 - (void)recordIntoRegister:(XVimRegister*)xregister{
     if (_recordingRegister == nil){
         _recordingRegister = xregister;
+        self.cmdLine.additionalStatus = @"recording";
         // when you record into a register you clear out any previous recording
         // unless it was capitalized
         [_recordingRegister clear];
@@ -819,6 +820,7 @@
         [self ringBell];
     }else{
         _recordingRegister = nil;
+        self.cmdLine.additionalStatus = @"";
     }
 }
 
