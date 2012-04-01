@@ -12,6 +12,11 @@
 #import "XVimYankEvaluator.h"
 #import "DVTSourceTextView.h"
 
+@interface XVimVisualEvaluator()
+- (XVimEvaluator*)ESC:(id)arg;
+@end
+
+
 @implementation XVimVisualEvaluator 
 
 - (NSUInteger)insertionPoint{

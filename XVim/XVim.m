@@ -37,6 +37,8 @@
 
 @interface XVim()
 - (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
+- (BOOL)replaceForward;
+
 @property (strong) NSString *searchCharacter;
 @end
 
