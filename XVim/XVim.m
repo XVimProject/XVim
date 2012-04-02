@@ -153,11 +153,8 @@
     if (self) {
         _mode = MODE_NORMAL;
         tag = XVIM_TAG;
-        _lastSearchString = [[NSMutableString alloc] init];
         _lastReplacementString = [[NSMutableString alloc] init];
         _lastReplacedString = [[NSMutableString alloc] init];
-        _nextSearchBaseLocation = 0;
-        _searchBackword = NO;
         _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
         _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
         _errorBells = FALSE; // ring bell on input errors.
@@ -244,7 +241,6 @@
 }
 
 -(void)dealloc{
-    [_lastSearchString release];
     [_lastReplacedString release];
     [_lastReplacementString release];
     [_options release];
@@ -313,167 +309,49 @@
         [_excmd executeCommand:c];
     }
     else if ([c characterAtIndex:0] == '/' || [c characterAtIndex:0] == '?') {
-        //[_searchcmd executeSearch:c];
-        // note: c is the whitespace trimmed version of command.
-        // we want the non trimmed version (command) because leading/trailing
-        // whitespace is something should be part of the search string
-        if ([command characterAtIndex:0] == '?') {
-            _searchBackword = YES;
-        } else {
-            _searchBackword = NO;
-        }
-        if([command length] == 1) {
-            // in vi, if there's no search string. use the last one specified. like you do for 'n'
-            // just set the direction of the search
-            [self searchNext];
-        }
-        else if([command length] > 1) {
-            NSString *s = [command substringFromIndex:1];
-            [_lastSearchString setString: s];
-            [self searchNext];
+        NSRange found = [_searchcmd executeSearch:c];
+        //Move cursor and show the found string
+        if( found.location != NSNotFound ){
+            [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+            [srcView scrollToCursor];
+            [srcView showFindIndicatorForRange:found];
+        }else{
+            [self statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",_searchcmd.lastSearchString] ringBell:TRUE];
         }
     }
-    
+   
     [[self window] makeFirstResponder:srcView]; // Since XVim is a subview of DVTSourceTextView;
     self.mode = MODE_NORMAL;
 }
 
-- (void)searchForward {
-    // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
-    // We use NSRegularExpression which does (if you tell it to)
-    
-    NSTextView* srcView = [self superview];
-    NSUInteger search_base = [self getNextSearchBaseLocation];
-    search_base = [srcView selectedRange].location;
-    NSRange found = {NSNotFound, 0};
-    
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-    if (_ignoreCase == TRUE) {
-        r_opts |= NSRegularExpressionCaseInsensitive;
-    }
-    
-    NSError *error = NULL;
-    NSRegularExpression *regex = [NSRegularExpression 
-        regularExpressionWithPattern:_lastSearchString
-        options:r_opts
-        error:&error];
-        
-    if (error != nil) {
-        [self statusMessage:[NSString stringWithFormat:
-            @"Cannot compile regular expression '%@'",_lastSearchString] ringBell:TRUE];
-        return;
-    }
-    
-    // search text beyond the search_base
-    if( [[srcView string] length]-1 > search_base){
-        found = [regex rangeOfFirstMatchInString:[srcView string] 
-            options:r_opts
-            range:NSMakeRange(search_base+1, [[srcView string] length] - search_base - 1)];
-    }
-    
-    // if wrapscan is on, wrap to the top and search
-    if (found.location == NSNotFound && _wrapScan == TRUE) {
-        found = [regex rangeOfFirstMatchInString:[srcView string] 
-            options:r_opts
-            range:NSMakeRange(0, [[srcView string] length])];
-        [self statusMessage:[NSString stringWithFormat:
-            @"Search wrapped for '%@'",_lastSearchString] ringBell:TRUE];
-    }
-    if( found.location != NSNotFound ){
-        //Move cursor and show the found string
-        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-        [srcView scrollToCursor];
-        [srcView showFindIndicatorForRange:found];
-        // note: make sure this stays *after* setSelectedRange which also updates 
-        // _nextSearchBaseLocation as a side effect
-        [self setNextSearchBaseLocation:found.location + ((found.length==0)? 0: found.length-1)];
-    } else {
-        [self statusMessage:[NSString stringWithFormat:
-            @"Cannot find '%@'",_lastSearchString] ringBell:TRUE];
-    }
-}
-
-
-- (void)searchBackward {
-    // opts = (NSBackwardsSearch | NSRegularExpressionSearch) is not supported by [NSString rangeOfString:opts]
-    // What we do instead is a search for all occurences and then
-    // use the range of the last match. Not very efficient, but i don't think
-    // optimization is warranted until slowness is experienced at the user level.
-    NSTextView* srcView = [self superview];
-    NSUInteger search_base = [self getNextSearchBaseLocation];
-    search_base = [srcView selectedRange].location;
-    NSRange found = {NSNotFound, 0};
-    
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-    if (_ignoreCase == TRUE) {
-        r_opts |= NSRegularExpressionCaseInsensitive;
-    }
-     
-    NSError *error = NULL;
-    NSRegularExpression *regex = [NSRegularExpression 
-        regularExpressionWithPattern:_lastSearchString
-        options:r_opts
-        error:&error];
-        
-    if (error != nil) {
-        [self statusMessage:[NSString stringWithFormat:
-            @"Cannot compile regular expression '%@'",_lastSearchString] ringBell:TRUE];
-        return;
-    }
-    
-    NSArray*  matches = [regex matchesInString:[srcView string]
-        options:r_opts
-        range:NSMakeRange(0, [[srcView string] length]-1)];
-        
-    // search above base
-    if (search_base > 0) {
-        for (NSTextCheckingResult *match in matches) { // get last match in area before search_base
-            NSRange tmp = [match range];
-            if (tmp.location >= search_base)
-                break;
-            found = tmp;
-        }
-    }
-    // if wrapscan is on, search below base as well
-    if (found.location == NSNotFound && _wrapScan == TRUE) {
-        if ([matches count] > 0) {
-            NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
-            found = [match range];
-            [self statusMessage:[NSString stringWithFormat:
-                @"Search wrapped for '%@'",_lastSearchString] ringBell:FALSE];
-        }
-    }
-    if (found.location != NSNotFound) {
-        // Move cursor and show the found string
-        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-        [srcView scrollToCursor];
-        [srcView showFindIndicatorForRange:found];
-        // note: make sure this stays *after* setSelectedRange which also updates 
-        // _nextSearchBaseLocation as a side effect
-        [self setNextSearchBaseLocation:found.location]; // demonstrative. not really needed
-    } else {
-        [self statusMessage:[NSString stringWithFormat:
-            @"Cannot find '%@'",_lastSearchString] ringBell:TRUE];
-    }
-}
-
-
 - (void)searchNext{
-    if( _searchBackword){
-        [self searchBackward];
+    NSTextView* srcView = (NSTextView*)[self superview]; // DVTTextSourceView
+    NSRange found = [_searchcmd searchNext];
+    //Move cursor and show the found string
+    if( found.location != NSNotFound ){
+        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
     }else{
-        [self searchForward];
+        [self statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",_searchcmd.lastSearchString] ringBell:TRUE];
     }
-    return;
- }
+}
 
 - (void)searchPrevious{
-    if( _searchBackword){
-        [self searchForward];
+    NSTextView* srcView = (NSTextView*)[self superview]; // DVTTextSourceView
+    NSRange found = [_searchcmd searchPrev];
+    //Move cursor and show the found string
+    if( found.location != NSNotFound ){
+        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+        [srcView scrollToCursor];
+        [srcView showFindIndicatorForRange:found];
     }else{
-        [self searchBackward];
+        [self statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",_searchcmd.lastSearchString] ringBell:TRUE];
     }
-    return;
+}
+
+- (void)setNextSearchBaseLocation:(NSUInteger)location{
+    _searchcmd.nextSearchBaseLocation = location;
 }
 
 - (void)setSearchCharacter:(NSString*)searchChar backward:(BOOL)backward previous:(BOOL)previous{
@@ -483,7 +361,7 @@
 }
 
 - (NSUInteger)searchCharacterBackward:(NSUInteger)start{
-    NSTextView *view = [self superview];
+    NSTextView *view = (NSTextView*)[self superview];
     NSString* s = [[view textStorage] string];
     NSRange at = NSMakeRange(start, 0); 
     if (at.location >= s.length-1) {
@@ -562,7 +440,7 @@
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
     
-    NSTextView* srcView = [self superview];
+    NSTextView* srcView = (NSTextView*)[self superview];
     NSUInteger search_base = _nextReplaceBaseLocation;
     search_base = [srcView selectedRange].location;
     NSRange found = {NSNotFound, 0};
@@ -580,7 +458,7 @@
     
     if (error != nil) {
         [self statusMessage:[NSString stringWithFormat:
-                             @"Cannot compile regular expression '%@'",_lastSearchString] ringBell:TRUE];
+                             @"Cannot compile regular expression '%@'",_searchcmd.lastSearchString] ringBell:TRUE];
         return NO;
     }
     
@@ -606,7 +484,6 @@
         return NO;
     }
 }
-
 
 
 - (void)commandCanceled{
@@ -641,13 +518,6 @@
         [self ringBell];
     }
     return;
-}
-
-- (void)setNextSearchBaseLocation:(NSUInteger)location {
-    _nextSearchBaseLocation = location;
-}
-- (NSUInteger)getNextSearchBaseLocation {
-    return _nextSearchBaseLocation;
 }
 
 - (XVimRegister*)findRegister:(NSString*)name{

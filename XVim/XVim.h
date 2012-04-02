@@ -30,9 +30,9 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @interface XVim : NSTextView <NSTextFieldDelegate>
  {
 @private
-     NSMutableString* _lastSearchString;
-     NSUInteger _nextSearchBaseLocation;
-     BOOL _searchBackword;
+     //NSMutableString* _lastSearchString;
+     //NSUInteger _nextSearchBaseLocation;
+     // BOOL _searchBackword;
      NSMutableString* _lastReplacedString;
      NSMutableString* _lastReplacementString;
      NSUInteger _nextReplaceBaseLocation;
