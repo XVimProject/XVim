@@ -8,6 +8,7 @@
 
 #import "NSTextView+VimMotion.h"
 #import "XVimOperatorEvaluator.h"
+#import "Logger.h"
 
 @implementation XVimOperatorEvaluator
 
@@ -55,5 +56,16 @@
     }
 }
 
-@end
+- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+    NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+    SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
+    if([self respondsToSelector:handler] || [key hasPrefix:@"NUM"]){
+        TRACE_LOG(@"REGISTER_APPEND");
+        return REGISTER_APPEND;
+    }
+    
+    TRACE_LOG(@"REGISTER_IGNORE");
+    return REGISTER_IGNORE;
+}
 
+@end

@@ -541,7 +541,8 @@ NSArray *_invalidRepeatKeys;
         return REGISTER_IGNORE;
     }else if (xregister.isRepeat){
         SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-        if( [self respondsToSelector:handler] && [[self superclass] instancesRespondToSelector:handler] == NO){
+        if([[XVimNormalEvaluator class] instancesRespondToSelector:handler] &&
+           ![[XVimNormalEvaluator superclass] instancesRespondToSelector:handler]){
             if ([_invalidRepeatKeys containsObject:key] == NO){
                 return REGISTER_REPLACE;
             }
