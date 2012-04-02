@@ -372,8 +372,21 @@
 - (XVimEvaluator*)s:(id)arg{
     NSTextView *view = [self textView];
     NSRange r = [view selectedRange];
-    [view setSelectedRange:NSMakeRange(r.location, [self numericArg])];
-    [view cut:self];
+	
+	// Set range to replace, ensuring we don't run over the end of the buffer
+	int endi = r.location + self.numericArg;
+	int maxi = [[view string] length];
+	endi = MIN(endi, maxi);
+	NSRange replacementRange = NSMakeRange(r.location, endi - r.location);
+	
+    [view setSelectedRange:replacementRange];
+	
+	// Xcode crashes if we cut a zero length selection
+	if (replacementRange.length > 0)
+	{
+		[view cut:self];
+	}
+	
     return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1];
 }
 
