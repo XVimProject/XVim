@@ -99,6 +99,15 @@ BOOL isKeyword(unichar ch);
 - (BOOL) isBlankLine:(NSUInteger)index;
 
 /**
+ * Determine if the position specified with "index" is an empty line.
+ * Empty line is one of them
+ *   - Blankline
+ *   - Only whitespace followed by Newline.
+ **/
+- (BOOL) isEmptyLine:(NSUInteger)index;
+
+
+/**
  * Determine if the position specified with "index" is valid cursor position in normal mode.
  * Valid position is followings
  *   - Non newline characters.

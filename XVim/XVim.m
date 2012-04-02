@@ -107,6 +107,7 @@
         _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
         _errorBells = FALSE; // ring bell on input errors.
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
+        [_currentEvaluator becameHandler:self];
         _localMarks = [[NSMutableDictionary alloc] init];
         // From the vim documentation:
         // There are nine types of registers:
