@@ -373,8 +373,21 @@
 - (XVimEvaluator*)s:(id)arg{
     NSTextView *view = [self textView];
     NSRange r = [view selectedRange];
-    [view setSelectedRange:NSMakeRange(r.location, [self numericArg])];
-    [view cut:self];
+	
+	// Set range to replace, ensuring we don't run over the end of the buffer
+	NSUInteger endi = r.location + self.numericArg;
+	NSUInteger maxi = [[view string] length];
+	endi = MIN(endi, maxi);
+	NSRange replacementRange = NSMakeRange(r.location, endi - r.location);
+	
+    [view setSelectedRange:replacementRange];
+	
+	// Xcode crashes if we cut a zero length selection
+	if (replacementRange.length > 0)
+	{
+		[view cut:self];
+	}
+	
     return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1];
 }
 
@@ -542,7 +555,8 @@ NSArray *_invalidRepeatKeys;
         return REGISTER_IGNORE;
     }else if (xregister.isRepeat){
         SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-        if( [self respondsToSelector:handler] && [[self superclass] instancesRespondToSelector:handler] == NO){
+        if([[XVimNormalEvaluator class] instancesRespondToSelector:handler] &&
+           ![[XVimNormalEvaluator superclass] instancesRespondToSelector:handler]){
             if ([_invalidRepeatKeys containsObject:key] == NO){
                 return REGISTER_REPLACE;
             }

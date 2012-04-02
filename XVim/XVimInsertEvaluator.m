@@ -131,7 +131,9 @@
     NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
     if ([self.cancelKeys containsObject:keyStr]){
         return REGISTER_APPEND;
-    }else if (xregister.isReadOnly == NO && [self.movementKeys containsObject:keyStr]){
+    }else if (xregister.isReadOnly == NO && ([self.movementKeys containsObject:keyStr] || _oneCharMode)){
+        return REGISTER_APPEND;
+    }else if (xregister.isRepeat && _oneCharMode){
         return REGISTER_APPEND;
     }
     

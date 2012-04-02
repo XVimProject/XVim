@@ -19,8 +19,6 @@
 //
 
 
-static NSArray* XVimWordDelimiterCharacterSets = nil;
-
 @implementation NSTextView (VimMotion)
 /////////////////////
 // Character set   //
@@ -28,28 +26,6 @@ static NSArray* XVimWordDelimiterCharacterSets = nil;
 
 #define CHARSET_ID_WHITESPACE 0
 #define CHARSET_ID_KEYWORD 1 // This is named after 'iskeyword' in Vim
-
-+ (NSArray*) wordDelimiterCharacterSets{
-    if (XVimWordDelimiterCharacterSets == nil) {
-        XVimWordDelimiterCharacterSets = [NSArray arrayWithObjects: [NSCharacterSet  whitespaceAndNewlineCharacterSet], // note: whitespace set is special and must be first in array
-                                          [NSCharacterSet  characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_"],
-                                          nil
-                                          ];
-    }    
-    return XVimWordDelimiterCharacterSets;
-}
-
-- (NSInteger)wordCharSetIdForChar:(unichar)c {
-    NSInteger cs_id=0;
-    for (NSCharacterSet* cs in [NSTextView wordDelimiterCharacterSets]) {
-        if ([cs characterIsMember:c])
-            break;
-        cs_id++;
-    }
-    return cs_id;
-};
-
-
 
 /////////////////////////
 // support functions   //
@@ -158,6 +134,25 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     }
     return NO;
 }
+
+/**
+ * Determine if the position specified with "index" is an empty line.
+ * Empty line is one of them
+ *   - Blankline
+ *   - Only whitespace followed by Newline.
+ **/
+- (BOOL) isEmptyLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if ([self isBlankLine:index]) {
+        return YES;
+    }
+    NSUInteger head = [self headOfLine:index];
+    if (head == NSNotFound || [self nextNonBlankInALine:head] == NSNotFound){
+        return YES;
+    }
+    return NO;
+}
+
 
 /**
  * Determine if the position specified with "index" is valid cursor position in normal mode.
@@ -667,11 +662,11 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         // End of line is one of following 2 cases. We must keep this to operate 'word' special case.
         //    - Last character of Non-Blankline
         //    - First character of Blankline 
-        if(  [self isEOF:i] ||  (isNewLine(curChar) && ![self isBlankLine:i] ) || [self isBlankLine:i-1] ){
+        if(  [self isEOF:i] ||  (isNonBlank(lastChar) && isNewLine(curChar)) || [self isBlankLine:i - 1]){
             info->lastEndOfLine = i - 1;
         }
         
-        if( [self isEOF:i] || (isNonBlank(lastChar) && isWhiteSpace(curChar) ) ){
+        if( [self isEOF:i] || (isNonBlank(lastChar) && isWhiteSpace(curChar)) || (!isWhiteSpace(lastChar) && (isKeyword(lastChar) != isKeyword(curChar)))){
             info->lastEndOfWord = i - 1;
         }
         
@@ -690,7 +685,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
            ( opt != BIGWORD && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(curChar) && isKeyword(curChar) )  ||
            ( isNewLine(lastChar) && [self isBlankLine:i] ) 
            ){
-            count--; 
+            count--;
             if( newLineStarts ){
                 info->isFirstWordInALine = YES;
                 newLineStarts = NO;
@@ -698,8 +693,13 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
                 info->isFirstWordInALine = NO;
             }
         }
-     
+        
         lastChar = curChar;
+        if( isNewLine(curChar) && opt == LEFT_RIGHT_NOWRAP ){
+            pos = i-1;
+            break;
+        }
+        
         if( 0 == count ){
             pos = i;
             break;
@@ -736,55 +736,16 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         }
         
         lastChar = curChar;
-        if( 0 == count ){
-            pos = i+1;
-            break;
-        }
         if( 0 == i ){
             pos = 0;
             break;
         }
+        if( 0 == count || (isNewLine(curChar) && opt == LEFT_RIGHT_NOWRAP) ){
+            pos = i+1;
+            break;
+        }
     }
     return pos;
-}
-
-- (NSUInteger)endOfWordForward:(NSUInteger)begin WholeWord:(BOOL)wholeWord{
-    NSString *s = [[self textStorage] string];
-    if (begin + 1 >= s.length) {
-        return begin;
-    }
-    
-    // Start search from the next character
-    NSInteger curId = [self wordCharSetIdForChar:[s characterAtIndex:begin + 1]];
-    for (NSUInteger x = begin; x + 1 < s.length; ++x) {
-        NSInteger nextId = [self wordCharSetIdForChar:[s characterAtIndex:x + 1]];
-        TRACE_LOG(@"curId: %d nextId: %d", curId, nextId);
-        if (wholeWord && nextId == 0 && curId != 0) {
-            return x;
-        } else if (!wholeWord && curId != 0 && curId != nextId) {
-            return x;
-        }
-        
-        curId = nextId;
-    }
-    return s.length - 1;
-}
-
-- (NSUInteger)endOfWordsForward:(NSNumber*)count{ //e
-    METHOD_TRACE_LOG();
-    NSRange r = [self selectedRange];
-    for(NSUInteger i = 0 ; i < [count unsignedIntValue]; i++ ){
-        r.location = [self endOfWordForward:r.location WholeWord:NO];
-    }
-    return r.location;
-}
-
-- (NSUInteger)endOfWORDSForward:(NSNumber*)count{ //E
-    NSRange r = [self selectedRange];
-    for( int i = 0 ; i < [count intValue]; i++ ){
-        r.location = [self endOfWordForward:r.location WholeWord:YES];
-    }
-    return r.location;
 }
 
 - (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(

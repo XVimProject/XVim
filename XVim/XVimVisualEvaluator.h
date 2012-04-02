@@ -25,4 +25,5 @@ typedef enum{
 @property (readonly) NSUInteger insertionPoint;
 - (id)initWithMode:(VISUAL_MODE)mode;
 - (void)updateSelection;
+- (XVimEvaluator*)ESC:(id)arg;
 @end

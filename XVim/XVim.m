@@ -37,6 +37,7 @@
 
 @interface XVim()
 - (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
+- (BOOL) replaceForward;
 @property (strong) NSString *searchCharacter;
 @end
 
@@ -105,6 +106,7 @@
         _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
         _errorBells = FALSE; // ring bell on input errors.
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
+        [_currentEvaluator becameHandler:self];
         _localMarks = [[NSMutableDictionary alloc] init];
         // From the vim documentation:
         // There are nine types of registers:
@@ -220,16 +222,15 @@
     }
     
     if( _currentEvaluator != nextEvaluator ){
-        XVIM_MODE newMode = [nextEvaluator becameHandler:self];
-        
-        // Special case for cmdline mode. I don't like this, but
-        // don't have time to refactor cmdline mode.
-        if (_mode != MODE_CMDLINE){
-            _mode = newMode;
-        }
-
         [_currentEvaluator release];
         _currentEvaluator = nextEvaluator;
+
+        XVIM_MODE newMode = [_currentEvaluator becameHandler:self];
+        if (self.mode != MODE_CMDLINE){
+            // Special case for cmdline mode. I don't like this, but
+            // don't have time to refactor cmdline mode.
+            self.mode = newMode;
+        }
     }
     
     [self.cmdLine setNeedsDisplay:YES];
@@ -712,8 +713,8 @@
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
     self.mode = MODE_CMDLINE;
-    [self cmdLine].mode = MODE_STRINGS[self.mode];
-    [[self cmdLine] setFocusOnCommandWithFirstLetter:first];
+    self.cmdLine.mode = MODE_STRINGS[self.mode];
+    [self.cmdLine setFocusOnCommandWithFirstLetter:first];
 }
 
 - (NSString*)modeName{
@@ -756,6 +757,7 @@
 - (void)recordIntoRegister:(XVimRegister*)xregister{
     if (_recordingRegister == nil){
         _recordingRegister = xregister;
+        self.cmdLine.additionalStatus = @"recording";
         // when you record into a register you clear out any previous recording
         // unless it was capitalized
         [_recordingRegister clear];
@@ -769,6 +771,7 @@
         [self ringBell];
     }else{
         _recordingRegister = nil;
+        self.cmdLine.additionalStatus = @"";
     }
 }
 

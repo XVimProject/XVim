@@ -17,8 +17,10 @@
 #define STATUS_BAR_HEIGHT 18
 
 @implementation XVimCommandLine
-@synthesize tag,xvim,mode;
-
+@synthesize tag = _tag;
+@synthesize xvim = _xvim;
+@synthesize mode = _mode;
+@synthesize additionalStatus = _additionalStatus;
 
 - (id)init{
     self = [super initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
@@ -36,12 +38,14 @@
         [self addSubview:_command];
         
         // Status View
+        _mode = @"";
+        _additionalStatus = @"";
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
         [paragraph setAlignment:NSRightTextAlignment];
         [paragraph setTailIndent:-10.0];
         _status = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
         [_status setBackgroundColor:[NSColor colorWithSRGBRed:0 green:0 blue:0 alpha:0.0]];
-        _status.stringValue = MODE_STRINGS[((XVim*)xvim).mode]; 
+        _status.stringValue = _mode;
         [_status setAlignment:NSRightTextAlignment];
         [_status setEditable:NO];
         [_status setBordered:NO];
@@ -108,9 +112,12 @@
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
-    [_status setStringValue:[xvim modeName]];
-	DVTSourceTextView *view = [xvim sourceView];
-    DVTFontAndColorsTheme* fontAndColors = [[view textStorage] fontAndColorTheme];
+    NSString *statusString = [self.xvim modeName];
+    if ([self.additionalStatus length] > 0){
+        statusString = [statusString stringByAppendingFormat:@" --%@", self.additionalStatus];
+    }
+    [_status setStringValue:statusString];
+    id fontAndColors = [[[self.xvim sourceView] textStorage] fontAndColorTheme];
     
     NSColor* color;
     if( [_command.stringValue isEqualToString:@""] ){
@@ -147,10 +154,10 @@
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView doCommandBySelector:(SEL)command{
     TRACE_LOG(@"Command : %@", NSStringFromSelector(command));
     if( @selector(insertNewline:) == command ){
-        [xvim commandDetermined:[_command stringValue]];
+        [self.xvim commandDetermined:[_command stringValue]];
         return YES;
     }else if( @selector(complete:) == command || @selector(cancelOperation:) == command){
-        [xvim commandCanceled];
+        [self.xvim commandCanceled];
         return YES;
     }else if( @selector(deleteBackward:) ){
         if( 1 == [[_command stringValue] length] ){
