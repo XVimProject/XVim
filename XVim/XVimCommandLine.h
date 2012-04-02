@@ -16,6 +16,7 @@
 @property NSInteger tag;
 @property(retain) id xvim;
 @property(retain) NSString* mode;
+@property(strong) NSString* additionalStatus;
 
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view;
 - (void)didFrameChanged:(NSNotification*)notification;

@@ -824,13 +824,12 @@
 
 - (XVimEvaluator*)Down:(id)arg{
     return [self j:(id)arg];
-    
 }
 
 - (XVimEvaluator*)Left:(id)arg{
     return [self h:(id)arg];
-    
 }
+
 - (XVimEvaluator*)Right:(id)arg{
     return [self l:(id)arg];
 }
@@ -840,7 +839,7 @@
         if (xregister.nonNumericKeyCount == 1){
             NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
             SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-            if([[self class] instancesRespondToSelector:handler] || [key hasPrefix:@"NUM"]){
+            if([[XVimMotionEvaluator class] instancesRespondToSelector:handler] || [key hasPrefix:@"NUM"]){
                 return REGISTER_APPEND;
             }
         }
