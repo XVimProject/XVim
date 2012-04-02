@@ -30,6 +30,8 @@
 #import "Hooker.h"
 #import "DVTSourceTextViewHook.h"
 #import "XVimEvaluator.h"
+#import "XVimExCommand.h"
+#import "XVimSearchCommand.h"
 #import "XVimNormalEvaluator.h"
 #import "NSTextView+VimMotion.h"
 
@@ -47,6 +49,11 @@
 @synthesize searchCharacter = _searchCharacter;
 @synthesize shouldSearchCharacterBackward = _shouldSearchCharacterBackward;
 @synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
+
+// Options set by :set command (Will be replaced  with _options variable)
+@synthesize ignoreCase = _ignoreCase;
+@synthesize wrapScan = _wrapScan;
+@synthesize errorBells = _errorBells;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -156,6 +163,9 @@
         _errorBells = FALSE; // ring bell on input errors.
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
         _localMarks = [[NSMutableDictionary alloc] init];
+        _excmd = [[XVimExCommand alloc] initWithXVim:self];
+        _searchcmd = [[XVimSearchCommand alloc] initWithXVim:self];
+        [self initializeOptions];
         // From the vim documentation:
         // There are nine types of registers:
         // *registers* *E354*
@@ -237,7 +247,12 @@
     [_lastSearchString release];
     [_lastReplacedString release];
     [_lastReplacementString release];
+    [_options release];
     [XVimNormalEvaluator release];
+}
+
+- (void)initializeOptions{
+    // Implement later
 }
 
 - (void)setMode:(NSInteger)mode{
@@ -295,169 +310,10 @@
         ERROR_LOG(@"command string empty");
     }
     else if( [c characterAtIndex:0] == ':' ){
-        // ex commands (is it right?)
-        NSString* ex_command;
-        if( [c length] > 1 ){
-            ex_command = [[c substringFromIndex:1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        }else{
-            ex_command = @"";
-        }
-        NSCharacterSet *words_cs = [NSCharacterSet whitespaceAndNewlineCharacterSet];
-        NSArray* words = [ex_command componentsSeparatedByCharactersInSet:words_cs];            
-        NSUInteger words_count = [words count];
-        int scanned_int_arg = -1;
-        TRACE_LOG(@"EX COMMAND:%@, word count = %d", ex_command, words_count);
-
-        // check to see if it's a simple ":NNN" ( go-line-NNN command )
-        if ((words_count == 1) && [[NSScanner scannerWithString:[words objectAtIndex:0]] scanInt:&scanned_int_arg]) {
-            // single arg that's a parsable int, go to line in scanned_int
-            TRACE_LOG("go to line CMD line no = %d", scanned_int_arg);
-            id mvid = nil; //seems to be ok to use nil for this for the movement calls we are doing
-            if (scanned_int_arg > 0) {
-                NSUInteger pos = [srcView positionAtLineNumber:scanned_int_arg column:0];
-                NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
-                if( NSNotFound == pos_wo_space ){
-                    pos_wo_space = pos;
-                }
-                [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-                [srcView scrollToCursor];
-            }
-            // TODO: This command must be treated as motion.
-        }
-        else if( [ex_command isEqualToString:@"w"] ){
-            
-            [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
-        } 
-        else if ([ex_command isEqualToString:@"wq"]) {
-            [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
-            [NSApp terminate:self];
-        } 
-        else if ([ex_command isEqualToString:@"q"]) {
-            [NSApp terminate:self];
-        }
-        else if( [ex_command isEqualToString:@"bn"] ){
-            // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
-            // TODO: set first responder to the new DVTSourceTextView after switching tabs.
-            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:/*{*/@"}" charactersIgnoringModifiers:/*{*/@"}" isARepeat:NO keyCode:1];
-            [[NSApplication sharedApplication] sendEvent:keyPress];
-        }
-        else if( [ex_command isEqualToString:@"bp"] ){
-            // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
-            // TODO: set first responder to the new DVTSourceTextView after switching tabs.
-            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"{"/*}*/ charactersIgnoringModifiers:@"{"/*}*/ isARepeat:NO keyCode:1];
-            [[NSApplication sharedApplication] sendEvent:keyPress];
-        }
-        else if( [ex_command hasPrefix:@"se"] ){
-            // vi users are used to doing ":se" as well as ":set"
-            // after 25+ yrs, my fingers are trained to use ":se ic" or ":se noic" -MH
-            NSString* arg0 = [words objectAtIndex:0];
-            if( ([words count] > 1) && ([arg0 isEqualToString:@"se"] || [arg0 isEqualToString:@"set"]) ){
-                NSString* setCommand = [words objectAtIndex:1];
-                if( [setCommand isEqualToString:@"wrap"] ){
-                    [srcView setWrapsLines:YES];
-                }
-                else if( [setCommand isEqualToString:@"nowrap"] ){
-                    [srcView setWrapsLines:NO];
-                }                
-                else if( [setCommand isEqualToString:@"ignorecase"] || [setCommand isEqualToString:@"ic"] ){
-                    _ignoreCase = TRUE;
-                }                
-                else if( [setCommand isEqualToString:@"noignorecase"] || [setCommand isEqualToString:@"noic"] ){
-                    _ignoreCase = FALSE;
-                }            
-                else if( [setCommand isEqualToString:@"wrapscan"] || [setCommand isEqualToString:@"ws"] ){
-                    _wrapScan = TRUE;
-                }                
-                else if( [setCommand isEqualToString:@"nowrapscan"] || [setCommand isEqualToString:@"nows"] ){
-                    _wrapScan = FALSE;
-                }            
-                else if( [setCommand isEqualToString:@"errorbells"] || [setCommand isEqualToString:@"eb"] ){
-                    _errorBells= TRUE;
-                }            
-                else if( [setCommand isEqualToString:@"noerrorbells"] || [setCommand isEqualToString:@"noeb"] ){
-                    _errorBells= FALSE;
-                }            
-
-                else {
-                    TRACE_LOG("Don't recognize '%@' sub command for ex_command line %@", setCommand, ex_command);
-                }
-            }
-        }
-        else if( [ex_command hasPrefix:@"!"] ){
-            
-        }
-        else if( [ex_command isEqualToString:@"debug"] ){
-           // Place Any debugging purpose process...
-            [[self superview] setSelectedRange:NSMakeRange([[[self superview] string] length], 0)];
-        }
-        else if( [ex_command isEqualToString:@"make"] ){
-            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
-            [[NSApplication sharedApplication] sendEvent:keyPress];
-        }
-        else if( [ex_command isEqualToString:@"run"] ){
-            NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-            NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
-            [[NSApplication sharedApplication] sendEvent:keyPress];
-        }
-        else if( [ex_command isEqualToString:@"reg"] ){
-            TRACE_LOG(@"registers: %@", self.registers);
-        }
-        else if( [ex_command hasPrefix:@"%s/"] ) {
-            // Split the string into the various components
-            NSString* replaced = @"";
-            NSString* replacement = @"";
-            char previous = 0;
-            int component = 0;
-            BOOL global = NO;
-            BOOL confirmation = NO;
-            if ([ex_command length] >= 3) {
-                for(int i=3;i<[ex_command length];++i) {
-                    char current = [ex_command characterAtIndex:i];
-                    if (current == '/' && previous != '\\') {
-                        component++;
-                    } else {
-                        if (component == 0) {
-                            replaced = [NSString stringWithFormat:@"%@%c",replaced,current];
-                        } else if (component == 1) {
-                            replacement = [NSString stringWithFormat:@"%@%c",replacement,current];
-                        } else {
-                            if (current == 'g') {
-                                global = YES;
-                            } else if (current == 'c') {
-                                confirmation = YES;
-                            } else {
-                                ERROR_LOG("Unknown replace option %c",current);
-                            }
-                        }
-                        previous = current;
-                    }
-                }
-                TRACE_LOG("replaced=%@",replaced);
-                TRACE_LOG("replacement=%@",replacement);
-            }
-            [_lastReplacedString setString:replaced];
-            [_lastReplacementString setString:replacement];
-            // Replace all the occurrences
-            _nextReplaceBaseLocation = 0;
-            int numReplacements = 0;
-            BOOL found;
-            do {
-                found = [self replaceForward];
-                if (found) {
-                    numReplacements++;
-                }
-            } while(found && global);
-            [self statusMessage:[NSString stringWithFormat:
-                                 @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
-        }
-        else {
-            TRACE_LOG("Don't recognize ex_command %@", ex_command);
-        }
+        [_excmd executeCommand:c];
     }
     else if ([c characterAtIndex:0] == '/' || [c characterAtIndex:0] == '?') {
+        //[_searchcmd executeSearch:c];
         // note: c is the whitespace trimmed version of command.
         // we want the non trimmed version (command) because leading/trailing
         // whitespace is something should be part of the search string

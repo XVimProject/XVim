@@ -6,8 +6,11 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+// Handles /,? searches
+// This may be also used in range specifier in the future.
+
 #import <Foundation/Foundation.h>
 
-@interface XVImSearchCommand : NSObject
+@interface XVimSearchCommand : NSObject
 
 @end

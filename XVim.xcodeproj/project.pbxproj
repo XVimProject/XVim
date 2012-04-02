@@ -22,6 +22,8 @@
 		A28D42F514FE87AF004BC121 /* XVimGEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A28D42F414FE87AF004BC121 /* XVimGEvaluator.m */; };
 		A28D42F814FE8E2A004BC121 /* XVimInsertEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A28D42F714FE8E2A004BC121 /* XVimInsertEvaluator.m */; };
 		A298D44515026E63004B94A1 /* XVimLocalMarkEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A298D44415026E63004B94A1 /* XVimLocalMarkEvaluator.m */; };
+		A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A736351527484B0051E8E4 /* XVimExCommand.m */; };
+		A2A736391527484B0051E8E4 /* XVImSearchCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A736371527484B0051E8E4 /* XVImSearchCommand.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
@@ -79,6 +81,10 @@
 		A28D42F714FE8E2A004BC121 /* XVimInsertEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimInsertEvaluator.m; path = XVim/XVimInsertEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A298D44315026E63004B94A1 /* XVimLocalMarkEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimLocalMarkEvaluator.h; path = XVim/XVimLocalMarkEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A298D44415026E63004B94A1 /* XVimLocalMarkEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimLocalMarkEvaluator.m; path = XVim/XVimLocalMarkEvaluator.m; sourceTree = SOURCE_ROOT; };
+		A2A736341527484B0051E8E4 /* XVimExCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimExCommand.h; path = XVim/XVimExCommand.h; sourceTree = SOURCE_ROOT; };
+		A2A736351527484B0051E8E4 /* XVimExCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimExCommand.m; path = XVim/XVimExCommand.m; sourceTree = SOURCE_ROOT; };
+		A2A736361527484B0051E8E4 /* XVImSearchCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVImSearchCommand.h; path = XVim/XVImSearchCommand.h; sourceTree = SOURCE_ROOT; };
+		A2A736371527484B0051E8E4 /* XVImSearchCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVImSearchCommand.m; path = XVim/XVImSearchCommand.m; sourceTree = SOURCE_ROOT; };
 		A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandLine.h; path = XVim/XVimCommandLine.h; sourceTree = SOURCE_ROOT; };
 		A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLine.m; path = XVim/XVimCommandLine.m; sourceTree = SOURCE_ROOT; };
 		A2B4BABB14D59F6600D817B0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -172,6 +178,10 @@
 		A2B4BAC114D59F6600D817B0 /* XVim */ = {
 			isa = PBXGroup;
 			children = (
+				A2A736341527484B0051E8E4 /* XVimExCommand.h */,
+				A2A736351527484B0051E8E4 /* XVimExCommand.m */,
+				A2A736361527484B0051E8E4 /* XVImSearchCommand.h */,
+				A2A736371527484B0051E8E4 /* XVImSearchCommand.m */,
 				A2277ECC14F8042C00A6B70C /* NSTextView+VimMotion.h */,
 				A2277ECD14F8042C00A6B70C /* NSTextView+VimMotion.m */,
 				A2F4A34014F00B35006DA5A5 /* Evaluators */,
@@ -335,6 +345,8 @@
 				F17D013B150861DC00A8111B /* XVimRegister.m in Sources */,
 				F100DC2E150BB6BC002C703C /* XVimRegisterEvaluator.m in Sources */,
 				A222B5E11514DFCD005E8802 /* XVimOperatorEvaluator.m in Sources */,
+				A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */,
+				A2A736391527484B0051E8E4 /* XVImSearchCommand.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

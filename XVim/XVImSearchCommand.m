@@ -8,6 +8,6 @@
 
 #import "XVImSearchCommand.h"
 
-@implementation XVImSearchCommand
+@implementation XVimSearchCommand
 
 @end
