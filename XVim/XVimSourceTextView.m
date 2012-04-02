@@ -199,7 +199,7 @@
     [base drawRect_:dirtyRect];
     
     if (MODE_VISUAL == xvim.mode){
-        int glyphIndex = xvim.currentEvaluator.insertionPoint;
+        NSUInteger glyphIndex = xvim.currentEvaluator.insertionPoint;
         NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[base textContainer]];
         
         [[[base insertionPointColor] colorWithAlphaComponent:0.5] set];
@@ -251,7 +251,7 @@
         if(flag){
             color = [color colorWithAlphaComponent:0.5];
             NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-            int glyphIndex = [[base layoutManager] glyphIndexForPoint:aPoint inTextContainer:[base textContainer]];
+            NSUInteger glyphIndex = [[base layoutManager] glyphIndexForPoint:aPoint inTextContainer:[base textContainer]];
             NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[base textContainer]];
             
             [color set];
