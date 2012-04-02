@@ -30,14 +30,12 @@ XVimRegisterEvalMode _mode;
     NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
     XVimRegister *xregister = [xvim findRegister:keyStr];
     if (_mode == REGISTER_EVAL_MODE_RECORD){
-        TRACE_LOG(@"handling record key: %@ register: %@", keyStr, xregister);
         if (xregister.isReadOnly == NO){
             [xvim recordIntoRegister:xregister];
         }else{
             [xvim ringBell];
         }
     } else if(_mode == REGISTER_EVAL_MODE_PLAYBACK){
-        TRACE_LOG(@"handling playback key %@", keyStr);
         return [[XVimNormalEvaluator alloc] initWithRegister:xregister andPlaybackCount:_count];
     }
 

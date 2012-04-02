@@ -270,16 +270,15 @@
     }
     
     if( _currentEvaluator != nextEvaluator ){
-        XVIM_MODE newMode = [nextEvaluator becameHandler:self];
-        
-        // Special case for cmdline mode. I don't like this, but
-        // don't have time to refactor cmdline mode.
-        if (self.mode != MODE_CMDLINE){
-            self.mode = newMode;
-        }
-
         [_currentEvaluator release];
         _currentEvaluator = nextEvaluator;
+
+        XVIM_MODE newMode = [_currentEvaluator becameHandler:self];
+        if (self.mode != MODE_CMDLINE){
+            // Special case for cmdline mode. I don't like this, but
+            // don't have time to refactor cmdline mode.
+            self.mode = newMode;
+        }
     }
     
     [self.cmdLine setNeedsDisplay:YES];
