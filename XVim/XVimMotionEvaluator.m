@@ -102,7 +102,6 @@
     NSUInteger from = [[self textView] selectedRange].location;
     NSString *string = [[self textView] string];
     if (from + 1 < [string length] && from > 0){
-        unichar lastChar = [[[self textView] string] characterAtIndex:from-1];
         unichar curChar = [[[self textView] string] characterAtIndex:from];
         unichar nextChar = [[[self textView] string] characterAtIndex:from+1];
         if( [[self textView] isBlankLine:from] || (isNonBlank(curChar) != isNonBlank(nextChar)) || (isKeyword(curChar) != isKeyword(nextChar)) || (isWhiteSpace(curChar) && isWhiteSpace(nextChar))){
