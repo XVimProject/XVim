@@ -45,7 +45,7 @@
         if (v == nil) {
             return nil;
         }
-        NSTextView* view = [_xvimTarget sourceView];
+        DVTSourceTextView* view = [_xvimTarget sourceView];
         NSString* s = [[view textStorage] string];
         if (r.location > [s length]) {
             // mark is past end of file do nothing

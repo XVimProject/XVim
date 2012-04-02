@@ -15,6 +15,7 @@
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "NSTextView+VimMotion.h"
+#import "DVTSourceTextView.h"
 
 
 
@@ -44,8 +45,10 @@
     NSTextView* view = [self textView];
     NSRange begin = [view selectedRange];
     NSUInteger motionFrom = begin.location;
-    NSUInteger motionTo = [view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
-    return [self _motionFixedFrom:motionFrom To:motionTo Type:type];
+    
+	NSUInteger motionTo = (NSUInteger)[view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
+    
+	return [self _motionFixedFrom:motionFrom To:motionTo Type:type];
 }
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
@@ -99,7 +102,6 @@
     NSUInteger from = [[self textView] selectedRange].location;
     NSString *string = [[self textView] string];
     if (from + 1 < [string length] && from > 0){
-        unichar lastChar = [[[self textView] string] characterAtIndex:from-1];
         unichar curChar = [[[self textView] string] characterAtIndex:from];
         unichar nextChar = [[[self textView] string] characterAtIndex:from+1];
         if( [[self textView] isBlankLine:from] || (isNonBlank(curChar) != isNonBlank(nextChar)) || (isKeyword(curChar) != isKeyword(nextChar)) || (isWhiteSpace(curChar) && isWhiteSpace(nextChar))){

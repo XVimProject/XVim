@@ -143,8 +143,6 @@ static char* keynames[] = {
     "DEL"
 };
 
-
-#pragma mark XVimEvaluator
 @implementation XVimEvaluator
 
 @synthesize xvim = _xvim;
@@ -233,7 +231,7 @@ static char* keynames[] = {
     return nil;
 }
 
-- (NSTextView*)textView{
+- (DVTSourceTextView*)textView{
     return [self.xvim sourceView];
 }
 
@@ -252,90 +250,4 @@ static char* keynames[] = {
 }
 @end
 
-#pragma mark VimLocalMarkEvaluator
-
-
-#pragma mark Numeric Evaluator
-
-@implementation XVimNumericEvaluator
-@synthesize numericMode,numericArg;
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        self.numericArg = 1;
-        self.numericMode = NO;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
-    if( [keyStr hasPrefix:@"NUM"] ){
-        if( self.numericMode ){
-            NSString* numStr = [keyStr substringFromIndex:3];
-            NSInteger n = [numStr integerValue]; 
-            self.numericArg*=10; //FIXME: consider integer overflow
-            self.numericArg+=n;
-            return self;
-        }
-        else{
-            if( [keyStr isEqualToString:@"NUM0"] ){
-                // Nothing to do
-                // Maybe handled by XVimNormalEvaluator
-            }else{
-                NSString* numStr = [keyStr substringFromIndex:3];
-                NSInteger n = [numStr integerValue]; 
-                self.numericArg=n;
-                self.numericMode=YES;
-                return self;
-            }
-        }
-    }
-    
-    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
-    [self resetNumericArg]; // Reset the numeric arg after evaluating an event
-    return nextEvaluator;
-}
-
-- (void)resetNumericArg{
-    self.numericArg = 1;
-    self.numericMode = NO;
-}
-@end
-
-
-// This evaluator is base class of an evaluator which takes argument to fix the motion
-// e.g. 'f','F'
-@implementation XVimMotionArgumentEvaluator
-@synthesize repeat;
-
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
-    self = [super init];
-    if( self ){
-        repeat = rep;
-        _motionEvaluator = [evaluator retain];
-    }
-    return self;
-}
-
-- (void)dealloc{
-    [_motionEvaluator release];
-    [super dealloc];
-}
-
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    if( nil != _motionEvaluator ){
-        return [_motionEvaluator motionFixedFrom:from To:to Type:type];
-    }
-    return nil;
-}
-
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type{
-    if( nil != _motionEvaluator ){
-        return [_motionEvaluator commonMotion:motion Type:type];
-    }
-    return nil;
-}
-@end
 

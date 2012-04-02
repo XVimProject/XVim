@@ -716,7 +716,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     
     NSUInteger pos = index-1;
     unichar lastChar= [[self string] characterAtIndex:pos];
-    for(NSUInteger i = pos-1 ; i >= 0; i-- ){
+    for(NSUInteger i = pos-1 ; ; i-- ){
         // Each time we encounter head of a word decrement "counter".
         // Remember blankline is a word
         

@@ -8,6 +8,7 @@
 
 #import "XVimShiftEvaluator.h"
 #import "NSTextView+VimMotion.h"
+#import "DVTSourceTextView.h"
 
 @implementation XVimShiftEvaluator
 @synthesize unshift;
@@ -40,7 +41,7 @@
 }
 
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = (DVTSourceTextView*)[self textView];
     [self selectOperationTargetFrom:from To:to Type:type];
     if( unshift ){
         [view shiftLeft:self];

@@ -31,6 +31,7 @@ another structure.
 #import "XVim.h"
 
 @class XVimMotionEvaluator;
+@class DVTSourceTextView;
 
 typedef enum {
   MARKOPERATOR_SET,
@@ -44,30 +45,9 @@ typedef enum {
 - (XVimEvaluator*)defaultNextEvaluator;
 // Made into a property so it can be set 
 @property (weak) XVim *xvim;
-@property (readonly) NSTextView *textView;
+@property (readonly) DVTSourceTextView *textView;
 @property (readonly) NSUInteger insertionPoint;
 
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
 - (XVIM_MODE)becameHandler:(XVim*)xvim;
-@end
-
-// This evaluator is waiting for number input.
-@interface XVimNumericEvaluator : XVimEvaluator{
-    NSUInteger _numericArg;
-    BOOL _numericMode;
-}
-@property BOOL numericMode;
-@property NSUInteger numericArg;
-- (NSUInteger)numericArg;
-- (void)resetNumericArg;
-@end
-
-// This is base class of an evaluator which takes arguments to determing the motion such as 'f','F'.
-// When the subclass fix the motion it must call motionFixedFrom:To: method.
-@interface XVimMotionArgumentEvaluator : XVimEvaluator{
-@private
-    XVimMotionEvaluator* _motionEvaluator;
-}
-@property (readonly) NSUInteger repeat;
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
 @end

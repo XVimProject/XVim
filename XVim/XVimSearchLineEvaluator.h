@@ -7,7 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
-#import "XVimMotionEvaluator.h"
+#import "XVimMotionArgumentEvaluator.h"
 
 @interface XVimSearchLineEvaluator : XVimMotionArgumentEvaluator
 @property BOOL forward;

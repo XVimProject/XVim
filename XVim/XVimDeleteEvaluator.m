@@ -11,6 +11,7 @@
 #import "XVim.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "DVTSourceTextView.h"
 
 @implementation XVimDeleteEvaluator
 
@@ -38,7 +39,7 @@
     if (_repeat < 1) 
         return nil;
     
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = [self textView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
@@ -53,7 +54,7 @@
     if (_repeat < 1) 
         return nil;
         
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = [self textView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
@@ -101,7 +102,7 @@
 }
 
 - (XVimEvaluator*)j:(id)arg{
-    NSTextView *view = [self textView];
+    DVTSourceTextView *view = [self textView];
     NSUInteger from = [view selectedRange].location;
     NSUInteger headOfLine = [view headOfLine:from];
     if (headOfLine != NSNotFound){
@@ -134,7 +135,7 @@
 }
 
 - (XVimEvaluator*)k:(id)arg{
-    NSTextView *view = [self textView];
+    DVTSourceTextView *view = [self textView];
     NSUInteger to = [view selectedRange].location;
     NSUInteger endOfLine = [view endOfLine:to];
     if (endOfLine != NSNotFound){
@@ -166,7 +167,7 @@
 }
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    NSTextView* view = [self textView];
+    DVTSourceTextView* view = [self textView];
     NSString* string = [view string];
     
     if( [string length] != 0 && [string length] == to && [string length] == from){

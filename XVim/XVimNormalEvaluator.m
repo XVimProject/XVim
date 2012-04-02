@@ -18,6 +18,7 @@
 #import "XVimInsertEvaluator.h"
 #import "XVimRegisterEvaluator.h"
 #import "NSTextView+VimMotion.h"
+#import "DVTSourceTextView.h"
 #import "XVim.h"
 #import "Logger.h"
 
