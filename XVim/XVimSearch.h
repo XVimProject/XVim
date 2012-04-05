@@ -15,7 +15,6 @@
 
 @interface XVimSearch: NSObject
 @property BOOL lastSearchBackword;  // If the last search was '?' command this is true
-@property BOOL ignoreCase;
 @property (strong) NSString* lastSearchString;
 @property (strong) NSString* lastReplacementString;
 @property NSUInteger nextSearchBaseLocation;

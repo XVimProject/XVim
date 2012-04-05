@@ -19,13 +19,14 @@
 @end
 
 @implementation XVimSearch
-@synthesize ignoreCase,lastSearchBackword, lastSearchString, lastReplacementString, nextSearchBaseLocation, endOfReplacement;
+@synthesize lastSearchBackword, lastSearchString, lastReplacementString, nextSearchBaseLocation, endOfReplacement;
 
 - (id)initWithXVim:(XVim*)xvim{
     
     if( self = [super init] ){
         _xvim = [xvim retain];
-        ignoreCase = NO;
+        lastSearchString = @"";
+        lastReplacementString = @"";
     }
     return self;
 }
@@ -78,7 +79,7 @@
     NSRange found = {NSNotFound, 0};
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-    if (_xvim.ignoreCase == TRUE) {
+    if (_xvim.options.ignorecase== TRUE) {
         r_opts |= NSRegularExpressionCaseInsensitive;
     }
     
@@ -102,7 +103,7 @@
     }
     
     // if wrapscan is on, wrap to the top and search
-    if (found.location == NSNotFound && _xvim.wrapScan == TRUE) {
+    if (found.location == NSNotFound && _xvim.options.wrapscan== TRUE) {
         found = [regex rangeOfFirstMatchInString:[srcView string] 
                                          options:r_opts
                                            range:NSMakeRange(0, [[srcView string] length])];
@@ -130,7 +131,7 @@
     NSRange found = {NSNotFound, 0};
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-    if (_xvim.ignoreCase == TRUE) {
+    if (_xvim.options.ignorecase == TRUE) {
         r_opts |= NSRegularExpressionCaseInsensitive;
     }
     
@@ -159,7 +160,7 @@
         }
     }
     // if wrapscan is on, search below base as well
-    if (found.location == NSNotFound && _xvim.wrapScan == TRUE) {
+    if (found.location == NSNotFound && _xvim.options.wrapscan == TRUE) {
         if ([matches count] > 0) {
             NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
             found = [match range];
@@ -182,7 +183,7 @@
     
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-    if (ignoreCase == YES) {
+    if (_xvim.options.ignorecase == YES) {
         r_opts |= NSRegularExpressionCaseInsensitive;
     }
     

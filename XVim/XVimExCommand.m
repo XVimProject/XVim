@@ -324,33 +324,24 @@
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     DVTSourceTextView* srcView = [_xvim sourceView];
     
+    if( [setCommand rangeOfString:@"="].location != NSNotFound ){
+        // "set XXX=YYY" form
+        
+    }else if( [setCommand hasPrefix:@"no"] ){
+        // "set noXXX" form
+        NSString* prop = [setCommand substringFromIndex:2];
+        [_xvim.options setOption:prop value:[NSNumber numberWithBool:NO]];
+    }else{
+        // "set XXX" form
+        [_xvim.options setOption:setCommand value:[NSNumber numberWithBool:YES]];
+    }
+    
     if( [setCommand isEqualToString:@"wrap"] ){
         [srcView setWrapsLines:YES];
     }
     else if( [setCommand isEqualToString:@"nowrap"] ){
         [srcView setWrapsLines:NO];
     }                
-    else if( [setCommand isEqualToString:@"ignorecase"] || [setCommand isEqualToString:@"ic"] ){
-        _xvim.ignoreCase = TRUE;
-    }                
-    else if( [setCommand isEqualToString:@"noignorecase"] || [setCommand isEqualToString:@"noic"] ){
-        _xvim.ignoreCase = FALSE;
-    }            
-    else if( [setCommand isEqualToString:@"wrapscan"] || [setCommand isEqualToString:@"ws"] ){
-        _xvim.wrapScan = TRUE;
-    }                
-    else if( [setCommand isEqualToString:@"nowrapscan"] || [setCommand isEqualToString:@"nows"] ){
-        _xvim.wrapScan = FALSE;
-    }            
-    else if( [setCommand isEqualToString:@"errorbells"] || [setCommand isEqualToString:@"eb"] ){
-        _xvim.errorBells= TRUE;
-    }            
-    else if( [setCommand isEqualToString:@"noerrorbells"] || [setCommand isEqualToString:@"noeb"] ){
-        _xvim.errorBells= FALSE;
-    }            
-    else {
-        TRACE_LOG("Don't recognize 'set %@' command", setCommand);
-    }
 }
 
 - (void)write:(XVimExArg*)args{ // :w

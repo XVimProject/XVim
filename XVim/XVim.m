@@ -52,11 +52,7 @@
 @synthesize shouldSearchCharacterBackward = _shouldSearchCharacterBackward;
 @synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
 @synthesize searcher,excmd;
-
-// Options set by :set command (Will be replaced  with _options variable)
-@synthesize ignoreCase = _ignoreCase;
-@synthesize wrapScan = _wrapScan;
-@synthesize errorBells = _errorBells;
+@synthesize options;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -106,14 +102,12 @@
         tag = XVIM_TAG;
         _lastReplacementString = [[NSMutableString alloc] init];
         _lastReplacedString = [[NSMutableString alloc] init];
-        _wrapScan = TRUE; // :set wrapscan. TRUE is vi default
-        _ignoreCase = FALSE; // :set ignorecase. FALSE is vi default
-        _errorBells = FALSE; // ring bell on input errors.
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
         [_currentEvaluator becameHandler:self];
         _localMarks = [[NSMutableDictionary alloc] init];
         excmd = [[XVimExCommand alloc] initWithXVim:self];
         searcher = [[XVimSearch alloc] initWithXVim:self];
+        options = [[XVimOptions alloc] init];
         // From the vim documentation:
         // There are nine types of registers:
         // *registers* *E354*
@@ -194,7 +188,7 @@
 -(void)dealloc{
     [_lastReplacedString release];
     [_lastReplacementString release];
-    [_options release];
+    [options release];
     [searcher release];
     [excmd release];
     [XVimNormalEvaluator release];
@@ -406,7 +400,7 @@
 }
 
 - (void)ringBell {
-    if (_errorBells) {
+    if ([self options].errorbells) {
         NSBeep();
     }
     return;
