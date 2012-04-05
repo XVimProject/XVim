@@ -205,6 +205,8 @@ BOOL isKeyword(unichar ch);
 // Selection
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to;
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
+- (NSUInteger)lineNumber:(NSUInteger)index;
+- (NSUInteger)numberOfLines;
     
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;

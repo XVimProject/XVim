@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "XVimCommandLine.h"
 #import "XVimRegister.h"
+#import "XVimSearch.h"
+#import "XVimExCommand.h"
 
 @class XVimEvaluator;
 @class DVTSourceTextView;
@@ -29,18 +31,16 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @interface XVim : NSTextView <NSTextFieldDelegate>
  {
 @private
-     NSMutableString* _lastSearchString;
-     NSUInteger _nextSearchBaseLocation;
-     BOOL _searchBackword;
-     BOOL _ignoreCase;
-     BOOL _wrapScan;
-     BOOL _errorBells;
+     //NSMutableString* _lastSearchString;
+     //NSUInteger _nextSearchBaseLocation;
+     // BOOL _searchBackword;
      NSMutableString* _lastReplacedString;
      NSMutableString* _lastReplacementString;
      NSUInteger _nextReplaceBaseLocation;
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
      NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
+     NSDictionary* _options; // Options used by set command (Not implemented yet)
 }
 
 @property NSInteger tag;
@@ -54,6 +54,14 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @property(readonly) BOOL shouldSearchCharacterBackward;
 @property(readonly) BOOL shouldSearchPreviousCharacter;
 
+// Options set by :set command (Will be replace with _options variables )
+@property BOOL ignoreCase;
+@property BOOL wrapScan;
+@property BOOL errorBells;
+
+@property (strong) XVimSearch* searcher;
+@property (strong) XVimExCommand* excmd;
+
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
 // Mark this property to YES before moving. And mark it to NO after moving.
 @property(assign) BOOL dontCheckNewline;
@@ -65,8 +73,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)commandCanceled;
 - (void)searchNext;
 - (void)searchPrevious;
-- (void)searchForward;
-- (void)searchBackward;
 - (NSUInteger)searchCharacterNext:(NSUInteger)start;
 - (NSUInteger)searchCharacterPrevious:(NSUInteger)start;
 - (void)setSearchCharacter:(NSString*)searchChar backward:(BOOL)backward previous:(BOOL)previous;
@@ -76,9 +82,15 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)ringBell;
 - (void)setNextSearchBaseLocation:(NSUInteger)location;
-- (NSUInteger)getNextSearchBaseLocation;
 - (XVimRegister*)findRegister:(NSString*)name;
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;
+
+// Option handlings( Not implemented yet )
+/*
+- (NSObject*)getOption:(NSString*)name;
+- (void)setOption:(NSString*)name withObject:(NSObject*)obj;
+ */
+
 @end

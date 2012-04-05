@@ -269,7 +269,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
  * If the size of document is 0 it does not have any head of line.
  * Blankline does NOT have headOfLine. So EOF is NEVER head of line.
  * Searching starts from position "index". So the "index" could be a head of line and may be returned.
- **/
+     **/
 - (NSUInteger)headOfLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( [[self string] length] == 0 ){
@@ -392,6 +392,11 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         pos++;
     }
     
+    if( num != 0 ){
+        // Coundn't find the line
+        return NSNotFound;
+    }
+    
     // pos is at the line number "num" and column 0
     NSUInteger end = [self endOfLine:pos];
     if( NSNotFound == end ){
@@ -407,6 +412,20 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     
 }
 
+- (NSUInteger)lineNumber:(NSUInteger)index{
+    NSUInteger newLines=1;
+    for( NSUInteger pos = 0 ; pos < index && pos < [[self string] length]; pos++ ){
+        if( [self isNewLine:pos] ){
+            newLines++;
+        }
+    }
+    return newLines;
+}
+
+- (NSUInteger)numberOfLines{
+    DVTSourceTextView* storage = (DVTSourceTextView*)[self textStorage];
+    return [storage numberOfLines]; //  This is DVTSourceTextStorage method
+}
 
 ////////////////
 // Selection  //
@@ -771,7 +790,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 - (NSUInteger)sectionsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
     return 0;
 }
-
+    
 
 ////////////////
 // Scrolling  //
