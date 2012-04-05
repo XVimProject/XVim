@@ -447,6 +447,20 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return index;
 }
 
+- (NSUInteger)lineNumber:(NSUInteger)index{
+    NSUInteger newLines=1;
+    for( NSUInteger pos = 0 ; pos < index && pos < [[self string] length]; pos++ ){
+        if( [self isNewLine:pos] ){
+            newLines++;
+        }
+    }
+    return newLines;
+}
+
+- (NSUInteger)numberOfLines{
+    NSTextStorage* storage = [self textStorage];
+    return [storage numberOfLines]; //  This is DVTSourceTextStorage method
+}
 
 /////////////
 // Motions //
@@ -811,6 +825,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
         pos++;
     }
     
+    if( num != 0 ){
+        // Coundn't find the line
+        return NSNotFound;
+    }
     // pos is at the line number "num" and column 0
     NSUInteger end = [self endOfLine:pos];
     if( NSNotFound == end ){

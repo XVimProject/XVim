@@ -52,6 +52,8 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 - (NSUInteger)nextNonBlankInALine:(NSUInteger)index;
 
+- (NSUInteger)lineNumber:(NSUInteger)index;
+- (NSUInteger)numberOfLines;
     
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;

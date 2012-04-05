@@ -65,6 +65,8 @@
     NSTextStorage* storage = [view textStorage];
     TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
+    NSUInteger begin = [view selectedRange].location;
+    NSUInteger end = [view selectedRange].location + [view selectedRange].length-1;
     unichar* tmp;
     NSUInteger count;
     unichar mark;
@@ -74,7 +76,7 @@
     {
         case '.':
             parsing++;
-            //addr = [view lineNumber:begin]; //TODO: This should be current cursor posotion
+            addr = [view lineNumber:begin];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
@@ -84,10 +86,10 @@
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
             if( '<' == mark ){
-                // addr =           //TODO: Get line number of begining of the selected range
+                addr = [view lineNumber:begin];
                 parsing+=2;
             }else if( '>' == mark ){
-                // addr =           //TODO: Get line number of end of the selected range
+                addr = [view lineNumber:end];
                 parsing+=2;
             }else{
                 // Other marks or invalid character. XVim does not support this.
@@ -185,7 +187,6 @@
 
 - (XVimExArg*)parseCommand:(NSString*)cmd{
     NSTextView* view = [_xvim sourceView];
-    NSTextStorage* storage = [view textStorage];
     XVimExArg* exarg = [[[XVimExArg alloc] init] autorelease]; 
     NSUInteger len = [cmd length];
     
@@ -211,7 +212,7 @@
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [storage numberOfLines];
+                exarg.lineEnd = [view numberOfLines];
                 parsing++;
             }
         }else{
@@ -231,15 +232,15 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        //exarg.lineBegin = [view lineNumber:[view selectedRange].location]; // Get current selected line number
-        //exarg.lineEnd = [view lineNumber:[view selectedRange].location]; // 
+        exarg.lineBegin = [view lineNumber:[view selectedRange].location];
+        exarg.lineEnd =  exarg.lineBegin;
     }
     
     // 4. parse command
     // In xvim command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    while( *parsing != ' ' && *parsing != 0 ){
+    while( isAlpha(*parsing) || *parsing == '!' ){
         parsing++;
         count++;
     }
@@ -314,59 +315,8 @@
 //   Commands    //
 ///////////////////
 
-// Please keep the order of commands implementation in order to the command list in initWithXVim.
-
-- (void)substitute:(NSString*)args{
-    // Temporarily off
-    /*
-     // Split the string into the various components
-     NSString* replaced = @"";
-     NSString* replacement = @"";
-     char previous = 0;
-     int component = 0;
-     BOOL global = NO;
-     BOOL confirmation = NO;
-     if ([ex_command length] >= 3) {
-     for(int i=3;i<[ex_command length];++i) {
-     char current = [ex_command characterAtIndex:i];
-     if (current == '/' && previous != '\\') {
-     component++;
-     } else {
-     if (component == 0) {
-     replaced = [NSString stringWithFormat:@"%@%c",replaced,current];
-     } else if (component == 1) {
-     replacement = [NSString stringWithFormat:@"%@%c",replacement,current];
-     } else {
-     if (current == 'g') {
-     global = YES;
-     } else if (current == 'c') {
-     confirmation = YES;
-     } else {
-     ERROR_LOG("Unknown replace option %c",current);
-     }
-     }
-     previous = current;
-     }
-     }
-     TRACE_LOG("replaced=%@",replaced);
-     TRACE_LOG("replacement=%@",replacement);
-     }
-     [_lastReplacedString setString:replaced];
-     [_lastReplacementString setString:replacement];
-     // Replace all the occurrences
-     _nextReplaceBaseLocation = 0;
-     int numReplacements = 0;
-     BOOL found;
-     do {
-     found = [self replaceForward];
-     if (found) {
-     numReplacements++;
-     }
-     } while(found && global);
-     [self statusMessage:[NSString stringWithFormat:
-     @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
-     
-     */
+- (void)sub:(XVimExArg*)args{
+    [[_xvim searcher] substitute:args.arg from:args.lineBegin to:args.lineEnd];
 }
 
 - (void)set:(XVimExArg*)args{

@@ -1,5 +1,5 @@
 //
-//  XVImSearchCommand.h
+//  XVimSearch.h
 //  XVim
 //
 //  Created by Shuichiro Suzuki on 3/26/12.
@@ -13,10 +13,13 @@
 
 @class XVim;
 
-@interface XVimSearchCommand : NSObject
+@interface XVimSearch: NSObject
 @property BOOL lastSearchBackword;  // If the last search was '?' command this is true
+@property BOOL ignoreCase;
 @property (strong) NSString* lastSearchString;
+@property (strong) NSString* lastReplacementString;
 @property NSUInteger nextSearchBaseLocation;
+@property NSUInteger endOfReplacement;
 
 - (id)initWithXVim:(XVim*)xvim;
 - (NSRange)executeSearch:(NSString*)searchCmd;

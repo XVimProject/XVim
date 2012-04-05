@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "XVimCommandLine.h"
 #import "XVimRegister.h"
-#import "XVimSearchCommand.h"
+#import "XVimSearch.h"
 #import "XVimExCommand.h"
 
 @class XVimEvaluator;
@@ -39,8 +39,6 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
      NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
-     XVimSearchCommand* _searchcmd;
-     XVimExCommand* _excmd;
      NSDictionary* _options; // Options used by set command (Not implemented yet)
 }
 
@@ -60,6 +58,8 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 @property BOOL wrapScan;
 @property BOOL errorBells;
 
+@property XVimSearch* searcher;
+@property XVimExCommand* excmd;
 
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
 // Mark this property to YES before moving. And mark it to NO after moving.
