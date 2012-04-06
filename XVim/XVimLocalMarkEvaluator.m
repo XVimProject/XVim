@@ -7,6 +7,7 @@
 //
 
 #import "XVimLocalMarkEvaluator.h"
+#import "XVimKeyStroke.h"
 
 @implementation XVimLocalMarkEvaluator
 
@@ -24,9 +25,9 @@
     return self;
 }
 
-- (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
-    if ([keyStr length] != 1) {
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+    NSString* keyStr = [keyStroke toSelectorString];
+	if ([keyStr length] != 1) {
         return nil;
     }
     unichar c = [keyStr characterAtIndex:0];

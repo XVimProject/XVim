@@ -10,6 +10,7 @@
 #import "NSTextView+VimMotion.h"
 #import "Xvim.h"
 #import "Logger.h"
+#import "XVimKeyStroke.h"
 #import "DVTSourceTextView.h"
 #import "DVTCompletionController.h"
 
@@ -50,6 +51,11 @@
     return MODE_INSERT;
 }
 
+- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+{
+	return keymaps[MODE_INSERT];
+}
+
 - (NSString*)getInsertedText{
     NSRange endRange = [self.xvim selectedRange];
     NSRange textRange;
@@ -73,8 +79,8 @@
     }
 }
 
-- (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+    NSString* keyStr = [keyStroke toSelectorString];
     if( [self.cancelKeys containsObject:keyStr] ){
         if( !_insertedEventsAbort ){
             NSString *text = [self getInsertedText];
@@ -107,6 +113,8 @@
         // Store off the new start range
         self.startRange = [self.xvim selectedRange];
     }
+	
+	NSEvent *event = [keyStroke toEvent];
 
     if (_oneCharMode == TRUE) {
         NSRange save = [[xvim sourceView] selectedRange];
@@ -126,9 +134,9 @@
     }
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     // Do not record key strokes for insert. Instead we will directly append the inserted text into the register.
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
+    NSString* keyStr = [keyStroke toSelectorString];
     if ([self.cancelKeys containsObject:keyStr]){
         return REGISTER_APPEND;
     }else if (xregister.isReadOnly == NO && ([self.movementKeys containsObject:keyStr] || _oneCharMode)){

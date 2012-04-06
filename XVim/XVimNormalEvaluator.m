@@ -19,7 +19,9 @@
 #import "XVimRegisterEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
+#import "XVimKeyStroke.h"
 #import "XVim.h"
+#import "NSTextView+VimMotion.h"
 #import "Logger.h"
 
 @interface XVimNormalEvaluator()
@@ -51,6 +53,11 @@
         self.playbackRegister = nil;
     }
     return MODE_NORMAL;
+}
+
+- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+{
+	return keymaps[MODE_NORMAL];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -532,7 +539,7 @@
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
 // This can always be changed to a set of valid keys in the future if need be.
 NSArray *_invalidRepeatKeys;
-- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =
         [[NSArray alloc] initWithObjects:
@@ -550,19 +557,18 @@ NSArray *_invalidRepeatKeys;
          @"SLASH",
          nil];
     }
-    NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+    NSString *key = [keyStroke toSelectorString];
     if (key == @"q"){
         return REGISTER_IGNORE;
     }else if (xregister.isRepeat){
-        SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-        if([[XVimNormalEvaluator class] instancesRespondToSelector:handler] &&
-           ![[XVimNormalEvaluator superclass] instancesRespondToSelector:handler]){
+        if([keyStroke classResponds:[XVimNormalEvaluator class]] &&
+           ![keyStroke classResponds:[XVimNormalEvaluator superclass]]){
             if ([_invalidRepeatKeys containsObject:key] == NO){
                 return REGISTER_REPLACE;
             }
         }
     }
-    return [super shouldRecordEvent:event inRegister:xregister];
+    return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
 
