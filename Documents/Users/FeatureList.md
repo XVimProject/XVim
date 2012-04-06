@@ -32,7 +32,7 @@ The index of the list below corresponds to the help document of Vim.
  n,N | 
  '',` | Move to the marked position. 'm' is supporeted to make a mark 
 
-Numeric arugment is supported.
+Numeric argument is supported.
 
 
 ## Scroll
@@ -44,7 +44,7 @@ Numeric arugment is supported.
  C-u | Currently works same as C-b (page up) 
  C-b | 
 
-Numeric arugment is supported.
+Numeric argument is supported.
 
 
 ## Insert
@@ -54,7 +54,7 @@ Numeric arugment is supported.
  a,A |
  i,I |
 
-Numeric arugment is supported.
+Numeric argument is supported.
 
 
 ## Change
@@ -71,7 +71,7 @@ Numeric arugment is supported.
  <,<< |
 
 
-Numeric arugment is supported.
+Numeric argument is supported.
 
 
 ## Undo
@@ -81,7 +81,7 @@ Numeric arugment is supported.
  u   |
  C-r |
 
-Numeric arugment is supported.
+Numeric argument is supported.
 
 ## Visual
 
@@ -106,12 +106,21 @@ Regex is supporeted in search command but it is ICU regex and not Vim''s one.
 
 ## Cmdline
 
- Command | Note
----------|-----
-  :w     | 
-  :wq    | 
-  :run   | This is XVim original command to invoke XCodes 'run' command
-  :make  | This is XVim original command to invoke XCodes 'build' command
+ Command   | Note
+-----------|-----
+  :w[rite] | 
+  :wq      | 
+  :q[uit]  |
+  :debug   |
+  :run     | This is XVim original command to invoke XCodes 'run' command
+  :make    | This is XVim original command to invoke XCodes 'build' command
+  :s[ubstitute]|
+  :set     | See Options for supported variables
+  :map     | Maps globally across XVim, in all modes
+  :nmap    | Maps normal mode
+  :vmap    | Maps visual mode
+  :imap    | Maps insert mode
+  :omap    | Maps operator pending mode
 
 
 ## Options
@@ -122,7 +131,28 @@ Regex is supporeted in search command but it is ICU regex and not Vim''s one.
   [no]wrap |
   [no]wrapscan |
   [no]errorbells |
-    
+
+
+## Key mapping
+
+XVim supports five map commands: map, nmap, vmap, imap, omap.
+A map command can change any one keystroke into one or more key strokes.
+
+Examples: 
+    nmap n e
+    imap ' <Esc>
+    nmap u 5jiInsert some text<Esc>
+
+
+## .xvimrc
+
+At startup XVim looks for ~/.xvimrc. Each line in this file is executed 
+as an ex command. This allows you to configure mappings and options.
+
+Example:
+    set ignorecase
+    set wrapscan
+    nmap n e
 
 # Know problems
  See XVim issue page.
