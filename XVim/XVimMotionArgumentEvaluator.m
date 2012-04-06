@@ -7,6 +7,7 @@
 //
 
 #import "XVimMotionArgumentEvaluator.h"
+#import "XVimKeyStroke.h"
 
 
 // This evaluator is base class of an evaluator which takes argument to fix the motion
@@ -40,5 +41,19 @@
         return [_motionEvaluator commonMotion:motion Type:type];
     }
     return nil;
+}
+
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
+    if (xregister.isRepeat){
+        if (xregister.nonNumericKeyCount == 1){
+            if([keyStroke classResponds:[XVimMotionArgumentEvaluator class]] || keyStroke.isNumeric){
+                return REGISTER_APPEND;
+            }
+        }
+        
+        return REGISTER_IGNORE;
+    }
+    
+    return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 @end

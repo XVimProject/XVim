@@ -18,7 +18,7 @@ typedef enum {
 
 @interface XVimRegister : NSObject
 
--(id) initWithRegisterName:(NSString*)name;
+-(id) initWithRegisterName:(NSString*)registerName displayName:(NSString*)displayName;
 
 -(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count;
 -(void) appendKeyEvent:(XVimKeyStroke*)keyStroke;
@@ -27,6 +27,7 @@ typedef enum {
 
 @property (readonly, strong) NSMutableString *text;
 @property (readonly, strong) NSString *name;
+@property (readonly, strong) NSString *displayName;
 @property (readonly) BOOL isAlpha;
 @property (readonly) BOOL isNumeric;
 @property (readonly) BOOL isRepeat;

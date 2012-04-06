@@ -63,8 +63,7 @@
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
-    NSString *key = [keyStroke toSelectorString];
-    if([keyStroke instanceResponds:self] || [key hasPrefix:@"NUM"]){
+    if([keyStroke instanceResponds:self] || keyStroke.isNumeric){
         TRACE_LOG(@"REGISTER_APPEND");
         return REGISTER_APPEND;
     }
