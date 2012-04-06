@@ -116,64 +116,64 @@
         _registers =
         [[NSSet alloc] initWithObjects:
          // 1. The unnamed register ""
-         [[XVimRegister alloc] initWithRegisterName:@"\""],
+         [[XVimRegister alloc] initWithRegisterName:@"DQUOTE" displayName:@"\""],
          // 2. 10 numbered registers "0 to "9 
-         [[XVimRegister alloc] initWithRegisterName:@"0"],
-         [[XVimRegister alloc] initWithRegisterName:@"1"],
-         [[XVimRegister alloc] initWithRegisterName:@"2"],
-         [[XVimRegister alloc] initWithRegisterName:@"3"],
-         [[XVimRegister alloc] initWithRegisterName:@"4"],
-         [[XVimRegister alloc] initWithRegisterName:@"5"],
-         [[XVimRegister alloc] initWithRegisterName:@"6"],
-         [[XVimRegister alloc] initWithRegisterName:@"7"],
-         [[XVimRegister alloc] initWithRegisterName:@"8"],
-         [[XVimRegister alloc] initWithRegisterName:@"9"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM0" displayName:@"0"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM1" displayName:@"1"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM2" displayName:@"2"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM3" displayName:@"3"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM4" displayName:@"4"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM5" displayName:@"5"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM6" displayName:@"6"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM7" displayName:@"7"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM8" displayName:@"8"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUM9" displayName:@"9"],
          // 3. The small delete register "-
-         [[XVimRegister alloc] initWithRegisterName:@"-"],
+         [[XVimRegister alloc] initWithRegisterName:@"DASH" displayName:@"-"],
          // 4. 26 named registers "a to "z or "A to "Z
-         [[XVimRegister alloc] initWithRegisterName:@"a"],
-         [[XVimRegister alloc] initWithRegisterName:@"b"],
-         [[XVimRegister alloc] initWithRegisterName:@"c"],
-         [[XVimRegister alloc] initWithRegisterName:@"d"],
-         [[XVimRegister alloc] initWithRegisterName:@"e"],
-         [[XVimRegister alloc] initWithRegisterName:@"f"],
-         [[XVimRegister alloc] initWithRegisterName:@"g"],
-         [[XVimRegister alloc] initWithRegisterName:@"h"],
-         [[XVimRegister alloc] initWithRegisterName:@"i"],
-         [[XVimRegister alloc] initWithRegisterName:@"j"],
-         [[XVimRegister alloc] initWithRegisterName:@"k"],
-         [[XVimRegister alloc] initWithRegisterName:@"l"],
-         [[XVimRegister alloc] initWithRegisterName:@"m"],
-         [[XVimRegister alloc] initWithRegisterName:@"n"],
-         [[XVimRegister alloc] initWithRegisterName:@"o"],
-         [[XVimRegister alloc] initWithRegisterName:@"p"],
-         [[XVimRegister alloc] initWithRegisterName:@"q"],
-         [[XVimRegister alloc] initWithRegisterName:@"r"],
-         [[XVimRegister alloc] initWithRegisterName:@"s"],
-         [[XVimRegister alloc] initWithRegisterName:@"t"],
-         [[XVimRegister alloc] initWithRegisterName:@"u"],
-         [[XVimRegister alloc] initWithRegisterName:@"v"],
-         [[XVimRegister alloc] initWithRegisterName:@"w"],
-         [[XVimRegister alloc] initWithRegisterName:@"x"],
-         [[XVimRegister alloc] initWithRegisterName:@"y"],
-         [[XVimRegister alloc] initWithRegisterName:@"z"],
+         [[XVimRegister alloc] initWithRegisterName:@"a" displayName:@"a"],
+         [[XVimRegister alloc] initWithRegisterName:@"b" displayName:@"b"],
+         [[XVimRegister alloc] initWithRegisterName:@"c" displayName:@"c"],
+         [[XVimRegister alloc] initWithRegisterName:@"d" displayName:@"d"],
+         [[XVimRegister alloc] initWithRegisterName:@"e" displayName:@"e"],
+         [[XVimRegister alloc] initWithRegisterName:@"f" displayName:@"f"],
+         [[XVimRegister alloc] initWithRegisterName:@"g" displayName:@"g"],
+         [[XVimRegister alloc] initWithRegisterName:@"h" displayName:@"h"],
+         [[XVimRegister alloc] initWithRegisterName:@"i" displayName:@"i"],
+         [[XVimRegister alloc] initWithRegisterName:@"j" displayName:@"j"],
+         [[XVimRegister alloc] initWithRegisterName:@"k" displayName:@"k"],
+         [[XVimRegister alloc] initWithRegisterName:@"l" displayName:@"l"],
+         [[XVimRegister alloc] initWithRegisterName:@"m" displayName:@"m"],
+         [[XVimRegister alloc] initWithRegisterName:@"n" displayName:@"n"],
+         [[XVimRegister alloc] initWithRegisterName:@"o" displayName:@"o"],
+         [[XVimRegister alloc] initWithRegisterName:@"p" displayName:@"p"],
+         [[XVimRegister alloc] initWithRegisterName:@"q" displayName:@"q"],
+         [[XVimRegister alloc] initWithRegisterName:@"r" displayName:@"r"],
+         [[XVimRegister alloc] initWithRegisterName:@"s" displayName:@"s"],
+         [[XVimRegister alloc] initWithRegisterName:@"t" displayName:@"t"],
+         [[XVimRegister alloc] initWithRegisterName:@"u" displayName:@"u"],
+         [[XVimRegister alloc] initWithRegisterName:@"v" displayName:@"v"],
+         [[XVimRegister alloc] initWithRegisterName:@"w" displayName:@"w"],
+         [[XVimRegister alloc] initWithRegisterName:@"x" displayName:@"x"],
+         [[XVimRegister alloc] initWithRegisterName:@"y" displayName:@"y"],
+         [[XVimRegister alloc] initWithRegisterName:@"z" displayName:@"z"],
          // 5. four read-only registers ":, "., "% and "#
-         [[XVimRegister alloc] initWithRegisterName:@":"],
-         [[XVimRegister alloc] initWithRegisterName:@"."],
-         [[XVimRegister alloc] initWithRegisterName:@"%"],
-         [[XVimRegister alloc] initWithRegisterName:@"#"],
+         [[XVimRegister alloc] initWithRegisterName:@"COLON" displayName:@":"],
+         [[XVimRegister alloc] initWithRegisterName:@"DOT" displayName:@"."],
+         [[XVimRegister alloc] initWithRegisterName:@"PERCENT" displayName:@"%"],
+         [[XVimRegister alloc] initWithRegisterName:@"NUMBER" displayName:@"#"],
          // 6. the expression register "=
-         [[XVimRegister alloc] initWithRegisterName:@"="],
+         [[XVimRegister alloc] initWithRegisterName:@"EQUAL" displayName:@"="],
          // 7. The selection and drop registers "*, "+ and "~  
-         [[XVimRegister alloc] initWithRegisterName:@"*"],
-         [[XVimRegister alloc] initWithRegisterName:@"+"],
-         [[XVimRegister alloc] initWithRegisterName:@"~"],
+         [[XVimRegister alloc] initWithRegisterName:@"ASTERISK" displayName:@"*"],
+         [[XVimRegister alloc] initWithRegisterName:@"PLUS" displayName:@"+"],
+         [[XVimRegister alloc] initWithRegisterName:@"TILDE" displayName:@"~"],
          // 8. The black hole register "_
-         [[XVimRegister alloc] initWithRegisterName:@"_"],
+         [[XVimRegister alloc] initWithRegisterName:@"UNDERSCORE" displayName:@"_"],
          // 9. Last search pattern register "/
-         [[XVimRegister alloc] initWithRegisterName:@"/"],
+         [[XVimRegister alloc] initWithRegisterName:@"SLASH" displayName:@"/"],
          // additional "hidden" register to store text for '.' command
-         [[XVimRegister alloc] initWithRegisterName:@"repeat"],
+         [[XVimRegister alloc] initWithRegisterName:@"repeat" displayName:@"repeat"],
          nil];
         
         _recordingRegister = nil;
@@ -453,7 +453,7 @@
 }
 
 - (XVimRegister*)findRegister:(NSString*)name{
-    return [self.registers member:[[XVimRegister alloc] initWithRegisterName:name]];
+    return [self.registers member:[[XVimRegister alloc] initWithRegisterName:name displayName:@""]];
 }
 
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{

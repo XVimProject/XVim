@@ -20,20 +20,22 @@
 
 @synthesize text = _text;
 @synthesize name = _name;
+@synthesize displayName = _displayName;
 @synthesize isPlayingBack = _isPlayingBack;
 @synthesize keyEventsAndInsertedText = _keyEventsAndInsertedText;
 @synthesize nonNumericKeyCount = _nonNumericKeyCount;
 
 -(NSString*) description{
-    return [[NSString alloc] initWithFormat:@"\"%@: %@", self.name, self.text];
+    return [[NSString alloc] initWithFormat:@"\"%@: %@", self.displayName, self.text];
 }
 
--(id) initWithRegisterName:(NSString*)registerName{
+-(id) initWithRegisterName:(NSString*)registerName displayName:(NSString*)displayName{
     self = [super init];
     if (self) {
         _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
         _text = [NSMutableString stringWithString:@""];
         _name = [NSString stringWithString:registerName];
+        _displayName = [NSString stringWithString:displayName];
         _nonNumericKeyCount = 0;
         _isPlayingBack = NO;
     }
@@ -57,11 +59,15 @@
 }
 
 -(BOOL) isRepeat{
-    return self.name == @"repeat";
+    return self.displayName == @"repeat";
 }
 
 -(BOOL) isReadOnly{
-    return self.name == @":" || self.name == @"." || self.name == @"%" || self.name == @"#" || self.isRepeat;
+    return self.displayName == @":" ||
+    self.displayName == @"." ||
+    self.displayName == @"%" ||
+    self.displayName == @"#" ||
+    self.isRepeat;
 }
 
 -(BOOL) isEqual:(id)object{
