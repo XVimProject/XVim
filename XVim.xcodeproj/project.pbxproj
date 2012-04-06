@@ -23,8 +23,8 @@
 		A2A6BA2E152A544C00F0EB5F /* XVimSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */; };
 		A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A736351527484B0051E8E4 /* XVimExCommand.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
+		A2AF5E18152EA92C00E13833 /* NSTextView+VimMotion.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AF5E17152EA92C00E13833 /* NSTextView+VimMotion.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
-		A2BA3E9E152E1A6200C18FB4 /* NSTextView+VimMotion.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ECD14F8042C00A6B70C /* NSTextView+VimMotion.m */; };
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
@@ -59,8 +59,6 @@
 /* Begin PBXFileReference section */
 		A222B5DF1514DFCD005E8802 /* XVimOperatorEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorEvaluator.h; path = XVim/XVimOperatorEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorEvaluator.m; path = XVim/XVimOperatorEvaluator.m; sourceTree = SOURCE_ROOT; };
-		A2277ECC14F8042C00A6B70C /* NSTextView+VimMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSTextView+VimMotion.h"; path = "/Users/shu/Develop/XVim/XVim/NSTextView+VimMotion.h"; sourceTree = "<absolute>"; };
-		A2277ECD14F8042C00A6B70C /* NSTextView+VimMotion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSTextView+VimMotion.m"; path = "/Users/shu/Develop/XVim/XVim/NSTextView+VimMotion.m"; sourceTree = "<absolute>"; };
 		A2277ED214F80BCB00A6B70C /* XVimDeleteEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimDeleteEvaluator.h; path = XVim/XVimDeleteEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimDeleteEvaluator.m; path = XVim/XVimDeleteEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2277ED614F80BFE00A6B70C /* XVimShiftEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimShiftEvaluator.h; path = XVim/XVimShiftEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -89,6 +87,8 @@
 		A2A736351527484B0051E8E4 /* XVimExCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimExCommand.m; path = XVim/XVimExCommand.m; sourceTree = SOURCE_ROOT; };
 		A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandLine.h; path = XVim/XVimCommandLine.h; sourceTree = SOURCE_ROOT; };
 		A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLine.m; path = XVim/XVimCommandLine.m; sourceTree = SOURCE_ROOT; };
+		A2AF5E16152EA92C00E13833 /* NSTextView+VimMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSTextView+VimMotion.h"; path = "XVim/NSTextView+VimMotion.h"; sourceTree = SOURCE_ROOT; };
+		A2AF5E17152EA92C00E13833 /* NSTextView+VimMotion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSTextView+VimMotion.m"; path = "XVim/NSTextView+VimMotion.m"; sourceTree = SOURCE_ROOT; };
 		A2B4BABB14D59F6600D817B0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A2B4BABE14D59F6600D817B0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A2B4BABF14D59F6600D817B0 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -195,6 +195,8 @@
 		A2B4BAC114D59F6600D817B0 /* XVim */ = {
 			isa = PBXGroup;
 			children = (
+				A2AF5E16152EA92C00E13833 /* NSTextView+VimMotion.h */,
+				A2AF5E17152EA92C00E13833 /* NSTextView+VimMotion.m */,
 				C38A5B481527C9EE00E1448D /* Xcode */,
 				A2A6BA2C152A544B00F0EB5F /* XVimSearch.h */,
 				A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */,
@@ -282,8 +284,6 @@
 		C38A5B481527C9EE00E1448D /* Xcode */ = {
 			isa = PBXGroup;
 			children = (
-				A2277ECD14F8042C00A6B70C /* NSTextView+VimMotion.m */,
-				A2277ECC14F8042C00A6B70C /* NSTextView+VimMotion.h */,
 				C38A5B3F15272B0500E1448D /* XVimSourceTextView.h */,
 				C38A5B4015272B0500E1448D /* XVimSourceTextView.m */,
 				C38A5B511527CF5900E1448D /* DVTFoldingTextStorage.h */,
@@ -359,7 +359,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2BA3E9E152E1A6200C18FB4 /* NSTextView+VimMotion.m in Sources */,
 				A24782BF14D6F56E003B6433 /* Logger.m in Sources */,
 				A24782C114D6F56E003B6433 /* XVim.m in Sources */,
 				A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */,
@@ -389,6 +388,7 @@
 				A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */,
 				A2A6BA2E152A544C00F0EB5F /* XVimSearch.m in Sources */,
 				A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */,
+				A2AF5E18152EA92C00E13833 /* NSTextView+VimMotion.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
