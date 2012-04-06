@@ -39,6 +39,8 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 #import "XVim.h"
 
 @class XVimMotionEvaluator;
+@class XVimKeyStroke;
+@class XVimKeymap;
 @class DVTSourceTextView;
 
 typedef enum {
@@ -49,15 +51,14 @@ typedef enum {
 
 
 @interface XVimEvaluator : NSObject
-+ (BOOL) isNumericKey:(NSEvent*)event;
-+ (NSString*) keyStringFromKeyEvent:(NSEvent*)event;
-- (XVimEvaluator*)eval:(NSEvent*) event ofXVim:(XVim*)xvim;
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim;
+- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps;
 - (XVimEvaluator*)defaultNextEvaluator;
 // Made into a property so it can be set 
 @property (weak) XVim *xvim;
 @property (readonly) DVTSourceTextView *textView;
 @property (readonly) NSUInteger insertionPoint;
 
-- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister;
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
 - (XVIM_MODE)becameHandler:(XVim*)xvim;
 @end

@@ -36,9 +36,12 @@
 #import "XVimSearch.h"
 #import "XVimNormalEvaluator.h"
 #import "NSTextView+VimMotion.h"
+#import "XVimKeyStroke.h"
+#import "XVimKeymap.h"
 
 @interface XVim()
-- (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister;
+- (void)parseRcFile;
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister;
 @property (strong) NSString *searchCharacter;
 @end
 
@@ -82,7 +85,6 @@
     //[Logger registerTracing:@"DVTSourceTextView"];
     //[Logger registerTracing:@"DVTTextFinder"];
     //[Logger registerTracing:@"DVTIncrementalFindBar"];
-    
 }
 
 + (void) hook
@@ -180,6 +182,15 @@
         _searchCharacter = @"";
         _shouldSearchCharacterBackward = NO;
         _shouldSearchPreviousCharacter = NO;
+		
+		for (int i = 0; i < MODE_COUNT; ++i)
+		{
+			_keymaps[i] = [[XVimKeymap alloc] init];
+		}
+		[XVimKeyStroke initKeymaps];
+		
+		// Must be last since ex commands can use self
+		[self parseRcFile];
     }
     
     return self;
@@ -219,25 +230,49 @@
     return [[self sourceView] selectedRange];
 }
 
-- (BOOL)handleKeyEvent:(NSEvent*)event{
-    XVimEvaluator* nextEvaluator = [_currentEvaluator eval:event ofXVim:self];
-    [self recordEvent:event intoRegister:_recordingRegister];
-    [self recordEvent:event intoRegister:[self findRegister:@"repeat"]];
-    if( nil == nextEvaluator ){
-        nextEvaluator = [[XVimNormalEvaluator alloc] init];
-    }
-    
-    if( _currentEvaluator != nextEvaluator ){
-        [_currentEvaluator release];
-        _currentEvaluator = nextEvaluator;
+- (void)parseRcFile {
+    NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
+    NSString *keymapPath = [homeDir stringByAppendingString: @"/.xvimrc"]; 
+    NSString *keymapData = [[NSString alloc] initWithContentsOfFile:keymapPath 
+                                                           encoding:NSUTF8StringEncoding
+															  error:NULL];
+	for (NSString *string in [keymapData componentsSeparatedByString:@"\n"])
+	{
+		[self.excmd executeCommand:[@":" stringByAppendingString:string]];
+	}
+}
 
-        XVIM_MODE newMode = [_currentEvaluator becameHandler:self];
-        if (self.mode != MODE_CMDLINE){
-            // Special case for cmdline mode. I don't like this, but
-            // don't have time to refactor cmdline mode.
-            self.mode = newMode;
-        }
-    }
+- (XVimKeymap*)keymapForMode:(int)mode {
+	return _keymaps[mode];
+}
+
+- (BOOL)handleKeyEvent:(NSEvent*)event{
+	
+	XVimKeyStroke* keyStroke = [XVimKeyStroke fromEvent:event];
+	XVimKeymap* keymap = [_currentEvaluator selectKeymap:_keymaps];
+	NSArray *keystrokes = [keymap lookupKeyStroke:keyStroke];
+	
+	for (XVimKeyStroke *keyStroke in keystrokes)
+	{
+		XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke ofXVim:self];
+		[self recordEvent:keyStroke intoRegister:_recordingRegister];
+		[self recordEvent:keyStroke intoRegister:[self findRegister:@"repeat"]];
+		if( nil == nextEvaluator ){
+			nextEvaluator = [[XVimNormalEvaluator alloc] init];
+		}
+		
+		if( _currentEvaluator != nextEvaluator ){
+			[_currentEvaluator release];
+			_currentEvaluator = nextEvaluator;
+			
+			XVIM_MODE newMode = [_currentEvaluator becameHandler:self];
+			if (self.mode != MODE_CMDLINE){
+				// Special case for cmdline mode. I don't like this, but
+				// don't have time to refactor cmdline mode.
+				self.mode = newMode;
+			}
+		}
+	}
     
     [self.cmdLine setNeedsDisplay:YES];
     return YES;
@@ -446,15 +481,15 @@
     }
 }
 
-- (void)recordEvent:(NSEvent*)event intoRegister:(XVimRegister*)xregister{
-    switch ([_currentEvaluator shouldRecordEvent:event inRegister:xregister]) {
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister{
+    switch ([_currentEvaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
         case REGISTER_APPEND:
-            [xregister appendKeyEvent:event];
+            [xregister appendKeyEvent:keyStroke];
             break;
             
         case REGISTER_REPLACE:
             [xregister clear];
-            [xregister appendKeyEvent:event];
+            [xregister appendKeyEvent:keyStroke];
             break;
             
         case REGISTER_IGNORE:

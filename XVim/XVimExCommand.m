@@ -11,6 +11,8 @@
 #import "XVimExCommand.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "XVimKeyStroke.h"
+#import "XVimKeymap.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -48,7 +50,12 @@
                    CMD(@"debug", @"debug:"),
                    CMD(@"make", @"make:"),  // The following 2 are original to XVim
                    CMD(@"run", @"run:"),
-                   nil];
+                   CMD(@"map", @"map:"),
+                   CMD(@"nmap", @"nmap:"),
+                   CMD(@"vmap", @"vmap:"),
+                   CMD(@"omap", @"omap:"),
+                   CMD(@"imap", @"imap:"),
+					   nil];
         _xvim = [xvim retain];
     }
     return self;
@@ -357,16 +364,73 @@
     [NSApp terminate:self];
 }
 
-- (void)debug:(NSString*)args{
+- (void)debug:(XVimExArg*)args{
 }
 
-- (void)make:(NSString*)args{
+- (void)make:(XVimExArg*)args{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
-- (void)run:(NSString*)args{
+- (void)mapMode:(int)mode withArgs:(XVimExArg*)args {
+	NSString *argString = args.arg;
+	NSScanner *scanner = [NSScanner scannerWithString:argString];
+	
+	NSMutableArray *subStrings = [[NSMutableArray alloc] init];
+	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+	for (;;)
+	{
+		NSString *string;
+		[scanner scanCharactersFromSet:ws intoString:&string];
+		
+		if (scanner.isAtEnd) { break; }
+		[scanner scanUpToCharactersFromSet:ws intoString:&string];
+		
+		[subStrings addObject:string];
+	}
+		
+	if (subStrings.count == 2)
+	{
+		NSString *fromString = [subStrings objectAtIndex:0];
+		NSString *toString = [subStrings objectAtIndex:1];
+		XVimKeyStroke *fromKeyStroke = [XVimKeyStroke fromString:fromString];
+		
+		NSMutableArray *toKeyStrokes = [[NSMutableArray alloc] init];
+		[XVimKeyStroke fromString:toString to:toKeyStrokes];
+		
+		if (fromKeyStroke && toKeyStrokes.count > 0)
+		{
+			XVimKeymap *keymap = [_xvim keymapForMode:mode];
+			[keymap mapKeyStroke:fromKeyStroke to:toKeyStrokes];
+		}
+	}
+}
+
+- (void)map:(XVimExArg*)args {
+	[self mapMode:MODE_GLOBAL_MAP withArgs:args];
+	[self mapMode:MODE_NORMAL withArgs:args];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args];
+	[self mapMode:MODE_VISUAL withArgs:args];
+}
+
+- (void)nmap:(XVimExArg*)args {
+	[self mapMode:MODE_NORMAL withArgs:args];
+}
+
+- (void)vmap:(XVimExArg*)args {
+	[self mapMode:MODE_VISUAL withArgs:args];
+}
+
+- (void)omap:(XVimExArg*)args {
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args];
+}
+
+- (void)imap:(XVimExArg*)args {
+	[self mapMode:MODE_INSERT withArgs:args];
+}
+
+- (void)run:(XVimExArg*)args{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
@@ -374,7 +438,7 @@
 
 // Following commands are useful and expected to be implemented but not working now.
 
-//- (void)bn:(NSString*)args{
+//- (void)bn:(XVimExArg*)args{
 //    // Not supported at the moment
 //    // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
 //    // TODO: set first responder to the new DVTSourceTextView after switching tabs.
@@ -384,7 +448,7 @@
 //    [[NSApplication sharedApplication] sendEvent:keyPress];
 //}
 //
-//- (void)bp:(NSString*)args{
+//- (void)bp:(XVimExArg*)args{
 //    // Not supported at the moment
 //    // Dosen't work as I intend... This switches between tabs but the focus doesnt gose to the DVTSorceTextView after switching...
 //    // TODO: set first responder to the new DVTSourceTextView after switching tabs.

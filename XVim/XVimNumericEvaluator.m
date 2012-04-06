@@ -7,6 +7,7 @@
 //
 
 #import "XVimNumericEvaluator.h"
+#import "XVimKeyStroke.h"
 
 @implementation XVimNumericEvaluator
 @synthesize numericMode,numericArg;
@@ -20,9 +21,9 @@
     return self;
 }
 
-- (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
-    NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
-    if( [XVimEvaluator isNumericKey:event] ){
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+    NSString* keyStr = [keyStroke toSelectorString];
+    if( keyStroke.isNumeric ){
         if( self.numericMode ){
             NSString* numStr = [keyStr substringFromIndex:3];
             NSInteger n = [numStr integerValue]; 
@@ -44,7 +45,7 @@
         }
     }
     
-    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
+    XVimEvaluator *nextEvaluator = [super eval:keyStroke ofXVim:xvim];
     [self resetNumericArg]; // Reset the numeric arg after evaluating an event
     return nextEvaluator;
 }

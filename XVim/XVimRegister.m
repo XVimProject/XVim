@@ -8,6 +8,7 @@
 
 #import "XVimRegister.h"
 #import "XVimEvaluator.h"
+#import "XVimKeyStroke.h"
 #import <CoreServices/CoreServices.h>
 
 @interface XVimRegister()
@@ -93,21 +94,21 @@
     [self.keyEventsAndInsertedText removeAllObjects];
 }
 
--(void) appendKeyEvent:(NSEvent*)event{
+-(void) appendKeyEvent:(XVimKeyStroke*)keyStroke{
     if (self.isPlayingBack){
         return;
     }
 
-    NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
+    NSString *key = [keyStroke toSelectorString];
     if (key.length > 1){
         [self.text appendString:[NSString stringWithFormat:@"<%@>", key]];
     }else{
         [self.text appendString:key];
     }
-    if ([XVimEvaluator isNumericKey:event] == NO){
+    if (!keyStroke.isNumeric){
         ++_nonNumericKeyCount;
     }
-    [self.keyEventsAndInsertedText addObject:event];
+    [self.keyEventsAndInsertedText addObject:keyStroke];
 }
 
 -(void) appendText:(NSString*)text{
@@ -123,9 +124,10 @@
     self.isPlayingBack = YES;
     for (NSUInteger i = 0; i < count; ++i) {
         [self.keyEventsAndInsertedText enumerateObjectsUsingBlock:^(id eventOrText, NSUInteger index, BOOL *stop){        
-            if ([eventOrText isKindOfClass:[NSEvent class]]){
+            if ([eventOrText isKindOfClass:[XVimKeyStroke class]]){
                 // Send the keyDown event directly to the view
-                [view keyDown:eventOrText];
+				NSEvent* event = [eventOrText toEvent];
+                [view keyDown:event];
             }else if([eventOrText isKindOfClass:[NSString class]]){
                 [view insertText:eventOrText];
             }

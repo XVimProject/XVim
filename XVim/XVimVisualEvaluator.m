@@ -59,11 +59,16 @@
     return MODE_VISUAL;
 }
 
-- (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
+- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+{
+	return keymaps[MODE_VISUAL];
+}
+
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
     DVTSourceTextView* v = [xvim sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
-    XVimEvaluator *nextEvaluator = [super eval:event ofXVim:xvim];
+    XVimEvaluator *nextEvaluator = [super eval:keyStroke ofXVim:xvim];
     if (nextEvaluator == self){
         [self updateSelection];   
     }

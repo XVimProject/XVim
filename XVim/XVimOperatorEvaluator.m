@@ -8,9 +8,15 @@
 
 #import "NSTextView+VimMotion.h"
 #import "XVimOperatorEvaluator.h"
+#import "XVimKeyStroke.h"
 #import "Logger.h"
 
 @implementation XVimOperatorEvaluator
+
+- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+{
+	return keymaps[MODE_OPERATOR_PENDING];
+}
 
 - (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
     if( from > to ){
@@ -56,10 +62,8 @@
     }
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
-    NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
-    SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-    if([self respondsToSelector:handler] || [XVimEvaluator isNumericKey:event]){
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
+    if([keyStroke instanceResponds:self] || keyStroke.isNumeric){
         TRACE_LOG(@"REGISTER_APPEND");
         return REGISTER_APPEND;
     }
