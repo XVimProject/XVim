@@ -197,6 +197,11 @@ static char* keynames[] = {
     return keyStr;
 }
 
++ (BOOL) isNumericKey:(NSEvent*)event{
+    NSString *keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
+    return [keyStr hasPrefix:@"NUM"] && [keyStr length] == 4;
+}
+
 - (id)init
 {
     self = [super init];

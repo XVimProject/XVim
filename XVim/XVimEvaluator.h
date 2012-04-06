@@ -47,7 +47,9 @@ typedef enum {
   MARKOPERATOR_MOVETOSTARTOFLINE
 } XVimMarkOperator;
 
+
 @interface XVimEvaluator : NSObject
++ (BOOL) isNumericKey:(NSEvent*)event;
 + (NSString*) keyStringFromKeyEvent:(NSEvent*)event;
 - (XVimEvaluator*)eval:(NSEvent*) event ofXVim:(XVim*)xvim;
 - (XVimEvaluator*)defaultNextEvaluator;

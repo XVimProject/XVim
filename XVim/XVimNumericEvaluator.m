@@ -22,7 +22,7 @@
 
 - (XVimEvaluator*)eval:(NSEvent*)event ofXVim:(XVim*)xvim{
     NSString* keyStr = [XVimEvaluator keyStringFromKeyEvent:event];
-    if( [keyStr hasPrefix:@"NUM"] ){
+    if( [XVimEvaluator isNumericKey:event] ){
         if( self.numericMode ){
             NSString* numStr = [keyStr substringFromIndex:3];
             NSInteger n = [numStr integerValue]; 

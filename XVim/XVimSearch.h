@@ -13,8 +13,15 @@
 
 @class XVim;
 
+typedef enum {
+    XVimSearchCaseDefault,
+    XVimSearchCaseSensitive,
+    XVimSearchCaseInsensitive
+} XVimSearchCase;
+
 @interface XVimSearch: NSObject
 @property BOOL lastSearchBackword;  // If the last search was '?' command this is true
+@property XVimSearchCase lastSearchCase;  // If the last search had "\c" or "\C"
 @property (strong) NSString* lastSearchString;
 @property (strong) NSString* lastReplacementString;
 @property NSUInteger nextSearchBaseLocation;
@@ -24,6 +31,7 @@
 - (NSRange)executeSearch:(NSString*)searchCmd;
 - (NSRange)searchNext;
 - (NSRange)searchPrev;
+- (NSRange)searchCurrentWord:(BOOL)forward matchWholeWord:(BOOL)wholeWord;
 - (void) substitute:(NSString*)string from:(NSUInteger)from to:(NSUInteger)to;
 
 @end

@@ -59,7 +59,7 @@
 - (XVimRegisterOperation)shouldRecordEvent:(NSEvent*) event inRegister:(XVimRegister*)xregister{
     NSString *key = [XVimEvaluator keyStringFromKeyEvent:event];
     SEL handler = NSSelectorFromString([key stringByAppendingString:@":"]);
-    if([self respondsToSelector:handler] || [key hasPrefix:@"NUM"]){
+    if([self respondsToSelector:handler] || [XVimEvaluator isNumericKey:event]){
         TRACE_LOG(@"REGISTER_APPEND");
         return REGISTER_APPEND;
     }

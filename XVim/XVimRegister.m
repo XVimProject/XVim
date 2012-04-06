@@ -104,7 +104,7 @@
     }else{
         [self.text appendString:key];
     }
-    if ([key hasPrefix:@"NUM"] == NO){
+    if ([XVimEvaluator isNumericKey:event] == NO){
         ++_nonNumericKeyCount;
     }
     [self.keyEventsAndInsertedText addObject:event];
