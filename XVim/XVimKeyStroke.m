@@ -243,7 +243,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 + (XVimKeyStroke*)fromEvent:(NSEvent*)event
 {
 	XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-	keyStroke.key = [event.characters characterAtIndex:0];
+	keyStroke.key = [[event charactersIgnoringModifiers] characterAtIndex:0];
 	keyStroke.modifierFlags = event.modifierFlags & 
 		(NSShiftKeyMask | NSControlKeyMask | NSCommandKeyMask | NSAlternateKeyMask);
 	return keyStroke;
