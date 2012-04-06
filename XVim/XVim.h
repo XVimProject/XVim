@@ -9,23 +9,15 @@
 #import <Foundation/Foundation.h>
 #import "XVimCommandLine.h"
 #import "XVimRegister.h"
+#import "XVimMode.h"
 #import "XVimSearch.h"
 #import "XVimExCommand.h"
 #import "XVimOptions.h"
 
 @class XVimEvaluator;
 @class DVTSourceTextView;
+@class XVimKeymap;
 
-typedef enum{
-    MODE_NORMAL,
-    MODE_CMDLINE,
-    MODE_INSERT,
-    MODE_VISUAL
-}XVIM_MODE;
-
-
-static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT", 
-    @"VISUAL"};
 
 #define XVIM_TAG 1209 // This is my birthday!
 
@@ -41,6 +33,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
      NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
      NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
+	 XVimKeymap* _keymaps[MODE_COUNT];
 }
 
 @property NSInteger tag;
@@ -82,6 +75,7 @@ static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT",
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;
+- (XVimKeymap*)keymapForMode:(int)mode;
 
 // Option handlings( Not implemented yet )
 /*

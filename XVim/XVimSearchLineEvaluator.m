@@ -10,14 +10,16 @@
 #import "XVimMotionEvaluator.h"
 #import "XVim.h"
 #import "Logger.h"
+#import "XVimKeyStroke.h"
 
 // Search Line 
 @implementation XVimSearchLineEvaluator
 @synthesize forward = _forward;
 @synthesize previous = _previous;
 
-- (XVimEvaluator*)eval:(NSEvent *)event ofXVim:(XVim *)xvim{
-    NSString *searchChar = [[event characters] substringWithRange:NSMakeRange(0, 1)];
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim *)xvim{
+	unichar key = keyStroke.key;
+    NSString *searchChar = [NSString stringWithCharacters:&key length:1];
     [xvim setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
 
     NSTextView *view = (NSTextView*)[xvim superview];
