@@ -32,11 +32,11 @@
     }
 
     //Move cursor and show the found string
+    NSRange begin = [[self textView] selectedRange];
     [[self textView] setSelectedRange:NSMakeRange(found.location, 0)];
     [[self textView] scrollToCursor];
     [[self textView] showFindIndicatorForRange:found];
     
-    NSRange begin = [[self textView] selectedRange];
     return [self _motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
@@ -52,11 +52,11 @@
     }
     
     //Move cursor and show the found string
+    NSRange begin = [[self textView] selectedRange];
     [[self textView] setSelectedRange:NSMakeRange(found.location, 0)];
     [[self textView] scrollToCursor];
     [[self textView] showFindIndicatorForRange:found];
     
-    NSRange begin = [[self textView] selectedRange];
     return [self _motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 @end
