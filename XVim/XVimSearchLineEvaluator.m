@@ -31,7 +31,7 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim *)xvim{
-	unichar key = keyStroke.key;
+	unichar key = keyStroke.keyCode;
     NSString *searchChar = [NSString stringWithCharacters:&key length:1];
     [xvim setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
 
