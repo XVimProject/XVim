@@ -29,13 +29,17 @@
 	[_dict setObject:targetKeyStrokes forKey:keyStroke];
 }
 
-- (NSArray*)lookupKeyStroke:(XVimKeyStroke*)keyStroke
+- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options withPrimary:(XVimKeyStroke*)primaryKeyStroke
 {
 	NSArray* ret = NULL;
 	
-	ret = ret ? ret : [_dict objectForKey:keyStroke];
-	ret = ret ? ret : [_dict objectForKey:[keyStroke keyStrokeByStrippingModifiers]];
-	ret = ret ? ret : [NSArray arrayWithObject:keyStroke];
+	for (XVimKeyStroke* option in options)
+	{
+		ret = [_dict objectForKey:option];
+		if (ret) break;
+	}
+	
+	ret = ret ? ret : [NSArray arrayWithObject:primaryKeyStroke];
 	
 	return ret;
 }

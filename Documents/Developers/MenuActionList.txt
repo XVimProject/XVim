@@ -1,0 +1,398 @@
+ Title:Xcode    Action:submenuAction:
+ 	Title:About Xcode    Action:orderFrontAboutPanel:
+ 	Title:Preferences…    Action:orderFrontPreferencesPanel:
+ 	Title:Behaviors    Action:submenuAction:
+ 		Title:Edit Behaviors…    Action:editAlerts:
+ 	Title:Services    Action:submenuAction:
+ 	Title:Hide Xcode    Action:hide:
+ 	Title:Hide Others    Action:hideOtherApplications:
+ 	Title:Show All    Action:unhideAllApplications:
+ 	Title:Quit Xcode    Action:terminate:
+ 	Title:Quit and Keep Windows    Action:terminate:
+ Title:File    Action:submenuAction:
+ 	Title:New    Action:submenuAction:
+ 		Title:New Tab    Action:newTab:
+ 		Title:New Window    Action:newWindow:
+ 		Title:New File…    Action:newDocument:
+ 		Title:New Target…    Action:newTarget:
+ 		Title:New Project…    Action:newProject:
+ 		Title:New Workspace…    Action:newWorkspace:
+ 		Title:New Group    Action:newGroup:
+ 		Title:New Group from Selection    Action:groupSelected:
+ 	Title:Add Files…    Action:addFiles:
+ 	Title:Open…    Action:openDocument:
+ 	Title:Open Recent    Action:submenuAction:
+ 		Title:Clear Menu    Action:clearRecentDocuments:
+ 	Title:Open Quickly…    Action:openQuickly:
+ 	Title:Close Window    Action:performClose:
+ 	Title:Close Tab    Action:closeCurrentTab:
+ 	Title:Close Document    Action:closeDocument:
+ 	Title:Close Workspace    Action:performCloseWorkspace:
+ 	Title:Save    Action:saveDocument:
+ 	Title:Save All    Action:saveAllEditorDocuments:
+ 	Title:Save Multiple…    Action:saveMultipleEditorDocuments:
+ 	Title:Save As…    Action:saveDocumentAs:
+ 	Title:Duplicate    Action:duplicateDocument:
+ 	Title:Revert Document…    Action:revertDocumentToSaved:
+ 	Title:Unlock…    Action:unlockDocument:
+ 	Title:Show in Finder    Action:showInFinder:
+ 	Title:Open with External Editor    Action:openWithExternalEditor:
+ 	Title:Save As Workspace…    Action:saveAsWorkspace:
+ 	Title:Workspace Settings…    Action:editWorkspaceUserSettings:
+ 	Title:Source Control    Action:submenuAction:
+ 		Title:Commit…    Action:commitCommand:
+ 		Title:Push…    Action:pushCommand:
+ 		Title:Update…    Action:updateCommand:
+ 		Title:Update All    Action:updateAllCommand:
+ 		Title:Merge…    Action:mergeBranchesCommand:
+ 		Title:Discard Changes…    Action:revertCommand:
+ 		Title:Add    Action:addCommand:
+ 		Title:Ignore    Action:ignoreCommand:
+ 		Title:Mark as Resolved    Action:resolvedCommand:
+ 		Title:Refresh Status    Action:refreshFileStatusCommand:
+ 		Title:Show Repository Status    Action:goOnlineOfflineCommand:
+ 		Title:Repositories…    Action:repositoriesCommand:
+ 	Title:Create Snapshot…    Action:createSnapshot:
+ 	Title:Restore Snapshot…    Action:restoreSnapshot:
+ 	Title:Page Setup…    Action:runPageLayout:
+ 	Title:Print…    Action:printDocument:
+ Title:Edit    Action:submenuAction:
+ 	Title:Undo    Action:undo:
+ 	Title:Redo    Action:redo:
+ 	Title:Cut    Action:cut:
+ 	Title:Copy    Action:copy:
+ 	Title:Paste    Action:paste:
+ 	Title:Paste Special    Action:specialPaste:
+ 	Title:Paste and Preserve Formatting    Action:pasteAndPreserveFormatting:
+ 	Title:Duplicate    Action:duplicate:
+ 	Title:Delete    Action:delete:
+ 	Title:Select All    Action:selectAll:
+ 	Title:Find    Action:submenuAction:
+ 		Title:Find in Workspace…    Action:findInWorkspace:
+ 		Title:Find Selected Text in Workspace…    Action:findSelectedTextInWorkspace:
+ 		Title:Find and Replace in Workspace…    Action:findAndReplaceInWorkspace:
+ 		Title:Find…    Action:find:
+ 		Title:Find and Replace…    Action:findAndReplace:
+ 		Title:Find Next    Action:findNext:
+ 		Title:Find Previous    Action:findPrevious:
+ 		Title:Replace    Action:replace:
+ 		Title:Replace All    Action:replaceAll:
+ 		Title:Replace and Find Next    Action:replaceAndFindNext:
+ 		Title:Replace and Find Previous    Action:replaceAndFindPrevious:
+ 		Title:Hide Find Bar    Action:hideFindBar:
+ 		Title:Use Selection for Find    Action:useSelectionForFind:
+ 		Title:Use Selection for Replace    Action:useSelectionForReplace:
+ 	Title:Filter    Action:submenuAction:
+ 		Title:Filter in Navigator    Action:filterInNavigator:
+ 		Title:Filter in Library    Action:filterInLibrary:
+ 	Title:Sort    Action:submenuAction:
+ 		Title:By Name    Action:sortFilesByName:
+ 		Title:By Type    Action:sortFilesByType:
+ 	Title:Format    Action:submenuAction:
+ 		Title:Font    Action:submenuAction:
+ 			Title:Show Fonts    Action:orderFrontFontPanel:
+ 			Title:Bold    Action:addFontTrait:
+ 			Title:Italics    Action:addFontTrait:
+ 			Title:Underline    Action:underline:
+ 			Title:Outline    Action:outline:
+ 			Title:Show Styles…    Action:orderFrontStylesPanel:
+ 			Title:Bigger    Action:modifyFont:
+ 			Title:Smaller    Action:modifyFont:
+ 			Title:Kern    Action:submenuAction:
+ 				Title:Use Default    Action:useStandardKerning:
+ 				Title:Use None    Action:turnOffKerning:
+ 				Title:Tighten    Action:tightenKerning:
+ 				Title:Loosen    Action:loosenKerning:
+ 			Title:Ligature    Action:submenuAction:
+ 				Title:Use Default    Action:useStandardLigatures:
+ 				Title:Use None    Action:turnOffLigatures:
+ 				Title:Use All    Action:useAllLigatures:
+ 			Title:Baseline    Action:submenuAction:
+ 				Title:Use Default    Action:unscript:
+ 				Title:Superscript    Action:superscript:
+ 				Title:Subscript    Action:subscript:
+ 				Title:Raise    Action:raiseBaseline:
+ 				Title:Lower    Action:lowerBaseline:
+ 			Title:Show Colors    Action:orderFrontColorPanel:
+ 			Title:Copy Style    Action:copyFont:
+ 			Title:Paste Style    Action:pasteFont:
+ 		Title:Text    Action:submenuAction:
+ 			Title:Align Left    Action:alignLeft:
+ 			Title:Center    Action:alignCenter:
+ 			Title:Justify    Action:alignJustified:
+ 			Title:Align Right    Action:alignRight:
+ 			Title:Writing Direction    Action:submenuAction:
+ 				Title:Paragraph    Action:nullParagraph:
+ 				Title:??????Default    Action:makeBaseWritingDirectionNatural:
+ 				Title:??????Left to Right    Action:makeBaseWritingDirectionLeftToRight:
+ 				Title:??????Right to Left    Action:makeBaseWritingDirectionRightToLeft:
+ 				Title:Selection    Action:nullSelection:
+ 				Title:??????Default    Action:makeTextWritingDirectionNatural:
+ 				Title:??????Left to Right    Action:makeTextWritingDirectionLeftToRight:
+ 				Title:??????Right to Left    Action:makeTextWritingDirectionRightToLeft:
+ 			Title:Show Ruler    Action:toggleRuler:
+ 			Title:Copy Ruler    Action:copyRuler:
+ 			Title:Paste Ruler    Action:pasteRuler:
+ 		Title:Spelling and Grammar    Action:submenuAction:
+ 			Title:Show Spelling and Grammar    Action:showGuessPanel:
+ 			Title:Check Document Now    Action:checkSpelling:
+ 			Title:Check Spelling While Typing    Action:toggleContinuousSpellChecking:
+ 			Title:Check Grammar With Spelling    Action:toggleGrammarChecking:
+ 			Title:Correct Spelling Automatically    Action:toggleAutomaticSpellingCorrection:
+ 		Title:Substitutions    Action:submenuAction:
+ 			Title:Show Substitutions    Action:orderFrontSubstitutionsPanel:
+ 			Title:Smart Copy/Paste    Action:toggleSmartInsertDelete:
+ 			Title:Smart Quotes    Action:toggleAutomaticQuoteSubstitution:
+ 			Title:Smart Dashes    Action:toggleAutomaticDashSubstitution:
+ 			Title:Smart Links    Action:toggleAutomaticLinkDetection:
+ 			Title:Data Detectors    Action:toggleAutomaticDataDetection:
+ 			Title:Text Replacement    Action:toggleAutomaticTextReplacement:
+ 		Title:Transformations    Action:submenuAction:
+ 			Title:Make Upper Case    Action:uppercaseWord:
+ 			Title:Make Lower Case    Action:lowercaseWord:
+ 			Title:Capitalize    Action:capitalizeWord:
+ 		Title:Speech    Action:submenuAction:
+ 			Title:Start Speaking    Action:startSpeaking:
+ 			Title:Stop Speaking    Action:stopSpeaking:
+ 	Title:Refactor    Action:submenuAction:
+ 		Title:Rename…    Action:refactorRename:
+ 		Title:Extract…    Action:refactorExtract:
+ 		Title:Create Superclass…    Action:refactorCreateSuperclass:
+ 		Title:Move Up…    Action:refactorMoveUp:
+ 		Title:Move Down…    Action:refactorMoveDown:
+ 		Title:Encapsulate…    Action:refactorEncapsulate:
+ 		Title:Convert to Objective-C ARC…    Action:showARCConversionAssistant:
+ 	Title:Special Characters…    Action:orderFrontCharacterPalette:
+ Title:View    Action:submenuAction:
+ 	Title:Standard Editor    Action:submenuAction:
+ 		Title:Show Standard Editor    Action:changeToStandardEditor:
+ 		Title:Show Related Items    Action:showRelatedItemsMenu:
+ 		Title:Show Previous History    Action:showPreviousHistoryMenu:
+ 		Title:Show Previous Files History    Action:showPreviousFilesHistoryMenu:
+ 		Title:Show Next History    Action:showNextHistoryMenu:
+ 		Title:Show Next Files History    Action:showNextFilesHistoryMenu:
+ 		Title:Show Top Level Items    Action:showTopLevelItemsMenu:
+ 		Title:Show Group Files    Action:showGroupFilesMenu:
+ 		Title:Show Document Items    Action:showDocumentItemsMenu:
+ 	Title:Assistant Editor    Action:submenuAction:
+ 		Title:Show Assistant Editor    Action:changeToGeniusEditor:
+ 		Title:Add Assistant Editor    Action:addAssistantEditor:
+ 		Title:Remove Assistant Editor    Action:removeAssistantEditor:
+ 		Title:Reset Editor    Action:resetEditor:
+ 		Title:Assistant Editors on Right    Action:changeToAssistantLayout_RV:
+ 		Title:Assistant Editors on Bottom    Action:changeToAssistantLayout_BH:
+ 		Title:All Editors Stacked Horizontally    Action:changeToAssistantLayout_RH:
+ 		Title:All Editors Stacked Vertically    Action:changeToAssistantLayout_BV:
+ 	Title:Version Editor    Action:submenuAction:
+ 		Title:Show Version Editor    Action:changeToVersionEditor:
+ 		Title:Show Comparison View    Action:changeToVersionEditorComparisonView:
+ 		Title:Show Blame View    Action:changeToVersionEditorBlameView:
+ 		Title:Show Log View    Action:changeToVersionEditorLogView:
+ 	Title:Navigators    Action:submenuAction:
+ 		Title:Show Project Navigator    Action:changeToStructureNavigator:
+ 		Title:Show Symbol Navigator    Action:changeToSymbolsNavigator:
+ 		Title:Show Search Navigator    Action:changeToFindNavigator:
+ 		Title:Show Issue Navigator    Action:changeToIssuesNavigator:
+ 		Title:Show Debug Navigator    Action:changeToDebuggerNavigator:
+ 		Title:Show Breakpoint Navigator    Action:changeToBreakpointsNavigator:
+ 		Title:Show Log Navigator    Action:changeToLogsNavigator:
+ 		Title:Show Navigator    Action:toggleNavigatorsVisibility:
+ 	Title:Debug Area    Action:submenuAction:
+ 		Title:Activate Console    Action:activateConsole:
+ 		Title:Show Debug Area    Action:toggleDebuggerVisibility:
+ 	Title:Utilities    Action:submenuAction:
+ 		Title:Show File Inspector    Action:showInspectorWithChoiceFromSender:
+ 		Title:Show Quick Help Inspector    Action:showInspectorWithChoiceFromSender:
+ 		Title:Show File Template Library    Action:showLibraryWithChoiceFromSender:
+ 		Title:Show Code Snippet Library    Action:showLibraryWithChoiceFromSender:
+ 		Title:Show Object Library    Action:showLibraryWithChoiceFromSender:
+ 		Title:Show Media Library    Action:showLibraryWithChoiceFromSender:
+ 		Title:Show Utilities    Action:toggleUtilitiesVisibility:
+ 		Title:Show Utilities    Action:toggleUtilitiesVisibilityAlternate:
+ 	Title:Show Toolbar    Action:toggleToolbarShown:
+ 	Title:Show Tab Bar    Action:toggleTabBar:
+ 	Title:Enter Full Screen    Action:toggleFullScreen:
+ Title:Navigate    Action:submenuAction:
+ 	Title:Reveal in Project Navigator    Action:revealInProjectNavigator:
+ 	Title:Reveal in Symbol Navigator    Action:revealInSymbolNavigator:
+ 	Title:Reveal in Debug Navigator    Action:revealInDebugNavigator:
+ 	Title:Open in…    Action:openInAdjacentEditorWithAlternate:
+ 	Title:Open in…    Action:openInAdjacentEditorWithShiftPlusAlternate:
+ 	Title:Move Focus To Next Area    Action:moveKeyboardFocusToNextArea:
+ 	Title:Move Focus To Previous Area    Action:moveKeyboardFocusToPreviousArea:
+ 	Title:Move Focus To Editor…    Action:moveFocusToEditor:
+ 	Title:Go Forward    Action:goForwardInHistoryByCommand:
+ 	Title:Go Forward (option)    Action:goForwardInHistoryByCommandWithAlternate:
+ 	Title:Go Forward (shift+option)    Action:goForwardInHistoryByCommandWithShiftPlusAlternate:
+ 	Title:Go Back    Action:goBackInHistoryByCommand:
+ 	Title:Go Back (option)    Action:goBackInHistoryByCommandWithAlternate:
+ 	Title:Go Back (shift+option)    Action:goBackInHistoryByCommandWithShiftPlusAlternate:
+ 	Title:Jump to Selection    Action:jumpToSelection:
+ 	Title:Jump to Definition    Action:jumpToDefinition:
+ 	Title:Jump to Definition (option)    Action:jumpToDefinitionWithAlternate:
+ 	Title:Jump to Definition (shift+option)    Action:jumpToDefinitionWithShiftPlusAlternate:
+ 	Title:Jump to Next Issue    Action:jumpToNextIssue:
+ 	Title:Fix Next Issue    Action:fixNextIssue:
+ 	Title:Jump to Previous Issue    Action:jumpToPreviousIssue:
+ 	Title:Fix Previous Issue    Action:fixPreviousIssue:
+ 	Title:Jump to Next Counterpart    Action:jumpToNextCounterpart:
+ 	Title:Jump to Next Counterpart (option)    Action:jumpToNextCounterpartWithAlternate:
+ 	Title:Jump to Next Counterpart (shift+option)    Action:jumpToNextCounterpartWithShiftPlusAlternate:
+ 	Title:Jump to Previous Counterpart    Action:jumpToPreviousCounterpart:
+ 	Title:Jump to Previous Counterpart (option)    Action:jumpToPreviousCounterpartWithAlternate:
+ 	Title:Jump to Previous Counterpart (shift+option)    Action:jumpToPreviousCounterpartWithShiftPlusAlternate:
+ 	Title:Jump To…    Action:openQuicklyScoped:
+ 	Title:Jump to Next Placeholder    Action:selectNextPlaceholder:
+ 	Title:Jump to Previous Placeholder    Action:selectPreviousPlaceholder:
+ Title:Editor    Action:submenuAction:
+ 	Title:Show Completions    Action:complete:
+ 	Title:Edit All in Scope    Action:toggleTokenizedEditing:
+ 	Title:Fix All in Scope    Action:fixAllInScope:
+ 	Title:Show Issue    Action:toggleIssueShown:
+ 	Title:Issues    Action:submenuAction:
+ 		Title:Show All Issues    Action:toggleMessageBubbles:
+ 		Title:All Issues    Action:showAllIssues:
+ 		Title:Errors Only    Action:showErrorsOnly:
+ 	Title:Structure    Action:submenuAction:
+ 		Title:Balance Delimiter    Action:balance:
+ 		Title:Re-Indent    Action:indentSelection:
+ 		Title:Shift Right    Action:shiftRight:
+ 		Title:Shift Left    Action:shiftLeft:
+ 		Title:Move Line Up    Action:moveCurrentLineUp:
+ 		Title:Move Line Down    Action:moveCurrentLineDown:
+ 		Title:Comment Selection    Action:commentAndUncommentCurrentLines:
+ 	Title:Code Folding    Action:submenuAction:
+ 		Title:Fold    Action:fold:
+ 		Title:Unfold    Action:unfold:
+ 		Title:Unfold All    Action:unfoldAll:
+ 		Title:Fold Methods & Functions    Action:foldAllMethods:
+ 		Title:Unfold Methods & Functions    Action:unfoldAllMethods:
+ 		Title:Fold Comment Blocks    Action:foldAllComments:
+ 		Title:Unfold Comment Blocks    Action:unfoldAllComments:
+ 		Title:Focus Follows Selection    Action:focusFollowsSelection:
+ 	Title:Syntax Coloring    Action:submenuAction:
+ 		Title:Default for File Type    Action:_useSourceCodeLanguageFromFileDataTypeAction:
+ 		Title:None    Action:_changeSourceCodeLanguageAction:
+ 		Title:AppleScript    Action:_changeSourceCodeLanguageAction:
+ 		Title:ARM-Assembly    Action:_changeSourceCodeLanguageAction:
+ 		Title:Bourne Shell Script    Action:_changeSourceCodeLanguageAction:
+ 		Title:C    Action:_changeSourceCodeLanguageAction:
+ 		Title:C Shell    Action:_changeSourceCodeLanguageAction:
+ 		Title:C++    Action:_changeSourceCodeLanguageAction:
+ 		Title:Core Data Model    Action:_changeSourceCodeLanguageAction:
+ 		Title:CSS    Action:_changeSourceCodeLanguageAction:
+ 		Title:Generic    Action:_changeSourceCodeLanguageAction:
+ 		Title:GLSL    Action:_changeSourceCodeLanguageAction:
+ 		Title:HTML    Action:_changeSourceCodeLanguageAction:
+ 		Title:Intel-Assembly    Action:_changeSourceCodeLanguageAction:
+ 		Title:Interface Builder    Action:_changeSourceCodeLanguageAction:
+ 		Title:Java    Action:_changeSourceCodeLanguageAction:
+ 		Title:JavaScript    Action:_changeSourceCodeLanguageAction:
+ 		Title:JSON    Action:_changeSourceCodeLanguageAction:
+ 		Title:Localization Strings File    Action:_changeSourceCodeLanguageAction:
+ 		Title:Manual Page    Action:_changeSourceCodeLanguageAction:
+ 		Title:Objective-C    Action:_changeSourceCodeLanguageAction:
+ 		Title:Objective-C++    Action:_changeSourceCodeLanguageAction:
+ 		Title:OpenCL    Action:_changeSourceCodeLanguageAction:
+ 		Title:Perl    Action:_changeSourceCodeLanguageAction:
+ 		Title:PHP    Action:_changeSourceCodeLanguageAction:
+ 		Title:PPC-Assembly    Action:_changeSourceCodeLanguageAction:
+ 		Title:Python    Action:_changeSourceCodeLanguageAction:
+ 		Title:Ruby    Action:_changeSourceCodeLanguageAction:
+ 		Title:Text Plist    Action:_changeSourceCodeLanguageAction:
+ 		Title:Xcode Configuration File    Action:_changeSourceCodeLanguageAction:
+ 		Title:XML    Action:_changeSourceCodeLanguageAction:
+ 	Title:Show Invisibles    Action:toggleInvisibleCharactersShown:
+ Title:Product    Action:submenuAction:
+ 	Title:Run    Action:runActiveRunContext:
+ 	Title:Run…    Action:editAndRunActiveRunContext:
+ 	Title:Test    Action:testActiveRunContext:
+ 	Title:Test…    Action:editAndTestActiveRunContext:
+ 	Title:Profile    Action:profileActiveScheme:
+ 	Title:Profile…    Action:editAndProfileActiveScheme:
+ 	Title:Analyze    Action:analyzeActiveRunContext:
+ 	Title:Analyze…    Action:editAndAnalyzeActiveRunContext:
+ 	Title:Archive    Action:buildAndArchiveActiveRunContext:
+ 	Title:Archive…    Action:editBuildAndArchiveActiveRunContext:
+ 	Title:Install    Action:installActiveRunContext:
+ 	Title:Build For    Action:submenuAction:
+ 		Title:Build For Running    Action:buildForRunActiveRunContext:
+ 		Title:Build For Testing    Action:buildForTestActiveRunContext:
+ 		Title:Build For Profiling    Action:buildForProfileActiveRunContext:
+ 		Title:Build For Archiving    Action:buildForArchiveActiveRunContext:
+ 		Title:Build For Installing    Action:buildForInstallActiveRunContext:
+ 	Title:Perform Action    Action:submenuAction:
+ 		Title:Run Without Building    Action:runActiveRunContextWithoutBuilding:
+ 		Title:Test Without Building    Action:testActiveRunContextWithoutBuilding:
+ 		Title:Profile Without Building    Action:profileActiveSchemeWithoutBuilding:
+ 	Title:Build    Action:buildActiveRunContext:
+ 	Title:Clean    Action:cleanActiveRunContext:
+ 	Title:Clean Build Folder…    Action:cleanBuildFolder:
+ 	Title:Stop    Action:cancelCurrentExecution:
+ 	Title:Generate Output    Action:submenuAction:
+ 		Title:Generate Preprocessed File    Action:preprocessFile:
+ 		Title:Generate Assembly File    Action:showAssemblyCodeForFile:
+ 	Title:Debug    Action:submenuAction:
+ 		Title:Pause / Continue    Action:pauseOrContinue:
+ 		Title:Continue To Current Line    Action:continueToCurrentLine:
+ 		Title:Step Over    Action:stepOver:
+ 		Title:Step Into    Action:stepInto:
+ 		Title:Step Out    Action:stepOut:
+ 		Title:Step Over Instruction    Action:stepOverInstruction:
+ 		Title:Step Over Thread    Action:stepOverThread:
+ 		Title:Step Into Instruction    Action:stepIntoInstruction:
+ 		Title:Step Into Thread    Action:stepIntoThread:
+ 		Title:Capture OpenGL ES Frame    Action:captureOpenGLFrame:
+ 		Title:Simulate Location    Action:submenuAction:
+ 			Title:Don't Simulate Location    Action:selectLocationScenarioItem:
+ 			Title:London, England    Action:selectLocationScenarioItem:
+ 			Title:Johannesburg, South Africa    Action:selectLocationScenarioItem:
+ 			Title:Moscow, Russia    Action:selectLocationScenarioItem:
+ 			Title:Mumbai, India    Action:selectLocationScenarioItem:
+ 			Title:Tokyo, Japan    Action:selectLocationScenarioItem:
+ 			Title:Sydney, Australia    Action:selectLocationScenarioItem:
+ 			Title:Hong Kong, China    Action:selectLocationScenarioItem:
+ 			Title:Honolulu, HI, USA    Action:selectLocationScenarioItem:
+ 			Title:San Francisco, CA, USA    Action:selectLocationScenarioItem:
+ 			Title:Mexico City, Mexico    Action:selectLocationScenarioItem:
+ 			Title:New York, NY, USA    Action:selectLocationScenarioItem:
+ 			Title:Rio de Janeiro, Brazil    Action:selectLocationScenarioItem:
+ 			Title:Add GPX File to Project…    Action:addGPXFile:
+ 		Title:Add Breakpoint at Current Line    Action:toggleBreakpointAtCurrentLine:
+ 		Title:Activate Breakpoints    Action:toggleBreakpoints:
+ 		Title:Shared Libraries...    Action:showSharedLibrariesPopUp:
+ 		Title:View Memory    Action:viewMemory:
+ 		Title:Clear Console    Action:clearConsole:
+ 	Title:Debug Workflow    Action:submenuAction:
+ 		Title:Standard Windowing    Action:setDebuggingWindowBehaviorNormal:
+ 		Title:Xcode Always Behind    Action:setDebuggingWindowBehaviorXcodeBehind:
+ 		Title:Xcode Always In Front    Action:setDebuggingWindowBehaviorXcodeInFront:
+ 		Title:Show Disassembly When Debugging    Action:setShowDisassemblyWhenDebugging:
+ 	Title:Attach to Process    Action:submenuAction:
+ 		Title:By Process Identifier (PID) or Name...    Action:askUserForProcessIdentifierToAttachTo:
+ 		Title:Getting Process List...    Action:(null)
+ 	Title:Edit Scheme…    Action:editActiveRunContext:
+ 	Title:New Scheme…    Action:newRunContext:
+ 	Title:Manage Schemes…    Action:manageRunContexts:
+ Title:Window    Action:submenuAction:
+ 	Title:Minimize    Action:performMiniaturize:
+ 	Title:Minimize All    Action:miniaturizeAll:
+ 	Title:Zoom    Action:performZoom:
+ 	Title:Zoom All    Action:zoomAll:
+ 	Title:Select Next Tab    Action:selectNextTab:
+ 	Title:Select Previous Tab    Action:selectPreviousTab:
+ 	Title:Welcome to Xcode    Action:showWelcomeToXcode:
+ 	Title:Organizer    Action:showOrganizer:
+ 	Title:Bring All to Front    Action:arrangeInFront:
+ 	Title:Arrange in Front    Action:alternateArrangeInFront:
+ 	Title:XVim    Action:(null)
+ 	Title:(Empty editor)    Action:_activateWorkspaceTabController:
+ 	Title:(Empty editor)    Action:_activateWorkspaceTabController:
+ 	Title:XVimExCommand.m    Action:_activateWorkspaceTabController:
+ Title:Help    Action:submenuAction:
+ 	Title:Xcode Help    Action:showXcodeHelp:
+ 	Title:Xcode User Guide    Action:showXcodeUserGuide:
+ 	Title:Documentation and API Reference    Action:showDeveloperDocumentation:
+ 	Title:Release Notes    Action:showXcodeReleaseNotes:
+ 	Title:Quick Help for Selected Item    Action:showQuickHelp:
+ 	Title:Search Documentation for Selected Text    Action:searchDocumentationForSelectedText:

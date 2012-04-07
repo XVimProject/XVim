@@ -16,6 +16,12 @@
 #import "Logger.h"
 
 @implementation XVimGEvaluator
+
+- (XVimEvaluator*)d:(id)arg{
+    [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
+    return nil;
+}
+
 - (XVimEvaluator*)g:(id)arg{
     //TODO: Must deal numeric arg as linenumber
     DVTSourceTextView* view = [self textView];
@@ -24,17 +30,17 @@
 }
 
 - (XVimEvaluator*)u:(id)arg {
-	int repeat = [self repeat];
+	NSUInteger repeat = [self repeat];
 	return [[XVimLowercaseEvaluator alloc] initWithRepeat:repeat];
 }
 
 - (XVimEvaluator*)U:(id)arg {
-	int repeat = [self repeat];
+	NSUInteger repeat = [self repeat];
 	return [[XVimUppercaseEvaluator alloc] initWithRepeat:repeat];
 }
 
 - (XVimEvaluator*)TILDE:(id)arg {
-	int repeat = [self repeat];
+	NSUInteger repeat = [self repeat];
 	return [[XVimTildeEvaluator alloc] initWithRepeat:repeat];
 }
 

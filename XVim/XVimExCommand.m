@@ -366,7 +366,14 @@
 }
 
 - (void)debug:(NSString*)args{
-    [[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 
+    NSMenu* menu = [NSApp mainMenu];
+    for( NSMenuItem* i in [menu itemArray] ){
+        TRACE_LOG(@"titile: %@  target: %@   action:%@", [i title], NSStringFromClass([[i target] class]), NSStringFromSelector([i action]));
+        for( NSMenuItem* si in [[i submenu] itemArray] ){
+            TRACE_LOG(@"titile: %@  target: %@   action:%@", [si title], NSStringFromClass([[si target] class]), NSStringFromSelector([si action]));
+        }
+    }
+    //[[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 
 }
 
 - (void)reg:(XVimExArg*)args{

@@ -9,6 +9,7 @@
 #import "XVimRegister.h"
 #import "XVimEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "XVimPlaybackHandler.h"
 #import <CoreServices/CoreServices.h>
 
 @interface XVimRegister()
@@ -29,7 +30,9 @@
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.displayName, self.text];
 }
 
--(id) initWithRegisterName:(NSString*)registerName displayName:(NSString*)displayName{
+-(id) initWithRegisterName:(NSString*)registerName 
+			   displayName:(NSString*)displayName
+{
     self = [super init];
     if (self) {
         _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
@@ -126,16 +129,14 @@
     [self.keyEventsAndInsertedText addObject:text];
 }
 
--(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count{
+-(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count{
     self.isPlayingBack = YES;
     for (NSUInteger i = 0; i < count; ++i) {
         [self.keyEventsAndInsertedText enumerateObjectsUsingBlock:^(id eventOrText, NSUInteger index, BOOL *stop){        
             if ([eventOrText isKindOfClass:[XVimKeyStroke class]]){
-                // Send the keyDown event directly to the view
-				NSEvent* event = [eventOrText toEvent];
-                [view keyDown:event];
+				[handler handleKeyStroke:(XVimKeyStroke*)eventOrText];
             }else if([eventOrText isKindOfClass:[NSString class]]){
-                [view insertText:eventOrText];
+                [handler handleTextInsertion:(NSString*)eventOrText];
             }
         }];
     }

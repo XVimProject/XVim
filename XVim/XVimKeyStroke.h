@@ -9,18 +9,40 @@
 #import <Foundation/Foundation.h>
 
 @interface XVimKeyStroke : NSObject<NSCopying>
-+ (void)initKeymaps;
-+ (XVimKeyStroke*)fromString:(NSString *)string;
-+ (void)fromString:(NSString *)string to:(NSMutableArray *)keystrokest;
-+ (XVimKeyStroke*)fromEvent:(NSEvent*)event;
-- (NSEvent*)toEvent;
-- (NSString*)toSelectorString;
-- (SEL)selectorForInstance:(id)target;
-- (BOOL)instanceResponds:(id)target;
-- (BOOL)classResponds:(Class)class;
-- (XVimKeyStroke*)keyStrokeByStrippingModifiers;
 
-@property (nonatomic) unichar key;
+// Call on startup to initialise static data
++ (void)initKeymaps;
+
+/**
+ * Returns all possible mapping options from an event
+ * Eg. S-n would return S-n, S-N and N.
+ * The primary key stroke is returned (in the above case, N is returned)
+ * This is to be used in case a mapping is not found
+**/
++ (XVimKeyStroke*)keyStrokeOptionsFromEvent:(NSEvent*)event into:(NSMutableArray*)options;
+
+// Parses a string into a key stroke
++ (XVimKeyStroke*)fromString:(NSString *)string;
+
+// Parses a string into an array of key strokes
++ (void)fromString:(NSString *)string to:(NSMutableArray *)keystrokes;
+
+// Generates an event from this key stroke
+- (NSEvent*)toEvent;
+
+// Creates the selector string from this key stroke
+- (NSString*)toSelectorString;
+
+// Returns a selector for the target for this key stroke if one exists
+- (SEL)selectorForInstance:(id)target;
+
+// Returns YES if the instance responds to this key stroke
+- (BOOL)instanceResponds:(id)target;
+
+// Returns YES if the class' instances respond to this key stroke
+- (BOOL)classResponds:(Class)class;
+
+@property (nonatomic) unichar keyCode;
 @property (nonatomic) int modifierFlags;
 @property (nonatomic, readonly) BOOL isNumeric;
 @end

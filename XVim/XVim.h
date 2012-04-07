@@ -13,6 +13,7 @@
 #import "XVimSearch.h"
 #import "XVimExCommand.h"
 #import "XVimOptions.h"
+#import "XVimPlaybackHandler.h"
 
 @class XVimEvaluator;
 @class DVTSourceTextView;
@@ -21,7 +22,7 @@
 
 #define XVIM_TAG 1209 // This is my birthday!
 
-@interface XVim : NSTextView <NSTextFieldDelegate,XVimCommandFieldDelegate>
+@interface XVim : NSTextView <NSTextFieldDelegate,XVimCommandFieldDelegate,XVimPlaybackHandler>
  {
 @private
      //NSMutableString* _lastSearchString;
@@ -74,6 +75,9 @@
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;
 - (XVimKeymap*)keymapForMode:(int)mode;
+
+- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;
+- (void)handleTextInsertion:(NSString*)text;
 
 // Message from XVimCommandField 
 - (BOOL)commandCanceled;
