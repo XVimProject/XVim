@@ -9,6 +9,9 @@
 #import "XVimGEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVimMotionEvaluator.h"
+#import "XVimTildeEvaluator.h"
+#import "XVimLowercaseEvaluator.h"
+#import "XVimUppercaseEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 
@@ -18,6 +21,21 @@
     DVTSourceTextView* view = [self textView];
     NSUInteger location = [view nextLine:0 column:0 count:self.repeat - 1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE];
+}
+
+- (XVimEvaluator*)u:(id)arg {
+	int repeat = [self repeat];
+	return [[XVimLowercaseEvaluator alloc] initWithRepeat:repeat];
+}
+
+- (XVimEvaluator*)U:(id)arg {
+	int repeat = [self repeat];
+	return [[XVimUppercaseEvaluator alloc] initWithRepeat:repeat];
+}
+
+- (XVimEvaluator*)TILDE:(id)arg {
+	int repeat = [self repeat];
+	return [[XVimTildeEvaluator alloc] initWithRepeat:repeat];
 }
 
 - (XVimEvaluator*)ASTERISK:(id)arg{

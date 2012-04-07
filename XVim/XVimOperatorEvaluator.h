@@ -14,6 +14,7 @@
 // See ':help word' in Vim for the difference.
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (XVimEvaluator*)w:(id)arg;
 - (XVimEvaluator*)W:(id)arg;
