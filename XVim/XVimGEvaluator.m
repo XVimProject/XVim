@@ -22,6 +22,18 @@
     return nil;
 }
 
+- (XVimEvaluator*)f:(id)arg{
+    // Does not work correctly.
+    // This seems because the when XCode change the content of DVTSourceTextView
+    // ( for example when the file shown in the view is changed )
+    // it makes the content empty first but does not set selectedRange.
+    // This cause assertion is NSTextView+VimMotion's ASSERT_VALID_RANGE_WITH_EOF.
+    // One option is change the assertion condition, but I still need to 
+    // know more about this to implement robust one.
+    //[NSApp sendAction:@selector(openQuickly:) to:nil from:self];
+    return nil;
+}
+
 - (XVimEvaluator*)g:(id)arg{
     //TODO: Must deal numeric arg as linenumber
     DVTSourceTextView* view = [self textView];
