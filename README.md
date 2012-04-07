@@ -31,6 +31,8 @@ Contoributions
 ==============
 Any suggestions,bug reports or feature requests are welcome.
 I really appreciate if you send a pull request for improvement.
+Also I can assign you as "collaborators" of this repository.
+Let me know if you have any interests.
 
 
 For Japanese Users/Developsers(日本の開発者のみなさまへ）
@@ -70,10 +72,7 @@ https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 Contributers
 ============
- - JugglerShu
- - mike-hoegeman
- - dojoteef
- - WarWithinMe
- - jmarcog
+See contributers page in github repository.
+https://github.com/JugglerShu/XVim/contributors
 
 
