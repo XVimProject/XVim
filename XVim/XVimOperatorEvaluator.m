@@ -18,7 +18,7 @@
 	return keymaps[MODE_OPERATOR_PENDING];
 }
 
-- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
     if( from > to ){
         NSUInteger tmp = from;
         from = to;
@@ -27,17 +27,24 @@
     
     DVTSourceTextView* view = [self textView];
     if( type == CHARACTERWISE_EXCLUSIVE ){
-        to--;
     }else if( type == CHARACTERWISE_INCLUSIVE ){
-        
+		to++;
     }else if( type == LINEWISE ){
-        to = [view tailOfLine:to];
+        to = [view tailOfLine:to] + 1;
         NSUInteger head = [view headOfLine:from];
         if( NSNotFound != head ){
             from = head; 
         }
     }
-    [view setSelectedRangeWithBoundsCheck:from To:to];
+	
+	return NSMakeRange(from, to - from);
+}
+	
+
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
+	DVTSourceTextView* view = [self textView];
+    [view setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
 - (XVimEvaluator*)w:(id)arg{
