@@ -1043,4 +1043,37 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 	range->length = length;
 }
 
+- (void)toggleCaseForRange:(NSRange)range {
+	
+    NSString* s = [self string];
+	[self clampRangeToBuffer:&range];
+	
+	unichar* characters = (unichar*)malloc(sizeof(unichar) * range.length);
+	[s getCharacters:&characters[0] range:range];
+	for (int i = 0; i < range.length; ++i)
+	{
+		unichar c = characters[i];
+		if (c >= 'a' && c <= 'z') { c += 'A' - 'a'; }
+		else if (c >= 'A' && c <= 'Z') { c += 'a' - 'A'; }
+		characters[i] = c;
+	}
+	
+	[self insertText:[NSString stringWithCharacters:characters length:range.length] replacementRange:range];
+	free(characters);
+}
+
+- (void)uppercaseRange:(NSRange)range {
+    NSString* s = [self string];
+	[self clampRangeToBuffer:&range];
+	
+	[self insertText:[[s substringWithRange:range] uppercaseString] replacementRange:range];
+}
+
+- (void)lowercaseRange:(NSRange)range {
+    NSString* s = [self string];
+	[self clampRangeToBuffer:&range];
+	
+	[self insertText:[[s substringWithRange:range] lowercaseString] replacementRange:range];
+}
+
 @end

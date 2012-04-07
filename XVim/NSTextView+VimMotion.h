@@ -234,6 +234,10 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
 - (void)scrollToCursor;
     
+// Case changes. These functions are all range checked.
+- (void)toggleCaseForRange:(NSRange)range;
+- (void)uppercaseRange:(NSRange)range;
+- (void)lowercaseRange:(NSRange)range;
 
 @end
 

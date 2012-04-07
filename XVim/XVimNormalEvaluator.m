@@ -526,6 +526,15 @@
     return nil;
 }
 
+- (XVimEvaluator*)TILDE:(id)arg{
+    NSTextView* view = [self textView];
+	NSRange replacementRange = [view selectedRange];
+	replacementRange.length = [self numericArg];
+	[view clampRangeToEndOfLine:&replacementRange];
+	[view toggleCaseForRange:replacementRange];
+	return nil;
+}
+
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.

@@ -153,6 +153,24 @@
     
 }
 
+- (XVimEvaluator*)u:(id)arg {
+	[self updateSelection];
+	NSTextView *view = [self textView];
+	NSRange r = [view selectedRange];
+	[view lowercaseRange:r];
+	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	return nil;
+}
+
+- (XVimEvaluator*)U:(id)arg {
+	[self updateSelection];
+	NSTextView *view = [self textView];
+	NSRange r = [view selectedRange];
+	[view uppercaseRange:r];
+	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	return nil;
+}
+
 - (XVimEvaluator*)C_u:(id)arg{
     _insertion = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
     [self updateSelection];
@@ -237,6 +255,15 @@
     [view setSelectedRange:r];
     return nil;
 }
+
+- (XVimEvaluator*)TILDE:(id)arg {
+	[self updateSelection];
+	NSTextView *view = [self textView];
+	NSRange r = [view selectedRange];
+	[view toggleCaseForRange:r];
+	return nil;
+}
+
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
