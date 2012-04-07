@@ -247,35 +247,44 @@
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-	
-	XVimKeyStroke* keyStroke = [XVimKeyStroke fromEvent:event];
+	NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
+	XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
 	XVimKeymap* keymap = [_currentEvaluator selectKeymap:_keymaps];
-	NSArray *keystrokes = [keymap lookupKeyStroke:keyStroke];
+	NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke];
 	
 	for (XVimKeyStroke *keyStroke in keystrokes)
 	{
-		XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke ofXVim:self];
-		[self recordEvent:keyStroke intoRegister:_recordingRegister];
-		[self recordEvent:keyStroke intoRegister:[self findRegister:@"repeat"]];
-		if( nil == nextEvaluator ){
-			nextEvaluator = [[XVimNormalEvaluator alloc] init];
-		}
-		
-		if( _currentEvaluator != nextEvaluator ){
-			[_currentEvaluator release];
-			_currentEvaluator = nextEvaluator;
-			
-			XVIM_MODE newMode = [_currentEvaluator becameHandler:self];
-			if (self.mode != MODE_CMDLINE){
-				// Special case for cmdline mode. I don't like this, but
-				// don't have time to refactor cmdline mode.
-				self.mode = newMode;
-			}
-		}
+		[self handleKeyStroke:keyStroke];
 	}
     
     [self.cmdLine setNeedsDisplay:YES];
     return YES;
+}
+
+- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
+	
+	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke ofXVim:self];
+	[self recordEvent:keyStroke intoRegister:_recordingRegister];
+	[self recordEvent:keyStroke intoRegister:[self findRegister:@"repeat"]];
+	if( nil == nextEvaluator ){
+		nextEvaluator = [[XVimNormalEvaluator alloc] init];
+	}
+	
+	if( _currentEvaluator != nextEvaluator ){
+		[_currentEvaluator release];
+		_currentEvaluator = nextEvaluator;
+		
+		XVIM_MODE newMode = [_currentEvaluator becameHandler:self];
+		if (self.mode != MODE_CMDLINE){
+			// Special case for cmdline mode. I don't like this, but
+			// don't have time to refactor cmdline mode.
+			self.mode = newMode;
+		}
+	}
+}
+
+- (void)handleTextInsertion:(NSString*)text {
+	[[self sourceView] insertText:text];
 }
 
 // Should move to separated file.
@@ -458,7 +467,7 @@
 }
 
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
-    [xregister playback:[self sourceView] withRepeatCount:count];
+    [xregister playbackWithHandler:self withRepeatCount:count];
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{

@@ -15,12 +15,14 @@ typedef enum {
 } XVimRegisterOperation;
 
 @class XVimKeyStroke;
+@protocol XVimPlaybackHandler;
 
 @interface XVimRegister : NSObject
 
--(id) initWithRegisterName:(NSString*)registerName displayName:(NSString*)displayName;
+-(id) initWithRegisterName:(NSString*)registerName 
+			   displayName:(NSString*)displayName;
 
--(void) playback:(NSView*)view withRepeatCount:(NSUInteger)count;
+-(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count;
 -(void) appendKeyEvent:(XVimKeyStroke*)keyStroke;
 -(void) appendText:(NSString*)text;
 -(void) clear;
