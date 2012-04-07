@@ -24,17 +24,17 @@
 }
 
 - (XVimEvaluator*)u:(id)arg {
-	int repeat = [self repeat];
+	NSUInteger repeat = [self repeat];
 	return [[XVimLowercaseEvaluator alloc] initWithRepeat:repeat];
 }
 
 - (XVimEvaluator*)U:(id)arg {
-	int repeat = [self repeat];
+	NSUInteger repeat = [self repeat];
 	return [[XVimUppercaseEvaluator alloc] initWithRepeat:repeat];
 }
 
 - (XVimEvaluator*)TILDE:(id)arg {
-	int repeat = [self repeat];
+	NSUInteger repeat = [self repeat];
 	return [[XVimTildeEvaluator alloc] initWithRepeat:repeat];
 }
 

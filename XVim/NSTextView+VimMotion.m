@@ -1031,15 +1031,21 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 - (void)clampRangeToEndOfLine:(NSRange*)range {
-	int starti = range->location;
-	int taili = [self tailOfLine:starti];
-	int length = MIN(range->length, taili - range->location);
+    ASSERT_VALID_RANGE_WITH_EOF(range->location);
+	NSUInteger starti = range->location;
+	NSUInteger taili = [self tailOfLine:starti];
+    NSUInteger length = range->length;
+    // We do not need to check if "taili > range->location"(Integer Undeflow) since taili is result of tailofLine based on the location 
+    length = MIN(range->length, taili - range->location);
 	range->length = length;
 }
 
 - (void)clampRangeToBuffer:(NSRange*)range {
-	int taili = [self endOfFile];
-	int length = MIN(range->length, taili - range->location);
+    ASSERT_VALID_RANGE_WITH_EOF(range->location);
+	NSUInteger taili = [self endOfFile];
+	NSUInteger length = range->length;
+    // We do not need to check if "taili > range->location"(Integer Undeflow) since taili(endOfFile) is equal or greater the location (which is checked by assersion)
+    length = MIN(range->length, taili - range->location);    
 	range->length = length;
 }
 

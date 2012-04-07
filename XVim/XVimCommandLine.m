@@ -117,6 +117,7 @@
     [super viewWillDraw];
 }
 
+
 - (void)drawRect:(NSRect)dirtyRect{
     NSString *statusString = [_xvim modeName];
     if ([self.additionalStatus length] > 0){
