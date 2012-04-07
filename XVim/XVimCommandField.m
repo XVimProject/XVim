@@ -46,7 +46,11 @@
 
 - (void)doCommandBySelector:(SEL)aSelector{
     if( @selector(complete:) == aSelector|| @selector(cancelOperation:) == aSelector){
-        [self.delegate commandCanceled];
+        if( [self.delegate commandCanceled] ){
+            [self setString:@""];
+            [self setEditable:NO];
+        }
+        return;
     }
     [super doCommandBySelector:aSelector];
 }
@@ -58,6 +62,7 @@
     }else if( isNewLine([insertString characterAtIndex:0])){
         if( [self.delegate commandFixed:[self string]] ){
             [self setString:@""];
+            [self setEditable:NO];
         }
         return;
     }else if( [insertString characterAtIndex:0] == '\t') {
