@@ -44,15 +44,15 @@
     _begin = cur.location;
     _insertion = cur.location + cur.length;
     if( _mode == MODE_CHARACTER ){
-        [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location];
+        [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
     }
     if( _mode == MODE_LINE ){
         NSUInteger head = [view headOfLine:cur.location];
         NSUInteger end = [view endOfLine:cur.location];
         if( NSNotFound != head && NSNotFound != end ){
-            [view setSelectedRangeWithBoundsCheck:head To:end];
+            [view setSelectedRangeWithBoundsCheck:head To:end+1];
         }else{
-            [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location];
+            [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
         }
     }
     
@@ -96,7 +96,7 @@
     }else if( _mode == MODE_BLOCK){
         // later
     }
-    [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end];
+    [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end+1];
     [view scrollToCursor];
 }
 

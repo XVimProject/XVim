@@ -439,8 +439,8 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to{
-    // This is inclusive selection, which means the letter at "from" and "to" is included in the result of selction.
-    // You can not use this method to move cursor since this method select 1 letter at leaset.
+    // This is exclusive selection
+	
     if( from > to ){
         NSUInteger tmp = from;
         from = to;
@@ -458,10 +458,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     }
     
     if( to >= [self string].length ){
-        to = [self string].length - 1;
+        to = [self string].length;
     }
     
-    [self setSelectedRange:NSMakeRange(from, to-from+1)];
+    [self setSelectedRange:NSMakeRange(from, to-from)];
 }
 
 /////////////
@@ -1023,6 +1023,24 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     
     [self setSelectedRange:range];
     return [self selectedRange].location;
+}
+
+- (NSUInteger)endOfFile
+{
+	return self.string.length;
+}
+
+- (void)clampRangeToEndOfLine:(NSRange*)range {
+	int starti = range->location;
+	int taili = [self tailOfLine:starti];
+	int length = MIN(range->length, taili - range->location);
+	range->length = length;
+}
+
+- (void)clampRangeToBuffer:(NSRange*)range {
+	int taili = [self endOfFile];
+	int length = MIN(range->length, taili - range->location);
+	range->length = length;
 }
 
 @end

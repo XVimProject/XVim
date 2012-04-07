@@ -121,7 +121,7 @@
     }
     
     if( eol != NSNotFound ){
-        [view setSelectedRangeWithBoundsCheck:range.location To:eol];
+        [view setSelectedRangeWithBoundsCheck:range.location To:eol+1];
         if( ![view isEOF:range.location] ){
             [view cut:self]; // cut with selection with {EOF,0} cause exception. This is a little strange since  setSelectedRange with {EOF,0} does not cause any exception...
         }
@@ -246,14 +246,14 @@
         NSUInteger nonblank = [view nextNonBlankInALine:[view selectedRange].location];
         if( NSNotFound == nonblank ){
             if( ![view isNewLine:curLocation] && [view isEOF:curLocation]){
-                [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]-1];
+                [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]];
                 [view delete:self];
             }else{
                 // Blank line. Nothing todo
             }
         }else{
             if( curLocation != nonblank ){
-                [view setSelectedRangeWithBoundsCheck:[view selectedRange].location To:nonblank-1];
+                [view setSelectedRangeWithBoundsCheck:[view selectedRange].location To:nonblank];
                 [view delete:self];
             }else{
                 // No white spaces in next line.
