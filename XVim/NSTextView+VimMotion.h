@@ -223,6 +223,7 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
 - (void)scrollToCursor;
     
+- (NSUInteger)toggleCase:(NSUInteger)index count:(NSUInteger)count;
 
 @end
 
