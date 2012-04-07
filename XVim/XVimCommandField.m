@@ -91,6 +91,7 @@
 
 - (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt{
     _askingMode=YES;
+    [_msg release];
     _msg = [msg retain];
     msgOwner = owner; // Weak reference
     responseHandler = selector;

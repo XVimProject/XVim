@@ -31,6 +31,7 @@
 - (id)initWithXVim:(XVim *)xvim{
     self = [super initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
     if (self) {
+        [xvim addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew context:nil];
         _xvim = [xvim retain];
         
         // Command View
@@ -68,6 +69,11 @@
     [super dealloc];
 }
 
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    if( [keyPath isEqualToString:@"mode"] ){
+        [_status setStringValue:MODE_STRINGS[[((NSNumber*)[change valueForKey:NSKeyValueChangeNewKey]) integerValue]]];
+    }
+}
 // Layout our statusbar in DVTSourceTextScrollView
 // TODO: This process may be done in viewDidEndLiveResize of DVTSourceTextScrollView
 // We can override the method and after the original method, we can relayout the subviews.
