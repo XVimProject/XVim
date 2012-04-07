@@ -1045,21 +1045,24 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 
 - (void)toggleCaseForRange:(NSRange)range {
 	
-    NSString* s = [self string];
+    NSString* text = [self string];
 	[self clampRangeToBuffer:&range];
 	
-	unichar* characters = (unichar*)malloc(sizeof(unichar) * range.length);
-	[s getCharacters:&characters[0] range:range];
-	for (int i = 0; i < range.length; ++i)
-	{
-		unichar c = characters[i];
-		if (c >= 'a' && c <= 'z') { c += 'A' - 'a'; }
-		else if (c >= 'A' && c <= 'Z') { c += 'a' - 'A'; }
-		characters[i] = c;
+	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
+	for (NSUInteger i = 0; i < range.length; ++i) {
+		NSRange currentRange = NSMakeRange(i, 1);
+		NSString *currentCase = [substring substringWithRange:currentRange];
+		NSString *upperCase = [currentCase uppercaseString];
+		
+		NSRange replaceRange = NSMakeRange(i, 1);
+		if ([currentCase isEqualToString:upperCase]){
+			[substring replaceCharactersInRange:replaceRange withString:[currentCase lowercaseString]];
+		}else{
+			[substring replaceCharactersInRange:replaceRange withString:upperCase];
+		}	
 	}
 	
-	[self insertText:[NSString stringWithCharacters:characters length:range.length] replacementRange:range];
-	free(characters);
+	[self insertText:substring replacementRange:range];
 }
 
 - (void)uppercaseRange:(NSRange)range {
