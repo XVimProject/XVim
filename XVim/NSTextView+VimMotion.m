@@ -1025,33 +1025,4 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return [self selectedRange].location;
 }
 
-- (NSUInteger)toggleCase:(NSUInteger)index count:(NSUInteger)count{
-    NSString *text = [self string];
-    NSRange range = NSMakeRange(index, count);
-    if ([self isEOF:index]) {
-        return index;
-    }
-
-    if (range.location + range.length >= self.string.length){
-        range.length = self.string.length - range.location - 1;
-    }
-
-    NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
-    for (NSUInteger i = 0; i < range.length; ++i) {
-        NSRange currentRange = NSMakeRange(i, 1);
-        NSString *currentCase = [substring substringWithRange:currentRange];
-        NSString *upperCase = [currentCase uppercaseString];
-        
-        NSRange replaceRange = NSMakeRange(i, 1);
-        if ([currentCase isEqualToString:upperCase]){
-            [substring replaceCharactersInRange:replaceRange withString:[currentCase lowercaseString]];
-        }else{
-            [substring replaceCharactersInRange:replaceRange withString:upperCase];
-        }
-    }
-
-    [self insertText:substring replacementRange:range];
-    return range.location + range.length;
-}
-
 @end

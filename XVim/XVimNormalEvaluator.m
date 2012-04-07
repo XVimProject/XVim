@@ -526,22 +526,6 @@
     return nil;
 }
 
-- (XVimEvaluator*)TILDE:(id)arg{
-    NSTextView *view = [self textView];
-    NSRange range = [self.xvim selectedRange];
-    range.length = [self numericArg];
-    
-    // Limit it to the current line based on the numericArg. Vim does it that way.
-    NSUInteger eol = [self.xvim endOfLine:range.location];
-    if (range.location + range.length >= eol){
-        range.length = eol - range.location;
-    }
-    
-    [view toggleCase:range.location count:range.length];
-    [view setSelectedRange:NSMakeRange(range.location + range.length, 0)];
-    return nil;
-}
-
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.

@@ -207,6 +207,7 @@
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE];
 }
 
+
 - (XVimEvaluator*)ESC:(id)arg{
     [[self textView] setSelectedRange:NSMakeRange(_insertion, 0)];
     return nil;
@@ -224,6 +225,7 @@
     return nil;
 }
 
+
 - (XVimEvaluator*)LESSTHAN:(id)arg{
     [self updateSelection];
     DVTSourceTextView* view = [self textView];
@@ -235,17 +237,6 @@
     [view setSelectedRange:r];
     return nil;
 }
-
-- (XVimEvaluator*)TILDE:(id)arg{
-    [self updateSelection];
-    NSTextView *view = [self textView];
-    NSRange range = [self.xvim selectedRange];
-    
-    [view toggleCase:range.location count:range.length];
-    [view setSelectedRange:NSMakeRange(range.location, 0)];
-    return nil;
-}
-
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
@@ -253,5 +244,5 @@
     [self updateSelection];
     return self;
 }
-
 @end
+
