@@ -108,8 +108,7 @@
 	XVim* xvim = [base viewWithTag:XVIM_TAG];
     if( nil != xvim ){
         TRACE_LOG(@"XVim object found");
-        XVimCommandLine* cmdline = [[[XVimCommandLine alloc] init] autorelease];
-        cmdline.xvim = xvim;
+        XVimCommandLine* cmdline = [[[XVimCommandLine alloc] initWithXVim:xvim] autorelease];
         xvim.cmdLine = cmdline; 
         xvim.sourceView = base;
         

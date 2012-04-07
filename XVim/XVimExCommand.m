@@ -365,7 +365,8 @@
     [NSApp terminate:self];
 }
 
-- (void)debug:(XVimExArg*)args{
+- (void)debug:(NSString*)args{
+    [[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 
 }
 
 - (void)reg:(XVimExArg*)args{

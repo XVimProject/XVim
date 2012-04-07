@@ -21,7 +21,7 @@
 
 #define XVIM_TAG 1209 // This is my birthday!
 
-@interface XVim : NSTextView <NSTextFieldDelegate>
+@interface XVim : NSTextView <NSTextFieldDelegate,XVimCommandFieldDelegate>
  {
 @private
      //NSMutableString* _lastSearchString;
@@ -58,8 +58,6 @@
 - (NSString*)string;
 - (NSRange)selectedRange;
 - (void)commandModeWithFirstLetter:(NSString*)first;
-- (void)commandDetermined:(NSString*)command;
-- (void)commandCanceled;
 - (void)searchNext;
 - (void)searchPrevious;
 - (NSUInteger)searchCharacterNext:(NSUInteger)start;
@@ -77,10 +75,8 @@
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;
 - (XVimKeymap*)keymapForMode:(int)mode;
 
-// Option handlings( Not implemented yet )
-/*
-- (NSObject*)getOption:(NSString*)name;
-- (void)setOption:(NSString*)name withObject:(NSObject*)obj;
- */
+// Message from XVimCommandField 
+- (BOOL)commandCanceled;
+- (BOOL)commandFixed:(NSString*)command;
 
 @end

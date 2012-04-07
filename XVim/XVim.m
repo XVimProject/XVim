@@ -279,7 +279,7 @@
 }
 
 // Should move to separated file.
-- (void)commandDetermined:(NSString*)command{
+- (BOOL)commandFixed:(NSString*)command{
     NSString* c = [command stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
     DVTSourceTextView* srcView = (DVTSourceTextView*)[self superview]; // DVTTextSourceView
     TRACE_LOG(@"command : %@", c);
@@ -304,6 +304,7 @@
    
     [[self window] makeFirstResponder:srcView]; // Since XVim is a subview of DVTSourceTextView;
     self.mode = MODE_NORMAL;
+    return YES;
 }
 
 - (void)searchNext{
@@ -418,10 +419,10 @@
     }
 }
 
-- (void)commandCanceled{
-    METHOD_TRACE_LOG();
+- (BOOL)commandCanceled{
     self.mode = MODE_NORMAL;
     [[self window] makeFirstResponder:[self superview]]; // Since XVim is a subview of DVTSourceTextView;
+    return YES;
 }
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
