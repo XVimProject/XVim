@@ -143,8 +143,13 @@ static NSMutableDictionary *s_keyCodeToSelectorString = NULL;
 static NSMutableDictionary *s_stringToKeyCode = NULL;
 
 @implementation XVimKeyStroke
-@synthesize key;
-@synthesize modifierFlags;
+@synthesize key = _key;
+@synthesize modifierFlags = _modifierFlags;
+
+- (BOOL) isNumeric{
+    NSString *keyStr = [self toSelectorString];
+    return [keyStr hasPrefix:@"NUM"] && [keyStr length] == 4;
+}
 
 + (void)initKeyCodeToSelectorString
 {
@@ -238,7 +243,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 + (XVimKeyStroke*)fromEvent:(NSEvent*)event
 {
 	XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-	keyStroke.key = [event.characters characterAtIndex:0];
+	keyStroke.key = [[event charactersIgnoringModifiers] characterAtIndex:0];
 	keyStroke.modifierFlags = event.modifierFlags & 
 		(NSShiftKeyMask | NSControlKeyMask | NSCommandKeyMask | NSAlternateKeyMask);
 	return keyStroke;
@@ -346,10 +351,10 @@ static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
 	[class instancesRespondToSelector:getSelector(self.key, stripModifiers(self.modifierFlags))];
 }
 
-+ (XVimKeyStroke *)fromString:(NSString *)string from:(int*)index
++ (XVimKeyStroke *)fromString:(NSString *)string from:(NSUInteger*)index
 {
-	int starti = *index;
-	int endi = starti;
+	NSUInteger starti = *index;
+	NSUInteger endi = starti;
 	NSString *keyString = NULL;
 	
 	int modifierFlags = 0;
@@ -380,8 +385,8 @@ static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
 		NSRange searchRange = {starti, string.length - starti};
 		NSRange keyStringEndRange = [string rangeOfString:@">" options:0 range:searchRange];
 		
-		int keyStringStarti = starti + 1 + (modifierFlags ? 2 : 0);
-		int keyStringEndi = keyStringEndRange.location;
+		NSUInteger keyStringStarti = starti + 1 + (modifierFlags ? 2 : 0);
+		NSUInteger keyStringEndi = keyStringEndRange.location;
 		
 		endi = keyStringEndi + 1; // Skip > char
 		
@@ -402,8 +407,8 @@ static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
 	if (number)
 	{
 		keyStroke = [[XVimKeyStroke alloc] init];
-		keyStroke->key = [number intValue];
-		keyStroke->modifierFlags = modifierFlags;
+		keyStroke.key = [number intValue];
+		keyStroke.modifierFlags = modifierFlags;
 	}
 	
 	*index = endi;
@@ -412,15 +417,15 @@ static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
 
 + (XVimKeyStroke*)fromString:(NSString *)string
 {
-	int index = 0;
+	NSUInteger index = 0;
 	XVimKeyStroke *keyStroke = [self fromString:string from:&index];
 	return keyStroke;
 }
 
 + (void)fromString:(NSString *)string to:(NSMutableArray *)keystrokes
 {
-	int index = 0;
-	int len = string.length;
+	NSUInteger index = 0;
+	NSUInteger len = string.length;
 	while (index < len)
 	{
 		XVimKeyStroke* keyStroke = [self fromString:string from:&index];

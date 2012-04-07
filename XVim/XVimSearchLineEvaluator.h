@@ -12,4 +12,5 @@
 @interface XVimSearchLineEvaluator : XVimMotionArgumentEvaluator
 @property BOOL forward;
 @property BOOL previous;
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep;
 @end

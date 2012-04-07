@@ -22,4 +22,5 @@
 
 @property (nonatomic) unichar key;
 @property (nonatomic) int modifierFlags;
+@property (nonatomic, readonly) BOOL isNumeric;
 @end

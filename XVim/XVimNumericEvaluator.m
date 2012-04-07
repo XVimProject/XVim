@@ -23,7 +23,7 @@
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
     NSString* keyStr = [keyStroke toSelectorString];
-    if( [keyStr hasPrefix:@"NUM"] ){
+    if( keyStroke.isNumeric ){
         if( self.numericMode ){
             NSString* numStr = [keyStr substringFromIndex:3];
             NSInteger n = [numStr integerValue]; 

@@ -286,67 +286,43 @@
 }
 
 - (XVimEvaluator*)ASTERISK:(id)arg{
-    NSTextView *view = [self textView];
-
-    NSRange begin = [view selectedRange];
-    NSString *string = [view string];
-    NSUInteger searchStart = begin.location;
-    NSUInteger firstNonBlank = NSNotFound;
-    while (![view isEOF:searchStart]) {
-        unichar curChar = [string characterAtIndex:searchStart];
-        if (isNewLine(curChar)){
-            searchStart = NSNotFound;
-            break;
-        }
-
-        if (isKeyword(curChar)){
-            break;
-        }
-
-        if (isNonBlank(curChar) && firstNonBlank == NSNotFound){
-            firstNonBlank = searchStart;
-        }
-
-        ++searchStart;
+    NSRange found;
+    for (NSUInteger i = 0; i < self.numericArg && found.location != NSNotFound; ++i){
+        found = [self.xvim.searcher searchCurrentWord:YES matchWholeWord:YES];
     }
-
-    if (searchStart == NSNotFound){
-        searchStart = firstNonBlank;
-    }
-
-    if (searchStart == NSNotFound){
-        [self.xvim ringBell];
+    
+    if (NSNotFound == found.location){
+        [self.xvim statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
         return nil;
     }
 
-    XVimWordInfo info;
-    NSUInteger wordStart = searchStart;
-    if (wordStart > 0){
-        unichar curChar = [string characterAtIndex:wordStart];
-        unichar lastChar = [string characterAtIndex:wordStart-1];
-        if ((isKeyword(curChar) && isKeyword(lastChar)) ||
-            (!isKeyword(curChar) && isNonBlank(curChar) && !isKeyword(lastChar) && isNonBlank(lastChar))){
-            wordStart = [view wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
-        }
+    //Move cursor and show the found string
+    NSRange begin = [[self textView] selectedRange];
+    [[self textView] setSelectedRange:NSMakeRange(found.location, 0)];
+    [[self textView] scrollToCursor];
+    [[self textView] showFindIndicatorForRange:found];
+
+    return [self motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE];
+}
+
+- (XVimEvaluator*)NUMBER:(id)arg{
+    NSRange found;
+    for (NSUInteger i = 0; i < self.numericArg && found.location != NSNotFound; ++i){
+        found = [self.xvim.searcher searchCurrentWord:NO matchWholeWord:YES];
     }
-
-    NSUInteger wordEnd = [view wordsForward:wordStart count:1 option:LEFT_RIGHT_NOWRAP info:&info];
-    if (info.lastEndOfWord != NSNotFound){
-        wordEnd = info.lastEndOfWord;
+    
+    if (NSNotFound == found.location){
+        [self.xvim statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
+        return nil;
     }
-
-    // Search for the word
-    NSRange wordRange = NSMakeRange(wordStart, wordEnd - wordStart + 1);
-    NSString *searchWord = [[view string] substringWithRange:wordRange];
-    NSString *escapedSearchWord = [NSRegularExpression escapedPatternForString:searchWord];
-    [self.xvim commandDetermined:[@"/" stringByAppendingString:escapedSearchWord]];
-
-    if (searchStart != begin.location){
-        [[self xvim] searchNext];
-    }
-
-    NSRange end = [view selectedRange];
-    return [self motionFixedFrom:begin.location To:end.location Type:CHARACTERWISE_EXCLUSIVE];
+    
+    //Move cursor and show the found string
+    NSRange begin = [[self textView] selectedRange];
+    [[self textView] setSelectedRange:NSMakeRange(found.location, 0)];
+    [[self textView] scrollToCursor];
+    [[self textView] showFindIndicatorForRange:found];
+    
+    return [self motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
@@ -840,8 +816,7 @@
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if (xregister.isRepeat){
         if (xregister.nonNumericKeyCount == 1){
-            NSString *key = [keyStroke toSelectorString];
-            if([keyStroke classResponds:[XVimMotionEvaluator class]] || [key hasPrefix:@"NUM"]){
+            if([keyStroke classResponds:[XVimMotionEvaluator class]] || keyStroke.isNumeric){
                 return REGISTER_APPEND;
             }
         }

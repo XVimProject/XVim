@@ -543,27 +543,26 @@ NSArray *_invalidRepeatKeys;
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =
         [[NSArray alloc] initWithObjects:
-         @"m",
-         @"q",
-         @"C_r",
-         @"u",
-         @"v",
-         @"V",
-         @"C_v",
-         @"AT",
-         @"COLON",
-         @"DOT",
-         @"QUESTION",
-         @"SLASH",
+         [NSValue valueWithPointer:@selector(m:)],
+         [NSValue valueWithPointer:@selector(C_r:)],
+         [NSValue valueWithPointer:@selector(u:)],
+         [NSValue valueWithPointer:@selector(v:)],
+         [NSValue valueWithPointer:@selector(V:)],
+         [NSValue valueWithPointer:@selector(C_v:)],
+         [NSValue valueWithPointer:@selector(AT:)],
+         [NSValue valueWithPointer:@selector(COLON:)],
+         [NSValue valueWithPointer:@selector(DOT:)],
+         [NSValue valueWithPointer:@selector(QUESTION:)],
+         [NSValue valueWithPointer:@selector(SLASH:)],
          nil];
     }
-    NSString *key = [keyStroke toSelectorString];
-    if (key == @"q"){
+    NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
+    if (keySelector == [NSValue valueWithPointer:@selector(q:)]){
         return REGISTER_IGNORE;
     }else if (xregister.isRepeat){
         if([keyStroke classResponds:[XVimNormalEvaluator class]] &&
            ![keyStroke classResponds:[XVimNormalEvaluator superclass]]){
-            if ([_invalidRepeatKeys containsObject:key] == NO){
+            if ([_invalidRepeatKeys containsObject:keySelector] == NO){
                 return REGISTER_REPLACE;
             }
         }

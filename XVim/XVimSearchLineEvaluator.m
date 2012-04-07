@@ -13,9 +13,22 @@
 #import "XVimKeyStroke.h"
 
 // Search Line 
+@interface XVimSearchLineEvaluator()
+@property (nonatomic) BOOL performedSearch;
+@end
+
 @implementation XVimSearchLineEvaluator
 @synthesize forward = _forward;
 @synthesize previous = _previous;
+@synthesize performedSearch = _performedSearch;
+
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
+    self = [super initWithMotionEvaluator:evaluator withRepeat:rep];
+    if( self ){
+        _performedSearch = NO;
+    }
+    return self;
+}
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim *)xvim{
 	unichar key = keyStroke.key;
@@ -47,10 +60,19 @@
             // If the last search was forward "semicolon" is forward search and this is the case its CHARACTERWISE_EXCLUSIVE
             type = CHARACTERWISE_EXCLUSIVE;
         }
+        self.performedSearch = YES;
         return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
     }
 
     return nil;
 }
+
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
+    if (self.performedSearch){
+        return REGISTER_APPEND;
+    }
     
+    return [super shouldRecordEvent:keyStroke inRegister:xregister];
+}
+
 @end

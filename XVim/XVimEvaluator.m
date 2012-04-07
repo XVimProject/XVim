@@ -27,8 +27,6 @@
     return MODE_NORMAL;
 }
 
-
-
 - (id)init
 {
     self = [super init];

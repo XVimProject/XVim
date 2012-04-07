@@ -55,6 +55,7 @@
                    CMD(@"vmap", @"vmap:"),
                    CMD(@"omap", @"omap:"),
                    CMD(@"imap", @"imap:"),
+                   CMD(@"registers", @"reg:"),
 					   nil];
         _xvim = [xvim retain];
     }
@@ -365,6 +366,10 @@
 }
 
 - (void)debug:(XVimExArg*)args{
+}
+
+- (void)reg:(XVimExArg*)args{
+    TRACE_LOG(@"registers: %@", [_xvim registers])
 }
 
 - (void)make:(XVimExArg*)args{
