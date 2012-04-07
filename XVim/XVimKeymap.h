@@ -12,5 +12,5 @@
 
 @interface XVimKeymap : NSObject
 - (void)mapKeyStroke:(XVimKeyStroke*)keyStroke to:(NSArray*)targetKeyStrokes;
-- (NSArray*)lookupKeyStroke:(XVimKeyStroke*)keyStroke;
+- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options withPrimary:(XVimKeyStroke*)primaryKeyStroke;
 @end

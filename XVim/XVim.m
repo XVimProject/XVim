@@ -247,10 +247,10 @@
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-	
-	XVimKeyStroke* keyStroke = [XVimKeyStroke fromEvent:event];
+	NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
+	XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
 	XVimKeymap* keymap = [_currentEvaluator selectKeymap:_keymaps];
-	NSArray *keystrokes = [keymap lookupKeyStroke:keyStroke];
+	NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke];
 	
 	for (XVimKeyStroke *keyStroke in keystrokes)
 	{
