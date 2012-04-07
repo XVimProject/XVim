@@ -190,6 +190,11 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)endOfLine:(NSUInteger)index; // May return NSNotFound
 
 /**
+ * Returns position of eof
+ **/
+- (NSUInteger)endOfFile;
+
+/**
  * Returns column number of the position "index"
  * Column number starts from 0
  **/
@@ -201,6 +206,12 @@ BOOL isKeyword(unichar ch);
  * Line number starts from 1.
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
+
+// Clamps range to end of line
+- (void)clampRangeToEndOfLine:(NSRange*)range;
+
+// Clamps range to buffer
+- (void)clampRangeToBuffer:(NSRange*)range;
 
 // Selection
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to;
@@ -223,6 +234,10 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
 - (void)scrollToCursor;
     
+// Case changes. These functions are all range checked.
+- (void)toggleCaseForRange:(NSRange)range;
+- (void)uppercaseRange:(NSRange)range;
+- (void)lowercaseRange:(NSRange)range;
 
 @end
 

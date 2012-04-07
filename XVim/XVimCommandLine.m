@@ -14,27 +14,32 @@
 #import "DVTFoldingTextStorage.h"
 #import "DVTFontAndColorsTheme.h"
 
-#define STATUS_BAR_HEIGHT 18
+#define STATUS_BAR_HEIGHT 36 
+
+
+@interface XVimCommandLine() {
+@private
+    XVim* _xvim;
+}
+@end
 
 @implementation XVimCommandLine
 @synthesize tag = _tag;
-@synthesize xvim = _xvim;
 @synthesize mode = _mode;
 @synthesize additionalStatus = _additionalStatus;
 
-- (id)init{
+- (id)initWithXVim:(XVim *)xvim{
     self = [super initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
     if (self) {
-        // Command View
+        _xvim = [xvim retain];
         
-        _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
-        _command.delegate = self;
-        [_command setBackgroundColor:[NSColor colorWithSRGBRed:0 green:0 blue:0 alpha:0.0]];
-        _command.stringValue = @"";
+        // Command View
+        _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+        [_command setBackgroundColor:[NSColor colorWithSRGBRed:0.5 green:0.5 blue:0.5 alpha:0.0]];
+        [_command setString: @""];
         [_command setEditable:NO];
-        [_command setBordered:NO];
-        [[_command cell] setFocusRingType:NSFocusRingTypeNone];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
+        _command.delegate = xvim;
         [self addSubview:_command];
         
         // Status View
@@ -42,9 +47,9 @@
         _additionalStatus = @"";
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
         [paragraph setAlignment:NSRightTextAlignment];
-        [paragraph setTailIndent:-10.0];
-        _status = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
-        [_status setBackgroundColor:[NSColor colorWithSRGBRed:0 green:0 blue:0 alpha:0.0]];
+        [paragraph setTailIndent:0];
+        _status = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+        [_status setBackgroundColor:[NSColor colorWithSRGBRed:0.5 green:0.5 blue:0.5 alpha:0.0]];
         _status.stringValue = _mode;
         [_status setAlignment:NSRightTextAlignment];
         [_status setEditable:NO];
@@ -58,6 +63,8 @@
 
 - (void)dealloc{
     [_command release];
+    [_status release];
+    [_xvim release];
     [super dealloc];
 }
 
@@ -66,11 +73,10 @@
 // We can override the method and after the original method, we can relayout the subviews.
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view{
     NSRect frame = [view frame];
-    frame.size.width -= 35;
-    [_command setFrameSize:NSMakeSize(frame.size.width/2, STATUS_BAR_HEIGHT)];
-    [_command setFrameOrigin:NSMakePoint(10, 0)];
-    [_status setFrameSize:NSMakeSize(frame.size.width/2-20, STATUS_BAR_HEIGHT)];
-    [_status setFrameOrigin:NSMakePoint(frame.size.width/2,0)];
+    [_command setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
+    [_command setFrameOrigin:NSMakePoint(0, 0)];
+    [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
+    [_status setFrameOrigin:NSMakePoint(0,STATUS_BAR_HEIGHT/2)];
     
     NSScrollView* parent = view;
     NSArray* views = [parent subviews];
@@ -93,15 +99,15 @@
             //barFrame.origin.y = bounds.origin.y + bounds.size.height -STATUS_BAR_HEIGHT;
             //barFrame.size.height = STATUS_BAR_HEIGHT;
             
-            barFrame.origin.y = bounds.origin.y + bounds.size.height -STATUS_BAR_HEIGHT-12;
-            barFrame.origin.x = 28; // TODO Get DVTTextSidebarView width to specify correct value
-            barFrame.size.width = bounds.size.width - 20 -28;
+            barFrame.origin.y = bounds.origin.y + bounds.size.height-STATUS_BAR_HEIGHT;
+            barFrame.origin.x = 0; // TODO Get DVTTextSidebarView width to specify correct value
+            barFrame.size.width = bounds.size.width;
             barFrame.size.height = STATUS_BAR_HEIGHT;
             [v setFrame:barFrame];
         }
         else{
-            //r.size.height = parentRect.size.height - STATUS_BAR_HEIGHT;
-            //[v setFrame:r];
+            r.size.height = frame.size.height - STATUS_BAR_HEIGHT;
+            [v setFrame:r];
         }
     }
 }
@@ -112,26 +118,18 @@
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
-    NSString *statusString = [self.xvim modeName];
+    NSString *statusString = [_xvim modeName];
     if ([self.additionalStatus length] > 0){
         statusString = [statusString stringByAppendingFormat:@" --%@", self.additionalStatus];
     }
     [_status setStringValue:statusString];
-    id fontAndColors = [[[self.xvim sourceView] textStorage] fontAndColorTheme];
+    id fontAndColors = [[[_xvim sourceView] textStorage] fontAndColorTheme];
     
-    NSColor* color;
-    if( [_command.stringValue isEqualToString:@""] ){
-        color = [NSColor colorWithSRGBRed:0 green:0.0 blue:0.0 alpha:0.0]; // not visible
-        [_status setTextColor:[fontAndColors sourcePlainTextColor]];
-
-    }else{
-        color = [[fontAndColors sourcePlainTextColor] colorWithAlphaComponent:0.8];
-        [_command setTextColor:[fontAndColors sourceTextBackgroundColor]];
-        [_status setTextColor:[fontAndColors sourceTextBackgroundColor]];
-    }
-    [color set];
-    NSBezierPath* path= [NSBezierPath bezierPathWithRect:dirtyRect];
-    [path fill];
+    [_status setTextColor:[fontAndColors sourcePlainTextColor]];
+    [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
+    [_command setTextColor:[fontAndColors sourcePlainTextColor]];
+    [_command setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
+    
     [super drawRect:dirtyRect];
 }
 
@@ -140,41 +138,19 @@
     [self setNeedsDisplay:YES];
 }
 
-- (void)didClipViewFrameChanged:(NSNotification*)notification{
-}
-
 - (void)setFocusOnCommandWithFirstLetter:(NSString*)first{
     [_command setEditable:YES];
     [[self window] makeFirstResponder:_command];
-    _command.stringValue = first;
-    NSText* textEditor = [[self window] fieldEditor:YES forObject:_command];
-    [textEditor moveToEndOfLine:self];
+    [_command setString:first];
+    [_command moveToEndOfLine:self];
 }
 
-- (BOOL)control:(NSControl *)control textView:(NSTextView *)textView doCommandBySelector:(SEL)command{
-    TRACE_LOG(@"Command : %@", NSStringFromSelector(command));
-    if( @selector(insertNewline:) == command ){
-        [self.xvim commandDetermined:[_command stringValue]];
-        return YES;
-    }else if( @selector(complete:) == command || @selector(cancelOperation:) == command){
-        [self.xvim commandCanceled];
-        return YES;
-    }else if( @selector(deleteBackward:) ){
-        if( 1 == [[_command stringValue] length] ){
-            return YES;
-        }
-    }
-    return NO; 
+
+- (void)statusMessage:(NSString*)msg{
+    
 }
 
-- (void)controlTextDidEndEditing:(NSNotification *)aNotification{
-    METHOD_TRACE_LOG();  
-    _command.stringValue = @"";
-    [_command setEditable:NO];
+- (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt{
+    [_command ask:msg owner:owner handler:selector option:opt];
 }
-
-- (void)controlTextDidBeginEditing:(NSNotification *)aNotification{
-    METHOD_TRACE_LOG();  
-}
-
 @end

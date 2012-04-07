@@ -44,15 +44,15 @@
     _begin = cur.location;
     _insertion = cur.location + cur.length;
     if( _mode == MODE_CHARACTER ){
-        [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location];
+        [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
     }
     if( _mode == MODE_LINE ){
         NSUInteger head = [view headOfLine:cur.location];
         NSUInteger end = [view endOfLine:cur.location];
         if( NSNotFound != head && NSNotFound != end ){
-            [view setSelectedRangeWithBoundsCheck:head To:end];
+            [view setSelectedRangeWithBoundsCheck:head To:end+1];
         }else{
-            [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location];
+            [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
         }
     }
     
@@ -96,7 +96,7 @@
     }else if( _mode == MODE_BLOCK){
         // later
     }
-    [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end];
+    [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end+1];
     [view scrollToCursor];
 }
 
@@ -151,6 +151,24 @@
     evaluator.xvim = self.xvim;
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE];
     
+}
+
+- (XVimEvaluator*)u:(id)arg {
+	[self updateSelection];
+	NSTextView *view = [self textView];
+	NSRange r = [view selectedRange];
+	[view lowercaseRange:r];
+	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	return nil;
+}
+
+- (XVimEvaluator*)U:(id)arg {
+	[self updateSelection];
+	NSTextView *view = [self textView];
+	NSRange r = [view selectedRange];
+	[view uppercaseRange:r];
+	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	return nil;
 }
 
 - (XVimEvaluator*)C_u:(id)arg{
@@ -237,6 +255,15 @@
     [view setSelectedRange:r];
     return nil;
 }
+
+- (XVimEvaluator*)TILDE:(id)arg {
+	[self updateSelection];
+	NSTextView *view = [self textView];
+	NSRange r = [view selectedRange];
+	[view toggleCaseForRange:r];
+	return nil;
+}
+
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     //TODO: Handle type
     // Expand current selected range (_begin, _insertion )

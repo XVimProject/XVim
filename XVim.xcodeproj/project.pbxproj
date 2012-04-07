@@ -39,6 +39,9 @@
 		C38A5B4715272DCD00E1448D /* XVimSourceCodeEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4615272DCD00E1448D /* XVimSourceCodeEditor.m */; };
 		C38A5B4D1527CEA500E1448D /* XVimNumericEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4C1527CEA400E1448D /* XVimNumericEvaluator.m */; };
 		C38A5B501527CEE600E1448D /* XVimMotionArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4F1527CEE600E1448D /* XVimMotionArgumentEvaluator.m */; };
+		C3AA7226152F186A00C61D97 /* XVimTildeEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */; };
+		C3AA722A152F1B1800C61D97 /* XVimLowercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */; };
+		C3AA722D152F1B2800C61D97 /* XVimUppercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */; };
 		F100DC2E150BB6BC002C703C /* XVimRegisterEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */; };
 		F17D013B150861DC00A8111B /* XVimRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = F17D013A150861DC00A8111B /* XVimRegister.m */; };
 		F1C1E515150475ED0005C1CB /* XVimEqualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F1C1E514150475ED0005C1CB /* XVimEqualEvaluator.m */; };
@@ -129,6 +132,12 @@
 		C38A5B561527D25C00E1448D /* DVTCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTCompletionController.h; path = XVim/DVTCompletionController.h; sourceTree = SOURCE_ROOT; };
 		C38A5B581527D53200E1448D /* IDESourceCodeEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDESourceCodeEditor.h; path = XVim/IDESourceCodeEditor.h; sourceTree = SOURCE_ROOT; };
 		C38A5B5B1527D58500E1448D /* DVTSourceTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTSourceTextView.h; path = XVim/DVTSourceTextView.h; sourceTree = SOURCE_ROOT; };
+		C3AA7224152F186A00C61D97 /* XVimTildeEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTildeEvaluator.h; path = XVim/XVimTildeEvaluator.h; sourceTree = SOURCE_ROOT; };
+		C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTildeEvaluator.m; path = XVim/XVimTildeEvaluator.m; sourceTree = SOURCE_ROOT; };
+		C3AA7228152F1B1700C61D97 /* XVimLowercaseEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimLowercaseEvaluator.h; path = XVim/XVimLowercaseEvaluator.h; sourceTree = SOURCE_ROOT; };
+		C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimLowercaseEvaluator.m; path = XVim/XVimLowercaseEvaluator.m; sourceTree = SOURCE_ROOT; };
+		C3AA722B152F1B2700C61D97 /* XVimUppercaseEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimUppercaseEvaluator.h; path = XVim/XVimUppercaseEvaluator.h; sourceTree = SOURCE_ROOT; };
+		C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimUppercaseEvaluator.m; path = XVim/XVimUppercaseEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegisterEvaluator.m; path = XVim/XVimRegisterEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F17D0139150861DC00A8111B /* XVimRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegister.h; path = XVim/XVimRegister.h; sourceTree = SOURCE_ROOT; };
@@ -165,6 +174,12 @@
 				A2277EDA14F80D5000A6B70C /* XVimYankEvaluator.m */,
 				A2277ED214F80BCB00A6B70C /* XVimDeleteEvaluator.h */,
 				A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */,
+				C3AA7224152F186A00C61D97 /* XVimTildeEvaluator.h */,
+				C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */,
+				C3AA7228152F1B1700C61D97 /* XVimLowercaseEvaluator.h */,
+				C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */,
+				C3AA722B152F1B2700C61D97 /* XVimUppercaseEvaluator.h */,
+				C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */,
 			);
 			name = Operators;
 			sourceTree = "<group>";
@@ -403,6 +418,9 @@
 				A2A6BA2E152A544C00F0EB5F /* XVimSearch.m in Sources */,
 				A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */,
 				A2AF5E18152EA92C00E13833 /* NSTextView+VimMotion.m in Sources */,
+				C3AA7226152F186A00C61D97 /* XVimTildeEvaluator.m in Sources */,
+				C3AA722A152F1B1800C61D97 /* XVimLowercaseEvaluator.m in Sources */,
+				C3AA722D152F1B2800C61D97 /* XVimUppercaseEvaluator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

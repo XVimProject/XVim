@@ -7,14 +7,15 @@
 //
 
 #import <AppKit/AppKit.h>
-@class XVimCommandField;
+#import "XVimCommandField.h"
 
-@interface XVimCommandLine : NSView  <NSTextFieldDelegate>{
+@class XVim;
+
+@interface XVimCommandLine : NSView{
     XVimCommandField* _command;
     NSTextField* _status;
 }
 @property NSInteger tag;
-@property(retain) id xvim;
 @property(retain) NSString* mode;
 @property(strong) NSString* additionalStatus;
 
@@ -22,5 +23,7 @@
 - (void)didFrameChanged:(NSNotification*)notification;
 - (void)setFocusOnCommandWithFirstLetter:(NSString*)first;
 
+- (id)initWithXVim:(XVim*)xvim;
+- (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt;
 
 @end
