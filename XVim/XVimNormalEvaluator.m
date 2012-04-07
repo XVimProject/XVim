@@ -47,7 +47,7 @@
     self.xvim = xvim;
     [[xvim sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
-        [self.playbackRegister playback:[xvim sourceView] withRepeatCount:self.playbackCount];
+        [self.playbackRegister playbackWithHandler:xvim withRepeatCount:self.playbackCount];
         
         // Clear the playback register now that we have finished playing it back
         self.playbackRegister = nil;

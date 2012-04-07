@@ -129,6 +129,7 @@
 		C38A5B561527D25C00E1448D /* DVTCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTCompletionController.h; path = XVim/DVTCompletionController.h; sourceTree = SOURCE_ROOT; };
 		C38A5B581527D53200E1448D /* IDESourceCodeEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDESourceCodeEditor.h; path = XVim/IDESourceCodeEditor.h; sourceTree = SOURCE_ROOT; };
 		C38A5B5B1527D58500E1448D /* DVTSourceTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTSourceTextView.h; path = XVim/DVTSourceTextView.h; sourceTree = SOURCE_ROOT; };
+		C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimPlaybackHandler.h; path = XVim/XVimPlaybackHandler.h; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegisterEvaluator.m; path = XVim/XVimRegisterEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F17D0139150861DC00A8111B /* XVimRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegister.h; path = XVim/XVimRegister.h; sourceTree = SOURCE_ROOT; };
@@ -225,6 +226,7 @@
 				C366C23915287EE30008C58E /* XVimKeymap.h */,
 				C366C23A15287EE30008C58E /* XVimKeymap.m */,
 				A2BA3EA0152E372900C18FB4 /* XVimOptions.h */,
+				C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */,
 				A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */,
 			);
 			name = XVim;
