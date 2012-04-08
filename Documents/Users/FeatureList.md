@@ -7,8 +7,6 @@ So some commands not listed here may already be implemented.
 If you feel unconfortable with some commands
 wait for the implemenation patiently or let me know through the XVim issue page.
 
-The index of the list below corresponds to the help document of Vim.
-
 ## Motion
 b,B,f,F,g,G,h,j,k,l,w,W,0,$,^,%,+,-,{,},(,),n,N,',`
 
