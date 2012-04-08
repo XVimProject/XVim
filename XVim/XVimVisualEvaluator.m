@@ -121,8 +121,8 @@
 
 - (XVimEvaluator*)c:(id)arg{
     [self updateSelection];
-    XVimDeleteEvaluator *evaluator =
-    [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:YES];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:YES];	
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:YES];
     
     // Need to set this explicitly because it is not in the constructor.
     // Maybe the constructors should be refactored to include it?
@@ -132,8 +132,8 @@
 
 - (XVimEvaluator*)d:(id)arg{
     [self updateSelection];
-    XVimDeleteEvaluator *evaluator =
-    [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:NO];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:NO];	
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:NO];
     
     // Need to set this explicitly because it is not in the constructor.
     // Maybe the constructors should be refactored to include it?
@@ -144,7 +144,8 @@
 
 - (XVimEvaluator*)D:(id)arg{
     [self updateSelection];
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:NO];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:NO];	
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:NO];
     
     // Need to set this explicitly because it is not in the constructor.
     // Maybe the constructors should be refactored to include it?
@@ -207,7 +208,8 @@
 
 - (XVimEvaluator*)y:(id)arg{
     [self updateSelection];
-    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
+	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithXVim:[self xvim]];
+    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     
     // Need to set this explicitly because it is not in the constructor.
     // Maybe the constructors should be refactored to include it?
@@ -217,7 +219,9 @@
 
 - (XVimEvaluator*)EQUAL:(id)arg{
     [self updateSelection];
-    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
+	
+	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] initWithXVim:[self xvim]];
+    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     
     // Need to set this explicitly because it is not in the constructor.
     // Maybe the constructors should be refactored to include it?

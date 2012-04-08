@@ -102,7 +102,8 @@
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
 - (XVimEvaluator*)c:(id)arg{
-    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:TRUE];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:TRUE];
+    return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:TRUE];
 }
 
 // 'C' works similar to 'D' except that once it's done deleting
@@ -143,7 +144,8 @@
 }
 
 - (XVimEvaluator*)d:(id)arg{
-    return [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:FALSE];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:FALSE];	
+    return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:FALSE];
 }
 
 - (XVimEvaluator*)D:(id)arg{
@@ -475,7 +477,8 @@
 }
 
 - (XVimEvaluator*)y:(id)arg{
-    return [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
+	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithXVim:[self xvim]];
+    return [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)AT:(id)arg{
@@ -483,18 +486,19 @@
 }
 
 - (XVimEvaluator*)EQUAL:(id)arg{
-    return [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
+	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] initWithXVim:[self xvim]];
+    return [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(id)arg{
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.unshift = NO;
+	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithXVim:[self xvim] unshift:NO];
+    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     return eval;
 }
 
 - (XVimEvaluator*)LESSTHAN:(id)arg{
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithRepeat:[self numericArg]];
-    eval.unshift = YES;
+	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithXVim:[self xvim] unshift:YES];
+    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     return eval;
     
 }

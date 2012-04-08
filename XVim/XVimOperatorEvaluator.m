@@ -8,43 +8,36 @@
 
 #import "NSTextView+VimMotion.h"
 #import "XVimOperatorEvaluator.h"
+#import "XVimOperatorAction.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 
+@interface XVimOperatorEvaluator() {
+	XVimOperatorAction *_operatorAction;
+}
+@end
+
 @implementation XVimOperatorEvaluator
+@synthesize repeat = _repeat;
+
+- (id)initWithOperatorAction:(XVimOperatorAction*) action repeat:(NSUInteger)repeat
+{
+	if (self = [super init])
+	{
+		self->_operatorAction = action;
+		self->_repeat = repeat;
+	}
+	return self;
+}
+
+- (id)initWithOperatorAction:(XVimOperatorAction*) action
+{
+	return [self initWithOperatorAction:action repeat:1];
+}
 
 - (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
 {
 	return keymaps[MODE_OPERATOR_PENDING];
-}
-
-- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
-    if( from > to ){
-        NSUInteger tmp = from;
-        from = to;
-        to = tmp;
-    }
-    
-    DVTSourceTextView* view = [self textView];
-    if( type == CHARACTERWISE_EXCLUSIVE ){
-    }else if( type == CHARACTERWISE_INCLUSIVE ){
-		to++;
-    }else if( type == LINEWISE ){
-        to = [view tailOfLine:to] + 1;
-        NSUInteger head = [view headOfLine:from];
-        if( NSNotFound != head ){
-            from = head; 
-        }
-    }
-	
-	return NSMakeRange(from, to - from);
-}
-	
-
-- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
-	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
-	DVTSourceTextView* view = [self textView];
-    [view setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
 - (XVimEvaluator*)w:(id)arg{
@@ -77,6 +70,10 @@
     
     TRACE_LOG(@"REGISTER_IGNORE");
     return REGISTER_IGNORE;
+}
+
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+	return [self->_operatorAction motionFixedFrom:from To:to Type:type];
 }
 
 @end

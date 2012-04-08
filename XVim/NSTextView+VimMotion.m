@@ -1085,4 +1085,31 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 	[self insertText:[[s substringWithRange:range] lowercaseString] replacementRange:range];
 }
 
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+    if( from > to ){
+        NSUInteger tmp = from;
+        from = to;
+        to = tmp;
+    }
+    
+    if( type == CHARACTERWISE_EXCLUSIVE ){
+    }else if( type == CHARACTERWISE_INCLUSIVE ){
+		to++;
+    }else if( type == LINEWISE ){
+        to = [self tailOfLine:to] + 1;
+        NSUInteger head = [self headOfLine:from];
+        if( NSNotFound != head ){
+            from = head; 
+        }
+    }
+	
+	return NSMakeRange(from, to - from);
+}
+
+
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
+    [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
+}
+
 @end
