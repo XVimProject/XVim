@@ -20,43 +20,59 @@
 @interface XVimCommandLine() {
 @private
     XVim* _xvim;
+    XVimCommandField* _command;
+    NSTextField* _static;
+    NSTextField* _status;
+    
 }
 @end
 
 @implementation XVimCommandLine
 @synthesize tag = _tag;
-@synthesize mode = _mode;
-@synthesize additionalStatus = _additionalStatus;
+@synthesize staticMessage = _staticMessage;
 
 - (id)initWithXVim:(XVim *)xvim{
     self = [super initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
     if (self) {
         [xvim addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew context:nil];
+        [xvim addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
+        [xvim addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
         _xvim = [xvim retain];
+        
+        id fontAndColors = [[[_xvim sourceView] textStorage] fontAndColorTheme];
+        
+        // Static Massage ( This is behind the command view if the command is active)
+        _static = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+        [_static setEditable:NO];
+        [_static setBordered:NO];
+        [_static setSelectable:NO];
+        [[_static cell] setFocusRingType:NSFocusRingTypeNone];
+        [_static setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
+        [self addSubview:_static];
         
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
-        [_command setBackgroundColor:[NSColor colorWithSRGBRed:0.5 green:0.5 blue:0.5 alpha:0.0]];
         [_command setString: @""];
         [_command setEditable:NO];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
         _command.delegate = xvim;
+        [_command setTextColor:[fontAndColors sourcePlainTextColor]];
+        [_command setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
+        [_command setHidden:YES];
         [self addSubview:_command];
         
+        
         // Status View
-        _mode = @"";
-        _additionalStatus = @"";
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
         [paragraph setAlignment:NSRightTextAlignment];
-        [paragraph setTailIndent:0];
         _status = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
-        [_status setBackgroundColor:[NSColor colorWithSRGBRed:0.5 green:0.5 blue:0.5 alpha:0.0]];
-        _status.stringValue = _mode;
         [_status setAlignment:NSRightTextAlignment];
         [_status setEditable:NO];
         [_status setBordered:NO];
         [_status setSelectable:NO];
         [[_status cell] setFocusRingType:NSFocusRingTypeNone];
+        [_status setTextColor:[fontAndColors sourcePlainTextColor]];
+        [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
         [self addSubview:_status];
     }
     return self;
@@ -65,6 +81,7 @@
 - (void)dealloc{
     [_command release];
     [_status release];
+    [_static release];
     [_xvim release];
     [super dealloc];
 }
@@ -72,6 +89,11 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if( [keyPath isEqualToString:@"mode"] ){
         [_status setStringValue:MODE_STRINGS[[((NSNumber*)[change valueForKey:NSKeyValueChangeNewKey]) integerValue]]];
+    }
+    else if( [keyPath isEqualToString:@"staticMessage"] ){
+        [_static setStringValue:[change valueForKey:NSKeyValueChangeNewKey]];
+    }
+    else if( [keyPath isEqualToString:@"errroMessag"] ){
     }
 }
 // Layout our statusbar in DVTSourceTextScrollView
@@ -81,6 +103,8 @@
     NSRect frame = [view frame];
     [_command setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
+    [_static setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
+    [_static setFrameOrigin:NSMakePoint(0, 0)];
     [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_status setFrameOrigin:NSMakePoint(0,STATUS_BAR_HEIGHT/2)];
     
@@ -102,9 +126,6 @@
         else if( [viewClass isEqualToString:@"XVimCommandLine"] ){
             NSRect bounds = [parent bounds];
             NSRect barFrame = bounds;
-            //barFrame.origin.y = bounds.origin.y + bounds.size.height -STATUS_BAR_HEIGHT;
-            //barFrame.size.height = STATUS_BAR_HEIGHT;
-            
             barFrame.origin.y = bounds.origin.y + bounds.size.height-STATUS_BAR_HEIGHT;
             barFrame.origin.x = 0; // TODO Get DVTTextSidebarView width to specify correct value
             barFrame.size.width = bounds.size.width;
@@ -124,22 +145,6 @@
 }
 
 
-- (void)drawRect:(NSRect)dirtyRect{
-    NSString *statusString = [_xvim modeName];
-    if ([self.additionalStatus length] > 0){
-        statusString = [statusString stringByAppendingFormat:@" --%@", self.additionalStatus];
-    }
-    [_status setStringValue:statusString];
-    id fontAndColors = [[[_xvim sourceView] textStorage] fontAndColorTheme];
-    
-    [_status setTextColor:[fontAndColors sourcePlainTextColor]];
-    [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
-    [_command setTextColor:[fontAndColors sourcePlainTextColor]];
-    [_command setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
-    
-    [super drawRect:dirtyRect];
-}
-
 - (void)didFrameChanged:(NSNotification*)notification{
     [self layoutDVTSourceTextScrollViewSubviews:[notification object]];
     [self setNeedsDisplay:YES];
@@ -147,14 +152,10 @@
 
 - (void)setFocusOnCommandWithFirstLetter:(NSString*)first{
     [_command setEditable:YES];
+    [_command setHidden:NO];
     [[self window] makeFirstResponder:_command];
     [_command setString:first];
     [_command moveToEndOfLine:self];
-}
-
-
-- (void)statusMessage:(NSString*)msg{
-    
 }
 
 - (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt{

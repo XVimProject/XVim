@@ -873,8 +873,9 @@
 }
 - (void)debug:(NSString*)args{
     // Write any debug code.
-    NSMenu* menu = [NSApp mainMenu];
-    [self debugMenu:menu :0];
+    [_xvim setStaticMessage:@"testmessage"];
+    //NSMenu* menu = [NSApp mainMenu];
+    //[self debugMenu:menu :0];
     //[[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 
 }
 

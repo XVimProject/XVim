@@ -56,6 +56,7 @@
 @synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
 @synthesize searcher,excmd;
 @synthesize options;
+@synthesize staticMessage,errorMessage;
 
 + (void) load { 
     // Entry Point of the Plugin.
@@ -436,7 +437,6 @@
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
     self.mode = MODE_CMDLINE;
-    self.cmdLine.mode = MODE_STRINGS[self.mode];
     [self.cmdLine setFocusOnCommandWithFirstLetter:first];
 }
 
@@ -473,7 +473,7 @@
 - (void)recordIntoRegister:(XVimRegister*)xregister{
     if (_recordingRegister == nil){
         _recordingRegister = xregister;
-        self.cmdLine.additionalStatus = @"recording";
+        [self setStaticMessage:@"recording"];
         // when you record into a register you clear out any previous recording
         // unless it was capitalized
         [_recordingRegister clear];
@@ -487,7 +487,7 @@
         [self ringBell];
     }else{
         _recordingRegister = nil;
-        self.cmdLine.additionalStatus = @"";
+        [self setStaticMessage: @""];
     }
 }
 

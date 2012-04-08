@@ -52,6 +52,9 @@
 @property (strong) XVimExCommand* excmd;
 @property (strong) XVimOptions* options;
 
+@property (strong) NSString* staticMessage;
+@property (strong) NSString* errorMessage;
+
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
 // Mark this property to YES before moving. And mark it to NO after moving.
 @property(assign) BOOL dontCheckNewline;

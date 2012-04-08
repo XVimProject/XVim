@@ -11,13 +11,9 @@
 
 @class XVim;
 
-@interface XVimCommandLine : NSView{
-    XVimCommandField* _command;
-    NSTextField* _status;
-}
+@interface XVimCommandLine : NSView
 @property NSInteger tag;
-@property(retain) NSString* mode;
-@property(strong) NSString* additionalStatus;
+@property(strong) NSString* staticMessage;
 
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view;
 - (void)didFrameChanged:(NSNotification*)notification;

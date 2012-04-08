@@ -241,8 +241,8 @@
 				C366C23915287EE30008C58E /* XVimKeymap.h */,
 				C366C23A15287EE30008C58E /* XVimKeymap.m */,
 				A2BA3EA0152E372900C18FB4 /* XVimOptions.h */,
-				C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */,
 				A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */,
+				C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */,
 			);
 			name = XVim;
 			path = XVim_lite2;
