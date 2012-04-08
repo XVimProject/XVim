@@ -7,10 +7,14 @@
 //
 
 #import "XVimOperatorEvaluator.h"
+#import "XVimOperatorAction.h"
 
-@interface XVimShiftEvaluator : XVimOperatorEvaluator{
-    NSUInteger _repeat;
-}
-@property BOOL unshift;
-- (id) initWithRepeat:(NSUInteger)repeat;
+@interface XVimShiftEvaluator : XVimOperatorEvaluator
+- (id)initWithOperatorAction:(XVimOperatorAction*)action 
+					  repeat:(NSUInteger)repeat 
+					 unshift:(BOOL)unshift;
+@end
+
+@interface XVimShiftAction : XVimOperatorAction
+- (id)initWithXVim:(XVim*)xvim unshift:(BOOL)unshift;
 @end

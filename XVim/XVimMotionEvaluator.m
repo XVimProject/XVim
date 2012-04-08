@@ -35,7 +35,7 @@
 {
     self = [super init];
     if (self) {
-        _inverseMotionType = NO;
+        _forceMotionType = NO;
     }
     return self;
 }
@@ -54,10 +54,12 @@
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
-    if( _inverseMotionType ){
-        if ( type == CHARACTERWISE_EXCLUSIVE ){
+    if( _forceMotionType ){
+		if ( type == LINEWISE) {
+			type = CHARACTERWISE_EXCLUSIVE;
+		} else if ( type == CHARACTERWISE_EXCLUSIVE ){
             type = CHARACTERWISE_INCLUSIVE;
-        }else if(type == CHARACTERWISE_INCLUSIVE){
+        } else if(type == CHARACTERWISE_INCLUSIVE) {
             type = CHARACTERWISE_EXCLUSIVE;
         }
    }    
@@ -254,7 +256,7 @@
 }
 
 - (XVimEvaluator*)v:(id)arg{
-    _inverseMotionType = !_inverseMotionType;
+    _forceMotionType = !_forceMotionType;
     return self;
 }
 

@@ -13,34 +13,35 @@
 #import "Logger.h"
 #import "DVTSourceTextView.h"
 
+@interface XVimDeleteEvaluator() {
+	BOOL _insertModeAtCompletion;
+}
+@end
+
 @implementation XVimDeleteEvaluator
 
-- (id)init
+- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction repeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
-    return [self initWithRepeat:1 insertModeAtCompletion:FALSE];
+	if (self = [super initWithOperatorAction:operatorAction repeat:repeat])
+	{
+		self->_insertModeAtCompletion = insertModeAtCompletion;
+	}
+	return self;
 }
 
-- (id)initWithRepeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion {
-    self = [super init];
-    if (self) {
-        _insertModeAtCompletion = insertModeAtCompletion;
-        _repeat = repeat;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)c:(id)arg{
+- (XVimEvaluator*)c:(id)arg
+{
     if( !_insertModeAtCompletion ){
         return nil;  // 'dc' does nothing
     }
     // 'cc' should obey the repeat specifier
     // '3cc' should delete/cut the current line and the 2 lines below it
     
-    if (_repeat < 1) 
+    if (self.repeat < 1) 
         return nil;
     
     DVTSourceTextView* view = [self textView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
 
@@ -51,11 +52,11 @@
     // 'dd' should obey the repeat specifier
     // '3dd' should delete/cut the current line and the 2 lines below it
     
-    if (_repeat < 1) 
+    if (self.repeat < 1) 
         return nil;
         
     DVTSourceTextView* view = [self textView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
 }
 
@@ -166,6 +167,25 @@
     return [self _motionFixedFrom:from To:to Type:motion];
 }
 
+
+@end
+
+@interface XVimDeleteAction() {
+	BOOL _insertModeAtCompletion;
+}
+@end
+
+@implementation XVimDeleteAction
+
+- (id)initWithXVim:(XVim*)xvim insertModeAtCompletion:(BOOL)insertModeAtCompletion
+{
+	if (self = [super initWithXVim:xvim])
+	{
+		self->_insertModeAtCompletion = insertModeAtCompletion;
+	}
+	return self;
+}
+
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     DVTSourceTextView* view = [self textView];
     NSString* string = [view string];
@@ -181,7 +201,7 @@
         return nil;
     }
     
-    [self selectOperationTargetFrom:from To:to Type:type];
+    [view selectOperationTargetFrom:from To:to Type:type];
     [view cut:self];
     
     if (_insertModeAtCompletion == TRUE) {
