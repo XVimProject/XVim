@@ -17,7 +17,7 @@
 	BOOL _inclusive;
 }
 @property (readonly) NSString *string;
-@property (readonly) NSInteger index;
+@property (readonly) NSUInteger index;
 @end
 
 @implementation XVimTextObjectEvaluator
@@ -38,7 +38,7 @@
 	return [self.textView string];
 }
 
-- (NSInteger)index
+- (NSUInteger)index
 {
 	return [self.textView selectedRange].location;
 }

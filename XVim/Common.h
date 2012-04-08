@@ -46,10 +46,10 @@ NSInteger xv_w_motion(NSString *string, NSInteger index, int repeatCount, BOOL b
 
 // Unlike vim, this function won't ignore indent before the current character
 // even if what is '{'
-NSRange xv_current_block(NSString *string, NSInteger index, int repeatCount, BOOL inclusive, char what, char other);
-NSRange xv_current_word(NSString *string, NSInteger index, int repeatCount, BOOL inclusive, BOOL fuzzy);
-NSRange xv_current_quote(NSString *string, NSInteger index, int repeatCount, BOOL inclusive, char what);
-NSRange xv_current_tagblock(NSString *string, NSInteger index, int repeatCount, BOOL inclusive);
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what, char other);
+NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL fuzzy);
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what);
+NSRange xv_current_tagblock(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive);
 
 // Find char in current line.
 // Return the current index if nothing found.

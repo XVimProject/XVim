@@ -779,7 +779,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
     return -1;
 }
 
-NSRange xv_current_block(NSString *string, NSInteger index, int count, BOOL inclusive, char what, char other)
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, BOOL inclusive, char what, char other)
 {
     NSInteger idx    = index;
     
@@ -884,7 +884,7 @@ static NSCharacterSet *get_search_set(unichar initialChar, NSCharacterSet *wsSet
 	return searchSet;
 }
 
-NSRange xv_current_word(NSString *string, NSInteger index, int repeatCount, BOOL inclusive, BOOL bigword)
+NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL bigword)
 {    
     NSInteger maxIndex = [string length] - 1;
 	if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
@@ -1008,8 +1008,8 @@ NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unic
 NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL ignoreEscape);
 NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL ignoreEscape)
 {
-	int pendingi = -1;
-	int pendingQuote = -1;
+	NSInteger pendingi = -1;
+	NSInteger pendingQuote = -1;
 	
     while (start >= 0)
     {
@@ -1018,7 +1018,7 @@ NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL
 		
 		if (ch == '\\' && !ignoreEscape)
 		{
-			int temp = pendingi;
+			NSInteger temp = pendingi;
 			pendingi = pendingQuote;
 			pendingQuote = temp;
 		}
@@ -1043,7 +1043,7 @@ NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL
     return pendingi;
 }
 
-NSRange xv_current_quote(NSString *string, NSInteger index, int repeatCount, BOOL inclusive, char what)
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what)
 {
 	NSInteger begin = find_prev_quote(string, index, what, NO);
 	if (begin == -1)
@@ -1091,7 +1091,7 @@ NSRange xv_current_quote(NSString *string, NSInteger index, int repeatCount, BOO
 }
 										  
 										  
-NSRange xv_current_tagblock(NSString *string, NSInteger index, int repeatCount, BOOL inclusive)
+NSRange xv_current_tagblock(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive)
 {
     // TODO: Implement tag block text object.
     return NSMakeRange(NSNotFound, 0);
