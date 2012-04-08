@@ -7,6 +7,8 @@
 //
 
 #import "NSTextView+VimMotion.h"
+#import "XVimMotionType.h"
+
 ////////////////////////
 // Term Definitions   //
 ////////////////////////
@@ -218,7 +220,9 @@ BOOL isKeyword(unichar ch);
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
 - (NSUInteger)lineNumber:(NSUInteger)index;
 - (NSUInteger)numberOfLines;
-    
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+ 
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;

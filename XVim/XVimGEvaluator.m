@@ -43,17 +43,20 @@
 
 - (XVimEvaluator*)u:(id)arg {
 	NSUInteger repeat = [self repeat];
-	return [[XVimLowercaseEvaluator alloc] initWithRepeat:repeat];
+	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] initWithXVim:[self xvim]];
+	return [[XVimLowercaseEvaluator alloc] initWithOperatorAction:operatorAction repeat:repeat];
 }
 
 - (XVimEvaluator*)U:(id)arg {
 	NSUInteger repeat = [self repeat];
-	return [[XVimUppercaseEvaluator alloc] initWithRepeat:repeat];
+	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] initWithXVim:[self xvim]];
+	return [[XVimUppercaseEvaluator alloc] initWithOperatorAction:operatorAction repeat:repeat];
 }
 
 - (XVimEvaluator*)TILDE:(id)arg {
 	NSUInteger repeat = [self repeat];
-	return [[XVimTildeEvaluator alloc] initWithRepeat:repeat];
+	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] initWithXVim:[self xvim]];
+	return [[XVimTildeEvaluator alloc] initWithOperatorAction:operatorAction repeat:repeat];
 }
 
 - (XVimEvaluator*)ASTERISK:(id)arg{
