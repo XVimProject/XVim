@@ -87,6 +87,7 @@
     NSRange r = [view selectedRange];
     NSUInteger end = [view tailOfLine:r.location];
     [view setSelectedRange:NSMakeRange(end,0)];
+    [view scrollToCursor];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
