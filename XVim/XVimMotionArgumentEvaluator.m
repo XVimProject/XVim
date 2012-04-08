@@ -29,21 +29,24 @@
     [super dealloc];
 }
 
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+-(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+{
     if( nil != _motionEvaluator ){
-        return [_motionEvaluator motionFixedFrom:from To:to Type:type];
+        return [_motionEvaluator motionFixedFrom:from To:to Type:type XVim:xvim];
     }
     return nil;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type {
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type XVim:(XVim*)xvim
+{
     if( nil != _motionEvaluator ){
-        return [_motionEvaluator commonMotion:motion Type:type];
+        return [_motionEvaluator commonMotion:motion Type:type XVim:xvim];
     }
     return nil;
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister
+{
     if (xregister.isRepeat){
         if (xregister.nonNumericKeyCount == 1){
             if([keyStroke classResponds:[XVimMotionArgumentEvaluator class]] || keyStroke.isNumeric){

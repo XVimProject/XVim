@@ -28,21 +28,21 @@
 	return self;
 }
 
-- (XVimEvaluator*)GREATERTHAN:(id)arg{
+- (XVimEvaluator*)GREATERTHAN:(XVim*)xvim{
     if( !_unshift ){
-        NSTextView* view = [self textView];
+        NSTextView* view = [xvim sourceView];
         NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
-        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE XVim:xvim];
     }
     return nil;
 }
 
-- (XVimEvaluator*)LESSTHAN:(id)arg{
+- (XVimEvaluator*)LESSTHAN:(XVim*)xvim{
     //unshift
     if( _unshift ){
-        NSTextView* view = [self textView];
+        NSTextView* view = [xvim sourceView];
         NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
-        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE XVim:xvim];
     }
     return nil;
 }
@@ -56,17 +56,18 @@
 
 @implementation XVimShiftAction
 
-- (id)initWithXVim:(XVim*)xvim unshift:(BOOL)unshift
+- (id)initWithUnshift:(BOOL)unshift
 {
-	if (self = [super initWithXVim:xvim])
+	if (self = [super init])
 	{
 		self->_unshift = unshift;
 	}
 	return self;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-	DVTSourceTextView* view = (DVTSourceTextView*)[self textView];
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+{
+	DVTSourceTextView* view = (DVTSourceTextView*)[xvim sourceView];
 	[view selectOperationTargetFrom:from To:to Type:type];
 	if( _unshift ){
 		[view shiftLeft:self];

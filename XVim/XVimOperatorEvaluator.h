@@ -21,6 +21,6 @@
 
 @property (nonatomic) NSUInteger repeat;
 
-- (XVimEvaluator*)w:(id)arg;
-- (XVimEvaluator*)W:(id)arg;
+- (XVimEvaluator*)w:(XVim*)xvim;
+- (XVimEvaluator*)W:(XVim*)xvim;
 @end

@@ -198,7 +198,7 @@
     [base drawRect_:dirtyRect];
     
     if (MODE_VISUAL == xvim.mode){
-        NSUInteger glyphIndex = xvim.currentEvaluator.insertionPoint;
+        NSUInteger glyphIndex = [xvim.currentEvaluator insertionPoint:xvim];
         NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[base textContainer]];
         
         [[[base insertionPointColor] colorWithAlphaComponent:0.5] set];

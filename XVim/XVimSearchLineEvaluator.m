@@ -30,7 +30,7 @@
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim *)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim *)xvim{
 	unichar key = keyStroke.keyCode;
     NSString *searchChar = [NSString stringWithCharacters:&key length:1];
     [xvim setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
@@ -61,7 +61,7 @@
             type = CHARACTERWISE_EXCLUSIVE;
         }
         self.performedSearch = YES;
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type XVim:xvim]; 
     }
 
     return nil;

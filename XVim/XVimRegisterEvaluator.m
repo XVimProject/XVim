@@ -27,7 +27,7 @@ XVimRegisterEvalMode _mode;
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim*)xvim{
     XVimRegister *xregister = [xvim findRegister:[keyStroke toSelectorString]];
     if (_mode == REGISTER_EVAL_MODE_RECORD){
         if (xregister.isReadOnly == NO){

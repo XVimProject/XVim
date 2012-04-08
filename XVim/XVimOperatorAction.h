@@ -5,9 +5,6 @@
 @class XVimEvaluator;
 
 @interface XVimOperatorAction : NSObject
-@property (weak) XVim *xvim;
-@property (readonly) DVTSourceTextView *textView;
 
-- (id)initWithXVim:(XVim*)xvim;
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim;
 @end

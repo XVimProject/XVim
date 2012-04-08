@@ -17,12 +17,12 @@
 
 @implementation XVimGEvaluator
 
-- (XVimEvaluator*)d:(id)arg{
+- (XVimEvaluator*)d:(XVim*)xvim{
     [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
     return nil;
 }
 
-- (XVimEvaluator*)f:(id)arg{
+- (XVimEvaluator*)f:(XVim*)xvim{
     // Does not work correctly.
     // This seems because the when XCode change the content of DVTSourceTextView
     // ( for example when the file shown in the view is changed )
@@ -34,69 +34,69 @@
     return nil;
 }
 
-- (XVimEvaluator*)g:(id)arg{
+- (XVimEvaluator*)g:(XVim*)xvim{
     //TODO: Must deal numeric arg as linenumber
-    DVTSourceTextView* view = [self textView];
+    DVTSourceTextView* view = [xvim sourceView];
     NSUInteger location = [view nextLine:0 column:0 count:self.repeat - 1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE];
+    return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE XVim:xvim];
 }
 
-- (XVimEvaluator*)u:(id)arg {
+- (XVimEvaluator*)u:(XVim*)xvim {
 	NSUInteger repeat = [self repeat];
-	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] initWithXVim:[self xvim]];
+	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] init];
 	return [[XVimLowercaseEvaluator alloc] initWithOperatorAction:operatorAction repeat:repeat];
 }
 
-- (XVimEvaluator*)U:(id)arg {
+- (XVimEvaluator*)U:(XVim*)xvim {
 	NSUInteger repeat = [self repeat];
-	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] initWithXVim:[self xvim]];
+	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] init];
 	return [[XVimUppercaseEvaluator alloc] initWithOperatorAction:operatorAction repeat:repeat];
 }
 
-- (XVimEvaluator*)TILDE:(id)arg {
+- (XVimEvaluator*)TILDE:(XVim*)xvim {
 	NSUInteger repeat = [self repeat];
-	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] initWithXVim:[self xvim]];
+	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] init];
 	return [[XVimTildeEvaluator alloc] initWithOperatorAction:operatorAction repeat:repeat];
 }
 
-- (XVimEvaluator*)ASTERISK:(id)arg{
+- (XVimEvaluator*)ASTERISK:(XVim*)xvim{
     NSRange found;
     for (NSUInteger i = 0; i < self.repeat && found.location != NSNotFound; ++i){
-        found = [self.xvim.searcher searchCurrentWord:YES matchWholeWord:NO];
+        found = [xvim.searcher searchCurrentWord:YES matchWholeWord:NO];
     }
 
     if (NSNotFound == found.location){
-        [self.xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
+        [xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", xvim.searcher.lastSearchString] ringBell:TRUE];
         return nil;
     }
 
     //Move cursor and show the found string
-    NSRange begin = [[self textView] selectedRange];
-    [[self textView] setSelectedRange:NSMakeRange(found.location, 0)];
-    [[self textView] scrollToCursor];
-    [[self textView] showFindIndicatorForRange:found];
+    NSRange begin = [[xvim sourceView] selectedRange];
+    [[xvim sourceView] setSelectedRange:NSMakeRange(found.location, 0)];
+    [[xvim sourceView] scrollToCursor];
+    [[xvim sourceView] showFindIndicatorForRange:found];
     
-    return [self _motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE];
+    return [self _motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
 }
 
-- (XVimEvaluator*)NUMBER:(id)arg{
+- (XVimEvaluator*)NUMBER:(XVim*)xvim{
     NSRange found;
     for (NSUInteger i = 0; i < self.repeat && found.location != NSNotFound; ++i){
-        found = [self.xvim.searcher searchCurrentWord:NO matchWholeWord:NO];
+        found = [xvim.searcher searchCurrentWord:NO matchWholeWord:NO];
     }
     
     if (NSNotFound == found.location){
-        [self.xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
+        [xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", xvim.searcher.lastSearchString] ringBell:TRUE];
         return nil;
     }
     
     //Move cursor and show the found string
-    NSRange begin = [[self textView] selectedRange];
-    [[self textView] setSelectedRange:NSMakeRange(found.location, 0)];
-    [[self textView] scrollToCursor];
-    [[self textView] showFindIndicatorForRange:found];
+    NSRange begin = [[xvim sourceView] selectedRange];
+    [[xvim sourceView] setSelectedRange:NSMakeRange(found.location, 0)];
+    [[xvim sourceView] scrollToCursor];
+    [[xvim sourceView] showFindIndicatorForRange:found];
     
-    return [self _motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE];
+    return [self _motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

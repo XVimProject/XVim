@@ -938,7 +938,7 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     XVim *xvim = [self viewWithTag:XVIM_TAG];
 
     NSRange characterRange;
-    characterRange.location = xvim.currentEvaluator.insertionPoint;
+    characterRange.location = [xvim.currentEvaluator insertionPoint:xvim];
     characterRange.length = [self isBlankLine:characterRange.location] ? 0 : 1;
     
     // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll

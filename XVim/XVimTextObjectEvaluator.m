@@ -16,8 +16,6 @@
 	NSUInteger _repeat;
 	BOOL _inclusive;
 }
-@property (readonly) NSString *string;
-@property (readonly) NSUInteger index;
 @end
 
 @implementation XVimTextObjectEvaluator
@@ -33,102 +31,92 @@
 	return self;
 }
 
-- (NSString *)string
-{
-	return [self.textView string];
-}
-
-- (NSUInteger)index
-{
-	return [self.textView selectedRange].location;
-}
-
-- (XVimEvaluator*)executeActionForRange:(NSRange)r
+- (XVimEvaluator*)executeActionForRange:(NSRange)r XVim:(XVim*)xvim
 {
 	if (r.location != NSNotFound)
 	{
-		[self.textView clampRangeToBuffer:&r];
-		return [_operatorAction motionFixedFrom:r.location To:r.location+r.length Type:CHARACTERWISE_EXCLUSIVE];
+		[xvim.sourceView clampRangeToBuffer:&r];
+		return [_operatorAction motionFixedFrom:r.location To:r.location+r.length Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
 	}
 	return nil;
 }
 
-- (XVimEvaluator*)b:(id)arg
+- (XVimEvaluator*)b:(XVim*)xvim
 {
-	NSRange r = xv_current_block(self.string, self.index, _repeat, _inclusive, '(', ')');
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_block([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, '(', ')');
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)B:(id)arg
+- (XVimEvaluator*)B:(XVim*)xvim
 {
-	NSRange r = xv_current_block(self.string, self.index, _repeat, _inclusive, '{', '}');
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_block([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, '{', '}');
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)w:(id)arg
+- (XVimEvaluator*)w:(XVim*)xvim
 {
-	NSRange r = xv_current_word(self.string, self.index, _repeat, _inclusive, NO);
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_word([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, NO);
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)W:(id)arg
+- (XVimEvaluator*)W:(XVim*)xvim
 {
-	NSRange r = xv_current_word(self.string, self.index, _repeat, _inclusive, YES);
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_word([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, YES);
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)LSQUAREBRACKET:(id)arg
+- (XVimEvaluator*)LSQUAREBRACKET:(XVim*)xvim
 {
-	NSRange r = xv_current_block(self.string, self.index, _repeat, _inclusive, '[', ']');
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_block([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, '[', ']');
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)RSQUAREBRACKET:(id)arg
+- (XVimEvaluator*)RSQUAREBRACKET:(XVim*)xvim
 {
-	return [self LSQUAREBRACKET:arg];
+	return [self LSQUAREBRACKET:xvim];
 }
 
-- (XVimEvaluator*)LBRACE:(id)arg
+- (XVimEvaluator*)LBRACE:(XVim*)xvim
 {
-	return [self B:arg];
+	return [self B:xvim];
 }
 
-- (XVimEvaluator*)RBRACE:(id)arg
+- (XVimEvaluator*)RBRACE:(XVim*)xvim
 {
-	return [self B:arg];
+	return [self B:xvim];
 }
 
-- (XVimEvaluator*)LESSTHAN:(id)arg
+- (XVimEvaluator*)LESSTHAN:(XVim*)xvim
 {
-	NSRange r = xv_current_block(self.string, self.index, _repeat, _inclusive, '<', '>');
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_block([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, '<', '>');
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)GREATERTHAN:(id)arg
+- (XVimEvaluator*)GREATERTHAN:(XVim*)xvim
 {
-	return [self LESSTHAN:arg];
+	return [self LESSTHAN:xvim];
 }
 
-- (XVimEvaluator*)LPARENTHESIS:(id)arg
+- (XVimEvaluator*)LPARENTHESIS:(XVim*)xvim
 {
-	return [self b:arg];
+	return [self b:xvim];
 }
 
-- (XVimEvaluator*)RPARENTHESIS:(id)arg
+- (XVimEvaluator*)RPARENTHESIS:(XVim*)xvim
 {
-	return [self b:arg];
+	return [self b:xvim];
 }
 
-- (XVimEvaluator*)SQUOTE:(id)arg
+- (XVimEvaluator*)SQUOTE:(XVim*)xvim
 {
-	NSRange r = xv_current_quote(self.string, self.index, _repeat, _inclusive, '\'');
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_quote([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, '\'');
+	return [self executeActionForRange:r XVim:xvim];
 }
 
-- (XVimEvaluator*)DQUOTE:(id)arg
+- (XVimEvaluator*)DQUOTE:(XVim*)xvim
 {
-	NSRange r = xv_current_quote(self.string, self.index, _repeat, _inclusive, '"');
-	return [self executeActionForRange:r];
+	NSRange r = xv_current_quote([xvim.sourceView string], [xvim.sourceView selectedRange].location, _repeat, _inclusive, '"');
+	return [self executeActionForRange:r XVim:xvim];
 }
 
 @end

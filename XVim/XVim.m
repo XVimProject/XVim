@@ -260,7 +260,7 @@
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self setErrorMessage:@""];
-	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke ofXVim:self];
+	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke XVim:self];
 	[self recordEvent:keyStroke intoRegister:_recordingRegister];
 	[self recordEvent:keyStroke intoRegister:[self findRegister:@"repeat"]];
 	if( nil == nextEvaluator ){

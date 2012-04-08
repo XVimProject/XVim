@@ -16,5 +16,5 @@
 @end
 
 @interface XVimShiftAction : XVimOperatorAction
-- (id)initWithXVim:(XVim*)xvim unshift:(BOOL)unshift;
+- (id)initWithUnshift:(BOOL)unshift;
 @end

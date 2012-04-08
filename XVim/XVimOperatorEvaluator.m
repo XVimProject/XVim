@@ -41,37 +41,35 @@
 	return keymaps[MODE_OPERATOR_PENDING];
 }
 
-- (XVimEvaluator*)a:(id)arg {
+- (XVimEvaluator*)a:(XVim*)xvim {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:YES];
-	eval.xvim = self.xvim;
 	return eval;
 }
 
-- (XVimEvaluator*)i:(id)arg {
+- (XVimEvaluator*)i:(XVim*)xvim {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:NO];
-	eval.xvim = self.xvim;
 	return eval;
 }
 
-- (XVimEvaluator*)w:(id)arg{
+- (XVimEvaluator*)w:(XVim*)xvim{
     XVimWordInfo info;
-    NSUInteger from = [[self textView] selectedRange].location;
-    NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+    NSUInteger from = [[xvim sourceView] selectedRange].location;
+    NSUInteger to = [[xvim sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
     if( info.isFirstWordInALine ){
-        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
     }else{
-        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
+        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
     }
 }
 
-- (XVimEvaluator*)W:(id)arg{
+- (XVimEvaluator*)W:(XVim*)xvim{
     XVimWordInfo info;
-    NSUInteger from = [[self textView] selectedRange].location;
-    NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+    NSUInteger from = [[xvim sourceView] selectedRange].location;
+    NSUInteger to = [[xvim sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
     if( info.isFirstWordInALine ){
-        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
     }else{
-        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
+        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
     }
 }
 
@@ -85,8 +83,9 @@
     return REGISTER_IGNORE;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-	return [self->_operatorAction motionFixedFrom:from To:to Type:type];
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+{
+	return [self->_operatorAction motionFixedFrom:from To:to Type:type XVim:xvim];
 }
 
 @end

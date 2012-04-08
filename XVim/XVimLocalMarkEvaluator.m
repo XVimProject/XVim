@@ -25,7 +25,7 @@
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim*)xvim{
     NSString* keyStr = [keyStroke toSelectorString];
 	if ([keyStr length] != 1) {
         return nil;

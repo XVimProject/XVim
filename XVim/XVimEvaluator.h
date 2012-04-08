@@ -51,13 +51,10 @@ typedef enum {
 
 
 @interface XVimEvaluator : NSObject
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim;
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim*)xvim;
 - (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps;
-- (XVimEvaluator*)defaultNextEvaluator;
-// Made into a property so it can be set 
-@property (weak) XVim *xvim;
-@property (readonly) DVTSourceTextView *textView;
-@property (readonly) NSUInteger insertionPoint;
+- (XVimEvaluator*)defaultNextEvaluatorWithXVim:(XVim*)xvim;
+- (NSUInteger)insertionPoint:(XVim*)xvim;
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
 - (XVIM_MODE)becameHandler:(XVim*)xvim;
