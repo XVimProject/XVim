@@ -19,8 +19,10 @@
 
 - (id)initWithXVim:(XVim*)xvim
 {
-	self->_xvim = xvim;
-	[super init];
+	if (self = [super init])
+	{
+		self->_xvim = xvim;
+	}
 	return self;
 }
 

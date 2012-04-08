@@ -9,6 +9,7 @@
 #import "NSTextView+VimMotion.h"
 #import "XVimOperatorEvaluator.h"
 #import "XVimOperatorAction.h"
+#import "XVimTextObjectEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 
@@ -38,6 +39,18 @@
 - (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
 {
 	return keymaps[MODE_OPERATOR_PENDING];
+}
+
+- (XVimEvaluator*)a:(id)arg {
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:YES];
+	eval.xvim = self.xvim;
+	return eval;
+}
+
+- (XVimEvaluator*)i:(id)arg {
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:NO];
+	eval.xvim = self.xvim;
+	return eval;
 }
 
 - (XVimEvaluator*)w:(id)arg{
