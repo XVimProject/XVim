@@ -22,6 +22,8 @@ C-d,C-f,C-u,C-b,zz,zb,zt
 
 Numeric argument is supported.
 
+## Jumps
+C-o,C-i
 
 ## Insert
 a,A,i,I
