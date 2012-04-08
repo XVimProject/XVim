@@ -101,6 +101,7 @@ XVim supports five map commands: map, nmap, vmap, imap, omap.
 A map command can change any one keystroke into one or more key strokes.
 
 Examples: 
+
     nmap n e
     imap ' <Esc>
     nmap u 5jiInsert some text<Esc>
@@ -112,6 +113,7 @@ At startup XVim looks for ~/.xvimrc. Each line in this file is executed
 as an ex command. This allows you to configure mappings and options.
 
 Example:
+
     set ignorecase
     set wrapscan
     nmap n e
