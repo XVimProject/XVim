@@ -22,6 +22,7 @@
 #import "XVimKeyStroke.h"
 #import "XVim.h"
 #import "NSTextView+VimMotion.h"
+#import "DVTCompletionController.h"
 #import "Logger.h"
 
 @interface XVimNormalEvaluator()
