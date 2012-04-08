@@ -21,16 +21,9 @@
 
 #define XVIM_TAG 1209 // This is my birthday!
 
-@interface XVim : NSTextView <NSTextFieldDelegate,XVimCommandFieldDelegate,XVimPlaybackHandler>
+@interface XVim : NSTextView <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
  {
 @private
-     //NSMutableString* _lastSearchString;
-     //NSUInteger _nextSearchBaseLocation;
-     // BOOL _searchBackword;
-     NSMutableString* _lastReplacedString;
-     NSMutableString* _lastReplacementString;
-     NSUInteger _nextReplaceBaseLocation;
-     NSUInteger _numericArgument;
      XVimEvaluator* _currentEvaluator;
      NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	 XVimKeymap* _keymaps[MODE_COUNT];

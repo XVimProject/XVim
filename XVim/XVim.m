@@ -103,8 +103,6 @@
     if (self) {
         _mode = MODE_NORMAL;
         tag = XVIM_TAG;
-        _lastReplacementString = [[NSMutableString alloc] init];
-        _lastReplacedString = [[NSMutableString alloc] init];
         _currentEvaluator = [[XVimNormalEvaluator alloc] init];
         [_currentEvaluator becameHandler:self];
         _localMarks = [[NSMutableDictionary alloc] init];
@@ -198,8 +196,6 @@
 }
 
 -(void)dealloc{
-    [_lastReplacedString release];
-    [_lastReplacementString release];
     [options release];
     [searcher release];
     [excmd release];
