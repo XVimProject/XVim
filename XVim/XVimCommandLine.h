@@ -13,7 +13,6 @@
 
 @interface XVimCommandLine : NSView
 @property NSInteger tag;
-@property(strong) NSString* staticMessage;
 
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view;
 - (void)didFrameChanged:(NSNotification*)notification;

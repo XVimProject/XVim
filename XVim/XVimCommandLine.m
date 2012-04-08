@@ -30,14 +30,10 @@
 
 @implementation XVimCommandLine
 @synthesize tag = _tag;
-@synthesize staticMessage = _staticMessage;
 
 - (id)initWithXVim:(XVim *)xvim{
     self = [super initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
     if (self) {
-        [xvim addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew context:nil];
-        [xvim addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
-        [xvim addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
         _xvim = [xvim retain];
         
         id fontAndColors = [[[_xvim sourceView] textStorage] fontAndColorTheme];
@@ -63,7 +59,6 @@
         
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
-        [_command setString: @""];
         [_command setEditable:NO];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
         _command.delegate = xvim;
@@ -84,6 +79,10 @@
         [_status setTextColor:[fontAndColors sourcePlainTextColor]];
         [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
         [self addSubview:_status];
+        
+        [xvim addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial context:nil];
+        [xvim addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
+        [xvim addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
     }
     return self;
 }
