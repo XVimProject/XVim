@@ -153,6 +153,9 @@
         }
     }
     
+    if( self != nextEvaluator ){
+        [[self.xvim sourceView] adjustCursorPosition];
+    }
     return nextEvaluator;
 }
 

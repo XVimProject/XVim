@@ -8,7 +8,9 @@ If you feel unconfortable with some commands
 wait for the implemenation patiently or let me know through the XVim issue page.
 
 ## Motion
-b,B,f,F,g,G,h,j,k,l,w,W,0,$,^,%,+,-,{,},(,),n,N,',`
+b,B,f,F,g,G,h,j,k,l,w,W,t,T,0,$,^,%,+,-,{,},(,),n,N,',`,M,H,L
+
+Comma and Semicolon are also supported
 
 Motion with mark is supported.
 Numeric argument is supported.
@@ -16,7 +18,7 @@ Toggle Inclusive/Exclusive by v is supported
 
 ## Scroll
 
-C-d,C-f,C-u,C-b
+C-d,C-f,C-u,C-b,zz,zb,zt
 
 Numeric argument is supported.
 
@@ -29,7 +31,7 @@ Numeric argument is supported.
 
 ## Change
 
-d,dd,D,y,yy,c,r,x,X,J,>,>>,<,<<
+d,dd,D,y,yy,c,r,s,x,X,J,>,>>,<,<<
 
 Numeric argument is supported.
 
@@ -50,7 +52,7 @@ The navigation is Visual Mode is not works greatly. Still in construction...
 
 ## Search and Replace
 
-/,?,:s
+/,?,#,*,g*,g#,:s
 
 Regex is supporeted in search command but it is ICU regex and not Vim''s one.
 ':s' is partially supported.

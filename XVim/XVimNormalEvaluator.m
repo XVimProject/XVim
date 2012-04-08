@@ -46,7 +46,7 @@
 
 - (XVIM_MODE)becameHandler:(XVim*)xvim{
     self.xvim = xvim;
-    [[xvim sourceView] adjustCursorPosition];
+    //[[xvim sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
         [self.playbackRegister playbackWithHandler:xvim withRepeatCount:self.playbackCount];
         
@@ -302,6 +302,16 @@
         [view setSelectedRange:NSMakeRange(prev,0)];
     }
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
+}
+
+- (XVimEvaluator*)C_o:(id)arg{
+    [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
+    return nil;
+}
+
+- (XVimEvaluator*)C_i:(id)arg{
+    [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
+    return nil;
 }
 
 - (XVimEvaluator*)p:(id)arg{
