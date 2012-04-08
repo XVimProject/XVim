@@ -19,7 +19,6 @@
 @class DVTSourceTextView;
 @class XVimKeymap;
 
-
 #define XVIM_TAG 1209 // This is my birthday!
 
 @interface XVim : NSTextView <NSTextFieldDelegate,XVimCommandFieldDelegate,XVimPlaybackHandler>
@@ -70,7 +69,7 @@
 - (NSString*)modeName;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (NSMutableDictionary *)getLocalMarks;
-- (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell;
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)ringBell;
 - (void)setNextSearchBaseLocation:(NSUInteger)location;
 - (XVimRegister*)findRegister:(NSString*)name;

@@ -263,7 +263,7 @@
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
-	
+    [self setErrorMessage:@""];
 	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke ofXVim:self];
 	[self recordEvent:keyStroke intoRegister:_recordingRegister];
 	[self recordEvent:keyStroke intoRegister:[self findRegister:@"repeat"]];
@@ -308,7 +308,7 @@
             [srcView scrollToCursor];
             [srcView showFindIndicatorForRange:found];
         }else{
-            [self statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+            [self errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
         }
     }
    
@@ -326,7 +326,7 @@
         [srcView scrollToCursor];
         [srcView showFindIndicatorForRange:found];
     }else{
-        [self statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+        [self errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
     }
 }
 
@@ -339,7 +339,7 @@
         [srcView scrollToCursor];
         [srcView showFindIndicatorForRange:found];
     }else{
-        [self statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+        [self errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
     }
 }
 
@@ -451,11 +451,8 @@
     return;
 }
 
-- (void)statusMessage:(NSString *)message ringBell:(BOOL)ringBell {
-    // right now we ERROR_LOG the message
-    // it should go into the status area before the MODE word and get cleared next time 
-    // the mode changes ?
-    ERROR_LOG("%@", message);
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
+    [self setErrorMessage:message];
     if (ringBell) {
         [self ringBell];
     }

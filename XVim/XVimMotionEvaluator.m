@@ -292,7 +292,7 @@
     }
     
     if (NSNotFound == found.location){
-        [self.xvim statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
+        [self.xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
         return nil;
     }
 
@@ -312,7 +312,7 @@
     }
     
     if (NSNotFound == found.location){
-        [self.xvim statusMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
+        [self.xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",self.xvim.searcher.lastSearchString] ringBell:TRUE];
         return nil;
     }
     

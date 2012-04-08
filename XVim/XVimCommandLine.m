@@ -23,7 +23,8 @@
     XVimCommandField* _command;
     NSTextField* _static;
     NSTextField* _status;
-    
+    NSTextField* _error;
+    NSTimer* _errorTimer;
 }
 @end
 
@@ -50,6 +51,16 @@
         [_static setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
         [self addSubview:_static];
         
+        // Error Message
+        _error = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+        [_error setEditable:NO];
+        [_error setBordered:NO];
+        [_error setSelectable:NO];
+        [[_error cell] setFocusRingType:NSFocusRingTypeNone];
+        [_error setBackgroundColor:[NSColor redColor]]; 
+        [_error setHidden:YES];
+        [self addSubview:_error];
+        
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
         [_command setString: @""];
@@ -60,7 +71,6 @@
         [_command setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
         [_command setHidden:YES];
         [self addSubview:_command];
-        
         
         // Status View
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
@@ -82,8 +92,13 @@
     [_command release];
     [_status release];
     [_static release];
+    [_error release];
     [_xvim release];
     [super dealloc];
+}
+
+- (void)errorMsgExpired{
+    [_error setHidden:YES];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
@@ -93,7 +108,18 @@
     else if( [keyPath isEqualToString:@"staticMessage"] ){
         [_static setStringValue:[change valueForKey:NSKeyValueChangeNewKey]];
     }
-    else if( [keyPath isEqualToString:@"errroMessag"] ){
+    else if( [keyPath isEqualToString:@"errorMessage"] ){
+        NSString* msg = [change valueForKey:NSKeyValueChangeNewKey];
+        if( [msg length] != 0 ){
+            [_error setStringValue:msg];
+            [_error setHidden:NO];
+            [_errorTimer invalidate];
+            _errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
+            [[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
+        }else{
+            [_errorTimer invalidate];
+            [_error setHidden:YES];
+        }
     }
 }
 // Layout our statusbar in DVTSourceTextScrollView
@@ -101,10 +127,12 @@
 // We can override the method and after the original method, we can relayout the subviews.
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view{
     NSRect frame = [view frame];
-    [_command setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
-    [_command setFrameOrigin:NSMakePoint(0, 0)];
     [_static setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
+    [_command setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
+    [_command setFrameOrigin:NSMakePoint(0, 0)];
+    [_error setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
+    [_error setFrameOrigin:NSMakePoint(0, 0)];
     [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_status setFrameOrigin:NSMakePoint(0,STATUS_BAR_HEIGHT/2)];
     

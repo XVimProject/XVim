@@ -117,7 +117,7 @@
                                   error:&error];
     
     if (error != nil) {
-        [_xvim statusMessage:[NSString stringWithFormat:
+        [_xvim errorMessage:[NSString stringWithFormat:
                              @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
@@ -134,7 +134,7 @@
         found = [regex rangeOfFirstMatchInString:[srcView string] 
                                          options:r_opts
                                            range:NSMakeRange(0, [[srcView string] length])];
-        [_xvim statusMessage:[NSString stringWithFormat:
+        [_xvim errorMessage:[NSString stringWithFormat:
                              @"Search wrapped for '%@'",self.lastSearchString] ringBell:TRUE];
     }
     
@@ -169,7 +169,7 @@
                                   error:&error];
     
     if (error != nil) {
-        [_xvim statusMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+        [_xvim errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
@@ -191,7 +191,7 @@
         if ([matches count] > 0) {
             NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
             found = [match range];
-            [_xvim statusMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchString] ringBell:FALSE];
+            [_xvim errorMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchString] ringBell:FALSE];
         }
     }
     if (found.location != NSNotFound) {
@@ -290,7 +290,7 @@
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchString options:r_opts error:&error];
     
     if (error != nil) {
-        [_xvim statusMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+        [_xvim errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
@@ -373,7 +373,7 @@
             numReplacements++;
         }
     } while(found.location != NSNotFound && global && self.nextSearchBaseLocation < self.endOfReplacement);
-    [_xvim statusMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
+    [_xvim errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
     
 }
 @end
