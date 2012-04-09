@@ -29,18 +29,18 @@
     [super dealloc];
 }
 
--(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+-(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     if( nil != _motionEvaluator ){
-        return [_motionEvaluator motionFixedFrom:from To:to Type:type XVim:xvim];
+        return [_motionEvaluator motionFixedFrom:from To:to Type:type inWindow:window];
     }
     return nil;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type XVim:(XVim*)xvim
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window
 {
     if( nil != _motionEvaluator ){
-        return [_motionEvaluator commonMotion:motion Type:type XVim:xvim];
+        return [_motionEvaluator commonMotion:motion Type:type inWindow:window];
     }
     return nil;
 }

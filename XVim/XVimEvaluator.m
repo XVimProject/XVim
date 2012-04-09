@@ -11,15 +11,16 @@
 #import "NSTextView+VimMotion.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
-#import "XVim.h"
+#import "XVimWindow.h"
+#import "XVimKeymapProvider.h"
 
 @implementation XVimEvaluator
 
-- (XVIM_MODE)becameHandler:(XVim*)xvim{
+- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
     return MODE_NORMAL;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim*)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     // This is default implementation of evaluator.
     // Only keyDown events are supposed to be passed here.	
     // Invokes each key event handler
@@ -29,20 +30,20 @@
 	if (handler)
 	{
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
-        return [self performSelector:handler withObject:xvim];
+        return [self performSelector:handler withObject:window];
 	}
     else{
         TRACE_LOG(@"SELECTOR %@ not found", NSStringFromSelector(handler));
-        return [self defaultNextEvaluatorWithXVim:xvim];
+        return [self defaultNextEvaluatorWithXVim:window];
     }
 }
 
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
-	return keymaps[MODE_GLOBAL_MAP];
+	return [keymapProvider keymapForMode:MODE_GLOBAL_MAP];
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorWithXVim:(XVim*)xvim{
+- (XVimEvaluator*)defaultNextEvaluatorWithXVim:(XVimWindow*)window{
     return nil;
 }
 
@@ -53,12 +54,12 @@
     return REGISTER_APPEND;
 }
 
-- (NSUInteger)insertionPoint:(XVim*)xvim {
-    NSRange range = [[xvim sourceView] selectedRange];
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window {
+    NSRange range = [[window sourceView] selectedRange];
     return range.location + range.length;
 }
 
-- (XVimEvaluator*)D_d:(XVim*)xvim{
+- (XVimEvaluator*)D_d:(XVimWindow*)window{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.
     

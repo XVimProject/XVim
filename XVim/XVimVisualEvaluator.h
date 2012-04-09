@@ -22,8 +22,8 @@ typedef enum{
     NSUInteger _selection_end;  // End of selection (This is differ from _insertion when its MODE_LINE)
     VISUAL_MODE _mode;
 }
-- (NSUInteger) insertionPoint:(XVim*)xvim;
+- (NSUInteger) insertionPointInWindow:(XVimWindow*)window;
 - (id)initWithMode:(VISUAL_MODE)mode;
-- (void)updateSelectionForXVim:(XVim*)xvim;
-- (XVimEvaluator*)ESC:(XVim*)xvim;
+- (void)updateSelectionForXVim:(XVimWindow*)window;
+- (XVimEvaluator*)ESC:(XVimWindow*)window;
 @end

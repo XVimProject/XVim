@@ -7,11 +7,12 @@
 //
 
 #import "XVimOperatorAction.h"
-#import "XVim.h"
+
+@class XVimEvaluator;
 
 @implementation XVimOperatorAction
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
 	return nil; // No-op
 }

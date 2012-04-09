@@ -7,9 +7,8 @@
 //
 
 #import "NSTextView+VimMotion.h"
+#import "DVTSourceTextView.h"
 #import "Logger.h"
-#import "XVim.h"
-#import "XVimEvaluator.h"
 
 //
 // This category deals Vim's motion in NSTextView.
@@ -934,11 +933,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return [self selectedRange].location;
 }
 
-- (void)scrollToCursor{
-    XVim *xvim = [self viewWithTag:XVIM_TAG];
-
+- (void)scrollTo:(NSUInteger)location
+{
     NSRange characterRange;
-    characterRange.location = [xvim.currentEvaluator insertionPoint:xvim];
+    characterRange.location = location;
     characterRange.length = [self isBlankLine:characterRange.location] ? 0 : 1;
     
     // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll

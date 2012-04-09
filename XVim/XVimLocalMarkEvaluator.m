@@ -8,24 +8,24 @@
 
 #import "XVimLocalMarkEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 
 @implementation XVimLocalMarkEvaluator
 
 - (id)init
 {
-    return [self initWithMarkOperator:MARKOPERATOR_SET xvimTarget:nil];
+    return [self initWithMarkOperator:MARKOPERATOR_SET];
 }
 
-- (id)initWithMarkOperator:(XVimMarkOperator)markOperator xvimTarget:(XVim *)xvimTarget{
+- (id)initWithMarkOperator:(XVimMarkOperator)markOperator {
     self = [super init];
     if (self) {
         _markOperator = markOperator;
-        _xvimTarget = xvimTarget;
     }
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim*)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     NSString* keyStr = [keyStroke toSelectorString];
 	if ([keyStr length] != 1) {
         return nil;
@@ -36,17 +36,17 @@
     }
     // we have a legal mark letter/name 
     if (_markOperator == MARKOPERATOR_SET) {
-        NSRange r = [[_xvimTarget sourceView] selectedRange];
+        NSRange r = [[window sourceView] selectedRange];
         NSValue *v =[NSValue valueWithRange:r];
-        [[_xvimTarget getLocalMarks] setValue:v forKey:keyStr];
+        [[window getLocalMarks] setValue:v forKey:keyStr];
     }
     else if (_markOperator == MARKOPERATOR_MOVETO || _markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
-        NSValue* v = [[_xvimTarget getLocalMarks] valueForKey:keyStr];
+        NSValue* v = [[window getLocalMarks] valueForKey:keyStr];
         NSRange r = [v rangeValue];
         if (v == nil) {
             return nil;
         }
-        DVTSourceTextView* view = [_xvimTarget sourceView];
+        DVTSourceTextView* view = [window sourceView];
         NSString* s = [[view textStorage] string];
         if (r.location > [s length]) {
             // mark is past end of file do nothing

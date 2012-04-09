@@ -12,7 +12,10 @@
 #import "XVimZEvaluator.h"
 #import "XVimLocalMarkEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 #import "XVim.h"
+#import "XVimSearch.h"
+#import "XVimCharacterSearch.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "NSTextView+VimMotion.h"
@@ -42,18 +45,18 @@
 
 // This is helper method commonly used by many key event handlers.
 // You do not need to use this if this is not proper to express the motion.
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
-    NSTextView* view = [xvim sourceView];
+    NSTextView* view = [window sourceView];
     NSRange begin = [view selectedRange];
     NSUInteger motionFrom = begin.location;
     
 	NSUInteger motionTo = (NSUInteger)[view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
     
-	return [self _motionFixedFrom:motionFrom To:motionTo Type:type XVim:xvim];
+	return [self _motionFixedFrom:motionFrom To:motionTo Type:type inWindow:window];
 }
 
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
     if( _forceMotionType ){
@@ -65,11 +68,11 @@
             type = CHARACTERWISE_EXCLUSIVE;
         }
    }    
-    return [self motionFixedFrom:from To:to Type:type XVim:xvim];
+    return [self motionFixedFrom:from To:to Type:type inWindow:window];
 }
 
 // Methods to override by subclass
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type XVim:(XVim*)xvim
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     return nil;
 }
@@ -79,82 +82,82 @@
 // Please keep it in alphabetical order ///
 ///////////////////////////////////////////
 
-- (XVimEvaluator*)b:(XVim*)xvim{
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger to = [[xvim sourceView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
-	return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)b:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
+	return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)B:(XVim*)xvim{
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger to = [[xvim sourceView] wordsBackward:from count:[self numericArg] option:BIGWORD];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)B:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:BIGWORD];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 /*
 // Since Ctrl-b, Ctrl-d is not "motion" but "scroll" 
 // they are implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
  
-- (XVimEvaluator*)C_b:(XVim*)xvim{
+- (XVimEvaluator*)C_b:(XVimWindow*)window{
     return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
 }
  
 */
 
-- (XVimEvaluator*)e:(XVim*)xvim{
+- (XVimEvaluator*)e:(XVimWindow*)window{
     NSUInteger realCount = [self numericArg];
 
     XVimWordInfo info;
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSString *string = [[xvim sourceView] string];
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSString *string = [[window sourceView] string];
     if (from + 1 < [string length] && from > 0){
-        unichar curChar = [[[xvim sourceView] string] characterAtIndex:from];
-        unichar nextChar = [[[xvim sourceView] string] characterAtIndex:from+1];
-        if( [[xvim sourceView] isBlankLine:from] || (isNonBlank(curChar) != isNonBlank(nextChar)) || (isKeyword(curChar) != isKeyword(nextChar)) || (isWhiteSpace(curChar) && isWhiteSpace(nextChar))){
+        unichar curChar = [[[window sourceView] string] characterAtIndex:from];
+        unichar nextChar = [[[window sourceView] string] characterAtIndex:from+1];
+        if( [[window sourceView] isBlankLine:from] || (isNonBlank(curChar) != isNonBlank(nextChar)) || (isKeyword(curChar) != isKeyword(nextChar)) || (isWhiteSpace(curChar) && isWhiteSpace(nextChar))){
             // Increase count by one such that the last end of word is properly set
             realCount += 1;
         }
     }
-    NSUInteger to = [[xvim sourceView] wordsForward:from count:realCount option:MOTION_OPTION_NONE info:&info];
+    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:MOTION_OPTION_NONE info:&info];
     if (info.isFirstWordInALine){
         to = info.lastEndOfLine;
     }else if( info.lastEndOfWord != NSNotFound){
         to = info.lastEndOfWord;
     }
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)E:(XVim*)xvim{
+- (XVimEvaluator*)E:(XVimWindow*)window{
     NSUInteger realCount = [self numericArg];
     
     XVimWordInfo info;
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSString *string = [[xvim sourceView] string];
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSString *string = [[window sourceView] string];
     if (from + 1 < [string length]){
-        unichar curChar = [[[xvim sourceView] string] characterAtIndex:from];
-        unichar nextChar = [[[xvim sourceView] string] characterAtIndex:from+1];
+        unichar curChar = [[[window sourceView] string] characterAtIndex:from];
+        unichar nextChar = [[[window sourceView] string] characterAtIndex:from+1];
         if (!isNonBlank(curChar) || !isNonBlank(nextChar)){
             // Increase count by one such that the last end of word is properly set
             realCount += 1;
         }
     }
-    NSUInteger to = [[xvim sourceView] wordsForward:from count:realCount option:BIGWORD info:&info];
+    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:BIGWORD info:&info];
     if (info.isFirstWordInALine){
         to = info.lastEndOfLine;
     }else if( info.lastEndOfWord != NSNotFound){
         to = info.lastEndOfWord;
     }
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)f:(XVim*)xvim{
+- (XVimEvaluator*)f:(XVimWindow*)window{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
     eval.previous = NO;
     return eval;
 }
 
-- (XVimEvaluator*)F:(XVim*)xvim{
+- (XVimEvaluator*)F:(XVimWindow*)window{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = NO;
     eval.previous = NO;
@@ -164,17 +167,17 @@
 /*
  // Since Ctrl-f is not "motion" but "scroll" 
  // it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
-- (XVimEvaluator*)C_f:(XVim*)xvim{
+- (XVimEvaluator*)C_f:(XVimWindow*)window{
     return [self commonMotion:@selector(pageForward:) Type:LINEWISE];
 }
 */
 
-- (XVimEvaluator*)g:(XVim*)xvim{
+- (XVimEvaluator*)g:(XVimWindow*)window{
     return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)G:(XVim*)xvim{
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)G:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSUInteger end;
     if( [self numericMode] ){
         end = [view positionAtLineNumber:[self numericArg] column:0];
@@ -184,54 +187,58 @@
             end = [[view string] length];
         }
     }
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE XVim:xvim];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
-- (XVimEvaluator*)h:(XVim*)xvim{
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger to = [[xvim sourceView] prev:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)h:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] prev:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)H:(XVim*)xvim{
-    return [self commonMotion:@selector(cursorTop:) Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)H:(XVimWindow*)window{
+    return [self commonMotion:@selector(cursorTop:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)j:(XVim*)xvim{
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger column = [[xvim sourceView] columnNumber:from]; // TODO: Keep column somewhere else
-    NSUInteger to = [[xvim sourceView] nextLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)j:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger column = [[window sourceView] columnNumber:from]; // TODO: Keep column somewhere else
+    NSUInteger to = [[window sourceView] nextLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)k:(XVim*)xvim{
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger column = [[xvim sourceView] columnNumber:from]; // TODO: Keep column somewhere else
-    NSUInteger to = [[xvim sourceView] prevLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)k:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger column = [[window sourceView] columnNumber:from]; // TODO: Keep column somewhere else
+    NSUInteger to = [[window sourceView] prevLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)l:(XVim*)xvim{
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger to = [[xvim sourceView] next:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)l:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] next:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)L:(XVim*)xvim{
-    return [self commonMotion:@selector(cursorBottom:) Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)L:(XVimWindow*)window{
+    return [self commonMotion:@selector(cursorBottom:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)M:(XVim*)xvim{
-    return [self commonMotion:@selector(cursorCenter:) Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)M:(XVimWindow*)window{
+    return [self commonMotion:@selector(cursorCenter:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)n:(XVim*)xvim{
-    [xvim searchNext];
+- (XVimEvaluator*)n:(XVimWindow*)window{
+	XVimSearch* searcher = [[XVim instance] searcher];
+    NSRange r = [searcher searchNextFrom:[window cursorLocation] inWindow:window];
+	[searcher selectSearchResult:r inWindow:window];
     return nil;
 }
 
-- (XVimEvaluator*)N:(XVim*)xvim{
-    [xvim searchPrevious];
+- (XVimEvaluator*)N:(XVimWindow*)window{
+	XVimSearch* searcher = [[XVim instance] searcher];
+    NSRange r = [searcher searchPrevFrom:[window cursorLocation] inWindow:window];
+	[searcher selectSearchResult:r inWindow:window];
     return nil;
 }
 
@@ -239,95 +246,82 @@
 // Since Ctrl-u is not "motion" but "scroll" 
 // it is implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
  
-- (XVimEvaluator*)C_u:(XVim*)xvim{
+- (XVimEvaluator*)C_u:(XVimWindow*)window{
     // This should not be implemneted here
 }
 */
 
-- (XVimEvaluator*)t:(XVim*)xvim{
+- (XVimEvaluator*)t:(XVimWindow*)window{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = YES;
     eval.previous = YES;
     return eval;
 }
 
-- (XVimEvaluator*)T:(XVim*)xvim{
+- (XVimEvaluator*)T:(XVimWindow*)window{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
     eval.forward = NO;
     eval.previous = YES;
     return eval;
 }
 
-- (XVimEvaluator*)v:(XVim*)xvim{
+- (XVimEvaluator*)v:(XVimWindow*)window{
     _forceMotionType = !_forceMotionType;
     return self;
 }
 
-- (XVimEvaluator*)w:(XVim*)xvim{
+- (XVimEvaluator*)w:(XVimWindow*)window{
     XVimWordInfo info;
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger to = [[xvim sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:&info];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:&info];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)W:(XVim*)xvim{
+- (XVimEvaluator*)W:(XVimWindow*)window{
     XVimWordInfo info;
-    NSUInteger from = [[xvim sourceView] selectedRange].location;
-    NSUInteger to = [[xvim sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:&info];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:&info];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)z:(XVim*)xvim{
+- (XVimEvaluator*)z:(XVimWindow*)window{
     return [[XVimZEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)NUM0:(XVim*)xvim{
-    NSRange begin = [[xvim sourceView] selectedRange];
-    NSUInteger end = [[xvim sourceView] headOfLine:begin.location];
+- (XVimEvaluator*)NUM0:(XVimWindow*)window{
+    NSRange begin = [[window sourceView] selectedRange];
+    NSUInteger end = [[window sourceView] headOfLine:begin.location];
     if( NSNotFound == end ){
         return nil;
     }
-    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)ASTERISK:(XVim*)xvim{
+- (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
+	XVimSearch* searcher = [[XVim instance] searcher];
+	
+	NSUInteger cursorLocation = [window cursorLocation];
+	NSUInteger searchLocation = cursorLocation;
     NSRange found;
     for (NSUInteger i = 0; i < self.numericArg && found.location != NSNotFound; ++i){
-        found = [xvim.searcher searchCurrentWord:YES matchWholeWord:YES];
+        found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:YES inWindow:window];
+		searchLocation = found.location;
     }
+	
+	if (![searcher selectSearchResult:found inWindow:window])
+	{
+		return nil;
+	}
     
-    if (NSNotFound == found.location){
-        [xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",xvim.searcher.lastSearchString] ringBell:TRUE];
-        return nil;
-    }
-
-    //Move cursor and show the found string
-    NSRange begin = [[xvim sourceView] selectedRange];
-    [[xvim sourceView] setSelectedRange:NSMakeRange(found.location, 0)];
-    [[xvim sourceView] scrollToCursor];
-    [[xvim sourceView] showFindIndicatorForRange:found];
-
-    return [self motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+	return [self motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)NUMBER:(XVim*)xvim{
-    NSRange found;
-    for (NSUInteger i = 0; i < self.numericArg && found.location != NSNotFound; ++i){
-        found = [xvim.searcher searchCurrentWord:NO matchWholeWord:YES];
-    }
-    
-    if (NSNotFound == found.location){
-        [xvim errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",xvim.searcher.lastSearchString] ringBell:TRUE];
-        return nil;
-    }
-    
-    //Move cursor and show the found string
-    NSRange begin = [[xvim sourceView] selectedRange];
-    [[xvim sourceView] setSelectedRange:NSMakeRange(found.location, 0)];
-    [[xvim sourceView] scrollToCursor];
-    [[xvim sourceView] showFindIndicatorForRange:found];
-    
-    return [self motionFixedFrom:begin.location To:found.location Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+- (XVimEvaluator*)ASTERISK:(XVimWindow*)window{
+	return [self searchCurrentWordInWindow:window forward:YES];
+}
+
+- (XVimEvaluator*)NUMBER:(XVimWindow*)window{
+	return [self searchCurrentWordInWindow:window forward:NO];
 }
 
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
@@ -335,44 +329,44 @@
 // It does nothing if the mark is not defined or if the mark is no longer within
 //  the range of the document
 
-- (XVimEvaluator*)SQUOTE:(XVim*)xvim{
-    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETOSTARTOFLINE xvimTarget:xvim];
+- (XVimEvaluator*)SQUOTE:(XVimWindow*)window{
+    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
 }
 
-- (XVimEvaluator*)BACKQUOTE:(XVim*)xvim{
-    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETO xvimTarget:xvim];
+- (XVimEvaluator*)BACKQUOTE:(XVimWindow*)window{
+    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETO];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
 // Note: CARET always moves to start of the current line ignoring any numericArg.
-- (XVimEvaluator*)CARET:(XVim*)xvim{
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)CARET:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger head = [view headOfLineWithoutSpaces:r.location];
     if( NSNotFound == head ){
         head = r.location;
     }
-    return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)DOLLAR:(XVim*)xvim{
-    NSRange begin = [[xvim sourceView] selectedRange];
-    NSUInteger end = [[xvim sourceView] endOfLine:begin.location];
+- (XVimEvaluator*)DOLLAR:(XVimWindow*)window{
+    NSRange begin = [[window sourceView] selectedRange];
+    NSUInteger end = [[window sourceView] endOfLine:begin.location];
     if( NSNotFound == end ){
         return nil;
     }
-    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)PERCENT:(XVim*)xvim {
+- (XVimEvaluator*)PERCENT:(XVimWindow*)window {
     // find matching bracketing character and go to it
     // as long as the nesting level matches up
-    NSTextView* view = [xvim sourceView];
+    NSTextView* view = [window sourceView];
     NSString* s = [[view textStorage] string];
     NSRange at = [view selectedRange]; 
     if (at.location >= s.length-1) {
-        // [xvim statusMessage:@"leveled match not found" :ringBell TRUE]
-        [xvim ringBell];
+        // [window statusMessage:@"leveled match not found" :ringBell TRUE]
+        [window ringBell];
         return self;
     }
     NSUInteger eol = [view endOfLine:at.location];
@@ -409,8 +403,8 @@
     }else{
         // src is not an open or close char
         // vim does not produce an error msg for this so we won't either i guess
-        // [xvim statusMessage:@"Not a match character" :ringBell TRUE]
-        [xvim ringBell];
+        // [window statusMessage:@"Not a match character" :ringBell TRUE]
+        [window ringBell];
         return self;
     }
 
@@ -451,63 +445,63 @@
     }
 
     if (search.location == NSNotFound) {
-        // [xvim statusMessage:@"leveled match not found" :ringBell TRUE]
-        [xvim ringBell];
+        // [window statusMessage:@"leveled match not found" :ringBell TRUE]
+        [window ringBell];
         return self;
     }
 
-    return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
 /* 
  * Space acts like 'l' in vi. moves  cursor forward
  */
-- (XVimEvaluator*)SPACE:(XVim*)xvim{
-    return [self l:xvim];
+- (XVimEvaluator*)SPACE:(XVimWindow*)window{
+    return [self l:window];
 }
 
 /* 
  * Delete (DEL) acts like 'h' in vi. moves cursor backward
  */
-- (XVimEvaluator*)DEL:(XVim*)xvim{
-    return [self h:xvim];
+- (XVimEvaluator*)DEL:(XVimWindow*)window{
+    return [self h:window];
 }
 
-- (XVimEvaluator*)PLUS:(XVim*)xvim{
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)PLUS:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger to = [view nextLine:r.location column:0 count:[self numericArg] option:MOTION_OPTION_NONE];
     NSUInteger to_wo_space= [view nextNonBlankInALine:to];
     if( NSNotFound != to_wo_space){
         to = to_wo_space;
     }
-    return [self _motionFixedFrom:r.location To:to Type:LINEWISE XVim:xvim];
+    return [self _motionFixedFrom:r.location To:to Type:LINEWISE inWindow:window];
 }
 /* 
  * CR (return) acts like PLUS in vi
  */
-- (XVimEvaluator*)CR:(XVim*)xvim{
-    return [self PLUS:xvim];
+- (XVimEvaluator*)CR:(XVimWindow*)window{
+    return [self PLUS:window];
 }
 
-- (XVimEvaluator*)MINUS:(XVim*)xvim{
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)MINUS:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger to = [view prevLine:r.location column:0 count:[self numericArg] option:MOTION_OPTION_NONE];
     NSUInteger to_wo_space= [view nextNonBlankInALine:to];
     if( NSNotFound != to_wo_space){
         to = to_wo_space;
     }
-    return [self _motionFixedFrom:r.location To:to Type:LINEWISE XVim:xvim];
+    return [self _motionFixedFrom:r.location To:to Type:LINEWISE inWindow:window];
 }
 
 
-- (XVimEvaluator*)LSQUAREBRACKET:(XVim*)xvim{
+- (XVimEvaluator*)LSQUAREBRACKET:(XVimWindow*)window{
     // TODO: implement XVimLSquareBracketEvaluator
     return nil;
 }
 
-- (XVimEvaluator*)RSQUAREBRACKET:(XVim*)xvim{
+- (XVimEvaluator*)RSQUAREBRACKET:(XVimWindow*)window{
     // TODO: implement XVimRSquareBracketEvaluator
     return nil;
 }
@@ -527,8 +521,8 @@
  the '{' flag is in 'cpoptions' then '{' in the first column is used as a
  paragraph boundary |posix|.
  */
-- (XVimEvaluator*)LBRACE:(XVim*)xvim{ // {
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)LBRACE:(XVimWindow*)window{ // {
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger pos = begin.location;
@@ -569,11 +563,11 @@
         paragraph_head = 0;
     }
     
-    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)RBRACE:(XVim*)xvim{ // }
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)RBRACE:(XVimWindow*)window{ // }
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger pos = begin.location;
@@ -610,7 +604,7 @@
         // end of document
         paragraph_head = s.length-1;
     }
-    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 
@@ -626,8 +620,8 @@
  follow the punctuation mark; <Tab>s are not recognized as white space.
  The definition of a sentence cannot be changed.
  */
-- (XVimEvaluator*)LPARENTHESIS:(XVim*)xvim{ // (
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window{ // (
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger pos = begin.location;
@@ -677,7 +671,7 @@
     }
     
     if( NSNotFound != sentence_head  ){
-        return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+        return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
     }else{
         // no movement
         return nil;
@@ -686,8 +680,8 @@
     
 }
 
-- (XVimEvaluator*)RPARENTHESIS:(XVim*)xvim{ // )
-    NSTextView* view = [xvim sourceView];
+- (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window{ // )
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger pos = begin.location;
@@ -734,20 +728,22 @@
         // end of document
         sentence_head = s.length-1;
     }
-    return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE XVim:xvim];
+    return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)COMMA:(XVim*)xvim{
-    NSTextView *view = [xvim sourceView];
+- (XVimEvaluator*)COMMA:(XVimWindow*)window{
+	XVimCharacterSearch* charSearcher = [[XVim instance] characterSearcher];
+    NSTextView *view = [window sourceView];
     NSUInteger location = [view selectedRange].location;
-    for (NSUInteger i = 0;;){
-        location = [xvim searchCharacterPrevious:location];
+    
+	for (NSUInteger i = 0;;) {
+        location = [charSearcher searchPrevCharacterFrom:location inWindow:window];
         if (location == NSNotFound || ++i >= [self numericArg]){
             break;
         }
         
-        if ([xvim shouldSearchPreviousCharacter]){
-            if ([xvim shouldSearchCharacterBackward]){
+        if ([charSearcher shouldSearchPreviousCharacter]){
+            if ([charSearcher shouldSearchCharacterBackward]){
                 location +=1;
             }else{
                 location -= 1;
@@ -756,31 +752,33 @@
     }
     
     if (location == NSNotFound){
-        [xvim ringBell];
+        [window ringBell];
     }else{
         // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
-        if( ![xvim shouldSearchCharacterBackward]  ){
+        if( ![charSearcher shouldSearchCharacterBackward]  ){
             // If the last search was forward "comma" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
             type = CHARACTERWISE_EXCLUSIVE;
         }
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type XVim:xvim]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type inWindow:window]; 
     }
 
     return nil;
 }
 
-- (XVimEvaluator*)SEMICOLON:(XVim*)xvim{
-    NSTextView *view = [xvim sourceView];
+- (XVimEvaluator*)SEMICOLON:(XVimWindow*)window
+{
+	XVimCharacterSearch* charSearcher = [[XVim instance] characterSearcher];
+    NSTextView *view = [window sourceView];
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
-        location = [xvim searchCharacterNext:location];
+        location = [charSearcher searchNextCharacterFrom:location inWindow:window];
         if (location == NSNotFound || ++i >= [self numericArg]){
             break;
         }
         
-        if ([xvim shouldSearchPreviousCharacter]){
-            if ([xvim shouldSearchCharacterBackward]){
+        if ([charSearcher shouldSearchPreviousCharacter]){
+            if ([charSearcher shouldSearchCharacterBackward]){
                 location -= 1;
             }else{
                 location +=1;
@@ -789,33 +787,33 @@
     }
     
     if (location == NSNotFound){
-        [xvim ringBell];
+        [window ringBell];
     }else{
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
         // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
-        if( [xvim shouldSearchCharacterBackward]  ){
+        if( [charSearcher shouldSearchCharacterBackward]  ){
             // If the last search was backward "semicolon" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
             type = CHARACTERWISE_EXCLUSIVE;
         }
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type XVim:xvim]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type inWindow:window]; 
     }
     return nil;
 }
 
-- (XVimEvaluator*)Up:(XVim*)xvim{
-    return [self k:(XVim*)xvim];
+- (XVimEvaluator*)Up:(XVimWindow*)window{
+    return [self k:(XVimWindow*)window];
 }
 
-- (XVimEvaluator*)Down:(XVim*)xvim{
-    return [self j:(XVim*)xvim];
+- (XVimEvaluator*)Down:(XVimWindow*)window{
+    return [self j:(XVimWindow*)window];
 }
 
-- (XVimEvaluator*)Left:(XVim*)xvim{
-    return [self h:(XVim*)xvim];
+- (XVimEvaluator*)Left:(XVimWindow*)window{
+    return [self h:(XVimWindow*)window];
 }
 
-- (XVimEvaluator*)Right:(XVim*)xvim{
-    return [self l:(XVim*)xvim];
+- (XVimEvaluator*)Right:(XVimWindow*)window{
+    return [self l:(XVimWindow*)window];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

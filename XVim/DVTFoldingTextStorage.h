@@ -12,5 +12,6 @@
 @interface DVTFoldingTextStorage : NSTextStorage
 - (DVTFontAndColorsTheme*)fontAndColorTheme;
 - (void)indentCharacterRange:(NSRange)range undoManager:(DVTUndoManager*)undoManager;
+
 - (NSUInteger)numberOfLines;
 @end

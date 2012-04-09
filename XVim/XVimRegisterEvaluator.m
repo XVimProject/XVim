@@ -10,6 +10,7 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimRegister.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 #import "XVim.h"
 #import "Logger.h"
 
@@ -27,13 +28,13 @@ XVimRegisterEvalMode _mode;
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke XVim:(XVim*)xvim{
-    XVimRegister *xregister = [xvim findRegister:[keyStroke toSelectorString]];
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+    XVimRegister *xregister = [[XVim instance] findRegister:[keyStroke toSelectorString]];
     if (_mode == REGISTER_EVAL_MODE_RECORD){
         if (xregister.isReadOnly == NO){
-            [xvim recordIntoRegister:xregister];
+            [window recordIntoRegister:xregister];
         }else{
-            [xvim ringBell];
+            [window ringBell];
         }
     } else if(_mode == REGISTER_EVAL_MODE_PLAYBACK){
         return [[XVimNormalEvaluator alloc] initWithRegister:xregister andPlaybackCount:_count];

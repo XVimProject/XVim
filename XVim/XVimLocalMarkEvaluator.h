@@ -12,7 +12,6 @@
 @interface XVimLocalMarkEvaluator : XVimEvaluator{
 @private
     XVimMarkOperator _markOperator;
-    XVim *_xvimTarget;
 }
-- (id)initWithMarkOperator:(XVimMarkOperator)markOperator xvimTarget:(XVim *)xvimTarget;
+- (id)initWithMarkOperator:(XVimMarkOperator)markOperator;
 @end
