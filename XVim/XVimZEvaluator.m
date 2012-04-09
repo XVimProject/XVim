@@ -13,34 +13,34 @@
 
 @implementation XVimZEvaluator
 
-- (XVimEvaluator*)b:(id)arg{
+- (XVimEvaluator*)b:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    return [self commonMotion:@selector(scrollBottom:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(scrollBottom:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)t:(id)arg{
+- (XVimEvaluator*)t:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    return [self commonMotion:@selector(scrollTop:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(scrollTop:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)z:(id)arg{
+- (XVimEvaluator*)z:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    return [self commonMotion:@selector(scrollCenter:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(scrollCenter:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)MINUS:(id)arg{
+- (XVimEvaluator*)MINUS:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    return [self commonMotion:@selector(scrollBottom:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(scrollBottom:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)DOT:(id)arg{
+- (XVimEvaluator*)DOT:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    return [self commonMotion:@selector(scrollCenter:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(scrollCenter:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)CR:(id)arg{
+- (XVimEvaluator*)CR:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    return [self commonMotion:@selector(scrollTop:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self commonMotion:@selector(scrollTop:) Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 @end

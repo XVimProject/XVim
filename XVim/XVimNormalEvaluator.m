@@ -20,9 +20,11 @@
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 #import "XVim.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTCompletionController.h"
+#import "XVimKeymapProvider.h"
 #import "Logger.h"
 
 @interface XVimNormalEvaluator()
@@ -44,11 +46,10 @@
     return self;
 }
 
-- (XVIM_MODE)becameHandler:(XVim*)xvim{
-    self.xvim = xvim;
-    //[[xvim sourceView] adjustCursorPosition];
+- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+    //[[window sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
-        [self.playbackRegister playbackWithHandler:xvim withRepeatCount:self.playbackCount];
+        [self.playbackRegister playbackWithHandler:window withRepeatCount:self.playbackCount];
         
         // Clear the playback register now that we have finished playing it back
         self.playbackRegister = nil;
@@ -56,9 +57,9 @@
     return MODE_NORMAL;
 }
 
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
-	return keymaps[MODE_NORMAL];
+	return [keymapProvider keymapForMode:MODE_NORMAL];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -67,12 +68,12 @@
 
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
-- (XVimEvaluator*)a:(id)arg{
+- (XVimEvaluator*)a:(XVimWindow*)window{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
    // next line. it appends to the current line
     // A cursor should not be on the new line break letter in Vim(Except empty line).
     // So the root solution is to prohibit a cursor be on the newline break letter.
-    NSTextView* view = [self textView];
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
@@ -83,33 +84,33 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)A:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)A:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger end = [view tailOfLine:r.location];
     [view setSelectedRange:NSMakeRange(end,0)];
-    [view scrollToCursor];
+    [view scrollTo:[window cursorLocation]];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_b:(id)arg{
-    NSUInteger next = [[self textView] pageBackward:[[self textView] selectedRange].location count:[self numericArg]];
-    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+- (XVimEvaluator*)C_b:(XVimWindow*)window{
+    NSUInteger next = [[window sourceView] pageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
 }
 
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
-- (XVimEvaluator*)c:(id)arg{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:TRUE];
+- (XVimEvaluator*)c:(XVimWindow*)window{
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:TRUE];
     return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:TRUE];
 }
 
 // 'C' works similar to 'D' except that once it's done deleting
 // it should go into insert mode
-- (XVimEvaluator*)C:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)C:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSRange range = [view selectedRange];
     NSUInteger count = [self numericArg];
     NSUInteger to = range.location;
@@ -137,19 +138,19 @@
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_d:(id)arg{
-    NSUInteger next = [[self textView] halfPageForward:[[self textView] selectedRange].location count:[self numericArg]];
-    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+- (XVimEvaluator*)C_d:(XVimWindow*)window{
+    NSUInteger next = [[window sourceView] halfPageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
 }
 
-- (XVimEvaluator*)d:(id)arg{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithXVim:[self xvim] insertModeAtCompletion:FALSE];	
+- (XVimEvaluator*)d:(XVimWindow*)window{
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:FALSE];	
     return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:FALSE];
 }
 
-- (XVimEvaluator*)D:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)D:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSRange range = [view selectedRange];
     NSUInteger count = [self numericArg];
     NSString *text = [view string];
@@ -191,32 +192,32 @@
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_f:(id)arg{
-    NSUInteger next = [[self textView] pageForward:[[self textView] selectedRange].location count:[self numericArg]];
-    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+- (XVimEvaluator*)C_f:(XVimWindow*)window{
+    NSUInteger next = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
 }
 
-- (XVimEvaluator*)i:(id)arg{
+- (XVimEvaluator*)i:(XVimWindow*)window{
     // Go to insert 
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)I:(id)arg{
-    NSRange range = [[self textView] selectedRange];
-    NSUInteger head = [[self textView] headOfLineWithoutSpaces:range.location];
+- (XVimEvaluator*)I:(XVimWindow*)window{
+    NSRange range = [[window sourceView] selectedRange];
+    NSUInteger head = [[window sourceView] headOfLineWithoutSpaces:range.location];
     if( NSNotFound == head ){
-        return [self A:arg]; // If its blankline or has only whitespaces'I' works line 'A'
+        return [self A:window]; // If its blankline or has only whitespaces'I' works line 'A'
     }
-    [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE];
+    [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE inWindow:window];
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
 // For 'J' (join line) bring the line up from below. all leading whitespac 
 // of the line joined in should be stripped and then one space should be inserted 
 // between the joined lines
-- (XVimEvaluator*)J:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)J:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSUInteger repeat = [self numericArg];
     //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
@@ -270,13 +271,13 @@
 
 // Should be moveed to XVimMotionEvaluator
 
- - (XVimEvaluator*)m:(id)arg{
+ - (XVimEvaluator*)m:(XVimWindow*)window{
     // 'm{letter}' sets a local mark.
-    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET xvimTarget:[self xvim]];
+    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_SET];
 }
 
-- (XVimEvaluator*)o:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)o:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSUInteger l = [view selectedRange].location;
     NSUInteger tail = [view tailOfLine:l];
     [view setSelectedRange:NSMakeRange(tail,0)];
@@ -284,8 +285,8 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)O:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)O:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSUInteger l = [view selectedRange].location;
     NSUInteger head = [view headOfLine:l];
     if( NSNotFound == head ){
@@ -304,17 +305,17 @@
     return [[XVimInsertEvaluator alloc] initWithRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)C_o:(id)arg{
+- (XVimEvaluator*)C_o:(XVimWindow*)window{
     [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
     return nil;
 }
 
-- (XVimEvaluator*)C_i:(id)arg{
+- (XVimEvaluator*)C_i:(XVimWindow*)window{
     [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
     return nil;
 }
 
-- (XVimEvaluator*)p:(id)arg{
+- (XVimEvaluator*)p:(XVimWindow*)window{
     // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
     // the line boundary and then paste the data in.
     // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
@@ -322,7 +323,7 @@
     
     // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
     // because dw is not working quite right it seems
-    NSTextView* view = [self textView];
+    NSTextView* view = [window sourceView];
     NSUInteger loc = [view selectedRange].location;
     NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
     unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
@@ -349,10 +350,10 @@
     return nil;
 }
 
-- (XVimEvaluator*)P:(id)arg{
+- (XVimEvaluator*)P:(XVimWindow*)window{
     // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
     // the line boundary and then paste the data in.
-    NSTextView* view = [self textView];
+    NSTextView* view = [window sourceView];
     NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
     unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
     if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
@@ -367,17 +368,17 @@
     return nil;
 }
 
-- (XVimEvaluator*)q:(id)arg{
-    if ([self xvim].recordingRegister != nil){
-        [[self xvim] stopRecordingRegister:[self xvim].recordingRegister];
+- (XVimEvaluator*)q:(XVimWindow*)window{
+    if (window.recordingRegister != nil){
+        [window stopRecordingRegister:window.recordingRegister];
         return nil;
     }
     
     return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_RECORD andCount:[self numericArg]];
 }
 
-- (XVimEvaluator*)C_r:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)C_r:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] redo];
     }
@@ -387,12 +388,12 @@
     return nil;
 }
 
-- (XVimEvaluator*)r:(id)arg{
+- (XVimEvaluator*)r:(XVimWindow*)window{
     return [[XVimInsertEvaluator alloc] initOneCharMode:YES withRepeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)s:(id)arg{
-    NSTextView *view = [self textView];
+- (XVimEvaluator*)s:(XVimWindow*)window{
+    NSTextView *view = [window sourceView];
     NSRange r = [view selectedRange];
 	
 	// Set range to replace, ensuring we don't run over the end of the buffer
@@ -412,8 +413,8 @@
     return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1];
 }
 
-- (XVimEvaluator*)u:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)u:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [[view undoManager] undo];
     }
@@ -425,27 +426,27 @@
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_u:(id)arg{
-    NSUInteger next = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
-    [[self textView] setSelectedRange:NSMakeRange(next,0)];
+- (XVimEvaluator*)C_u:(XVimWindow*)window{
+    NSUInteger next = [[window sourceView] halfPageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
 }
 
-- (XVimEvaluator*)v:(id)arg{
+- (XVimEvaluator*)v:(XVimWindow*)window{
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER];
 }
 
-- (XVimEvaluator*)V:(id)arg{
+- (XVimEvaluator*)V:(XVimWindow*)window{
     return [[XVimVisualEvaluator alloc] initWithMode:MODE_LINE]; 
 }
 
-- (XVimEvaluator*)C_v:(id)arg{
+- (XVimEvaluator*)C_v:(XVimWindow*)window{
     // Block selection
     return nil;
 }
 
-- (XVimEvaluator*)x:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)x:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     // note: in vi you are not supposed to move beyond the end of a line when doing "x" operations
     // it's that way on purpose. this allows you to hit a bunch of x's in a row and not worry about 
@@ -469,8 +470,8 @@
 }
 
 // like 'x" but it goes backwards instead of forwards
-- (XVimEvaluator*)X:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)X:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
     NSMutableString* s = [[view textStorage] mutableString];
     // note: in vi you are not supposed to move beyond the start of a line when doing "X" operations
     // it's that way on purpose. this allows you to hit a bunch of X's in a row and not worry about 
@@ -486,64 +487,64 @@
     return nil;
 }
 
-- (XVimEvaluator*)y:(id)arg{
-	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithXVim:[self xvim]];
+- (XVimEvaluator*)y:(XVimWindow*)window{
+	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
     return [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)AT:(id)arg{
+- (XVimEvaluator*)AT:(XVimWindow*)window{
     return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_PLAYBACK andCount:[self numericArg]];
 }
 
-- (XVimEvaluator*)EQUAL:(id)arg{
-	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] initWithXVim:[self xvim]];
+- (XVimEvaluator*)EQUAL:(XVimWindow*)window{
+	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     return [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
 }
 
-- (XVimEvaluator*)GREATERTHAN:(id)arg{
-	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithXVim:[self xvim] unshift:NO];
+- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
+	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     return eval;
 }
 
-- (XVimEvaluator*)LESSTHAN:(id)arg{
-	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithXVim:[self xvim] unshift:YES];
+- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
+	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     return eval;
     
 }
 
-- (XVimEvaluator*)HT:(id)arg{
-    [[[self xvim] sourceView] selectNextPlaceholder:self];
+- (XVimEvaluator*)HT:(XVimWindow*)window{
+    [[window sourceView] selectNextPlaceholder:self];
     return nil;
 }
 
-- (XVimEvaluator*)COLON:(id)arg{
+- (XVimEvaluator*)COLON:(XVimWindow*)window{
     // Go to Cmd Line mode
     // Command line mode is treated totally different way from this XVimEvaluation system
     // aet firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
-    [[self xvim] commandModeWithFirstLetter:@":"];
+    [window commandModeWithFirstLetter:@":"];
     return nil;
 }
 
-- (XVimEvaluator*)QUESTION:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"?"];
+- (XVimEvaluator*)QUESTION:(XVimWindow*)window{
+    [window commandModeWithFirstLetter:@"?"];
     return nil;
 }
 
-- (XVimEvaluator*)SLASH:(id)arg{
-    [[self xvim] commandModeWithFirstLetter:@"/"];
+- (XVimEvaluator*)SLASH:(XVimWindow*)window{
+    [window commandModeWithFirstLetter:@"/"];
     return nil;
 }
 
-- (XVimEvaluator*)DOT:(id)arg{
-    XVimRegister *repeatRegister = [[self xvim] findRegister:@"repeat"];
-    [[self xvim] playbackRegister:repeatRegister withRepeatCount:[self numericArg]];
+- (XVimEvaluator*)DOT:(XVimWindow*)window{
+    XVimRegister *repeatRegister = [[XVim instance] findRegister:@"repeat"];
+    [window playbackRegister:repeatRegister withRepeatCount:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)TILDE:(id)arg{
-    NSTextView* view = [self textView];
+- (XVimEvaluator*)TILDE:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
 	NSRange replacementRange = [view selectedRange];
 	replacementRange.length = [self numericArg];
 	[view clampRangeToEndOfLine:&replacementRange];
@@ -551,13 +552,14 @@
 	return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
+{
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.
-    NSTextView* view = [self textView];
+    NSTextView* view = [window sourceView];
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
-    [view scrollToCursor];
+    [view scrollTo:[window cursorLocation]];
     return nil;
 }
 

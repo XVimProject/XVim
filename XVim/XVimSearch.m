@@ -8,28 +8,21 @@
 
 #import "XVimSearch.h"
 #import "NSTextView+VimMotion.h"
+#import "DVTSourceTextView.h"
+#import "XVimWindow.h"
 #import "XVim.h"
+#import "XVimOptions.h"
 #import "Logger.h"
-
-@interface XVimSearch(){
-    XVim* _xvim;
-}
-- (NSRange)searchForward;
-- (NSRange)searchBackward;
-@end
 
 @implementation XVimSearch
 @synthesize lastSearchCase = _lastSearchCase;
 @synthesize lastSearchBackword = _lastSearchBackword;
 @synthesize lastSearchString = _lastSearchString;
 @synthesize lastReplacementString = _lastReplacementString;
-@synthesize nextSearchBaseLocation = _nextSearchBaseLocation;
-@synthesize endOfReplacement = _endOfReplacement;
 
-- (id)initWithXVim:(XVim*)xvim{
-    
+- (id)init
+{
     if( self = [super init] ){
-        _xvim = [xvim retain];
         _lastSearchString = @"";
         _lastReplacementString = @"";
         _lastSearchCase = XVimSearchCaseDefault;
@@ -38,12 +31,8 @@
     return self;
 }
 
-- (void)dealloc{
-    [_xvim release];
-    [super dealloc];
-}
-
-- (NSRange)executeSearch:(NSString*)searchCmd{
+- (NSRange)executeSearch:(NSString*)searchCmd from:(NSUInteger)from inWindow:(XVimWindow*)window
+{
     unichar first = [searchCmd characterAtIndex:0];
     if( first == '?' ){
         self.lastSearchBackword = YES;
@@ -77,35 +66,22 @@
     if( [searchCmd length] > 1 ){
         self.lastSearchString = [searchCmd substringFromIndex:1];
     }
-    return [self searchNext];
+    return [self searchNextFrom:from inWindow:window];
 }
 
-- (NSRange)searchNext{
-    if( self.lastSearchBackword ){
-        return [self searchBackward];
-    }else{
-        return [self searchForward];
-    }
-}
-
-- (NSRange)searchPrev{
-    if( self.lastSearchBackword ){
-        return [self searchForward];
-    }else{
-        return [self searchBackward];
-    }
-}
-
-- (NSRange)searchForward {
+- (NSRange)searchForwardFrom:(NSUInteger)from inWindow:(XVimWindow*)window 
+{
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
+	
+	XVimOptions *options = [[XVim instance] options];
 
-    DVTSourceTextView* srcView = [_xvim sourceView];
-    NSUInteger search_base = self.nextSearchBaseLocation;
+    DVTSourceTextView* srcView = [window sourceView];
+    NSUInteger search_base = from;
     NSRange found = {NSNotFound, 0};
 
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-    if ((_xvim.options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
+    if ((options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
         self.lastSearchCase == XVimSearchCaseInsensitive) {
         r_opts |= NSRegularExpressionCaseInsensitive;
     }
@@ -117,7 +93,7 @@
                                   error:&error];
     
     if (error != nil) {
-        [_xvim errorMessage:[NSString stringWithFormat:
+        [window errorMessage:[NSString stringWithFormat:
                              @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
@@ -130,34 +106,32 @@
     }
     
     // if wrapscan is on, wrap to the top and search
-    if (found.location == NSNotFound && _xvim.options.wrapscan== TRUE) {
+    if (found.location == NSNotFound && options.wrapscan== TRUE) {
         found = [regex rangeOfFirstMatchInString:[srcView string] 
                                          options:r_opts
                                            range:NSMakeRange(0, [[srcView string] length])];
-        [_xvim errorMessage:[NSString stringWithFormat:
+        [window errorMessage:[NSString stringWithFormat:
                              @"Search wrapped for '%@'",self.lastSearchString] ringBell:TRUE];
     }
     
-    if( found.location != NSNotFound ){
-        // note: make sure this stays *after* setSelectedRange which also updates 
-        // _nextSearchBaseLocation as a side effect
-        self.nextSearchBaseLocation = found.location + ((found.length==0)? 0: found.length-1);
-    }
     return found;
 }
 
 
-- (NSRange)searchBackward {
+- (NSRange)searchBackwardFrom:(NSUInteger)from inWindow:(XVimWindow*)window
+{
     // opts = (NSBackwardsSearch | NSRegularExpressionSearch) is not supported by [NSString rangeOfString:opts]
     // What we do instead is a search for all occurences and then
     // use the range of the last match. Not very efficient, but i don't think
     // optimization is warranted until slowness is experienced at the user level.
-    DVTSourceTextView* srcView = [_xvim sourceView];
-    NSUInteger search_base = self.nextSearchBaseLocation;
+	XVimOptions *options = [[XVim instance] options];
+	
+    DVTSourceTextView* srcView = [window sourceView];
+    NSUInteger search_base = from;
     NSRange found = {NSNotFound, 0};
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-    if ((_xvim.options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
+    if ((options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
         self.lastSearchCase == XVimSearchCaseInsensitive) {
         r_opts |= NSRegularExpressionCaseInsensitive;
     }
@@ -169,7 +143,7 @@
                                   error:&error];
     
     if (error != nil) {
-        [_xvim errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+        [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
@@ -187,21 +161,38 @@
         }
     }
     // if wrapscan is on, search below base as well
-    if (found.location == NSNotFound && _xvim.options.wrapscan == TRUE) {
+    if (found.location == NSNotFound && options.wrapscan == TRUE) {
         if ([matches count] > 0) {
             NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
             found = [match range];
-            [_xvim errorMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchString] ringBell:FALSE];
+            [window errorMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchString] ringBell:FALSE];
         }
     }
-    if (found.location != NSNotFound) {
-        [self setNextSearchBaseLocation:found.location];
-    }
+	 
     return found;
 }
 
-- (NSRange)searchCurrentWord:(BOOL)forward matchWholeWord:(BOOL)wholeWord {
-    NSTextView *view = (NSTextView*)[_xvim sourceView];
+- (NSRange)searchNextFrom:(NSUInteger)from inWindow:(XVimWindow*)window
+{
+    if( self.lastSearchBackword ){
+        return [self searchBackwardFrom:from inWindow:window];
+    }else{
+        return [self searchForwardFrom:from inWindow:window];
+    }
+}
+
+- (NSRange)searchPrevFrom:(NSUInteger)from inWindow:(XVimWindow*)window
+{
+    if( self.lastSearchBackword ){
+        return [self searchForwardFrom:from inWindow:window];
+    }else{
+        return [self searchBackwardFrom:from inWindow:window];
+    }
+}
+
+- (NSRange)searchCurrentWordFrom:(NSUInteger)from forward:(BOOL)forward matchWholeWord:(BOOL)wholeWord inWindow:(XVimWindow*)window
+{
+    NSTextView *view = (NSTextView*)[window sourceView];
 
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
@@ -259,28 +250,28 @@
     }
 
     NSString *searchString = [(forward ? @"/" : @"?") stringByAppendingString:escapedSearchWord];
-    NSRange found = [self executeSearch:searchString];
+    NSRange found = [self executeSearch:searchString from:from inWindow:window];
 
     if (found.location != NSNotFound &&
         ((!forward && begin.location != wordRange.location) ||
          (forward && searchStart != begin.location))){
-        self.nextSearchBaseLocation = found.location;
-        found = [self searchNext];
+			found = [self searchNextFrom:found.location inWindow:window];
     }
 
     return found;
 }
 
-- (NSRange)replaceForward{
+- (NSRange)replaceForwardFrom:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
+{
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
     
-    NSTextView* srcView = (NSTextView*)[_xvim sourceView];
+    NSTextView* srcView = (NSTextView*)[window sourceView];
     NSRange found = {NSNotFound, 0};
     
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-    if ((_xvim.options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
+    if (([[XVim instance] options].ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
         self.lastSearchCase == XVimSearchCaseInsensitive) {
         r_opts |= NSRegularExpressionCaseInsensitive;
     }
@@ -290,29 +281,27 @@
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchString options:r_opts error:&error];
     
     if (error != nil) {
-        [_xvim errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+        [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
     // search text beyond the search_base
-    found = [regex rangeOfFirstMatchInString:[srcView string] options:r_opts range:NSMakeRange(self.nextSearchBaseLocation, [[srcView string] length] - self.nextSearchBaseLocation)];
+    found = [regex rangeOfFirstMatchInString:[srcView string] options:r_opts range:NSMakeRange(from, [[srcView string] length] - from)];
     
-    if( found.location >= self.endOfReplacement ){
+    if( found.location >= to) {
         return NSMakeRange(NSNotFound, 0);
     }
     if( found.location != NSNotFound){
         // Replace the text
         // The following method is undoable
         [srcView insertText:self.lastReplacementString replacementRange:found];
-        // Move the next search base and end of replacement pos according to replaced and replacement test length
-        self.nextSearchBaseLocation = found.location + [self.lastReplacementString length];
-        self.endOfReplacement = self.endOfReplacement - (found.length) + [self.lastReplacementString length];
     }
     
     return found;
 }
 
-- (void)substitute:(NSString*)ex_command from:(NSUInteger)from to:(NSUInteger)to{
+- (void)substitute:(NSString*)ex_command from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
+{
     // Split the string into the various components
     NSString* replaced = @"";
     NSString* replacement = @"";
@@ -349,16 +338,15 @@
     self.lastReplacementString = replacement;
     
     // Find the position to start searching
-    NSUInteger replace_start_location = [[_xvim sourceView] positionAtLineNumber:from column:0];
+    NSUInteger replace_start_location = [[window sourceView] positionAtLineNumber:from column:0];
     if( NSNotFound == replace_start_location){
         return;
     }
-    self.nextSearchBaseLocation = replace_start_location;
     
     // Find the position to end the searching
-    self.endOfReplacement = [[_xvim sourceView] positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
-    if( NSNotFound == self.endOfReplacement ){
-        self.endOfReplacement = [[[_xvim sourceView] string] length];
+    NSUInteger endOfReplacement = [[window sourceView] positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
+    if( NSNotFound == endOfReplacement ){
+        endOfReplacement = [[[window sourceView] string] length];
     }
     // This is lazy implementation.
     // When text is substituted the end location may be smaller or greater than original end position.
@@ -368,12 +356,32 @@
     int numReplacements = 0;
     NSRange found;
     do {
-        found = [self replaceForward];
+        found = [self replaceForwardFrom:replace_start_location to:endOfReplacement inWindow:window];
         if (found.location != NSNotFound) {
             numReplacements++;
         }
-    } while(found.location != NSNotFound && global && self.nextSearchBaseLocation < self.endOfReplacement);
-    [_xvim errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
+		replace_start_location = found.location + [replacement length];
+		endOfReplacement = endOfReplacement + [replacement length] - found.length;
+    } while(found.location != NSNotFound && global && replace_start_location < endOfReplacement);
+    [window errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
     
 }
+
+- (BOOL)selectSearchResult:(NSRange)found inWindow:(XVimWindow*)window
+{
+	BOOL valid = found.location != NSNotFound;
+	
+	// Move cursor and show the found string
+    if(valid) {
+		NSTextView* srcView = [window sourceView];
+        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
+		[srcView scrollTo:[window cursorLocation]];
+        [srcView showFindIndicatorForRange:found];
+    }else{
+        [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", self.lastSearchString] ringBell:TRUE];
+    }
+	
+	return valid;
+}
+
 @end

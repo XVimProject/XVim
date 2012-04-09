@@ -8,7 +8,7 @@
 
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
-#import "XVim.h"
+#import "XVimWindow.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 #import "DVTSourceTextView.h"
@@ -29,7 +29,7 @@
 	return self;
 }
 
-- (XVimEvaluator*)c:(id)arg
+- (XVimEvaluator*)c:(XVimWindow*)window
 {
     if( !_insertModeAtCompletion ){
         return nil;  // 'dc' does nothing
@@ -40,12 +40,12 @@
     if (self.repeat < 1) 
         return nil;
     
-    DVTSourceTextView* view = [self textView];
+    DVTSourceTextView* view = [window sourceView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
-- (XVimEvaluator*)d:(id)arg{
+- (XVimEvaluator*)d:(XVimWindow*)window{
     if( _insertModeAtCompletion ){
         return nil;  // 'cd' does nothing
     }
@@ -55,55 +55,55 @@
     if (self.repeat < 1) 
         return nil;
         
-    DVTSourceTextView* view = [self textView];
+    DVTSourceTextView* view = [window sourceView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
 
 
-- (XVimEvaluator*)w:(id)arg{
+- (XVimEvaluator*)w:(XVimWindow*)window{
     if( _insertModeAtCompletion ){ 
         // cw is special case of word motion
         XVimWordInfo info;
-        NSUInteger from = [[self textView] selectedRange].location;
-        NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+        NSUInteger from = [[window sourceView] selectedRange].location;
+        NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
         if( info.isFirstWordInALine ){
-            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
         }else{
             if( info.lastEndOfWord != NSNotFound){
-                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE inWindow:window];   
             }else{
-                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window]; 
             }
         }
     }else{
-        return [super w:arg];
+        return [super w:window];
     }
 }
 
-- (XVimEvaluator*)W:(id)arg{
+- (XVimEvaluator*)W:(XVimWindow*)window{
     if( _insertModeAtCompletion ){ 
         // cw is special case of word motion
         XVimWordInfo info;
-        NSUInteger from = [[self textView] selectedRange].location;
-        NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+        NSUInteger from = [[window sourceView] selectedRange].location;
+        NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
         if( info.isFirstWordInALine ){
-            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
         }else{
             if( info.lastEndOfWord != NSNotFound){
-                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE inWindow:window];   
             }else{
-                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window]; 
             }
         }
     }else{
-        return [super W:arg];
+        return [super W:window];
     }
 }
 
-- (XVimEvaluator*)j:(id)arg{
-    DVTSourceTextView *view = [self textView];
+- (XVimEvaluator*)j:(XVimWindow*)window{
+    DVTSourceTextView *view = [window sourceView];
     NSUInteger from = [view selectedRange].location;
     NSUInteger headOfLine = [view headOfLine:from];
     if (headOfLine != NSNotFound){
@@ -132,11 +132,11 @@
         motion = LINEWISE;   
     }
 
-    return [self _motionFixedFrom:from To:to Type:motion];
+    return [self _motionFixedFrom:from To:to Type:motion inWindow:window];
 }
 
-- (XVimEvaluator*)k:(id)arg{
-    DVTSourceTextView *view = [self textView];
+- (XVimEvaluator*)k:(XVimWindow*)window{
+    DVTSourceTextView *view = [window sourceView];
     NSUInteger to = [view selectedRange].location;
     NSUInteger endOfLine = [view endOfLine:to];
     if (endOfLine != NSNotFound){
@@ -164,7 +164,7 @@
         motion = LINEWISE;   
     }
 
-    return [self _motionFixedFrom:from To:to Type:motion];
+    return [self _motionFixedFrom:from To:to Type:motion inWindow:window];
 }
 
 
@@ -177,17 +177,18 @@
 
 @implementation XVimDeleteAction
 
-- (id)initWithXVim:(XVim*)xvim insertModeAtCompletion:(BOOL)insertModeAtCompletion
+- (id)initWithInsertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
-	if (self = [super initWithXVim:xvim])
+	if (self = [super init])
 	{
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}
 	return self;
 }
 
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    DVTSourceTextView* view = [self textView];
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
+{
+    DVTSourceTextView* view = [window sourceView];
     NSString* string = [view string];
     
     if( [string length] != 0 && [string length] == to && [string length] == from){

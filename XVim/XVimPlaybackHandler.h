@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class XVimKeyStroke;
+
 @protocol XVimPlaybackHandler<NSObject>
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;
 - (void)handleTextInsertion:(NSString*)text;

@@ -9,7 +9,7 @@
 #import "XVimCommandLine.h"
 #import "XVimCommandField.h"
 #import "Logger.h"
-#import "XVim.h"
+#import "XVimWindow.h"
 #import "DVTSourceTextView.h"
 #import "DVTFoldingTextStorage.h"
 #import "DVTFontAndColorsTheme.h"
@@ -19,7 +19,6 @@
 
 @interface XVimCommandLine() {
 @private
-    XVim* _xvim;
     XVimCommandField* _command;
     NSTextField* _static;
     NSTextField* _status;
@@ -31,12 +30,12 @@
 @implementation XVimCommandLine
 @synthesize tag = _tag;
 
-- (id)initWithXVim:(XVim *)xvim{
+- (id)initWithWindow:(XVimWindow*)window
+{
     self = [super initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT)];
     if (self) {
-        _xvim = [xvim retain];
         
-        id fontAndColors = [[[_xvim sourceView] textStorage] fontAndColorTheme];
+        id fontAndColors = [[[window sourceView] textStorage] fontAndColorTheme];
         
         // Static Massage ( This is behind the command view if the command is active)
         _static = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
@@ -61,7 +60,7 @@
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
         [_command setEditable:NO];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
-        _command.delegate = xvim;
+        _command.delegate = window;
         [_command setTextColor:[fontAndColors sourcePlainTextColor]];
         [_command setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
         [_command setHidden:YES];
@@ -80,9 +79,9 @@
         [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
         [self addSubview:_status];
         
-        [xvim addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial context:nil];
-        [xvim addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
-        [xvim addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
+        [window addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial context:nil];
+        [window addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
+        [window addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
     }
     return self;
 }
@@ -92,7 +91,6 @@
     [_status release];
     [_static release];
     [_error release];
-    [_xvim release];
     [super dealloc];
 }
 

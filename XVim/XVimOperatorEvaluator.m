@@ -11,7 +11,9 @@
 #import "XVimOperatorAction.h"
 #import "XVimTextObjectEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 #import "Logger.h"
+#import "XVimKeymapProvider.h"
 
 @interface XVimOperatorEvaluator() {
 	XVimOperatorAction *_operatorAction;
@@ -36,42 +38,40 @@
 	return [self initWithOperatorAction:action repeat:1];
 }
 
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
-	return keymaps[MODE_OPERATOR_PENDING];
+	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
 }
 
-- (XVimEvaluator*)a:(id)arg {
+- (XVimEvaluator*)a:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:YES];
-	eval.xvim = self.xvim;
 	return eval;
 }
 
-- (XVimEvaluator*)i:(id)arg {
+- (XVimEvaluator*)i:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:NO];
-	eval.xvim = self.xvim;
 	return eval;
 }
 
-- (XVimEvaluator*)w:(id)arg{
+- (XVimEvaluator*)w:(XVimWindow*)window{
     XVimWordInfo info;
-    NSUInteger from = [[self textView] selectedRange].location;
-    NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
     if( info.isFirstWordInALine ){
-        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
     }else{
-        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
+        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
     }
 }
 
-- (XVimEvaluator*)W:(id)arg{
+- (XVimEvaluator*)W:(XVimWindow*)window{
     XVimWordInfo info;
-    NSUInteger from = [[self textView] selectedRange].location;
-    NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
     if( info.isFirstWordInALine ){
-        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
     }else{
-        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE];
+        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
     }
 }
 
@@ -85,8 +85,9 @@
     return REGISTER_IGNORE;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-	return [self->_operatorAction motionFixedFrom:from To:to Type:type];
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
+{
+	return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
 }
 
 @end

@@ -8,11 +8,13 @@
 
 #import "XVimInsertEvaluator.h"
 #import "NSTextView+VimMotion.h"
-#import "Xvim.h"
+#import "XVimWindow.h"
+#import "XVim.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
 #import "DVTSourceTextView.h"
 #import "DVTCompletionController.h"
+#import "XVimKeymapProvider.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -57,19 +59,18 @@
     return self;
 }
 
-- (XVIM_MODE)becameHandler:(XVim *)xvim{
-    self.xvim = xvim;
-    self.startRange = [xvim selectedRange];
+- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+    self.startRange = [window selectedRange];
     return MODE_INSERT;
 }
 
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
-    return keymaps[MODE_INSERT];
+	return [keymapProvider keymapForMode:MODE_INSERT];
 }
 
-- (NSString*)getInsertedText{
-    NSRange endRange = [self.xvim selectedRange];
+- (NSString*)getInsertedTextInWindow:(XVimWindow*)window {
+    NSRange endRange = [window selectedRange];
     NSRange textRange;
     if (endRange.location > self.startRange.location){
         textRange = NSMakeRange(self.startRange.location, endRange.location - self.startRange.location);
@@ -77,120 +78,120 @@
         textRange = NSMakeRange(endRange.location, self.startRange.location - endRange.location);
     }
     
-    NSString *text = [[self.xvim string] substringWithRange:textRange];
+    NSString *text = [[window sourceText] substringWithRange:textRange];
     return text;
     
 }
 
-- (void)recordTextIntoRegister:(XVimRegister*)xregister{
-    NSString *text = [self getInsertedText];
+- (void)recordTextIntoRegister:(XVimRegister*)xregister inWindow:(XVimWindow*)window {
+    NSString *text = [self getInsertedTextInWindow:window];
     if (text.length > 0){
         [xregister appendText:text];
     }
 }
 
-- (void)onMovementKeyPressed{
+- (void)onMovementKeyPressed:(XVimWindow*)window {
     _insertedEventsAbort = YES;
     if (!self.movementKeyPressed){
         self.movementKeyPressed = YES;
         
         // Store off any needed text
-        self.lastInsertedText = [self getInsertedText];
-        [self recordTextIntoRegister:self.xvim.recordingRegister];
+        self.lastInsertedText = [self getInsertedTextInWindow:window];
+        [self recordTextIntoRegister:window.recordingRegister inWindow:window];
     }
     
     // Store off the new start range
-    self.startRange = [self.xvim selectedRange];
+    self.startRange = [window selectedRange];
 }
 
-- (void)onFinishInsert{
+- (void)onFinishInsert:(XVimWindow*)window {
     if( !_insertedEventsAbort ){
-        NSString *text = [self getInsertedText];
+        NSString *text = [self getInsertedTextInWindow:window];
         for( int i = 0 ; i < _repeat-1; i++ ){
-            [[self.xvim sourceView] insertText:text];
+            [[window sourceView] insertText:text];
         }
     }
     
     // Store off any needed text
     if (!self.movementKeyPressed){
-        [self recordTextIntoRegister:self.xvim.recordingRegister];
-        [self recordTextIntoRegister:[self.xvim findRegister:@"repeat"]];
+        [self recordTextIntoRegister:window.recordingRegister inWindow:window];
+        [self recordTextIntoRegister:[[XVim instance] findRegister:@"repeat"] inWindow:window];
     }else if(self.lastInsertedText.length > 0){
-        [[self.xvim findRegister:@"repeat"] appendText:self.lastInsertedText];
+        [[[XVim instance] findRegister:@"repeat"] appendText:self.lastInsertedText];
     }
-    [[[self.xvim sourceView] completionController] hideCompletions];
+    [[[window sourceView] completionController] hideCompletions];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     XVimEvaluator *nextEvaluator = self;
     SEL keySelector = [keyStroke selectorForInstance:self];
     if (keySelector){
-        nextEvaluator = [self performSelector:keySelector withObject:nil];
+        nextEvaluator = [self performSelector:keySelector withObject:window];
     }else if(self.movementKeyPressed){
         // Flag movement key as not pressed until the next movement key is pressed
         self.movementKeyPressed = NO;
         
         // Store off the new start range
-        self.startRange = [self.xvim selectedRange];
+        self.startRange = [window selectedRange];
     }
     
     if (nextEvaluator != nil){
         NSEvent *event = [keyStroke toEvent];
         if (_oneCharMode == TRUE) {
-            NSRange save = [[self.xvim sourceView] selectedRange];
+            NSRange save = [[window sourceView] selectedRange];
             for (NSUInteger i = 0; i < _repeat; ++i) {
-                [[self.xvim sourceView] deleteForward:self];
-                [[self.xvim sourceView] keyDown_:event];
+                [[window sourceView] deleteForward:self];
+                [[window sourceView] keyDown_:event];
                 
                 save.location += 1;
-                [[self.xvim sourceView] setSelectedRange:save];
+                [[window sourceView] setSelectedRange:save];
             }
             save.location -= 1;
-            [[self.xvim sourceView] setSelectedRange:save];
+            [[window sourceView] setSelectedRange:save];
             nextEvaluator = nil;
         } else {
-            [[self.xvim sourceView] keyDown_:event];
+            [[window sourceView] keyDown_:event];
         }
     }
     
     if( self != nextEvaluator ){
-        [[self.xvim sourceView] adjustCursorPosition];
+        [[window sourceView] adjustCursorPosition];
     }
     return nextEvaluator;
 }
 
-- (XVimEvaluator*)ESC:(id)arg{
-    [self onFinishInsert];
+- (XVimEvaluator*)ESC:(XVimWindow*)window{
+    [self onFinishInsert:window];
     return nil;
 }
 
-- (XVimEvaluator*)C_LSQUAREBRACKET:(id)arg{
-    [self onFinishInsert];
+- (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window{
+    [self onFinishInsert:window];
     return nil;
 }
 
-- (XVimEvaluator*)C_c:(id)arg{
-    [self onFinishInsert];
+- (XVimEvaluator*)C_c:(XVimWindow*)window{
+    [self onFinishInsert:window];
     return nil;
 }
 
-- (XVimEvaluator*)Up:(id)arg{
-    [self onMovementKeyPressed];
+- (XVimEvaluator*)Up:(XVimWindow*)window{
+    [self onMovementKeyPressed:window];
     return self;
 }
 
-- (XVimEvaluator*)Down:(id)arg{
-    [self onMovementKeyPressed];
+- (XVimEvaluator*)Down:(XVimWindow*)window{
+    [self onMovementKeyPressed:window];
     return self;
 }
 
-- (XVimEvaluator*)Left:(id)arg{
-    [self onMovementKeyPressed];
+- (XVimEvaluator*)Left:(XVimWindow*)window{
+    [self onMovementKeyPressed:window];
     return self;
 }
 
-- (XVimEvaluator*)Right:(id)arg{
-    [self onMovementKeyPressed];
+- (XVimEvaluator*)Right:(XVimWindow*)window{
+    [self onMovementKeyPressed:window];
     return self;
 }
 

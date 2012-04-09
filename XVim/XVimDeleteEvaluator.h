@@ -16,5 +16,5 @@
 @end
 
 @interface XVimDeleteAction : XVimOperatorAction
-- (id)initWithXVim:(XVim*)xvim insertModeAtCompletion:(BOOL)insertModeAtCompletion;
+- (id)initWithInsertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end
