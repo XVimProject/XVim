@@ -112,6 +112,8 @@
 			// don't have time to refactor cmdline mode.
 			self.mode = newMode;
 		}
+		
+		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
 	}
 }
 
