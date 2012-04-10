@@ -10,6 +10,7 @@
 #import "XVimOperatorAction.h"
 #import "NSTextView+VimMotion.h"
 #import "XVimWindow.h"
+#import "XVimKeyStroke.h"
 #import "common.h"
 
 @interface XVimTextObjectEvaluator() {
@@ -118,6 +119,16 @@
 {
 	NSRange r = xv_current_quote([window.sourceView string], [window.sourceView selectedRange].location, _repeat, _inclusive, '"');
 	return [self executeActionForRange:r inWindow:window];
+}
+
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister
+{
+    if (xregister.isRepeat && [keyStroke instanceResponds:self] ) 
+	{
+		return REGISTER_APPEND;
+	}
+    
+    return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
 @end

@@ -191,6 +191,12 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return;
 }
 
+- (void)del:(id)sender
+{
+	[self cut:sender];
+	[self adjustCursorPosition];
+}
+
 /**
  * Returns next non-blank character position after the position "index" in a current line.
  * If no non-blank character is found or the line is a blank line this returns NSNotFound.
