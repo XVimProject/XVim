@@ -13,9 +13,14 @@
 // When 'w' is used with operator its motion is a little different.
 // See ':help word' in Vim for the difference.
 
+@class XVimOperatorAction;
+
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
-- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
-- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
-- (XVimEvaluator*)w:(id)arg;
-- (XVimEvaluator*)W:(id)arg;
+- (id)initWithOperatorAction:(XVimOperatorAction*) action repeat:(NSUInteger)repeat;
+- (id)initWithOperatorAction:(XVimOperatorAction*) action;
+
+@property (nonatomic) NSUInteger repeat;
+
+- (XVimEvaluator*)w:(XVimWindow*)window;
+- (XVimEvaluator*)W:(XVimWindow*)window;
 @end

@@ -7,9 +7,8 @@
 //
 
 #import "NSTextView+VimMotion.h"
+#import "DVTSourceTextView.h"
 #import "Logger.h"
-#import "XVim.h"
-#import "XVimEvaluator.h"
 
 //
 // This category deals Vim's motion in NSTextView.
@@ -934,11 +933,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return [self selectedRange].location;
 }
 
-- (void)scrollToCursor{
-    XVim *xvim = [self viewWithTag:XVIM_TAG];
-
+- (void)scrollTo:(NSUInteger)location
+{
     NSRange characterRange;
-    characterRange.location = xvim.currentEvaluator.insertionPoint;
+    characterRange.location = location;
     characterRange.length = [self isBlankLine:characterRange.location] ? 0 : 1;
     
     // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll
@@ -1083,6 +1081,33 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 	[self clampRangeToBuffer:&range];
 	
 	[self insertText:[[s substringWithRange:range] lowercaseString] replacementRange:range];
+}
+
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+    if( from > to ){
+        NSUInteger tmp = from;
+        from = to;
+        to = tmp;
+    }
+    
+    if( type == CHARACTERWISE_EXCLUSIVE ){
+    }else if( type == CHARACTERWISE_INCLUSIVE ){
+		to++;
+    }else if( type == LINEWISE ){
+        to = [self tailOfLine:to] + 1;
+        NSUInteger head = [self headOfLine:from];
+        if( NSNotFound != head ){
+            from = head; 
+        }
+    }
+	
+	return NSMakeRange(from, to - from);
+}
+
+
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
+    [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
 @end

@@ -1,3 +1,4 @@
+
 //
 //  Common.c
 //  XVim
@@ -7,6 +8,7 @@
 //
 
 #import "Common.h"
+#import <Foundation/NSCharacterSet.h>
 
 // ==========
 // Testing
@@ -84,24 +86,13 @@ unichar characterAtIndex(NSStringHelper* h, NSInteger index)
 
 // ==========
 // Common vim implementation.
-struct XVBuffer {
-    NSString* string;
-    NSInteger index;
-};
 
-static struct XVBuffer xv_buffer = {};
-
-void xv_set_string(NSString* s) { xv_buffer.string = s; }
-void xv_set_index (NSInteger i) { xv_buffer.index = i;  }
-
-
-NSInteger xv_dollar()
+NSInteger xv_dollar(NSString *string, NSInteger index)
 {
-    NSInteger strLen = [xv_buffer.string length];
-    NSInteger index  = xv_buffer.index;
+    NSInteger strLen = [string length];
     
     NSStringHelper helper;
-    initNSStringHelper(&helper, xv_buffer.string, strLen);
+    initNSStringHelper(&helper, string, strLen);
     
     while (index < strLen)
     {
@@ -114,13 +105,12 @@ NSInteger xv_dollar()
     return index; 
 }
 
-NSInteger xv_dollar_inc()
+NSInteger xv_dollar_inc(NSString *string, NSInteger index)
 {
-    NSInteger index  = xv_buffer.index;
-    NSInteger strLen = [xv_buffer.string length];
+    NSInteger strLen = [string length];
     
     NSStringHelper helper;
-    initNSStringHelper(&helper, xv_buffer.string, strLen);
+    initNSStringHelper(&helper, string, strLen);
     
     while (index < strLen)
     {
@@ -134,10 +124,9 @@ NSInteger xv_dollar_inc()
     return index;
 }
 
-NSInteger xv_g_()
+NSInteger xv_g_(NSString *string, NSInteger index)
 {
-    NSInteger index  = xv_dollar();
-    NSString* string = xv_buffer.string;
+    index  = xv_dollar(string, index);
     while (index > 0)
     {
         --index;
@@ -147,12 +136,10 @@ NSInteger xv_g_()
     return index;
 }
 
-NSInteger xv_caret()
+NSInteger xv_caret(NSString *string, NSInteger index)
 {
-    NSInteger index        = xv_buffer.index;
     NSInteger resultIndex  = index;
     NSInteger seekingIndex = index;
-    NSString* string       = xv_buffer.string;
     
     while (seekingIndex > 0) {
         unichar ch = [string characterAtIndex:seekingIndex-1];
@@ -178,14 +165,13 @@ NSInteger xv_caret()
     return resultIndex;
 }
 
-NSInteger xv_percent()
+NSInteger xv_percent(NSString *string, NSInteger index)
 {
-    NSString* string    = xv_buffer.string;
-    NSInteger idxBefore = xv_buffer.index;
+    NSInteger idxBefore = index;
     
     // Find the first brace in this line that is after the caret.
     NSCharacterSet* set  = [NSCharacterSet characterSetWithCharactersInString:@"([{)]}"];
-    NSRange    range     = NSMakeRange(idxBefore, xv_dollar() - idxBefore);
+    NSRange    range     = NSMakeRange(idxBefore, xv_dollar(string, index) - idxBefore);
     NSInteger  idxNew    = [string rangeOfCharacterFromSet:set 
                                                    options:0 
                                                      range:range].location;
@@ -231,22 +217,18 @@ NSInteger xv_percent()
     return idxBefore;
 }
 
-NSInteger xv_0()
+NSInteger xv_0(NSString *string, NSInteger index)
 {    
-    NSInteger index = xv_buffer.index;
     while (index > 0)
     {
-        if (testNewLine([xv_buffer.string characterAtIndex:index-1])) { break; }
+        if (testNewLine([string characterAtIndex:index-1])) { break; }
         --index;
     }
     return index;
 }
 
-NSInteger xv_h(int repeatCount)
+NSInteger xv_h(NSString *string, NSInteger index, int repeatCount)
 {
-    NSInteger  index  = xv_buffer.index;
-    NSString*  string = xv_buffer.string;
-    
     for (int i = 0; i < repeatCount; ++i)
     {
         if (index == 0) { 
@@ -269,10 +251,8 @@ NSInteger xv_h(int repeatCount)
     return index;
 }
 
-NSInteger xv_l(int repeatCount, BOOL stepForward)
+NSInteger xv_l(NSString *string, NSInteger index, int repeatCount, BOOL stepForward)
 {
-    NSString* string   = xv_buffer.string;
-    NSInteger index    = xv_buffer.index;
     NSInteger maxIndex = [string length] - 1;
     
     for (int i = 0; i < repeatCount; ++i) {
@@ -300,10 +280,8 @@ testAscii testForChar(unichar ch)
     return testDelimeter;
 }
 
-NSInteger xv_w(int repeatCount, BOOL bigWord)
+NSInteger xv_w(NSString *string, NSInteger index, int repeatCount, BOOL bigWord)
 {
-    NSString* string = xv_buffer.string;
-    NSInteger index  = xv_buffer.index;
     NSInteger maxIndex = [string length] - 1;
     
     if (index == maxIndex) { return maxIndex + 1; }
@@ -351,12 +329,11 @@ NSInteger xv_w(int repeatCount, BOOL bigWord)
     return index;
 }
 
-NSInteger xv_w_motion(int repeatCount, BOOL bigWord)
+NSInteger xv_w_motion(NSString *string, NSInteger index, int repeatCount, BOOL bigWord)
 {
-    NSString* string  = xv_buffer.string;
-    NSInteger oldIdx  = xv_buffer.index;
+    NSInteger oldIdx  = index;
     // Reduce index if we are at the beginning indentation of another line.
-    NSInteger newIdx  = xv_w(repeatCount, bigWord);
+    NSInteger newIdx  = xv_w(string, index, repeatCount, bigWord);
     NSInteger testIdx = newIdx - 1;
     
     while (testIdx > oldIdx)
@@ -376,12 +353,10 @@ NSInteger xv_w_motion(int repeatCount, BOOL bigWord)
     return oldIdx == testIdx ? newIdx : testIdx;
 }
 
-NSInteger xv_b(int repeatCount, BOOL bigWord)
+NSInteger xv_b(NSString *string, NSInteger index, int repeatCount, BOOL bigWord)
 {
     // 'b' If we are not at the beginning of a word, go to the beginning of it.
     // Otherwise go to the beginning of the word before it.
-    NSInteger index  = xv_buffer.index;
-    NSString* string = xv_buffer.string;
     NSInteger maxI   = [string length] - 1;
     if (index >= maxI) { index = maxI; }
     
@@ -445,7 +420,7 @@ NSInteger xv_b(int repeatCount, BOOL bigWord)
     return index;
 }
 
-NSInteger xv_e(int repeatCount, BOOL bigWord)
+NSInteger xv_e(NSString *string, NSInteger index, int repeatCount, BOOL bigWord)
 {
     // 'e' If we are not at the end of a word, go to the end of it.
     // Otherwise go to the end of the word after it.
@@ -454,8 +429,6 @@ NSInteger xv_e(int repeatCount, BOOL bigWord)
     // the blank line is not consider a word.
     // So whitespace and newline are totally ingored.
     
-    NSString* string   = xv_buffer.string;
-    NSInteger index    = xv_buffer.index;
     NSInteger maxIndex = [string length] - 1;
     
     for (int i = 0; i < repeatCount && index < maxIndex; ++i)
@@ -499,10 +472,8 @@ NSInteger xv_e(int repeatCount, BOOL bigWord)
     return index;
 }
 
-NSInteger xv_columnToIndex(NSUInteger column)
+NSInteger xv_columnToIndex(NSString *string, NSInteger index, NSUInteger column)
 {
-    NSInteger index  = xv_buffer.index;
-    NSString* string = xv_buffer.string;
     NSInteger strLen = [string length];
     
     if (index >= strLen) { return index; }
@@ -808,10 +779,9 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
     return -1;
 }
 
-NSRange xv_current_block(int count, BOOL inclusive, char what, char other)
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, BOOL inclusive, char what, char other)
 {
-    NSString* string = xv_buffer.string;
-    NSInteger idx    = xv_buffer.index;
+    NSInteger idx    = index;
     
     if ([string characterAtIndex:idx] == what)
     {
@@ -851,16 +821,16 @@ NSRange xv_current_block(int count, BOOL inclusive, char what, char other)
         ++start_pos;
         if (what == '{')
         {
-            NSInteger oldIdx = xv_buffer.index;
-            xv_buffer.index = end_pos;
-            NSInteger idx = xv_caret();
+            NSInteger oldIdx = index;
+            index = end_pos;
+            NSInteger idx = xv_caret(string, index);
             
             if (idx == end_pos)
             {
                 // The '}' is only preceded by indent, skip that indent.
-                end_pos = (int) xv_0() - 1;
+                end_pos = (int) xv_0(string, index) - 1;
             }
-            xv_buffer.index = oldIdx;
+            index = oldIdx;
         }
     } else {
         ++end_pos;
@@ -869,216 +839,270 @@ NSRange xv_current_block(int count, BOOL inclusive, char what, char other)
     return NSMakeRange(start_pos, end_pos - start_pos);
 }
 
-NSRange xv_current_word(int repeatCount, BOOL inclusive, BOOL fuzzy)
-{    
-    NSString* string   = xv_buffer.string;
-    NSInteger index    = xv_buffer.index;
-    NSInteger maxIndex = [string length] - 1;
-    
-    if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
-    
-    unichar    ch    = [string characterAtIndex:index];
-    testAscii  test  = testWhiteSpace(ch) ? testWhiteSpace : (fuzzy ? testFuzzyWord : testForChar(ch));
-    
-    NSInteger begin = index;
-    NSInteger end   = index;
-    
+static NSInteger seek_backwards(NSString *string, NSInteger begin, NSCharacterSet *charSet)
+{
     while (begin > 0)
     {
-        if (test([string characterAtIndex:begin - 1]) == NO) { break; }
+		unichar ch = [string characterAtIndex:begin - 1];
+        if (![charSet characterIsMember:ch]) { break; }
         --begin;
     }
-    
-    NSInteger oldIdx = xv_buffer.index;
-    
-    //
-    // Word is like (  word  )
-    if (testWhiteSpace(ch) == inclusive)
-    {
-        xv_buffer.index = index;
-        
-        // If inclusive and at whitespace, whitespace is included: ("  word"  )
-        // If exclusive and not at whitespace, then: (  "word"  )
-        // That means we should find the end of the word.
-        end = xv_e(repeatCount, fuzzy) + 1;
-        xv_buffer.index = oldIdx;
-    } else {
-        xv_buffer.index = end;
-        
-        // If inclusive and not at whitespace: (  "word  ")
-        // If exclusive and at whitespace, then: ("  "word  )
-        
-        if (repeatCount > 1) {
-            // Select more words.
-            xv_buffer.index = xv_w(repeatCount - 1, fuzzy);
-        }
-        // If the end index is at beginning indent of next line,
-        // Go back to prev line.
-        end = xv_w_motion(1, fuzzy);
-        
-        xv_buffer.index = oldIdx;
-        
-        // If we don't have any trailing whitespace,
-        // Extend begin to include whitespace.
-        if (!testWhiteSpace([string characterAtIndex:end - 1]))
-        {
-            while (begin > 0 && testWhiteSpace([string characterAtIndex:begin - 1]))
-            {
-                --begin;
-            }
-        }
-    }
-    
-    return NSMakeRange(begin, end - begin);
+	
+	return begin;
 }
 
-NSInteger find_next_quote(NSStringHelper* h, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape);
-NSInteger find_next_quote(NSStringHelper* h, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape)
+static NSInteger seek_forwards(NSString *string, NSInteger end, NSCharacterSet *charSet)
 {
-    while (start <= max)
+	while (end < [string length])
+	{
+		unichar ch = [string characterAtIndex:end];
+		if (![charSet characterIsMember:ch]) { break; }
+		++end;
+	}
+	return end;
+}
+
+static NSCharacterSet *get_search_set(unichar initialChar, NSCharacterSet *wsSet, NSCharacterSet *wordSet)
+{
+	NSCharacterSet *searchSet = nil;
+	
+	if ([wsSet characterIsMember:initialChar])
+	{
+		searchSet = wsSet;
+	}
+	else if ([wordSet characterIsMember:initialChar])
+	{
+		searchSet = wordSet;
+	}
+	else
+	{
+		NSMutableCharacterSet *charSet = [[wordSet invertedSet] mutableCopy];
+		[charSet removeCharactersInString:@" \t"];
+		searchSet = charSet;
+	}
+	
+	return searchSet;
+}
+
+NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL bigword)
+{    
+    NSInteger maxIndex = [string length] - 1;
+	if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
+	
+	NSInteger rangeStart = index;
+	NSInteger rangeEnd = index;
+	
+	// repeatCount loop starts here
+	while (repeatCount--)
+	{
+		// Skip past newline
+		while (index < maxIndex && testNewLine([string characterAtIndex:index]))
+		{
+			++index;
+		}
+		
+		if (index > maxIndex) { break; }
+		
+		NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
+		NSCharacterSet *wordSet = nil;
+		
+		if (bigword)
+		{
+			NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
+			wordSet = charSet;
+		}
+		else
+		{
+			NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+			[charSet addCharactersInString:@"_"];
+			wordSet = charSet;
+		}
+		
+		unichar initialChar = [string characterAtIndex:index];
+		BOOL initialCharIsWs = [wsSet characterIsMember:initialChar];
+		NSCharacterSet *searchSet = get_search_set(initialChar, wsSet, wordSet);
+		
+		NSInteger begin = index;
+		NSInteger end = MIN(index + 1, maxIndex);
+		
+		// Seek backwards
+		begin = seek_backwards(string, begin, searchSet);
+		
+		// Seek forwards
+		end = seek_forwards(string, end, searchSet);
+		
+		// For inclusive mode, try to eat some more
+		if (inclusive)
+		{
+			NSInteger newEnd = end;
+			
+			if (end < maxIndex)
+			{
+				if (initialCharIsWs)
+				{
+					unichar c = [string characterAtIndex:end];
+					searchSet = get_search_set(c, wsSet, wordSet);
+					newEnd = seek_forwards(string, end, searchSet);
+				}
+				else
+				{
+					newEnd = seek_forwards(string, end, wsSet);
+				}
+			}
+			
+			// If we couldn't eat anything from the end, try to eat start
+			NSInteger newBegin = begin;
+			if (newEnd == end)
+			{
+				if (!initialCharIsWs)
+				{
+					newBegin = seek_backwards(string, begin, wsSet);
+					
+					// Never remove a line's leading whitespace
+					if (newBegin == 0 || testNewLine([string characterAtIndex:newBegin - 1]))
+					{
+						newBegin = begin;
+					}
+				}
+			}
+			
+			begin = newBegin;
+			end = newEnd;
+		}
+		
+		index = end;
+		
+		rangeStart = MIN(rangeStart, begin);
+		rangeEnd = MAX(rangeEnd, end);
+	}
+    
+    return NSMakeRange(rangeStart, rangeEnd - rangeStart);
+}
+
+NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape);
+NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape)
+{
+	BOOL ignoreNextChar = NO;
+	
+    while (start < max)
     {
-        unichar ch = characterAtIndex(h, start);
-        if (ch == quote)     { return start; }
-        if (!ignoreEscape && ch == '\\')
-        {
-            ++start;
-            if (start > max) { return -1; }
-            ch = characterAtIndex(h, start);
-        }
-        if (testNewLine(ch)) { return -1; }
-        ++start;
+        unichar ch = [string characterAtIndex:start];
+		if (testNewLine(ch)) { break; }
+		
+		if (!ignoreNextChar || ignoreEscape)
+		{
+			if (ch == quote)     { return start; }
+			ignoreNextChar = (ch == '\\');
+		}
+		else
+		{
+			ignoreNextChar = NO;
+		}
+		
+		++start;
     }
     
     return -1;
 }
 
-NSInteger find_prev_quote(NSStringHelper* h, NSInteger start, unichar quote, BOOL ignoreEscape);
-NSInteger find_prev_quote(NSStringHelper* h, NSInteger start, unichar quote, BOOL ignoreEscape)
+NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL ignoreEscape);
+NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL ignoreEscape)
 {
-    while (start > 0)
+	NSInteger pendingi = -1;
+	NSInteger pendingQuote = -1;
+	
+    while (start >= 0)
     {
-        --start;
-        if (testNewLine(characterAtIndex(h, start))) { break; }
-        
-        int n = 1;
-        if (!ignoreEscape)
-        {
-            while (start - n >= 0)
-            {
-                unichar ch = characterAtIndex(h, start - n);
-                if (ch == '\\') {
-                    ++n;
-                } else if (testNewLine(ch))
-                {
-                    --n;
-                    break;
-                } else {
-                    break;
-                }
-            }
-        }
-        
-        if (n & 1) {
-            // Even escape.
-            if (characterAtIndex(h, start) == quote) { return start; }
-        } else {
-            start -= (n - 1);
-        }
+		unichar ch = [string characterAtIndex:start];	
+        if (testNewLine(ch)) { break; }
+		
+		if (ch == '\\' && !ignoreEscape)
+		{
+			NSInteger temp = pendingi;
+			pendingi = pendingQuote;
+			pendingQuote = temp;
+		}
+		else
+		{
+			pendingQuote = -1;
+		}
+		
+		if (pendingi >= 0)
+		{
+			break;
+		}
+		
+		if (ch == quote) 
+		{ 
+			pendingi = start;
+		}
+		
+		--start;
     }
     
-    return -1;
+    return pendingi;
 }
 
-NSRange xv_current_quote(int repeatCount, BOOL inclusive, char what)
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what)
 {
-    // Rules:
-    // 1. If the quote is escaped, ignore it, unless it's the first quote in the line.
-    // 2. If the char under the caret is a quote, mark it as openning if there are even
-    //    quotes before. Otherwise, mark it as closing.
-    // 3. Find out the closest quotes near the caret.
-    // 4. If repeatCount is greater than 1, it will always include the quote,
-    //    regardless of inclusive.
-    // 5. a" will include the trailing space, if no trailing space, extend to include any
-    //    preceeding space.
-    
-    NSString* string = xv_buffer.string;
-    NSInteger idx    = xv_buffer.index;
-    NSInteger maxIdx = [string length] - 1;
-    NSInteger start  = 0;
-    NSInteger end    = 0;
-    
-    NSStringHelper helper;
-    NSStringHelper* h = &helper;
-    
-    NSInteger oldIdx = xv_buffer.index;
-    
-    if ([string characterAtIndex:idx] == what)
-    {
-        initNSStringHelper(h, string, maxIdx + 1);
-        // Find start quote.
-        xv_buffer.index = idx;
-        start = xv_0();
-        xv_buffer.index = oldIdx;
-        
-        end   = start;
-        while (YES)
-        {
-            start = find_next_quote(h, start,   maxIdx, what, YES);
-            if (start == -1) { return NSMakeRange(NSNotFound, 0); }
-            end   = find_next_quote(h, start+1, maxIdx, what, YES);
-            if (end   == -1) { return NSMakeRange(NSNotFound, 0); }
-            if (start <= idx && idx <= end) { break; } // Found.
-            start = end + 1;
-        }
-    } else {
-        initNSStringHelperBackward(h, string, maxIdx + 1);
-        start = find_prev_quote(h, idx, what, NO); 
-        
-        initNSStringHelper(h, string, maxIdx + 1);
-        if (start == -1) {
-            // No quote before. Find quote afterward.
-            start = find_next_quote(h, idx, maxIdx, what, YES);
-            if (start == -1) { return NSMakeRange(NSNotFound, 0); }
-        }
-        end   = find_next_quote(h, idx + 1, maxIdx, what, YES);
-        if (end == -1) { return NSMakeRange(NSNotFound, 0); }
-    }
-    
-    if (inclusive)
-    {
-        xv_buffer.index = end;
-        end = xv_w(1, NO);
-        xv_buffer.index = oldIdx;
-        
-        if (end > maxIdx || !testWhiteSpace(characterAtIndex(h, end - 1)))
-        {
-            // Include preceeding whitespace.
-            while (start > 0 && testWhiteSpace([string characterAtIndex:start - 1]))
-                --start;
-        }
-    } else {
-        if (repeatCount > 1) {
-            ++end;
-        } else {
-            ++start;
-        }
-    }
-    
-    return NSMakeRange(start, end - start);
+	NSInteger begin = find_prev_quote(string, index, what, NO);
+	if (begin == -1)
+	{
+		begin = find_next_quote(string, index, [string length], what, NO);
+	}
+	
+	if (begin == -1)
+	{
+		return NSMakeRange(NSNotFound, 0);
+	}
+	
+	NSInteger end = find_next_quote(string, begin + 1, [string length], what, NO);
+	if (end == -1)
+	{
+		return NSMakeRange(NSNotFound, 0);
+	}
+	
+	if (inclusive)
+	{
+		end = end + 1;
+		
+		NSInteger newBegin = begin;
+		NSInteger newEnd = end;
+		
+		if (index >= begin)
+		{
+			newEnd = seek_forwards(string, end, [NSCharacterSet whitespaceCharacterSet]);
+		}
+		
+		if (index < begin || newEnd == end)
+		{
+			newBegin = seek_backwards(string, begin, [NSCharacterSet whitespaceCharacterSet]);
+		}
+		
+		begin = newBegin;
+		end = newEnd;
+	}
+	else
+	{
+		begin = begin + 1;
+	}
+	
+	return NSMakeRange(begin, end - begin);
 }
-NSRange xv_current_tagblock(int repeatCount, BOOL inclusive)
+										  
+										  
+NSRange xv_current_tagblock(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive)
 {
     // TODO: Implement tag block text object.
     return NSMakeRange(NSNotFound, 0);
 }
 
-NSInteger xv_findChar(int repeatCount, char command, unichar what, BOOL inclusive)
+NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char command, unichar what, BOOL inclusive)
 {
     int increment = command <= 'Z' ? -1 : 1; // Capital means backward.
     
-    NSString* string = xv_buffer.string;
     NSInteger maxIdx = [string length] - 1;
-    NSInteger idx    = xv_buffer.index;
+    NSInteger idx    = index;
     NSInteger result = idx;
     
     NSStringHelper  help;

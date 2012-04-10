@@ -8,7 +8,7 @@
 
 #import "XVimSourceTextView.h"
 #import "XVimEvaluator.h"
-#import "XVim.h"
+#import "XVimWindow.h"
 #import "Hooker.h"
 #import "Logger.h"
 #import "NSTextView+VimMotion.h"
@@ -63,10 +63,7 @@
 - (void)setSelectedRange:(NSRange)charRange {
     // Call original method
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
     [base setSelectedRange_:charRange];
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    [xvim setNextSearchBaseLocation: charRange.location];
     return;
 }
 
@@ -74,8 +71,8 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     NSRange newCharRange = charRange;
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if( xvim.handlingMouseClick && xvim.mode != MODE_INSERT && ![base isValidCursorPosition:charRange.location] ){
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if( window.handlingMouseClick && window.mode != MODE_INSERT && ![base isValidCursorPosition:charRange.location] ){
         newCharRange.location = charRange.location - 1;
     }
     
@@ -95,22 +92,22 @@
     // Call original method
     [base initWithCoder_:aDecoder];
     
-    XVim* xvim = [[XVim alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)]; // XVim is dummy NSView object. This is not worked as a view. Just because to keep this object as subview in DVTSourceTextView 
-    // Bind DVTSourceTextView and XVim object by tagging    
-    xvim.tag = XVIM_TAG;
-    [base addSubview:xvim];
+    XVimWindow* window = [[XVimWindow alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)]; // XVimWindow is dummy NSView object. This is not worked as a view. Just because to keep this object as subview in DVTSourceTextView 
+    // Bind DVTSourceTextView and XVimWindow object by tagging    
+    window.tag = XVIM_TAG;
+    [base addSubview:window];
     return (id)base;
 }
 
 - (void)viewDidMoveToSuperview{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
-	XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if( nil != xvim ){
-        TRACE_LOG(@"XVim object found");
-        XVimCommandLine* cmdline = [[[XVimCommandLine alloc] initWithXVim:xvim] autorelease];
-        xvim.cmdLine = cmdline; 
-        xvim.sourceView = base;
+	XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if( nil != window ){
+        TRACE_LOG(@"XVimWindow object found");
+        XVimCommandLine* cmdline = [[[XVimCommandLine alloc] initWithWindow:window] autorelease];
+        window.cmdLine = cmdline; 
+        window.sourceView = base;
         
         // Try to find parent scroll view
         NSScrollView* scrollView = [base enclosingScrollView]; // DVTSourceTextScrollView
@@ -126,15 +123,15 @@
             ERROR_LOG(@"DVTSourceTExtScrollView not found.");
         }
     }else{
-        ERROR_LOG(@"XVim object not found.");
+        ERROR_LOG(@"XVimWindow object not found.");
     }
 }
 
 -  (void)keyDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if( nil == xvim ){
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if( nil == window ){
         [base keyDown_:theEvent];
         return;
     }
@@ -150,7 +147,7 @@
     unichar charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
     [Logger logWithLevel:LogDebug format:@"Obj:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode];
     
-    if( [xvim handleKeyEvent:theEvent] ){
+    if( [window handleKeyEvent:theEvent] ){
         return;
     }
     // Call Original keyDown:
@@ -162,16 +159,16 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     TRACE_LOG(@"got a mouseDown:");
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if( nil == xvim ){
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if( nil == window ){
         [base mouseDown_:theEvent];
         return;
     }
     
     // Call Original mouseDown:
-    xvim.handlingMouseClick = YES;
+    window.handlingMouseClick = YES;
     [base mouseDown_:theEvent]; // this loops until it gets a mouse up
-    xvim.handlingMouseClick = NO;
+    window.handlingMouseClick = NO;
     return;
 }
 
@@ -179,14 +176,14 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     TRACE_LOG(@"got a mouseUp:");
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if( nil == xvim ){
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if( nil == window ){
         [base mouseUp_:theEvent];
         return;
     }
 	
     // Call Original mouseDown:
-    xvim.handlingMouseClick = NO;
+    window.handlingMouseClick = NO;
     [base mouseUp_:theEvent];
     return;
 }
@@ -194,11 +191,11 @@
 - (void)drawRect:(NSRect)dirtyRect{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
     [base drawRect_:dirtyRect];
     
-    if (MODE_VISUAL == xvim.mode){
-        NSUInteger glyphIndex = xvim.currentEvaluator.insertionPoint;
+    if (MODE_VISUAL == window.mode){
+        NSUInteger glyphIndex = [window.currentEvaluator insertionPointInWindow:window];
         NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[base textContainer]];
         
         [[[base insertionPointColor] colorWithAlphaComponent:0.5] set];
@@ -222,16 +219,16 @@
 - (BOOL)shouldDrawInsertionPoint{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    return (MODE_VISUAL != xvim.mode);
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    return (MODE_VISUAL != window.mode);
 }
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == xvim.mode){
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if(MODE_INSERT == window.mode){
         [base _drawInsertionPointInRect_:aRect color:aColor];
     }else{
         [base drawInsertionPointInRect:aRect color:aColor turnedOn:YES];
@@ -242,8 +239,8 @@
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
-    XVim* xvim = [base viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == xvim.mode){
+    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if(MODE_INSERT == window.mode){
         [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
     }
     else{

@@ -9,21 +9,16 @@
 #import <AppKit/AppKit.h>
 #import "XVimCommandField.h"
 
-@class XVim;
+@class XVimWindow;
 
-@interface XVimCommandLine : NSView{
-    XVimCommandField* _command;
-    NSTextField* _status;
-}
+@interface XVimCommandLine : NSView
 @property NSInteger tag;
-@property(retain) NSString* mode;
-@property(strong) NSString* additionalStatus;
 
+- (id)initWithWindow:(XVimWindow*)window;
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view;
 - (void)didFrameChanged:(NSNotification*)notification;
 - (void)setFocusOnCommandWithFirstLetter:(NSString*)first;
 
-- (id)initWithXVim:(XVim*)xvim;
 - (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt;
 
 @end

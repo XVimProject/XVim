@@ -30,9 +30,9 @@
     /*
 	 NSTextView* view = textView; // DVTSourceTextView
 	 
-	 XVim* xvim = [view viewWithTag:XVIM_TAG];
+	 XVim* window = [view viewWithTag:XVIM_TAG];
 	 if( nil != view ){
-	 if( xvim.mode != MODE_INSERT ){
+	 if( window.mode != MODE_INSERT ){
 	 NSRange r = [[newSelectedCharRanges objectAtIndex:0] rangeValue];
 	 if( ![view isValidCursorPosition:r.location] ){
 	 NSValue* val;

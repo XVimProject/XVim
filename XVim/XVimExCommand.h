@@ -8,8 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-@class XVim;
-
 // This file corresponds Vim's ex_cmds.h
 // Wondering if we can reuse ex_*.* files in Vim...
 
@@ -53,6 +51,8 @@
 //#endif
 //};
 
+@class XVimWindow;
+
 @interface XVimExArg : NSObject{
 }
 @property (retain) NSString* arg;
@@ -74,9 +74,7 @@
 
 @interface XVimExCommand : NSObject{
     NSArray* _excommands;
-    XVim* _xvim;
 }
 
-- (id)initWithXVim:(XVim*)xvim;
-- (void)executeCommand:(NSString*)cmd;
+- (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window;
 @end

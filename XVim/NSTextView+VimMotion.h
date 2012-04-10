@@ -7,6 +7,8 @@
 //
 
 #import "NSTextView+VimMotion.h"
+#import "XVimMotionType.h"
+
 ////////////////////////
 // Term Definitions   //
 ////////////////////////
@@ -218,7 +220,9 @@ BOOL isKeyword(unichar ch);
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
 - (NSUInteger)lineNumber:(NSUInteger)index;
 - (NSUInteger)numberOfLines;
-    
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+ 
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
@@ -232,7 +236,7 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (void)scrollToCursor;
+- (void)scrollTo:(NSUInteger)location;
     
 // Case changes. These functions are all range checked.
 - (void)toggleCaseForRange:(NSRange)range;
