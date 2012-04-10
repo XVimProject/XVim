@@ -385,6 +385,7 @@
     // Redo should not keep anything selected
     NSRange r = [view selectedRange];
     [view setSelectedRange:NSMakeRange(r.location, 0)];
+	[view adjustCursorPosition];
     return nil;
 }
 
@@ -422,6 +423,7 @@
     // Undo should not keep anything selected
     NSRange r = [view selectedRange];
     [view setSelectedRange:NSMakeRange(r.location, 0)];
+	[view adjustCursorPosition];
     return nil;
 }
 
