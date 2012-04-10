@@ -56,7 +56,7 @@ typedef enum {
 @interface XVimEvaluator : NSObject
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
-- (XVimEvaluator*)defaultNextEvaluatorWithXVim:(XVimWindow*)window;
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
