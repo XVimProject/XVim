@@ -127,7 +127,7 @@
     if( eol != NSNotFound ){
         [view setSelectedRangeWithBoundsCheck:range.location To:eol+1];
         if( ![view isEOF:range.location] ){
-            [view cut:self]; // cut with selection with {EOF,0} cause exception. This is a little strange since  setSelectedRange with {EOF,0} does not cause any exception...
+            [view del:self]; // cut with selection with {EOF,0} cause exception. This is a little strange since  setSelectedRange with {EOF,0} does not cause any exception...
         }
     }
     
@@ -179,7 +179,7 @@
     NSUInteger length = to - from - 1;
     if (length > 0){
         [view setSelectedRange:NSMakeRange(from, length)];
-        [view cut:self];
+        [view del:self];
         
         // Bounds check
         if (from == range.location && ![view isBlankLine:from]){
@@ -407,7 +407,7 @@
 	// Xcode crashes if we cut a zero length selection
 	if (replacementRange.length > 0)
 	{
-		[view cut:self];
+		[view cut:self]; // Can't use del here since we may want to wind up at end of line
 	}
 	
     return [[XVimInsertEvaluator alloc] initOneCharMode:NO withRepeat:1];
@@ -465,7 +465,7 @@
         }
         [view moveForwardAndModifySelection:self];
     }
-    [view cut:self];
+    [view del:self];
     return nil;
 }
 
@@ -483,7 +483,7 @@
             break;
         [view moveBackwardAndModifySelection:self]; 
     }
-    [view cut:self];
+    [view del:self];
     return nil;
 }
 

@@ -209,6 +209,9 @@ BOOL isKeyword(unichar ch);
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
+// Deletes the selected range and adjusts cursor position
+- (void)del:(id)sender;
+
 // Clamps range to end of line
 - (void)clampRangeToEndOfLine:(NSRange*)range;
 

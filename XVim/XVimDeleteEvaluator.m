@@ -198,12 +198,12 @@
         // this is vi behavior.
         from--;
         [view setSelectedRange:NSMakeRange(from, 1)];
-        [view cut:self];
+        [view del:self];
         return nil;
     }
     
     [view selectOperationTargetFrom:from To:to Type:type];
-    [view cut:self];
+    [view del:self];
     
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
