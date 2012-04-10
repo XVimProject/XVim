@@ -12,6 +12,8 @@
 #import "XVimYankEvaluator.h"
 #import "DVTSourceTextView.h"
 #import "XVimKeymapProvider.h"
+#import "XVimTextObjectEvaluator.h"
+#import "XVimSelectAction.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -24,11 +26,20 @@
     self = [super init];
     if (self) {
         _mode = mode;
+		_begin = NSNotFound;
     }
     return self;
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorWithXVim:(XVimWindow*)window
+- (id)initWithMode:(VISUAL_MODE)mode withRange:(NSRange)range {
+	if (self = [self initWithMode:mode]) {
+		_begin = range.location;
+		_insertion = MAX(_begin, range.location + range.length - 1);
+	}
+	return self;
+}
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
 {
     // This is quick hack. When unsupported keys are pressed in Visual mode we have to set selection
     // because in "eval::" method we cancel the selection temporarily to handle motion.
@@ -36,27 +47,34 @@
     // we do not need to call updateSelection.
     // Since this method is called when unsupported keys are pressed I use here to call updateSelection but its not clear why we call this here.
     // We should make another process for this.
-    [self updateSelectionForXVim:window]; 
+    [self updateSelectionInWindow:window]; 
     return self;
 }
 
 - (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
-    DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
-    NSRange cur = [view selectedRange];
-    _begin = cur.location;
-    _insertion = cur.location + cur.length;
-    if( _mode == MODE_CHARACTER ){
-        [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
-    }
-    if( _mode == MODE_LINE ){
-        NSUInteger head = [view headOfLine:cur.location];
-        NSUInteger end = [view endOfLine:cur.location];
-        if( NSNotFound != head && NSNotFound != end ){
-            [view setSelectedRangeWithBoundsCheck:head To:end+1];
-        }else{
-            [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
-        }
-    }
+	
+	if (_begin == NSNotFound)
+	{
+		DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
+		NSRange cur = [view selectedRange];
+		if( _mode == MODE_CHARACTER ){
+			_begin = cur.location;
+			_insertion = cur.location;
+		}
+		if( _mode == MODE_LINE ){
+			NSUInteger head = [view headOfLine:cur.location];
+			NSUInteger end = [view endOfLine:cur.location];
+			if( NSNotFound != head && NSNotFound != end ){
+				_begin = head;
+				_insertion = end;
+			}else{
+				_begin = cur.location;
+				_insertion = cur.location;
+			}
+		}
+	}
+	
+	[self updateSelectionInWindow:window];
     
     return MODE_VISUAL;
 }
@@ -72,13 +90,13 @@
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
     if (nextEvaluator == self){
-        [self updateSelectionForXVim:window];   
+        [self updateSelectionInWindow:window];   
     }
     return nextEvaluator;
 }
 
 
-- (void)updateSelectionForXVim:(XVimWindow*)window
+- (void)updateSelectionInWindow:(XVimWindow*)window
 {
     NSTextView* view = [window sourceView];
     if( _mode == MODE_CHARACTER ){
@@ -105,32 +123,44 @@
 
 - (XVimEvaluator*)C_b:(XVimWindow*)window{
     _insertion = [[window sourceView] pageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
 - (XVimEvaluator*)C_d:(XVimWindow*)window{
     _insertion = [[window sourceView] halfPageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
 - (XVimEvaluator*)C_f:(XVimWindow*)window{
     _insertion = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
+- (XVimEvaluator*)a:(XVimWindow*)window
+{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
+	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
+																				  from:_insertion
+																				inMode:MODE_VISUAL
+																			withParent:self
+																				repeat:1 
+																			 inclusive:YES];
+	return evaluator;
+}
 
 - (XVimEvaluator*)c:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:YES];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:YES];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
@@ -138,15 +168,28 @@
 
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE inWindow:window];
     
 }
 
+- (XVimEvaluator*)i:(XVimWindow*)window
+{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
+	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
+																				  from:_insertion
+																				inMode:MODE_VISUAL
+																			withParent:self
+																				repeat:1 
+																			 inclusive:NO];
+	return evaluator;
+}
+
 - (XVimEvaluator*)u:(XVimWindow*)window {
-	[self updateSelectionForXVim:window];
+	[self updateSelectionInWindow:window];
 	NSTextView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view lowercaseRange:r];
@@ -155,7 +198,7 @@
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
-	[self updateSelectionForXVim:window];
+	[self updateSelectionInWindow:window];
 	NSTextView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view uppercaseRange:r];
@@ -165,7 +208,7 @@
 
 - (XVimEvaluator*)C_u:(XVimWindow*)window{
     _insertion = [[window sourceView] halfPageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
@@ -175,7 +218,7 @@
         return  [self ESC:window];
     }
     _mode = MODE_CHARACTER;
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
@@ -185,7 +228,7 @@
         return  [self ESC:window];
     }
     _mode = MODE_LINE;
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
@@ -198,14 +241,14 @@
 }
 
 - (XVimEvaluator*)y:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
     XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
 	
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
@@ -220,7 +263,7 @@
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftRight:self];
@@ -233,7 +276,7 @@
 
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     DVTSourceTextView* view = [window sourceView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftLeft:self];
@@ -245,7 +288,7 @@
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
-	[self updateSelectionForXVim:window];
+	[self updateSelectionInWindow:window];
 	NSTextView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view toggleCaseForRange:r];
@@ -257,7 +300,7 @@
     //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
     _insertion = to;
-    [self updateSelectionForXVim:window];
+    [self updateSelectionInWindow:window];
     return self;
 }
 @end

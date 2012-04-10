@@ -11,5 +11,10 @@
 @class XVimOperatorAction;
 
 @interface XVimTextObjectEvaluator : XVimEvaluator
-- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction repeat:(NSUInteger)repeat inclusive:(BOOL)inclusive;
+- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+					from:(NSUInteger)location
+					  inMode:(XVIM_MODE)mode
+					withParent:(XVimEvaluator*)eval
+					  repeat:(NSUInteger)repeat 
+				   inclusive:(BOOL)inclusive;
 @end
