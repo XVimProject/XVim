@@ -196,24 +196,26 @@
 
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
-    NSUInteger searchStart = begin.location;
+    NSUInteger searchStart = NSNotFound;
     NSUInteger firstNonBlank = NSNotFound;
-    while (![view isEOF:searchStart]) {
-        unichar curChar = [string characterAtIndex:searchStart];
+	
+	for (NSUInteger i = begin.location; ![view isEOF:i]; ++i)
+	{
+        unichar curChar = [string characterAtIndex:i];
         if (isNewLine(curChar)){
-            searchStart = NSNotFound;
             break;
         }
 
         if (isKeyword(curChar)){
+			searchStart = i;
             break;
         }
 
         if (isNonBlank(curChar) && firstNonBlank == NSNotFound){
-            firstNonBlank = searchStart;
+            firstNonBlank = i;
         }
 
-        ++searchStart;
+        ++i;
     }
 
     if (searchStart == NSNotFound){
