@@ -48,12 +48,7 @@
  *
  **/
 
-typedef enum{
-    MOTION_OPTION_NONE,
-    LEFT_RIGHT_WRAP,
-    LEFT_RIGHT_NOWRAP,
-    BIGWORD // for 'WORD' motion
-} MOTION_OPTION;
+#include "XVimMotionOption.h"
 
 typedef struct _XVimWordInfo{
     BOOL isFirstWordInALine;

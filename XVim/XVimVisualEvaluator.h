@@ -24,6 +24,7 @@ typedef enum{
 }
 - (NSUInteger) insertionPointInWindow:(XVimWindow*)window;
 - (id)initWithMode:(VISUAL_MODE)mode;
-- (void)updateSelectionForXVim:(XVimWindow*)window;
+- (id)initWithMode:(VISUAL_MODE)mode withRange:(NSRange)range;
+- (void)updateSelectionInWindow:(XVimWindow*)window;
 - (XVimEvaluator*)ESC:(XVimWindow*)window;
 @end

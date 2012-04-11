@@ -44,12 +44,22 @@
 }
 
 - (XVimEvaluator*)a:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:YES];
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
+																			 from:[window cursorLocation]
+																		   inMode:MODE_NORMAL
+																	   withParent:nil
+																		   repeat:_repeat 
+																		inclusive:YES];
 	return eval;
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction repeat:_repeat inclusive:NO];
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
+																			 from:[window cursorLocation]
+																		   inMode:MODE_NORMAL
+																	   withParent:nil
+																		   repeat:_repeat 
+																		inclusive:NO];
 	return eval;
 }
 

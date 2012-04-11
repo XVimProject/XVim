@@ -34,7 +34,7 @@
 	}
     else{
         TRACE_LOG(@"SELECTOR %@ not found", NSStringFromSelector(handler));
-        return [self defaultNextEvaluatorWithXVim:window];
+        return [self defaultNextEvaluatorInWindow:window];
     }
 }
 
@@ -43,7 +43,7 @@
 	return [keymapProvider keymapForMode:MODE_GLOBAL_MAP];
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorWithXVim:(XVimWindow*)window{
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
     return nil;
 }
 
