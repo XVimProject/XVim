@@ -264,8 +264,8 @@
 - (void)keyDown_:(NSEvent *)theEvent;
 
 - (void)mouseDown_:(NSEvent *)theEvent;
-
 - (void)mouseUp_:(NSEvent *)theEvent;
+- (void)mouseDragged_:(NSEvent *)theEvent;
 
 - (void)drawRect:(NSRect)dirtyRect;
 - (void)drawRect_:(NSRect)dirtyRect;

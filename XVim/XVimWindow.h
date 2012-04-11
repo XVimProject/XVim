@@ -21,7 +21,6 @@
 
 @property NSInteger tag;
 @property (readonly) NSInteger mode;
-@property BOOL handlingMouseClick;
 
 @property(retain) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
@@ -39,7 +38,12 @@
 - (NSUInteger)cursorLocation; // Same as selectedRange.location
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;
+- (void)beginMouseEvent:(NSEvent*)event;
+- (void)endMouseEvent:(NSEvent*)event;
+- (NSRange)restrictSelectedRange:(NSRange)range;
 - (NSMutableDictionary *)getLocalMarks;
+
+- (void)setEvaluator:(XVimEvaluator*)evaluator;
 
 // Message from XVimCommandField 
 - (BOOL)commandCanceled;

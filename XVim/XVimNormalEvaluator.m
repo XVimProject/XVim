@@ -47,8 +47,10 @@
     return self;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window{	
+	[[window sourceView] adjustCursorPosition];
 	[super becameHandlerInWindow:window];
+	
     //[[window sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
         [self.playbackRegister playbackWithHandler:window withRepeatCount:self.playbackCount];

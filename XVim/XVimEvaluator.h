@@ -59,6 +59,9 @@ typedef enum {
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
 
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window;
+- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
+
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
 - (void)becameHandlerInWindow:(XVimWindow*)window;
 - (XVIM_MODE)mode;

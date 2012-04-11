@@ -21,6 +21,7 @@
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
 	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
+	BOOL _handlingMouseEvent;
 }
 - (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister;
 @end
@@ -31,26 +32,38 @@
 @synthesize sourceView = _sourceView;
 @synthesize mode = _mode;
 @synthesize recordingRegister = _recordingRegister;
-@synthesize handlingMouseClick = _handlingMouseClick;
 @synthesize staticMessage = _staticMessage;
 @synthesize errorMessage = _errorMessage;
 
 - (id) initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
-        _mode = MODE_NORMAL;
         _tag = XVIM_TAG;
-        _currentEvaluator = [[XVimNormalEvaluator alloc] init];
-        [_currentEvaluator becameHandlerInWindow:self];
+		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
-        
 		_recordingRegister = nil;
-        _handlingMouseClick = NO;
 	}
 	return self;
 }
 
 - (void)setMode:(NSInteger)mode{
     _mode = mode;
+}
+
+- (void)setEvaluator:(XVimEvaluator*)evaluator {
+	if (evaluator != _currentEvaluator)
+	{
+		_mode = [evaluator mode]; 
+		_currentEvaluator = evaluator;
+		[evaluator becameHandlerInWindow:self];
+		
+		XVIM_MODE newMode = [evaluator mode];
+		if (self.mode != MODE_CMDLINE){
+			// Special case for cmdline mode. I don't like this, but
+			// don't have time to refactor cmdline mode.
+			self.mode = newMode;
+		}
+		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
+	}
 }
 
 - (NSString*)modeName{
@@ -102,20 +115,7 @@
 		nextEvaluator = [[XVimNormalEvaluator alloc] init];
 	}
 	
-	if( _currentEvaluator != nextEvaluator ){
-		[_currentEvaluator release];
-		_currentEvaluator = nextEvaluator;
-		
-		[nextEvaluator becameHandlerInWindow:self];
-		XVIM_MODE newMode = [nextEvaluator mode];
-		if (self.mode != MODE_CMDLINE){
-			// Special case for cmdline mode. I don't like this, but
-			// don't have time to refactor cmdline mode.
-			self.mode = newMode;
-		}
-		
-		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
-	}
+	[self setEvaluator:nextEvaluator];
 }
 
 - (void)handleTextInsertion:(NSString*)text {
@@ -222,6 +222,27 @@
         default:
             break;
     }
+}
+
+- (void)beginMouseEvent:(NSEvent*)event
+{
+	_handlingMouseEvent = YES;
+}
+
+- (void)endMouseEvent:(NSEvent*)event
+{
+	_handlingMouseEvent = NO;
+	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
+	[self setEvaluator:next];
+}
+
+- (NSRange)restrictSelectedRange:(NSRange)range
+{
+	if (_handlingMouseEvent)
+	{
+		range = [_currentEvaluator restrictSelectedRange:range inWindow:self];
+	}
+	return range;
 }
 
 @end

@@ -39,7 +39,10 @@
     [Hooker hookMethod:@selector(mouseDown:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseDown:) ) keepingOriginalWith:@selector(mouseDown_:)];
 	
     // Hook mouseUp:
-    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseUp:) ) keepingOriginalWith:@selector(mouseUp_:)];    
+    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseUp:) ) keepingOriginalWith:@selector(mouseDragged_:)];    
+	
+    // Hook mouseDragged:
+    [Hooker hookMethod:@selector(mouseDragged:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseDragged:) ) keepingOriginalWith:@selector(mouseUp_:)];    
 	
     // Hook drawRect:
     [Hooker hookMethod:@selector(drawRect:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(drawRect:)) keepingOriginalWith:@selector(drawRect_:)];
@@ -69,15 +72,12 @@
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    NSRange newCharRange = charRange;
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( window.handlingMouseClick && window.mode != MODE_INSERT && ![base isValidCursorPosition:charRange.location] ){
-        newCharRange.location = charRange.location - 1;
-    }
-    
-    // Call original method
-    [base setSelectedRange_:newCharRange affinity:affinity stillSelecting:flag];
+	XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if (window) 
+	{
+		charRange = [window restrictSelectedRange:charRange];
+	}
+    [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
     return;
 }
 
@@ -157,34 +157,32 @@
 
 -  (void)mouseDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    TRACE_LOG(@"got a mouseDown:");
+
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( nil == window ){
-        [base mouseDown_:theEvent];
-        return;
+	if (window)
+	{
+		[window beginMouseEvent:theEvent];
+	}
+   
+	[base mouseDown_:theEvent]; // this loops until it gets a mouse up
+
+    if (window)
+	{
+		[window endMouseEvent:theEvent];
     }
-    
-    // Call Original mouseDown:
-    window.handlingMouseClick = YES;
-    [base mouseDown_:theEvent]; // this loops until it gets a mouse up
-    window.handlingMouseClick = NO;
-    return;
+	
+	return;
 }
 
 -  (void)mouseUp:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    TRACE_LOG(@"got a mouseUp:");
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( nil == window ){
-        [base mouseUp_:theEvent];
-        return;
-    }
-	
-    // Call Original mouseDown:
-    window.handlingMouseClick = NO;
     [base mouseUp_:theEvent];
+	return;
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent {
+	DVTSourceTextView *base = (DVTSourceTextView*)self;
+    [base mouseDragged_:theEvent];
     return;
 }
 
