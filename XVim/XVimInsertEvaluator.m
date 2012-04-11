@@ -105,10 +105,12 @@
 }
 
 - (void)onFinishInsert:(XVimWindow*)window {
+	DVTSourceTextView *sourceView = [window sourceView];
+	
     if( !_insertedEventsAbort ){
         NSString *text = [self getInsertedTextInWindow:window];
         for( int i = 0 ; i < _repeat-1; i++ ){
-            [[window sourceView] insertText:text];
+            [sourceView insertText:text];
         }
     }
     
@@ -119,7 +121,16 @@
     }else if(self.lastInsertedText.length > 0){
         [[[XVim instance] findRegister:@"repeat"] appendText:self.lastInsertedText];
     }
-    [[[window sourceView] completionController] hideCompletions];
+    [[sourceView completionController] hideCompletions];
+	
+	// Set selection to one-before-where-we-were
+	NSUInteger insertionPoint = [self insertionPointInWindow:window];
+	NSUInteger headOfLine = [sourceView headOfLine:insertionPoint];
+	if (insertionPoint > 0 && headOfLine != insertionPoint && headOfLine != NSNotFound)
+	{
+		--insertionPoint;
+	}
+	[sourceView setSelectedRange:NSMakeRange(insertionPoint, 0)];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
