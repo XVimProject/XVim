@@ -16,7 +16,10 @@
 
 @implementation XVimEvaluator
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window {
+}
+
+- (XVIM_MODE)mode {
     return MODE_NORMAL;
 }
 

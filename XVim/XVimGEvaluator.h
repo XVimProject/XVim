@@ -10,5 +10,4 @@
 #import "XVimMotionArgumentEvaluator.h"
 
 @interface XVimGEvaluator : XVimMotionArgumentEvaluator
-
 @end

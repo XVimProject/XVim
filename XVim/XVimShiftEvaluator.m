@@ -19,10 +19,13 @@
 @implementation XVimShiftEvaluator
 
 - (id)initWithOperatorAction:(XVimOperatorAction*)action 
+				  withParent:(XVimEvaluator*)parent
 					  repeat:(NSUInteger)repeat 
 					 unshift:(BOOL)unshift
 {
-	if (self = [super initWithOperatorAction:action repeat:repeat])
+	if (self = [super initWithOperatorAction:action 
+								  withParent:parent
+									  repeat:repeat])
 	{
 		self->_unshift = unshift;
 	}

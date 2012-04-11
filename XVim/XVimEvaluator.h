@@ -60,5 +60,6 @@ typedef enum {
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window;
+- (void)becameHandlerInWindow:(XVimWindow*)window;
+- (XVIM_MODE)mode;
 @end

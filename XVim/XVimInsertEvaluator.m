@@ -59,8 +59,11 @@
     return self;
 }
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window{
     self.startRange = [window selectedRange];
+}
+
+- (XVIM_MODE)mode {
     return MODE_INSERT;
 }
 

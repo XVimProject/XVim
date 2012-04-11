@@ -106,7 +106,8 @@
 		[_currentEvaluator release];
 		_currentEvaluator = nextEvaluator;
 		
-		XVIM_MODE newMode = [_currentEvaluator becameHandlerInWindow:self];
+		[nextEvaluator becameHandlerInWindow:self];
+		XVIM_MODE newMode = [nextEvaluator mode];
 		if (self.mode != MODE_CMDLINE){
 			// Special case for cmdline mode. I don't like this, but
 			// don't have time to refactor cmdline mode.
