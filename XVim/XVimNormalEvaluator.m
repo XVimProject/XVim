@@ -48,6 +48,7 @@
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
+	[super becameHandlerInWindow:window];
     //[[window sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
         [self.playbackRegister playbackWithHandler:window withRepeatCount:self.playbackCount];
@@ -580,7 +581,7 @@
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
     [view scrollTo:[window cursorLocation]];
-    return nil;
+    return self;
 }
 
 // There are fewer invalid keys than valid ones so make a list of invalid keys.

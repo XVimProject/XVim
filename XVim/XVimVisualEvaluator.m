@@ -52,6 +52,7 @@
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
+	[super becameHandlerInWindow:window];
 	
 	if (_begin == NSNotFound)
 	{

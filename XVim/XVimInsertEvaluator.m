@@ -60,6 +60,7 @@
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
+	[super becameHandlerInWindow:window];
     self.startRange = [window selectedRange];
 }
 

@@ -17,13 +17,7 @@
 // When motion is generated motionFixedFrom:To:Type: method is called.
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
 
-@interface XVimMotionEvaluator : XVimNumericEvaluator {
-    
-@private    
-    NSUInteger _motionFrom;
-    NSUInteger _motionTo;
-    BOOL _forceMotionType; // linewise -> exclusive, exclusive <-> inclusive
-}
+@interface XVimMotionEvaluator : XVimNumericEvaluator 
 
 // Override this method to implement operations on motions.
 // There could be from < to (This means backwards motion)

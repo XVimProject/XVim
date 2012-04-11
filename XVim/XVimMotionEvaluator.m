@@ -33,6 +33,15 @@
 // How the motion is treated depends on a subclass of the XVimMotionEvaluator.
 // For example, XVimDeleteEvaluator will delete the letters represented by motion.
 
+@interface XVimMotionEvaluator() {
+    NSUInteger _motionFrom;
+    NSUInteger _motionTo;
+	NSUInteger _column;
+	BOOL _preserveColumn;
+	BOOL _forceMotionType;
+}
+@end
+
 @implementation XVimMotionEvaluator
 
 - (id)init
@@ -40,8 +49,37 @@
     self = [super init];
     if (self) {
         _forceMotionType = NO;
+		_column = NSNotFound;
     }
     return self;
+}
+
+- (NSUInteger)column
+{
+	return _column;
+}
+
+- (void)setColumnInWindow:(XVimWindow*)window
+{
+	if (!_preserveColumn)
+	{
+		_column = [[window sourceView] columnNumber:[self insertionPointInWindow:window]]; // TODO: Keep column somewhere else
+	}
+	_preserveColumn = NO;
+}
+
+- (void)preserveColumn
+{
+	_preserveColumn = YES;
+}
+
+- (void)becameHandlerInWindow:(XVimWindow*)window
+{
+	[super becameHandlerInWindow:window];
+	
+	if (_column == NSNotFound) {
+		[self setColumnInWindow:window];
+	}
 }
 
 // This is helper method commonly used by many key event handlers.
@@ -68,8 +106,12 @@
         } else if(type == CHARACTERWISE_INCLUSIVE) {
             type = CHARACTERWISE_EXCLUSIVE;
         }
-   }    
-    return [self motionFixedFrom:from To:to Type:type inWindow:window];
+	}
+	
+	XVimEvaluator *ret = [self motionFixedFrom:from To:to Type:type inWindow:window];
+	[self setColumnInWindow:window];
+	
+	return ret;
 }
 
 // Methods to override by subclass
@@ -203,14 +245,18 @@
 
 - (XVimEvaluator*)j:(XVimWindow*)window{
     NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger column = [[window sourceView] columnNumber:from]; // TODO: Keep column somewhere else
+    NSUInteger column = [self column];
+	[self preserveColumn];
+	
     NSUInteger to = [[window sourceView] nextLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
     NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger column = [[window sourceView] columnNumber:from]; // TODO: Keep column somewhere else
+    NSUInteger column = [self column];
+	[self preserveColumn];
+	
     NSUInteger to = [[window sourceView] prevLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
