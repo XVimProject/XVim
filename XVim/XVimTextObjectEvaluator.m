@@ -11,7 +11,6 @@
 #import "NSTextView+VimMotion.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
-#import "common.h"
 
 @interface XVimTextObjectEvaluator() {
 	XVimOperatorAction *_operatorAction;

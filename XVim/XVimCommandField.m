@@ -7,6 +7,7 @@
 //
 
 #import "XVimCommandField.h"
+#import "NSString+VimHelper.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 

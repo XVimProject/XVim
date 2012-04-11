@@ -19,6 +19,7 @@
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "NSTextView+VimMotion.h"
+#import "NSString+VimHelper.h"
 #import "DVTSourceTextView.h"
 
 
@@ -506,229 +507,41 @@
     return nil;
 }
 
-
-/*
- Definition of Sentence from gVim help
- 
- A paragraph begins after each empty line, and also at each of a set of
- paragraph macros, specified by the pairs of characters in the 'paragraphs'
- option.  The default is "IPLPPPQPP TPHPLIPpLpItpplpipbp", which corresponds to
- the macros ".IP", ".LP", etc.  (These are nroff macros, so the dot must be in
- the first column).  A section boundary is also a paragraph boundary.
- Note that a blank line (only containing white space) is NOT a paragraph
- boundary.
- Also note that this does not include a '{' or '}' in the first column.  When
- the '{' flag is in 'cpoptions' then '{' in the first column is used as a
- paragraph boundary |posix|.
- */
 - (XVimEvaluator*)LBRACE:(XVimWindow*)window{ // {
     NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    NSRange begin = [view selectedRange];
-    NSUInteger pos = begin.location;
-    if( pos == 0 ){
-        return nil;
-    }
-    if( pos == s.length )
-    {
-        pos = pos - 1;
-    }
-    NSUInteger prevpos = pos - 1;
-    NSUInteger paragraph_head = NSNotFound;
-    int paragraph_found = 0;
-    BOOL newlines_skipped = NO;
-    for( ; pos > 0 && NSNotFound == paragraph_head ; pos--,prevpos-- ){
-        unichar c = [s characterAtIndex:pos];
-        unichar prevc = [s characterAtIndex:prevpos];
-        if( [[NSCharacterSet newlineCharacterSet] characterIsMember:c] && [[NSCharacterSet newlineCharacterSet] characterIsMember:prevc]){
-            if( newlines_skipped ){
-                paragraph_found++;
-                if( [self numericArg] == paragraph_found ){
-                    paragraph_head = pos;
-                    break;
-                }else{
-                    newlines_skipped = NO;
-                }
-            }else{
-                // skip continuous newlines 
-                continue;
-            }
-        }else{
-            newlines_skipped = YES;
-        }
-    }
-    
-    if( NSNotFound == paragraph_head   ){
-        // begining of document
-        paragraph_head = 0;
-    }
-    
-    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    NSUInteger begin = [view selectedRange].location;
+    NSUInteger paragraph_head = [view paragraphsBackward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)RBRACE:(XVimWindow*)window{ // }
     NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    NSRange begin = [view selectedRange];
-    NSUInteger pos = begin.location;
-    if( 0 == pos ){
-        pos = 1;
-    }
-    NSUInteger prevpos = pos - 1;
-    
-    NSUInteger paragraph_head = NSNotFound;
-    int paragraph_found = 0;
-    BOOL newlines_skipped = NO;
-    for( ; pos < s.length && NSNotFound == paragraph_head ; pos++,prevpos++ ){
-        unichar c = [s characterAtIndex:pos];
-        unichar prevc = [s characterAtIndex:prevpos];
-        if( [[NSCharacterSet newlineCharacterSet] characterIsMember:c] && [[NSCharacterSet newlineCharacterSet] characterIsMember:prevc]){
-            if( newlines_skipped ){
-                paragraph_found++;
-                if( [self numericArg] == paragraph_found ){
-                    paragraph_head = pos;
-                    break;
-                }else{
-                    newlines_skipped = NO;
-                }
-            }else{
-                // skip continuous newlines 
-                continue;
-            }
-        }else{
-            newlines_skipped = YES;
-        }
-    }
-    
-    if( NSNotFound == paragraph_head   ){
-        // end of document
-        paragraph_head = s.length-1;
-    }
-    return [self _motionFixedFrom:begin.location To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    NSUInteger begin = [view selectedRange].location;
+    NSUInteger paragraph_head = [view paragraphsForward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 
-/*
- Definition of Sentence from gVim help
- 
- - A sentence is defined as ending at a '.', '!' or '?' followed by either the
- end of a line, or by a space or tab.  Any number of closing ')', ']', '"'
- and ''' characters may appear after the '.', '!' or '?' before the spaces,
- tabs or end of line.  A paragraph and section boundary is also a sentence
- boundary.
- If the 'J' flag is present in 'cpoptions', at least two spaces have to
- follow the punctuation mark; <Tab>s are not recognized as white space.
- The definition of a sentence cannot be changed.
- */
 - (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window{ // (
     NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    NSRange begin = [view selectedRange];
-    NSUInteger pos = begin.location;
-    
-    NSUInteger sentence_head = NSNotFound;
-    int sentence_found = 0;
-    // Search "." or "!" or "?" backwards and check if it is followed by spaces(and closing characters)
-    for( ; pos > 0 && NSNotFound == sentence_head ; pos-- ){
-        unichar c = [s characterAtIndex:pos];
-        if( c == '.' || c == '!' || c == '?' ){
-            // search forward for a space while ignoring ")","]",'"','''
-            for( NSUInteger k = pos+1; k < s.length && k < begin.location ; k++ ){
-                unichar c2 = [s characterAtIndex:k];
-                if( c2 == ')' || c2 == ']' || c2 == '"' || c2 == '\'' ){
-                    continue;
-                }else if( [[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
-                    // search next character(which is not white space) to find the head of sentence.
-                    for( k++; k < s.length; k++ ){
-                        if( ![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
-                            // Found a head of sentence.
-                            // if the current insertion point is the head of sentence we do not count it as we find a head of sentence.
-                            if( begin.location != k ){
-                                sentence_found++;
-                                if( [self numericArg] == sentence_found ){
-                                    sentence_head = k;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }else{
-                    // not a head of sentence
-                    break;
-                }
-                if( NSNotFound != sentence_head ){
-                    // already found the position we want
-                    break;
-                }
-            }   
-        }
-    }
-    
-    if( ((sentence_found+1) == [self numericArg] && pos == 0 ) ){
-        //begining of document
-        sentence_head = 0;
-        
-    }
-    
+    NSUInteger begin = [view selectedRange].location;
+    NSUInteger sentence_head = [view sentencesBackward:begin count:[self numericArg]option:MOTION_OPTION_NONE];
     if( NSNotFound != sentence_head  ){
-        return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+        return [self _motionFixedFrom:begin To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
     }else{
-        // no movement
         return nil;
     }
-    
-    
 }
 
 - (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window{ // )
     NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
-    NSRange begin = [view selectedRange];
-    NSUInteger pos = begin.location;
-    
-    NSUInteger sentence_head = NSNotFound;
-    int sentence_found = 0;
-    // Search "." or "!" or "?" forward and check if it is followed by spaces(and closing characters)
-    for( ; pos < s.length && NSNotFound == sentence_head ; pos++ ){
-        unichar c = [s characterAtIndex:pos];
-        if( c == '.' || c == '!' || c == '?' ){
-            // search forward for a space while ignoring ")","]",'"','''
-            for( NSUInteger k = pos+1; k < s.length ; k++ ){
-                unichar c2 = [s characterAtIndex:k];
-                if( c2 == ')' || c2 == ']' || c2 == '"' || c2 == '\'' ){
-                    continue;
-                }else if( [[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
-                    // search next character(which is not white space) to find the head of sentence.
-                    for( k++; k < s.length; k++ ){
-                        if( ![[NSCharacterSet whitespaceCharacterSet] characterIsMember:[s characterAtIndex:k]] && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:k]]){
-                            // Found a head of sentence.
-                            // if the current insertion point is the head of sentence we do not count it as we find a head of sentence.
-                            if( begin.location != k ){
-                                sentence_found++;
-                                if( [self numericArg] == sentence_found ){
-                                    sentence_head = k;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }else{
-                    // not a end of sentence
-                    break;
-                }
-                if( NSNotFound != sentence_head ){
-                    // already found the position we want
-                    break;
-                }
-            }   
-        }
+    NSUInteger begin = [view selectedRange].location;
+    NSUInteger sentence_head = [view sentencesForward:begin count:[self numericArg]option:MOTION_OPTION_NONE];
+    if( NSNotFound != sentence_head  ){
+        return [self _motionFixedFrom:begin To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    }else{
+        return nil;
     }
-    
-    if( NSNotFound == sentence_head   ){
-        // end of document
-        sentence_head = s.length-1;
-    }
-    return [self _motionFixedFrom:begin.location To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)COMMA:(XVimWindow*)window{

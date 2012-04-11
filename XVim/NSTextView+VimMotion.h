@@ -56,15 +56,6 @@ typedef struct _XVimWordInfo{
     NSUInteger lastEndOfWord;
 }XVimWordInfo;
 
-BOOL isDigit(unichar ch);
-BOOL isAlpha(unichar ch);
-BOOL isDelimeter(unichar ch);
-BOOL isWhiteSpace(unichar ch);
-BOOL isNonAscii(unichar ch);
-BOOL isNewLine(unichar ch);
-BOOL isFuzzyWord(unichar ch);
-BOOL isNonBlank(unichar ch);
-BOOL isKeyword(unichar ch);
 
 @interface NSTextView (VimMotion)
 
@@ -228,6 +219,10 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info;
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
 // Scrolls
 - (NSUInteger)pageForward:(NSUInteger)index count:(NSUInteger)count;
@@ -240,6 +235,49 @@ BOOL isKeyword(unichar ch);
 - (void)toggleCaseForRange:(NSRange)range;
 - (void)uppercaseRange:(NSRange)range;
 - (void)lowercaseRange:(NSRange)range;
+
+
+
+
+// The following code is from xVim by WarWithinMe.
+// These will be integreted into NSTextView category.
+
+// =======================
+// Return the location of the start of indentation on current line. '^'
+NSInteger xv_caret(NSString *string, NSInteger index);
+// Return the beginning of line location. '0'
+NSInteger xv_0(NSString *string, NSInteger index);
+
+// Unlike vim, this function won't ignore indent before the current character
+// even if what is '{'
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what, char other);
+NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL fuzzy);
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what);
+
+// Find char in current line.
+// Return the current index if nothing found.
+// If inclusive is YES :
+//   'fx' returns the index after 'x'
+//   'Fx' returns the index before 'x'
+NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char command, unichar what, BOOL inclusive);
+
+
+/*
+ * NSStringHelper is used to provide fast character iteration.
+ */
+#define ITERATE_STRING_BUFFER_SIZE 64
+typedef struct s_NSStringHelper
+{
+    unichar    buffer[ITERATE_STRING_BUFFER_SIZE];
+    NSString*  string;
+    NSUInteger strLen;
+    NSInteger  index;
+    
+} NSStringHelper;
+
+void initNSStringHelper(NSStringHelper*, NSString* string, NSUInteger strLen);
+void initNSStringHelperBackward(NSStringHelper*, NSString* string, NSUInteger strLen);
+unichar characterAtIndex(NSStringHelper*, NSInteger index);
 
 @end
 

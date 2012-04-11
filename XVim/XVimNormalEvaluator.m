@@ -23,6 +23,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "NSTextView+VimMotion.h"
+#import "NSString+VimHelper.h"
 #import "DVTCompletionController.h"
 #import "XVimKeymapProvider.h"
 #import "Logger.h"

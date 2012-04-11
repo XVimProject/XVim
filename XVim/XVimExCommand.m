@@ -12,6 +12,7 @@
 #include "XVimSearch.h"
 #import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
+#import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"

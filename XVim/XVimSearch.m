@@ -8,6 +8,7 @@
 
 #import "XVimSearch.h"
 #import "NSTextView+VimMotion.h"
+#import "NSString+VimHelper.h"
 #import "DVTSourceTextView.h"
 #import "XVimWindow.h"
 #import "XVim.h"
