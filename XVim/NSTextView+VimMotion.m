@@ -1664,8 +1664,17 @@ NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, B
         if (idx >= [string length]) {
             return NSMakeRange(NSNotFound, 0);
         }
-    }
-    
+	}
+  
+	if ([string characterAtIndex:idx] == other)
+	{
+        /* cursor on ')' or '}', move cursor just after it */
+		--idx;
+		if (idx < 0) {
+			return NSMakeRange(NSNotFound, 0);
+		}
+	}
+	
     int start_pos = (int)idx;
     int end_pos   = (int)idx;
     
