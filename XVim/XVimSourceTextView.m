@@ -228,9 +228,9 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == window.mode){
+    if (window.mode == MODE_INSERT) {
         [base _drawInsertionPointInRect_:aRect color:aColor];
-    }else{
+    } else {
         [base drawInsertionPointInRect:aRect color:aColor turnedOn:YES];
     }
 }
@@ -240,25 +240,27 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == window.mode){
-        [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
-    }
-    else{
-        if(flag){
-            color = [color colorWithAlphaComponent:0.5];
-            NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-            NSUInteger glyphIndex = [[base layoutManager] glyphIndexForPoint:aPoint inTextContainer:[base textContainer]];
-            NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[base textContainer]];
-            
-            [color set];
-            rect.size.width =rect.size.height/2;
-            if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
-                rect.size.width=glyphRect.size.width;
-            NSRectFillUsingOperation( rect, NSCompositeSourceOver);
-        } else {
-            [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
-        }
-    }
+	if (window.mode != MODE_INSERT && flag)
+	{
+		color = [color colorWithAlphaComponent:0.5];
+		NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+		NSUInteger glyphIndex = [[base layoutManager] glyphIndexForPoint:aPoint inTextContainer:[base textContainer]];
+		NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[base textContainer]];
+		
+		[color set];
+		rect.size.width =rect.size.height/2;
+		if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
+			rect.size.width=glyphRect.size.width;
+		NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+	}
+	else
+	{
+		if (window.mode == MODE_INSERT)
+		{
+			[base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+		}
+		[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+	}
 }
 
 - (void)doCommandBySelector:(SEL)aSelector{
