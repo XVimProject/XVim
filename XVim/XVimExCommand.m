@@ -530,6 +530,7 @@
                        CMD(@"wqall", @"wqall:inWindow:"),
                        CMD(@"wsverb", @"wsverb:inWindow:"),
                        CMD(@"wviminfo", @"viminfo:inWindow:"),
+                       CMD(@"xccmd" , @"xccmd:inWindow:"),
                        CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
                        CMD(@"xit", @"exit:inWindow:"),
                        CMD(@"xall", @"wqall:inWindow:"),
@@ -999,4 +1000,8 @@
     [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
 }
 
+- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
+    [NSApp sendAction:sel  to:nil from:self];
+}
 @end
