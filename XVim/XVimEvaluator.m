@@ -89,7 +89,7 @@
 	return YES;
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
+- (void)drawBlockCaretInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
 {
 	DVTSourceTextView *sourceView = [window sourceView];
 	
@@ -102,7 +102,16 @@
 	rect.size.width =rect.size.height/2;
 	if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
 		rect.size.width=glyphRect.size.width;
+	
+	rect.origin.y += (1 - heightRatio) * rect.size.height;
+	rect.size.height *= heightRatio;
+	
 	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
+{
+	[self drawBlockCaretInRect:rect color:color inWindow:window heightRatio:1];
 }
 
 - (XVimEvaluator*)D_d:(XVimWindow*)window{

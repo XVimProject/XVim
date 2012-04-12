@@ -79,8 +79,15 @@
 // Move to insert mode, have it call insertion point on sourceView
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
 {
-	DVTSourceTextView *sourceView = [window sourceView];
-	[sourceView _drawInsertionPointInRect_:rect color:color];
+	if (_oneCharMode)
+	{
+		[self drawBlockCaretInRect:rect color:color inWindow:window heightRatio:.25];
+	}
+	else
+	{
+		DVTSourceTextView *sourceView = [window sourceView];
+		[sourceView _drawInsertionPointInRect_:rect color:color];
+	}
 }
 
 - (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window

@@ -69,4 +69,6 @@ typedef enum {
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
 - (void)becameHandlerInWindow:(XVimWindow*)window;
 - (XVIM_MODE)mode;
+
+- (void)drawBlockCaretInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
 @end
