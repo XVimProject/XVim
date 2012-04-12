@@ -10,7 +10,7 @@ INSTALL
 From Installer Package
 --------
 
-Download XVim_X.XX.pkg and install it. Do not change the install directory.
+[Download XVim_X.XX.pkg](https://github.com/JugglerShu/XVim/downloads) and install it. Do not change the install directory.
 Then restart XCode. That's it!
 
 
