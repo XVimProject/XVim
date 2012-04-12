@@ -196,6 +196,40 @@
 	return evaluator;
 }
 
+- (XVimEvaluator*)p:(XVimWindow*)window{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
+    // the line boundary and then paste the data in.
+    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
+    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
+    NSTextView* view = [window sourceView];
+    [self updateSelectionInWindow:window];
+    // Keep currently selected string
+    NSString* current = [[view string] substringWithRange:[view selectedRange]];
+    [view delete:self];
+    NSUInteger loc = [view selectedRange].location;
+    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+        if( [view isBlankLine:loc] && ![view isEOF:loc]){
+            [view setSelectedRange:NSMakeRange(loc+1,0)];
+        }else{
+                [view insertNewline:self];
+        }
+    }
+    
+    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
+        [view paste:self];
+    }
+    [[NSPasteboard generalPasteboard] setString:current forType:NSStringPboardType];
+    return nil;
+}
+
+- (XVimEvaluator*)P:(XVimWindow*)window{
+    // Looks P works as p in Visual Mode.. right?
+    return [self p:window];
+}
+
+
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	[self updateSelectionInWindow:window];
 	NSTextView *view = [window sourceView];
