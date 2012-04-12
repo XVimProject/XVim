@@ -530,6 +530,7 @@
                        CMD(@"wqall", @"wqall:inWindow:"),
                        CMD(@"wsverb", @"wsverb:inWindow:"),
                        CMD(@"wviminfo", @"viminfo:inWindow:"),
+                       CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
                        CMD(@"xit", @"exit:inWindow:"),
                        CMD(@"xall", @"wqall:inWindow:"),
                        CMD(@"xmap", @"map:inWindow:"),
@@ -989,6 +990,11 @@
 - (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
+}
+
+- (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
 }
 
 @end
