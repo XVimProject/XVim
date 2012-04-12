@@ -76,6 +76,13 @@
 																	  withRange:range];
 }
 
+// Move to insert mode, have it call insertion point on sourceView
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
+{
+	DVTSourceTextView *sourceView = [window sourceView];
+	[sourceView _drawInsertionPointInRect_:rect color:color];
+}
+
 - (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window
 {
 	return range;

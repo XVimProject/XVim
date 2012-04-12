@@ -23,30 +23,6 @@
 
 - (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
 {
-    // It seems that original IDESourceCodeEditor does not implement this delegate method.
-    // So if we try to call original method it causes exception.
-    
-    // What we do here is to restrict cursor position when its not insert mode
-    /*
-	 NSTextView* view = textView; // DVTSourceTextView
-	 
-	 XVim* window = [view viewWithTag:XVIM_TAG];
-	 if( nil != view ){
-	 if( window.mode != MODE_INSERT ){
-	 NSRange r = [[newSelectedCharRanges objectAtIndex:0] rangeValue];
-	 if( ![view isValidCursorPosition:r.location] ){
-	 NSValue* val;
-	 if( r.length != 0 ){
-	 val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length+1)];
-	 }else{
-	 val = [NSValue valueWithRange:NSMakeRange(r.location-1, r.length)]; // same as (r.locatio-1, 0)
-	 }
-	 NSMutableArray* ary = [NSMutableArray arrayWithObject:val];
-	 return [ary arrayByAddingObjectsFromArray:[newSelectedCharRanges subarrayWithRange:NSMakeRange(1, [newSelectedCharRanges count]-1)]];
-	 }
-	 }
-	 }
-     */
     return newSelectedCharRanges;
 }
 

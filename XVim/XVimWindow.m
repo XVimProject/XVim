@@ -245,4 +245,19 @@
 	return range;
 }
 
+- (void)drawRect:(NSRect)rect
+{
+	[_currentEvaluator drawRect:rect inWindow:self];
+}
+
+- (BOOL)shouldDrawInsertionPoint
+{
+	return [_currentEvaluator shouldDrawInsertionPointInWindow:self];
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
+{
+	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self];
+}
+
 @end

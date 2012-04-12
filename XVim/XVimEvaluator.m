@@ -80,6 +80,31 @@
 	return range;
 }
 
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+}
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return YES;
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
+{
+	DVTSourceTextView *sourceView = [window sourceView];
+	
+	color = [color colorWithAlphaComponent:0.5];
+	NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+	NSUInteger glyphIndex = [[sourceView layoutManager] glyphIndexForPoint:aPoint inTextContainer:[sourceView textContainer]];
+	NSRect glyphRect = [[sourceView layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[sourceView textContainer]];
+	
+	[color set];
+	rect.size.width =rect.size.height/2;
+	if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
+		rect.size.width=glyphRect.size.width;
+	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+}
+
 - (XVimEvaluator*)D_d:(XVimWindow*)window{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.

@@ -87,6 +87,22 @@
 	return [keymapProvider keymapForMode:MODE_VISUAL];
 }
 
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return NO;
+}
+
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+    DVTSourceTextView* sourceView = [window sourceView];
+	
+	NSUInteger glyphIndex = [self insertionPointInWindow:window];
+	NSRect glyphRect = [[sourceView layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[sourceView textContainer]];
+	
+	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
+	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
+}
+
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     DVTSourceTextView* v = [window sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection

@@ -43,6 +43,10 @@
 - (NSRange)restrictSelectedRange:(NSRange)range;
 - (NSMutableDictionary *)getLocalMarks;
 
+- (void)drawRect:(NSRect)rect;
+- (BOOL)shouldDrawInsertionPoint;
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
+
 - (void)setEvaluator:(XVimEvaluator*)evaluator;
 
 // Message from XVimCommandField 
