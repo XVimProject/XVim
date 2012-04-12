@@ -39,6 +39,14 @@
 	return self;
 }
 
+
+static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
+
+- (NSString*)modeString
+{
+	return MODE_STRINGS[_mode];
+}
+
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
 {
     // This is quick hack. When unsupported keys are pressed in Visual mode we have to set selection
@@ -78,10 +86,6 @@
 	[self updateSelectionInWindow:window];
 }
     
-- (XVIM_MODE)mode {
-    return MODE_VISUAL;
-}
-
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
 	return [keymapProvider keymapForMode:MODE_VISUAL];
@@ -108,7 +112,7 @@
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
-    if (nextEvaluator && nextEvaluator.mode == MODE_VISUAL) {
+    if (nextEvaluator) {
         [self updateSelectionInWindow:window];   
     }
     return nextEvaluator;

@@ -21,10 +21,6 @@
 - (void)becameHandlerInWindow:(XVimWindow*)window {
 }
 
-- (XVIM_MODE)mode {
-    return MODE_NORMAL;
-}
-
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     // This is default implementation of evaluator.
     // Only keyDown events are supposed to be passed here.	
@@ -89,7 +85,7 @@
 	return YES;
 }
 
-- (void)drawBlockCaretInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
 {
 	DVTSourceTextView *sourceView = [window sourceView];
 	
@@ -109,9 +105,9 @@
 	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
+- (NSString*)modeString
 {
-	[self drawBlockCaretInRect:rect color:color inWindow:window heightRatio:1];
+	return @"NORMAL";
 }
 
 - (XVimEvaluator*)D_d:(XVimWindow*)window{

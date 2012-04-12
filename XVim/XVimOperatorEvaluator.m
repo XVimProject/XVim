@@ -48,8 +48,24 @@
     return [_parent insertionPointInWindow:window];
 }
 
-- (XVIM_MODE)mode {
-	return [_parent mode];
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+	return [_parent drawRect:rect inWindow:window];
+}
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return [_parent shouldDrawInsertionPointInWindow:window];
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
+{
+	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.5];
+}
+
+- (NSString*)modeString
+{
+	return [_parent modeString];
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{

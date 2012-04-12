@@ -34,8 +34,24 @@
     return [_motionEvaluator insertionPointInWindow:window];
 }
 
-- (XVIM_MODE)mode {
-	return [_motionEvaluator mode];
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+	return [_motionEvaluator drawRect:rect inWindow:window];
+}
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return [_motionEvaluator shouldDrawInsertionPointInWindow:window];
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
+{
+	return [_motionEvaluator drawInsertionPointInRect:rect color:color inWindow:window heightRatio:heightRatio];
+}
+
+- (NSString*)modeString
+{
+	return [_motionEvaluator modeString];
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{

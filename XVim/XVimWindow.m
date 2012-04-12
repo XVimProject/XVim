@@ -28,9 +28,9 @@
 
 @implementation XVimWindow
 @synthesize tag = _tag;
+@synthesize modeString = _modeString;
 @synthesize cmdLine = _cmdLine;
 @synthesize sourceView = _sourceView;
-@synthesize mode = _mode;
 @synthesize recordingRegister = _recordingRegister;
 @synthesize staticMessage = _staticMessage;
 @synthesize errorMessage = _errorMessage;
@@ -45,29 +45,15 @@
 	return self;
 }
 
-- (void)setMode:(NSInteger)mode{
-    _mode = mode;
-}
-
 - (void)setEvaluator:(XVimEvaluator*)evaluator {
 	if (evaluator != _currentEvaluator)
 	{
-		_mode = [evaluator mode]; 
 		_currentEvaluator = evaluator;
 		[evaluator becameHandlerInWindow:self];
 		
-		XVIM_MODE newMode = [evaluator mode];
-		if (self.mode != MODE_CMDLINE){
-			// Special case for cmdline mode. I don't like this, but
-			// don't have time to refactor cmdline mode.
-			self.mode = newMode;
-		}
+		self.modeString = [evaluator modeString];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
 	}
-}
-
-- (NSString*)modeName{
-    return MODE_STRINGS[self.mode];
 }
 
 - (XVimEvaluator*)currentEvaluator{
@@ -123,7 +109,6 @@
 }
 
 - (void)commandModeWithFirstLetter:(NSString*)first{
-    self.mode = MODE_CMDLINE;
     [self.cmdLine setFocusOnCommandWithFirstLetter:first];
 }
 
@@ -155,12 +140,10 @@
     }
 	
     [[self window] makeFirstResponder:srcView]; // Since XVim is a subview of DVTSourceTextView;
-    self.mode = MODE_NORMAL;
     return YES;
 }
 
 - (BOOL)commandCanceled{
-    self.mode = MODE_NORMAL;
     [[self window] makeFirstResponder:[self superview]]; // Since XVim is a subview of DVTSourceTextView;
     return YES;
 }
@@ -257,7 +240,7 @@
 
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
 {
-	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self];
+	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
 }
 
 @end

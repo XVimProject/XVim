@@ -54,21 +54,29 @@ typedef enum {
 
 
 @interface XVimEvaluator : NSObject
+
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
-
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window;
-- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
-
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window;
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window;
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
-- (void)becameHandlerInWindow:(XVimWindow*)window;
-- (XVIM_MODE)mode;
 
-- (void)drawBlockCaretInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
+
+- (void)becameHandlerInWindow:(XVimWindow*)window;
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
+
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window;
+
+- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
+
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
+
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window;
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
+
+- (NSString*)modeString;
+
 @end

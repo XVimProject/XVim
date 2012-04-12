@@ -11,6 +11,7 @@
 #import "NSTextView+VimMotion.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
+#import "XVimKeymapProvider.h"
 
 @interface XVimTextObjectEvaluator() {
 	XVimOperatorAction *_operatorAction;
@@ -42,12 +43,33 @@
     return [_parent insertionPointInWindow:window];
 }
 
-- (XVIM_MODE)mode {
-	return [_parent mode];
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+	return [_parent drawRect:rect inWindow:window];
+}
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return [_parent shouldDrawInsertionPointInWindow:window];
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
+{
+	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.5];
+}
+
+- (NSString*)modeString
+{
+	return [_parent modeString];
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
     return _parent;
+}
+
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
+{
+	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
 }
 
 - (XVimEvaluator*)executeActionForRange:(NSRange)r inWindow:(XVimWindow*)window

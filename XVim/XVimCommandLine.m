@@ -79,7 +79,7 @@
         [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
         [self addSubview:_status];
         
-        [window addObserver:self forKeyPath:@"mode" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial context:nil];
+        [window addObserver:self forKeyPath:@"modeString" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial context:nil];
         [window addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
         [window addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
     }
@@ -99,8 +99,8 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if( [keyPath isEqualToString:@"mode"] ){
-        [_status setStringValue:MODE_STRINGS[[((NSNumber*)[change valueForKey:NSKeyValueChangeNewKey]) integerValue]]];
+    if( [keyPath isEqualToString:@"modeString"] ){
+        [_status setStringValue:[change valueForKey:NSKeyValueChangeNewKey]];
     }
     else if( [keyPath isEqualToString:@"staticMessage"] ){
         [_static setStringValue:[change valueForKey:NSKeyValueChangeNewKey]];

@@ -28,6 +28,11 @@ XVimRegisterEvalMode _mode;
     return self;
 }
 
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
+{
+	return [keymapProvider keymapForMode:MODE_NONE];
+}
+
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     XVimRegister *xregister = [[XVim instance] findRegister:[keyStroke toSelectorString]];
     if (_mode == REGISTER_EVAL_MODE_RECORD){

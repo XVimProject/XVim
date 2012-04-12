@@ -20,7 +20,7 @@
 @interface XVimWindow : NSTextView <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property NSInteger tag;
-@property (readonly) NSInteger mode;
+@property (nonatomic, strong) NSString *modeString;
 
 @property(retain) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
@@ -31,7 +31,6 @@
 @property (strong) NSString* errorMessage;
 
 - (void)commandModeWithFirstLetter:(NSString*)first;
-- (NSString*)modeName;
 
 - (NSString*)sourceText;
 - (NSRange)selectedRange;

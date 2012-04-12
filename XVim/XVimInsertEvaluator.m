@@ -60,13 +60,14 @@
     return self;
 }
 
+- (NSString*)modeString
+{
+	return @"INSERT";
+}
+
 - (void)becameHandlerInWindow:(XVimWindow*)window{
 	[super becameHandlerInWindow:window];
     self.startRange = [window selectedRange];
-}
-
-- (XVIM_MODE)mode {
-    return MODE_INSERT;
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
@@ -77,11 +78,11 @@
 }
 
 // Move to insert mode, have it call insertion point on sourceView
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
 {
 	if (_oneCharMode)
 	{
-		[self drawBlockCaretInRect:rect color:color inWindow:window heightRatio:.25];
+		[super drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.25];
 	}
 	else
 	{

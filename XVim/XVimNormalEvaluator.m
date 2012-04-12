@@ -60,8 +60,8 @@
     }
 }
 
-- (XVIM_MODE)mode {
-    return MODE_NORMAL;
+- (NSString*)modeString {
+    return @"NORMAL";
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider

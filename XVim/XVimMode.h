@@ -16,6 +16,3 @@ typedef enum {
 	MODE_NONE, // Use to make sure you get no mapping
 	MODE_COUNT,
 } XVIM_MODE;
-
-static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT", 
-    @"VISUAL", @"OPERATOR"};

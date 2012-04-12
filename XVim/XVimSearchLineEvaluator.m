@@ -32,6 +32,11 @@
     return self;
 }
 
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
+{
+	return [keymapProvider keymapForMode:MODE_NONE];
+}
+
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
 {
 	XVimCharacterSearch *charSearcher = [[XVim instance] characterSearcher];
