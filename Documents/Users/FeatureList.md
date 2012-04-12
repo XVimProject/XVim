@@ -26,14 +26,14 @@ Numeric argument is supported.
 C-o,C-i
 
 ## Insert
-a,A,i,I
+a,A,i,I,o,O
 
 Numeric argument is supported.
 
 
 ## Change
 
-d,dd,D,y,yy,c,r,s,x,X,J,>,>>,<,<<
+d,dd,D,y,yy,c,C,r,s,x,X,J,>,>>,<,<<
 
 Numeric argument is supported.
 
