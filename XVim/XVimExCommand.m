@@ -929,15 +929,17 @@
 	{
 		NSString *fromString = [subStrings objectAtIndex:0];
 		NSString *toString = [subStrings objectAtIndex:1];
-		XVimKeyStroke *fromKeyStroke = [XVimKeyStroke fromString:fromString];
+		
+		NSMutableArray *fromKeyStrokes = [[NSMutableArray alloc] init];
+		[XVimKeyStroke fromString:fromString to:fromKeyStrokes];
 		
 		NSMutableArray *toKeyStrokes = [[NSMutableArray alloc] init];
 		[XVimKeyStroke fromString:toString to:toKeyStrokes];
 		
-		if (fromKeyStroke && toKeyStrokes.count > 0)
+		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0)
 		{
 			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
-			[keymap mapKeyStroke:fromKeyStroke to:toKeyStrokes];
+			[keymap mapKeyStroke:fromKeyStrokes to:toKeyStrokes];
 		}
 	}
 }
