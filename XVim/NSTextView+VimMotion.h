@@ -178,6 +178,16 @@ typedef struct _XVimWordInfo{
 - (NSUInteger)endOfLine:(NSUInteger)index; // May return NSNotFound
 
 /**
+ * Returns position of first character of the line specified by index.
+ * Note that first character in the line is different from head of line.
+ * First character may be newline when its blankline.
+ * First character may be EOF if the EOF is blankline
+ * In short words, its just after a newline or begining of document.
+ * This never returns NSNotFound
+ **/
+- (NSUInteger)firstOfLine:(NSUInteger)index;
+
+/**
  * Returns position of eof
  **/
 - (NSUInteger)endOfFile;
@@ -237,7 +247,8 @@ typedef struct _XVimWordInfo{
 - (void)lowercaseRange:(NSRange)range;
 
 
-
+// Text Object
+- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
 // The following code is from xVim by WarWithinMe.
 // These will be integreted into NSTextView category.

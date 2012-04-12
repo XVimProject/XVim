@@ -7,8 +7,9 @@
 //
 
 typedef enum{
-    MOTION_OPTION_NONE,
-    LEFT_RIGHT_WRAP,
-    LEFT_RIGHT_NOWRAP,
-    BIGWORD // for 'WORD' motion
+    MOTION_OPTION_NONE = 0x00,
+    LEFT_RIGHT_WRAP = 0x01,
+    LEFT_RIGHT_NOWRAP = 0x02,
+    BIGWORD = 0x04, // for 'WORD' motion
+    INCLUSIVE = 0x08
 } MOTION_OPTION;

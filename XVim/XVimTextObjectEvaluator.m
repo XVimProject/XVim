@@ -80,13 +80,15 @@
 
 - (XVimEvaluator*)w:(XVimWindow*)window
 {
-	NSRange r = xv_current_word([window.sourceView string], _location, _repeat, _inclusive, NO);
+    MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
+    NSRange r = [window.sourceView currentWord:_location count:_repeat option:opt];
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)W:(XVimWindow*)window
 {
-	NSRange r = xv_current_word([window.sourceView string], _location, _repeat, _inclusive, YES);
+    MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
+    NSRange r = [window.sourceView currentWord:_location count:_repeat option:opt|BIGWORD];
 	return [self executeActionForRange:r inWindow:window];
 }
 

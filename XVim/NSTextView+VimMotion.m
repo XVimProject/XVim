@@ -1,10 +1,8 @@
-//
-//  NSTextView+VimMotion.m
-//  XVim
-//
+// {aaa}
 //  Created by Shuichiro Suzuki on 2/25/12.
 //  Copyright (c) 2012 JugglerShu.Net. All 
 //
+// aaa {aaaaaa}
 
 #import "NSTextView+VimMotion.h"
 #import "NSString+VimHelper.h"
@@ -227,14 +225,14 @@
 }
 
 /**
- * Returns position of the head of line of the current line specified by index.
+ * Returns position of the head of line specified by index.
  * Head of line is one of them which is found first when searching backwords from "index".
  *    - Character just after newline
  *    - Character at the head of document
  * If the size of document is 0 it does not have any head of line.
  * Blankline does NOT have headOfLine. So EOF is NEVER head of line.
  * Searching starts from position "index". So the "index" could be a head of line and may be returned.
-     **/
+**/
 - (NSUInteger)headOfLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( [[self string] length] == 0 ){
@@ -251,6 +249,23 @@
     return prevNewline+1; // Then this is the head of line
 }
 
+/**
+ * Returns position of first character of the line specified by index.
+ * Note that first character in the line is different from head of line.
+ * First character may be newline when its blankline.
+ * First character may be EOF if the EOF is blankline
+ * In short words, its just after a newline or begining of document.
+ * This never returns NSNotFound
+ **/
+- (NSUInteger)firstOfLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    while (index > 0)
+    {
+        if (isNewLine([[self string] characterAtIndex:index-1])) { break; }
+        --index;
+    }
+    return index;
+}
 /**
  * Returns position of the first non-whitespace character past the head of line of the
  * current line specified by index.
@@ -1282,6 +1297,93 @@
     [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
+////////////////////
+/// Text Object ////
+////////////////////
+- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSString* string = [self string];
+    NSInteger maxIndex = [string length] - 1;
+    if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
+    
+    NSInteger rangeStart = index;
+    NSInteger rangeEnd = index;
+    
+    // repeatCount loop starts here
+    while (count--) {
+        // Skip past newline
+        while (index < maxIndex && isNewLine([string characterAtIndex:index])) {
+            ++index;
+        }
+        
+        if (index > maxIndex) {
+            break;
+        }         
+        NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
+        NSCharacterSet *wordSet = nil;
+        
+        if ( opt & BIGWORD) {
+            NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
+            wordSet = charSet;
+        }
+        else {
+            NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+            [charSet addCharactersInString:@"_"];
+            wordSet = charSet;
+        }
+        
+        unichar initialChar = [string characterAtIndex:index];
+        BOOL initialCharIsWs = [wsSet characterIsMember:initialChar];
+        NSCharacterSet *searchSet = get_search_set(initialChar, wsSet, wordSet);
+        
+        NSInteger begin = index;
+        NSInteger end = MIN(index + 1, maxIndex);
+        
+        // Seek backwards
+        begin = seek_backwards(string, begin, searchSet);
+        
+        // Seek forwards
+        end = seek_forwards(string, end, searchSet);
+        
+        // For inclusive mode, try to eat some more
+        if ( opt & INCLUSIVE) {
+            NSInteger newEnd = end;
+            if (end < maxIndex) {
+                if (initialCharIsWs) {
+                    unichar c = [string characterAtIndex:end];
+                    searchSet = get_search_set(c, wsSet, wordSet);
+                    newEnd = seek_forwards(string, end, searchSet);
+                }
+                else {
+                    newEnd = seek_forwards(string, end, wsSet);
+                }
+            }
+            
+            // If we couldn't eat anything from the end, try to eat start
+            NSInteger newBegin = begin;
+            if (newEnd == end) {
+                if (!initialCharIsWs) {
+                    newBegin = seek_backwards(string, begin, wsSet);
+                    
+                    // Never remove a line's leading whitespace
+                    if (newBegin == 0 || isNewLine([string characterAtIndex:newBegin - 1])) {
+                        newBegin = begin;
+                    }
+                }
+            }
+            
+            begin = newBegin;
+            end = newEnd;
+        }
+        
+        index = end;
+        
+        rangeStart = MIN(rangeStart, begin);
+        rangeEnd = MAX(rangeEnd, end);
+    }
+    
+    return NSMakeRange(rangeStart, rangeEnd - rangeStart);
+}
+
 
 
 // The following code is from xVim by WarWithinMe.
@@ -1653,6 +1755,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
     return -1;
 }
 
+//- (NSRange) currentBlock:(NSUInteger)index count:(NSUInteger)count 
 NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, BOOL inclusive, char what, char other)
 {
     NSInteger idx    = index;
@@ -1702,7 +1805,8 @@ NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, B
             if (idx == end_pos)
             {
                 // The '}' is only preceded by indent, skip that indent.
-                end_pos = (int) xv_0(string, index) - 1;
+                //end_pos = [self firstOfLine:index]-1;
+                end_pos = xv_0(string ,index)-1;
             }
             index = oldIdx;
         }
@@ -1756,101 +1860,6 @@ static NSCharacterSet *get_search_set(unichar initialChar, NSCharacterSet *wsSet
 	}
 	
 	return searchSet;
-}
-
-NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL bigword)
-{    
-    NSInteger maxIndex = [string length] - 1;
-	if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
-	
-	NSInteger rangeStart = index;
-	NSInteger rangeEnd = index;
-	
-	// repeatCount loop starts here
-	while (repeatCount--)
-	{
-		// Skip past newline
-		while (index < maxIndex && isNewLine([string characterAtIndex:index]))
-		{
-			++index;
-		}
-		
-		if (index > maxIndex) { break; }
-		
-		NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
-		NSCharacterSet *wordSet = nil;
-		
-		if (bigword)
-		{
-			NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
-			wordSet = charSet;
-		}
-		else
-		{
-			NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
-			[charSet addCharactersInString:@"_"];
-			wordSet = charSet;
-		}
-		
-		unichar initialChar = [string characterAtIndex:index];
-		BOOL initialCharIsWs = [wsSet characterIsMember:initialChar];
-		NSCharacterSet *searchSet = get_search_set(initialChar, wsSet, wordSet);
-		
-		NSInteger begin = index;
-		NSInteger end = MIN(index + 1, maxIndex);
-		
-		// Seek backwards
-		begin = seek_backwards(string, begin, searchSet);
-		
-		// Seek forwards
-		end = seek_forwards(string, end, searchSet);
-		
-		// For inclusive mode, try to eat some more
-		if (inclusive)
-		{
-			NSInteger newEnd = end;
-			
-			if (end < maxIndex)
-			{
-				if (initialCharIsWs)
-				{
-					unichar c = [string characterAtIndex:end];
-					searchSet = get_search_set(c, wsSet, wordSet);
-					newEnd = seek_forwards(string, end, searchSet);
-				}
-				else
-				{
-					newEnd = seek_forwards(string, end, wsSet);
-				}
-			}
-			
-			// If we couldn't eat anything from the end, try to eat start
-			NSInteger newBegin = begin;
-			if (newEnd == end)
-			{
-				if (!initialCharIsWs)
-				{
-					newBegin = seek_backwards(string, begin, wsSet);
-					
-					// Never remove a line's leading whitespace
-					if (newBegin == 0 || isNewLine([string characterAtIndex:newBegin - 1]))
-					{
-						newBegin = begin;
-					}
-				}
-			}
-			
-			begin = newBegin;
-			end = newEnd;
-		}
-		
-		index = end;
-		
-		rangeStart = MIN(rangeStart, begin);
-		rangeEnd = MAX(rangeEnd, end);
-	}
-    
-    return NSMakeRange(rangeStart, rangeEnd - rangeStart);
 }
 
 NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape);
