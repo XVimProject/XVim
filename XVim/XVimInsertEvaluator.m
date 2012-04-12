@@ -158,7 +158,9 @@
 	// Set selection to one-before-where-we-were
 	NSUInteger insertionPoint = [self insertionPointInWindow:window];
 	NSUInteger headOfLine = [sourceView headOfLine:insertionPoint];
-	if (insertionPoint > 0 && headOfLine != insertionPoint && headOfLine != NSNotFound)
+	if (insertionPoint > 0 
+		&& headOfLine != insertionPoint && headOfLine != NSNotFound
+		&& !_oneCharMode)
 	{
 		--insertionPoint;
 	}
