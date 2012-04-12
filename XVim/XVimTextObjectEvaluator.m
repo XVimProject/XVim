@@ -14,10 +14,8 @@
 
 @interface XVimTextObjectEvaluator() {
 	XVimOperatorAction *_operatorAction;
-	NSUInteger _location;
 	NSUInteger _repeat;
 	BOOL _inclusive;
-	XVIM_MODE _mode;
 	XVimEvaluator *_parent;
 }
 @end
@@ -25,8 +23,6 @@
 @implementation XVimTextObjectEvaluator
 
 - (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
-						from:(NSUInteger)location
-					  inMode:(XVIM_MODE)mode
 					withParent:(XVimEvaluator*)parent
 					  repeat:(NSUInteger)repeat 
 				   inclusive:(BOOL)inclusive
@@ -34,10 +30,8 @@
 	if (self = [super init])
 	{
 		self->_operatorAction = operatorAction;
-		self->_location = location;
 		self->_repeat = repeat;
 		self->_inclusive = inclusive;
-		self->_mode = mode;
 		self->_parent = parent;
 	}
 	return self;
@@ -45,11 +39,11 @@
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window
 {
-    return _location;
+    return [_parent insertionPointInWindow:window];
 }
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
-	return _mode;
+- (XVIM_MODE)mode {
+	return [_parent mode];
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
@@ -68,33 +62,33 @@
 
 - (XVimEvaluator*)b:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], _location, _repeat, _inclusive, '(', ')');
+	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], _repeat, _inclusive, '(', ')');
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)B:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], _location, _repeat, _inclusive, '{', '}');
+	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], _repeat, _inclusive, '{', '}');
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)w:(XVimWindow*)window
 {
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
-    NSRange r = [window.sourceView currentWord:_location count:_repeat option:opt];
+    NSRange r = [window.sourceView currentWord:[self insertionPointInWindow:window] count:_repeat option:opt];
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)W:(XVimWindow*)window
 {
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
-    NSRange r = [window.sourceView currentWord:_location count:_repeat option:opt|BIGWORD];
+    NSRange r = [window.sourceView currentWord:[self insertionPointInWindow:window] count:_repeat option:opt|BIGWORD];
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)LSQUAREBRACKET:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], _location, _repeat, _inclusive, '[', ']');
+	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], _repeat, _inclusive, '[', ']');
 	return [self executeActionForRange:r inWindow:window];
 }
 
@@ -115,7 +109,7 @@
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], _location, _repeat, _inclusive, '<', '>');
+	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], _repeat, _inclusive, '<', '>');
 	return [self executeActionForRange:r inWindow:window];
 }
 
@@ -136,13 +130,13 @@
 
 - (XVimEvaluator*)SQUOTE:(XVimWindow*)window
 {
-	NSRange r = xv_current_quote([window.sourceView string], _location, _repeat, _inclusive, '\'');
+	NSRange r = xv_current_quote([window.sourceView string], [self insertionPointInWindow:window], _repeat, _inclusive, '\'');
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window
 {
-	NSRange r = xv_current_quote([window.sourceView string], _location, _repeat, _inclusive, '"');
+	NSRange r = xv_current_quote([window.sourceView string], [self insertionPointInWindow:window], _repeat, _inclusive, '"');
 	return [self executeActionForRange:r inWindow:window];
 }
 

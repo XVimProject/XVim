@@ -15,6 +15,7 @@
 #import "DVTSourceTextView.h"
 #import "DVTCompletionController.h"
 #import "XVimKeymapProvider.h"
+#import "XVimVisualEvaluator.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -59,9 +60,25 @@
     return self;
 }
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window{
+	[super becameHandlerInWindow:window];
     self.startRange = [window selectedRange];
+}
+
+- (XVIM_MODE)mode {
     return MODE_INSERT;
+}
+
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
+{
+	NSRange range = [window selectedRange];
+	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER 
+																	  withRange:range];
+}
+
+- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window
+{
+	return range;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider

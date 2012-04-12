@@ -20,9 +20,14 @@
 
 @implementation XVimDeleteEvaluator
 
-- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction repeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion
+- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+				  withParent:(XVimEvaluator*)parent
+					  repeat:(NSUInteger)repeat 
+	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
-	if (self = [super initWithOperatorAction:operatorAction repeat:repeat])
+	if (self = [super initWithOperatorAction:operatorAction 
+								  withParent:parent
+									  repeat:repeat])
 	{
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}

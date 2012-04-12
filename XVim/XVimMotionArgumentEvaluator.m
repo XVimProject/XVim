@@ -29,6 +29,19 @@
     [super dealloc];
 }
 
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
+{
+    return [_motionEvaluator insertionPointInWindow:window];
+}
+
+- (XVIM_MODE)mode {
+	return [_motionEvaluator mode];
+}
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
+    return _motionEvaluator;
+}
+
 -(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     if( nil != _motionEvaluator ){

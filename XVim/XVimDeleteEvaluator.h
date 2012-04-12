@@ -12,7 +12,10 @@
 
 // Handles input after 'd' or 'c'
 @interface XVimDeleteEvaluator : XVimOperatorEvaluator
-- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction repeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion;
+- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+				  withParent:(XVimEvaluator*)parent
+					  repeat:(NSUInteger)repeat 
+	  insertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end
 
 @interface XVimDeleteAction : XVimOperatorAction

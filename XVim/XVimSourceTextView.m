@@ -39,7 +39,10 @@
     [Hooker hookMethod:@selector(mouseDown:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseDown:) ) keepingOriginalWith:@selector(mouseDown_:)];
 	
     // Hook mouseUp:
-    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseUp:) ) keepingOriginalWith:@selector(mouseUp_:)];    
+    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseUp:) ) keepingOriginalWith:@selector(mouseDragged_:)];    
+	
+    // Hook mouseDragged:
+    [Hooker hookMethod:@selector(mouseDragged:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseDragged:) ) keepingOriginalWith:@selector(mouseUp_:)];    
 	
     // Hook drawRect:
     [Hooker hookMethod:@selector(drawRect:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(drawRect:)) keepingOriginalWith:@selector(drawRect_:)];
@@ -69,15 +72,12 @@
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    NSRange newCharRange = charRange;
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( window.handlingMouseClick && window.mode != MODE_INSERT && ![base isValidCursorPosition:charRange.location] ){
-        newCharRange.location = charRange.location - 1;
-    }
-    
-    // Call original method
-    [base setSelectedRange_:newCharRange affinity:affinity stillSelecting:flag];
+	XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    if (window) 
+	{
+		charRange = [window restrictSelectedRange:charRange];
+	}
+    [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
     return;
 }
 
@@ -157,34 +157,32 @@
 
 -  (void)mouseDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    TRACE_LOG(@"got a mouseDown:");
+
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( nil == window ){
-        [base mouseDown_:theEvent];
-        return;
+	if (window)
+	{
+		[window beginMouseEvent:theEvent];
+	}
+   
+	[base mouseDown_:theEvent]; // this loops until it gets a mouse up
+
+    if (window)
+	{
+		[window endMouseEvent:theEvent];
     }
-    
-    // Call Original mouseDown:
-    window.handlingMouseClick = YES;
-    [base mouseDown_:theEvent]; // this loops until it gets a mouse up
-    window.handlingMouseClick = NO;
-    return;
+	
+	return;
 }
 
 -  (void)mouseUp:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    TRACE_LOG(@"got a mouseUp:");
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( nil == window ){
-        [base mouseUp_:theEvent];
-        return;
-    }
-	
-    // Call Original mouseDown:
-    window.handlingMouseClick = NO;
     [base mouseUp_:theEvent];
+	return;
+}
+
+- (void)mouseDragged:(NSEvent *)theEvent {
+	DVTSourceTextView *base = (DVTSourceTextView*)self;
+    [base mouseDragged_:theEvent];
     return;
 }
 
@@ -228,9 +226,9 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == window.mode){
+    if (window.mode == MODE_INSERT) {
         [base _drawInsertionPointInRect_:aRect color:aColor];
-    }else{
+    } else {
         [base drawInsertionPointInRect:aRect color:aColor turnedOn:YES];
     }
 }
@@ -240,25 +238,27 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
 	
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if(MODE_INSERT == window.mode){
-        [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
-    }
-    else{
-        if(flag){
-            color = [color colorWithAlphaComponent:0.5];
-            NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-            NSUInteger glyphIndex = [[base layoutManager] glyphIndexForPoint:aPoint inTextContainer:[base textContainer]];
-            NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[base textContainer]];
-            
-            [color set];
-            rect.size.width =rect.size.height/2;
-            if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
-                rect.size.width=glyphRect.size.width;
-            NSRectFillUsingOperation( rect, NSCompositeSourceOver);
-        } else {
-            [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
-        }
-    }
+	if (window.mode != MODE_INSERT && flag)
+	{
+		color = [color colorWithAlphaComponent:0.5];
+		NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+		NSUInteger glyphIndex = [[base layoutManager] glyphIndexForPoint:aPoint inTextContainer:[base textContainer]];
+		NSRect glyphRect = [[base layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[base textContainer]];
+		
+		[color set];
+		rect.size.width =rect.size.height/2;
+		if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
+			rect.size.width=glyphRect.size.width;
+		NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+	}
+	else
+	{
+		if (window.mode == MODE_INSERT)
+		{
+			[base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+		}
+		[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+	}
 }
 
 - (void)doCommandBySelector:(SEL)aSelector{

@@ -17,25 +17,43 @@
 
 @interface XVimOperatorEvaluator() {
 	XVimOperatorAction *_operatorAction;
+	XVimEvaluator *_parent;
 }
 @end
 
 @implementation XVimOperatorEvaluator
 @synthesize repeat = _repeat;
 
-- (id)initWithOperatorAction:(XVimOperatorAction*) action repeat:(NSUInteger)repeat
+- (id)initWithOperatorAction:(XVimOperatorAction*) action 
+				  withParent:(XVimEvaluator*)parent
+					  repeat:(NSUInteger)repeat
 {
 	if (self = [super init])
 	{
 		self->_operatorAction = action;
+		self->_parent = parent;
 		self->_repeat = repeat;
 	}
 	return self;
 }
 
 - (id)initWithOperatorAction:(XVimOperatorAction*) action
+				  withParent:(XVimEvaluator*)parent
 {
-	return [self initWithOperatorAction:action repeat:1];
+	return [self initWithOperatorAction:action withParent:parent repeat:1];
+}
+
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
+{
+    return [_parent insertionPointInWindow:window];
+}
+
+- (XVIM_MODE)mode {
+	return [_parent mode];
+}
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
+    return _parent;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
@@ -45,9 +63,7 @@
 
 - (XVimEvaluator*)a:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
-																			 from:[window cursorLocation]
-																		   inMode:MODE_NORMAL
-																	   withParent:nil
+																	   withParent:_parent
 																		   repeat:_repeat 
 																		inclusive:YES];
 	return eval;
@@ -55,9 +71,7 @@
 
 - (XVimEvaluator*)i:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
-																			 from:[window cursorLocation]
-																		   inMode:MODE_NORMAL
-																	   withParent:nil
+																	   withParent:_parent
 																		   repeat:_repeat 
 																		inclusive:NO];
 	return eval;

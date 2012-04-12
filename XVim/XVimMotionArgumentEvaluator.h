@@ -13,7 +13,7 @@
 // This is base class of an evaluator which takes arguments to determing the motion such as 'f','F'.
 // When the subclass fix the motion it must call motionFixedFrom:To: method.
 @interface XVimMotionArgumentEvaluator : XVimEvaluator{
-@private
+@protected
     XVimMotionEvaluator* _motionEvaluator;
 }
 @property (readonly) NSUInteger repeat;

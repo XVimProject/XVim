@@ -47,7 +47,10 @@
     return self;
 }
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window{	
+	[[window sourceView] adjustCursorPosition];
+	[super becameHandlerInWindow:window];
+	
     //[[window sourceView] adjustCursorPosition];
     if (self.playbackRegister) {
         [self.playbackRegister playbackWithHandler:window withRepeatCount:self.playbackCount];
@@ -55,6 +58,9 @@
         // Clear the playback register now that we have finished playing it back
         self.playbackRegister = nil;
     }
+}
+
+- (XVIM_MODE)mode {
     return MODE_NORMAL;
 }
 
@@ -105,7 +111,10 @@
 // it should go you into insert mode
 - (XVimEvaluator*)c:(XVimWindow*)window{
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:TRUE];
-    return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:TRUE];
+    return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+													withParent:self
+														repeat:[self numericArg] 
+										insertModeAtCompletion:TRUE];
 }
 
 // 'C' works similar to 'D' except that once it's done deleting
@@ -147,7 +156,10 @@
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:FALSE];	
-    return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:FALSE];
+    return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+													withParent:self
+														repeat:[self numericArg] 
+										insertModeAtCompletion:FALSE];
 }
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
@@ -492,7 +504,9 @@
 
 - (XVimEvaluator*)y:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
-    return [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
+    return [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction 
+												  withParent:self
+													  repeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)AT:(XVimWindow*)window{
@@ -501,18 +515,24 @@
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
-    return [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
+    return [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction 
+												   withParent:self
+													   repeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
+    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
+																		withParent:self
+																			repeat:[self numericArg]];
     return eval;
 }
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
+    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
+																		withParent:self
+																			repeat:[self numericArg]];
     return eval;
     
 }
@@ -563,7 +583,7 @@
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
     [view scrollTo:[window cursorLocation]];
-    return nil;
+    return self;
 }
 
 // There are fewer invalid keys than valid ones so make a list of invalid keys.

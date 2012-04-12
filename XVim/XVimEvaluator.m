@@ -13,10 +13,15 @@
 #import "Logger.h"
 #import "XVimWindow.h"
 #import "XVimKeymapProvider.h"
+#import "XVimNormalEvaluator.h"
+#import "XVimVisualEvaluator.h"
 
 @implementation XVimEvaluator
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window {
+}
+
+- (XVIM_MODE)mode {
     return MODE_NORMAL;
 }
 
@@ -57,6 +62,22 @@
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window {
     NSRange range = [[window sourceView] selectedRange];
     return range.location + range.length;
+}
+
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
+{
+	NSRange range = [window selectedRange];
+	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER 
+																									withRange:range];
+}
+
+- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window
+{
+	if (range.length == 0 && ![[window sourceView] isValidCursorPosition:range.location])
+	{
+		--range.location;
+	}
+	return range;
 }
 
 - (XVimEvaluator*)D_d:(XVimWindow*)window{

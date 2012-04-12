@@ -51,7 +51,8 @@
     return self;
 }
 
-- (XVIM_MODE)becameHandlerInWindow:(XVimWindow*)window{
+- (void)becameHandlerInWindow:(XVimWindow*)window{
+	[super becameHandlerInWindow:window];
 	
 	if (_begin == NSNotFound)
 	{
@@ -75,7 +76,9 @@
 	}
 	
 	[self updateSelectionInWindow:window];
+}
     
+- (XVIM_MODE)mode {
     return MODE_VISUAL;
 }
 
@@ -89,7 +92,7 @@
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
-    if (nextEvaluator == self){
+    if (nextEvaluator && nextEvaluator.mode == MODE_VISUAL) {
         [self updateSelectionInWindow:window];   
     }
     return nextEvaluator;
@@ -144,8 +147,6 @@
     [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
-																				  from:_insertion
-																				inMode:MODE_VISUAL
 																			withParent:self
 																				repeat:1 
 																			 inclusive:YES];
@@ -155,14 +156,20 @@
 - (XVimEvaluator*)c:(XVimWindow*)window{
     [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:YES];	
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:YES];
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+																			  withParent:self
+																				  repeat:[self numericArg] 
+																  insertModeAtCompletion:YES];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
     [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:NO];
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+																			  withParent:self
+																				  repeat:[self numericArg] 
+																  insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
@@ -170,7 +177,10 @@
 - (XVimEvaluator*)D:(XVimWindow*)window{
     [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action repeat:[self numericArg] insertModeAtCompletion:NO];
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+																			  withParent:self
+																				  repeat:[self numericArg] 
+																  insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE inWindow:window];
     
 }
@@ -180,8 +190,6 @@
     [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
-																				  from:_insertion
-																				inMode:MODE_VISUAL
 																			withParent:self
 																				repeat:1 
 																			 inclusive:NO];
@@ -243,7 +251,9 @@
 - (XVimEvaluator*)y:(XVimWindow*)window{
     [self updateSelectionInWindow:window];
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
-    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
+    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction 
+																		  withParent:self
+																			  repeat:[self numericArg]];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
@@ -251,7 +261,9 @@
     [self updateSelectionInWindow:window];
 	
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
-    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction repeat:[self numericArg]];
+    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction 
+																			withParent:self
+																				repeat:[self numericArg]];
 
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
