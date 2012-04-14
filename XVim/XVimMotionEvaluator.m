@@ -224,6 +224,9 @@
     NSUInteger end;
     if( [self numericMode] ){
         end = [view positionAtLineNumber:[self numericArg] column:0];
+		if (end == NSNotFound) {
+			end = [view headOfLine:[[view string] length]];
+		}
     }else{
         end = [view headOfLine:[[view string] length]];
         if( NSNotFound == end ){
