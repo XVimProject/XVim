@@ -560,14 +560,24 @@
     NSTextView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger paragraph_head = [view paragraphsBackward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	
+	if (paragraph_head != NSNotFound)
+	{
+		return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	}
+	return nil;
 }
 
 - (XVimEvaluator*)RBRACE:(XVimWindow*)window{ // }
     NSTextView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger paragraph_head = [view paragraphsForward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	
+	if (paragraph_head != NSNotFound)
+	{
+		return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	}
+	return nil;
 }
 
 
