@@ -9,6 +9,33 @@
 #import "XVimKeymap.h"
 #import "XVimKeyStroke.h"
 
+@class XVimKeymapNode;
+
+@interface XVimKeymapContext() {
+@public
+	NSMutableArray *_absorbedKeys;
+	XVimKeymapNode *_node;
+}
+@end
+
+@implementation XVimKeymapContext
+
+- (id)init
+{
+	if (self = [super init])
+	{
+		_absorbedKeys = [[NSMutableArray alloc] init];
+	}
+	return self;
+}
+
+- (void)clear
+{
+	[_absorbedKeys removeAllObjects];
+	_node = nil;
+}
+@end
+
 @interface XVimKeymapNode : NSObject {
 @public
 	NSMutableDictionary *_dict;
@@ -60,10 +87,10 @@
 
 - (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options 
 						   withPrimary:(XVimKeyStroke*)primaryKeyStroke
-						   withContext:(XVimKeymapNode**)context
+						   withContext:(XVimKeymapContext*)context
 {
 	NSArray *ret = nil;
-	XVimKeymapNode *node = *context;
+	XVimKeymapNode *node = context->_node;
 	if (!node) { node = _node; }
 	
 	XVimKeymapNode *foundNode = nil;
@@ -78,13 +105,19 @@
 		// Leaf node?
 		if ([foundNode->_dict count] == 0) {
 			ret = foundNode->_target;
-			foundNode = NULL;
+			[context clear];
+		} else {
+			[context->_absorbedKeys addObject:primaryKeyStroke];
+			context->_node = foundNode;
 		}
+		
 	} else {
-		ret = [NSArray arrayWithObject:primaryKeyStroke];
+		NSMutableArray *objects = [NSMutableArray arrayWithArray:context->_absorbedKeys];
+		[objects addObject:primaryKeyStroke];
+		[context clear];
+		
+		ret = objects;
 	}
-	
-	*context = foundNode;
 	
 	return ret;
 }

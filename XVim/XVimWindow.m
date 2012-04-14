@@ -20,7 +20,7 @@
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
-	XVimKeymapNode* _keymapContext;
+	XVimKeymapContext* _keymapContext;
 	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	BOOL _handlingMouseEvent;
 }
@@ -42,6 +42,7 @@
 		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
 		_recordingRegister = nil;
+		_keymapContext = [[XVimKeymapContext alloc] init];
 	}
 	return self;
 }
@@ -52,7 +53,7 @@
 		_currentEvaluator = evaluator;
 		[evaluator becameHandlerInWindow:self];
 		
-		_keymapContext = nil;
+		[_keymapContext clear];
 		
 		self.modeString = [evaluator modeString];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
@@ -87,7 +88,7 @@
 	
 	NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions 
 												 withPrimary:primaryKeyStroke
-												 withContext:&_keymapContext];
+												 withContext:_keymapContext];
 	if (keystrokes)
 	{
 		for (XVimKeyStroke *keyStroke in keystrokes)
