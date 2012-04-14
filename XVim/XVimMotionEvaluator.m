@@ -8,7 +8,7 @@
 
 #import "XVimMotionEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
-#import "XVimGEvaluator.h"
+#import "XVimGMotionEvaluator.h"
 #import "XVimZEvaluator.h"
 #import "XVimLocalMarkEvaluator.h"
 #import "XVimKeyStroke.h"
@@ -216,7 +216,7 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    return [[XVimGMotionEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{

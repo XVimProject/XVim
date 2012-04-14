@@ -1,24 +1,18 @@
 //
-//  XVimGEvaluator.m
+//  XVimGActionEvaluator.m
 //  XVim
 //
-//  Created by Shuichiro Suzuki on 3/1/12.
-//  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
+//  Created by Tomas Lundell on 14/04/12.
+//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "XVimGEvaluator.h"
-#import "NSTextView+VimMotion.h"
-#import "XVimMotionEvaluator.h"
+#import "XVimGActionEvaluator.h"
 #import "XVimTildeEvaluator.h"
 #import "XVimLowercaseEvaluator.h"
 #import "XVimUppercaseEvaluator.h"
 #import "XVimKeyStroke.h"
-#import "XVimWindow.h"
-#import "XVim.h"
-#import "XVimSearch.h"
-#import "Logger.h"
 
-@implementation XVimGEvaluator
+@implementation XVimGActionEvaluator
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
@@ -35,13 +29,6 @@
     // know more about this to implement robust one.
     //[NSApp sendAction:@selector(openQuickly:) to:nil from:self];
     return nil;
-}
-
-- (XVimEvaluator*)g:(XVimWindow*)window{
-    //TODO: Must deal numeric arg as linenumber
-    DVTSourceTextView* view = [window sourceView];
-    NSUInteger location = [view nextLine:0 column:0 count:self.repeat - 1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE inWindow:window];
 }
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
@@ -68,35 +55,8 @@
 													   repeat:repeat];
 }
 
-- (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
-	XVimSearch* searcher = [[XVim instance] searcher];
-	
-	NSUInteger cursorLocation = [window cursorLocation];
-	NSUInteger searchLocation = cursorLocation;
-    NSRange found;
-    for (NSUInteger i = 0; i < self.repeat && found.location != NSNotFound; ++i){
-        found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:NO inWindow:window];
-		searchLocation = found.location;
-    }
-	
-	if (![searcher selectSearchResult:found inWindow:window])
-	{
-		return nil;
-	}
-    
-	return [self _motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-}
-
-- (XVimEvaluator*)ASTERISK:(XVimWindow*)window{
-	return [self searchCurrentWordInWindow:window forward:YES];
-}
-
-- (XVimEvaluator*)NUMBER:(XVimWindow*)window{
-	return [self searchCurrentWordInWindow:window forward:YES];
-}
-
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
-    if ([keyStroke classResponds:[XVimGEvaluator class]]){
+    if ([keyStroke classImplements:[XVimGActionEvaluator class]]){
         return REGISTER_APPEND;
     }
     

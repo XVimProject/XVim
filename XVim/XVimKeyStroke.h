@@ -41,6 +41,9 @@
 // Creates the selector string from this key stroke
 - (NSString*)toSelectorString;
 
+// Returns the selector for this object
+- (SEL)selector;
+
 // Returns a selector for the target for this key stroke if one exists
 - (SEL)selectorForInstance:(id)target;
 
@@ -49,6 +52,9 @@
 
 // Returns YES if the class' instances respond to this key stroke
 - (BOOL)classResponds:(Class)class;
+
+// Returns YES if the class implements this method and does so different to its superclass
+- (BOOL)classImplements:(Class)class;
 
 @property (nonatomic) unichar keyCode;
 @property (nonatomic) int modifierFlags;

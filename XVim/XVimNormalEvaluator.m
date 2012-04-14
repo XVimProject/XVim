@@ -17,6 +17,7 @@
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimRegisterEvaluator.h"
+#import "XVimGActionEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
 #import "XVimKeyStroke.h"
@@ -209,6 +210,10 @@
     NSUInteger next = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
     [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
+}
+
+- (XVimEvaluator*)g:(XVimWindow*)window{
+    return [[XVimGActionEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window{
@@ -607,12 +612,11 @@ NSArray *_invalidRepeatKeys;
          nil];
     }
     NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
-    if (keySelector == [NSValue valueWithPointer:@selector(q:)]){
+    if (keySelector == [NSValue valueWithPointer:@selector(q:)]) {
         return REGISTER_IGNORE;
-    }else if (xregister.isRepeat){
-        if([keyStroke classResponds:[XVimNormalEvaluator class]] &&
-           ![keyStroke classResponds:[XVimNormalEvaluator superclass]]){
-            if ([_invalidRepeatKeys containsObject:keySelector] == NO){
+    } else if (xregister.isRepeat) {
+        if ([keyStroke classImplements:[XVimNormalEvaluator class]]) {
+            if ([_invalidRepeatKeys containsObject:keySelector] == NO) {
                 return REGISTER_REPLACE;
             }
         }
