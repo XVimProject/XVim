@@ -123,8 +123,18 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 {
     NSTextView* view = [window sourceView];
     if( _mode == MODE_CHARACTER ){
-        _selection_begin = _begin;
-        _selection_end = _insertion;
+		
+		if (_begin <= _insertion)
+		{
+			_selection_begin = _begin;
+			_selection_end = _insertion;
+		}
+		else
+		{
+			_selection_begin = _insertion;
+			_selection_end = _begin;
+		}
+		
     }else if( _mode == MODE_LINE ){
         NSUInteger begin = _begin;
         NSUInteger end = _insertion;
