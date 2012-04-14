@@ -18,6 +18,7 @@
 @class XVimEvaluator;
 @class DVTSourceTextView;
 @class XVimKeymap;
+@class XVimSourceCodeEditor;
 
 
 #define XVIM_TAG 1209 // This is my birthday!
@@ -51,6 +52,7 @@
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimExCommand* excmd;
 @property (strong) XVimOptions* options;
+@property (weak) XVimSourceCodeEditor* editor;
 
 // In normal mode, if when moving the caret to somewhere, and it might be at the newline character.
 // Mark this property to YES before moving. And mark it to NO after moving.

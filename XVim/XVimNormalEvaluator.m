@@ -17,6 +17,7 @@
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimRegisterEvaluator.h"
+#import "XVimWindowEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
 #import "XVimKeyStroke.h"
@@ -428,6 +429,10 @@
 - (XVimEvaluator*)C_v:(id)arg{
     // Block selection
     return nil;
+}
+
+- (XVimEvaluator*)C_w:(id)arg{
+    return [[XVimWindowEvaluator alloc] init];
 }
 
 - (XVimEvaluator*)x:(id)arg{

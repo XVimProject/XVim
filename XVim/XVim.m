@@ -56,6 +56,7 @@
 @synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
 @synthesize searcher,excmd;
 @synthesize options;
+@synthesize editor = _editor;
 
 + (void) load { 
     // Entry Point of the Plugin.

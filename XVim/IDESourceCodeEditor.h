@@ -8,6 +8,11 @@
 
 #import <Foundation/Foundation.h>
 
+@class IDEWorkspaceTabController;
+
 @interface IDESourceCodeEditor : NSObject
-- (NSRange) textView_:(NSTextView *)textView willChangeSelectionFromCharacterRange:(NSRange)oldSelectedCharRange toCharacterRange:(NSRange)newSelectedCharRange;
+- (NSView*)view;
+- (IDEWorkspaceTabController*)workspaceTabController;
+- (id)initWithNibName_:(NSString*)nibName bundle:(NSBundle*)nibBundle document:(NSDocument*)nibDocument;
+- (NSRange)textView_:(NSTextView *)textView willChangeSelectionFromCharacterRange:(NSRange)oldSelectedCharRange toCharacterRange:(NSRange)newSelectedCharRange;
 @end
