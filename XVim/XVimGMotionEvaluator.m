@@ -21,7 +21,7 @@
 - (XVimEvaluator*)g:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
     DVTSourceTextView* view = [window sourceView];
-    NSUInteger location = [view nextLine:0 column:0 count:self.repeat - 1 option:MOTION_OPTION_NONE];
+    NSUInteger location = [view nextLine:0 column:0 count:[self numericArg] - 1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE inWindow:window];
 }
 
@@ -31,7 +31,7 @@
 	NSUInteger cursorLocation = [window cursorLocation];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found;
-    for (NSUInteger i = 0; i < self.repeat && found.location != NSNotFound; ++i){
+    for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
         found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:NO inWindow:window];
 		searchLocation = found.location;
     }

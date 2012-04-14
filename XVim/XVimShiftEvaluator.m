@@ -20,12 +20,10 @@
 
 - (id)initWithOperatorAction:(XVimOperatorAction*)action 
 				  withParent:(XVimEvaluator*)parent
-					  repeat:(NSUInteger)repeat 
 					 unshift:(BOOL)unshift
 {
 	if (self = [super initWithOperatorAction:action 
-								  withParent:parent
-									  repeat:repeat])
+								  withParent:parent])
 	{
 		self->_unshift = unshift;
 	}
@@ -35,7 +33,7 @@
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
     if( !_unshift ){
         NSTextView* view = [window sourceView];
-        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
         return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
     }
     return nil;
@@ -45,7 +43,7 @@
     //unshift
     if( _unshift ){
         NSTextView* view = [window sourceView];
-        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
         return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
     }
     return nil;

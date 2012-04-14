@@ -110,12 +110,18 @@
 	return @"NORMAL";
 }
 
+- (NSUInteger)numericArg
+{
+	return 1;
+}
+
 - (XVimEvaluator*)D_d:(XVimWindow*)window{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.
     
     return nil;
 }
+
 @end
 
 

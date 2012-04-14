@@ -13,12 +13,10 @@
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
-@synthesize repeat;
 
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator {
     self = [super init];
     if( self ){
-        repeat = rep;
         _motionEvaluator = [evaluator retain];
     }
     return self;
@@ -87,5 +85,10 @@
     }
     
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
+}
+
+- (NSUInteger)numericArg
+{
+	return [_motionEvaluator numericArg] * [super numericArg];
 }
 @end

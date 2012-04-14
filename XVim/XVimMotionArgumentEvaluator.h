@@ -16,9 +16,8 @@
 @protected
     XVimMotionEvaluator* _motionEvaluator;
 }
-@property (readonly) NSUInteger repeat;
 
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window;
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator;
 @end

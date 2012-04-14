@@ -194,14 +194,14 @@
 }
 
 - (XVimEvaluator*)f:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self];
     eval.forward = YES;
     eval.previous = NO;
     return eval;
 }
 
 - (XVimEvaluator*)F:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self];
     eval.forward = NO;
     eval.previous = NO;
     return eval;
@@ -216,7 +216,7 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGMotionEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    return [[XVimGMotionEvaluator alloc] initWithMotionEvaluator:self];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
@@ -302,14 +302,14 @@
 */
 
 - (XVimEvaluator*)t:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self];
     eval.forward = YES;
     eval.previous = YES;
     return eval;
 }
 
 - (XVimEvaluator*)T:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self];
     eval.forward = NO;
     eval.previous = YES;
     return eval;
@@ -335,7 +335,7 @@
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
-    return [[XVimZEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    return [[XVimZEvaluator alloc] initWithMotionEvaluator:self];
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{
@@ -353,7 +353,7 @@
 	NSUInteger cursorLocation = [window cursorLocation];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found;
-    for (NSUInteger i = 0; i < self.numericArg && found.location != NSNotFound; ++i){
+    for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
         found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:YES inWindow:window];
 		searchLocation = found.location;
     }

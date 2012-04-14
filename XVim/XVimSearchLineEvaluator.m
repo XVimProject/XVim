@@ -24,8 +24,8 @@
 @synthesize previous = _previous;
 @synthesize performedSearch = _performedSearch;
 
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
-    self = [super initWithMotionEvaluator:evaluator withRepeat:rep];
+- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator {
+    self = [super initWithMotionEvaluator:evaluator];
     if( self ){
         _performedSearch = NO;
     }
@@ -49,7 +49,7 @@
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
         location = [charSearcher searchNextCharacterFrom:location inWindow:window];
-        if (location == NSNotFound || ++i >= self.repeat){
+        if (location == NSNotFound || ++i >= [self numericArg]){
             break;
         }
 

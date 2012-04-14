@@ -79,4 +79,6 @@ typedef enum {
 
 - (NSString*)modeString;
 
+- (NSUInteger)numericArg;
+
 @end

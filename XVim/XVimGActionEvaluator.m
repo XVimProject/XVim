@@ -32,27 +32,21 @@
 }
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
-	NSUInteger repeat = [self repeat];
 	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] init];
 	return [[XVimLowercaseEvaluator alloc] initWithOperatorAction:operatorAction 
-													   withParent:_motionEvaluator
-														   repeat:repeat];
+													   withParent:_motionEvaluator];
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
-	NSUInteger repeat = [self repeat];
 	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] init];
 	return [[XVimUppercaseEvaluator alloc] initWithOperatorAction:operatorAction 
-													   withParent:_motionEvaluator
-														   repeat:repeat];
+													   withParent:_motionEvaluator];
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
-	NSUInteger repeat = [self repeat];
 	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] init];
 	return [[XVimTildeEvaluator alloc] initWithOperatorAction:operatorAction 
-												   withParent:_motionEvaluator
-													   repeat:repeat];
+												   withParent:_motionEvaluator];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
