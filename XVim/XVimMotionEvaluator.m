@@ -416,7 +416,7 @@
     NSRange at = [view selectedRange]; 
     if (at.location >= s.length-1) {
         // [window statusMessage:@"leveled match not found" :ringBell TRUE]
-        [window ringBell];
+        [[XVim instance] ringBell];
         return self;
     }
     NSUInteger eol = [view endOfLine:at.location];
@@ -454,7 +454,7 @@
         // src is not an open or close char
         // vim does not produce an error msg for this so we won't either i guess
         // [window statusMessage:@"Not a match character" :ringBell TRUE]
-        [window ringBell];
+        [[XVim instance] ringBell];
         return self;
     }
 
@@ -496,7 +496,7 @@
 
     if (search.location == NSNotFound) {
         // [window statusMessage:@"leveled match not found" :ringBell TRUE]
-        [window ringBell];
+        [[XVim instance] ringBell];
         return self;
     }
 
@@ -624,7 +624,7 @@
     }
     
     if (location == NSNotFound){
-        [window ringBell];
+        [[XVim instance]ringBell];
     }else{
         // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
@@ -659,7 +659,7 @@
     }
     
     if (location == NSNotFound){
-        [window ringBell];
+        [[XVim instance] ringBell];
     }else{
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
         // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE

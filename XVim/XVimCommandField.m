@@ -6,21 +6,30 @@
 //  Copyright 2012 JugglerShu.Net. All rights reserved.
 //
 
+#import "XVim.h"
 #import "XVimCommandField.h"
 #import "NSString+VimHelper.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+
+typedef enum{
+    MODE_EXCOMMAND,
+    MODE_SEARCH,
+}CMDMODE;
 
 @interface XVimCommandField(){
     BOOL _askingMode;
     NSString* _msg;
     id msgOwner;
     SEL responseHandler;
+    NSUInteger _historyNo; // Hisotry Number starts at 1. 0 means currently input command.
 }
+@property (strong) NSString* currentCmd;
 @end
 
 @implementation XVimCommandField
 @synthesize delegate;
+@synthesize currentCmd = _currentCmd;
 
 - (void)answered:(id)sender{
     METHOD_TRACE_LOG();
@@ -28,6 +37,7 @@
 
 - (id)initWithFrame:(NSRect)frameRect{
     if( self = [super initWithFrame:frameRect] ){
+        _historyNo = 0;
         _askingMode = NO;
     }
     return self;
@@ -44,6 +54,11 @@
     [self setHidden:YES];
 }
 
+- (BOOL)becomeFirstResponder{
+    _historyNo = 0;
+    return YES;
+}
+
 - (BOOL)resignFirstResponder{
     if( _askingMode ){
         return NO;
@@ -53,9 +68,44 @@
 }
 
 - (void)doCommandBySelector:(SEL)aSelector{
+    XVim* xvim = [XVim instance];
     if( @selector(complete:) == aSelector|| @selector(cancelOperation:) == aSelector){
         if( [self.delegate commandCanceled] ){
             [self onLoseFocus];
+        }
+        return;
+    }else if(@selector(moveUp:) == aSelector ){
+        if( _historyNo == 0 ){
+            self.currentCmd = [[[self string] copy] autorelease];
+        }
+        _historyNo++;
+        NSString* cmd = [xvim exCommandHistory:_historyNo withPrefix:self.currentCmd];
+        if( nil == cmd ){
+            [[XVim instance] ringBell];
+            _historyNo--;
+            [self moveToEndOfLine:self];
+        }else{
+            [self setString:cmd];
+            [self moveToEndOfLine:self];
+        }
+        return;
+    }else if(@selector(moveDown:) == aSelector ){
+        if( _historyNo == 0 ){
+            // Nothing
+        }else{
+            _historyNo--;
+            if( _historyNo == 0 ){
+                [self setString:_currentCmd];
+                [self moveToEndOfLine:self];
+            }else{
+                NSString* cmd = [xvim exCommandHistory:_historyNo withPrefix:self.currentCmd];
+                if( nil == cmd ){
+                    [[XVim instance] ringBell];
+                }else{
+                    [self setString:cmd];
+                    [self moveToEndOfLine:self];
+                }
+            }
         }
         return;
     }
@@ -77,6 +127,12 @@
     }
     [super insertText:insertString]; 
 }
+
+- (void)didChangeText{
+    self.currentCmd = [[[self string] copy] autorelease];
+    _historyNo = 0;
+}
+
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
     if(flag){

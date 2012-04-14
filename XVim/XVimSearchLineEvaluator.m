@@ -55,7 +55,7 @@
     }
 
     if (location == NSNotFound) {
-        [window ringBell];
+        [[XVim instance] ringBell];
     }else{
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
         if( !_forward ){

@@ -156,19 +156,11 @@
     return YES;
 }
 
-- (void)ringBell {
-	XVimOptions *options = [[XVim instance] options];
-    if (options.errorbells) 
-	{
-        NSBeep();
-    }
-    return;
-}
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
     [self setErrorMessage:message];
     if (ringBell) {
-        [self ringBell];
+        [[XVim instance] ringBell];
     }
     return;
 }
@@ -185,13 +177,13 @@
         // unless it was capitalized
         [_recordingRegister clear];
     }else{        
-        [self ringBell];
+        [[XVim instance] ringBell];
     }
 }
 
 - (void)stopRecordingRegister:(XVimRegister*)xregister{
     if (_recordingRegister == nil){
-        [self ringBell];
+        [[XVim instance] ringBell];
     }else{
         _recordingRegister = nil;
         [self setStaticMessage: @""];
