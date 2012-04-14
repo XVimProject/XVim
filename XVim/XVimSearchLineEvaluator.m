@@ -24,14 +24,6 @@
 @synthesize previous = _previous;
 @synthesize performedSearch = _performedSearch;
 
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator {
-    self = [super initWithMotionEvaluator:evaluator];
-    if( self ){
-        _performedSearch = NO;
-    }
-    return self;
-}
-
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
 	return [keymapProvider keymapForMode:MODE_NONE];

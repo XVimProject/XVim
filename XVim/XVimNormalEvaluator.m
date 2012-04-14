@@ -114,6 +114,7 @@
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:TRUE];
     return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 													withParent:self
+													numericArg:[self numericArg]
 										insertModeAtCompletion:TRUE];
 }
 
@@ -158,6 +159,7 @@
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:FALSE];	
     return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 													withParent:self
+													numericArg:[self numericArg]
 										insertModeAtCompletion:FALSE];
 }
 
@@ -211,7 +213,7 @@
 }
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGActionEvaluator alloc] initWithMotionEvaluator:self];
+    return [[XVimGActionEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window{
@@ -508,7 +510,8 @@
 - (XVimEvaluator*)y:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
     return [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction 
-												  withParent:self];
+												  withParent:self
+												  numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)AT:(XVimWindow*)window{
@@ -518,20 +521,23 @@
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     return [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction 
-												   withParent:self];
+												   withParent:self
+												   numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
-																		withParent:self];
+																		withParent:self
+																		numericArg:[self numericArg]];
     return eval;
 }
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
-																		withParent:self];
+																		withParent:self
+																		numericArg:[self numericArg]];
     return eval;
     
 }

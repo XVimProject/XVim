@@ -18,6 +18,7 @@
 @interface XVimOperatorEvaluator() {
 	XVimOperatorAction *_operatorAction;
 	XVimEvaluator *_parent;
+	NSUInteger _parentNumericArg;
 }
 @end
 
@@ -25,11 +26,13 @@
 
 - (id)initWithOperatorAction:(XVimOperatorAction*) action 
 				  withParent:(XVimEvaluator*)parent
+				  numericArg:(NSUInteger)numericArg
 {
 	if (self = [super init])
 	{
 		self->_operatorAction = action;
 		self->_parent = parent;
+		self->_parentNumericArg = numericArg;
 	}
 	return self;
 }
@@ -123,7 +126,7 @@
 
 - (NSUInteger)numericArg
 {
-	return [_parent numericArg] * [super numericArg];
+	return [super numericArg] * _parentNumericArg;
 }
 
 @end

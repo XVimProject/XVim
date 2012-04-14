@@ -20,10 +20,12 @@
 
 - (id)initWithOperatorAction:(XVimOperatorAction*)action 
 				  withParent:(XVimEvaluator*)parent
+				  numericArg:(NSUInteger)numericArg
 					 unshift:(BOOL)unshift
 {
 	if (self = [super initWithOperatorAction:action 
-								  withParent:parent])
+								  withParent:parent
+								  numericArg:numericArg])
 	{
 		self->_unshift = unshift;
 	}

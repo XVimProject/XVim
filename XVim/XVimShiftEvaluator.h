@@ -12,6 +12,7 @@
 @interface XVimShiftEvaluator : XVimOperatorEvaluator
 - (id)initWithOperatorAction:(XVimOperatorAction*)action 
 				  withParent:(XVimEvaluator*)parent
+				  numericArg:(NSUInteger)numericArg
 					 unshift:(BOOL)unshift;
 @end
 

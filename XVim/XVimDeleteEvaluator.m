@@ -22,10 +22,13 @@
 
 - (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
 				  withParent:(XVimEvaluator*)parent
+				  numericArg:(NSUInteger)numericArg
 	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
 	if (self = [super initWithOperatorAction:operatorAction 
-								  withParent:parent])
+								  withParent:parent
+								  numericArg:numericArg
+				])
 	{
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}

@@ -17,7 +17,8 @@
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
 - (id)initWithOperatorAction:(XVimOperatorAction*)action 
-				  withParent:(XVimEvaluator*)parent;
+				  withParent:(XVimEvaluator*)parent
+				  numericArg:(NSUInteger)numericArg;
 
 - (XVimEvaluator*)w:(XVimWindow*)window;
 - (XVimEvaluator*)W:(XVimWindow*)window;
