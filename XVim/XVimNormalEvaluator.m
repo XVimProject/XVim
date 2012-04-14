@@ -213,7 +213,7 @@
 }
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGActionEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    return [[XVimGActionEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window{

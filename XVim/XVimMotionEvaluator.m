@@ -194,14 +194,14 @@
 }
 
 - (XVimEvaluator*)f:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = YES;
     eval.previous = NO;
     return eval;
 }
 
 - (XVimEvaluator*)F:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = NO;
     eval.previous = NO;
     return eval;
@@ -216,7 +216,7 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGMotionEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    return [[XVimGMotionEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
@@ -302,14 +302,14 @@
 */
 
 - (XVimEvaluator*)t:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = YES;
     eval.previous = YES;
     return eval;
 }
 
 - (XVimEvaluator*)T:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = NO;
     eval.previous = YES;
     return eval;
@@ -335,7 +335,7 @@
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
-    return [[XVimZEvaluator alloc] initWithMotionEvaluator:self numericArg:[self numericArg]];
+    return [[XVimZEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{

@@ -14,6 +14,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimTextObjectEvaluator.h"
 #import "XVimSelectAction.h"
+#import "XVimGVisualEvaluator.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -213,6 +214,11 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 																  insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE inWindow:window];
     
+}
+
+- (XVimEvaluator*)g:(XVimWindow*)window
+{
+	return [[XVimGVisualEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window

@@ -34,21 +34,21 @@
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] init];
 	return [[XVimLowercaseEvaluator alloc] initWithOperatorAction:operatorAction 
-													   withParent:_motionEvaluator
+													   withParent:_parent
 													   numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] init];
 	return [[XVimUppercaseEvaluator alloc] initWithOperatorAction:operatorAction 
-													   withParent:_motionEvaluator
+													   withParent:_parent
 													   numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] init];
 	return [[XVimTildeEvaluator alloc] initWithOperatorAction:operatorAction 
-												   withParent:_motionEvaluator
+												   withParent:_parent
 												   numericArg:[self numericArg]];
 }
 
