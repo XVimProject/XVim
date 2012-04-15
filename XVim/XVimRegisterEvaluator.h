@@ -9,6 +9,7 @@
 #import "XVimEvaluator.h"
 
 typedef enum {
+    REGISTER_EVAL_MODE_YANK,
     REGISTER_EVAL_MODE_RECORD,
     REGISTER_EVAL_MODE_PLAYBACK
 } XVimRegisterEvalMode;

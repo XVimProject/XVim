@@ -21,17 +21,20 @@
 
 + (XVim*)instance;
 
-@property(strong, readonly) NSSet* registers;
+@property (strong, readonly) NSDictionary* registers;
 @property (strong) XVimOptions* options;
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimCharacterSearch* characterSearcher;
 @property (strong) XVimExCommand* excmd;
 @property (weak) XVimSourceCodeEditor* editor;
+@property (strong) XVimRegister *yankRegister;
+@property (readonly) NSString* pasteText;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;
 - (void)parseRcFile;
-- (NSString*) exCommandHistory:(NSUInteger)no withPrefix:(NSString*)str;
+- (NSString*)exCommandHistory:(NSUInteger)no withPrefix:(NSString*)str;
 - (void)ringBell;
+- (void)onDeleteOrYank;
 
 @end

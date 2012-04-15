@@ -15,6 +15,8 @@
 #import "XVimTextObjectEvaluator.h"
 #import "XVimSelectAction.h"
 #import "XVimGVisualEvaluator.h"
+#import "XVimRegisterEvaluator.h"
+#import "XVim.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -243,20 +245,23 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
     NSString* current = [[view string] substringWithRange:[view selectedRange]];
     [view delete:self];
     NSUInteger loc = [view selectedRange].location;
-    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
-    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
-    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        if( [view isBlankLine:loc] && ![view isEOF:loc]){
-            [view setSelectedRange:NSMakeRange(loc+1,0)];
-        }else{
+    NSString *text = [XVim instance].pasteText;
+    if (text.length > 0){
+        unichar uc = [text characterAtIndex:[text length] -1];
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+            if( [view isBlankLine:loc] && ![view isEOF:loc]){
+                [view setSelectedRange:NSMakeRange(loc+1,0)];
+            }else{
                 [view insertNewline:self];
+            }
         }
+        
+        for(NSUInteger i = 0; i < [self numericArg]; i++ ){
+            [view insertText:text];
+        }
+        
+        [[NSPasteboard generalPasteboard] setString:current forType:NSStringPboardType];
     }
-    
-    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-        [view paste:self];
-    }
-    [[NSPasteboard generalPasteboard] setString:current forType:NSStringPboardType];
     return nil;
 }
 
@@ -325,6 +330,10 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 																		  withParent:self
 																		  numericArg:[self numericArg]];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+}
+
+- (XVimEvaluator*)DQUOTE:(XVimWindow*)window{
+    return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_YANK andCount:1];
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{

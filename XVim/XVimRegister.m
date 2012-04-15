@@ -20,7 +20,6 @@
 @implementation XVimRegister
 
 @synthesize text = _text;
-@synthesize name = _name;
 @synthesize displayName = _displayName;
 @synthesize isPlayingBack = _isPlayingBack;
 @synthesize keyEventsAndInsertedText = _keyEventsAndInsertedText;
@@ -30,14 +29,12 @@
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.displayName, self.text];
 }
 
--(id) initWithRegisterName:(NSString*)registerName 
-			   displayName:(NSString*)displayName
+-(id) initWithDisplayName:(NSString*)displayName
 {
     self = [super init];
     if (self) {
         _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
         _text = [NSMutableString stringWithString:@""];
-        _name = [NSString stringWithString:registerName];
         _displayName = [NSString stringWithString:displayName];
         _nonNumericKeyCount = 0;
         _isPlayingBack = NO;
@@ -46,18 +43,18 @@
 }
 
 -(BOOL) isAlpha{
-    if (self.name.length != 1){
+    if (self.displayName.length != 1){
         return NO;
     }
-    unichar charcode = [self.name characterAtIndex:0];
+    unichar charcode = [self.displayName characterAtIndex:0];
     return (65 <= charcode && charcode <= 90) || (97 <= charcode && charcode <= 122);
 }
 
 -(BOOL) isNumeric{
-    if (self.name.length != 1){
+    if (self.displayName.length != 1){
         return NO;
     }
-    unichar charcode = [self.name characterAtIndex:0];
+    unichar charcode = [self.displayName characterAtIndex:0];
     return (48 <= charcode && charcode <= 57);
 }
 
@@ -78,7 +75,7 @@
 }
 
 -(NSUInteger) hash{
-    return [self.name hash];
+    return [self.displayName hash];
 }
 
 -(NSUInteger) keyCount{

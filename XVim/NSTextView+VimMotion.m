@@ -8,6 +8,7 @@
 #import "NSString+VimHelper.h"
 #import "DVTSourceTextView.h"
 #import "Logger.h"
+#import "XVim.h"
 
 @implementation NSTextView (VimMotion)
 
@@ -153,6 +154,7 @@
 {
 	[self cut:sender];
 	[self adjustCursorPosition];
+    [[XVim instance] onDeleteOrYank];
 }
 
 /**

@@ -35,13 +35,19 @@ XVimRegisterEvalMode _mode;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     XVimRegister *xregister = [[XVim instance] findRegister:[keyStroke toSelectorString]];
-    if (_mode == REGISTER_EVAL_MODE_RECORD){
+    if (_mode == REGISTER_EVAL_MODE_YANK){
+        if (xregister.isReadOnly == NO){
+            return [[XVimNormalEvaluator alloc] initWithYankRegister:xregister];
+        }else{
+            [[XVim instance] ringBell];
+        }
+    } else if (_mode == REGISTER_EVAL_MODE_RECORD){
         if (xregister.isReadOnly == NO){
             [window recordIntoRegister:xregister];
         }else{
             [[XVim instance] ringBell];
         }
-    } else if(_mode == REGISTER_EVAL_MODE_PLAYBACK){
+    } else if (_mode == REGISTER_EVAL_MODE_PLAYBACK){
         return [[XVimNormalEvaluator alloc] initWithRegister:xregister andPlaybackCount:_count];
     }
 

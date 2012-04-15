@@ -40,11 +40,32 @@
 @synthesize playbackCount = _playbackCount;
 @synthesize playbackRegister = _playbackRegister;
 
+-(id)init{
+    self = [super init];
+    if (self){
+        _playbackCount = 0;
+        _playbackRegister = nil;
+        [XVim instance].yankRegister = nil;
+    }
+    return self;
+}
+
+-(id)initWithYankRegister:(XVimRegister*)xregister{
+    self = [super init];
+    if (self){
+        _playbackCount = 0;
+        _playbackRegister = nil;
+        [XVim instance].yankRegister = xregister;
+    }
+    return self;
+}
+
 -(id)initWithRegister:(XVimRegister*)xregister andPlaybackCount:(NSUInteger)count{
     self = [super init];
     if (self){
         _playbackCount = count;
         _playbackRegister = xregister;
+        [XVim instance].yankRegister = nil;
     }
     return self;
 }
@@ -348,27 +369,29 @@
     // because dw is not working quite right it seems
     NSTextView* view = [window sourceView];
     NSUInteger loc = [view selectedRange].location;
-    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
-    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
-    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        if( [view isBlankLine:loc] && ![view isEOF:loc]){
-            [view setSelectedRange:NSMakeRange(loc+1,0)];
-        }else{
-            NSUInteger newline = [view nextNewLine:loc];
-            if( NSNotFound == newline ){
-                // add newline at EOF
-                [view setSelectedRange:NSMakeRange([[view string]length], 0)];
-                [view insertNewline:self];
+    NSString *text = [XVim instance].pasteText;
+    if (text.length > 0){
+        unichar uc = [text characterAtIndex:[text length] -1];
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+            if( [view isBlankLine:loc] && ![view isEOF:loc]){
+                [view setSelectedRange:NSMakeRange(loc+1,0)];
             }else{
-                [view setSelectedRange:NSMakeRange(newline+1, 0)];
+                NSUInteger newline = [view nextNewLine:loc];
+                if( NSNotFound == newline ){
+                    // add newline at EOF
+                    [view setSelectedRange:NSMakeRange([[view string]length], 0)];
+                    [view insertNewline:self];
+                }else{
+                    [view setSelectedRange:NSMakeRange(newline+1, 0)];
+                }
             }
+        }else{
+            [view moveForward:self];
         }
-    }else{
-        [view moveForward:self];
-    }
-    
-    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-        [view paste:self];
+        
+        for(NSUInteger i = 0; i < [self numericArg]; i++ ){
+            [view insertText:text];
+        }
     }
     return nil;
 }
@@ -377,16 +400,18 @@
     // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
     // the line boundary and then paste the data in.
     NSTextView* view = [window sourceView];
-    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
-    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
-    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-        NSUInteger b = [view headOfLine:[view selectedRange].location];
-        if( NSNotFound != b ){
-            [view setSelectedRange:NSMakeRange(b,0)];
+    NSString *text = [XVim instance].pasteText;
+    if (text.length > 0){
+        unichar uc = [text characterAtIndex:[text length] -1];
+        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+            NSUInteger b = [view headOfLine:[view selectedRange].location];
+            if( NSNotFound != b ){
+                [view setSelectedRange:NSMakeRange(b,0)];
+            }
         }
-    }
-    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-        [view paste:self];
+        for(NSUInteger i = 0; i < [self numericArg]; i++ ){
+            [view insertText:text];
+        }
     }
     return nil;
 }
@@ -525,6 +550,10 @@
 
 - (XVimEvaluator*)AT:(XVimWindow*)window{
     return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_PLAYBACK andCount:[self numericArg]];
+}
+
+- (XVimEvaluator*)DQUOTE:(XVimWindow*)window{
+    return [[XVimRegisterEvaluator alloc] initWithMode:REGISTER_EVAL_MODE_YANK andCount:1];
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
