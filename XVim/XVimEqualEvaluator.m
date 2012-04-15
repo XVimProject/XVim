@@ -13,6 +13,7 @@
 #import "XVimMotionEvaluator.h"
 #import "XVimWindow.h"
 #import "Logger.h"
+#import "XVim.h"
 
 @implementation XVimEqualEvaluator
 
@@ -33,6 +34,8 @@
 	DVTSourceTextView* view = [window sourceView];
 	[view selectOperationTargetFrom:from To:to Type:type];
 	[view copy:self];
+    [[XVim instance] onDeleteOrYank];
+
 	// Indent
 	[[view textStorage] indentCharacterRange: [view selectedRange] undoManager:[view undoManager]];
 	[view setSelectedRange:NSMakeRange(from<to?from:to, 0)];

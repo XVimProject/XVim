@@ -11,6 +11,7 @@
 #import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "XVim.h"
 
 @implementation XVimYankEvaluator
 
@@ -34,6 +35,8 @@
     DVTSourceTextView* view = [window sourceView];
     [view selectOperationTargetFrom:from To:to Type:type];
     [view copy:self];
+    [[XVim instance] onDeleteOrYank];
+
     [view setSelectedRange:NSMakeRange(from, 0)];
     return nil;
 }
