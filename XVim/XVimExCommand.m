@@ -6,13 +6,17 @@
 //  Copyright (c) 2012 JugglerSHu.Net. All rights reserved.
 //
 
-#import "XVim.h"
-#import "DVTSourceTextView.h"
 #import "XVimExCommand.h"
+#import "XVimWindow.h"
+#include "XVim.h"
+#include "XVimSearch.h"
+#import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
+#import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
+#import "XVimOptions.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -34,7 +38,7 @@
 @implementation XVimExCommand
 
 #define CMD(cmd,mtd) [[XVimExCmdname alloc] initWithCmd:cmd method:mtd]
--(id)initWithXVim:(XVim*)xvim{
+-(id)init {
     if( self = [super init] ){
         // This is the ex command list.
         // This is list from ex_cmds.h in Vim source code.
@@ -42,529 +46,530 @@
         // You can change the method name as needed ( Since Vim's one is not always suitable )
         
         _excommands = [[NSArray alloc] initWithObjects:
-                       CMD(@"append", @"append:"),
-                       CMD(@"abbreviate", @"abbreviate:"),
-                       CMD(@"abclear", @"abclear:"),
-                       CMD(@"aboveleft", @"wrongmodifier:"),
-                       CMD(@"all", @"all:"),
-                       CMD(@"amenu", @"menu:"),
-                       CMD(@"anoremenu", @"menu:"),
-                       CMD(@"args", @"args:"),
-                       CMD(@"argadd", @"argadd:"),
-                       CMD(@"argdelete", @"argdelete:"),
-                       CMD(@"argdo", @"listdo:"),
-                       CMD(@"argedit", @"argedit:"),
-                       CMD(@"argglobal", @"args:"),
-                       CMD(@"arglocal", @"args:"),
-                       CMD(@"argument", @"argument:"),
-                       CMD(@"ascii", @"ascii:"),
-                       CMD(@"autocmd", @"autocmd:"),
-                       CMD(@"augroup", @"autocmd:"),
-                       CMD(@"aunmenu", @"menu:"),
-                       CMD(@"buffer", @"buffer:"),
-                       CMD(@"bNext", @"bprevious:"),
-                       CMD(@"ball", @"buffer_all:"),
-                       CMD(@"badd", @"edit:"),
-                       CMD(@"bdelete", @"bunload:"),
-                       CMD(@"behave", @"behave:"),
-                       CMD(@"belowright", @"wrongmodifier:"),
-                       CMD(@"bfirst", @"brewind:"),
-                       CMD(@"blast", @"blast:"),
-                       CMD(@"bmodified", @"bmodified:"),
-                       CMD(@"bnext", @"bnext:"),
-                       CMD(@"botright", @"wrongmodifier:"),
-                       CMD(@"bprevious", @"bprevious:"),
-                       CMD(@"brewind", @"brewind:"),
-                       CMD(@"break", @"break:"),
-                       CMD(@"breakadd", @"breakadd:"),
-                       CMD(@"breakdel", @"breakdel:"),
-                       CMD(@"breaklist", @"breaklist:"),
-                       CMD(@"browse", @"wrongmodifier:"),
-                       CMD(@"buffers", @"buflist_list:"),
-                       CMD(@"bufdo", @"listdo:"),
-                       CMD(@"bunload", @"bunload:"),
-                       CMD(@"bwipeout", @"bunload:"),
-                       CMD(@"change", @"change:"),
-                       CMD(@"cNext", @"cnext:"),
-                       CMD(@"cNfile", @"cnext:"),
-                       CMD(@"cabbrev", @"abbreviate:"),
-                       CMD(@"cabclear", @"abclear:"),
-                       CMD(@"caddbuffer", @"cbuffer:"),
-                       CMD(@"caddexpr", @"cexpr:"),
-                       CMD(@"caddfile", @"cfile:"),
-                       CMD(@"call", @"call:"),
-                       CMD(@"catch", @"catch:"),
-                       CMD(@"cbuffer", @"cbuffer:"),
-                       CMD(@"cc", @"cc:"),
-                       CMD(@"cclose", @"cclose:"),
-                       CMD(@"cd", @"cd:"),
-                       CMD(@"center", @"align:"),
-                       CMD(@"cexpr", @"cexpr:"),
-                       CMD(@"cfile", @"cfile:"),
-                       CMD(@"cfirst", @"cc:"),
-                       CMD(@"cgetfile", @"cfile:"),
-                       CMD(@"cgetbuffer", @"cbuffer:"),
-                       CMD(@"cgetexpr", @"cexpr:"),
-                       CMD(@"chdir", @"cd:"),
-                       CMD(@"changes", @"changes:"),
-                       CMD(@"checkpath", @"checkpath:"),
-                       CMD(@"checktime", @"checktime:"),
-                       CMD(@"clist", @"qf_list:"),
-                       CMD(@"clast", @"cc:"),
-                       CMD(@"close", @"close:"),
-                       CMD(@"cmap", @"map:"),
-                       CMD(@"cmapclear", @"mapclear:"),
-                       CMD(@"cmenu", @"menu:"),
-                       CMD(@"cnext", @"cnext:"),
-                       CMD(@"cnewer", @"qf_age:"),
-                       CMD(@"cnfile", @"cnext:"),
-                       CMD(@"cnoremap", @"map:"),
-                       CMD(@"cnoreabbrev", @"abbreviate:"),
-                       CMD(@"cnoremenu", @"menu:"),
-                       CMD(@"copy", @"copymove:"),
-                       CMD(@"colder", @"qf_age:"),
-                       CMD(@"colorscheme", @"colorscheme:"),
-                       CMD(@"command", @"command:"),
-                       CMD(@"comclear", @"comclear:"),
-                       CMD(@"compiler", @"compiler:"),
-                       CMD(@"continue", @"continue:"),
-                       CMD(@"confirm", @"wrongmodifier:"),
-                       CMD(@"copen", @"copen:"),
-                       CMD(@"cprevious", @"cnext:"),
-                       CMD(@"cpfile", @"cnext:"),
-                       CMD(@"cquit", @"cquit:"),
-                       CMD(@"crewind", @"cc:"),
-                       CMD(@"cscope", @"cscope:"),
-                       CMD(@"cstag", @"cstag:"),
-                       CMD(@"cunmap", @"unmap:"),
-                       CMD(@"cunabbrev", @"abbreviate:"),
-                       CMD(@"cunmenu", @"menu:"),
-                       CMD(@"cwindow", @"cwindow:"),
-                       CMD(@"delete", @"operators:"),
-                       CMD(@"delmarks", @"delmarks:"),
-                       CMD(@"debug", @"debug:"),
-                       CMD(@"debuggreedy", @"debuggreedy:"),
-                       CMD(@"delcommand", @"delcommand:"),
-                       CMD(@"delfunction", @"delfunction:"),
-                       CMD(@"display", @"display:"),
-                       CMD(@"diffupdate", @"diffupdate:"),
-                       CMD(@"diffget", @"diffgetput:"),
-                       CMD(@"diffoff", @"diffoff:"),
-                       CMD(@"diffpatch", @"diffpatch:"),
-                       CMD(@"diffput", @"diffgetput:"),
-                       CMD(@"diffsplit", @"diffsplit:"),
-                       CMD(@"diffthis", @"diffthis:"),
-                       CMD(@"digraphs", @"digraphs:"),
-                       CMD(@"djump", @"findpat:"),
-                       CMD(@"dlist", @"findpat:"),
-                       CMD(@"doautocmd", @"doautocmd:"),
-                       CMD(@"doautoall", @"doautoall:"),
-                       CMD(@"drop", @"drop:"),
-                       CMD(@"dsearch", @"findpat:"),
-                       CMD(@"dsplit", @"findpat:"),
-                       CMD(@"edit", @"edit:"),
-                       CMD(@"earlier", @"later:"),
-                       CMD(@"echo", @"echo:"),
-                       CMD(@"echoerr", @"execute:"),
-                       CMD(@"echohl", @"echohl:"),
-                       CMD(@"echomsg", @"execute:"),
-                       CMD(@"echon", @"echo:"),
-                       CMD(@"else", @"else:"),
-                       CMD(@"elseif", @"else:"),
-                       CMD(@"emenu", @"emenu:"),
-                       CMD(@"endif", @"endif:"),
-                       CMD(@"endfunction", @"endfunction:"),
-                       CMD(@"endfor", @"endwhile:"),
-                       CMD(@"endtry", @"endtry:"),
-                       CMD(@"endwhile", @"endwhile:"),
-                       CMD(@"enew", @"edit:"),
-                       CMD(@"ex", @"edit:"),
-                       CMD(@"execute", @"execute:"),
-                       CMD(@"exit", @"exit:"),
-                       CMD(@"exusage", @"exusage:"),
-                       CMD(@"file", @"file:"),
-                       CMD(@"files", @"buflist_list:"),
-                       CMD(@"filetype", @"filetype:"),
-                       CMD(@"find", @"find:"),
-                       CMD(@"finally", @"finally:"),
-                       CMD(@"finish", @"finish:"),
-                       CMD(@"first", @"rewind:"),
-                       CMD(@"fixdel", @"fixdel:"),
-                       CMD(@"fold", @"fold:"),
-                       CMD(@"foldclose", @"foldopen:"),
-                       CMD(@"folddoopen", @"folddo:"),
-                       CMD(@"folddoclosed", @"folddo:"),
-                       CMD(@"foldopen", @"foldopen:"),
-                       CMD(@"for", @"while:"),
-                       CMD(@"function", @"function:"),
-                       CMD(@"global", @"global:"),
-                       CMD(@"goto", @"goto:"),
-                       CMD(@"grep", @"make:"),
-                       CMD(@"grepadd", @"make:"),
-                       CMD(@"gui", @"gui:"),
-                       CMD(@"gvim", @"gui:"),
-                       CMD(@"help", @"help:"),
-                       CMD(@"helpfind", @"helpfind:"),
-                       CMD(@"helpgrep", @"helpgrep:"),
-                       CMD(@"helptags", @"helptags:"),
-                       CMD(@"hardcopy", @"hardcopy:"),
-                       CMD(@"highlight", @"highlight:"),
-                       CMD(@"hide", @"hide:"),
-                       CMD(@"history", @"history:"),
-                       CMD(@"insert", @"append:"),
-                       CMD(@"iabbrev", @"abbreviate:"),
-                       CMD(@"iabclear", @"abclear:"),
-                       CMD(@"if", @"if:"),
-                       CMD(@"ijump", @"findpat:"),
-                       CMD(@"ilist", @"findpat:"),
-                       CMD(@"imap", @"imap:"),
-                       CMD(@"imapclear", @"mapclear:"),
-                       CMD(@"imenu", @"menu:"),
-                       CMD(@"inoremap", @"map:"),
-                       CMD(@"inoreabbrev", @"abbreviate:"),
-                       CMD(@"inoremenu", @"menu:"),
-                       CMD(@"intro", @"intro:"),
-                       CMD(@"isearch", @"findpat:"),
-                       CMD(@"isplit", @"findpat:"),
-                       CMD(@"iunmap", @"unmap:"),
-                       CMD(@"iunabbrev", @"abbreviate:"),
-                       CMD(@"iunmenu", @"menu:"),
-                       CMD(@"join", @"join:"),
-                       CMD(@"jumps", @"jumps:"),
-                       CMD(@"k", @"mark:"),
-                       CMD(@"keepmarks", @"wrongmodifier:"),
-                       CMD(@"keepjumps", @"wrongmodifier:"),
-                       CMD(@"keepalt", @"wrongmodifier:"),
-                       CMD(@"list", @"print:"),
-                       CMD(@"lNext", @"cnext:"),
-                       CMD(@"lNfile", @"cnext:"),
-                       CMD(@"last", @"last:"),
-                       CMD(@"language", @"language:"),
-                       CMD(@"laddexpr", @"cexpr:"),
-                       CMD(@"laddbuffer", @"cbuffer:"),
-                       CMD(@"laddfile", @"cfile:"),
-                       CMD(@"later", @"later:"),
-                       CMD(@"lbuffer", @"cbuffer:"),
-                       CMD(@"lcd", @"cd:"),
-                       CMD(@"lchdir", @"cd:"),
-                       CMD(@"lclose", @"cclose:"),
-                       CMD(@"lcscope", @"cscope:"),
-                       CMD(@"left", @"align:"),
-                       CMD(@"leftabove", @"wrongmodifier:"),
-                       CMD(@"let", @"let:"),
-                       CMD(@"lexpr", @"cexpr:"),
-                       CMD(@"lfile", @"cfile:"),
-                       CMD(@"lfirst", @"cc:"),
-                       CMD(@"lgetfile", @"cfile:"),
-                       CMD(@"lgetbuffer", @"cbuffer:"),
-                       CMD(@"lgetexpr", @"cexpr:"),
-                       CMD(@"lgrep", @"make:"),
-                       CMD(@"lgrepadd", @"make:"),
-                       CMD(@"lhelpgrep", @"helpgrep:"),
-                       CMD(@"ll", @"cc:"),
-                       CMD(@"llast", @"cc:"),
-                       CMD(@"llist", @"qf_list:"),
-                       CMD(@"lmap", @"map:"),
-                       CMD(@"lmapclear", @"mapclear:"),
-                       CMD(@"lmake", @"make:"),
-                       CMD(@"lnoremap", @"map:"),
-                       CMD(@"lnext", @"cnext:"),
-                       CMD(@"lnewer", @"qf_age:"),
-                       CMD(@"lnfile", @"cnext:"),
-                       CMD(@"loadview", @"loadview:"),
-                       CMD(@"loadkeymap", @"loadkeymap:"),
-                       CMD(@"lockmarks", @"wrongmodifier:"),
-                       CMD(@"lockvar", @"lockvar:"),
-                       CMD(@"lolder", @"qf_age:"),
-                       CMD(@"lopen", @"copen:"),
-                       CMD(@"lprevious", @"cnext:"),
-                       CMD(@"lpfile", @"cnext:"),
-                       CMD(@"lrewind", @"cc:"),
-                       CMD(@"ltag", @"tag:"),
-                       CMD(@"lunmap", @"unmap:"),
-                       CMD(@"lvimgrep", @"vimgrep:"),
-                       CMD(@"lvimgrepadd", @"vimgrep:"),
-                       CMD(@"lwindow", @"cwindow:"),
-                       CMD(@"ls", @"	buflist_list:"),
-                       CMD(@"move", @"copymove:"),
-                       CMD(@"mark", @"mark:"),
-                       CMD(@"make", @"make:"),
-                       CMD(@"map", @"map:"),
-                       CMD(@"mapclear", @"mapclear:"),
-                       CMD(@"marks", @"marks:"),
-                       CMD(@"match", @"match:"),
-                       CMD(@"menu", @"menu:"),
-                       CMD(@"menutranslate", @"menutranslate:"),
-                       CMD(@"messages", @"messages:"),
-                       CMD(@"mkexrc", @"mkrc:"),
-                       CMD(@"mksession", @"mkrc:"),
-                       CMD(@"mkspell", @"mkspell:"),
-                       CMD(@"mkvimrc", @"mkrc:"),
-                       CMD(@"mkview", @"mkrc:"),
-                       CMD(@"mode", @"mode:"),
-                       CMD(@"mzscheme", @"mzscheme:"),
-                       CMD(@"mzfile", @"mzfile:"),
-                       CMD(@"next", @"next:"),
-                       CMD(@"nbkey", @"nbkey:"),
-                       CMD(@"new", @"splitview:"),
-                       CMD(@"nmap", @"nmap:"),
-                       CMD(@"nmapclear", @"mapclear:"),
-                       CMD(@"nmenu", @"menu:"),
-                       CMD(@"nnoremap", @"map:"),
-                       CMD(@"nnoremenu", @"menu:"),
-                       CMD(@"noremap", @"map:"),
-                       CMD(@"noautocmd", @"wrongmodifier:"),
-                       CMD(@"nohlsearch", @"nohlsearch:"),
-                       CMD(@"noreabbrev", @"abbreviate:"),
-                       CMD(@"noremenu", @"menu:"),
-                       CMD(@"normal", @"normal:"),
-                       CMD(@"number", @"print:"),
-                       CMD(@"nunmap", @"unmap:"),
-                       CMD(@"nunmenu", @"menu:"),
-                       CMD(@"open", @"open:"),
-                       CMD(@"oldfiles", @"oldfiles:"),
-                       CMD(@"omap", @"omap:"),
-                       CMD(@"omapclear", @"mapclear:"),
-                       CMD(@"omenu", @"menu:"),
-                       CMD(@"only", @"only:"),
-                       CMD(@"onoremap", @"map:"),
-                       CMD(@"onoremenu", @"menu:"),
-                       CMD(@"options", @"options:"),
-                       CMD(@"ounmap", @"unmap:"),
-                       CMD(@"ounmenu", @"menu:"),
-                       CMD(@"print", @"print:"),
-                       CMD(@"pclose", @"pclose:"),
-                       CMD(@"perl", @"perl:"),
-                       CMD(@"perldo", @"perldo:"),
-                       CMD(@"pedit", @"pedit:"),
-                       CMD(@"pop", @"tag:"),
-                       CMD(@"popup", @"popup:"),
-                       CMD(@"ppop", @"ptag:"),
-                       CMD(@"preserve", @"preserve:"),
-                       CMD(@"previous", @"previous:"),
-                       CMD(@"promptfind", @"gui_mch_find_dialog:"),
-                       CMD(@"promptrepl", @"gui_mch_replace_dialog:"),
-                       CMD(@"profile", @"profile:"),
-                       CMD(@"profdel", @"breakdel:"),
-                       CMD(@"psearch", @"psearch:"),
-                       CMD(@"ptag", @"ptag:"),
-                       CMD(@"ptNext", @"ptag:"),
-                       CMD(@"ptfirst", @"ptag:"),
-                       CMD(@"ptjump", @"ptag:"),
-                       CMD(@"ptlast", @"ptag:"),
-                       CMD(@"ptnext", @"ptag:"),
-                       CMD(@"ptprevious", @"ptag:"),
-                       CMD(@"ptrewind", @"ptag:"),
-                       CMD(@"ptselect", @"ptag:"),
-                       CMD(@"put", @"put:"),
-                       CMD(@"pwd", @"pwd:"),
-                       CMD(@"python", @"python:"),
-                       CMD(@"pyfile", @"pyfile:"),
-                       CMD(@"quit", @"quit:"),
-                       CMD(@"quitall", @"quit_all:"),
-                       CMD(@"qall", @"quit_all:"),
-                       CMD(@"read", @"read:"),
-                       CMD(@"recover", @"recover:"),
-                       CMD(@"redo", @"redo:"),
-                       CMD(@"redir", @"redir:"),
-                       CMD(@"redraw", @"redraw:"),
-                       CMD(@"redrawstatus", @"redrawstatus:"),
-                       CMD(@"registers", @"reg:"),
-                       CMD(@"resize", @"resize:"),
-                       CMD(@"retab", @"retab:"),
-                       CMD(@"return", @"return:"),
-                       CMD(@"rewind", @"rewind:"),
-                       CMD(@"right", @"align:"),
-                       CMD(@"rightbelow", @"wrongmodifier:"),
-                       CMD(@"run",@"run:"), // This is XVim original command
-                       CMD(@"runtime", @"runtime:"),
-                       CMD(@"ruby", @"ruby:"),
-                       CMD(@"rubydo", @"rubydo:"),
-                       CMD(@"rubyfile", @"rubyfile:"),
-                       CMD(@"rviminfo", @"viminfo:"),
-                       CMD(@"substitute", @"sub:"),
-                       CMD(@"sNext", @"previous:"),
-                       CMD(@"sargument", @"argument:"),
-                       CMD(@"sall", @"all:"),
-                       CMD(@"sandbox", @"wrongmodifier:"),
-                       CMD(@"saveas", @"write:"),
-                       CMD(@"sbuffer", @"buffer:"),
-                       CMD(@"sbNext", @"bprevious:"),
-                       CMD(@"sball", @"buffer_all:"),
-                       CMD(@"sbfirst", @"brewind:"),
-                       CMD(@"sblast", @"blast:"),
-                       CMD(@"sbmodified", @"bmodified:"),
-                       CMD(@"sbnext", @"bnext:"),
-                       CMD(@"sbprevious", @"bprevious:"),
-                       CMD(@"sbrewind", @"brewind:"),
-                       CMD(@"scriptnames", @"scriptnames:"),
-                       CMD(@"scriptencoding", @"scriptencoding:"),
-                       CMD(@"scscope", @"scscope:"),
-                       CMD(@"set", @"set:"),
-                       CMD(@"setfiletype", @"setfiletype:"),
-                       CMD(@"setglobal", @"set:"),
-                       CMD(@"setlocal", @"set:"),
-                       CMD(@"sfind", @"splitview:"),
-                       CMD(@"sfirst", @"rewind:"),
-                       CMD(@"shell", @"shell:"),
-                       CMD(@"simalt", @"simalt:"),
-                       CMD(@"sign", @"sign:"),
-                       CMD(@"silent", @"wrongmodifier:"),
-                       CMD(@"sleep", @"sleep:"),
-                       CMD(@"slast", @"last:"),
-                       CMD(@"smagic", @"submagic:"),
-                       CMD(@"smap", @"map:"),
-                       CMD(@"smapclear", @"mapclear:"),
-                       CMD(@"smenu", @"menu:"),
-                       CMD(@"snext", @"next:"),
-                       CMD(@"sniff", @"sniff:"),
-                       CMD(@"snomagic", @"submagic:"),
-                       CMD(@"snoremap", @"map:"),
-                       CMD(@"snoremenu", @"menu:"),
-                       CMD(@"source", @"source:"),
-                       CMD(@"sort", @"sort:"),
-                       CMD(@"split", @"splitview:"),
-                       CMD(@"spellgood", @"spell:"),
-                       CMD(@"spelldump", @"spelldump:"),
-                       CMD(@"spellinfo", @"spellinfo:"),
-                       CMD(@"spellrepall", @"spellrepall:"),
-                       CMD(@"spellundo", @"spell:"),
-                       CMD(@"spellwrong", @"spell:"),
-                       CMD(@"sprevious", @"previous:"),
-                       CMD(@"srewind", @"rewind:"),
-                       CMD(@"stop", @"stop:"),
-                       CMD(@"stag", @"stag:"),
-                       CMD(@"startinsert", @"startinsert:"),
-                       CMD(@"startgreplace", @"startinsert:"),
-                       CMD(@"startreplace", @"startinsert:"),
-                       CMD(@"stopinsert", @"stopinsert:"),
-                       CMD(@"stjump", @"stag:"),
-                       CMD(@"stselect", @"stag:"),
-                       CMD(@"sunhide", @"buffer_all:"),
-                       CMD(@"sunmap", @"unmap:"),
-                       CMD(@"sunmenu", @"menu:"),
-                       CMD(@"suspend", @"stop:"),
-                       CMD(@"sview", @"splitview:"),
-                       CMD(@"swapname", @"swapname:"),
-                       CMD(@"syntax", @"syntax:"),
-                       CMD(@"syncbind", @"syncbind:"),
-                       CMD(@"t", @"copymove:"),
-                       CMD(@"tNext", @"tag:"),
-                       CMD(@"tag", @"tag:"),
-                       CMD(@"tags", @"tags:"),
-                       CMD(@"tab", @"wrongmodifier:"),
-                       CMD(@"tabclose", @"tabclose:"),
-                       CMD(@"tabdo", @"listdo:"),
-                       CMD(@"tabedit", @"splitview:"),
-                       CMD(@"tabfind", @"splitview:"),
-                       CMD(@"tabfirst", @"tabnext:"),
-                       CMD(@"tabmove", @"tabmove:"),
-                       CMD(@"tablast", @"tabnext:"),
-                       CMD(@"tabnext", @"tabnext:"),
-                       CMD(@"tabnew", @"splitview:"),
-                       CMD(@"tabonly", @"tabonly:"),
-                       CMD(@"tabprevious", @"tabnext:"),
-                       CMD(@"tabNext", @"tabnext:"),
-                       CMD(@"tabrewind", @"tabnext:"),
-                       CMD(@"tabs", @"tabs:"),
-                       CMD(@"tcl", @"tcl:"),
-                       CMD(@"tcldo", @"tcldo:"),
-                       CMD(@"tclfile", @"tclfile:"),
-                       CMD(@"tearoff", @"tearoff:"),
-                       CMD(@"tfirst", @"tag:"),
-                       CMD(@"throw", @"throw:"),
-                       CMD(@"tjump", @"tag:"),
-                       CMD(@"tlast", @"tag:"),
-                       CMD(@"tmenu", @"menu:"),
-                       CMD(@"tnext", @"tag:"),
-                       CMD(@"topleft", @"wrongmodifier:"),
-                       CMD(@"tprevious", @"tag:"),
-                       CMD(@"trewind", @"tag:"),
-                       CMD(@"try", @"try:"),
-                       CMD(@"tselect", @"tag:"),
-                       CMD(@"tunmenu", @"menu:"),
-                       CMD(@"undo", @"undo:"),
-                       CMD(@"undojoin", @"undojoin:"),
-                       CMD(@"undolist", @"undolist:"),
-                       CMD(@"unabbreviate", @"abbreviate:"),
-                       CMD(@"unhide", @"buffer_all:"),
-                       CMD(@"unlet", @"unlet:"),
-                       CMD(@"unlockvar", @"lockvar:"),
-                       CMD(@"unmap", @"unmap:"),
-                       CMD(@"unmenu", @"menu:"),
-                       CMD(@"unsilent", @"wrongmodifier:"),
-                       CMD(@"update", @"update:"),
-                       CMD(@"vglobal", @"global:"),
-                       CMD(@"version", @"version:"),
-                       CMD(@"verbose", @"wrongmodifier:"),
-                       CMD(@"vertical", @"wrongmodifier:"),
-                       CMD(@"visual", @"edit:"),
-                       CMD(@"view", @"edit:"),
-                       CMD(@"vimgrep", @"vimgrep:"),
-                       CMD(@"vimgrepadd", @"vimgrep:"),
-                       CMD(@"viusage", @"viusage:"),
-                       CMD(@"vmap", @"vmap:"),
-                       CMD(@"vmapclear", @"mapclear:"),
-                       CMD(@"vmenu", @"menu:"),
-                       CMD(@"vnoremap", @"map:"),
-                       CMD(@"vnew", @"splitview:"),
-                       CMD(@"vnoremenu", @"menu:"),
-                       CMD(@"vsplit", @"splitview:"),
-                       CMD(@"vunmap", @"unmap:"),
-                       CMD(@"vunmenu", @"menu:"),
-                       CMD(@"write", @"write:"),
-                       CMD(@"wNext", @"wnext:"),
-                       CMD(@"wall", @"wqall:"),
-                       CMD(@"while", @"while:"),
-                       CMD(@"winsize", @"winsize:"),
-                       CMD(@"wincmd", @"wincmd:"),
-                       CMD(@"windo", @"listdo:"),
-                       CMD(@"winpos", @"winpos:"),
-                       CMD(@"wnext", @"wnext:"),
-                       CMD(@"wprevious", @"wnext:"),
-                       CMD(@"wq", @"exit:"),
-                       CMD(@"wqall", @"wqall:"),
-                       CMD(@"wsverb", @"wsverb:"),
-                       CMD(@"wviminfo", @"viminfo:"),
-                       CMD(@"xit", @"exit:"),
-                       CMD(@"xall", @"wqall:"),
-                       CMD(@"xmap", @"map:"),
-                       CMD(@"xmapclear", @"mapclear:"),
-                       CMD(@"xmenu", @"menu:"),
-                       CMD(@"xnoremap", @"map:"),
-                       CMD(@"xnoremenu", @"menu:"),
-                       CMD(@"xunmap", @"unmap:"),
-                       CMD(@"xunmenu", @"menu:"),
-                       CMD(@"yank", @"operators:"),
-                       CMD(@"z", @"z:"),
-                       CMD(@"!", @"bang:"),
-                       CMD(@"#", @"print:"),
-                       CMD(@"&", @"sub:"),
-                       CMD(@"*", @"at:"),
-                       CMD(@"<", @"operators:"),
-                       CMD(@"=", @"equal:"),
-                       CMD(@">", @"operators:"),
-                       CMD(@"@", @"at:"),
-                       CMD(@"Next", @"previous:"),
-                       CMD(@"Print", @"print:"),
-                       CMD(@"X", @"X:"),
-                       CMD(@"~", @"sub:"),
+                       CMD(@"append", @"append:inWindow:"),
+                       CMD(@"abbreviate", @"abbreviate:inWindow:"),
+                       CMD(@"abclear", @"abclear:inWindow:"),
+                       CMD(@"aboveleft", @"wrongmodifier:inWindow:"),
+                       CMD(@"all", @"all:inWindow:"),
+                       CMD(@"amenu", @"menu:inWindow:"),
+                       CMD(@"anoremenu", @"menu:inWindow:"),
+                       CMD(@"args", @"args:inWindow:"),
+                       CMD(@"argadd", @"argadd:inWindow:"),
+                       CMD(@"argdelete", @"argdelete:inWindow:"),
+                       CMD(@"argdo", @"listdo:inWindow:"),
+                       CMD(@"argedit", @"argedit:inWindow:"),
+                       CMD(@"argglobal", @"args:inWindow:"),
+                       CMD(@"arglocal", @"args:inWindow:"),
+                       CMD(@"argument", @"argument:inWindow:"),
+                       CMD(@"ascii", @"ascii:inWindow:"),
+                       CMD(@"autocmd", @"autocmd:inWindow:"),
+                       CMD(@"augroup", @"autocmd:inWindow:"),
+                       CMD(@"aunmenu", @"menu:inWindow:"),
+                       CMD(@"buffer", @"buffer:inWindow:"),
+                       CMD(@"bNext", @"bprevious:inWindow:"),
+                       CMD(@"ball", @"buffer_all:inWindow:"),
+                       CMD(@"badd", @"edit:inWindow:"),
+                       CMD(@"bdelete", @"bunload:inWindow:"),
+                       CMD(@"behave", @"behave:inWindow:"),
+                       CMD(@"belowright", @"wrongmodifier:inWindow:"),
+                       CMD(@"bfirst", @"brewind:inWindow:"),
+                       CMD(@"blast", @"blast:inWindow:"),
+                       CMD(@"bmodified", @"bmodified:inWindow:"),
+                       CMD(@"bnext", @"bnext:inWindow:"),
+                       CMD(@"botright", @"wrongmodifier:inWindow:"),
+                       CMD(@"bprevious", @"bprevious:inWindow:"),
+                       CMD(@"brewind", @"brewind:inWindow:"),
+                       CMD(@"break", @"break:inWindow:"),
+                       CMD(@"breakadd", @"breakadd:inWindow:"),
+                       CMD(@"breakdel", @"breakdel:inWindow:"),
+                       CMD(@"breaklist", @"breaklist:inWindow:"),
+                       CMD(@"browse", @"wrongmodifier:inWindow:"),
+                       CMD(@"buffers", @"buflist_list:inWindow:"),
+                       CMD(@"bufdo", @"listdo:inWindow:"),
+                       CMD(@"bunload", @"bunload:inWindow:"),
+                       CMD(@"bwipeout", @"bunload:inWindow:"),
+                       CMD(@"change", @"change:inWindow:"),
+                       CMD(@"cNext", @"cnext:inWindow:"),
+                       CMD(@"cNfile", @"cnext:inWindow:"),
+                       CMD(@"cabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"cabclear", @"abclear:inWindow:"),
+                       CMD(@"caddbuffer", @"cbuffer:inWindow:"),
+                       CMD(@"caddexpr", @"cexpr:inWindow:"),
+                       CMD(@"caddfile", @"cfile:inWindow:"),
+                       CMD(@"call", @"call:inWindow:"),
+                       CMD(@"catch", @"catch:inWindow:"),
+                       CMD(@"cbuffer", @"cbuffer:inWindow:"),
+                       CMD(@"cc", @"cc:inWindow:"),
+                       CMD(@"cclose", @"cclose:inWindow:"),
+                       CMD(@"cd", @"cd:inWindow:"),
+                       CMD(@"center", @"align:inWindow:"),
+                       CMD(@"cexpr", @"cexpr:inWindow:"),
+                       CMD(@"cfile", @"cfile:inWindow:"),
+                       CMD(@"cfirst", @"cc:inWindow:"),
+                       CMD(@"cgetfile", @"cfile:inWindow:"),
+                       CMD(@"cgetbuffer", @"cbuffer:inWindow:"),
+                       CMD(@"cgetexpr", @"cexpr:inWindow:"),
+                       CMD(@"chdir", @"cd:inWindow:"),
+                       CMD(@"changes", @"changes:inWindow:"),
+                       CMD(@"checkpath", @"checkpath:inWindow:"),
+                       CMD(@"checktime", @"checktime:inWindow:"),
+                       CMD(@"clist", @"qf_list:inWindow:"),
+                       CMD(@"clast", @"cc:inWindow:"),
+                       CMD(@"close", @"close:inWindow:"),
+                       CMD(@"cmap", @"map:inWindow:"),
+                       CMD(@"cmapclear", @"mapclear:inWindow:"),
+                       CMD(@"cmenu", @"menu:inWindow:"),
+                       CMD(@"cnext", @"cnext:inWindow:"),
+                       CMD(@"cnewer", @"qf_age:inWindow:"),
+                       CMD(@"cnfile", @"cnext:inWindow:"),
+                       CMD(@"cnoremap", @"map:inWindow:"),
+                       CMD(@"cnoreabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"cnoremenu", @"menu:inWindow:"),
+                       CMD(@"copy", @"copymove:inWindow:"),
+                       CMD(@"colder", @"qf_age:inWindow:"),
+                       CMD(@"colorscheme", @"colorscheme:inWindow:"),
+                       CMD(@"command", @"command:inWindow:"),
+                       CMD(@"comclear", @"comclear:inWindow:"),
+                       CMD(@"compiler", @"compiler:inWindow:"),
+                       CMD(@"continue", @"continue:inWindow:"),
+                       CMD(@"confirm", @"wrongmodifier:inWindow:"),
+                       CMD(@"copen", @"copen:inWindow:"),
+                       CMD(@"cprevious", @"cnext:inWindow:"),
+                       CMD(@"cpfile", @"cnext:inWindow:"),
+                       CMD(@"cquit", @"cquit:inWindow:"),
+                       CMD(@"crewind", @"cc:inWindow:"),
+                       CMD(@"cscope", @"cscope:inWindow:"),
+                       CMD(@"cstag", @"cstag:inWindow:"),
+                       CMD(@"cunmap", @"unmap:inWindow:"),
+                       CMD(@"cunabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"cunmenu", @"menu:inWindow:"),
+                       CMD(@"cwindow", @"cwindow:inWindow:"),
+                       CMD(@"delete", @"operators:inWindow:"),
+                       CMD(@"delmarks", @"delmarks:inWindow:"),
+                       CMD(@"debug", @"debug:inWindow:"),
+                       CMD(@"debuggreedy", @"debuggreedy:inWindow:"),
+                       CMD(@"delcommand", @"delcommand:inWindow:"),
+                       CMD(@"delfunction", @"delfunction:inWindow:"),
+                       CMD(@"display", @"display:inWindow:"),
+                       CMD(@"diffupdate", @"diffupdate:inWindow:"),
+                       CMD(@"diffget", @"diffgetput:inWindow:"),
+                       CMD(@"diffoff", @"diffoff:inWindow:"),
+                       CMD(@"diffpatch", @"diffpatch:inWindow:"),
+                       CMD(@"diffput", @"diffgetput:inWindow:"),
+                       CMD(@"diffsplit", @"diffsplit:inWindow:"),
+                       CMD(@"diffthis", @"diffthis:inWindow:"),
+                       CMD(@"digraphs", @"digraphs:inWindow:"),
+                       CMD(@"djump", @"findpat:inWindow:"),
+                       CMD(@"dlist", @"findpat:inWindow:"),
+                       CMD(@"doautocmd", @"doautocmd:inWindow:"),
+                       CMD(@"doautoall", @"doautoall:inWindow:"),
+                       CMD(@"drop", @"drop:inWindow:"),
+                       CMD(@"dsearch", @"findpat:inWindow:"),
+                       CMD(@"dsplit", @"findpat:inWindow:"),
+                       CMD(@"edit", @"edit:inWindow:"),
+                       CMD(@"earlier", @"later:inWindow:"),
+                       CMD(@"echo", @"echo:inWindow:"),
+                       CMD(@"echoerr", @"execute:inWindow:"),
+                       CMD(@"echohl", @"echohl:inWindow:"),
+                       CMD(@"echomsg", @"execute:inWindow:"),
+                       CMD(@"echon", @"echo:inWindow:"),
+                       CMD(@"else", @"else:inWindow:"),
+                       CMD(@"elseif", @"else:inWindow:"),
+                       CMD(@"emenu", @"emenu:inWindow:"),
+                       CMD(@"endif", @"endif:inWindow:"),
+                       CMD(@"endfunction", @"endfunction:inWindow:"),
+                       CMD(@"endfor", @"endwhile:inWindow:"),
+                       CMD(@"endtry", @"endtry:inWindow:"),
+                       CMD(@"endwhile", @"endwhile:inWindow:"),
+                       CMD(@"enew", @"edit:inWindow:"),
+                       CMD(@"ex", @"edit:inWindow:"),
+                       CMD(@"execute", @"execute:inWindow:"),
+                       CMD(@"exit", @"exit:inWindow:"),
+                       CMD(@"exusage", @"exusage:inWindow:"),
+                       CMD(@"file", @"file:inWindow:"),
+                       CMD(@"files", @"buflist_list:inWindow:"),
+                       CMD(@"filetype", @"filetype:inWindow:"),
+                       CMD(@"find", @"find:inWindow:"),
+                       CMD(@"finally", @"finally:inWindow:"),
+                       CMD(@"finish", @"finish:inWindow:"),
+                       CMD(@"first", @"rewind:inWindow:"),
+                       CMD(@"fixdel", @"fixdel:inWindow:"),
+                       CMD(@"fold", @"fold:inWindow:"),
+                       CMD(@"foldclose", @"foldopen:inWindow:"),
+                       CMD(@"folddoopen", @"folddo:inWindow:"),
+                       CMD(@"folddoclosed", @"folddo:inWindow:"),
+                       CMD(@"foldopen", @"foldopen:inWindow:"),
+                       CMD(@"for", @"while:inWindow:"),
+                       CMD(@"function", @"function:inWindow:"),
+                       CMD(@"global", @"global:inWindow:"),
+                       CMD(@"goto", @"goto:inWindow:"),
+                       CMD(@"grep", @"make:inWindow:"),
+                       CMD(@"grepadd", @"make:inWindow:"),
+                       CMD(@"gui", @"gui:inWindow:"),
+                       CMD(@"gvim", @"gui:inWindow:"),
+                       CMD(@"help", @"help:inWindow:"),
+                       CMD(@"helpfind", @"helpfind:inWindow:"),
+                       CMD(@"helpgrep", @"helpgrep:inWindow:"),
+                       CMD(@"helptags", @"helptags:inWindow:"),
+                       CMD(@"hardcopy", @"hardcopy:inWindow:"),
+                       CMD(@"highlight", @"highlight:inWindow:"),
+                       CMD(@"hide", @"hide:inWindow:"),
+                       CMD(@"history", @"history:inWindow:"),
+                       CMD(@"insert", @"append:inWindow:"),
+                       CMD(@"iabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"iabclear", @"abclear:inWindow:"),
+                       CMD(@"if", @"if:inWindow:"),
+                       CMD(@"ijump", @"findpat:inWindow:"),
+                       CMD(@"ilist", @"findpat:inWindow:"),
+                       CMD(@"imap", @"imap:inWindow:"),
+                       CMD(@"imapclear", @"mapclear:inWindow:"),
+                       CMD(@"imenu", @"menu:inWindow:"),
+                       CMD(@"inoremap", @"map:inWindow:"),
+                       CMD(@"inoreabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"inoremenu", @"menu:inWindow:"),
+                       CMD(@"intro", @"intro:inWindow:"),
+                       CMD(@"isearch", @"findpat:inWindow:"),
+                       CMD(@"isplit", @"findpat:inWindow:"),
+                       CMD(@"iunmap", @"unmap:inWindow:"),
+                       CMD(@"iunabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"iunmenu", @"menu:inWindow:"),
+                       CMD(@"join", @"join:inWindow:"),
+                       CMD(@"jumps", @"jumps:inWindow:"),
+                       CMD(@"k", @"mark:inWindow:"),
+                       CMD(@"keepmarks", @"wrongmodifier:inWindow:"),
+                       CMD(@"keepjumps", @"wrongmodifier:inWindow:"),
+                       CMD(@"keepalt", @"wrongmodifier:inWindow:"),
+                       CMD(@"list", @"print:inWindow:"),
+                       CMD(@"lNext", @"cnext:inWindow:"),
+                       CMD(@"lNfile", @"cnext:inWindow:"),
+                       CMD(@"last", @"last:inWindow:"),
+                       CMD(@"language", @"language:inWindow:"),
+                       CMD(@"laddexpr", @"cexpr:inWindow:"),
+                       CMD(@"laddbuffer", @"cbuffer:inWindow:"),
+                       CMD(@"laddfile", @"cfile:inWindow:"),
+                       CMD(@"later", @"later:inWindow:"),
+                       CMD(@"lbuffer", @"cbuffer:inWindow:"),
+                       CMD(@"lcd", @"cd:inWindow:"),
+                       CMD(@"lchdir", @"cd:inWindow:"),
+                       CMD(@"lclose", @"cclose:inWindow:"),
+                       CMD(@"lcscope", @"cscope:inWindow:"),
+                       CMD(@"left", @"align:inWindow:"),
+                       CMD(@"leftabove", @"wrongmodifier:inWindow:"),
+                       CMD(@"let", @"let:inWindow:"),
+                       CMD(@"lexpr", @"cexpr:inWindow:"),
+                       CMD(@"lfile", @"cfile:inWindow:"),
+                       CMD(@"lfirst", @"cc:inWindow:"),
+                       CMD(@"lgetfile", @"cfile:inWindow:"),
+                       CMD(@"lgetbuffer", @"cbuffer:inWindow:"),
+                       CMD(@"lgetexpr", @"cexpr:inWindow:"),
+                       CMD(@"lgrep", @"make:inWindow:"),
+                       CMD(@"lgrepadd", @"make:inWindow:"),
+                       CMD(@"lhelpgrep", @"helpgrep:inWindow:"),
+                       CMD(@"ll", @"cc:inWindow:"),
+                       CMD(@"llast", @"cc:inWindow:"),
+                       CMD(@"llist", @"qf_list:inWindow:"),
+                       CMD(@"lmap", @"map:inWindow:"),
+                       CMD(@"lmapclear", @"mapclear:inWindow:"),
+                       CMD(@"lmake", @"make:inWindow:"),
+                       CMD(@"lnoremap", @"map:inWindow:"),
+                       CMD(@"lnext", @"cnext:inWindow:"),
+                       CMD(@"lnewer", @"qf_age:inWindow:"),
+                       CMD(@"lnfile", @"cnext:inWindow:"),
+                       CMD(@"loadview", @"loadview:inWindow:"),
+                       CMD(@"loadkeymap", @"loadkeymap:inWindow:"),
+                       CMD(@"lockmarks", @"wrongmodifier:inWindow:"),
+                       CMD(@"lockvar", @"lockvar:inWindow:"),
+                       CMD(@"lolder", @"qf_age:inWindow:"),
+                       CMD(@"lopen", @"copen:inWindow:"),
+                       CMD(@"lprevious", @"cnext:inWindow:"),
+                       CMD(@"lpfile", @"cnext:inWindow:"),
+                       CMD(@"lrewind", @"cc:inWindow:"),
+                       CMD(@"ltag", @"tag:inWindow:"),
+                       CMD(@"lunmap", @"unmap:inWindow:"),
+                       CMD(@"lvimgrep", @"vimgrep:inWindow:"),
+                       CMD(@"lvimgrepadd", @"vimgrep:inWindow:"),
+                       CMD(@"lwindow", @"cwindow:inWindow:"),
+                       CMD(@"ls", @"	buflist_list:inWindow:"),
+                       CMD(@"move", @"copymove:inWindow:"),
+                       CMD(@"mark", @"mark:inWindow:"),
+                       CMD(@"make", @"make:inWindow:"),
+                       CMD(@"map", @"map:inWindow:"),
+                       CMD(@"mapclear", @"mapclear:inWindow:"),
+                       CMD(@"marks", @"marks:inWindow:"),
+                       CMD(@"match", @"match:inWindow:"),
+                       CMD(@"menu", @"menu:inWindow:"),
+                       CMD(@"menutranslate", @"menutranslate:inWindow:"),
+                       CMD(@"messages", @"messages:inWindow:"),
+                       CMD(@"mkexrc", @"mkrc:inWindow:"),
+                       CMD(@"mksession", @"mkrc:inWindow:"),
+                       CMD(@"mkspell", @"mkspell:inWindow:"),
+                       CMD(@"mkvimrc", @"mkrc:inWindow:"),
+                       CMD(@"mkview", @"mkrc:inWindow:"),
+                       CMD(@"mode", @"mode:inWindow:"),
+                       CMD(@"mzscheme", @"mzscheme:inWindow:"),
+                       CMD(@"mzfile", @"mzfile:inWindow:"),
+                       CMD(@"next", @"next:inWindow:"),
+                       CMD(@"nbkey", @"nbkey:inWindow:"),
+                       CMD(@"new", @"splitview:inWindow:"),
+                       CMD(@"nmap", @"nmap:inWindow:"),
+                       CMD(@"nmapclear", @"mapclear:inWindow:"),
+                       CMD(@"nmenu", @"menu:inWindow:"),
+                       CMD(@"nnoremap", @"map:inWindow:"),
+                       CMD(@"nnoremenu", @"menu:inWindow:"),
+                       CMD(@"noremap", @"map:inWindow:"),
+                       CMD(@"noautocmd", @"wrongmodifier:inWindow:"),
+                       CMD(@"nohlsearch", @"nohlsearch:inWindow:"),
+                       CMD(@"noreabbrev", @"abbreviate:inWindow:"),
+                       CMD(@"noremenu", @"menu:inWindow:"),
+                       CMD(@"normal", @"normal:inWindow:"),
+                       CMD(@"number", @"print:inWindow:"),
+                       CMD(@"nunmap", @"unmap:inWindow:"),
+                       CMD(@"nunmenu", @"menu:inWindow:"),
+                       CMD(@"open", @"open:inWindow:"),
+                       CMD(@"oldfiles", @"oldfiles:inWindow:"),
+                       CMD(@"omap", @"omap:inWindow:"),
+                       CMD(@"omapclear", @"mapclear:inWindow:"),
+                       CMD(@"omenu", @"menu:inWindow:"),
+                       CMD(@"only", @"only:inWindow:"),
+                       CMD(@"onoremap", @"map:inWindow:"),
+                       CMD(@"onoremenu", @"menu:inWindow:"),
+                       CMD(@"options", @"options:inWindow:"),
+                       CMD(@"ounmap", @"unmap:inWindow:"),
+                       CMD(@"ounmenu", @"menu:inWindow:"),
+                       CMD(@"print", @"print:inWindow:"),
+                       CMD(@"pclose", @"pclose:inWindow:"),
+                       CMD(@"perl", @"perl:inWindow:"),
+                       CMD(@"perldo", @"perldo:inWindow:"),
+                       CMD(@"pedit", @"pedit:inWindow:"),
+                       CMD(@"pop", @"tag:inWindow:"),
+                       CMD(@"popup", @"popup:inWindow:"),
+                       CMD(@"ppop", @"ptag:inWindow:"),
+                       CMD(@"preserve", @"preserve:inWindow:"),
+                       CMD(@"previous", @"previous:inWindow:"),
+                       CMD(@"promptfind", @"gui_mch_find_dialog:inWindow:"),
+                       CMD(@"promptrepl", @"gui_mch_replace_dialog:inWindow:"),
+                       CMD(@"profile", @"profile:inWindow:"),
+                       CMD(@"profdel", @"breakdel:inWindow:"),
+                       CMD(@"psearch", @"psearch:inWindow:"),
+                       CMD(@"ptag", @"ptag:inWindow:"),
+                       CMD(@"ptNext", @"ptag:inWindow:"),
+                       CMD(@"ptfirst", @"ptag:inWindow:"),
+                       CMD(@"ptjump", @"ptag:inWindow:"),
+                       CMD(@"ptlast", @"ptag:inWindow:"),
+                       CMD(@"ptnext", @"ptag:inWindow:"),
+                       CMD(@"ptprevious", @"ptag:inWindow:"),
+                       CMD(@"ptrewind", @"ptag:inWindow:"),
+                       CMD(@"ptselect", @"ptag:inWindow:"),
+                       CMD(@"put", @"put:inWindow:"),
+                       CMD(@"pwd", @"pwd:inWindow:"),
+                       CMD(@"python", @"python:inWindow:"),
+                       CMD(@"pyfile", @"pyfile:inWindow:"),
+                       CMD(@"quit", @"quit:inWindow:"),
+                       CMD(@"quitall", @"quit_all:inWindow:"),
+                       CMD(@"qall", @"quit_all:inWindow:"),
+                       CMD(@"read", @"read:inWindow:"),
+                       CMD(@"recover", @"recover:inWindow:"),
+                       CMD(@"redo", @"redo:inWindow:"),
+                       CMD(@"redir", @"redir:inWindow:"),
+                       CMD(@"redraw", @"redraw:inWindow:"),
+                       CMD(@"redrawstatus", @"redrawstatus:inWindow:"),
+                       CMD(@"registers", @"reg:inWindow:"),
+                       CMD(@"resize", @"resize:inWindow:"),
+                       CMD(@"retab", @"retab:inWindow:"),
+                       CMD(@"return", @"return:inWindow:"),
+                       CMD(@"rewind", @"rewind:inWindow:"),
+                       CMD(@"right", @"align:inWindow:"),
+                       CMD(@"rightbelow", @"wrongmodifier:inWindow:"),
+                       CMD(@"run",@"run:inWindow:"), // This is XVim original command
+                       CMD(@"runtime", @"runtime:inWindow:"),
+                       CMD(@"ruby", @"ruby:inWindow:"),
+                       CMD(@"rubydo", @"rubydo:inWindow:"),
+                       CMD(@"rubyfile", @"rubyfile:inWindow:"),
+                       CMD(@"rviminfo", @"viminfo:inWindow:"),
+                       CMD(@"substitute", @"sub:inWindow:"),
+                       CMD(@"sNext", @"previous:inWindow:"),
+                       CMD(@"sargument", @"argument:inWindow:"),
+                       CMD(@"sall", @"all:inWindow:"),
+                       CMD(@"sandbox", @"wrongmodifier:inWindow:"),
+                       CMD(@"saveas", @"write:inWindow:"),
+                       CMD(@"sbuffer", @"buffer:inWindow:"),
+                       CMD(@"sbNext", @"bprevious:inWindow:"),
+                       CMD(@"sball", @"buffer_all:inWindow:"),
+                       CMD(@"sbfirst", @"brewind:inWindow:"),
+                       CMD(@"sblast", @"blast:inWindow:"),
+                       CMD(@"sbmodified", @"bmodified:inWindow:"),
+                       CMD(@"sbnext", @"bnext:inWindow:"),
+                       CMD(@"sbprevious", @"bprevious:inWindow:"),
+                       CMD(@"sbrewind", @"brewind:inWindow:"),
+                       CMD(@"scriptnames", @"scriptnames:inWindow:"),
+                       CMD(@"scriptencoding", @"scriptencoding:inWindow:"),
+                       CMD(@"scscope", @"scscope:inWindow:"),
+                       CMD(@"set", @"set:inWindow:"),
+                       CMD(@"setfiletype", @"setfiletype:inWindow:"),
+                       CMD(@"setglobal", @"set:inWindow:"),
+                       CMD(@"setlocal", @"set:inWindow:"),
+                       CMD(@"sfind", @"splitview:inWindow:"),
+                       CMD(@"sfirst", @"rewind:inWindow:"),
+                       CMD(@"shell", @"shell:inWindow:"),
+                       CMD(@"simalt", @"simalt:inWindow:"),
+                       CMD(@"sign", @"sign:inWindow:"),
+                       CMD(@"silent", @"wrongmodifier:inWindow:"),
+                       CMD(@"sleep", @"sleep:inWindow:"),
+                       CMD(@"slast", @"last:inWindow:"),
+                       CMD(@"smagic", @"submagic:inWindow:"),
+                       CMD(@"smap", @"map:inWindow:"),
+                       CMD(@"smapclear", @"mapclear:inWindow:"),
+                       CMD(@"smenu", @"menu:inWindow:"),
+                       CMD(@"snext", @"next:inWindow:"),
+                       CMD(@"sniff", @"sniff:inWindow:"),
+                       CMD(@"snomagic", @"submagic:inWindow:"),
+                       CMD(@"snoremap", @"map:inWindow:"),
+                       CMD(@"snoremenu", @"menu:inWindow:"),
+                       CMD(@"source", @"source:inWindow:"),
+                       CMD(@"sort", @"sort:inWindow:"),
+                       CMD(@"split", @"splitview:inWindow:"),
+                       CMD(@"spellgood", @"spell:inWindow:"),
+                       CMD(@"spelldump", @"spelldump:inWindow:"),
+                       CMD(@"spellinfo", @"spellinfo:inWindow:"),
+                       CMD(@"spellrepall", @"spellrepall:inWindow:"),
+                       CMD(@"spellundo", @"spell:inWindow:"),
+                       CMD(@"spellwrong", @"spell:inWindow:"),
+                       CMD(@"sprevious", @"previous:inWindow:"),
+                       CMD(@"srewind", @"rewind:inWindow:"),
+                       CMD(@"stop", @"stop:inWindow:"),
+                       CMD(@"stag", @"stag:inWindow:"),
+                       CMD(@"startinsert", @"startinsert:inWindow:"),
+                       CMD(@"startgreplace", @"startinsert:inWindow:"),
+                       CMD(@"startreplace", @"startinsert:inWindow:"),
+                       CMD(@"stopinsert", @"stopinsert:inWindow:"),
+                       CMD(@"stjump", @"stag:inWindow:"),
+                       CMD(@"stselect", @"stag:inWindow:"),
+                       CMD(@"sunhide", @"buffer_all:inWindow:"),
+                       CMD(@"sunmap", @"unmap:inWindow:"),
+                       CMD(@"sunmenu", @"menu:inWindow:"),
+                       CMD(@"suspend", @"stop:inWindow:"),
+                       CMD(@"sview", @"splitview:inWindow:"),
+                       CMD(@"swapname", @"swapname:inWindow:"),
+                       CMD(@"syntax", @"syntax:inWindow:"),
+                       CMD(@"syncbind", @"syncbind:inWindow:"),
+                       CMD(@"t", @"copymove:inWindow:"),
+                       CMD(@"tNext", @"tag:inWindow:"),
+                       CMD(@"tag", @"tag:inWindow:"),
+                       CMD(@"tags", @"tags:inWindow:"),
+                       CMD(@"tab", @"wrongmodifier:inWindow:"),
+                       CMD(@"tabclose", @"tabclose:inWindow:"),
+                       CMD(@"tabdo", @"listdo:inWindow:"),
+                       CMD(@"tabedit", @"splitview:inWindow:"),
+                       CMD(@"tabfind", @"splitview:inWindow:"),
+                       CMD(@"tabfirst", @"tabnext:inWindow:"),
+                       CMD(@"tabmove", @"tabmove:inWindow:"),
+                       CMD(@"tablast", @"tabnext:inWindow:"),
+                       CMD(@"tabnext", @"tabnext:inWindow:"),
+                       CMD(@"tabnew", @"splitview:inWindow:"),
+                       CMD(@"tabonly", @"tabonly:inWindow:"),
+                       CMD(@"tabprevious", @"tabnext:inWindow:"),
+                       CMD(@"tabNext", @"tabnext:inWindow:"),
+                       CMD(@"tabrewind", @"tabnext:inWindow:"),
+                       CMD(@"tabs", @"tabs:inWindow:"),
+                       CMD(@"tcl", @"tcl:inWindow:"),
+                       CMD(@"tcldo", @"tcldo:inWindow:"),
+                       CMD(@"tclfile", @"tclfile:inWindow:"),
+                       CMD(@"tearoff", @"tearoff:inWindow:"),
+                       CMD(@"tfirst", @"tag:inWindow:"),
+                       CMD(@"throw", @"throw:inWindow:"),
+                       CMD(@"tjump", @"tag:inWindow:"),
+                       CMD(@"tlast", @"tag:inWindow:"),
+                       CMD(@"tmenu", @"menu:inWindow:"),
+                       CMD(@"tnext", @"tag:inWindow:"),
+                       CMD(@"topleft", @"wrongmodifier:inWindow:"),
+                       CMD(@"tprevious", @"tag:inWindow:"),
+                       CMD(@"trewind", @"tag:inWindow:"),
+                       CMD(@"try", @"try:inWindow:"),
+                       CMD(@"tselect", @"tag:inWindow:"),
+                       CMD(@"tunmenu", @"menu:inWindow:"),
+                       CMD(@"undo", @"undo:inWindow:"),
+                       CMD(@"undojoin", @"undojoin:inWindow:"),
+                       CMD(@"undolist", @"undolist:inWindow:"),
+                       CMD(@"unabbreviate", @"abbreviate:inWindow:"),
+                       CMD(@"unhide", @"buffer_all:inWindow:"),
+                       CMD(@"unlet", @"unlet:inWindow:"),
+                       CMD(@"unlockvar", @"lockvar:inWindow:"),
+                       CMD(@"unmap", @"unmap:inWindow:"),
+                       CMD(@"unmenu", @"menu:inWindow:"),
+                       CMD(@"unsilent", @"wrongmodifier:inWindow:"),
+                       CMD(@"update", @"update:inWindow:"),
+                       CMD(@"vglobal", @"global:inWindow:"),
+                       CMD(@"version", @"version:inWindow:"),
+                       CMD(@"verbose", @"wrongmodifier:inWindow:"),
+                       CMD(@"vertical", @"wrongmodifier:inWindow:"),
+                       CMD(@"visual", @"edit:inWindow:"),
+                       CMD(@"view", @"edit:inWindow:"),
+                       CMD(@"vimgrep", @"vimgrep:inWindow:"),
+                       CMD(@"vimgrepadd", @"vimgrep:inWindow:"),
+                       CMD(@"viusage", @"viusage:inWindow:"),
+                       CMD(@"vmap", @"vmap:inWindow:"),
+                       CMD(@"vmapclear", @"mapclear:inWindow:"),
+                       CMD(@"vmenu", @"menu:inWindow:"),
+                       CMD(@"vnoremap", @"map:inWindow:"),
+                       CMD(@"vnew", @"splitview:inWindow:"),
+                       CMD(@"vnoremenu", @"menu:inWindow:"),
+                       CMD(@"vsplit", @"splitview:inWindow:"),
+                       CMD(@"vunmap", @"unmap:inWindow:"),
+                       CMD(@"vunmenu", @"menu:inWindow:"),
+                       CMD(@"write", @"write:inWindow:"),
+                       CMD(@"wNext", @"wnext:inWindow:"),
+                       CMD(@"wall", @"wqall:inWindow:"),
+                       CMD(@"while", @"while:inWindow:"),
+                       CMD(@"winsize", @"winsize:inWindow:"),
+                       CMD(@"wincmd", @"wincmd:inWindow:"),
+                       CMD(@"windo", @"listdo:inWindow:"),
+                       CMD(@"winpos", @"winpos:inWindow:"),
+                       CMD(@"wnext", @"wnext:inWindow:"),
+                       CMD(@"wprevious", @"wnext:inWindow:"),
+                       CMD(@"wq", @"exit:inWindow:"),
+                       CMD(@"wqall", @"wqall:inWindow:"),
+                       CMD(@"wsverb", @"wsverb:inWindow:"),
+                       CMD(@"wviminfo", @"viminfo:inWindow:"),
+                       CMD(@"xccmd" , @"xccmd:inWindow:"),
+                       CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
+                       CMD(@"xit", @"exit:inWindow:"),
+                       CMD(@"xall", @"wqall:inWindow:"),
+                       CMD(@"xmap", @"map:inWindow:"),
+                       CMD(@"xmapclear", @"mapclear:inWindow:"),
+                       CMD(@"xmenu", @"menu:inWindow:"),
+                       CMD(@"xnoremap", @"map:inWindow:"),
+                       CMD(@"xnoremenu", @"menu:inWindow:"),
+                       CMD(@"xunmap", @"unmap:inWindow:"),
+                       CMD(@"xunmenu", @"menu:inWindow:"),
+                       CMD(@"yank", @"operators:inWindow:"),
+                       CMD(@"z", @"z:inWindow:"),
+                       CMD(@"!", @"bang:inWindow:"),
+                       CMD(@"#", @"print:inWindow:"),
+                       CMD(@"&", @"sub:inWindow:"),
+                       CMD(@"*", @"at:inWindow:"),
+                       CMD(@"<", @"operators:inWindow:"),
+                       CMD(@"=", @"equal:inWindow:"),
+                       CMD(@">", @"operators:inWindow:"),
+                       CMD(@"@", @"at:inWindow:"),
+                       CMD(@"Next", @"previous:inWindow:"),
+                       CMD(@"Print", @"print:inWindow:"),
+                       CMD(@"X", @"X:inWindow:"),
+                       CMD(@"~", @"sub:inWindow:"),
                        
 					   nil];
-        _xvim = [xvim retain];
     }
     return self;
 }
 
 - (void)dealloc{
     [_excommands release];
-    [_xvim release];
     [super dealloc];
 }
 
 // This method correnspons parsing part of get_address in ex_cmds.c
-- (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft{
-    DVTSourceTextView* view = [_xvim sourceView];
+- (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
+{
+    DVTSourceTextView* view = [window sourceView];
     DVTFoldingTextStorage* storage = [view textStorage];
     TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
@@ -688,8 +693,8 @@
  * 
  */
 
-- (XVimExArg*)parseCommand:(NSString*)cmd{
-    DVTSourceTextView* view = [_xvim sourceView];
+- (XVimExArg*)parseCommand:(NSString*)cmd inWindow:(XVimWindow*)window
+{
     XVimExArg* exarg = [[[XVimExArg alloc] init] autorelease]; 
     NSUInteger len = [cmd length];
     
@@ -710,8 +715,10 @@
     // 3. parse range
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
+	
+    DVTSourceTextView* view = [window sourceView];
     for(;;){
-        NSUInteger addr = [self getAddress:parsing :&parsing];
+        NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
@@ -740,7 +747,7 @@
     }
     
     // 4. parse command
-    // In xvim command and its argument must be separeted by space
+    // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
     while( isAlpha(*parsing) || *parsing == '!' ){
@@ -777,18 +784,20 @@
 }
 
 // This method corresponds to do_one_cmd in ex_docmd.c in Vim
-- (void)executeCommand:(NSString*)cmd{
+- (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
+{
     // cmd INCLUDE ":" character
     
-    DVTSourceTextView* srcView = [_xvim sourceView];
     if( [cmd length] == 0 ){
         ERROR_LOG(@"command string empty");
         return;
     }
           
     // Actual parsing is done in following method.
-    XVimExArg* exarg = [self parseCommand:cmd];
-    if( exarg.cmd == nil ){
+    XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
+    if( exarg.cmd == nil ) {
+		DVTSourceTextView* srcView = [window sourceView];
+		
         // Jump to location
         NSUInteger pos = [srcView positionAtLineNumber:exarg.lineBegin column:0];
         NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
@@ -796,7 +805,7 @@
             pos_wo_space = pos;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [srcView scrollToCursor];
+        [srcView scrollTo:[window cursorLocation]];
         return;
     }
     
@@ -805,7 +814,7 @@
         if( [cmdname.cmdName hasPrefix:[exarg cmd]] ){
             SEL method = NSSelectorFromString(cmdname.methodName);
             if( [self respondsToSelector:method] ){
-                [self performSelector:method withObject:exarg];
+                [self performSelector:method withObject:exarg withObject:window];
                 break;
             }
         }
@@ -818,13 +827,17 @@
 //   Commands    //
 ///////////////////
 
-- (void)sub:(XVimExArg*)args{
-    [[_xvim searcher] substitute:args.arg from:args.lineBegin to:args.lineEnd];
+- (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	XVimSearch *searcher = [[XVim instance] searcher];
+    [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
 }
 
-- (void)set:(XVimExArg*)args{
+- (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    DVTSourceTextView* srcView = [_xvim sourceView];
+    DVTSourceTextView* srcView = [window sourceView];
+	XVimOptions* options = [[XVim instance] options];
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
         // "set XXX=YYY" form
@@ -832,10 +845,10 @@
     }else if( [setCommand hasPrefix:@"no"] ){
         // "set noXXX" form
         NSString* prop = [setCommand substringFromIndex:2];
-        [_xvim.options setOption:prop value:[NSNumber numberWithBool:NO]];
+        [options setOption:prop value:[NSNumber numberWithBool:NO]];
     }else{
         // "set XXX" form
-        [_xvim.options setOption:setCommand value:[NSNumber numberWithBool:YES]];
+        [options setOption:setCommand value:[NSNumber numberWithBool:YES]];
     }
     
     if( [setCommand isEqualToString:@"wrap"] ){
@@ -846,16 +859,19 @@
     }                
 }
 
-- (void)write:(XVimExArg*)args{ // :w
+- (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
+{ // :w
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
 }
 
-- (void)exit:(XVimExArg*)args{ // :wq
+- (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window
+{ // :wq
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
     [NSApp terminate:self];
 }
 
-- (void)quit:(XVimExArg*)args{ // :q
+- (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window
+{ // :q
     [NSApp terminate:self];
 }
 
@@ -871,24 +887,29 @@
         [self debugMenu:[item submenu] :depth+1];
     }
 }
-- (void)debug:(NSString*)args{
+- (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     // Write any debug code.
-    NSMenu* menu = [NSApp mainMenu];
-    [self debugMenu:menu :0];
+    [window setStaticMessage:@"testmessage"];
+    //NSMenu* menu = [NSApp mainMenu];
+    //[self debugMenu:menu :0];
     //[[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 
 }
 
-- (void)reg:(XVimExArg*)args{
-    TRACE_LOG(@"registers: %@", [_xvim registers])
+- (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    TRACE_LOG(@"registers: %@", [[XVim instance] registers])
 }
 
-- (void)make:(XVimExArg*)args{
+- (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
-- (void)mapMode:(int)mode withArgs:(XVimExArg*)args {
+- (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
 	NSString *argString = args.arg;
 	NSScanner *scanner = [NSScanner scannerWithString:argString];
 	
@@ -909,58 +930,78 @@
 	{
 		NSString *fromString = [subStrings objectAtIndex:0];
 		NSString *toString = [subStrings objectAtIndex:1];
-		XVimKeyStroke *fromKeyStroke = [XVimKeyStroke fromString:fromString];
+		
+		NSMutableArray *fromKeyStrokes = [[NSMutableArray alloc] init];
+		[XVimKeyStroke fromString:fromString to:fromKeyStrokes];
 		
 		NSMutableArray *toKeyStrokes = [[NSMutableArray alloc] init];
 		[XVimKeyStroke fromString:toString to:toKeyStrokes];
 		
-		if (fromKeyStroke && toKeyStrokes.count > 0)
+		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0)
 		{
-			XVimKeymap *keymap = [_xvim keymapForMode:mode];
-			[keymap mapKeyStroke:fromKeyStroke to:toKeyStrokes];
+			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
+			[keymap mapKeyStroke:fromKeyStrokes to:toKeyStrokes];
 		}
 	}
 }
 
-- (void)map:(XVimExArg*)args {
-	[self mapMode:MODE_GLOBAL_MAP withArgs:args];
-	[self mapMode:MODE_NORMAL withArgs:args];
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args];
-	[self mapMode:MODE_VISUAL withArgs:args];
+- (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_GLOBAL_MAP withArgs:args inWindow:window];
+	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
+	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
 }
 
-- (void)nmap:(XVimExArg*)args {
-	[self mapMode:MODE_NORMAL withArgs:args];
+- (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
 }
 
-- (void)vmap:(XVimExArg*)args {
-	[self mapMode:MODE_VISUAL withArgs:args];
+- (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
 }
 
-- (void)omap:(XVimExArg*)args {
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args];
+- (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
 }
 
-- (void)imap:(XVimExArg*)args {
-	[self mapMode:MODE_INSERT withArgs:args];
+- (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_INSERT withArgs:args inWindow:window];
 }
 
-- (void)run:(XVimExArg*)args{
+- (void)run:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
-- (void)tabnext:(XVimExArg*)args{
+- (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(selectNextTab:) to:nil from:self];
 }
 
-- (void)tabprevious:(XVimExArg*)args{
+- (void)tabprevious:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(selectPreviousTab:) to:nil from:self];
 }
 
-- (void)tabclose:(XVimExArg*)args{
+- (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
 }
 
+- (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
+}
+
+- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
+    [NSApp sendAction:sel  to:nil from:self];
+}
 @end

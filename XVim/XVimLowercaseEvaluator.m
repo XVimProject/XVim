@@ -9,37 +9,29 @@
 #import "XVimLowercaseEvaluator.h"
 #import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
+#import "XVimWindow.h"
 
 @implementation XVimLowercaseEvaluator
 
-- (id)init
-{
-    return [self initWithRepeat:1];
-}
-
-- (id)initWithRepeat:(NSUInteger)repeat{
-    self = [super init];
-    if (self) {
-        _repeat = repeat;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)u:(id)arg {
-    if (_repeat < 1) 
+- (XVimEvaluator*)u:(XVimWindow*)window {
+    if (self.repeat < 1) 
         return nil;
     
-    DVTSourceTextView* view = [self textView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
-}
-
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-	NSTextView *view = [self textView];
-	NSRange r = [self getOperationRangeFrom:from To:to Type:type];
-	[view lowercaseRange:r];
-	[view setSelectedRange:NSMakeRange(r.location, 0)];
-    return nil;
+    DVTSourceTextView* view = [window sourceView];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
 @end
+
+@implementation XVimLowercaseAction
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
+{
+	NSTextView *view = [window sourceView];
+	NSRange r = [view getOperationRangeFrom:from To:to Type:type];
+	[view lowercaseRange:r];
+	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	return nil;
+}
+@end
+

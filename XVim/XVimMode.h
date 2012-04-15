@@ -12,9 +12,7 @@ typedef enum {
     MODE_INSERT,
     MODE_VISUAL,
 	MODE_OPERATOR_PENDING,
-	MODE_GLOBAL_MAP,
+	MODE_GLOBAL_MAP, // Used by map
+	MODE_NONE, // Use to make sure you get no mapping
 	MODE_COUNT,
 } XVIM_MODE;
-
-static NSString* MODE_STRINGS[] = {@"NORMAL", @"CMDLINE", @"INSERT", 
-    @"VISUAL", @"OPERATOR"};

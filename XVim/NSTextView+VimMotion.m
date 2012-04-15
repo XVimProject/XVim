@@ -1,58 +1,15 @@
-//
-//  NSTextView+VimMotion.m
-//  XVim
-//
+// {aaa}
 //  Created by Shuichiro Suzuki on 2/25/12.
 //  Copyright (c) 2012 JugglerShu.Net. All 
 //
+// aaa {aaaaaa}
 
 #import "NSTextView+VimMotion.h"
+#import "NSString+VimHelper.h"
+#import "DVTSourceTextView.h"
 #import "Logger.h"
-#import "XVim.h"
-#import "XVimEvaluator.h"
-
-//
-// This category deals Vim's motion in NSTextView.
-// Each method of motion should return the destination position of the motion.
-// They shouldn't change the position of current insertion point(selected range)
-// They also have some support methods for Vim motions such as obtaining next newline break.
-//
-
 
 @implementation NSTextView (VimMotion)
-/////////////////////
-// Character set   //
-/////////////////////
-
-#define CHARSET_ID_WHITESPACE 0
-#define CHARSET_ID_KEYWORD 1 // This is named after 'iskeyword' in Vim
-
-/////////////////////////
-// support functions   //
-/////////////////////////
-BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
-BOOL isWhiteSpace(unichar ch) { return ch == ' ' || ch == '\t'; }
-BOOL isNewLine(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
-BOOL isNonAscii(unichar ch) { return ch > 128; } // is this not ch >= 128 ? (JugglerShu)
-BOOL isAlpha(unichar ch) { 
-    return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_';
-}
-BOOL isDelimeter(unichar ch) {
-    return (ch >= '!' && ch <= '/') ||
-    (ch >= ':' && ch <= '@') ||
-    (ch >= '[' && ch <= '`' && ch != '_') ||
-    (ch >= '{' && ch <= '~');
-}
-BOOL isFuzzyWord(unichar ch) {
-    return (!isWhiteSpace(ch)) && (!isNewLine(ch));
-}
-BOOL isNonBlank(unichar ch) {
-    return (!isWhiteSpace(ch)) && (!isNewLine(ch));
-}
-BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined for 1 byte char
-    return isDigit(ch) || isAlpha(ch)  || ch >= 192;
-}
-
 
 /////////////////////////
 // support methods     //
@@ -62,8 +19,8 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 // The following macros asserts the range of index.
 // WITH_EOF permits the index at EOF position.
 // WITHOUT_EOF doesn't permit the index at EOF position.
-#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length], @"index can not exceed the length of string" )
-#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length], @"index can not exceed the length of string - 1" )
+#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string" )
+#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string - 1" )
 
 // Some methods assume that "index" is at valid cursor position in Normal mode.
 // See isValidCursorPosition's description the condition of the valid cursor position.
@@ -192,6 +149,12 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return;
 }
 
+- (void)del:(id)sender
+{
+	[self cut:sender];
+	[self adjustCursorPosition];
+}
+
 /**
  * Returns next non-blank character position after the position "index" in a current line.
  * If no non-blank character is found or the line is a blank line this returns NSNotFound.
@@ -262,14 +225,14 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 }
 
 /**
- * Returns position of the head of line of the current line specified by index.
+ * Returns position of the head of line specified by index.
  * Head of line is one of them which is found first when searching backwords from "index".
  *    - Character just after newline
  *    - Character at the head of document
  * If the size of document is 0 it does not have any head of line.
  * Blankline does NOT have headOfLine. So EOF is NEVER head of line.
  * Searching starts from position "index". So the "index" could be a head of line and may be returned.
-     **/
+**/
 - (NSUInteger)headOfLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( [[self string] length] == 0 ){
@@ -286,6 +249,23 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return prevNewline+1; // Then this is the head of line
 }
 
+/**
+ * Returns position of first character of the line specified by index.
+ * Note that first character in the line is different from head of line.
+ * First character may be newline when its blankline.
+ * First character may be EOF if the EOF is blankline
+ * In short words, its just after a newline or begining of document.
+ * This never returns NSNotFound
+ **/
+- (NSUInteger)firstOfLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    while (index > 0)
+    {
+        if (isNewLine([[self string] characterAtIndex:index-1])) { break; }
+        --index;
+    }
+    return index;
+}
 /**
  * Returns position of the first non-whitespace character past the head of line of the
  * current line specified by index.
@@ -767,20 +747,226 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return pos;
 }
 
+/*
+ Definition of Sentence from gVim help
+ 
+ - A sentence is defined as ending at a '.', '!' or '?' followed by either the
+ end of a line, or by a space or tab.  Any number of closing ')', ']', '"'
+ and ''' characters may appear after the '.', '!' or '?' before the spaces,
+ tabs or end of line.  A paragraph and section boundary is also a sentence
+ boundary.
+ If the 'J' flag is present in 'cpoptions', at least two spaces have to
+ follow the punctuation mark; <Tab>s are not recognized as white space.
+ The definition of a sentence cannot be changed.
+ */
+
+// TODO: Treat paragraph and section boundary as sections baundary as well
 - (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
-    return 0;
+    NSUInteger pos = index+1;
+    NSUInteger sentence_head = NSNotFound;
+    NSString* s = [self string];
+    NSUInteger sentence_found = 0;
+    if( pos >= s.length-1 ){
+        return NSNotFound;
+    }
+    // Search "." or "!" or "?" forward and check if it is followed by spaces(and closing characters)
+    for( ; pos < s.length && NSNotFound == sentence_head ; pos++ ){
+        unichar c = [s characterAtIndex:pos];
+        if( c == '.' || c == '!' || c == '?' ){
+            // Check if this is end of a sentence.
+            NSUInteger k = pos+1;
+            unichar c2;
+            // Skip )]"'
+            for( ; k < s.length ; k++ ){
+                c2 = [s characterAtIndex:k];
+                if( c2 != ')' && c2 != ']' && c2 != '"' && c2  != '\'' ){
+                    break;
+                }
+            }
+            // after )]"' must be space to be end of a sentence.
+            if( k < s.length && !isNonBlank(c2) ){ // !isNonBlank == isBlank
+                // This is a end of sentence.
+                // Now search for next non blank character to find head of sentence
+                for( k++ ; k < s.length ; k++ ){
+                    c2 = [s characterAtIndex:k];
+                    if(isNonBlank(c2)){
+                        // Found a head of sentence.
+                        sentence_found++;
+                        if( count == sentence_found ){
+                            sentence_head = k;
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    if( sentence_head == NSNotFound && pos == s.length ){
+        if( (sentence_found+1) == count ){
+            sentence_head = [self endOfFile];
+            while( ![self isValidCursorPosition:sentence_head] ){
+                sentence_head--;
+            }
+        }
+    }
+    return sentence_head;
 }
 
 - (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
-    return 0;
+    if( 0 == index ){
+        return NSNotFound;
+    }
+    
+    NSUInteger pos = index-1; 
+    NSUInteger lastSearchBase = index;
+    NSUInteger sentence_head = NSNotFound;
+    NSString* s = [self string];
+    NSUInteger sentence_found = 0;
+    // Search "." or "!" or "?" backwards and check if it is followed by spaces(and closing characters)
+    for( ; NSNotFound == sentence_head ; pos-- ){
+        if( pos == 0 ){
+            // Head of file is always head of sentece
+            sentence_found++;
+            if( count == sentence_found ){
+                sentence_head = pos;
+            }
+            break;
+        }
+        unichar c = [s characterAtIndex:pos];
+        if( c == '.' || c == '!' || c == '?' ){
+            // Check if this is end of a sentence.
+            NSUInteger k = pos+1;
+            unichar c2;
+            // Skip )]"'
+            for( ; k < lastSearchBase ; k++ ){
+                c2 = [s characterAtIndex:k];
+                if( c2 != ')' && c2 != ']' && c2 != '"' && c2 != '\'' ){
+                    break;
+                }
+            }
+            // after )]"' must be space to be end of a sentence.
+            if( k < lastSearchBase && !isNonBlank(c2) ){ // !isNonBlank == isBlank
+                // This is a end of sentence.
+                // Now search for next non blank character
+                for( k++ ; k < lastSearchBase ; k++ ){
+                    c2 = [s characterAtIndex:k];
+                    if(isNonBlank(c2)){
+                        // Found a head of sentence.
+                        sentence_found++;
+                        if( count == sentence_found ){
+                            sentence_head = k;
+                        }
+                        break;
+                    }
+                }
+            }
+            lastSearchBase = pos;
+        }
+    }
+    
+    return sentence_head;
 }
 
+/*
+ Definition of paragraph from gVim help
+ 
+ A paragraph begins after each empty line, and also at each of a set of
+ paragraph macros, specified by the pairs of characters in the 'paragraphs'
+ option.  The default is "IPLPPPQPP TPHPLIPpLpItpplpipbp", which corresponds to
+ the macros ".IP", ".LP", etc.  (These are nroff macros, so the dot must be in
+ the first column).  A section boundary is also a paragraph boundary.
+ Note that a blank line (only containing white space) is NOT a paragraph
+ boundary.
+ Also note that this does not include a '{' or '}' in the first column.  When
+ the '{' flag is in 'cpoptions' then '{' in the first column is used as a
+ paragraph boundary |posix|.
+ */
+
 - (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
-    return 0;
+    NSUInteger pos = index;
+    NSString* s = [self string];
+    if( 0 == pos ){
+        pos = 1;
+    }
+    NSUInteger prevpos = pos - 1;
+    
+    NSUInteger paragraph_head = NSNotFound;
+    int paragraph_found = 0;
+    BOOL newlines_skipped = NO;
+    for( ; pos < s.length && NSNotFound == paragraph_head ; pos++,prevpos++ ){
+        unichar c = [s characterAtIndex:pos];
+        unichar prevc = [s characterAtIndex:prevpos];
+        if( isNewLine(c) && isNewLine(prevc)){
+            if( newlines_skipped ){
+                paragraph_found++;
+                if( count  == paragraph_found ){
+                    paragraph_head = pos;
+                    break;
+                }else{
+                    newlines_skipped = NO;
+                }
+            }else{
+                // skip continuous newlines 
+                continue;
+            }
+        }else{
+            newlines_skipped = YES;
+        }
+    }
+    
+    if( NSNotFound == paragraph_head   ){
+        // end of document
+        paragraph_head = [self endOfFile];
+        while( ![self isValidCursorPosition:paragraph_head] ){
+            paragraph_head--;
+        }
+    }
+    
+    return paragraph_head;
 }
 
 - (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
-    return 0;
+    NSUInteger pos = index;
+    NSString* s = [self string];
+    if( pos == 0 ){
+        return NSNotFound;
+    }
+    if( pos == s.length )
+    {
+        pos = pos - 1;
+    }
+    NSUInteger prevpos = pos - 1;
+    NSUInteger paragraph_head = NSNotFound;
+    int paragraph_found = 0;
+    BOOL newlines_skipped = NO;
+    for( ; pos > 0 && NSNotFound == paragraph_head ; pos--,prevpos-- ){
+        unichar c = [s characterAtIndex:pos];
+        unichar prevc = [s characterAtIndex:prevpos];
+        if(isNewLine(c) && isNewLine(prevc)){
+            if( newlines_skipped ){
+                paragraph_found++;
+                if( count == paragraph_found ){
+                    paragraph_head = pos;
+                    break;
+                }else{
+                    newlines_skipped = NO;
+                }
+            }else{
+                // skip continuous newlines 
+                continue;
+            }
+        }else{
+            newlines_skipped = YES;
+        }
+    }
+    
+    if( NSNotFound == paragraph_head   ){
+        // begining of document
+        paragraph_head = 0;
+    }
+    
+    return paragraph_head;
 }
 
 - (NSUInteger)sectionsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
@@ -934,11 +1120,10 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return [self selectedRange].location;
 }
 
-- (void)scrollToCursor{
-    XVim *xvim = [self viewWithTag:XVIM_TAG];
-
+- (void)scrollTo:(NSUInteger)location
+{
     NSRange characterRange;
-    characterRange.location = xvim.currentEvaluator.insertionPoint;
+    characterRange.location = location;
     characterRange.length = [self isBlankLine:characterRange.location] ? 0 : 1;
     
     // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll
@@ -1085,4 +1270,765 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
 	[self insertText:[[s substringWithRange:range] lowercaseString] replacementRange:range];
 }
 
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+    if( from > to ){
+        NSUInteger tmp = from;
+        from = to;
+        to = tmp;
+    }
+    
+    if( type == CHARACTERWISE_EXCLUSIVE ){
+    }else if( type == CHARACTERWISE_INCLUSIVE ){
+		to++;
+    }else if( type == LINEWISE ){
+        to = [self tailOfLine:to] + 1;
+        NSUInteger head = [self headOfLine:from];
+        if( NSNotFound != head ){
+            from = head; 
+        }
+    }
+	
+	return NSMakeRange(from, to - from);
+}
+
+
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
+    [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
+}
+
+////////////////////
+/// Text Object ////
+////////////////////
+- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSString* string = [self string];
+    NSInteger maxIndex = [string length] - 1;
+    if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
+    
+    NSInteger rangeStart = index;
+    NSInteger rangeEnd = index;
+    
+    // repeatCount loop starts here
+    while (count--) {
+        // Skip past newline
+        while (index < maxIndex && isNewLine([string characterAtIndex:index])) {
+            ++index;
+        }
+        
+        if (index > maxIndex) {
+            break;
+        }         
+        NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
+        NSCharacterSet *wordSet = nil;
+        
+        if ( opt & BIGWORD) {
+            NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
+            wordSet = charSet;
+        }
+        else {
+            NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+            [charSet addCharactersInString:@"_"];
+            wordSet = charSet;
+        }
+        
+        unichar initialChar = [string characterAtIndex:index];
+        BOOL initialCharIsWs = [wsSet characterIsMember:initialChar];
+        NSCharacterSet *searchSet = get_search_set(initialChar, wsSet, wordSet);
+        
+        NSInteger begin = index;
+        NSInteger end = MIN(index + 1, maxIndex);
+        
+        // Seek backwards
+        begin = seek_backwards(string, begin, searchSet);
+        
+        // Seek forwards
+        end = seek_forwards(string, end, searchSet);
+        
+        // For inclusive mode, try to eat some more
+        if ( opt & INCLUSIVE) {
+            NSInteger newEnd = end;
+            if (end < maxIndex) {
+                if (initialCharIsWs) {
+                    unichar c = [string characterAtIndex:end];
+                    searchSet = get_search_set(c, wsSet, wordSet);
+                    newEnd = seek_forwards(string, end, searchSet);
+                }
+                else {
+                    newEnd = seek_forwards(string, end, wsSet);
+                }
+            }
+            
+            // If we couldn't eat anything from the end, try to eat start
+            NSInteger newBegin = begin;
+            if (newEnd == end) {
+                if (!initialCharIsWs) {
+                    newBegin = seek_backwards(string, begin, wsSet);
+                    
+                    // Never remove a line's leading whitespace
+                    if (newBegin == 0 || isNewLine([string characterAtIndex:newBegin - 1])) {
+                        newBegin = begin;
+                    }
+                }
+            }
+            
+            begin = newBegin;
+            end = newEnd;
+        }
+        
+        index = end;
+        
+        rangeStart = MIN(rangeStart, begin);
+        rangeEnd = MAX(rangeEnd, end);
+    }
+    
+    return NSMakeRange(rangeStart, rangeEnd - rangeStart);
+}
+
+
+
+// The following code is from xVim by WarWithinMe.
+// These will be integreted into NSTextView category.
+
+// ==========
+// NSStringHelper
+void initNSStringHelper(NSStringHelper* h, NSString* string, NSUInteger strLen)
+{
+    h->string = string;
+    h->strLen = strLen;
+    h->index  = -ITERATE_STRING_BUFFER_SIZE;
+}
+
+void initNSStringHelperBackward(NSStringHelper* h, NSString* string, NSUInteger strLen)
+{
+    h->string = string;
+    h->strLen = strLen;
+    h->index  = strLen;
+}
+
+NSInteger fetchSubStringFrom(NSStringHelper* h, NSInteger index);
+NSInteger fetchSubStringFrom(NSStringHelper* h, NSInteger index)
+{
+    NSInteger copyBegin = index;
+    NSInteger size      = (index + ITERATE_STRING_BUFFER_SIZE) > h->strLen ? h->strLen - index : ITERATE_STRING_BUFFER_SIZE;
+    [h->string getCharacters:h->buffer range:NSMakeRange(copyBegin, size)];
+    return copyBegin;
+}
+
+NSInteger fetchSubStringEnds(NSStringHelper* h, NSInteger index);
+NSInteger fetchSubStringEnds(NSStringHelper* h, NSInteger index)
+{
+    NSInteger copyBegin = (index + 1) >= ITERATE_STRING_BUFFER_SIZE ? index + 1 - ITERATE_STRING_BUFFER_SIZE : 0;
+    NSInteger size      = index - copyBegin + 1;
+    [h->string getCharacters:h->buffer range:NSMakeRange(copyBegin, size)];
+    return copyBegin;
+}
+
+unichar characterAtIndex(NSStringHelper* h, NSInteger index)
+{
+    if (h->index > index)
+    {
+        h->index = fetchSubStringEnds(h, index);
+    } else if (index >= (h->index + ITERATE_STRING_BUFFER_SIZE))
+    {
+        h->index = fetchSubStringFrom(h, index);
+    }
+    return h->buffer[index - h->index];
+}
+
+
+
+
+NSInteger xv_caret(NSString *string, NSInteger index)
+{
+    NSInteger resultIndex  = index;
+    NSInteger seekingIndex = index;
+    
+    while (seekingIndex > 0) {
+        unichar ch = [string characterAtIndex:seekingIndex-1];
+        if (isNewLine(ch)) {
+            break;
+        } else if (ch != '\t' && ch != ' ') {
+            resultIndex = seekingIndex - 1;
+        }
+        --seekingIndex;
+    }
+    
+    if (resultIndex == index) {
+        NSInteger maxIndex = [string length] - 1;
+        while (resultIndex < maxIndex) {
+            unichar ch = [string characterAtIndex:resultIndex];
+            if (isNewLine(ch) || isWhiteSpace(ch) == NO) {
+                break;
+            }
+            ++resultIndex;
+        }
+    }
+    
+    return resultIndex;
+}
+
+NSInteger xv_0(NSString *string, NSInteger index)
+{    
+    while (index > 0)
+    {
+        if (isNewLine([string characterAtIndex:index-1])) { break; }
+        --index;
+    }
+    return index;
+}
+
+
+// A port from vim's findmatchlimit, simplied version.
+// This one only works for (), [], {}, <>
+// Return -1 if we cannot find it.
+// cpo_match is YES means ignore quotes.
+#define MAYBE     2
+#define FORWARD   1
+#define BACKWARD -1
+int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_match);
+int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_match)
+{ 
+    // ----------
+    unichar    findc           = 0; // The char to find.
+    BOOL       backwards       = NO;
+    
+    int        count           = 0;      // Cumulative number of braces.
+    int        do_quotes       = -1;     // Check for quotes in current line.
+    int        at_start        = -1;     // do_quotes value at start position.
+    int        start_in_quotes = MAYBE;  // Start position is in quotes
+    BOOL       inquote         = NO;     // YES when inside quotes
+    int        match_escaped   = 0;      // Search for escaped match.
+    
+    // NSInteger pos             = cursor; // Current search position
+    // BOOL      cpo_match       = YES;    // cpo_match = (vim_strchr(p_cpo, CPO_MATCH) != NULL);
+    BOOL       cpo_bsl         = NO;     // cpo_bsl = (vim_strchr(p_cpo, CPO_MATCHBSL) != NULL);
+    
+    // ----------
+    char*      b_p_mps         = "(:),{:},[:],<:>";
+    for (char* ptr = b_p_mps; *b_p_mps; ptr += 2) 
+    {
+        if (*ptr == initc) {
+            findc = initc;
+            initc = ptr[2];
+            backwards = YES;
+            break;
+        }
+        
+        ptr += 2;
+        if (*ptr == initc) {
+            findc = initc;
+            initc = *(ptr - 2);
+            backwards = NO;
+            break;
+        }
+        
+        if (ptr[1] != ',') { break; } // Invalid initc!
+    }
+    
+    if (findc == 0) { return -1; }
+    
+    // ----------
+    
+    
+    // ----------
+    NSStringHelper  help;
+    NSStringHelper* h        = &help;
+    NSInteger       maxIndex = [string length] - 1; 
+    backwards ? initNSStringHelperBackward(h, string, maxIndex+1) : initNSStringHelper(h, string, maxIndex+1);
+    
+    // ----------
+    while (YES)
+    {
+        if (backwards)
+        {
+            if (pos == 0) { break; } // At start of file
+            --pos;
+            
+            if (isNewLine(characterAtIndex(h, pos)))
+            {
+                // At prev line.
+                do_quotes = -1;
+            }
+        } else {  // Forward search
+            if (pos == maxIndex) { break; } // At end of file
+            
+            if (isNewLine(characterAtIndex(h, pos))) {
+                do_quotes = -1;
+            }
+            
+            ++pos;
+        }
+        
+        // ----------
+        // if (pos.col == 0 && (flags & FM_BLOCKSTOP) && (linep[0] == '{' || linep[0] == '}'))
+        // if (comment_dir)
+        // ----------
+        
+        if (cpo_match) {
+            do_quotes = 0;
+        } else if (do_quotes == -1)
+        {
+            /*
+             * Count the number of quotes in the line, skipping \" and '"'.
+             * Watch out for "\\".
+             */
+            at_start = do_quotes;
+            
+            NSInteger ptr = pos;
+            while (ptr > 0 && !isNewLine([string characterAtIndex:ptr-1])) { --ptr; }
+            NSInteger sta = ptr;
+            
+            while (ptr < maxIndex && 
+                   !isNewLine(characterAtIndex(h, ptr)))
+            {
+                if (ptr == pos + backwards) { at_start = (do_quotes & 1); }
+                
+                if (characterAtIndex(h, ptr) == '"' &&
+                    (ptr == sta || 
+                     characterAtIndex(h, ptr - 1) != '\'' || 
+                     characterAtIndex(h, ptr + 1) != '\'')) 
+                {
+                    ++do_quotes;
+                }
+                
+                if (characterAtIndex(h, ptr) == '\\' && 
+                    ptr + 1 < maxIndex && 
+                    !isNewLine(characterAtIndex(h, ptr+1))) 
+                { ++ptr; }
+                ++ptr;
+            }
+            do_quotes &= 1; // result is 1 with even number of quotes
+            
+            //
+            // If we find an uneven count, check current line and previous
+            // one for a '\' at the end.
+            //
+            if (do_quotes == 0)
+            {
+                inquote = NO;
+                if (start_in_quotes == MAYBE)
+                {
+                    // Do we need to use at_start here?
+                    inquote = YES;
+                    start_in_quotes = YES;
+                } else if (backwards)
+                {
+                    inquote = YES;
+                }
+                
+                if (sta > 1 && characterAtIndex(h, sta - 2) == '\\')
+                {
+                    // Checking last char fo previous line.
+                    do_quotes = 1;
+                    if (start_in_quotes == MAYBE) {
+                        inquote = at_start != 0;
+                        if (inquote) {
+                            start_in_quotes = YES;
+                        }
+                    } else if (!backwards)
+                    {
+                        inquote = YES;
+                    }
+                }
+            }
+        }
+        if (start_in_quotes == MAYBE) {
+            start_in_quotes = NO;
+        }
+        
+        unichar c = characterAtIndex(h, pos);
+        switch (c) {
+                
+            case '"':
+                /* a quote that is preceded with an odd number of backslashes is
+                 * ignored */
+                if (do_quotes)
+                {
+                    NSInteger col = pos;
+                    int qcnt = 0;
+                    unichar c2;
+                    while (col > 0) {
+                        --col;
+                        c2 = characterAtIndex(h, col);
+                        if (isNewLine(c2) || c2 != '\\') {
+                            break;
+                        }
+                        ++qcnt;
+                    }
+                    if ((qcnt & 1) == 0) {
+                        inquote = !inquote;
+                        start_in_quotes = NO;
+                    }
+                }
+                break;
+                
+            case '\'':
+                if (!cpo_match && initc != '\'' && findc != '\'')
+                {
+                    if (backwards)
+                    {
+                        NSInteger p1 = pos;
+                        int col = 0;
+                        while (p1 > 0 && col < 3) {
+                            --p1;
+                            if (isNewLine(characterAtIndex(h, p1))) {
+                                break;
+                            }
+                            ++col;
+                        }
+                        
+                        if (col > 1)
+                        {
+                            if (characterAtIndex(h, pos - 2) == '\'')
+                            {
+                                pos -= 2;
+                                break;
+                            } else if (col > 2 &&
+                                       characterAtIndex(h, pos - 2) == '\\' &&
+                                       characterAtIndex(h, pos - 3) == '\'')
+                            {
+                                pos -= 3;
+                                break;
+                            }
+                        }
+                    } else {
+                        // Forward search
+                        if (pos < maxIndex && !isNewLine(characterAtIndex(h, pos + 1)))
+                        {
+                            if (characterAtIndex(h, pos + 1) == '\\' &&
+                                (pos < maxIndex - 2) &&
+                                !isNewLine(characterAtIndex(h, pos + 2)) &&
+                                characterAtIndex(h, pos + 3) == '\'') 
+                            {
+                                pos += 3;
+                                break;
+                            } else if (pos < maxIndex - 1 && 
+                                       characterAtIndex(h, pos + 2) == '\'')
+                            {
+                                pos += 2;
+                                break;
+                            }
+                        }
+                    }
+                }
+                /* FALLTHROUGH */
+                
+            default:
+                /* Check for match outside of quotes, and inside of
+                 * quotes when the start is also inside of quotes. */
+                if ((!inquote || start_in_quotes == YES) && 
+                    (c == initc || c == findc))
+                {
+                    int bslcnt = 0;
+                    
+                    if (!cpo_bsl)
+                    {
+                        NSInteger col = pos;
+                        unichar c2;
+                        while (col > 0) {
+                            --col;
+                            c2 = characterAtIndex(h, col);
+                            if (isNewLine(c2) || c2 != '\\') {
+                                break;
+                            }
+                            ++bslcnt;
+                        }
+                    }
+                    /* Only accept a match when 'M' is in 'cpo' or when escaping
+                     * is what we expect. */
+                    if (cpo_bsl || (bslcnt & 1) == match_escaped)
+                    {
+                        if (c == initc)
+                            count++;
+                        else
+                        {
+                            if (count == 0)
+                                return (int)pos;
+                            --count;
+                        }
+                    }
+                }
+        }
+        
+    } // End of while
+    
+    return -1;
+}
+
+//- (NSRange) currentBlock:(NSUInteger)index count:(NSUInteger)count 
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, BOOL inclusive, char what, char other)
+{
+    NSInteger idx    = index;
+    
+    if ([string characterAtIndex:idx] == what)
+    {
+        /* cursor on '(' or '{', move cursor just after it */
+        ++idx;
+        if (idx >= [string length]) {
+            return NSMakeRange(NSNotFound, 0);
+        }
+	}
+  
+	if ([string characterAtIndex:idx] == other)
+	{
+        /* cursor on ')' or '}', move cursor just after it */
+		--idx;
+		if (idx < 0) {
+			return NSMakeRange(NSNotFound, 0);
+		}
+	}
+	
+    int start_pos = (int)idx;
+    int end_pos   = (int)idx;
+    
+    while (count-- > 0)
+    {
+        /*
+         * Search backwards for unclosed '(', '{', etc..
+         * Put this position in start_pos.
+         * Ignore quotes here.
+         */
+        if ((start_pos = findmatchlimit(string, start_pos, what, YES)) == -1)
+        {
+            return NSMakeRange(NSNotFound, 0);
+        }
+        
+        /*
+         * Search for matching ')', '}', etc.
+         * Put this position in curwin->w_cursor.
+         */
+        if ((end_pos = findmatchlimit(string, end_pos, other, NO)) == -1) {
+            return NSMakeRange(NSNotFound, 0);
+        }
+    }
+    
+    if (!inclusive)
+    {
+        ++start_pos;
+        if (what == '{')
+        {
+            NSInteger oldIdx = index;
+            index = end_pos;
+            NSInteger idx = xv_caret(string, index);
+            
+            if (idx == end_pos)
+            {
+                // The '}' is only preceded by indent, skip that indent.
+                //end_pos = [self firstOfLine:index]-1;
+                end_pos = xv_0(string ,index)-1;
+            }
+            index = oldIdx;
+        }
+    } else {
+        ++end_pos;
+    }
+    
+    return NSMakeRange(start_pos, end_pos - start_pos);
+}
+
+static NSInteger seek_backwards(NSString *string, NSInteger begin, NSCharacterSet *charSet)
+{
+    while (begin > 0)
+    {
+		unichar ch = [string characterAtIndex:begin - 1];
+        if (![charSet characterIsMember:ch]) { break; }
+        --begin;
+    }
+	
+	return begin;
+}
+
+static NSInteger seek_forwards(NSString *string, NSInteger end, NSCharacterSet *charSet)
+{
+	while (end < [string length])
+	{
+		unichar ch = [string characterAtIndex:end];
+		if (![charSet characterIsMember:ch]) { break; }
+		++end;
+	}
+	return end;
+}
+
+static NSCharacterSet *get_search_set(unichar initialChar, NSCharacterSet *wsSet, NSCharacterSet *wordSet)
+{
+	NSCharacterSet *searchSet = nil;
+	
+	if ([wsSet characterIsMember:initialChar])
+	{
+		searchSet = wsSet;
+	}
+	else if ([wordSet characterIsMember:initialChar])
+	{
+		searchSet = wordSet;
+	}
+	else
+	{
+		NSMutableCharacterSet *charSet = [[wordSet invertedSet] mutableCopy];
+		[charSet removeCharactersInString:@" \t"];
+		searchSet = charSet;
+	}
+	
+	return searchSet;
+}
+
+NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape);
+NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unichar quote, BOOL ignoreEscape)
+{
+	BOOL ignoreNextChar = NO;
+	
+    while (start < max)
+    {
+        unichar ch = [string characterAtIndex:start];
+		if (isNewLine(ch)) { break; }
+		
+		if (!ignoreNextChar || ignoreEscape)
+		{
+			if (ch == quote)     { return start; }
+			ignoreNextChar = (ch == '\\');
+		}
+		else
+		{
+			ignoreNextChar = NO;
+		}
+		
+		++start;
+    }
+    
+    return -1;
+}
+
+NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL ignoreEscape);
+NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL ignoreEscape)
+{
+	NSInteger pendingi = -1;
+	NSInteger pendingQuote = -1;
+	
+    while (start >= 0)
+    {
+		unichar ch = [string characterAtIndex:start];	
+        if (isNewLine(ch)) { break; }
+		
+		if (ch == '\\' && !ignoreEscape)
+		{
+			NSInteger temp = pendingi;
+			pendingi = pendingQuote;
+			pendingQuote = temp;
+		}
+		else
+		{
+			pendingQuote = -1;
+		}
+		
+		if (pendingi >= 0)
+		{
+			break;
+		}
+		
+		if (ch == quote) 
+		{ 
+			pendingi = start;
+		}
+		
+		--start;
+    }
+    
+    return pendingi;
+}
+
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what)
+{
+	NSInteger begin = find_prev_quote(string, index, what, NO);
+	if (begin == -1)
+	{
+		begin = find_next_quote(string, index, [string length], what, NO);
+	}
+	
+	if (begin == -1)
+	{
+		return NSMakeRange(NSNotFound, 0);
+	}
+	
+	NSInteger end = find_next_quote(string, begin + 1, [string length], what, NO);
+	if (end == -1)
+	{
+		return NSMakeRange(NSNotFound, 0);
+	}
+	
+	if (inclusive)
+	{
+		end = end + 1;
+		
+		NSInteger newBegin = begin;
+		NSInteger newEnd = end;
+		
+		if (index >= begin)
+		{
+			newEnd = seek_forwards(string, end, [NSCharacterSet whitespaceCharacterSet]);
+		}
+		
+		if (index < begin || newEnd == end)
+		{
+			newBegin = seek_backwards(string, begin, [NSCharacterSet whitespaceCharacterSet]);
+		}
+		
+		begin = newBegin;
+		end = newEnd;
+	}
+	else
+	{
+		begin = begin + 1;
+	}
+	
+	return NSMakeRange(begin, end - begin);
+}
+
+NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char command, unichar what, BOOL inclusive)
+{
+    int increment = command <= 'Z' ? -1 : 1; // Capital means backward.
+    
+    NSInteger maxIdx = [string length] - 1;
+    NSInteger idx    = index;
+    NSInteger result = idx;
+    
+    NSStringHelper  help;
+    NSStringHelper* h   = &help;
+    
+    if (increment == -1) 
+        initNSStringHelperBackward(h, string, maxIdx + 1);
+    else
+        initNSStringHelper(h, string, maxIdx + 1);
+    
+    idx += increment;
+    while (idx >= 0 && idx <= maxIdx) 
+    {
+        unichar ch = characterAtIndex(h, idx);
+        if (ch == what) 
+        {
+            if ((--repeatCount) == 0) {
+                result = idx; // Found
+                break;
+            }
+        } else if (isNewLine(ch))
+        {
+            break; // Only search in current line.
+        }
+        idx += increment;
+    }
+    
+    if (result == idx)
+    {
+        if (command == 't') {
+            --result;
+        } else if (command == 'T') {
+            ++result;
+        }
+        
+        if (inclusive && increment == 1) // Include the position we found.
+        {
+            ++result;
+        }
+    }
+    
+    return result;
+}
 @end

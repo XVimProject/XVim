@@ -27,7 +27,7 @@
 @implementation XVimWindowEvaluator
 
 - (void)addEditorWindow{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self.xvim.editor;
+    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
     IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
     IDEEditorArea *editorArea = [workspaceTabController editorArea];
     if ([editorArea editorMode] != 1){
@@ -38,7 +38,7 @@
 }
 
 - (void)removeEditorWindow{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self.xvim.editor;
+    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
     IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
     IDEEditorArea *editorArea = [workspaceTabController editorArea];
     if ([editorArea editorMode] != 1){
@@ -59,7 +59,7 @@
 }
 
 - (XVimEvaluator*)o:(id)arg{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self.xvim.editor;
+    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
     IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
     IDEEditorArea *editorArea = [workspaceTabController editorArea];
     if ([editorArea editorMode] != 1){
@@ -78,7 +78,7 @@
     [self addEditorWindow];
     
     // Change to horizontal
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self.xvim.editor;
+    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
     IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
     [workspaceTabController changeToAssistantLayout_BH:self];
     return nil;
@@ -93,7 +93,7 @@
     [self addEditorWindow];
     
     // Change to vertical
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self.xvim.editor;
+    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
     IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
     [workspaceTabController changeToAssistantLayout_BV:self];
     return nil;

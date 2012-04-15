@@ -8,12 +8,16 @@
 
 
 #import "XVimOperatorEvaluator.h"
+#import "XVimOperatorAction.h"
 
 // Handles input after 'd' or 'c'
-@interface XVimDeleteEvaluator : XVimOperatorEvaluator{
-@private
-    BOOL _insertModeAtCompletion;
-    NSUInteger _repeat;
-}
-- (id)initWithRepeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion;
+@interface XVimDeleteEvaluator : XVimOperatorEvaluator
+- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+				  withParent:(XVimEvaluator*)parent
+					  repeat:(NSUInteger)repeat 
+	  insertModeAtCompletion:(BOOL)insertModeAtCompletion;
+@end
+
+@interface XVimDeleteAction : XVimOperatorAction
+- (id)initWithInsertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end

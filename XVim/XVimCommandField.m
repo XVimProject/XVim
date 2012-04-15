@@ -7,6 +7,7 @@
 //
 
 #import "XVimCommandField.h"
+#import "NSString+VimHelper.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 
@@ -37,18 +38,24 @@
     [super dealloc];
 }
 
+- (void)onLoseFocus{
+    [self setString:@""];
+    [self setEditable:NO];
+    [self setHidden:YES];
+}
+
 - (BOOL)resignFirstResponder{
     if( _askingMode ){
         return NO;
     }
+    [self onLoseFocus];
     return YES;
 }
 
 - (void)doCommandBySelector:(SEL)aSelector{
     if( @selector(complete:) == aSelector|| @selector(cancelOperation:) == aSelector){
         if( [self.delegate commandCanceled] ){
-            [self setString:@""];
-            [self setEditable:NO];
+            [self onLoseFocus];
         }
         return;
     }
@@ -61,8 +68,7 @@
         return;
     }else if( isNewLine([insertString characterAtIndex:0])){
         if( [self.delegate commandFixed:[self string]] ){
-            [self setString:@""];
-            [self setEditable:NO];
+            [self onLoseFocus];
         }
         return;
     }else if( [insertString characterAtIndex:0] == '\t') {

@@ -28,20 +28,25 @@
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
+		A2D48B1F15347B5C0088AB71 /* NSString+VimHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */; };
 		A2F4A33E14F00B25006DA5A5 /* XVimNormalEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */; };
 		A2F4A34314F00BD3006DA5A5 /* XVimVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34214F00BD3006DA5A5 /* XVimVisualEvaluator.m */; };
 		A2F4A34614F00D69006DA5A5 /* XVimSearchLineEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34514F00D69006DA5A5 /* XVimSearchLineEvaluator.m */; };
 		A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */; };
-		A5118D9F14FF64F000C6AFB2 /* Common.m in Sources */ = {isa = PBXBuildFile; fileRef = A5118D9E14FF64F000C6AFB2 /* Common.m */; };
 		C366C23B15287EE30008C58E /* XVimKeymap.m in Sources */ = {isa = PBXBuildFile; fileRef = C366C23A15287EE30008C58E /* XVimKeymap.m */; };
+		C36C104B153120E200CE1D62 /* XVimOperatorAction.m in Sources */ = {isa = PBXBuildFile; fileRef = C36C104A153120E200CE1D62 /* XVimOperatorAction.m */; };
+		C36C104E153131C600CE1D62 /* XVimTextObjectEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */; };
 		C38A5B301526C6B100E1448D /* XVimKeyStroke.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B2F1526C6B100E1448D /* XVimKeyStroke.m */; };
 		C38A5B4115272B0500E1448D /* XVimSourceTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4015272B0500E1448D /* XVimSourceTextView.m */; };
 		C38A5B4715272DCD00E1448D /* XVimSourceCodeEditor.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4615272DCD00E1448D /* XVimSourceCodeEditor.m */; };
 		C38A5B4D1527CEA500E1448D /* XVimNumericEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4C1527CEA400E1448D /* XVimNumericEvaluator.m */; };
 		C38A5B501527CEE600E1448D /* XVimMotionArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4F1527CEE600E1448D /* XVimMotionArgumentEvaluator.m */; };
+		C39DC81515326F5500185390 /* XVimCharacterSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = C39DC81415326F5500185390 /* XVimCharacterSearch.m */; };
 		C3AA7226152F186A00C61D97 /* XVimTildeEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */; };
 		C3AA722A152F1B1800C61D97 /* XVimLowercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */; };
 		C3AA722D152F1B2800C61D97 /* XVimUppercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */; };
+		C3EC83091534355600F84712 /* XVimSelectAction.m in Sources */ = {isa = PBXBuildFile; fileRef = C3EC83081534355600F84712 /* XVimSelectAction.m */; };
+		C3FA1A1D1532648700059BF6 /* XVimWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FA1A1C1532648700059BF6 /* XVimWindow.m */; };
 		F100DC2E150BB6BC002C703C /* XVimRegisterEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */; };
 		F15805C71530B4000031175A /* XVimWindowEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F15805C61530B4000031175A /* XVimWindowEvaluator.m */; };
 		F17D013B150861DC00A8111B /* XVimRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = F17D013A150861DC00A8111B /* XVimRegister.m */; };
@@ -105,6 +110,8 @@
 		A2C4E79714E7F35300751199 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim/Hooker.m; sourceTree = "<group>"; };
 		A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEvaluator.h; path = XVim/XVimEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEvaluator.m; path = XVim/XVimEvaluator.m; sourceTree = SOURCE_ROOT; };
+		A2D48B1D15347B5C0088AB71 /* NSString+VimHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+VimHelper.h"; path = "XVim/NSString+VimHelper.h"; sourceTree = SOURCE_ROOT; };
+		A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+VimHelper.m"; path = "XVim/NSString+VimHelper.m"; sourceTree = SOURCE_ROOT; };
 		A2F4A33C14F00B25006DA5A5 /* XVimNormalEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimNormalEvaluator.h; path = XVim/XVimNormalEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimNormalEvaluator.m; path = XVim/XVimNormalEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2F4A34114F00BD3006DA5A5 /* XVimVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimVisualEvaluator.h; path = XVim/XVimVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -113,11 +120,16 @@
 		A2F4A34514F00D69006DA5A5 /* XVimSearchLineEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimSearchLineEvaluator.m; path = XVim/XVimSearchLineEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2FF17CF1502B291003FE648 /* XVimMotionEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMotionEvaluator.h; path = XVim/XVimMotionEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotionEvaluator.m; path = XVim/XVimMotionEvaluator.m; sourceTree = SOURCE_ROOT; };
-		A5118D9D14FF64F000C6AFB2 /* Common.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Common.h; path = XVim/Common.h; sourceTree = "<group>"; };
-		A5118D9E14FF64F000C6AFB2 /* Common.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Common.m; path = XVim/Common.m; sourceTree = "<group>"; };
+		C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimKeymapProvider.h; path = XVim/XVimKeymapProvider.h; sourceTree = SOURCE_ROOT; };
+		C36266CB153455C9000C79D8 /* XVimMotionOption.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimMotionOption.h; path = XVim/XVimMotionOption.h; sourceTree = SOURCE_ROOT; };
 		C366C23715287E080008C58E /* XVimMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimMode.h; path = XVim/XVimMode.h; sourceTree = SOURCE_ROOT; };
 		C366C23915287EE30008C58E /* XVimKeymap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimKeymap.h; path = XVim/XVimKeymap.h; sourceTree = SOURCE_ROOT; };
 		C366C23A15287EE30008C58E /* XVimKeymap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimKeymap.m; path = XVim/XVimKeymap.m; sourceTree = SOURCE_ROOT; };
+		C36C1045153104EC00CE1D62 /* XVimMotionType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimMotionType.h; path = XVim/XVimMotionType.h; sourceTree = SOURCE_ROOT; };
+		C36C1047153107CC00CE1D62 /* XVimOperatorAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorAction.h; path = XVim/XVimOperatorAction.h; sourceTree = SOURCE_ROOT; };
+		C36C104A153120E200CE1D62 /* XVimOperatorAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorAction.m; path = XVim/XVimOperatorAction.m; sourceTree = SOURCE_ROOT; };
+		C36C104C153131C500CE1D62 /* XVimTextObjectEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTextObjectEvaluator.h; path = XVim/XVimTextObjectEvaluator.h; sourceTree = SOURCE_ROOT; };
+		C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTextObjectEvaluator.m; path = XVim/XVimTextObjectEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C38A5B2E1526C6B100E1448D /* XVimKeyStroke.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimKeyStroke.h; path = XVim/XVimKeyStroke.h; sourceTree = SOURCE_ROOT; };
 		C38A5B2F1526C6B100E1448D /* XVimKeyStroke.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimKeyStroke.m; path = XVim/XVimKeyStroke.m; sourceTree = SOURCE_ROOT; };
 		C38A5B3F15272B0500E1448D /* XVimSourceTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimSourceTextView.h; path = XVim/XVimSourceTextView.h; sourceTree = SOURCE_ROOT; };
@@ -133,6 +145,8 @@
 		C38A5B561527D25C00E1448D /* DVTCompletionController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTCompletionController.h; path = XVim/DVTCompletionController.h; sourceTree = SOURCE_ROOT; };
 		C38A5B581527D53200E1448D /* IDESourceCodeEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDESourceCodeEditor.h; path = XVim/IDESourceCodeEditor.h; sourceTree = SOURCE_ROOT; };
 		C38A5B5B1527D58500E1448D /* DVTSourceTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTSourceTextView.h; path = XVim/DVTSourceTextView.h; sourceTree = SOURCE_ROOT; };
+		C39DC81315326F5500185390 /* XVimCharacterSearch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCharacterSearch.h; path = XVim/XVimCharacterSearch.h; sourceTree = SOURCE_ROOT; };
+		C39DC81415326F5500185390 /* XVimCharacterSearch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCharacterSearch.m; path = XVim/XVimCharacterSearch.m; sourceTree = SOURCE_ROOT; };
 		C3AA7224152F186A00C61D97 /* XVimTildeEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTildeEvaluator.h; path = XVim/XVimTildeEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTildeEvaluator.m; path = XVim/XVimTildeEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C3AA7228152F1B1700C61D97 /* XVimLowercaseEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimLowercaseEvaluator.h; path = XVim/XVimLowercaseEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -140,6 +154,10 @@
 		C3AA722B152F1B2700C61D97 /* XVimUppercaseEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimUppercaseEvaluator.h; path = XVim/XVimUppercaseEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimUppercaseEvaluator.m; path = XVim/XVimUppercaseEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimPlaybackHandler.h; path = XVim/XVimPlaybackHandler.h; sourceTree = SOURCE_ROOT; };
+		C3EC83071534355600F84712 /* XVimSelectAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimSelectAction.h; path = XVim/XVimSelectAction.h; sourceTree = SOURCE_ROOT; };
+		C3EC83081534355600F84712 /* XVimSelectAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimSelectAction.m; path = XVim/XVimSelectAction.m; sourceTree = SOURCE_ROOT; };
+		C3FA1A1B1532648700059BF6 /* XVimWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimWindow.h; path = XVim/XVimWindow.h; sourceTree = SOURCE_ROOT; };
+		C3FA1A1C1532648700059BF6 /* XVimWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimWindow.m; path = XVim/XVimWindow.m; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegisterEvaluator.m; path = XVim/XVimRegisterEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F11C83E71539F1BF00719D68 /* IDEEditorGeniusMode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEEditorGeniusMode.h; path = XVim/IDEEditorGeniusMode.h; sourceTree = SOURCE_ROOT; };
@@ -191,6 +209,12 @@
 				C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */,
 				C3AA722B152F1B2700C61D97 /* XVimUppercaseEvaluator.h */,
 				C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */,
+				C36C104A153120E200CE1D62 /* XVimOperatorAction.m */,
+				C36C1047153107CC00CE1D62 /* XVimOperatorAction.h */,
+				C36C104C153131C500CE1D62 /* XVimTextObjectEvaluator.h */,
+				C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */,
+				C3EC83071534355600F84712 /* XVimSelectAction.h */,
+				C3EC83081534355600F84712 /* XVimSelectAction.m */,
 			);
 			name = Operators;
 			sourceTree = "<group>";
@@ -228,31 +252,40 @@
 		A2B4BAC114D59F6600D817B0 /* XVim */ = {
 			isa = PBXGroup;
 			children = (
+				C38A5B481527C9EE00E1448D /* Xcode */,
+				A2F4A34014F00B35006DA5A5 /* Evaluators */,
+				A2D48B1D15347B5C0088AB71 /* NSString+VimHelper.h */,
+				A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */,
 				A2AF5E16152EA92C00E13833 /* NSTextView+VimMotion.h */,
 				A2AF5E17152EA92C00E13833 /* NSTextView+VimMotion.m */,
-				C38A5B481527C9EE00E1448D /* Xcode */,
 				A2A6BA2C152A544B00F0EB5F /* XVimSearch.h */,
 				A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */,
 				A2A736341527484B0051E8E4 /* XVimExCommand.h */,
 				A2A736351527484B0051E8E4 /* XVimExCommand.m */,
-				A2F4A34014F00B35006DA5A5 /* Evaluators */,
-				A24782B814D6F56E003B6433 /* XVim.m */,
 				A24782B714D6F56E003B6433 /* XVim.h */,
+				A24782B814D6F56E003B6433 /* XVim.m */,
 				A24782B914D6F56E003B6433 /* XVimCommandField.h */,
 				A24782BA14D6F56E003B6433 /* XVimCommandField.m */,
 				A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */,
 				A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */,
-				A2B4BAC214D59F6600D817B0 /* Supporting Files */,
 				F17D0139150861DC00A8111B /* XVimRegister.h */,
 				F17D013A150861DC00A8111B /* XVimRegister.m */,
 				C38A5B2E1526C6B100E1448D /* XVimKeyStroke.h */,
 				C38A5B2F1526C6B100E1448D /* XVimKeyStroke.m */,
-				C366C23715287E080008C58E /* XVimMode.h */,
 				C366C23915287EE30008C58E /* XVimKeymap.h */,
 				C366C23A15287EE30008C58E /* XVimKeymap.m */,
 				A2BA3EA0152E372900C18FB4 /* XVimOptions.h */,
-				C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */,
 				A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */,
+				C3FA1A1B1532648700059BF6 /* XVimWindow.h */,
+				C3FA1A1C1532648700059BF6 /* XVimWindow.m */,
+				C36C1045153104EC00CE1D62 /* XVimMotionType.h */,
+				C39DC81315326F5500185390 /* XVimCharacterSearch.h */,
+				C39DC81415326F5500185390 /* XVimCharacterSearch.m */,
+				C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */,
+				C36266CB153455C9000C79D8 /* XVimMotionOption.h */,
+				C3AA7236153032F500C61D97 /* XVimPlaybackHandler.h */,
+				C366C23715287E080008C58E /* XVimMode.h */,
+				A2B4BAC214D59F6600D817B0 /* Supporting Files */,
 			);
 			name = XVim;
 			path = XVim_lite2;
@@ -272,8 +305,6 @@
 			isa = PBXGroup;
 			children = (
 				A2C4E79614E7F35300751199 /* Hooker.h */,
-				A5118D9D14FF64F000C6AFB2 /* Common.h */,
-				A5118D9E14FF64F000C6AFB2 /* Common.m */,
 				A2C4E79714E7F35300751199 /* Hooker.m */,
 			);
 			name = Support;
@@ -372,7 +403,7 @@
 		A2B4BAAF14D59F6600D817B0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0430;
 			};
 			buildConfigurationList = A2B4BAB214D59F6600D817B0 /* Build configuration list for PBXProject "XVim" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -421,7 +452,6 @@
 				A2277EDB14F80D5000A6B70C /* XVimYankEvaluator.m in Sources */,
 				A28D42F514FE87AF004BC121 /* XVimGEvaluator.m in Sources */,
 				A28D42F814FE8E2A004BC121 /* XVimInsertEvaluator.m in Sources */,
-				A5118D9F14FF64F000C6AFB2 /* Common.m in Sources */,
 				A298D44515026E63004B94A1 /* XVimLocalMarkEvaluator.m in Sources */,
 				A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */,
 				F1F2426D15041A9B00F706A4 /* XVimZEvaluator.m in Sources */,
@@ -443,6 +473,12 @@
 				C3AA722A152F1B1800C61D97 /* XVimLowercaseEvaluator.m in Sources */,
 				C3AA722D152F1B2800C61D97 /* XVimUppercaseEvaluator.m in Sources */,
 				F15805C71530B4000031175A /* XVimWindowEvaluator.m in Sources */,
+				C36C104B153120E200CE1D62 /* XVimOperatorAction.m in Sources */,
+				C36C104E153131C600CE1D62 /* XVimTextObjectEvaluator.m in Sources */,
+				C3FA1A1D1532648700059BF6 /* XVimWindow.m in Sources */,
+				C39DC81515326F5500185390 /* XVimCharacterSearch.m in Sources */,
+				C3EC83091534355600F84712 /* XVimSelectAction.m in Sources */,
+				A2D48B1F15347B5C0088AB71 /* NSString+VimHelper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

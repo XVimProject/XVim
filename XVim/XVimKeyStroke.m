@@ -142,7 +142,12 @@ static char* keynames[] = {
 static NSMutableDictionary *s_keyCodeToSelectorString = NULL;
 static NSMutableDictionary *s_stringToKeyCode = NULL;
 
+@interface XVimKeyStroke()
+@property (strong, nonatomic) NSEvent *event;
+@end
+
 @implementation XVimKeyStroke
+@synthesize event = _event;
 @synthesize keyCode = _keyCode;
 @synthesize modifierFlags = _modifierFlags;
 
@@ -235,6 +240,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 
 - (id)copyWithZone:(NSZone *)zone {
 	XVimKeyStroke* copy = [[XVimKeyStroke allocWithZone:zone] init];
+	copy.event = self.event;
 	copy.keyCode = self.keyCode;
 	copy.modifierFlags = self.modifierFlags;
 	return copy;
@@ -250,9 +256,9 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 	if (modifierFlags & (NSControlKeyMask | NSCommandKeyMask))
 	{
 		// Eg. "C-a"
-		XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-		keyStroke.keyCode = unmodifiedKeyCode;
-		keyStroke.modifierFlags = modifierFlags;
+		XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithEvent:event
+																keyCode:unmodifiedKeyCode
+														  modifierFlags:modifierFlags];
 		
 		[options addObject:keyStroke];
 		primaryKeyStroke = keyStroke;
@@ -261,34 +267,34 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 	{
 		// Eg. "S-a"
 		{
-			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-			keyStroke.keyCode = unmodifiedKeyCode;
-			keyStroke.modifierFlags = modifierFlags;
+			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithEvent:event
+																	keyCode:unmodifiedKeyCode
+															  modifierFlags:modifierFlags];
 			[options addObject:keyStroke];
 		}
 		
 		// Eg. "S-A"
 		{
-			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-			keyStroke.keyCode = modifiedKeyCode;
-			keyStroke.modifierFlags = modifierFlags;
+			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithEvent:event
+																	keyCode:modifiedKeyCode
+															  modifierFlags:modifierFlags];
 			[options addObject:keyStroke];
 		}
 		
 		// Eg. "A"
 		{
-			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-			keyStroke.keyCode = modifiedKeyCode;
-			keyStroke.modifierFlags = 0;
+			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithEvent:event
+																	keyCode:modifiedKeyCode
+															  modifierFlags:0];
 			[options addObject:keyStroke];
 			primaryKeyStroke = keyStroke;
 		}
 	}
 	else
 	{
-		XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] init];
-		keyStroke.keyCode = modifiedKeyCode;
-		keyStroke.modifierFlags = 0;
+		XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithEvent:event
+																keyCode:modifiedKeyCode
+														  modifierFlags:0];
 		
 		[options addObject:keyStroke];
 		primaryKeyStroke = keyStroke;
@@ -297,23 +303,53 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 	return primaryKeyStroke;
 }
 
+- (id)initWithKeyCode:(unichar)keyCode
+		modifierFlags:(int)modifierFlags
+{
+	if (self = [super init])
+	{
+		self->_keyCode = keyCode;
+		self->_modifierFlags = modifierFlags;
+	}
+	return self;
+}
+
+// Constructs a key stroke from an event
+- (id)initWithEvent:(NSEvent*)event 
+				keyCode:(unichar)keyCode 
+		  modifierFlags:(int)modifierFlags
+{
+	if (self = [self initWithKeyCode:keyCode modifierFlags:modifierFlags])
+	{
+		self->_event = event;
+	}
+	return self;
+}
+
 - (NSEvent*)toEvent
 {
-	unichar c = self.keyCode;
-	NSString *characters = [NSString stringWithCharacters:&c length:1];
-	int mflags = self.modifierFlags;
+	NSEvent *event = _event;
 	
-	NSEvent*  e = [NSEvent keyEventWithType:NSKeyDown 
-								   location:NSMakePoint(0, 0)
-							  modifierFlags:mflags
-								  timestamp:0
-							   windowNumber:0
-									context:nil
-								 characters:characters
-				charactersIgnoringModifiers:characters
-								  isARepeat:NO 
-									keyCode:0];
-	return e;
+	// This key stroke is from a key map, synthesise event
+	if (!event)
+	{
+		unichar c = self.keyCode;
+		NSString *characters = [NSString stringWithCharacters:&c length:1];
+		int mflags = self.modifierFlags;
+		
+		event = [NSEvent keyEventWithType:NSKeyDown 
+								 location:NSMakePoint(0, 0)
+							modifierFlags:mflags
+								timestamp:0
+							 windowNumber:0
+								  context:nil
+							   characters:characters
+			  charactersIgnoringModifiers:characters
+								isARepeat:NO 
+								  keyCode:0];
+	}
+	
+	return event;
 }
 
 static NSString* toSelectorString(unichar charcode, int modifierFlags)
@@ -439,9 +475,8 @@ static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
 	XVimKeyStroke *keyStroke = NULL;
 	if (number)
 	{
-		keyStroke = [[XVimKeyStroke alloc] init];
-		keyStroke.keyCode = [number intValue];
-		keyStroke.modifierFlags = modifierFlags;
+		keyStroke = [[XVimKeyStroke alloc] initWithKeyCode:[number intValue]
+											 modifierFlags:modifierFlags];
 	}
 	
 	*index = endi;

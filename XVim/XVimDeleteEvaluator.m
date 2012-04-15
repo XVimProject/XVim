@@ -8,101 +8,107 @@
 
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
-#import "XVim.h"
+#import "XVimWindow.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
 #import "DVTSourceTextView.h"
 
+@interface XVimDeleteEvaluator() {
+	BOOL _insertModeAtCompletion;
+}
+@end
+
 @implementation XVimDeleteEvaluator
 
-- (id)init
+- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+				  withParent:(XVimEvaluator*)parent
+					  repeat:(NSUInteger)repeat 
+	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
-    return [self initWithRepeat:1 insertModeAtCompletion:FALSE];
+	if (self = [super initWithOperatorAction:operatorAction 
+								  withParent:parent
+									  repeat:repeat])
+	{
+		self->_insertModeAtCompletion = insertModeAtCompletion;
+	}
+	return self;
 }
 
-- (id)initWithRepeat:(NSUInteger)repeat insertModeAtCompletion:(BOOL)insertModeAtCompletion {
-    self = [super init];
-    if (self) {
-        _insertModeAtCompletion = insertModeAtCompletion;
-        _repeat = repeat;
-    }
-    return self;
-}
-
-- (XVimEvaluator*)c:(id)arg{
+- (XVimEvaluator*)c:(XVimWindow*)window
+{
     if( !_insertModeAtCompletion ){
         return nil;  // 'dc' does nothing
     }
     // 'cc' should obey the repeat specifier
     // '3cc' should delete/cut the current line and the 2 lines below it
     
-    if (_repeat < 1) 
+    if (self.repeat < 1) 
         return nil;
     
-    DVTSourceTextView* view = [self textView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+    DVTSourceTextView* view = [window sourceView];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
-- (XVimEvaluator*)d:(id)arg{
+- (XVimEvaluator*)d:(XVimWindow*)window{
     if( _insertModeAtCompletion ){
         return nil;  // 'cd' does nothing
     }
     // 'dd' should obey the repeat specifier
     // '3dd' should delete/cut the current line and the 2 lines below it
     
-    if (_repeat < 1) 
+    if (self.repeat < 1) 
         return nil;
         
-    DVTSourceTextView* view = [self textView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:_repeat-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE];
+    DVTSourceTextView* view = [window sourceView];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
 
 
-- (XVimEvaluator*)w:(id)arg{
+- (XVimEvaluator*)w:(XVimWindow*)window{
     if( _insertModeAtCompletion ){ 
         // cw is special case of word motion
         XVimWordInfo info;
-        NSUInteger from = [[self textView] selectedRange].location;
-        NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+        NSUInteger from = [[window sourceView] selectedRange].location;
+        NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
         if( info.isFirstWordInALine ){
-            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
         }else{
             if( info.lastEndOfWord != NSNotFound){
-                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE inWindow:window];   
             }else{
-                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window]; 
             }
         }
     }else{
-        return [super w:arg];
+        return [super w:window];
     }
 }
 
-- (XVimEvaluator*)W:(id)arg{
+- (XVimEvaluator*)W:(XVimWindow*)window{
     if( _insertModeAtCompletion ){ 
         // cw is special case of word motion
         XVimWordInfo info;
-        NSUInteger from = [[self textView] selectedRange].location;
-        NSUInteger to = [[self textView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+        NSUInteger from = [[window sourceView] selectedRange].location;
+        NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
         if( info.isFirstWordInALine ){
-            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE];
+            return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
         }else{
             if( info.lastEndOfWord != NSNotFound){
-                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE];   
+                return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE inWindow:window];   
             }else{
-                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE]; 
+                return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window]; 
             }
         }
     }else{
-        return [super W:arg];
+        return [super W:window];
     }
 }
 
-- (XVimEvaluator*)j:(id)arg{
-    DVTSourceTextView *view = [self textView];
+- (XVimEvaluator*)j:(XVimWindow*)window{
+    DVTSourceTextView *view = [window sourceView];
     NSUInteger from = [view selectedRange].location;
     NSUInteger headOfLine = [view headOfLine:from];
     if (headOfLine != NSNotFound){
@@ -131,11 +137,11 @@
         motion = LINEWISE;   
     }
 
-    return [self _motionFixedFrom:from To:to Type:motion];
+    return [self _motionFixedFrom:from To:to Type:motion inWindow:window];
 }
 
-- (XVimEvaluator*)k:(id)arg{
-    DVTSourceTextView *view = [self textView];
+- (XVimEvaluator*)k:(XVimWindow*)window{
+    DVTSourceTextView *view = [window sourceView];
     NSUInteger to = [view selectedRange].location;
     NSUInteger endOfLine = [view endOfLine:to];
     if (endOfLine != NSNotFound){
@@ -163,11 +169,31 @@
         motion = LINEWISE;   
     }
 
-    return [self _motionFixedFrom:from To:to Type:motion];
+    return [self _motionFixedFrom:from To:to Type:motion inWindow:window];
 }
 
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    DVTSourceTextView* view = [self textView];
+
+@end
+
+@interface XVimDeleteAction() {
+	BOOL _insertModeAtCompletion;
+}
+@end
+
+@implementation XVimDeleteAction
+
+- (id)initWithInsertModeAtCompletion:(BOOL)insertModeAtCompletion
+{
+	if (self = [super init])
+	{
+		self->_insertModeAtCompletion = insertModeAtCompletion;
+	}
+	return self;
+}
+
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
+{
+    DVTSourceTextView* view = [window sourceView];
     NSString* string = [view string];
     
     if( [string length] != 0 && [string length] == to && [string length] == from){
@@ -177,12 +203,12 @@
         // this is vi behavior.
         from--;
         [view setSelectedRange:NSMakeRange(from, 1)];
-        [view cut:self];
+        [view del:self];
         return nil;
     }
     
-    [self selectOperationTargetFrom:from To:to Type:type];
-    [view cut:self];
+    [view selectOperationTargetFrom:from To:to Type:type];
+    [view del:self];
     
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for

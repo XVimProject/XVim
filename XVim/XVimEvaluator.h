@@ -36,12 +36,15 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 */
 
 #import "XVimRegister.h"
-#import "XVim.h"
+#import "XVimMode.h"
 
 @class XVimMotionEvaluator;
 @class XVimKeyStroke;
 @class XVimKeymap;
+@class XVimWindow;
 @class DVTSourceTextView;
+@class XVimRegister;
+@protocol XVimKeymapProvider;
 
 typedef enum {
   MARKOPERATOR_SET,
@@ -51,14 +54,29 @@ typedef enum {
 
 
 @interface XVimEvaluator : NSObject
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim;
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps;
-- (XVimEvaluator*)defaultNextEvaluator;
-// Made into a property so it can be set 
-@property (weak) XVim *xvim;
-@property (readonly) DVTSourceTextView *textView;
-@property (readonly) NSUInteger insertionPoint;
+
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
-- (XVIM_MODE)becameHandler:(XVim*)xvim;
+
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
+
+- (void)becameHandlerInWindow:(XVimWindow*)window;
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
+
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window;
+
+- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
+
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
+
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window;
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
+
+- (NSString*)modeString;
+
 @end

@@ -11,7 +11,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class XVim;
+@class XVimWindow;
 
 typedef enum {
     XVimSearchCaseDefault,
@@ -24,14 +24,17 @@ typedef enum {
 @property XVimSearchCase lastSearchCase;  // If the last search had "\c" or "\C"
 @property (strong) NSString* lastSearchString;
 @property (strong) NSString* lastReplacementString;
-@property NSUInteger nextSearchBaseLocation;
-@property NSUInteger endOfReplacement;
 
-- (id)initWithXVim:(XVim*)xvim;
-- (NSRange)executeSearch:(NSString*)searchCmd;
-- (NSRange)searchNext;
-- (NSRange)searchPrev;
-- (NSRange)searchCurrentWord:(BOOL)forward matchWholeWord:(BOOL)wholeWord;
-- (void) substitute:(NSString*)string from:(NSUInteger)from to:(NSUInteger)to;
+- (NSRange)executeSearch:(NSString*)searchCmd from:(NSUInteger)from inWindow:(XVimWindow*)window;
+- (NSRange)searchNextFrom:(NSUInteger)from inWindow:(XVimWindow*)window;
+- (NSRange)searchPrevFrom:(NSUInteger)from inWindow:(XVimWindow*)window;
+- (NSRange)searchCurrentWordFrom:(NSUInteger)from forward:(BOOL)forward matchWholeWord:(BOOL)wholeWord inWindow:(XVimWindow*)window;
+
+// Tries to select the passed range. 
+// If range.location == NSNotFound, an error is added to the command line
+// Returns whether range.location is valid
+- (BOOL)selectSearchResult:(NSRange)r inWindow:(XVimWindow*)window;
+
+- (void)substitute:(NSString*)string from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window;
 
 @end

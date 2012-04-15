@@ -9,8 +9,26 @@
 #import "XVimKeymap.h"
 #import "XVimKeyStroke.h"
 
+@interface XVimKeymapNode : NSObject {
+@public
+	NSMutableDictionary *_dict;
+	NSArray *_target;
+}
+@end
+
+@implementation XVimKeymapNode
+- (id)init
+{
+	if (self = [super init])
+	{
+		_dict = [[NSMutableDictionary alloc] init];
+	}
+	return self;
+}
+@end
+
 @interface XVimKeymap() {
-	__strong NSMutableDictionary *_dict;
+	XVimKeymapNode* _node;
 }
 @end
 
@@ -19,27 +37,54 @@
 {
 	self = [super init];
 	if (self) {
-		_dict = [[NSMutableDictionary alloc] init];
+		_node = [[XVimKeymapNode alloc] init];
 	}
 	return self;
 }
 
-- (void)mapKeyStroke:(XVimKeyStroke*)keyStroke to:(NSArray*)targetKeyStrokes
+- (void)mapKeyStroke:(NSArray*)keyStrokes to:(NSArray*)targetKeyStrokes
 {
-	[_dict setObject:targetKeyStrokes forKey:keyStroke];
+	XVimKeymapNode *node = _node;
+	for (XVimKeyStroke *keyStroke in keyStrokes)
+	{
+		XVimKeymapNode *nextNode = [node->_dict objectForKey:keyStroke];
+		if (!nextNode)
+		{
+			nextNode = [[XVimKeymapNode alloc] init];
+			[node->_dict setObject:nextNode forKey:keyStroke];
+		}
+		node = nextNode;
+	}
+	node->_target = targetKeyStrokes;
 }
 
-- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options withPrimary:(XVimKeyStroke*)primaryKeyStroke
+- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options 
+						   withPrimary:(XVimKeyStroke*)primaryKeyStroke
+						   withContext:(XVimKeymapNode**)context
 {
-	NSArray* ret = NULL;
+	NSArray *ret = nil;
+	XVimKeymapNode *node = *context;
+	if (!node) { node = _node; }
+	
+	XVimKeymapNode *foundNode = nil;
 	
 	for (XVimKeyStroke* option in options)
 	{
-		ret = [_dict objectForKey:option];
-		if (ret) break;
+		foundNode = [node->_dict objectForKey:option];
+		if (foundNode) { break; }
 	}
 	
-	ret = ret ? ret : [NSArray arrayWithObject:primaryKeyStroke];
+	if (foundNode) {
+		// Leaf node?
+		if ([foundNode->_dict count] == 0) {
+			ret = foundNode->_target;
+			foundNode = NULL;
+		}
+	} else {
+		ret = [NSArray arrayWithObject:primaryKeyStroke];
+	}
+	
+	*context = foundNode;
 	
 	return ret;
 }

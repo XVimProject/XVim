@@ -11,34 +11,17 @@
 #import "NSTextView+VimMotion.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
-#import "XVim.h"
+#import "XVimWindow.h"
+#import "XVimKeymapProvider.h"
+#import "XVimNormalEvaluator.h"
+#import "XVimVisualEvaluator.h"
 
 @implementation XVimEvaluator
 
-@synthesize xvim = _xvim;
-
-- (NSUInteger)insertionPoint{
-    NSRange range = [[self textView] selectedRange];
-    return range.location + range.length;
+- (void)becameHandlerInWindow:(XVimWindow*)window {
 }
 
-- (XVIM_MODE)becameHandler:(XVim*)xvim{
-    self.xvim = xvim;
-    return MODE_NORMAL;
-}
-
-- (id)init
-{
-    self = [super init];
-    if (self) {
-        // Initialization code here.
-    }
-    
-    return self;
-}
-
-
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     // This is default implementation of evaluator.
     // Only keyDown events are supposed to be passed here.	
     // Invokes each key event handler
@@ -48,25 +31,21 @@
 	if (handler)
 	{
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
-        return [self performSelector:handler withObject:nil];
+        return [self performSelector:handler withObject:window];
 	}
     else{
         TRACE_LOG(@"SELECTOR %@ not found", NSStringFromSelector(handler));
-        return [self defaultNextEvaluator];
+        return [self defaultNextEvaluatorInWindow:window];
     }
 }
 
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
-	return keymaps[MODE_GLOBAL_MAP];
+	return [keymapProvider keymapForMode:MODE_GLOBAL_MAP];
 }
 
-- (XVimEvaluator*)defaultNextEvaluator{
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
     return nil;
-}
-
-- (DVTSourceTextView*)textView{
-    return [self.xvim sourceView];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
@@ -76,7 +55,62 @@
     return REGISTER_APPEND;
 }
 
-- (XVimEvaluator*)D_d:(id)arg{
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window {
+    NSRange range = [[window sourceView] selectedRange];
+    return range.location + range.length;
+}
+
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
+{
+	NSRange range = [window selectedRange];
+	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER 
+																									withRange:range];
+}
+
+- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window
+{
+	if (range.length == 0 && ![[window sourceView] isValidCursorPosition:range.location])
+	{
+		--range.location;
+	}
+	return range;
+}
+
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+}
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return YES;
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
+{
+	DVTSourceTextView *sourceView = [window sourceView];
+	
+	color = [color colorWithAlphaComponent:0.5];
+	NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+	NSUInteger glyphIndex = [[sourceView layoutManager] glyphIndexForPoint:aPoint inTextContainer:[sourceView textContainer]];
+	NSRect glyphRect = [[sourceView layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[sourceView textContainer]];
+	
+	[color set];
+	rect.size.width =rect.size.height/2;
+	if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
+		rect.size.width=glyphRect.size.width;
+	
+	rect.origin.y += (1 - heightRatio) * rect.size.height;
+	rect.size.height *= heightRatio;
+	
+	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+}
+
+- (NSString*)modeString
+{
+	return @"NORMAL";
+}
+
+- (XVimEvaluator*)D_d:(XVimWindow*)window{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.
     

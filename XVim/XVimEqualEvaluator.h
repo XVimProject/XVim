@@ -7,10 +7,10 @@
 //
 
 #import "XVimOperatorEvaluator.h"
+#import "XVimOperatorAction.h"
 
-@interface XVimEqualEvaluator : XVimOperatorEvaluator{
-@private
-    NSUInteger _repeat;
-}
-- (id)initWithRepeat:(NSUInteger)repeat;
+@interface XVimEqualEvaluator : XVimOperatorEvaluator
+@end
+
+@interface XVimEqualAction : XVimOperatorAction
 @end

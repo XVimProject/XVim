@@ -5,16 +5,20 @@
 
 #import "XVimVisualEvaluator.h"
 #import "NSTextView+VimMotion.h"
-#import "XVim.h"
+#import "XVimWindow.h"
 #import "Logger.h"
 #import "XVimEqualEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimYankEvaluator.h"
 #import "DVTSourceTextView.h"
+#import "XVimKeymapProvider.h"
+#import "XVimTextObjectEvaluator.h"
+#import "XVimSelectAction.h"
 
 @implementation XVimVisualEvaluator 
 
-- (NSUInteger)insertionPoint{
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
+{
     return _insertion;
 }
 
@@ -22,62 +26,102 @@
     self = [super init];
     if (self) {
         _mode = mode;
+		_begin = NSNotFound;
     }
     return self;
 }
 
-- (XVimEvaluator*)defaultNextEvaluator{
+- (id)initWithMode:(VISUAL_MODE)mode withRange:(NSRange)range {
+	if (self = [self initWithMode:mode]) {
+		_begin = range.location;
+		_insertion = MAX(_begin, range.location + range.length - 1);
+	}
+	return self;
+}
+
+
+static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
+
+- (NSString*)modeString
+{
+	return MODE_STRINGS[_mode];
+}
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
+{
     // This is quick hack. When unsupported keys are pressed in Visual mode we have to set selection
-    // because in "eval:ofXVim:" method we cancel the selection temporarily to handle motion.
+    // because in "eval::" method we cancel the selection temporarily to handle motion.
     // Because methods handles supporeted keys call motionFixedFrom:To: method to update the selection
     // we do not need to call updateSelection.
     // Since this method is called when unsupported keys are pressed I use here to call updateSelection but its not clear why we call this here.
     // We should make another process for this.
-    [self updateSelection]; 
+    [self updateSelectionInWindow:window]; 
     return self;
 }
 
-- (XVIM_MODE)becameHandler:(XVim *)xvim{
-    self.xvim = xvim;
-    DVTSourceTextView* view = (DVTSourceTextView*)[xvim sourceView];
-    NSRange cur = [view selectedRange];
-    _begin = cur.location;
-    _insertion = cur.location + cur.length;
-    if( _mode == MODE_CHARACTER ){
-        [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
-    }
-    if( _mode == MODE_LINE ){
-        NSUInteger head = [view headOfLine:cur.location];
-        NSUInteger end = [view endOfLine:cur.location];
-        if( NSNotFound != head && NSNotFound != end ){
-            [view setSelectedRangeWithBoundsCheck:head To:end+1];
-        }else{
-            [view setSelectedRangeWithBoundsCheck:cur.location To:cur.location+1];
-        }
-    }
+- (void)becameHandlerInWindow:(XVimWindow*)window{
+	[super becameHandlerInWindow:window];
+	
+	if (_begin == NSNotFound)
+	{
+		DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
+		NSRange cur = [view selectedRange];
+		if( _mode == MODE_CHARACTER ){
+			_begin = cur.location;
+			_insertion = cur.location;
+		}
+		if( _mode == MODE_LINE ){
+			NSUInteger head = [view headOfLine:cur.location];
+			NSUInteger end = [view endOfLine:cur.location];
+			if( NSNotFound != head && NSNotFound != end ){
+				_begin = head;
+				_insertion = end;
+			}else{
+				_begin = cur.location;
+				_insertion = cur.location;
+			}
+		}
+	}
+	
+	[self updateSelectionInWindow:window];
+}
     
-    return MODE_VISUAL;
-}
-
-- (XVimKeymap*)selectKeymap:(XVimKeymap**)keymaps
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
-	return keymaps[MODE_VISUAL];
+	return [keymapProvider keymapForMode:MODE_VISUAL];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim*)xvim{
-    DVTSourceTextView* v = [xvim sourceView];
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return NO;
+}
+
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+    DVTSourceTextView* sourceView = [window sourceView];
+	
+	NSUInteger glyphIndex = [self insertionPointInWindow:window];
+	NSRect glyphRect = [[sourceView layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[sourceView textContainer]];
+	
+	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
+	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
+}
+
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+    DVTSourceTextView* v = [window sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
-    XVimEvaluator *nextEvaluator = [super eval:keyStroke ofXVim:xvim];
-    if (nextEvaluator == self){
-        [self updateSelection];   
+    XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
+    if (nextEvaluator) {
+        [self updateSelectionInWindow:window];   
     }
     return nextEvaluator;
 }
 
 
-- (void)updateSelection{
-    NSTextView* view = [self textView];
+- (void)updateSelectionInWindow:(XVimWindow*)window
+{
+    NSTextView* view = [window sourceView];
     if( _mode == MODE_CHARACTER ){
         _selection_begin = _begin;
         _selection_end = _insertion;
@@ -97,178 +141,232 @@
         // later
     }
     [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end+1];
-    [view scrollToCursor];
+	[view scrollTo:[window cursorLocation]];
 }
 
-- (XVimEvaluator*)C_b:(id)arg{
-    _insertion = [[self textView] pageBackward:[[self textView] selectedRange].location count:[self numericArg]];
-    [self updateSelection];
+- (XVimEvaluator*)C_b:(XVimWindow*)window{
+    _insertion = [[window sourceView] pageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
-- (XVimEvaluator*)C_d:(id)arg{
-    _insertion = [[self textView] halfPageForward:[[self textView] selectedRange].location count:[self numericArg]];
-    [self updateSelection];
+- (XVimEvaluator*)C_d:(XVimWindow*)window{
+    _insertion = [[window sourceView] halfPageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
-- (XVimEvaluator*)C_f:(id)arg{
-    _insertion = [[self textView] pageForward:[[self textView] selectedRange].location count:[self numericArg]];
-    [self updateSelection];
+- (XVimEvaluator*)C_f:(XVimWindow*)window{
+    _insertion = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
-
-- (XVimEvaluator*)c:(id)arg{
-    [self updateSelection];
-    XVimDeleteEvaluator *evaluator =
-    [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:YES];
-    
-    // Need to set this explicitly because it is not in the constructor.
-    // Maybe the constructors should be refactored to include it?
-    evaluator.xvim = self.xvim;
-    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE];
+- (XVimEvaluator*)a:(XVimWindow*)window
+{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
+	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
+																			withParent:self
+																				repeat:1 
+																			 inclusive:YES];
+	return evaluator;
 }
 
-- (XVimEvaluator*)d:(id)arg{
-    [self updateSelection];
-    XVimDeleteEvaluator *evaluator =
-    [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:NO];
-    
-    // Need to set this explicitly because it is not in the constructor.
-    // Maybe the constructors should be refactored to include it?
-    evaluator.xvim = self.xvim;
-    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE];
+- (XVimEvaluator*)c:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:YES];	
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+																			  withParent:self
+																				  repeat:[self numericArg] 
+																  insertModeAtCompletion:YES];
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+}
+
+- (XVimEvaluator*)d:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+																			  withParent:self
+																				  repeat:[self numericArg] 
+																  insertModeAtCompletion:NO];
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
 
-- (XVimEvaluator*)D:(id)arg{
-    [self updateSelection];
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithRepeat:[self numericArg] insertModeAtCompletion:NO];
-    
-    // Need to set this explicitly because it is not in the constructor.
-    // Maybe the constructors should be refactored to include it?
-    evaluator.xvim = self.xvim;
-    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE];
+- (XVimEvaluator*)D:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
+    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
+																			  withParent:self
+																				  repeat:[self numericArg] 
+																  insertModeAtCompletion:NO];
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE inWindow:window];
     
 }
 
-- (XVimEvaluator*)u:(id)arg {
-	[self updateSelection];
-	NSTextView *view = [self textView];
+- (XVimEvaluator*)i:(XVimWindow*)window
+{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
+	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
+																			withParent:self
+																				repeat:1 
+																			 inclusive:NO];
+	return evaluator;
+}
+
+- (XVimEvaluator*)p:(XVimWindow*)window{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
+    // the line boundary and then paste the data in.
+    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
+    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
+    NSTextView* view = [window sourceView];
+    [self updateSelectionInWindow:window];
+    // Keep currently selected string
+    NSString* current = [[view string] substringWithRange:[view selectedRange]];
+    [view delete:self];
+    NSUInteger loc = [view selectedRange].location;
+    NSString *pb_string = [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    unichar uc =[pb_string characterAtIndex:[pb_string length] -1];
+    if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+        if( [view isBlankLine:loc] && ![view isEOF:loc]){
+            [view setSelectedRange:NSMakeRange(loc+1,0)];
+        }else{
+                [view insertNewline:self];
+        }
+    }
+    
+    for(NSUInteger i = 0; i < [self numericArg]; i++ ){
+        [view paste:self];
+    }
+    [[NSPasteboard generalPasteboard] setString:current forType:NSStringPboardType];
+    return nil;
+}
+
+- (XVimEvaluator*)P:(XVimWindow*)window{
+    // Looks P works as p in Visual Mode.. right?
+    return [self p:window];
+}
+
+
+- (XVimEvaluator*)u:(XVimWindow*)window {
+	[self updateSelectionInWindow:window];
+	NSTextView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view lowercaseRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
 	return nil;
 }
 
-- (XVimEvaluator*)U:(id)arg {
-	[self updateSelection];
-	NSTextView *view = [self textView];
+- (XVimEvaluator*)U:(XVimWindow*)window {
+	[self updateSelectionInWindow:window];
+	NSTextView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view uppercaseRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
 	return nil;
 }
 
-- (XVimEvaluator*)C_u:(id)arg{
-    _insertion = [[self textView] halfPageBackward:[[self textView] selectedRange].location count:[self numericArg]];
-    [self updateSelection];
+- (XVimEvaluator*)C_u:(XVimWindow*)window{
+    _insertion = [[window sourceView] halfPageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
-- (XVimEvaluator*)v:(id)arg{
+- (XVimEvaluator*)v:(XVimWindow*)window{
     if( _mode == MODE_CHARACTER ){
         // go to normal mode
-        return  [self ESC:arg];
+        return  [self ESC:window];
     }
     _mode = MODE_CHARACTER;
-    [self updateSelection];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
-- (XVimEvaluator*)V:(id)arg{
+- (XVimEvaluator*)V:(XVimWindow*)window{
     if( MODE_LINE == _mode ){
         // go to normal mode
-        return  [self ESC:arg];
+        return  [self ESC:window];
     }
     _mode = MODE_LINE;
-    [self updateSelection];
+    [self updateSelectionInWindow:window];
     return self;
 }
 
-- (XVimEvaluator*)x:(id)arg{
-    return [self d:arg];
+- (XVimEvaluator*)x:(XVimWindow*)window{
+    return [self d:window];
 }
 
-- (XVimEvaluator*)X:(id)arg{
-    return [self D:arg];
+- (XVimEvaluator*)X:(XVimWindow*)window{
+    return [self D:window];
 }
 
-- (XVimEvaluator*)y:(id)arg{
-    [self updateSelection];
-    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithRepeat:[self numericArg]];
-    
-    // Need to set this explicitly because it is not in the constructor.
-    // Maybe the constructors should be refactored to include it?
-    evaluator.xvim = self.xvim;
-    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE];
+- (XVimEvaluator*)y:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
+    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction 
+																		  withParent:self
+																			  repeat:[self numericArg]];
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
-- (XVimEvaluator*)EQUAL:(id)arg{
-    [self updateSelection];
-    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithRepeat:[self numericArg]];
-    
-    // Need to set this explicitly because it is not in the constructor.
-    // Maybe the constructors should be refactored to include it?
-    evaluator.xvim = self.xvim;
-    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE];
+- (XVimEvaluator*)EQUAL:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+	
+	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
+    XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction 
+																			withParent:self
+																				repeat:[self numericArg]];
+
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
 
-- (XVimEvaluator*)ESC:(id)arg{
-    [[self textView] setSelectedRange:NSMakeRange(_insertion, 0)];
+- (XVimEvaluator*)ESC:(XVimWindow*)window{
+    [[window sourceView] setSelectedRange:NSMakeRange(_insertion, 0)];
     return nil;
 }
 
-- (XVimEvaluator*)GREATERTHAN:(id)arg{
-    [self updateSelection];
-    DVTSourceTextView* view = (DVTSourceTextView*)[self textView];
+- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+    DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftRight:self];
     }
-    NSRange r = [[self textView] selectedRange];
+    NSRange r = [[window sourceView] selectedRange];
     r.length = 0;
     [view setSelectedRange:r];
     return nil;
 }
 
 
-- (XVimEvaluator*)LESSTHAN:(id)arg{
-    [self updateSelection];
-    DVTSourceTextView* view = [self textView];
+- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+    DVTSourceTextView* view = [window sourceView];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftLeft:self];
     }
-    NSRange r = [[self textView] selectedRange];
+    NSRange r = [[window sourceView] selectedRange];
     r.length = 0;
     [view setSelectedRange:r];
     return nil;
 }
 
-- (XVimEvaluator*)TILDE:(id)arg {
-	[self updateSelection];
-	NSTextView *view = [self textView];
+- (XVimEvaluator*)TILDE:(XVimWindow*)window {
+	[self updateSelectionInWindow:window];
+	NSTextView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view toggleCaseForRange:r];
 	return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
+{
     //TODO: Handle type
     // Expand current selected range (_begin, _insertion )
     _insertion = to;
-    [self updateSelection];
+    [self updateSelectionInWindow:window];
     return self;
 }
 @end

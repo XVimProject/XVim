@@ -7,6 +7,8 @@
 //
 
 #import "NSTextView+VimMotion.h"
+#import "XVimMotionType.h"
+
 ////////////////////////
 // Term Definitions   //
 ////////////////////////
@@ -46,12 +48,7 @@
  *
  **/
 
-typedef enum{
-    MOTION_OPTION_NONE,
-    LEFT_RIGHT_WRAP,
-    LEFT_RIGHT_NOWRAP,
-    BIGWORD // for 'WORD' motion
-} MOTION_OPTION;
+#include "XVimMotionOption.h"
 
 typedef struct _XVimWordInfo{
     BOOL isFirstWordInALine;
@@ -59,15 +56,6 @@ typedef struct _XVimWordInfo{
     NSUInteger lastEndOfWord;
 }XVimWordInfo;
 
-BOOL isDigit(unichar ch);
-BOOL isAlpha(unichar ch);
-BOOL isDelimeter(unichar ch);
-BOOL isWhiteSpace(unichar ch);
-BOOL isNonAscii(unichar ch);
-BOOL isNewLine(unichar ch);
-BOOL isFuzzyWord(unichar ch);
-BOOL isNonBlank(unichar ch);
-BOOL isKeyword(unichar ch);
 
 @interface NSTextView (VimMotion)
 
@@ -190,6 +178,16 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)endOfLine:(NSUInteger)index; // May return NSNotFound
 
 /**
+ * Returns position of first character of the line specified by index.
+ * Note that first character in the line is different from head of line.
+ * First character may be newline when its blankline.
+ * First character may be EOF if the EOF is blankline
+ * In short words, its just after a newline or begining of document.
+ * This never returns NSNotFound
+ **/
+- (NSUInteger)firstOfLine:(NSUInteger)index;
+
+/**
  * Returns position of eof
  **/
 - (NSUInteger)endOfFile;
@@ -207,6 +205,9 @@ BOOL isKeyword(unichar ch);
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
+// Deletes the selected range and adjusts cursor position
+- (void)del:(id)sender;
+
 // Clamps range to end of line
 - (void)clampRangeToEndOfLine:(NSRange*)range;
 
@@ -218,7 +219,9 @@ BOOL isKeyword(unichar ch);
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
 - (NSUInteger)lineNumber:(NSUInteger)index;
 - (NSUInteger)numberOfLines;
-    
+- (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+ 
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
@@ -226,18 +229,66 @@ BOOL isKeyword(unichar ch);
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info;
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
 // Scrolls
 - (NSUInteger)pageForward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (void)scrollToCursor;
+- (void)scrollTo:(NSUInteger)location;
     
 // Case changes. These functions are all range checked.
 - (void)toggleCaseForRange:(NSRange)range;
 - (void)uppercaseRange:(NSRange)range;
 - (void)lowercaseRange:(NSRange)range;
+
+
+// Text Object
+- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+
+// The following code is from xVim by WarWithinMe.
+// These will be integreted into NSTextView category.
+
+// =======================
+// Return the location of the start of indentation on current line. '^'
+NSInteger xv_caret(NSString *string, NSInteger index);
+// Return the beginning of line location. '0'
+NSInteger xv_0(NSString *string, NSInteger index);
+
+// Unlike vim, this function won't ignore indent before the current character
+// even if what is '{'
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what, char other);
+NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL fuzzy);
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what);
+
+// Find char in current line.
+// Return the current index if nothing found.
+// If inclusive is YES :
+//   'fx' returns the index after 'x'
+//   'Fx' returns the index before 'x'
+NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char command, unichar what, BOOL inclusive);
+
+
+/*
+ * NSStringHelper is used to provide fast character iteration.
+ */
+#define ITERATE_STRING_BUFFER_SIZE 64
+typedef struct s_NSStringHelper
+{
+    unichar    buffer[ITERATE_STRING_BUFFER_SIZE];
+    NSString*  string;
+    NSUInteger strLen;
+    NSInteger  index;
+    
+} NSStringHelper;
+
+void initNSStringHelper(NSStringHelper*, NSString* string, NSUInteger strLen);
+void initNSStringHelperBackward(NSStringHelper*, NSString* string, NSUInteger strLen);
+unichar characterAtIndex(NSStringHelper*, NSInteger index);
 
 @end
 

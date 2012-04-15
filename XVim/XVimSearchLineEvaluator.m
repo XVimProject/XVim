@@ -8,7 +8,9 @@
 
 #import "XVimSearchLineEvaluator.h"
 #import "XVimMotionEvaluator.h"
+#import "XVimWindow.h"
 #import "XVim.h"
+#import "XVimCharacterSearch.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
 
@@ -30,15 +32,23 @@
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke ofXVim:(XVim *)xvim{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
+{
+	return [keymapProvider keymapForMode:MODE_NONE];
+}
+
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
+{
+	XVimCharacterSearch *charSearcher = [[XVim instance] characterSearcher];
+	
 	unichar key = keyStroke.keyCode;
     NSString *searchChar = [NSString stringWithCharacters:&key length:1];
-    [xvim setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
+    [charSearcher setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
 
-    NSTextView *view = (NSTextView*)[xvim superview];
+    NSTextView *view = (NSTextView*)[window superview];
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
-        location = [xvim searchCharacterNext:location];
+        location = [charSearcher searchNextCharacterFrom:location inWindow:window];
         if (location == NSNotFound || ++i >= self.repeat){
             break;
         }
@@ -53,7 +63,7 @@
     }
 
     if (location == NSNotFound) {
-        [xvim ringBell];
+        [window ringBell];
     }else{
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
         if( !_forward ){
@@ -61,7 +71,7 @@
             type = CHARACTERWISE_EXCLUSIVE;
         }
         self.performedSearch = YES;
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type inWindow:window]; 
     }
 
     return nil;
