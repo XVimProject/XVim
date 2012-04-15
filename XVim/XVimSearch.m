@@ -18,6 +18,7 @@
 @implementation XVimSearch
 @synthesize lastSearchCase = _lastSearchCase;
 @synthesize lastSearchBackword = _lastSearchBackword;
+@synthesize lastSearchCmd = _lastSearchCmd;
 @synthesize lastSearchString = _lastSearchString;
 @synthesize lastReplacementString = _lastReplacementString;
 
@@ -43,6 +44,9 @@
         NSAssert(NO, @"first letter of search command must be ? or /");
     }
     
+    // Store off the original search string into the lastSearchString
+    self.lastSearchString = [searchCmd substringFromIndex:1];
+    
     // In vim \c specifies a case insensitive search and \C specifies case sensitive
     // If there are any \c then it overrides any \C that may be in the search string
     if ([searchCmd rangeOfString:@"\\c"].location != NSNotFound){
@@ -65,7 +69,7 @@
     
     // in vi, if there's no search string. use the last one specified. like you do for 'n'
     if( [searchCmd length] > 1 ){
-        self.lastSearchString = [searchCmd substringFromIndex:1];
+        self.lastSearchCmd = [searchCmd substringFromIndex:1];
     }
     return [self searchNextFrom:from inWindow:window];
 }
@@ -89,7 +93,7 @@
 
     NSError *error = NULL;
     NSRegularExpression *regex = [NSRegularExpression 
-                                  regularExpressionWithPattern:self.lastSearchString
+                                  regularExpressionWithPattern:self.lastSearchCmd
                                   options:r_opts
                                   error:&error];
     
@@ -139,7 +143,7 @@
     
     NSError *error = NULL;
     NSRegularExpression *regex = [NSRegularExpression 
-                                  regularExpressionWithPattern:self.lastSearchString
+                                  regularExpressionWithPattern:self.lastSearchCmd
                                   options:r_opts
                                   error:&error];
     
@@ -281,7 +285,7 @@
     
     NSError *error = NULL;
     TRACE_LOG(@"%@", self.lastReplacementString);
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchString options:r_opts error:&error];
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchCmd options:r_opts error:&error];
     
     if (error != nil) {
         [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
@@ -337,6 +341,7 @@
         TRACE_LOG("replaced=%@",replaced);
         TRACE_LOG("replacement=%@",replacement);
     }
+    self.lastSearchCmd = replaced;
     self.lastSearchString = replaced;
     self.lastReplacementString = replacement;
     
