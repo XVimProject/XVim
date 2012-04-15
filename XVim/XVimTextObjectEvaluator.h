@@ -12,7 +12,7 @@
 
 @interface XVimTextObjectEvaluator : XVimEvaluator
 - (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
-					withParent:(XVimEvaluator*)eval
-					  repeat:(NSUInteger)repeat 
+					withParent:(XVimEvaluator*)parent
+					  numericArg:(NSUInteger)numericArg
 				   inclusive:(BOOL)inclusive;
 @end

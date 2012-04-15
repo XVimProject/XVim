@@ -22,12 +22,13 @@
 
 - (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
 				  withParent:(XVimEvaluator*)parent
-					  repeat:(NSUInteger)repeat 
+				  numericArg:(NSUInteger)numericArg
 	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
 	if (self = [super initWithOperatorAction:operatorAction 
 								  withParent:parent
-									  repeat:repeat])
+								  numericArg:numericArg
+				])
 	{
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}
@@ -42,11 +43,11 @@
     // 'cc' should obey the repeat specifier
     // '3cc' should delete/cut the current line and the 2 lines below it
     
-    if (self.repeat < 1) 
+    if ([self numericArg] < 1) 
         return nil;
     
     DVTSourceTextView* view = [window sourceView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
@@ -57,11 +58,11 @@
     // 'dd' should obey the repeat specifier
     // '3dd' should delete/cut the current line and the 2 lines below it
     
-    if (self.repeat < 1) 
+    if ([self numericArg] < 1) 
         return nil;
         
     DVTSourceTextView* view = [window sourceView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 

@@ -14,6 +14,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimTextObjectEvaluator.h"
 #import "XVimSelectAction.h"
+#import "XVimGVisualEvaluator.h"
 
 @implementation XVimVisualEvaluator 
 
@@ -123,8 +124,18 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 {
     NSTextView* view = [window sourceView];
     if( _mode == MODE_CHARACTER ){
-        _selection_begin = _begin;
-        _selection_end = _insertion;
+		
+		if (_begin <= _insertion)
+		{
+			_selection_begin = _begin;
+			_selection_end = _insertion;
+		}
+		else
+		{
+			_selection_begin = _insertion;
+			_selection_end = _begin;
+		}
+		
     }else if( _mode == MODE_LINE ){
         NSUInteger begin = _begin;
         NSUInteger end = _insertion;
@@ -168,7 +179,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
 																			withParent:self
-																				repeat:1 
+																				numericArg:[self numericArg] 
 																			 inclusive:YES];
 	return evaluator;
 }
@@ -178,7 +189,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:YES];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 																			  withParent:self
-																				  repeat:[self numericArg] 
+																			  numericArg:[self numericArg]
 																  insertModeAtCompletion:YES];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
@@ -188,7 +199,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 																			  withParent:self
-																				  repeat:[self numericArg] 
+																			  numericArg:[self numericArg]
 																  insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
@@ -199,10 +210,15 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:NO];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 																			  withParent:self
-																				  repeat:[self numericArg] 
+																			  numericArg:[self numericArg]
 																  insertModeAtCompletion:NO];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE inWindow:window];
     
+}
+
+- (XVimEvaluator*)g:(XVimWindow*)window
+{
+	return [[XVimGVisualEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window
@@ -211,7 +227,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:action 
 																			withParent:self
-																				repeat:1 
+																				numericArg:[self numericArg]
 																			 inclusive:NO];
 	return evaluator;
 }
@@ -307,7 +323,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
     XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction 
 																		  withParent:self
-																			  repeat:[self numericArg]];
+																		  numericArg:[self numericArg]];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
@@ -317,7 +333,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction 
 																			withParent:self
-																				repeat:[self numericArg]];
+																			numericArg:[self numericArg]];
 
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }

@@ -17,11 +17,11 @@
 - (XVimEvaluator*)y:(XVimWindow*)window{
     // 'yy' should obey the repeat specifier 
     // e.g., '3yy' should yank/copy the current line and the two lines below it
-    if (self.repeat < 1) 
+    if ([self numericArg] < 1) 
         return nil;
     
     DVTSourceTextView* view = [window sourceView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:self.repeat-1 option:MOTION_OPTION_NONE];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 

@@ -56,7 +56,6 @@
 - (void)handleTextInsertion:(NSString*)text;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
-- (void)ringBell;
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;

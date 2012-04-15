@@ -9,67 +9,70 @@
 #import "XVimMotionArgumentEvaluator.h"
 #import "XVimKeyStroke.h"
 
+@interface XVimMotionArgumentEvaluator() {
+	NSUInteger _parentNumericArg;
+}
+@end
 
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
-@synthesize repeat;
 
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
+- (id)initWithParent:(XVimMotionEvaluator*)parent numericArg:(NSUInteger)numericArg {
     self = [super init];
     if( self ){
-        repeat = rep;
-        _motionEvaluator = [evaluator retain];
+        _parent = [parent retain];
+		_parentNumericArg = numericArg;
     }
     return self;
 }
 
 - (void)dealloc{
-    [_motionEvaluator release];
+    [_parent release];
     [super dealloc];
 }
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window
 {
-    return [_motionEvaluator insertionPointInWindow:window];
+    return [_parent insertionPointInWindow:window];
 }
 
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
 {
-	return [_motionEvaluator drawRect:rect inWindow:window];
+	return [_parent drawRect:rect inWindow:window];
 }
 
 - (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
 {
-	return [_motionEvaluator shouldDrawInsertionPointInWindow:window];
+	return [_parent shouldDrawInsertionPointInWindow:window];
 }
 
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
 {
-	return [_motionEvaluator drawInsertionPointInRect:rect color:color inWindow:window heightRatio:heightRatio];
+	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:heightRatio];
 }
 
 - (NSString*)modeString
 {
-	return [_motionEvaluator modeString];
+	return [_parent modeString];
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return _motionEvaluator;
+    return _parent;
 }
 
 -(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
-    if( nil != _motionEvaluator ){
-        return [_motionEvaluator motionFixedFrom:from To:to Type:type inWindow:window];
+    if( nil != _parent ){
+        return [_parent motionFixedFrom:from To:to Type:type inWindow:window];
     }
     return nil;
 }
 
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window
 {
-    if( nil != _motionEvaluator ){
-        return [_motionEvaluator commonMotion:motion Type:type inWindow:window];
+    if( nil != _parent ){
+        return [_parent commonMotion:motion Type:type inWindow:window];
     }
     return nil;
 }
@@ -87,5 +90,10 @@
     }
     
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
+}
+
+- (NSUInteger)numericArg
+{
+	return [super numericArg] * _parentNumericArg;
 }
 @end

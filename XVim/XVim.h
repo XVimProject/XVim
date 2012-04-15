@@ -31,5 +31,7 @@
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;
 - (void)parseRcFile;
+- (NSString*) exCommandHistory:(NSUInteger)no withPrefix:(NSString*)str;
+- (void)ringBell;
 
 @end

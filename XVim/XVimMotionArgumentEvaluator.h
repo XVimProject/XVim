@@ -14,11 +14,11 @@
 // When the subclass fix the motion it must call motionFixedFrom:To: method.
 @interface XVimMotionArgumentEvaluator : XVimEvaluator{
 @protected
-    XVimMotionEvaluator* _motionEvaluator;
+    XVimMotionEvaluator* _parent;
 }
-@property (readonly) NSUInteger repeat;
 
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window;
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)repeat;
+
+- (id)initWithParent:(XVimMotionEvaluator*)parent numericArg:(NSUInteger)numericArg;
 @end

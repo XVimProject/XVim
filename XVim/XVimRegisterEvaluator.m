@@ -39,7 +39,7 @@ XVimRegisterEvalMode _mode;
         if (xregister.isReadOnly == NO){
             [window recordIntoRegister:xregister];
         }else{
-            [window ringBell];
+            [[XVim instance] ringBell];
         }
     } else if(_mode == REGISTER_EVAL_MODE_PLAYBACK){
         return [[XVimNormalEvaluator alloc] initWithRegister:xregister andPlaybackCount:_count];

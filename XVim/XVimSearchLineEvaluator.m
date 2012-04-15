@@ -24,14 +24,6 @@
 @synthesize previous = _previous;
 @synthesize performedSearch = _performedSearch;
 
-- (id)initWithMotionEvaluator:(XVimMotionEvaluator*)evaluator withRepeat:(NSUInteger)rep{
-    self = [super initWithMotionEvaluator:evaluator withRepeat:rep];
-    if( self ){
-        _performedSearch = NO;
-    }
-    return self;
-}
-
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
 	return [keymapProvider keymapForMode:MODE_NONE];
@@ -49,7 +41,7 @@
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
         location = [charSearcher searchNextCharacterFrom:location inWindow:window];
-        if (location == NSNotFound || ++i >= self.repeat){
+        if (location == NSNotFound || ++i >= [self numericArg]){
             break;
         }
 
@@ -63,7 +55,7 @@
     }
 
     if (location == NSNotFound) {
-        [window ringBell];
+        [[XVim instance] ringBell];
     }else{
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
         if( !_forward ){

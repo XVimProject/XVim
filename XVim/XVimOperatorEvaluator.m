@@ -18,29 +18,23 @@
 @interface XVimOperatorEvaluator() {
 	XVimOperatorAction *_operatorAction;
 	XVimEvaluator *_parent;
+	NSUInteger _parentNumericArg;
 }
 @end
 
 @implementation XVimOperatorEvaluator
-@synthesize repeat = _repeat;
 
 - (id)initWithOperatorAction:(XVimOperatorAction*) action 
 				  withParent:(XVimEvaluator*)parent
-					  repeat:(NSUInteger)repeat
+				  numericArg:(NSUInteger)numericArg
 {
 	if (self = [super init])
 	{
 		self->_operatorAction = action;
 		self->_parent = parent;
-		self->_repeat = repeat;
+		self->_parentNumericArg = numericArg;
 	}
 	return self;
-}
-
-- (id)initWithOperatorAction:(XVimOperatorAction*) action
-				  withParent:(XVimEvaluator*)parent
-{
-	return [self initWithOperatorAction:action withParent:parent repeat:1];
 }
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window
@@ -80,7 +74,7 @@
 - (XVimEvaluator*)a:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
 																	   withParent:_parent
-																		   repeat:_repeat 
+																		   numericArg:[self numericArg]
 																		inclusive:YES];
 	return eval;
 }
@@ -88,7 +82,7 @@
 - (XVimEvaluator*)i:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
 																	   withParent:_parent
-																		   repeat:_repeat 
+																		   numericArg:[self numericArg]
 																		inclusive:NO];
 	return eval;
 }
@@ -128,6 +122,11 @@
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
 	return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
+}
+
+- (NSUInteger)numericArg
+{
+	return [super numericArg] * _parentNumericArg;
 }
 
 @end

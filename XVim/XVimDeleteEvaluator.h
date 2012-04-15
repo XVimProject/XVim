@@ -14,7 +14,7 @@
 @interface XVimDeleteEvaluator : XVimOperatorEvaluator
 - (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
 				  withParent:(XVimEvaluator*)parent
-					  repeat:(NSUInteger)repeat 
+				  numericArg:(NSUInteger)numericArg
 	  insertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end
 

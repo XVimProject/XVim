@@ -8,7 +8,7 @@
 
 #import "XVimMotionEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
-#import "XVimGEvaluator.h"
+#import "XVimGMotionEvaluator.h"
 #import "XVimZEvaluator.h"
 #import "XVimLocalMarkEvaluator.h"
 #import "XVimKeyStroke.h"
@@ -194,14 +194,14 @@
 }
 
 - (XVimEvaluator*)f:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = YES;
     eval.previous = NO;
     return eval;
 }
 
 - (XVimEvaluator*)F:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = NO;
     eval.previous = NO;
     return eval;
@@ -216,7 +216,7 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    return [[XVimGMotionEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
@@ -224,6 +224,9 @@
     NSUInteger end;
     if( [self numericMode] ){
         end = [view positionAtLineNumber:[self numericArg] column:0];
+		if (end == NSNotFound) {
+			end = [view headOfLine:[[view string] length]];
+		}
     }else{
         end = [view headOfLine:[[view string] length]];
         if( NSNotFound == end ){
@@ -299,14 +302,14 @@
 */
 
 - (XVimEvaluator*)t:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = YES;
     eval.previous = YES;
     return eval;
 }
 
 - (XVimEvaluator*)T:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
     eval.forward = NO;
     eval.previous = YES;
     return eval;
@@ -332,7 +335,7 @@
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
-    return [[XVimZEvaluator alloc] initWithMotionEvaluator:self withRepeat:[self numericArg]];
+    return [[XVimZEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{
@@ -350,7 +353,7 @@
 	NSUInteger cursorLocation = [window cursorLocation];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found;
-    for (NSUInteger i = 0; i < self.numericArg && found.location != NSNotFound; ++i){
+    for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
         found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:YES inWindow:window];
 		searchLocation = found.location;
     }
@@ -413,7 +416,7 @@
     NSRange at = [view selectedRange]; 
     if (at.location >= s.length-1) {
         // [window statusMessage:@"leveled match not found" :ringBell TRUE]
-        [window ringBell];
+        [[XVim instance] ringBell];
         return self;
     }
     NSUInteger eol = [view endOfLine:at.location];
@@ -451,7 +454,7 @@
         // src is not an open or close char
         // vim does not produce an error msg for this so we won't either i guess
         // [window statusMessage:@"Not a match character" :ringBell TRUE]
-        [window ringBell];
+        [[XVim instance] ringBell];
         return self;
     }
 
@@ -493,7 +496,7 @@
 
     if (search.location == NSNotFound) {
         // [window statusMessage:@"leveled match not found" :ringBell TRUE]
-        [window ringBell];
+        [[XVim instance] ringBell];
         return self;
     }
 
@@ -557,14 +560,24 @@
     NSTextView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger paragraph_head = [view paragraphsBackward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	
+	if (paragraph_head != NSNotFound)
+	{
+		return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	}
+	return nil;
 }
 
 - (XVimEvaluator*)RBRACE:(XVimWindow*)window{ // }
     NSTextView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger paragraph_head = [view paragraphsForward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	
+	if (paragraph_head != NSNotFound)
+	{
+		return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	}
+	return nil;
 }
 
 
@@ -611,7 +624,7 @@
     }
     
     if (location == NSNotFound){
-        [window ringBell];
+        [[XVim instance]ringBell];
     }else{
         // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
@@ -646,7 +659,7 @@
     }
     
     if (location == NSNotFound){
-        [window ringBell];
+        [[XVim instance] ringBell];
     }else{
         MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
         // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE

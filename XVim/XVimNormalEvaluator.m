@@ -18,6 +18,7 @@
 #import "XVimInsertEvaluator.h"
 #import "XVimRegisterEvaluator.h"
 #import "XVimWindowEvaluator.h"
+#import "XVimGActionEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
 #import "XVimKeyStroke.h"
@@ -113,7 +114,7 @@
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:TRUE];
     return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 													withParent:self
-														repeat:[self numericArg] 
+													numericArg:[self numericArg]
 										insertModeAtCompletion:TRUE];
 }
 
@@ -158,7 +159,7 @@
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithInsertModeAtCompletion:FALSE];	
     return [[XVimDeleteEvaluator alloc] initWithOperatorAction:action 
 													withParent:self
-														repeat:[self numericArg] 
+													numericArg:[self numericArg]
 										insertModeAtCompletion:FALSE];
 }
 
@@ -209,6 +210,10 @@
     NSUInteger next = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
     [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
+}
+
+- (XVimEvaluator*)g:(XVimWindow*)window{
+    return [[XVimGActionEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window{
@@ -411,7 +416,7 @@
     NSRange r = [view selectedRange];
 	
 	// Set range to replace, ensuring we don't run over the end of the buffer
-	NSUInteger endi = r.location + self.numericArg;
+	NSUInteger endi = r.location + [self numericArg];
 	NSUInteger maxi = [[view string] length];
 	endi = MIN(endi, maxi);
 	NSRange replacementRange = NSMakeRange(r.location, endi - r.location);
@@ -510,7 +515,7 @@
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] init];
     return [[XVimYankEvaluator alloc] initWithOperatorAction:operatorAction 
 												  withParent:self
-													  repeat:[self numericArg]];
+												  numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)AT:(XVimWindow*)window{
@@ -521,14 +526,14 @@
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     return [[XVimEqualEvaluator alloc] initWithOperatorAction:operatorAction 
 												   withParent:self
-													   repeat:[self numericArg]];
+												   numericArg:[self numericArg]];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
 																		withParent:self
-																			repeat:[self numericArg]];
+																		numericArg:[self numericArg]];
     return eval;
 }
 
@@ -536,7 +541,7 @@
 	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
 																		withParent:self
-																			repeat:[self numericArg]];
+																		numericArg:[self numericArg]];
     return eval;
     
 }
@@ -611,12 +616,11 @@ NSArray *_invalidRepeatKeys;
          nil];
     }
     NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
-    if (keySelector == [NSValue valueWithPointer:@selector(q:)]){
+    if (keySelector == [NSValue valueWithPointer:@selector(q:)]) {
         return REGISTER_IGNORE;
-    }else if (xregister.isRepeat){
-        if([keyStroke classResponds:[XVimNormalEvaluator class]] &&
-           ![keyStroke classResponds:[XVimNormalEvaluator superclass]]){
-            if ([_invalidRepeatKeys containsObject:keySelector] == NO){
+    } else if (xregister.isRepeat) {
+        if ([keyStroke classImplements:[XVimNormalEvaluator class]]) {
+            if ([_invalidRepeatKeys containsObject:keySelector] == NO) {
                 return REGISTER_REPLACE;
             }
         }

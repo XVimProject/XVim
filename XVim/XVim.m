@@ -212,4 +212,30 @@ static XVim* s_instance = nil;
     return [self.registers member:[[XVimRegister alloc] initWithRegisterName:name displayName:@""]];
 }
 
+- (NSString*) exCommandHistory:(NSUInteger)no withPrefix:(NSString*)str{
+    NSAssert( no != 0, @"no starts from 1" );
+    NSUInteger count = 0;
+    for( NSString* s in _excmd.history ){
+        if( [s hasPrefix:str] ){
+            count++;
+            if( no == count){
+                return s;
+            }
+        }
+    }
+    return nil;
+}
+
+- (NSString*) searchHistory:(NSUInteger)no{
+    // TODO: implement
+    return nil;
+}
+
+- (void)ringBell {
+    if (_options.errorbells) {
+        NSBeep();
+    }
+    return;
+}
+
 @end

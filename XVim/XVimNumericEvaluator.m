@@ -9,26 +9,41 @@
 #import "XVimNumericEvaluator.h"
 #import "XVimKeyStroke.h"
 
+@interface XVimNumericEvaluator() {
+    NSUInteger _numericArg;
+    BOOL _numericMode;
+}
+- (void)resetNumericArg;
+@end
+
 @implementation XVimNumericEvaluator
-@synthesize numericMode,numericArg;
 - (id)init
 {
     self = [super init];
     if (self) {
-        self.numericArg = 1;
-        self.numericMode = NO;
+		[self resetNumericArg];
     }
     return self;
+}
+
+- (NSUInteger)numericArg
+{
+	return _numericArg;
+}
+
+- (BOOL)numericMode
+{
+	return _numericMode;
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     NSString* keyStr = [keyStroke toSelectorString];
     if( keyStroke.isNumeric ){
-        if( self.numericMode ){
+        if( _numericMode ){
             NSString* numStr = [keyStr substringFromIndex:3];
             NSInteger n = [numStr integerValue]; 
-            self.numericArg*=10; //FIXME: consider integer overflow
-            self.numericArg+=n;
+            _numericArg*=10; //FIXME: consider integer overflow
+            _numericArg+=n;
             return self;
         }
         else{
@@ -38,8 +53,8 @@
             }else{
                 NSString* numStr = [keyStr substringFromIndex:3];
                 NSInteger n = [numStr integerValue]; 
-                self.numericArg=n;
-                self.numericMode=YES;
+                _numericArg=n;
+                _numericMode=YES;
                 return self;
             }
         }
@@ -51,7 +66,7 @@
 }
 
 - (void)resetNumericArg{
-    self.numericArg = 1;
-    self.numericMode = NO;
+    _numericArg = 1;
+    _numericMode = NO;
 }
 @end

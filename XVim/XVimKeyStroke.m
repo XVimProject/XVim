@@ -395,19 +395,14 @@ static SEL getSelector(unichar charcode, int modifierFlags)
 	return selector;
 }
 
-static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
-{
-	SEL selector = getSelector(charcode, modifierFlags);
-	BOOL responds = [target respondsToSelector:selector];
-	return responds ? selector : NULL;
+- (SEL)selector {
+	return getSelector(self.keyCode, self.modifierFlags);
 }
 
-- (SEL) selectorForInstance:(id)target {
-	SEL handler = NULL;
-	
-	handler = handler ? handler : matchSingleHandler(target, self.keyCode, self.modifierFlags);
-		
-	return handler;
+- (SEL)selectorForInstance:(id)target {
+	SEL selector = getSelector(self.keyCode, self.modifierFlags);
+	BOOL responds = [target respondsToSelector:selector];
+	return responds ? selector : NULL;
 }
 
 - (BOOL)instanceResponds:(id)target
@@ -417,7 +412,15 @@ static SEL matchSingleHandler(id target, unichar charcode, int modifierFlags)
 
 - (BOOL)classResponds:(Class)class
 {
-	return [class instancesRespondToSelector:getSelector(self.keyCode, self.modifierFlags)];
+	SEL selector = [self selector];
+	return [class instancesRespondToSelector:selector];
+}
+
+- (BOOL)classImplements:(Class)class
+{
+	SEL selector = [self selector];
+	IMP imp = [class instanceMethodForSelector:selector];
+	return imp && imp != [[class superclass] instanceMethodForSelector:selector];
 }
 
 + (XVimKeyStroke *)fromString:(NSString *)string from:(NSUInteger*)index

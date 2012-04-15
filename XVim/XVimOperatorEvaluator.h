@@ -16,13 +16,9 @@
 @class XVimOperatorAction;
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
-- (id)initWithOperatorAction:(XVimOperatorAction*) action 
+- (id)initWithOperatorAction:(XVimOperatorAction*)action 
 				  withParent:(XVimEvaluator*)parent
-					  repeat:(NSUInteger)repeat;
-- (id)initWithOperatorAction:(XVimOperatorAction*) action
-				  withParent:(XVimEvaluator*)parent;
-
-@property (nonatomic) NSUInteger repeat;
+				  numericArg:(NSUInteger)numericArg;
 
 - (XVimEvaluator*)w:(XVimWindow*)window;
 - (XVimEvaluator*)W:(XVimWindow*)window;
