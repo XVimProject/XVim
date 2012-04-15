@@ -38,10 +38,13 @@
 #import "XVimRegister.h"
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
+#import "XVimHistoryHandler.h"
 
 static XVim* s_instance = nil;
 
 @interface XVim() {
+	XVimHistoryHandler *_exCommandHistory;
+	XVimHistoryHandler *_searchHistory;
 	XVimKeymap* _keymaps[MODE_COUNT];
 }
 - (void)parseRcFile;
@@ -106,6 +109,8 @@ static XVim* s_instance = nil;
 	if (self = [super init])
 	{
 		_excmd = [[XVimExCommand alloc] init];
+		_exCommandHistory = [[XVimHistoryHandler alloc] init];
+		_searchHistory = [[XVimHistoryHandler alloc] init];
 		_searcher = [[XVimSearch alloc] init];
 		_characterSearcher = [[XVimCharacterSearch alloc] init];
 		_options = [[XVimOptions alloc] init];
@@ -212,23 +217,14 @@ static XVim* s_instance = nil;
     return [self.registers member:[[XVimRegister alloc] initWithRegisterName:name displayName:@""]];
 }
 
-- (NSString*) exCommandHistory:(NSUInteger)no withPrefix:(NSString*)str{
-    NSAssert( no != 0, @"no starts from 1" );
-    NSUInteger count = 0;
-    for( NSString* s in _excmd.history ){
-        if( [s hasPrefix:str] ){
-            count++;
-            if( no == count){
-                return s;
-            }
-        }
-    }
-    return nil;
+- (XVimHistoryHandler*)exCommandHistory
+{
+    return _exCommandHistory;
 }
 
-- (NSString*) searchHistory:(NSUInteger)no{
-    // TODO: implement
-    return nil;
+- (XVimHistoryHandler*)searchHistory
+{
+	return _searchHistory;
 }
 
 - (void)ringBell {

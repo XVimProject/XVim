@@ -37,7 +37,7 @@
         
         id fontAndColors = [[[window sourceView] textStorage] fontAndColorTheme];
         
-        // Static Massage ( This is behind the command view if the command is active)
+        // Static Message ( This is behind the command view if the command is active)
         _static = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
         [_static setEditable:NO];
         [_static setBordered:NO];
@@ -60,11 +60,11 @@
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
         [_command setEditable:NO];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
-        _command.delegate = window;
         [_command setTextColor:[fontAndColors sourcePlainTextColor]];
         [_command setBackgroundColor:[fontAndColors sourceTextBackgroundColor]]; 
         [_command setHidden:YES];
         [self addSubview:_command];
+		[_command setDelegate:window];
         
         // Status View
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
@@ -78,10 +78,6 @@
         [_status setTextColor:[fontAndColors sourcePlainTextColor]];
         [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
         [self addSubview:_status];
-        
-        [window addObserver:self forKeyPath:@"modeString" options:NSKeyValueObservingOptionNew|NSKeyValueObservingOptionInitial context:nil];
-        [window addObserver:self forKeyPath:@"staticMessage" options:NSKeyValueObservingOptionNew context:nil];
-        [window addObserver:self forKeyPath:@"errorMessage" options:NSKeyValueObservingOptionNew context:nil];
     }
     return self;
 }
@@ -98,31 +94,41 @@
     [_error setHidden:YES];
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if( [keyPath isEqualToString:@"modeString"] ){
-        [_status setStringValue:[change valueForKey:NSKeyValueChangeNewKey]];
-    }
-    else if( [keyPath isEqualToString:@"staticMessage"] ){
-        [_static setStringValue:[change valueForKey:NSKeyValueChangeNewKey]];
-    }
-    else if( [keyPath isEqualToString:@"errorMessage"] ){
-        NSString* msg = [change valueForKey:NSKeyValueChangeNewKey];
-        if( [msg length] != 0 ){
-            [_error setStringValue:msg];
-            [_error setHidden:NO];
-            [_errorTimer invalidate];
-            _errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
-            [[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
-        }else{
-            [_errorTimer invalidate];
-            [_error setHidden:YES];
-        }
-    }
+- (void)setStatusString:(NSString*)string
+{
+	[_status setStringValue:string];
 }
+
+- (void)setStaticString:(NSString*)string
+{
+	[_static setStringValue:string];
+}
+
+- (void)errorMessage:(NSString*)string
+{
+	NSString* msg = string;
+	if( [msg length] != 0 ){
+		[_error setStringValue:msg];
+		[_error setHidden:NO];
+		[_errorTimer invalidate];
+		_errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
+		[[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
+	}else{
+		[_errorTimer invalidate];
+		[_error setHidden:YES];
+	}
+}
+
+- (XVimCommandField*)commandField
+{
+	return _command;
+}
+
 // Layout our statusbar in DVTSourceTextScrollView
 // TODO: This process may be done in viewDidEndLiveResize of DVTSourceTextScrollView
 // We can override the method and after the original method, we can relayout the subviews.
-- (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view{
+- (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view
+{
     NSRect frame = [view frame];
     [_static setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
@@ -164,26 +170,16 @@
     }
 }
 
-- (void)viewWillDraw{
+- (void)viewWillDraw
+{
     [self layoutDVTSourceTextScrollViewSubviews:(NSScrollView*)[self superview]];
     [super viewWillDraw];
 }
 
-
-- (void)didFrameChanged:(NSNotification*)notification{
+- (void)didFrameChanged:(NSNotification*)notification
+{
     [self layoutDVTSourceTextScrollViewSubviews:[notification object]];
     [self setNeedsDisplay:YES];
 }
 
-- (void)setFocusOnCommandWithFirstLetter:(NSString*)first{
-    [_command setEditable:YES];
-    [_command setHidden:NO];
-    [[self window] makeFirstResponder:_command];
-    [_command setString:first];
-    [_command moveToEndOfLine:self];
-}
-
-- (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt{
-    [_command ask:msg owner:owner handler:selector option:opt];
-}
 @end

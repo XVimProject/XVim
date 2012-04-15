@@ -36,7 +36,6 @@
 
 
 @implementation XVimExCommand
-@synthesize history = _history;
 #define CMD(cmd,mtd) [[XVimExCmdname alloc] initWithCmd:cmd method:mtd]
 -(id)init {
     if( self = [super init] ){
@@ -557,14 +556,12 @@
                        CMD(@"~", @"sub:inWindow:"),
                        
 					   nil];
-        _history = [[NSMutableArray alloc] init];  // Internal array is mutable
     }
     return self;
 }
 
 - (void)dealloc{
     [_excommands release];
-    [_history release];
     [super dealloc];
 }
 
@@ -795,7 +792,6 @@
         return;
     }
           
-    [(NSMutableArray*)_history insertObject:cmd atIndex:0];
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
@@ -893,7 +889,7 @@
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     // Write any debug code.
-    [window setStaticMessage:@"testmessage"];
+    [window setStaticString:@"testmessage"];
     //NSMenu* menu = [NSApp mainMenu];
     //[self debugMenu:menu :0];
     //[[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 

@@ -16,6 +16,7 @@
 @class XVimCharacterSearch;
 @class XVimExCommand;
 @class XVimSourceCodeEditor;
+@class XVimHistoryHandler;
 
 @interface XVim : NSObject<XVimKeymapProvider>
 
@@ -31,7 +32,8 @@
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;
 - (void)parseRcFile;
-- (NSString*) exCommandHistory:(NSUInteger)no withPrefix:(NSString*)str;
+- (XVimHistoryHandler*)exCommandHistory;
+- (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
 
 @end

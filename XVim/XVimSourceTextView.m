@@ -106,7 +106,7 @@
     if( nil != window ){
         TRACE_LOG(@"XVimWindow object found");
         XVimCommandLine* cmdline = [[[XVimCommandLine alloc] initWithWindow:window] autorelease];
-        window.cmdLine = cmdline; 
+        window.commandLine = cmdline; 
         window.sourceView = base;
         
         // Try to find parent scroll view

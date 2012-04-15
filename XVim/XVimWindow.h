@@ -20,17 +20,18 @@
 @interface XVimWindow : NSTextView <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property NSInteger tag;
-@property (nonatomic, strong) NSString *modeString;
 
 @property(retain) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
 @property(weak, readonly) XVimRegister *recordingRegister;
 
-@property(retain) XVimCommandLine* cmdLine;
-@property (strong) NSString* staticMessage;
-@property (strong) NSString* errorMessage;
+@property(retain) XVimCommandLine* commandLine;
 
-- (void)commandModeWithFirstLetter:(NSString*)first;
+- (void)setStatusString:(NSString*)string;
+- (void)setStaticString:(NSString*)string;
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
+- (void)clearErrorMessage;
+- (XVimCommandField*)commandField;
 
 - (NSString*)sourceText;
 - (NSRange)selectedRange;
@@ -48,14 +49,14 @@
 
 - (void)setEvaluator:(XVimEvaluator*)evaluator;
 
-// Message from XVimCommandField 
-- (BOOL)commandCanceled;
-- (BOOL)commandFixed:(NSString*)command;
+// XVimCommandFieldDelegate
+- (void)commandFieldLostFocus:(XVimCommandField*)commandField;
+- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event;
 
+// XVimPlaybackHandler
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;
 - (void)handleTextInsertion:(NSString*)text;
 
-- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;

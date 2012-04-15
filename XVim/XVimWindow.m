@@ -11,9 +11,6 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
-#import "XVimExCommand.h"
-#import "XVimSearch.h"
-#import "XVimOptions.h"
 #import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
@@ -29,12 +26,9 @@
 
 @implementation XVimWindow
 @synthesize tag = _tag;
-@synthesize modeString = _modeString;
-@synthesize cmdLine = _cmdLine;
+@synthesize commandLine = _commandLine;
 @synthesize sourceView = _sourceView;
 @synthesize recordingRegister = _recordingRegister;
-@synthesize staticMessage = _staticMessage;
-@synthesize errorMessage = _errorMessage;
 
 - (id) initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
@@ -50,12 +44,17 @@
 - (void)setEvaluator:(XVimEvaluator*)evaluator {
 	if (evaluator != _currentEvaluator)
 	{
+		if( nil == evaluator ){
+			evaluator = [[XVimNormalEvaluator alloc] init];
+		}
+		
 		_currentEvaluator = evaluator;
 		[evaluator becameHandlerInWindow:self];
 		
 		[_keymapContext clear];
 		
-		self.modeString = [evaluator modeString];
+		NSString *modeString = [evaluator modeString];
+		[self setStatusString:modeString];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
 	}
 }
@@ -97,18 +96,15 @@
 		}
 	}
     
-    [self.cmdLine setNeedsDisplay:YES];
+    [self.commandLine setNeedsDisplay:YES];
     return YES;
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
-    [self setErrorMessage:@""];
+    [self clearErrorMessage];
 	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke inWindow:self];
 	[self recordEvent:keyStroke intoRegister:_recordingRegister];
 	[self recordEvent:keyStroke intoRegister:[[XVim instance] findRegister:@"repeat"]];
-	if( nil == nextEvaluator ){
-		nextEvaluator = [[XVimNormalEvaluator alloc] init];
-	}
 	
 	[self setEvaluator:nextEvaluator];
 }
@@ -117,53 +113,47 @@
 	[[self sourceView] insertText:text];
 }
 
-- (void)commandModeWithFirstLetter:(NSString*)first{
-    [self.cmdLine setFocusOnCommandWithFirstLetter:first];
+- (void)setStatusString:(NSString*)string
+{
+	XVimCommandLine *commandLine = self.commandLine;
+	[commandLine setStatusString:string];
 }
 
-// Should move to separated file.
-- (BOOL)commandFixed:(NSString*)command{
-    NSString* c = [command stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-    DVTSourceTextView* srcView = (DVTSourceTextView*)[self superview]; // DVTTextSourceView
-    TRACE_LOG(@"command : %@", c);
-    if( [c length] == 0 ){
-        // Something wrong
-        ERROR_LOG(@"command string empty");
-    }
-    else if( [c characterAtIndex:0] == ':' ){
-		XVimExCommand *excmd = [[XVim instance] excmd];
-        [excmd executeCommand:c inWindow:self];
-    }
-    else if ([c characterAtIndex:0] == '/' || [c characterAtIndex:0] == '?') 
-	{
-		XVimSearch *searcher = [[XVim instance] searcher];
-        NSRange found = [searcher executeSearch:c from:[self cursorLocation] inWindow:self];
-        //Move cursor and show the found string
-        if( found.location != NSNotFound ){
-            [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-			[srcView scrollTo:[self cursorLocation]];
-            [srcView showFindIndicatorForRange:found];
-        }else{
-            [self errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
-        }
-    }
-	
-    [[self window] makeFirstResponder:srcView]; // Since XVim is a subview of DVTSourceTextView;
-    return YES;
+- (void)setStaticString:(NSString*)string
+{
+	XVimCommandLine *commandLine = self.commandLine;
+	[commandLine setStaticString:string];
 }
-
-- (BOOL)commandCanceled{
-    [[self window] makeFirstResponder:[self superview]]; // Since XVim is a subview of DVTSourceTextView;
-    return YES;
-}
-
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
-    [self setErrorMessage:message];
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:message];
     if (ringBell) {
         [[XVim instance] ringBell];
     }
     return;
+}
+
+- (void)clearErrorMessage
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:@""];
+}
+
+- (XVimCommandField*)commandField 
+{
+	XVimCommandLine *commandLine = self.commandLine;
+	return [commandLine commandField];
+}
+
+- (void)commandFieldLostFocus:(XVimCommandField*)commandField
+{
+	[self setEvaluator:nil];
+}
+
+- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event
+{
+	[[self sourceView] keyDown:event];
 }
 
 - (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
@@ -173,7 +163,7 @@
 - (void)recordIntoRegister:(XVimRegister*)xregister{
     if (_recordingRegister == nil){
         _recordingRegister = xregister;
-        [self setStaticMessage:@"recording"];
+        [self setStaticString:@"recording"];
         // when you record into a register you clear out any previous recording
         // unless it was capitalized
         [_recordingRegister clear];
@@ -187,7 +177,7 @@
         [[XVim instance] ringBell];
     }else{
         _recordingRegister = nil;
-        [self setStaticMessage: @""];
+        [self setStaticString: @""];
     }
 }
 

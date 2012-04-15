@@ -29,6 +29,9 @@
 #import "DVTCompletionController.h"
 #import "XVimKeymapProvider.h"
 #import "Logger.h"
+#import "XVimCommandLineEvaluator.h"
+#import "XVimExCommand.h"
+#import "XVimSearch.h"
 
 @interface XVimNormalEvaluator()
 @property (readwrite) NSUInteger playbackCount;
@@ -557,21 +560,48 @@
 }
 
 - (XVimEvaluator*)COLON:(XVimWindow*)window{
-    // Go to Cmd Line mode
-    // Command line mode is treated totally different way from this XVimEvaluation system
-    // aet firstResponder to XVimCommandLine(NSView's subclass) and everything is processed there.
-    [window commandModeWithFirstLetter:@":"];
-    return nil;
+	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithParent:self 
+															   firstLetter:@":" 
+																   history:[[XVim instance] exCommandHistory]
+																onComplete:^ XVimEvaluator* (NSString* command) 
+	{
+		XVimExCommand *excmd = [[XVim instance] excmd];
+        [excmd executeCommand:command inWindow:window];
+		return nil;
+	}];
+	
+	return eval;
+}
+
+- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter 
+{
+	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithParent:self 
+															   firstLetter:firstLetter
+																   history:[[XVim instance] searchHistory]
+																onComplete:^ XVimEvaluator* (NSString *command)
+						   {
+							   XVimSearch *searcher = [[XVim instance] searcher];
+							   DVTSourceTextView *sourceView = [window sourceView];
+							   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+							   //Move cursor and show the found string
+							   if (found.location != NSNotFound) {
+								   [sourceView setSelectedRange:NSMakeRange(found.location, 0)];
+								   [sourceView scrollTo:[window cursorLocation]];
+								   [sourceView showFindIndicatorForRange:found];
+							   } else {
+								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+							   }
+							   return nil;
+						   }];
+	return eval;
 }
 
 - (XVimEvaluator*)QUESTION:(XVimWindow*)window{
-    [window commandModeWithFirstLetter:@"?"];
-    return nil;
+	return [self executeSearch:window firstLetter:@"?"];
 }
 
 - (XVimEvaluator*)SLASH:(XVimWindow*)window{
-    [window commandModeWithFirstLetter:@"/"];
-    return nil;
+	return [self executeSearch:window firstLetter:@"/"];
 }
 
 - (XVimEvaluator*)DOT:(XVimWindow*)window{

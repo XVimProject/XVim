@@ -46,13 +46,6 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 @class XVimRegister;
 @protocol XVimKeymapProvider;
 
-typedef enum {
-  MARKOPERATOR_SET,
-  MARKOPERATOR_MOVETO,
-  MARKOPERATOR_MOVETOSTARTOFLINE
-} XVimMarkOperator;
-
-
 @interface XVimEvaluator : NSObject
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;

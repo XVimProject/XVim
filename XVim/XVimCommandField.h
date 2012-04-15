@@ -7,22 +7,24 @@
 //
 
 #import <AppKit/AppKit.h>
-typedef enum {
-    ASKING_OPTION_NONE = 0x00,
-    ACCEPT_ONE_LETTER,
-}ASKING_OPTION;
+
+@class XVimKeyStroke;
+@class XVimWindow;
+@class XVimCommandField;
 
 @protocol XVimCommandFieldDelegate
-- (BOOL)commandCanceled;
-- (BOOL)commandFixed:(NSString*)cmd;
+- (void)commandFieldLostFocus:(XVimCommandField*)commandField;
+- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event;
 @end
 
-@interface XVimCommandField : NSTextView{
-    id <XVimCommandFieldDelegate> delegate;
-}
-@property (retain, nonatomic) id <XVimCommandFieldDelegate> delegate;
+@interface XVimCommandField : NSTextView
 
-- (void)answered:(id)sender;
-- (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt;
+- (void)setDelegate:(id<XVimCommandFieldDelegate>)delegate;
+- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
+- (void)show;
+- (void)hide;
+
+// Hack: Prevents commandFieldLostFocus when command field disappears naturally
+- (void)absorbFocusEvent;
 
 @end
