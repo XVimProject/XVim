@@ -175,9 +175,10 @@
             --count;
         }
     }
+
     NSUInteger from = range.location;
     NSUInteger head = [view headOfLine:range.location];
-    if ([self numericArg] > 1 && !isWhiteSpace([text characterAtIndex:from])){
+    if (head != NSNotFound && [self numericArg] > 1 && !isWhiteSpace([text characterAtIndex:from])){
         for (; from >= head; --from){
             unichar c = [text characterAtIndex:from-1];
             if (isNewLine(c)){
@@ -190,7 +191,11 @@
         }
     }
     
-    NSUInteger length = to - from - 1;
+    NSUInteger length = to - from;
+    if (![view isEOF:to]){
+        length -= 1;
+    }
+ 
     if (length > 0){
         [view setSelectedRange:NSMakeRange(from, length)];
         [view del:self];

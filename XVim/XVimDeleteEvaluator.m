@@ -195,15 +195,19 @@
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     DVTSourceTextView* view = [window sourceView];
-    NSString* string = [view string];
     
-    if( [string length] != 0 && [string length] == to && [string length] == from){
+    BOOL eof = [view isEOF:to];
+    BOOL eol = [view isEOL:to];
+    BOOL blank = [view isBlankLine:to];
+    BOOL last = [view isLastCharacter:to];
+    BOOL exclusive = type == CHARACTERWISE_EXCLUSIVE;
+    TRACE_LOG(@"from: %d to: %d eof: %d eol: %d", from, to, eof, eol);
+    if(from == to && (((eol || last) && exclusive) || eof)){
         // edge case:
         // if repeat is only one and we are at the end of a file at an empty line
         // delete the current line even though it's "behind us" (sort of)
         // this is vi behavior.
-        from--;
-        [view setSelectedRange:NSMakeRange(from, 1)];
+        [view setSelectedRange:NSMakeRange(eof && blank ? from - 1 : from, 1)];
         [view del:self];
         return nil;
     }
