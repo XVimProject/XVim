@@ -129,7 +129,7 @@
         
         // Store off any needed text
         self.lastInsertedText = [self getInsertedTextInWindow:window];
-        [self recordTextIntoRegister:window.recordingRegister inWindow:window];
+        [self recordTextIntoRegister:[XVim instance].recordingRegister inWindow:window];
     }
     
     // Store off the new start range
@@ -147,11 +147,12 @@
     }
     
     // Store off any needed text
+    XVim *xvim = [XVim instance];
     if (!self.movementKeyPressed){
-        [self recordTextIntoRegister:window.recordingRegister inWindow:window];
-        [self recordTextIntoRegister:[[XVim instance] findRegister:@"repeat"] inWindow:window];
+        [self recordTextIntoRegister:xvim.recordingRegister inWindow:window];
+        [self recordTextIntoRegister:xvim.repeatRegister inWindow:window];
     }else if(self.lastInsertedText.length > 0){
-        [[[XVim instance] findRegister:@"repeat"] appendText:self.lastInsertedText];
+        [xvim.repeatRegister appendText:self.lastInsertedText];
     }
     [[sourceView completionController] hideCompletions];
 	

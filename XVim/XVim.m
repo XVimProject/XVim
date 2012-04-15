@@ -54,6 +54,9 @@ static XVim* s_instance = nil;
 @implementation XVim
 @synthesize registers = _registers;
 @synthesize yankRegister = _yankRegister;
+@synthesize repeatRegister = _repeatRegister;
+@synthesize recordingRegister = _recordingRegister;
+@synthesize lastPlaybackRegister = _lastPlaybackRegister;
 @synthesize numberedRegisters = _numberedRegisters;
 @synthesize searcher = _searcher;
 @synthesize characterSearcher = _characterSearcher;
@@ -198,7 +201,10 @@ static XVim* s_instance = nil;
          nil];
         
         _yankRegister = nil;
-
+        _recordingRegister = nil;
+        _lastPlaybackRegister = nil;
+        _repeatRegister = [_registers valueForKey:@"repeat"];
+        
 		for (int i = 0; i < MODE_COUNT; ++i)
 		{
 			_keymaps[i] = [[XVimKeymap alloc] init];
@@ -254,6 +260,11 @@ static XVim* s_instance = nil;
 }
 
 - (void)onDeleteOrYank{
+    // Don't do anything if we are recording into a register (that isn't the repeat register)
+    if (self.recordingRegister != nil){
+        return;
+    }
+
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
     if (self.yankRegister != nil){

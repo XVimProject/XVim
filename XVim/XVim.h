@@ -22,14 +22,18 @@
 
 + (XVim*)instance;
 
-@property (strong, readonly) NSDictionary* registers;
 @property (strong) XVimOptions* options;
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimCharacterSearch* characterSearcher;
 @property (strong) XVimExCommand* excmd;
 @property (weak) XVimSourceCodeEditor* editor;
-@property (strong) XVimRegister *yankRegister;
 @property (readonly) NSString* pasteText;
+
+@property (strong, readonly) NSDictionary* registers;
+@property (weak) XVimRegister *yankRegister;
+@property (weak) XVimRegister *repeatRegister;
+@property (weak) XVimRegister *recordingRegister;
+@property (weak) XVimRegister *lastPlaybackRegister;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;

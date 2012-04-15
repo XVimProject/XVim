@@ -34,6 +34,12 @@ XVimRegisterEvalMode _mode;
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+	SEL handler = [keyStroke selectorForInstance:self];
+	if (handler){
+		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
+        return [self performSelector:handler withObject:window];
+    }
+
     XVimRegister *xregister = [[XVim instance] findRegister:[keyStroke toSelectorString]];
     if (_mode == REGISTER_EVAL_MODE_YANK){
         if (xregister.isReadOnly == NO){
@@ -52,6 +58,10 @@ XVimRegisterEvalMode _mode;
     }
 
     return nil;
+}
+
+- (XVimEvaluator*)AT:(XVimWindow*)window{
+        return [[XVimNormalEvaluator alloc] initWithRegister:[XVim instance].lastPlaybackRegister andPlaybackCount:_count];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{

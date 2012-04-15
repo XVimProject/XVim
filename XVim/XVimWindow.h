@@ -23,7 +23,6 @@
 
 @property(retain) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
-@property(weak, readonly) XVimRegister *recordingRegister;
 
 @property(retain) XVimCommandLine* commandLine;
 

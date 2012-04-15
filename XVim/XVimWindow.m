@@ -28,14 +28,12 @@
 @synthesize tag = _tag;
 @synthesize commandLine = _commandLine;
 @synthesize sourceView = _sourceView;
-@synthesize recordingRegister = _recordingRegister;
 
 - (id) initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
         _tag = XVIM_TAG;
 		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
-		_recordingRegister = nil;
 		_keymapContext = [[XVimKeymapContext alloc] init];
 	}
 	return self;
@@ -102,9 +100,10 @@
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self clearErrorMessage];
+    XVim *xvim = [XVim instance];
 	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke inWindow:self];
-	[self recordEvent:keyStroke intoRegister:_recordingRegister];
-	[self recordEvent:keyStroke intoRegister:[[XVim instance] findRegister:@"repeat"]];
+	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister];
+	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister];
 	
 	[self setEvaluator:nextEvaluator];
 }
@@ -161,22 +160,24 @@
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{
-    if (_recordingRegister == nil){
-        _recordingRegister = xregister;
+    XVim *xvim = [XVim instance];
+    if (xvim.recordingRegister == nil){
+        xvim.recordingRegister = xregister;
         [self setStaticString:@"recording"];
         // when you record into a register you clear out any previous recording
         // unless it was capitalized
-        [_recordingRegister clear];
+        [xvim.recordingRegister clear];
     }else{        
-        [[XVim instance] ringBell];
+        [xvim ringBell];
     }
 }
 
 - (void)stopRecordingRegister:(XVimRegister*)xregister{
-    if (_recordingRegister == nil){
-        [[XVim instance] ringBell];
+    XVim *xvim = [XVim instance];
+    if (xvim.recordingRegister == nil){
+        [xvim ringBell];
     }else{
-        _recordingRegister = nil;
+        xvim.recordingRegister = nil;
         [self setStaticString: @""];
     }
 }

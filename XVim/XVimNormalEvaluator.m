@@ -69,6 +69,7 @@
         _playbackCount = count;
         _playbackRegister = xregister;
         [XVim instance].yankRegister = nil;
+        [XVim instance].lastPlaybackRegister = xregister;
     }
     return self;
 }
@@ -420,8 +421,9 @@
 }
 
 - (XVimEvaluator*)q:(XVimWindow*)window{
-    if (window.recordingRegister != nil){
-        [window stopRecordingRegister:window.recordingRegister];
+    XVim *xvim = [XVim instance];
+    if (xvim.recordingRegister != nil){
+        [window stopRecordingRegister:xvim.recordingRegister];
         return nil;
     }
     
