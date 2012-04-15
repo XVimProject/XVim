@@ -1418,7 +1418,7 @@ NSInteger fetchSubStringEnds(NSStringHelper* h, NSInteger index);
 NSInteger fetchSubStringEnds(NSStringHelper* h, NSInteger index)
 {
     NSInteger copyBegin = (index + 1) >= ITERATE_STRING_BUFFER_SIZE ? index + 1 - ITERATE_STRING_BUFFER_SIZE : 0;
-    NSInteger size      = index - copyBegin + 1;
+    NSInteger size      = (index + ITERATE_STRING_BUFFER_SIZE) > h->strLen ? h->strLen - index : ITERATE_STRING_BUFFER_SIZE;
     [h->string getCharacters:h->buffer range:NSMakeRange(copyBegin, size)];
     return copyBegin;
 }
@@ -1434,9 +1434,6 @@ unichar characterAtIndex(NSStringHelper* h, NSInteger index)
     }
     return h->buffer[index - h->index];
 }
-
-
-
 
 NSInteger xv_caret(NSString *string, NSInteger index)
 {
