@@ -9,12 +9,15 @@
 #import <Foundation/Foundation.h>
 
 @class XVimKeyStroke;
-@class XVimKeymapNode;
+
+@interface XVimKeymapContext : NSObject
+- (void)clear;
+@end
 
 @interface XVimKeymap : NSObject
 - (void)mapKeyStroke:(NSArray*)keyStrokes to:(NSArray*)targetKeyStrokes;
 
 - (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options 
 						   withPrimary:(XVimKeyStroke*)primaryKeyStroke
-						   withContext:(XVimKeymapNode**)context;
+						   withContext:(XVimKeymapContext*)context;
 @end

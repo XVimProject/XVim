@@ -8,6 +8,12 @@
 
 #import "XVimEvaluator.h"
 
+typedef enum {
+	MARKOPERATOR_SET,
+	MARKOPERATOR_MOVETO,
+	MARKOPERATOR_MOVETOSTARTOFLINE
+} XVimMarkOperator;
+
 // This evaluator is collecting a mark name as part of the 'm{mark-name-letter}' command
 @interface XVimLocalMarkEvaluator : XVimEvaluator{
 @private

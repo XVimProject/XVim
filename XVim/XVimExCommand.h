@@ -75,6 +75,5 @@
 @interface XVimExCommand : NSObject{
     NSArray* _excommands;
 }
-@property (readonly) NSArray* history;
 - (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window;
 @end

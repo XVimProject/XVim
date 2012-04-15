@@ -15,10 +15,14 @@
 @property NSInteger tag;
 
 - (id)initWithWindow:(XVimWindow*)window;
+
+- (void)setStatusString:(NSString*)string;
+- (void)setStaticString:(NSString*)string;
+- (void)errorMessage:(NSString*)string;
+
+- (XVimCommandField*)commandField;
+
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view;
 - (void)didFrameChanged:(NSNotification*)notification;
-- (void)setFocusOnCommandWithFirstLetter:(NSString*)first;
-
-- (void)ask:(NSString*)msg owner:(id)owner handler:(SEL)selector option:(ASKING_OPTION)opt;
 
 @end
