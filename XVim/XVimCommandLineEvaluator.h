@@ -15,10 +15,11 @@ typedef void (^OnKeyPressHandler) (NSString* command);
 
 @interface XVimCommandLineEvaluator : XVimEvaluator
 
-- (id)initWithParent:(XVimEvaluator*)parent 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+			   parent:(XVimEvaluator*)parent 
 		 firstLetter:(NSString*)firstLetter 
 			 history:(XVimHistoryHandler*)history
-		  onComplete:(OnCompleteHandler)completeHandler
+		  completion:(OnCompleteHandler)completeHandler
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
@@ -44,7 +45,5 @@ typedef void (^OnKeyPressHandler) (NSString* command);
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
 
 - (NSString*)modeString;
-
-- (NSUInteger)numericArg;
 
 @end

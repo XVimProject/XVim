@@ -8,13 +8,13 @@
 
 #import "XVimEvaluator.h"
 
-@interface XVimInsertEvaluator : XVimEvaluator{
-    NSUInteger _repeat;
+@interface XVimInsertEvaluator : XVimEvaluator {
     BOOL _insertedEventsAbort;
     NSMutableArray* _insertedEvents;
     BOOL _oneCharMode;
 }
 
-- (id)initWithRepeat:(NSUInteger)repeat;
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat;
+- (id)initWithContext:(XVimEvaluatorContext*)context
+		  oneCharMode:(BOOL)oneCharMode;
+
 @end

@@ -9,20 +9,16 @@
 #import "XVimMotionArgumentEvaluator.h"
 #import "XVimKeyStroke.h"
 
-@interface XVimMotionArgumentEvaluator() {
-	NSUInteger _parentNumericArg;
-}
-@end
-
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
 
-- (id)initWithParent:(XVimMotionEvaluator*)parent numericArg:(NSUInteger)numericArg {
-    self = [super init];
+- (id)initWithContext:(XVimEvaluatorContext*)context
+			   parent:(XVimMotionEvaluator*)parent
+{
+    self = [super initWithContext:context];
     if( self ){
         _parent = [parent retain];
-		_parentNumericArg = numericArg;
     }
     return self;
 }
@@ -58,7 +54,7 @@
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return _parent;
+    return [_parent withNewContext];
 }
 
 -(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
@@ -92,8 +88,4 @@
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
-- (NSUInteger)numericArg
-{
-	return [super numericArg] * _parentNumericArg;
-}
 @end

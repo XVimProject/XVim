@@ -14,13 +14,15 @@
 
 @implementation XVimLocalMarkEvaluator
 
-- (id)init
+/*- (id)init
 {
     return [self initWithMarkOperator:MARKOPERATOR_SET];
-}
+}*/
 
-- (id)initWithMarkOperator:(XVimMarkOperator)markOperator {
-    self = [super init];
+- (id)initWithContext:(XVimEvaluatorContext*)context
+		 markOperator:(XVimMarkOperator)markOperator 
+{
+    self = [super initWithContext:context];
     if (self) {
         _markOperator = markOperator;
     }

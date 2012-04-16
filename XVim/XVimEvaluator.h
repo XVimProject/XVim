@@ -46,7 +46,11 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 @class XVimRegister;
 @protocol XVimKeymapProvider;
 
+@class XVimEvaluatorContext;
+
 @interface XVimEvaluator : NSObject
+
+- (id)initWithContext:(XVimEvaluatorContext*)context;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
 
@@ -72,6 +76,62 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (NSString*)modeString;
 
+////////////////////////////////////////////////
+// Context convenience functions
+
+// Normally argumentString, but can be overridden
+- (NSString*)argumentDisplayString;
+
+// Returns the current stack of arguments (eg. "a10d...")
+- (NSString*)argumentString;
+
+// Returns the context yank register if any
+- (XVimRegister*)yankRegister;
+
+// Returns the context numeric arguments multiplied together
 - (NSUInteger)numericArg;
 
+// Returns the context
+- (XVimEvaluatorContext*)context;
+
+// Equivalent to [[self context] copy]
+- (XVimEvaluatorContext*)contextCopy;
+
+// Clears the context and returns self, useful for escaping from operators
+- (XVimEvaluator*)withNewContext;
+
+// Returns self with the passed context
+- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context;
+
 @end
+
+///////////////////////////////////////////////////
+
+@interface XVimEvaluatorContext : NSObject
+
++ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg;
+
++ (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument;
+
+- (XVimRegister*)yankRegister;
+
+- (XVimRegister*)setYankRegister:(XVimRegister*)yankRegister;
+
+- (NSUInteger)numericArg;
+
+- (void)pushEmptyNumericArgHead;
+
+- (void)setNumericArgHead:(NSUInteger)numericArg;
+
+- (NSNumber*)numericArgHead;
+
+- (NSString*)argumentString;
+
+- (XVimEvaluatorContext*)setArgumentString:(NSString*)argument;
+
+- (XVimEvaluatorContext*)appendArgument:(NSString*)argument;
+
+- (XVimEvaluatorContext*)copy;
+
+@end
+

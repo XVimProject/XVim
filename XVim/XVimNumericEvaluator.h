@@ -11,6 +11,5 @@
 
 // This evaluator is waiting for number input.
 @interface XVimNumericEvaluator : XVimEvaluator
-- (NSUInteger)numericArg;
 - (BOOL)numericMode;
 @end

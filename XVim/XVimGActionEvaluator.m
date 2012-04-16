@@ -33,23 +33,23 @@
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] init];
-	return [[XVimLowercaseEvaluator alloc] initWithOperatorAction:operatorAction 
-													   withParent:_parent
-													   numericArg:[self numericArg]];
+	return [[XVimLowercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"u"]
+											operatorAction:operatorAction 
+												withParent:_parent];
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] init];
-	return [[XVimUppercaseEvaluator alloc] initWithOperatorAction:operatorAction 
-													   withParent:_parent
-													   numericArg:[self numericArg]];
+	return [[XVimUppercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"U"]
+											operatorAction:operatorAction 
+												withParent:_parent];
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] init];
-	return [[XVimTildeEvaluator alloc] initWithOperatorAction:operatorAction 
-												   withParent:_parent
-												   numericArg:[self numericArg]];
+	return [[XVimTildeEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"~"]
+										operatorAction:operatorAction 
+											withParent:_parent];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

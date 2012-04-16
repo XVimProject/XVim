@@ -11,8 +11,8 @@
 @class XVimOperatorAction;
 
 @interface XVimTextObjectEvaluator : XVimEvaluator
-- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+	   operatorAction:(XVimOperatorAction*)operatorAction 
 					withParent:(XVimEvaluator*)parent
-					  numericArg:(NSUInteger)numericArg
 				   inclusive:(BOOL)inclusive;
 @end

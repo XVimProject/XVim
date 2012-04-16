@@ -27,10 +27,8 @@
 @property (strong) XVimCharacterSearch* characterSearcher;
 @property (strong) XVimExCommand* excmd;
 @property (weak) XVimSourceCodeEditor* editor;
-@property (readonly) NSString* pasteText;
 
 @property (strong, readonly) NSDictionary* registers;
-@property (weak) XVimRegister *yankRegister;
 @property (weak) XVimRegister *repeatRegister;
 @property (weak) XVimRegister *recordingRegister;
 @property (weak) XVimRegister *lastPlaybackRegister;
@@ -41,6 +39,7 @@
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
-- (void)onDeleteOrYank;
+- (void)onDeleteOrYank:(XVimRegister*)yankRegister;
+- (NSString*)pasteText:(XVimRegister*)yankRegister;
 
 @end

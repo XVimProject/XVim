@@ -9,41 +9,30 @@
 #import "XVimNumericEvaluator.h"
 #import "XVimKeyStroke.h"
 
-@interface XVimNumericEvaluator() {
-    NSUInteger _numericArg;
-    BOOL _numericMode;
-}
-- (void)resetNumericArg;
-@end
-
 @implementation XVimNumericEvaluator
-- (id)init
-{
-    self = [super init];
-    if (self) {
-		[self resetNumericArg];
-    }
-    return self;
-}
-
-- (NSUInteger)numericArg
-{
-	return _numericArg;
-}
 
 - (BOOL)numericMode
 {
-	return _numericMode;
+	return [[self context] numericArgHead] != nil;
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
     NSString* keyStr = [keyStroke toSelectorString];
-    if( keyStroke.isNumeric ){
-        if( _numericMode ){
+	XVimEvaluatorContext *context = [self context];
+	
+    if (keyStroke.isNumeric) {
+		
+		NSNumber *numericArgHead = [context numericArgHead];
+		
+        if (numericArgHead) {
             NSString* numStr = [keyStr substringFromIndex:3];
             NSInteger n = [numStr integerValue]; 
-            _numericArg*=10; //FIXME: consider integer overflow
-            _numericArg+=n;
+			NSUInteger newHead = [numericArgHead unsignedIntegerValue];
+            newHead*=10; //FIXME: consider integer overflow
+            newHead+=n;
+			[context setNumericArgHead:newHead];
+			[context appendArgument:numStr];
+			
             return self;
         }
         else{
@@ -53,20 +42,14 @@
             }else{
                 NSString* numStr = [keyStr substringFromIndex:3];
                 NSInteger n = [numStr integerValue]; 
-                _numericArg=n;
-                _numericMode=YES;
+				[context setNumericArgHead:n];
+				[context appendArgument:numStr];
                 return self;
             }
         }
     }
     
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
-    [self resetNumericArg]; // Reset the numeric arg after evaluating an event
     return nextEvaluator;
-}
-
-- (void)resetNumericArg{
-    _numericArg = 1;
-    _numericMode = NO;
 }
 @end

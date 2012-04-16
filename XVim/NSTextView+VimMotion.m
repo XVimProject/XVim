@@ -150,11 +150,11 @@
     return;
 }
 
-- (void)del:(id)sender
+- (void)del:(id)sender intoYankRegister:(XVimRegister*)xregister
 {
 	[self cut:sender];
 	[self adjustCursorPosition];
-    [[XVim instance] onDeleteOrYank];
+    [[XVim instance] onDeleteOrYank:xregister];
 }
 
 /**

@@ -18,21 +18,19 @@
 @interface XVimOperatorEvaluator() {
 	XVimOperatorAction *_operatorAction;
 	XVimEvaluator *_parent;
-	NSUInteger _parentNumericArg;
 }
 @end
 
 @implementation XVimOperatorEvaluator
 
-- (id)initWithOperatorAction:(XVimOperatorAction*) action 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+	   operatorAction:(XVimOperatorAction*) action 
 				  withParent:(XVimEvaluator*)parent
-				  numericArg:(NSUInteger)numericArg
 {
-	if (self = [super init])
+	if (self = [super initWithContext:context])
 	{
 		self->_operatorAction = action;
 		self->_parent = parent;
-		self->_parentNumericArg = numericArg;
 	}
 	return self;
 }
@@ -63,7 +61,7 @@
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return _parent;
+    return [_parent withNewContext];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
@@ -72,17 +70,17 @@
 }
 
 - (XVimEvaluator*)a:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"]
+															operatorAction:_operatorAction 
 																	   withParent:_parent
-																		   numericArg:[self numericArg]
 																		inclusive:YES];
 	return eval;
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithOperatorAction:_operatorAction 
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"]
+															operatorAction:_operatorAction 
 																	   withParent:_parent
-																		   numericArg:[self numericArg]
 																		inclusive:NO];
 	return eval;
 }
@@ -122,11 +120,6 @@
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
 	return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
-}
-
-- (NSUInteger)numericArg
-{
-	return [super numericArg] * _parentNumericArg;
 }
 
 @end

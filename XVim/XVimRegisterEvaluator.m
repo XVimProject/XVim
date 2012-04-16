@@ -14,18 +14,24 @@
 #import "XVim.h"
 #import "Logger.h"
 
+@interface XVimRegisterEvaluator() {
+	XVimEvaluator *_parent;
+	OnSelectRegister _onComplete;
+}
+@end
+
 @implementation XVimRegisterEvaluator
 
-NSUInteger _count;
-XVimRegisterEvalMode _mode;
-
--(id)initWithMode:(XVimRegisterEvalMode)mode andCount:(NSUInteger)count{
-    self = [super init];
-    if (self != nil){
-        _mode = mode;
-        _count = count;
-    }
-    return self;
+- (id)initWithContext:(XVimEvaluatorContext*)context
+			   parent:(XVimEvaluator*)parent
+		 completion:(OnSelectRegister)onComplete
+{
+	if (self = [super initWithContext:context])
+	{
+		_parent = parent;
+		_onComplete = [onComplete copy];
+	}
+	return self;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
@@ -33,39 +39,49 @@ XVimRegisterEvalMode _mode;
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke 
+			  inWindow:(XVimWindow*)window
+{
 	SEL handler = [keyStroke selectorForInstance:self];
 	if (handler){
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
         return [self performSelector:handler withObject:window];
     }
 
-    XVimRegister *xregister = [[XVim instance] findRegister:[keyStroke toSelectorString]];
-    if (_mode == REGISTER_EVAL_MODE_YANK){
-        if (xregister.isReadOnly == NO){
-            return [[XVimNormalEvaluator alloc] initWithYankRegister:xregister];
-        }else{
-            [[XVim instance] ringBell];
-        }
-    } else if (_mode == REGISTER_EVAL_MODE_RECORD){
-        if (xregister.isReadOnly == NO){
-            [window recordIntoRegister:xregister];
-        }else{
-            [[XVim instance] ringBell];
-        }
-    } else if (_mode == REGISTER_EVAL_MODE_PLAYBACK){
-        return [[XVimNormalEvaluator alloc] initWithRegister:xregister andPlaybackCount:_count];
-    }
-
-    return nil;
+	return _onComplete([keyStroke toSelectorString], [self contextCopy]);
 }
-
-- (XVimEvaluator*)AT:(XVimWindow*)window{
-        return [[XVimNormalEvaluator alloc] initWithRegister:[XVim instance].lastPlaybackRegister andPlaybackCount:_count];
-}
-
+	
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     return REGISTER_IGNORE;
+}
+
+- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
+{
+    return [_parent insertionPointInWindow:window];
+}
+
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
+{
+	return [_parent drawRect:rect inWindow:window];
+}
+
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
+{
+	return [_parent shouldDrawInsertionPointInWindow:window];
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
+{
+	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.5];
+}
+
+- (NSString*)modeString
+{
+	return [_parent modeString];
+}
+
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
+    return [_parent withNewContext];
 }
 
 @end

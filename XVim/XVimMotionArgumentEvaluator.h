@@ -20,5 +20,6 @@
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window;
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
 
-- (id)initWithParent:(XVimMotionEvaluator*)parent numericArg:(NSUInteger)numericArg;
+- (id)initWithContext:(XVimEvaluatorContext*)context
+			   parent:(XVimMotionEvaluator*)parent;
 @end

@@ -18,15 +18,16 @@
 
 @implementation XVimShiftEvaluator
 
-- (id)initWithOperatorAction:(XVimShiftAction*)action 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+	   operatorAction:(XVimOperatorAction*)action 
 				  withParent:(XVimEvaluator*)parent
-				  numericArg:(NSUInteger)numericArg
+					 unshift:(BOOL)unshift
 {
-	if (self = [super initWithOperatorAction:action 
-								  withParent:parent
-								  numericArg:numericArg])
+	if (self = [super initWithContext:context
+					   operatorAction:action 
+								  withParent:parent])
 	{
-		_unshift = action.unshift;
+		self->_unshift = unshift;
 	}
 	return self;
 }
@@ -59,13 +60,11 @@
 
 @implementation XVimShiftAction
 
-@synthesize unshift = _unshift;
-
 - (id)initWithUnshift:(BOOL)unshift
 {
 	if (self = [super init])
 	{
-		_unshift = unshift;
+		self->_unshift = unshift;
 	}
 	return self;
 }

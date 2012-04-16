@@ -22,6 +22,7 @@
 	BOOL _handlingMouseEvent;
 }
 - (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister;
+- (void)setArgumentString:(NSString*)string;
 @end
 
 @implementation XVimWindow
@@ -51,8 +52,8 @@
 		
 		[_keymapContext clear];
 		
-		NSString *modeString = [evaluator modeString];
-		[self setStatusString:modeString];
+		[self setStatusString:[evaluator modeString]];
+		[self setArgumentString:[evaluator argumentDisplayString]];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
 	}
 }
@@ -106,6 +107,7 @@
 	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister];
 	
 	[self setEvaluator:nextEvaluator];
+	[self setArgumentString:[_currentEvaluator argumentDisplayString]];
 }
 
 - (void)handleTextInsertion:(NSString*)text {
@@ -116,6 +118,12 @@
 {
 	XVimCommandLine *commandLine = self.commandLine;
 	[commandLine setStatusString:string];
+}
+
+- (void)setArgumentString:(NSString*)string
+{
+	XVimCommandLine *commandLine = self.commandLine;
+	[commandLine setArgumentString:string];
 }
 
 - (void)setStaticString:(NSString*)string

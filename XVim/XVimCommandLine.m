@@ -22,7 +22,9 @@
     XVimCommandField* _command;
     NSTextField* _static;
     NSTextField* _status;
+    NSTextField* _argument;
     NSTextField* _error;
+	NSBox* _statusBarBackgroundBox;
     NSTimer* _errorTimer;
 }
 @end
@@ -65,12 +67,17 @@
         [_command setHidden:YES];
         [self addSubview:_command];
 		[_command setDelegate:window];
+		
+		// Box
+		_statusBarBackgroundBox = [[NSBox alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+		[_statusBarBackgroundBox setBorderType:NSNoBorder];
+		[_statusBarBackgroundBox setBoxType:NSBoxCustom];
+		[_statusBarBackgroundBox setFillColor:[fontAndColors sourceTextInvisiblesColor]];
+		[self addSubview:_statusBarBackgroundBox];
         
         // Status View
-        NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
-        [paragraph setAlignment:NSRightTextAlignment];
         _status = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
-        [_status setAlignment:NSRightTextAlignment];
+        [_status setAlignment:NSLeftTextAlignment];
         [_status setEditable:NO];
         [_status setBordered:NO];
         [_status setSelectable:NO];
@@ -78,12 +85,25 @@
         [_status setTextColor:[fontAndColors sourcePlainTextColor]];
         [_status setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
         [self addSubview:_status];
+        
+		// Argument View
+		_argument = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+        [_argument setAlignment:NSLeftTextAlignment];
+        [_argument setEditable:NO];
+        [_argument setBordered:NO];
+        [_argument setSelectable:NO];
+        [[_argument cell] setFocusRingType:NSFocusRingTypeNone];
+        [_argument setTextColor:[fontAndColors sourcePlainTextColor]];
+        [_argument setBackgroundColor:[fontAndColors sourceTextInvisiblesColor]];
+        [self addSubview:_argument];
     }
     return self;
 }
 
 - (void)dealloc{
+	[_statusBarBackgroundBox release];
     [_command release];
+	[_argument release];
     [_status release];
     [_static release];
     [_error release];
@@ -97,6 +117,11 @@
 - (void)setStatusString:(NSString*)string
 {
 	[_status setStringValue:string];
+}
+
+- (void)setArgumentString:(NSString*)string
+{
+	[_argument setStringValue:string];
 }
 
 - (void)setStaticString:(NSString*)string
@@ -130,14 +155,22 @@
 - (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view
 {
     NSRect frame = [view frame];
+	
+	CGFloat statusMargin = 2;
+	CGFloat argumentSize = 100;
+	
     [_static setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
     [_command setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
     [_error setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
     [_error setFrameOrigin:NSMakePoint(0, 0)];
-    [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
-    [_status setFrameOrigin:NSMakePoint(0,STATUS_BAR_HEIGHT/2)];
+    [_statusBarBackgroundBox setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT/2)];
+    [_statusBarBackgroundBox setFrameOrigin:NSMakePoint(0,STATUS_BAR_HEIGHT/2)];
+    [_status setFrameSize:NSMakeSize(frame.size.width/2, STATUS_BAR_HEIGHT/2)];
+    [_status setFrameOrigin:NSMakePoint(statusMargin,STATUS_BAR_HEIGHT/2)];
+    [_argument setFrameSize:NSMakeSize(argumentSize, STATUS_BAR_HEIGHT/2)];
+    [_argument setFrameOrigin:NSMakePoint(frame.size.width - argumentSize,STATUS_BAR_HEIGHT/2)];
     
     NSScrollView* parent = view;
     NSArray* views = [parent subviews];

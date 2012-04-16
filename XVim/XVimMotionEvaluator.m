@@ -44,9 +44,9 @@
 
 @implementation XVimMotionEvaluator
 
-- (id)init
+- (id)initWithContext:(XVimEvaluatorContext*)context
 {
-    self = [super init];
+    self = [super initWithContext:context];
     if (self) {
         _forceMotionType = NO;
 		_column = NSNotFound;
@@ -194,14 +194,16 @@
 }
 
 - (XVimEvaluator*)f:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"f"]
+																			  parent:self];
     eval.forward = YES;
     eval.previous = NO;
     return eval;
 }
 
 - (XVimEvaluator*)F:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"F"]
+																			  parent:self];
     eval.forward = NO;
     eval.previous = NO;
     return eval;
@@ -216,7 +218,8 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGMotionEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
+    return [[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"]
+																					 parent:self];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
@@ -302,14 +305,16 @@
 */
 
 - (XVimEvaluator*)t:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"t"]
+																												 parent:self];
     eval.forward = YES;
     eval.previous = YES;
     return eval;
 }
 
 - (XVimEvaluator*)T:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"T"]
+																												 parent:self];
     eval.forward = NO;
     eval.previous = YES;
     return eval;
@@ -335,7 +340,8 @@
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
-    return [[XVimZEvaluator alloc] initWithParent:self numericArg:[self numericArg]];
+    return [[XVimZEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"z"]
+																			   parent:self];
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{
@@ -380,11 +386,13 @@
 //  the range of the document
 
 - (XVimEvaluator*)SQUOTE:(XVimWindow*)window{
-    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
+    return [[XVimLocalMarkEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"]
+																				 markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
 }
 
 - (XVimEvaluator*)BACKQUOTE:(XVimWindow*)window{
-    return [[XVimLocalMarkEvaluator alloc] initWithMarkOperator:MARKOPERATOR_MOVETO];
+    return [[XVimLocalMarkEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] 
+											  markOperator:MARKOPERATOR_MOVETO];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)

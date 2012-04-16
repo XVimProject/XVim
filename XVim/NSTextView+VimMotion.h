@@ -9,6 +9,8 @@
 #import "NSTextView+VimMotion.h"
 #import "XVimMotionType.h"
 
+@class XVimRegister;
+
 ////////////////////////
 // Term Definitions   //
 ////////////////////////
@@ -206,7 +208,7 @@ typedef struct _XVimWordInfo{
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
 // Deletes the selected range and adjusts cursor position
-- (void)del:(id)sender;
+- (void)del:(id)sender intoYankRegister:(XVimRegister*)xregister;
 
 // Clamps range to end of line
 - (void)clampRangeToEndOfLine:(NSRange*)range;

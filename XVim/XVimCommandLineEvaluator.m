@@ -29,13 +29,14 @@
 
 @implementation XVimCommandLineEvaluator
 
-- (id)initWithParent:(XVimEvaluator*)parent 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+			   parent:(XVimEvaluator*)parent 
 		 firstLetter:(NSString*)firstLetter 
 			 history:(XVimHistoryHandler*)history
-		  onComplete:(OnCompleteHandler)completeHandler
+		  completion:(OnCompleteHandler)completeHandler
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler
 {
-	if (self = [super init])
+	if (self = [super initWithContext:context])
 	{
 		_parent = parent;
 		_firstLetter = firstLetter;
@@ -115,7 +116,7 @@
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
 {
-	return _parent;
+	return [_parent withNewContext];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
@@ -153,11 +154,6 @@
 	return [_parent modeString];
 }
 
-- (NSUInteger)numericArg
-{
-	return 1;
-}
-
 - (XVimEvaluator*)C_p:(XVimWindow*)window{
     return [self Up:window];
 }
@@ -178,7 +174,7 @@
 {
     DVTSourceTextView *sourceView = [window sourceView];
     [sourceView scrollTo:[window cursorLocation]];
-	return _parent;
+	return [_parent withNewContext];
 }
 
 - (XVimEvaluator*)Up:(XVimWindow*)window

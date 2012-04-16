@@ -19,5 +19,8 @@ typedef enum {
 @private
     XVimMarkOperator _markOperator;
 }
-- (id)initWithMarkOperator:(XVimMarkOperator)markOperator;
+
+- (id)initWithContext:(XVimEvaluatorContext*)context
+		 markOperator:(XVimMarkOperator)markOperator;
+
 @end

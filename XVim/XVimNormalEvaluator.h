@@ -15,7 +15,12 @@
 // If XVimMotionEvaluator returns valid range object
 // move the cusor to the position
 @interface XVimNormalEvaluator : XVimMotionEvaluator
--(id)init;
--(id)initWithYankRegister:(XVimRegister*)xregister;
--(id)initWithRegister:(XVimRegister*)xregister andPlaybackCount:(NSUInteger)count;
+
+- (id)init;
+
+- (id)initWithContext:(XVimEvaluatorContext*)context;
+
+- (id)initWithContext:(XVimEvaluatorContext*)context
+	 playbackRegister:(XVimRegister*)xregister;
+
 @end

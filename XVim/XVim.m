@@ -53,7 +53,6 @@ static XVim* s_instance = nil;
 
 @implementation XVim
 @synthesize registers = _registers;
-@synthesize yankRegister = _yankRegister;
 @synthesize repeatRegister = _repeatRegister;
 @synthesize recordingRegister = _recordingRegister;
 @synthesize lastPlaybackRegister = _lastPlaybackRegister;
@@ -200,7 +199,6 @@ static XVim* s_instance = nil;
          [_registers valueForKey:@"NUM9"],
          nil];
         
-        _yankRegister = nil;
         _recordingRegister = nil;
         _lastPlaybackRegister = nil;
         _repeatRegister = [_registers valueForKey:@"repeat"];
@@ -259,7 +257,8 @@ static XVim* s_instance = nil;
     return;
 }
 
-- (void)onDeleteOrYank{
+- (void)onDeleteOrYank:(XVimRegister*)yankRegister
+{
     // Don't do anything if we are recording into a register (that isn't the repeat register)
     if (self.recordingRegister != nil){
         return;
@@ -267,9 +266,9 @@ static XVim* s_instance = nil;
 
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
-    if (self.yankRegister != nil){
-        [self.yankRegister clear];
-        [self.yankRegister appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
+    if (yankRegister != nil){
+        [yankRegister clear];
+        [yankRegister appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
     }else{
         // There are 10 numbered registers
         for (NSInteger i = self.numberedRegisters.count - 2; i >= 0; --i){
@@ -286,11 +285,12 @@ static XVim* s_instance = nil;
     }
 }
 
-- (NSString*)pasteText{
-    if (self.yankRegister != nil){
-        TRACE_LOG(@"yankRegister: %@", self.yankRegister);
-        return self.yankRegister.text;
-    }
+- (NSString*)pasteText:(XVimRegister*)yankRegister
+{
+	if (yankRegister)
+	{
+		return yankRegister.text;
+	}
     
     return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
 }

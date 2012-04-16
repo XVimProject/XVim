@@ -20,14 +20,14 @@
 
 @implementation XVimDeleteEvaluator
 
-- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+	   operatorAction:(XVimOperatorAction*)operatorAction 
 				  withParent:(XVimEvaluator*)parent
-				  numericArg:(NSUInteger)numericArg
 	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
-	if (self = [super initWithOperatorAction:operatorAction 
+	if (self = [super initWithContext:context
+					   operatorAction:operatorAction 
 								  withParent:parent
-								  numericArg:numericArg
 				])
 	{
 		self->_insertModeAtCompletion = insertModeAtCompletion;
@@ -177,17 +177,19 @@
 @end
 
 @interface XVimDeleteAction() {
+	__weak XVimRegister* _yankRegister;
 	BOOL _insertModeAtCompletion;
 }
 @end
 
 @implementation XVimDeleteAction
-
-- (id)initWithInsertModeAtCompletion:(BOOL)insertModeAtCompletion
+- (id)initWithYankRegister:(XVimRegister*)xregister
+	insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
 	if (self = [super init])
 	{
-		self->_insertModeAtCompletion = insertModeAtCompletion;
+		_insertModeAtCompletion = insertModeAtCompletion;
+		_yankRegister = xregister;
 	}
 	return self;
 }
@@ -208,12 +210,12 @@
         // delete the current line even though it's "behind us" (sort of)
         // this is vi behavior.
         [view setSelectedRange:NSMakeRange(eof && blank ? from - 1 : from, 1)];
-        [view del:self];
+        [view del:self intoYankRegister:_yankRegister];
         return nil;
     }
     
     [view selectOperationTargetFrom:from To:to Type:type];
-    [view del:self];
+    [view del:self intoYankRegister:_yankRegister];
     
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
@@ -232,7 +234,7 @@
                 [view insertNewline:self];
             }
         }
-        return [[XVimInsertEvaluator alloc] initWithRepeat:1];
+        return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
     }
     return nil;
 }

@@ -33,14 +33,16 @@
 @synthesize lastInsertedText = _lastInsertedText;
 @synthesize movementKeyPressed = _movementKeyPressed;
 
-- (id)initWithRepeat:(NSUInteger)repeat{
-    return [self initOneCharMode:FALSE withRepeat:repeat];
+- (id)initWithContext:(XVimEvaluatorContext*)context
+{
+    return [self initWithContext:context oneCharMode:NO];
 }
 
-- (id)initOneCharMode:(BOOL)oneCharMode withRepeat:(NSUInteger)repeat{
-    self = [super init];
+- (id)initWithContext:(XVimEvaluatorContext*)context
+		  oneCharMode:(BOOL)oneCharMode
+{
+    self = [super initWithContext:context];
     if (self) {
-        _repeat = repeat;
         _lastInsertedText = @"";
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
@@ -62,7 +64,7 @@
 
 - (NSString*)modeString
 {
-	return @"INSERT";
+	return @"-- INSERT --";
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
@@ -73,7 +75,8 @@
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
 	NSRange range = [window selectedRange];
-	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER 
+	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+																			  mode:MODE_CHARACTER 
 																	  withRange:range];
 }
 
@@ -141,7 +144,7 @@
 	
     if( !_insertedEventsAbort ){
         NSString *text = [self getInsertedTextInWindow:window];
-        for( int i = 0 ; i < _repeat-1; i++ ){
+        for( int i = 0 ; i < [self numericArg]-1; i++ ){
             [sourceView insertText:text];
         }
     }
@@ -185,7 +188,7 @@
         NSEvent *event = [keyStroke toEvent];
         if (_oneCharMode == TRUE) {
             NSRange save = [[window sourceView] selectedRange];
-            for (NSUInteger i = 0; i < _repeat; ++i) {
+            for (NSUInteger i = 0; i < [self numericArg]; ++i) {
                 [[window sourceView] deleteForward:self];
                 [[window sourceView] keyDown_:event];
                 

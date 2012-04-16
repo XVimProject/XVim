@@ -16,7 +16,27 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 
+@interface XVimEvaluator() {
+	XVimEvaluatorContext *_context;
+}
+@end
+
 @implementation XVimEvaluator
+
+- (id)init
+{
+	[NSException raise:@"Invalid init" format:@"Must call initWithContext"];
+	return nil;
+}
+
+- (id)initWithContext:(XVimEvaluatorContext*)context
+{
+	if (self = [super init])
+	{
+		_context = context;
+	}
+	return self;
+}
 
 - (void)becameHandlerInWindow:(XVimWindow*)window {
 }
@@ -63,7 +83,8 @@
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
 	NSRange range = [window selectedRange];
-	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithMode:MODE_CHARACTER 
+	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+																											mode:MODE_CHARACTER 
 																									withRange:range];
 }
 
@@ -107,12 +128,7 @@
 
 - (NSString*)modeString
 {
-	return @"NORMAL";
-}
-
-- (NSUInteger)numericArg
-{
-	return 1;
+	return @"";
 }
 
 - (XVimEvaluator*)D_d:(XVimWindow*)window{
@@ -122,6 +138,153 @@
     return nil;
 }
 
+// Normally argumentString, but can be overridden
+- (NSString*)argumentDisplayString
+{
+	return [self argumentString];
+}
+
+// Returns the current stack of arguments (eg. "a10d...")
+- (NSString*)argumentString
+{
+	return [[self context] argumentString];
+}
+
+// Returns the context yank register if any
+- (XVimRegister*)yankRegister
+{
+	return [[self context] yankRegister];
+}
+
+// Returns the context numeric arguments multiplied together
+- (NSUInteger)numericArg
+{
+	return [[self context] numericArg];
+}
+
+// Returns the context
+- (XVimEvaluatorContext*)context
+{
+	return _context;
+}
+
+// Equivalent to [[self context] copy]
+- (XVimEvaluatorContext*)contextCopy
+{
+	return [[self context] copy];
+}
+
+// Clears the context and returns self, useful for escaping from operators
+- (XVimEvaluator*)withNewContext
+{
+	_context = [[XVimEvaluatorContext alloc] init];
+	return self;
+}
+
+- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context
+{
+	_context = context;
+	return self;
+}
+
 @end
 
 
+@interface XVimEvaluatorContext() {
+	NSUInteger _numericArgTail;
+	NSNumber *_numericArgHead;
+	__weak XVimRegister *_yankRegister;
+	NSString *_argumentString;
+}
+@end
+
+
+@implementation XVimEvaluatorContext
+
+- (id)init
+{
+	if (self = [super init])
+	{
+		_numericArgTail = 1;
+		_numericArgHead = nil;
+		_yankRegister = nil;
+		_argumentString = @"";
+	}
+	return self;
+}
+
++ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg
+{
+	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
+	instance->_numericArgTail = 1;
+	return instance;
+}
+
++ (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument
+{
+	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
+	instance->_argumentString = [argument copy];
+	return instance;
+}
+
+- (XVimRegister*)yankRegister
+{
+	return _yankRegister;
+}
+
+- (XVimEvaluatorContext*)setYankRegister:(XVimRegister*)yankRegister
+{
+	_yankRegister = yankRegister;
+	return self;
+}
+
+- (NSUInteger)numericArg
+{
+	return _numericArgTail * (_numericArgHead ? [_numericArgHead unsignedIntegerValue] : 1);
+}
+
+- (void)pushEmptyNumericArgHead
+{
+	_numericArgTail = [self numericArg];
+	_numericArgHead = nil;
+}
+
+- (void)setNumericArgHead:(NSUInteger)numericArg
+{
+	_numericArgHead = [NSNumber numberWithUnsignedInteger:numericArg];
+}
+
+- (NSNumber*)numericArgHead
+{
+	return _numericArgHead;
+}
+
+- (NSString*)argumentString
+{
+	return _argumentString;
+}
+
+- (XVimEvaluatorContext*)setArgumentString:(NSString*)argument
+{
+	_argumentString = [argument copy];
+	return self;
+}
+
+- (XVimEvaluatorContext*)appendArgument:(NSString*)argument
+{
+	_argumentString = [_argumentString stringByAppendingString:argument];
+	return self;
+}
+
+- (XVimEvaluatorContext*)copy
+{
+	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
+	instance->_argumentString = [self->_argumentString copy];
+	instance->_numericArgTail = [self numericArg];
+	instance->_numericArgHead = nil;
+	instance->_yankRegister = self->_yankRegister;
+	
+	return instance;
+}
+
+@end

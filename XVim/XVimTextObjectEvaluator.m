@@ -15,7 +15,6 @@
 
 @interface XVimTextObjectEvaluator() {
 	XVimOperatorAction *_operatorAction;
-	NSUInteger _parentNumericArg;
 	BOOL _inclusive;
 	XVimEvaluator *_parent;
 }
@@ -23,15 +22,14 @@
 
 @implementation XVimTextObjectEvaluator
 
-- (id)initWithOperatorAction:(XVimOperatorAction*)operatorAction 
+- (id)initWithContext:(XVimEvaluatorContext*)context
+	   operatorAction:(XVimOperatorAction*)operatorAction 
 					withParent:(XVimEvaluator*)parent
-					  numericArg:(NSUInteger)numericArg
 				   inclusive:(BOOL)inclusive
 {
-	if (self = [super init])
+	if (self = [super initWithContext:context])
 	{
 		self->_operatorAction = operatorAction;
-		self->_parentNumericArg = numericArg;
 		self->_inclusive = inclusive;
 		self->_parent = parent;
 	}
@@ -64,7 +62,7 @@
 }
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return _parent;
+    return [_parent withNewContext];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
@@ -79,7 +77,7 @@
 		[window.sourceView clampRangeToBuffer:&r];
 		return [_operatorAction motionFixedFrom:r.location To:r.location+r.length Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 	}
-	return _parent;
+	return [_parent withNewContext];
 }
 
 - (XVimEvaluator*)b:(XVimWindow*)window
@@ -170,11 +168,6 @@
 	}
     
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
-}
-
-- (NSUInteger)numericArg
-{
-	return _parentNumericArg;
 }
 
 @end

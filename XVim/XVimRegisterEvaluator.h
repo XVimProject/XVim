@@ -8,14 +8,12 @@
 
 #import "XVimEvaluator.h"
 
-typedef enum {
-    REGISTER_EVAL_MODE_YANK,
-    REGISTER_EVAL_MODE_RECORD,
-    REGISTER_EVAL_MODE_PLAYBACK
-} XVimRegisterEvalMode;
+typedef XVimEvaluator* (^OnSelectRegister) (NSString*, XVimEvaluatorContext*);
 
 @interface XVimRegisterEvaluator : XVimEvaluator
 
--(id)initWithMode:(XVimRegisterEvalMode)mode andCount:(NSUInteger)count;
+- (id)initWithContext:(XVimEvaluatorContext*)context
+			   parent:(XVimEvaluator*)parent 
+		   completion:(OnSelectRegister)onComplete;
 
 @end

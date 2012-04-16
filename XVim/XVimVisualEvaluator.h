@@ -14,7 +14,7 @@ typedef enum{
     MODE_BLOCK // for 'CTRL-V'. may be implemented later...
 }VISUAL_MODE;
 
-@interface XVimVisualEvaluator : XVimMotionEvaluator{
+@interface XVimVisualEvaluator : XVimMotionEvaluator {
     // _begin may be greater than _insertion ( in case of backward selection )
     NSUInteger _begin;  // Position Start of the Visual mode
     NSUInteger _insertion; //  Current cursor position
@@ -23,8 +23,14 @@ typedef enum{
     VISUAL_MODE _mode;
 }
 - (NSUInteger) insertionPointInWindow:(XVimWindow*)window;
-- (id)initWithMode:(VISUAL_MODE)mode;
-- (id)initWithMode:(VISUAL_MODE)mode withRange:(NSRange)range;
+
+- (id)initWithContext:(XVimEvaluatorContext*)context
+				 mode:(VISUAL_MODE)mode;
+
+- (id)initWithContext:(XVimEvaluatorContext*)context
+				 mode:(VISUAL_MODE)mode 
+			withRange:(NSRange)range;
+
 - (void)updateSelectionInWindow:(XVimWindow*)window;
-- (XVimEvaluator*)ESC:(XVimWindow*)window;
+
 @end
