@@ -11,13 +11,15 @@
 @class XVimHistoryHandler;
 
 typedef XVimEvaluator* (^OnCompleteHandler) (NSString* command);
+typedef void (^OnKeyPressHandler) (NSString* command);
 
 @interface XVimCommandLineEvaluator : XVimEvaluator
 
 - (id)initWithParent:(XVimEvaluator*)parent 
 		 firstLetter:(NSString*)firstLetter 
 			 history:(XVimHistoryHandler*)history
-		  onComplete:(OnCompleteHandler)handler;
+		  onComplete:(OnCompleteHandler)completeHandler
+		  onKeyPress:(OnKeyPressHandler)keyPressHandler;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
 

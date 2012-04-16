@@ -12,6 +12,7 @@
 @property BOOL ignorecase;
 @property BOOL wrapscan;
 @property BOOL errorbells;
+@property BOOL incsearch;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

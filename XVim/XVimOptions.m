@@ -15,21 +15,27 @@
 @end
 
 @implementation XVimOptions
-@synthesize ignorecase,wrapscan,errorbells;
+@synthesize ignorecase = _ignorecase;
+@synthesize wrapscan = _wrapscan;
+@synthesize errorbells = _errorbells;
+@synthesize incsearch = _incsearch;
 
 - (id)init{
     if( self = [super init] ){
         // Abbreviation mapping
-        _option_maps = [[NSDictionary alloc] initWithObjectsAndKeys:
-            @"ignorecase",@"ic",
-            @"wrapscan",@"ws",
-            @"errorbells",@"eb",
-        nil];
+        _option_maps =
+        [[NSDictionary alloc] initWithObjectsAndKeys:
+         @"ignorecase",@"ic",
+         @"wrapscan",@"ws",
+         @"errorbells",@"eb",
+         @"incsearch",@"is",
+         nil];
         
         // Default values
-        ignorecase = NO;
-        wrapscan = YES;
-        errorbells = NO;
+        _ignorecase = NO;
+        _wrapscan = YES;
+        _errorbells = NO;
+        _incsearch = YES;
     }
     return self;
 }
@@ -64,7 +70,4 @@
     }
 }
 
-
 @end
-
-

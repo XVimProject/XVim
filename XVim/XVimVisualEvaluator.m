@@ -16,6 +16,10 @@
 #import "XVimSelectAction.h"
 #import "XVimGVisualEvaluator.h"
 #import "XVimRegisterEvaluator.h"
+#import "XVimCommandLineEvaluator.h"
+#import "XVimExCommand.h"
+#import "XVimSearch.h"
+#import "XVimOptions.h"
 #import "XVim.h"
 
 @implementation XVimVisualEvaluator 
@@ -353,6 +357,24 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
     return nil;
 }
 
+- (XVimEvaluator*)COLON:(XVimWindow*)window{
+	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithParent:self 
+															   firstLetter:@":" 
+																   history:[[XVim instance] exCommandHistory]
+																onComplete:^ XVimEvaluator* (NSString* command) 
+                           {
+                               XVimExCommand *excmd = [[XVim instance] excmd];
+                               [excmd executeCommand:command inWindow:window];
+
+							   DVTSourceTextView *sourceView = [window sourceView];
+                               [sourceView setSelectedRange:NSMakeRange(_insertion, 0)];
+                               return nil;
+                           }
+                                                                onKeyPress:nil];
+	
+	return eval;
+}
+
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
     [self updateSelectionInWindow:window];
     DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
@@ -378,6 +400,69 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
     return nil;
 }
 
+- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter 
+{
+	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithParent:self 
+															   firstLetter:firstLetter
+																   history:[[XVim instance] searchHistory]
+																onComplete:^ XVimEvaluator* (NSString *command)
+						   {
+							   XVimSearch *searcher = [[XVim instance] searcher];
+							   DVTSourceTextView *sourceView = [window sourceView];
+							   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+							   //Move cursor and show the found string
+							   if (found.location != NSNotFound) {
+                                   unichar firstChar = [command characterAtIndex:0];
+                                   if (firstChar == '?'){
+                                       _insertion = found.location;
+                                   }else if (firstChar == '/'){
+                                       _insertion = found.location + command.length - 1;
+                                   }
+                                   [self updateSelectionInWindow:window];
+								   [sourceView scrollTo:[window cursorLocation]];
+								   [sourceView showFindIndicatorForRange:found];
+							   } else {
+								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+							   }
+                               return self;
+						   }
+                                                                onKeyPress:^void(NSString *command)
+                           {
+                               XVimOptions *options = [[XVim instance] options];
+                               if (options.incsearch){
+                                   XVimSearch *searcher = [[XVim instance] searcher];
+                                   DVTSourceTextView *sourceView = [window sourceView];
+                                   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+                                   //Move cursor and show the found string
+                                   if (found.location != NSNotFound) {
+                                       // Update the selection while preserving the current insertion point
+                                       // The insertion point will be finalized if we complete a search
+                                       NSUInteger prevInsertion = _insertion;
+                                       unichar firstChar = [command characterAtIndex:0];
+                                       if (firstChar == '?'){
+                                           _insertion = found.location;
+                                       }else if (firstChar == '/'){
+                                           _insertion = found.location + command.length - 1;
+                                       }
+                                       [self updateSelectionInWindow:window];
+                                       _insertion = prevInsertion;
+                                       
+                                       [sourceView scrollTo:found.location];
+                                       [sourceView showFindIndicatorForRange:found];
+                                   }
+                               }
+                           }];
+	return eval;
+}
+
+- (XVimEvaluator*)QUESTION:(XVimWindow*)window{
+	return [self executeSearch:window firstLetter:@"?"];
+}
+
+- (XVimEvaluator*)SLASH:(XVimWindow*)window{
+	return [self executeSearch:window firstLetter:@"/"];
+}
+
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	[self updateSelectionInWindow:window];
 	NSTextView *view = [window sourceView];
@@ -395,4 +480,3 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
     return self;
 }
 @end
-

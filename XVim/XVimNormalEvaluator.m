@@ -32,6 +32,7 @@
 #import "XVimCommandLineEvaluator.h"
 #import "XVimExCommand.h"
 #import "XVimSearch.h"
+#import "XVimOptions.h"
 
 @interface XVimNormalEvaluator()
 @property (readwrite) NSUInteger playbackCount;
@@ -595,11 +596,12 @@
 															   firstLetter:@":" 
 																   history:[[XVim instance] exCommandHistory]
 																onComplete:^ XVimEvaluator* (NSString* command) 
-	{
-		XVimExCommand *excmd = [[XVim instance] excmd];
-        [excmd executeCommand:command inWindow:window];
-		return nil;
-	}];
+                           {
+                               XVimExCommand *excmd = [[XVim instance] excmd];
+                               [excmd executeCommand:command inWindow:window];
+                               return nil;
+                           }
+                                                                onKeyPress:nil];
 	
 	return eval;
 }
@@ -623,7 +625,21 @@
 								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
 							   }
 							   return nil;
-						   }];
+						   }
+                                                                onKeyPress:^void(NSString *command)
+                           {
+                               XVimOptions *options = [[XVim instance] options];
+                               if (options.incsearch){
+                                   XVimSearch *searcher = [[XVim instance] searcher];
+                                   DVTSourceTextView *sourceView = [window sourceView];
+                                   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+                                   //Move cursor and show the found string
+                                   if (found.location != NSNotFound) {
+                                       [sourceView scrollTo:found.location];
+                                       [sourceView showFindIndicatorForRange:found];
+                                   }
+                               }
+                           }];
 	return eval;
 }
 

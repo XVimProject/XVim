@@ -7,6 +7,7 @@
 //
 
 #import "XVimCommandLineEvaluator.h"
+#import "NSTextView+VimMotion.h"
 #import "XVimKeymapProvider.h"
 #import "XVimWindow.h"
 #import "DVTSourceTextView.h"
@@ -21,6 +22,7 @@
 	NSString *_currentCmd;
 	NSString *_firstLetter;
 	OnCompleteHandler _onComplete;
+	OnKeyPressHandler _onKeyPress;
 	NSUInteger _historyNo;
 }
 @end
@@ -30,14 +32,16 @@
 - (id)initWithParent:(XVimEvaluator*)parent 
 		 firstLetter:(NSString*)firstLetter 
 			 history:(XVimHistoryHandler*)history
-		  onComplete:(OnCompleteHandler)handler
+		  onComplete:(OnCompleteHandler)completeHandler
+		  onKeyPress:(OnKeyPressHandler)keyPressHandler
 {
 	if (self = [super init])
 	{
 		_parent = parent;
 		_firstLetter = firstLetter;
 		_history = history;
-		_onComplete = [handler copy];
+		_onComplete = [completeHandler copy];
+		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
 	}
 	return self;
@@ -74,7 +78,7 @@
 		if ([text length] == 0)
 		{
 			next = nil;
-		}
+        }
 		
 		_historyNo = 0; // Typing always resets history
 	}
@@ -82,8 +86,10 @@
 	if (next != self)
 	{
 		[self relinquishFocusToWindow:window];
-	}
-	
+    } else if (_onKeyPress != nil) {
+        _onKeyPress([[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]);
+    }
+            
 	return next;
 }
 
@@ -162,6 +168,8 @@
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window
 {
+    DVTSourceTextView *sourceView = [window sourceView];
+    [sourceView scrollTo:[window cursorLocation]];
 	return _parent;
 }
 
