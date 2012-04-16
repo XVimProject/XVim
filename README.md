@@ -13,7 +13,7 @@ From Installer Package
 [Download XVim_X.XX.pkg](https://github.com/JugglerShu/XVim/downloads) and install it. Do not change the install directory.
 Then restart XCode. That's it!
 
-You also can donwload daily built package from http://programming.jugglershu.net/xvim 
+You also can donwload daily built package from http://programming.jugglershu.net/xvim. If you have any problem with released package try this to find out if it is fixed.
 
 From Source Code
 -----------------
