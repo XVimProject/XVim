@@ -20,15 +20,15 @@ From Source Code
 Download source code and just build XVim.xcodeproj.
 It automatically build the plugin and installs into the proper directory.
 
-Unisntall
+Uninstall
 =============
 Delete following directory
 
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
     
-Contoributions
-==============
+Contributions
+=============
 Any suggestions,bug reports or feature requests are welcome.
 I really appreciate if you send a pull request for improvement.
 Also I can assign you as "collaborators" of this repository.
@@ -70,9 +70,9 @@ https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim )にいただけると、開発のモチベーションにつながります。
 
 
-Contributers
+Contributors
 ============
-See contributers page in github repository.
+See contributors page in github repository.
 https://github.com/JugglerShu/XVim/contributors
 
 
