@@ -158,6 +158,14 @@
 	return 1;
 }
 
+- (XVimEvaluator*)C_p:(XVimWindow*)window{
+    return [self Up:window];
+}
+
+- (XVimEvaluator*)C_n:(XVimWindow*)window{
+    return [self Down:window];
+}
+
 - (XVimEvaluator*)CR:(XVimWindow*)window
 {
 	XVimCommandField *commandField = [window commandField];
