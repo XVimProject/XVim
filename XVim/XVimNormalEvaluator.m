@@ -653,7 +653,7 @@
 
 - (XVimEvaluator*)DOT:(XVimWindow*)window{
     XVimRegister *repeatRegister = [[XVim instance] findRegister:@"repeat"];
-    [window playbackRegister:repeatRegister withRepeatCount:[self numericArg]];
+    [repeatRegister playbackWithHandler:window withRepeatCount:[self numericArg]];
     return nil;
 }
 

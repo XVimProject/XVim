@@ -58,6 +58,5 @@
 
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
-- (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count;
 
 @end

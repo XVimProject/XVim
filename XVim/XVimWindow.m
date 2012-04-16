@@ -155,10 +155,6 @@
 	[[self sourceView] keyDown:event];
 }
 
-- (void)playbackRegister:(XVimRegister*)xregister withRepeatCount:(NSUInteger)count{
-    [xregister playbackWithHandler:self withRepeatCount:count];
-}
-
 - (void)recordIntoRegister:(XVimRegister*)xregister{
     XVim *xvim = [XVim instance];
     if (xvim.recordingRegister == nil){
