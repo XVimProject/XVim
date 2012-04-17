@@ -178,8 +178,6 @@
 		F15805C61530B4000031175A /* XVimWindowEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimWindowEvaluator.m; path = XVim/XVimWindowEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F17D0139150861DC00A8111B /* XVimRegister.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegister.h; path = XVim/XVimRegister.h; sourceTree = SOURCE_ROOT; };
 		F17D013A150861DC00A8111B /* XVimRegister.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegister.m; path = XVim/XVimRegister.m; sourceTree = SOURCE_ROOT; };
-		F1867C8E153A0A41006F178A /* IDEEditorContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEEditorContext.h; path = XVim/IDEEditorContext.h; sourceTree = SOURCE_ROOT; };
-		F1867C90153A0ABC006F178A /* IDEEditorGeniusResults.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEEditorGeniusResults.h; path = XVim/IDEEditorGeniusResults.h; sourceTree = SOURCE_ROOT; };
 		F196C36C15315564000581EE /* IDEWorkspaceTabController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEWorkspaceTabController.h; path = XVim/IDEWorkspaceTabController.h; sourceTree = SOURCE_ROOT; };
 		F1B350D71539EC0700A7A7FD /* IDEEditorModeViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEEditorModeViewController.h; path = XVim/IDEEditorModeViewController.h; sourceTree = SOURCE_ROOT; };
 		F1C1E513150475ED0005C1CB /* XVimEqualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEqualEvaluator.h; path = XVim/XVimEqualEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -384,8 +382,6 @@
 		C38A5B481527C9EE00E1448D /* Xcode */ = {
 			isa = PBXGroup;
 			children = (
-				F1867C90153A0ABC006F178A /* IDEEditorGeniusResults.h */,
-				F1867C8E153A0A41006F178A /* IDEEditorContext.h */,
 				F1E0B3BC1539F9C900ED0C7E /* IDEEditorMultipleContext.h */,
 				F11C83E71539F1BF00719D68 /* IDEEditorGeniusMode.h */,
 				F1B350D71539EC0700A7A7FD /* IDEEditorModeViewController.h */,
