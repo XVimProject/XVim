@@ -359,7 +359,7 @@ static NSString* MODE_STRINGS[] = {@"VISUAL", @"VISUAL LINE", @"VISUAL BLOCK"};
 
 - (XVimEvaluator*)COLON:(XVimWindow*)window{
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithParent:self 
-															   firstLetter:@":" 
+															   firstLetter:@":'<,'>" 
 																   history:[[XVim instance] exCommandHistory]
 																onComplete:^ XVimEvaluator* (NSString* command) 
                            {
