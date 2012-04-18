@@ -225,7 +225,7 @@
     if( [self numericMode] ){
         end = [view positionAtLineNumber:[self numericArg] column:0];
 		if (end == NSNotFound) {
-			end = [view headOfLine:[[view string] length]];
+			end = [view firstOfLine:[[view string] length]];
 		}
     }else{
         end = [view headOfLine:[[view string] length]];
@@ -703,3 +703,5 @@
 }
 
 @end
+
+
