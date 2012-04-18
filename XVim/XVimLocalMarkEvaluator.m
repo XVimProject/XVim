@@ -10,6 +10,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
+#import "NSTextView+VimMotion.h"
 
 @implementation XVimLocalMarkEvaluator
 
@@ -71,6 +72,8 @@
                 [view moveRight:self];
             }
         }
+        
+        [view scrollTo:[view selectedRange].location];
     }
     else {
     }
