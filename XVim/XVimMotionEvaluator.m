@@ -222,12 +222,8 @@
 - (XVimEvaluator*)G:(XVimWindow*)window{
     NSTextView* view = [window sourceView];
     NSUInteger end;
-    if( [self numericMode] ){
-        end = [view positionAtLineNumber:[self numericArg] column:0];
-		if (end == NSNotFound) {
-			end = [view headOfLine:[[view string] length]];
-		}
-    }else{
+    if ([self numericMode] && (end = [view positionAtLineNumber:[self numericArg] column:0]) != NSNotFound) {
+    } else {
         end = [view headOfLine:[[view string] length]];
         if( NSNotFound == end ){
             end = [[view string] length];
