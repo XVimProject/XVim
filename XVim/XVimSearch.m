@@ -74,6 +74,20 @@
     return [self searchNextFrom:from inWindow:window];
 }
 
+- (BOOL)isCaseInsensitive
+{
+	if (self.lastSearchCase == XVimSearchCaseInsensitive) { return YES; }
+	if (self.lastSearchCase == XVimSearchCaseSensitive) { return NO; }
+	
+	XVimOptions *options = [[XVim instance] options];
+	BOOL ignorecase = options.ignorecase;
+	if (ignorecase && options.smartcase)
+	{
+		ignorecase = [self.lastSearchCmd isEqualToString:[self.lastSearchCmd lowercaseString]];
+	}
+	return ignorecase;
+}
+
 - (NSRange)searchForwardFrom:(NSUInteger)from inWindow:(XVimWindow*)window 
 {
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
@@ -86,10 +100,10 @@
     NSRange found = {NSNotFound, 0};
 
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-    if ((options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
-        self.lastSearchCase == XVimSearchCaseInsensitive) {
-        r_opts |= NSRegularExpressionCaseInsensitive;
-    }
+	if ([self isCaseInsensitive])
+	{
+		r_opts |= NSRegularExpressionCaseInsensitive;
+	}
 
     NSError *error = NULL;
     NSRegularExpression *regex = [NSRegularExpression 
@@ -136,10 +150,10 @@
     NSRange found = {NSNotFound, 0};
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-    if ((options.ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
-        self.lastSearchCase == XVimSearchCaseInsensitive) {
-        r_opts |= NSRegularExpressionCaseInsensitive;
-    }
+	if ([self isCaseInsensitive])
+	{
+		r_opts |= NSRegularExpressionCaseInsensitive;
+	}
     
     NSError *error = NULL;
     NSRegularExpression *regex = [NSRegularExpression 
@@ -278,10 +292,10 @@
     
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-    if (([[XVim instance] options].ignorecase && !self.lastSearchCase == XVimSearchCaseSensitive) ||
-        self.lastSearchCase == XVimSearchCaseInsensitive) {
-        r_opts |= NSRegularExpressionCaseInsensitive;
-    }
+	if ([self isCaseInsensitive])
+	{
+		r_opts |= NSRegularExpressionCaseInsensitive;
+	}
     
     NSError *error = NULL;
     TRACE_LOG(@"%@", self.lastReplacementString);
@@ -309,12 +323,13 @@
 
 - (void)substitute:(NSString*)ex_command from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
 {
+	XVimOptions *options = [[XVim instance] options];
     // Split the string into the various components
     NSString* replaced = @"";
     NSString* replacement = @"";
     char previous = 0;
     int component = 0;
-    BOOL global = NO;
+    BOOL global = options.gdefault;
     BOOL confirmation = NO;
     if ([ex_command length] >= 3) {
         for(int i=1;i<[ex_command length];++i) {
@@ -328,7 +343,7 @@
                     replacement = [NSString stringWithFormat:@"%@%c",replacement,current];
                 } else {
                     if (current == 'g') {
-                        global = YES;
+                        global = !global;
                     } else if (current == 'c') {
                         confirmation = YES;
                     } else {

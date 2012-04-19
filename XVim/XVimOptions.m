@@ -19,6 +19,8 @@
 @synthesize wrapscan = _wrapscan;
 @synthesize errorbells = _errorbells;
 @synthesize incsearch = _incsearch;
+@synthesize gdefault = _gdefault;
+@synthesize smartcase = _smartcase;
 
 - (id)init{
     if( self = [super init] ){
@@ -29,6 +31,8 @@
          @"wrapscan",@"ws",
          @"errorbells",@"eb",
          @"incsearch",@"is",
+         @"gdefault",@"gd",
+         @"smartcase",@"scs",
          nil];
         
         // Default values
@@ -36,6 +40,8 @@
         _wrapscan = YES;
         _errorbells = NO;
         _incsearch = YES;
+		_gdefault = NO;
+		_smartcase = NO;
     }
     return self;
 }
