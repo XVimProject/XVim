@@ -37,6 +37,7 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 #import "XVimRegister.h"
 #import "XVimMode.h"
+#import "XVimEvaluatorContext.h"
 
 @class XVimMotionEvaluator;
 @class XVimKeyStroke;
@@ -105,33 +106,4 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 @end
 
-///////////////////////////////////////////////////
-
-@interface XVimEvaluatorContext : NSObject
-
-+ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg;
-
-+ (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument;
-
-- (XVimRegister*)yankRegister;
-
-- (XVimRegister*)setYankRegister:(XVimRegister*)yankRegister;
-
-- (NSUInteger)numericArg;
-
-- (void)pushEmptyNumericArgHead;
-
-- (void)setNumericArgHead:(NSUInteger)numericArg;
-
-- (NSNumber*)numericArgHead;
-
-- (NSString*)argumentString;
-
-- (XVimEvaluatorContext*)setArgumentString:(NSString*)argument;
-
-- (XVimEvaluatorContext*)appendArgument:(NSString*)argument;
-
-- (XVimEvaluatorContext*)copy;
-
-@end
 
