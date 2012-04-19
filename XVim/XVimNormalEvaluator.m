@@ -570,7 +570,7 @@
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
+	XVimShiftAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
 																		withParent:self
 																		numericArg:[self numericArg]];
@@ -578,7 +578,7 @@
 }
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
+	XVimShiftAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
     XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithOperatorAction:operatorAction 
 																		withParent:self
 																		numericArg:[self numericArg]];

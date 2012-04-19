@@ -9,13 +9,13 @@
 #import "XVimOperatorEvaluator.h"
 #import "XVimOperatorAction.h"
 
-@interface XVimShiftEvaluator : XVimOperatorEvaluator
-- (id)initWithOperatorAction:(XVimOperatorAction*)action 
-				  withParent:(XVimEvaluator*)parent
-				  numericArg:(NSUInteger)numericArg
-					 unshift:(BOOL)unshift;
-@end
-
 @interface XVimShiftAction : XVimOperatorAction
 - (id)initWithUnshift:(BOOL)unshift;
+@property (readonly) BOOL unshift;
+@end
+
+@interface XVimShiftEvaluator : XVimOperatorEvaluator
+- (id)initWithOperatorAction:(XVimShiftAction*)action 
+				  withParent:(XVimEvaluator*)parent
+				  numericArg:(NSUInteger)numericArg;
 @end
