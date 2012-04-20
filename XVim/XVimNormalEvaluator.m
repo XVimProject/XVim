@@ -383,8 +383,10 @@
                     [view setSelectedRange:NSMakeRange(newline+1, 0)];
                 }
             }
-        }else{
-            [view moveForward:self];
+        } else {
+			if (![view isNewLine:loc]) {
+				[view moveForward:self];
+			}
         }
         
         for(NSUInteger i = 0; i < [self numericArg]; i++ ){
