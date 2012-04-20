@@ -234,6 +234,9 @@
                 [view insertNewline:self];
             }
         }
+		else {
+			[view setSelectedRangeWithBoundsCheck:from To:from];
+		}
         return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
     }
     return nil;
