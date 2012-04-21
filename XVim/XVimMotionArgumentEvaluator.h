@@ -7,19 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XVimEvaluator.h"
-#import "XVimMotionEvaluator.h"
+#import "XVimArgumentEvaluator.h"
+#import "XVimMotionType.h"
 
 // This is base class of an evaluator which takes arguments to determing the motion such as 'f','F'.
 // When the subclass fix the motion it must call motionFixedFrom:To: method.
-@interface XVimMotionArgumentEvaluator : XVimEvaluator{
-@protected
-    XVimMotionEvaluator* _parent;
-}
-
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window;
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
+@interface XVimMotionArgumentEvaluator : XVimArgumentEvaluator
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
 			   parent:(XVimMotionEvaluator*)parent;
+
+- (XVimMotionEvaluator*)motionEvaluator;
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window;
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
 @end

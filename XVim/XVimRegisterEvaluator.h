@@ -7,10 +7,11 @@
 //
 
 #import "XVimEvaluator.h"
+#import "XVimArgumentEvaluator.h"
 
 typedef XVimEvaluator* (^OnSelectRegister) (NSString*, XVimEvaluatorContext*);
 
-@interface XVimRegisterEvaluator : XVimEvaluator
+@interface XVimRegisterEvaluator : XVimArgumentEvaluator
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
 			   parent:(XVimEvaluator*)parent 

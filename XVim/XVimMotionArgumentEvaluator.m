@@ -8,6 +8,7 @@
 
 #import "XVimMotionArgumentEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "XVimMotionEvaluator.h"
 
 // This evaluator is base class of an evaluator which takes argument to fix the motion
 // e.g. 'f','F'
@@ -16,51 +17,21 @@
 - (id)initWithContext:(XVimEvaluatorContext*)context
 			   parent:(XVimMotionEvaluator*)parent
 {
-    self = [super initWithContext:context];
-    if( self ){
-        _parent = [parent retain];
-    }
-    return self;
+	if (self = [super initWithContext:context parent:parent])
+	{
+	}
+	return self;
 }
 
-- (void)dealloc{
-    [_parent release];
-    [super dealloc];
-}
-
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
+- (XVimMotionEvaluator*)motionEvaluator
 {
-    return [_parent insertionPointInWindow:window];
-}
-
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
-	return [_parent drawRect:rect inWindow:window];
-}
-
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
-	return [_parent shouldDrawInsertionPointInWindow:window];
-}
-
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
-{
-	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:heightRatio];
-}
-
-- (NSString*)modeString
-{
-	return [_parent modeString];
-}
-
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return [_parent withNewContext];
+	return (XVimMotionEvaluator*)_parent;
 }
 
 -(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     if( nil != _parent ){
-        return [_parent motionFixedFrom:from To:to Type:type inWindow:window];
+        return [[self motionEvaluator] motionFixedFrom:from To:to Type:type inWindow:window];
     }
     return nil;
 }
@@ -68,7 +39,7 @@
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window
 {
     if( nil != _parent ){
-        return [_parent commonMotion:motion Type:type inWindow:window];
+        return [[self motionEvaluator] commonMotion:motion Type:type inWindow:window];
     }
     return nil;
 }

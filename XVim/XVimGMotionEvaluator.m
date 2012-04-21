@@ -17,7 +17,6 @@
 
 @implementation XVimGMotionEvaluator
 
-
 - (XVimEvaluator*)g:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
     DVTSourceTextView* view = [window sourceView];

@@ -15,7 +15,6 @@
 #import "Logger.h"
 
 @interface XVimRegisterEvaluator() {
-	XVimEvaluator *_parent;
 	OnSelectRegister _onComplete;
 }
 @end
@@ -26,7 +25,7 @@
 			   parent:(XVimEvaluator*)parent
 		 completion:(OnSelectRegister)onComplete
 {
-	if (self = [super initWithContext:context])
+	if (self = [super initWithContext:context parent:parent])
 	{
 		_parent = parent;
 		_onComplete = [onComplete copy];
@@ -53,35 +52,6 @@
 	
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     return REGISTER_IGNORE;
-}
-
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
-{
-    return [_parent insertionPointInWindow:window];
-}
-
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
-	return [_parent drawRect:rect inWindow:window];
-}
-
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
-	return [_parent shouldDrawInsertionPointInWindow:window];
-}
-
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
-{
-	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.5];
-}
-
-- (NSString*)modeString
-{
-	return [_parent modeString];
-}
-
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return [_parent withNewContext];
 }
 
 @end

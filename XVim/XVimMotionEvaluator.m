@@ -10,7 +10,7 @@
 #import "XVimSearchLineEvaluator.h"
 #import "XVimGMotionEvaluator.h"
 #import "XVimZEvaluator.h"
-#import "XVimLocalMarkEvaluator.h"
+#import "XVimMarkMotionEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
@@ -386,13 +386,15 @@
 //  the range of the document
 
 - (XVimEvaluator*)SQUOTE:(XVimWindow*)window{
-    return [[XVimLocalMarkEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"]
-																				 markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
+    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"]
+													 parent:self
+											   markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
 }
 
 - (XVimEvaluator*)BACKQUOTE:(XVimWindow*)window{
-    return [[XVimLocalMarkEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] 
-											  markOperator:MARKOPERATOR_MOVETO];
+    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] 
+													 parent:self
+											   markOperator:MARKOPERATOR_MOVETO];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)

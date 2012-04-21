@@ -9,7 +9,7 @@
 
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
-#import "XVimLocalMarkEvaluator.h"
+#import "XVimMarkSetEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimYankEvaluator.h"
 #import "XVimEqualEvaluator.h"
@@ -19,6 +19,7 @@
 #import "XVimRegisterEvaluator.h"
 #import "XVimWindowEvaluator.h"
 #import "XVimGActionEvaluator.h"
+#import "XVimMarkSetEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
 #import "XVimKeyStroke.h"
@@ -314,8 +315,8 @@
 
  - (XVimEvaluator*)m:(XVimWindow*)window{
     // 'm{letter}' sets a local mark.
-	return [[XVimLocalMarkEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
-											  markOperator:MARKOPERATOR_SET];
+	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
+												  parent:self];
 }
 
 - (XVimEvaluator*)o:(XVimWindow*)window{
