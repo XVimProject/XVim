@@ -19,13 +19,13 @@
 @synthesize lastSearchCase = _lastSearchCase;
 @synthesize lastSearchBackword = _lastSearchBackword;
 @synthesize lastSearchCmd = _lastSearchCmd;
-@synthesize lastSearchString = _lastSearchString;
+@synthesize lastSearchDisplayString = _lastSearchDisplayString;
 @synthesize lastReplacementString = _lastReplacementString;
 
 - (id)init
 {
     if( self = [super init] ){
-        _lastSearchString = @"";
+        _lastSearchDisplayString = @"";
         _lastReplacementString = @"";
         _lastSearchCase = XVimSearchCaseDefault;
         _lastSearchBackword = NO;
@@ -33,7 +33,7 @@
     return self;
 }
 
-- (NSRange)executeSearch:(NSString*)searchCmd from:(NSUInteger)from inWindow:(XVimWindow*)window
+- (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window
 {
     unichar first = [searchCmd characterAtIndex:0];
     if( first == '?' ){
@@ -45,7 +45,7 @@
     }
     
     // Store off the original search string into the lastSearchString
-    self.lastSearchString = [searchCmd substringFromIndex:1];
+    self.lastSearchDisplayString = displayString;
     
     // In vim \c specifies a case insensitive search and \C specifies case sensitive
     // If there are any \c then it overrides any \C that may be in the search string
@@ -113,7 +113,7 @@
     
     if (error != nil) {
         [window errorMessage:[NSString stringWithFormat:
-                             @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+                             @"Cannot compile regular expression '%@'",self.lastSearchDisplayString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
@@ -130,7 +130,7 @@
                                          options:r_opts
                                            range:NSMakeRange(0, [[srcView string] length])];
         [window errorMessage:[NSString stringWithFormat:
-                             @"Search wrapped for '%@'",self.lastSearchString] ringBell:TRUE];
+                             @"Search wrapped for '%@'",self.lastSearchDisplayString] ringBell:TRUE];
     }
     
     return found;
@@ -162,7 +162,7 @@
                                   error:&error];
     
     if (error != nil) {
-        [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+        [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchDisplayString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
@@ -184,7 +184,7 @@
         if ([matches count] > 0) {
             NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
             found = [match range];
-            [window errorMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchString] ringBell:FALSE];
+            [window errorMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchDisplayString] ringBell:FALSE];
         }
     }
 	 
@@ -271,7 +271,7 @@
     }
 
     NSString *searchString = [(forward ? @"/" : @"?") stringByAppendingString:escapedSearchWord];
-    NSRange found = [self executeSearch:searchString from:from inWindow:window];
+    NSRange found = [self executeSearch:searchString display:searchWord from:from inWindow:window];
 
     if (found.location != NSNotFound &&
         ((!forward && begin.location != wordRange.location) ||
@@ -302,7 +302,7 @@
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchCmd options:r_opts error:&error];
     
     if (error != nil) {
-        [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchString] ringBell:TRUE];
+        [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchDisplayString] ringBell:TRUE];
         return NSMakeRange(NSNotFound,0);
     }
     
@@ -357,7 +357,7 @@
         TRACE_LOG("replacement=%@",replacement);
     }
     self.lastSearchCmd = replaced;
-    self.lastSearchString = replaced;
+    self.lastSearchDisplayString = replaced;
     self.lastReplacementString = replacement;
     
     // Find the position to start searching
@@ -401,7 +401,7 @@
 		[srcView scrollTo:[window cursorLocation]];
         [srcView showFindIndicatorForRange:found];
     }else{
-        [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", self.lastSearchString] ringBell:TRUE];
+        [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", self.lastSearchDisplayString] ringBell:TRUE];
     }
 	
 	return valid;

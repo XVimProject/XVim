@@ -434,7 +434,10 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
 							   DVTSourceTextView *sourceView = [window sourceView];
-							   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+							   NSRange found = [searcher executeSearch:command 
+															   display:[command substringFromIndex:1]
+																  from:[window cursorLocation] 
+															  inWindow:window];
 							   //Move cursor and show the found string
 							   if (found.location != NSNotFound) {
                                    unichar firstChar = [command characterAtIndex:0];
@@ -447,7 +450,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 								   [sourceView scrollTo:[window cursorLocation]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
-								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
 							   }
                                return self;
 						   }
@@ -457,7 +460,10 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
                                    DVTSourceTextView *sourceView = [window sourceView];
-                                   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+                                   NSRange found = [searcher executeSearch:command 
+																   display:[command substringFromIndex:1]
+																	  from:[window cursorLocation] 
+																  inWindow:window];
                                    //Move cursor and show the found string
                                    if (found.location != NSNotFound) {
                                        // Update the selection while preserving the current insertion point

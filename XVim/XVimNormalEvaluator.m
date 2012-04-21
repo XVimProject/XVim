@@ -687,14 +687,17 @@
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
 							   DVTSourceTextView *sourceView = [window sourceView];
-							   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+							   NSRange found = [searcher executeSearch:command 
+															   display:[command substringFromIndex:1] 
+																  from:[window cursorLocation] 
+															  inWindow:window];
 							   //Move cursor and show the found string
 							   if (found.location != NSNotFound) {
 								   [sourceView setSelectedRange:NSMakeRange(found.location, 0)];
 								   [sourceView scrollTo:[window cursorLocation]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
-								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchString] ringBell:TRUE];
+								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
 							   }
 							   return nil;
 						   }
@@ -704,7 +707,10 @@
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
                                    DVTSourceTextView *sourceView = [window sourceView];
-                                   NSRange found = [searcher executeSearch:command from:[window cursorLocation] inWindow:window];
+                                   NSRange found = [searcher executeSearch:command 
+																   display:[command substringFromIndex:1]
+																	  from:[window cursorLocation] 
+																  inWindow:window];
                                    //Move cursor and show the found string
                                    if (found.location != NSNotFound) {
                                        [sourceView scrollTo:found.location];
