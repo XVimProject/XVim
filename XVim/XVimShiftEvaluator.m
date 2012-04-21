@@ -78,7 +78,8 @@
 	}else{
 		[view shiftRight:self];
 	}
-	[view setSelectedRange:NSMakeRange([view selectedRange].location, 0)];
+	NSUInteger cursorLocation = [view firstNonBlankInALine:MIN(from, to)];
+	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
 	return nil;
 }
 @end
