@@ -394,6 +394,18 @@
     
 }
 
+// Returns first position that is non-whitespace. If newline or eof encountered, returns index.
+- (NSUInteger)skipWhiteSpace:(NSUInteger)index
+{
+	NSUInteger length = [[self string] length];
+	for (NSUInteger i = index; i < length; ++i)
+	{
+		if ([self isNewLine:i]) { break; }
+		if (![self isWhiteSpace:i]) { return i; }
+	}
+	return index;
+}
+
 - (NSUInteger)lineNumber:(NSUInteger)index{
     NSUInteger newLines=1;
     for( NSUInteger pos = 0 ; pos < index && pos < [[self string] length]; pos++ ){

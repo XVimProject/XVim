@@ -370,7 +370,8 @@
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
         unichar uc = [text characterAtIndex:[text length] -1];
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+		BOOL linewise = [[NSCharacterSet newlineCharacterSet] characterIsMember:uc];
+        if (linewise) {
             if( [view isBlankLine:loc] && ![view isEOF:loc]){
                 [view setSelectedRange:NSMakeRange(loc+1,0)];
             }else{
@@ -388,10 +389,19 @@
 				[view moveForward:self];
 			}
         }
-        
+		
+		NSUInteger cursorLocation = [view selectedRange].location;
         for(NSUInteger i = 0; i < [self numericArg]; i++ ){
             [view insertText:text];
         }
+		
+		// Adjust cursor position
+		if (!linewise) {
+			cursorLocation += [text length] - 1;
+		} else {
+			cursorLocation = [view skipWhiteSpace:cursorLocation];
+		}
+		[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
     }
     return nil;
 }
@@ -403,15 +413,26 @@
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
         unichar uc = [text characterAtIndex:[text length] -1];
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+		BOOL linewise = [[NSCharacterSet newlineCharacterSet] characterIsMember:uc];
+        if (linewise) {
             NSUInteger b = [view headOfLine:[view selectedRange].location];
             if( NSNotFound != b ){
                 [view setSelectedRange:NSMakeRange(b,0)];
             }
         }
+		NSUInteger loc = [view selectedRange].location;
         for(NSUInteger i = 0; i < [self numericArg]; i++ ){
             [view insertText:text];
         }
+		
+		NSUInteger cursorLocation = 0;
+		if (linewise) {
+			cursorLocation = [view skipWhiteSpace:loc];
+		} else {
+			cursorLocation = loc + [text length] - 1;
+		}
+		
+		[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
     }
     return nil;
 }

@@ -207,6 +207,9 @@ typedef struct _XVimWordInfo{
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
+// Returns first position that is non-whitespace. If newline or eof encountered, returns index.
+- (NSUInteger)skipWhiteSpace:(NSUInteger)index;
+
 // Deletes the selected range and adjusts cursor position
 - (void)del:(id)sender intoYankRegister:(XVimRegister*)xregister;
 
