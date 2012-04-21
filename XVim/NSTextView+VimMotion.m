@@ -1789,8 +1789,8 @@ NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, B
 		}
 	}
 	
-    int start_pos = (int)idx;
-    int end_pos   = (int)idx;
+    NSInteger start_pos = idx;
+    NSInteger end_pos   = idx;
     
     while (count-- > 0)
     {
