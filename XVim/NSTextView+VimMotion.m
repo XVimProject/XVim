@@ -7,6 +7,7 @@
 #import "NSTextView+VimMotion.h"
 #import "NSString+VimHelper.h"
 #import "DVTSourceTextView.h"
+#import "DVTFoldingTextStorage.h"
 #import "Logger.h"
 #import "XVim.h"
 
@@ -348,11 +349,24 @@
  **/
 - (NSUInteger)columnNumber:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    NSUInteger head = [self headOfLine:index];
-    if( NSNotFound == head ){
-        return 0; // This is balnkline
+	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[self textStorage];
+	return [textStorage columnForPositionConvertingTabs:index];
+}
+
+- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column
+{
+    // pos is at the line number "num" and column 0
+    NSUInteger end = [self endOfLine:pos];
+    if( NSNotFound == end ){
+        return pos;
     }
-    return index-head;
+	
+	// Primitive search until the column number matches
+	while (pos < end) {
+		if ([self columnNumber:pos] == column) { break; }
+		++pos;
+	}
+	return pos;
 }
 
 /**
@@ -363,11 +377,13 @@
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
     NSAssert(0 != num, @"line number starts from 1");
     
-    // Premitive search to find line number
+    // Primitive search to find line number
     // TODO: we may need to keep track line number and position by hooking insertText: method.
     NSUInteger pos = 0;
     num--; // line number starts from 1
-    while( pos < [[self string] length] && num != 0){ 
+	
+	NSUInteger length = [[self string] length];
+    while( pos < length && num != 0){ 
         if( [self isNewLine:pos] ){
             num--;
         }
@@ -378,20 +394,8 @@
         // Coundn't find the line
         return NSNotFound;
     }
-    
-    // pos is at the line number "num" and column 0
-    NSUInteger end = [self endOfLine:pos];
-    if( NSNotFound == end ){
-        return pos;
-    }
-    
-    // check if there is enough columns at the current line
-    if( end - pos >= column ){
-        return pos + column;
-    }else{
-        return end;
-    }
-    
+	
+	return [self nextPositionFrom:pos matchingColumn:column];
 }
 
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
@@ -564,12 +568,8 @@
     if( NSNotFound == head ){
         return pos;
     }
-    NSUInteger end = [self endOfLine:head];
-    NSAssert( end != NSNotFound, @"End can not be NSNotFound here" );
-    if( head+column > end ){
-        return end;
-    }
-    return head+column;
+	
+	return [self nextPositionFrom:head matchingColumn:column];
 }
 
 /**
@@ -604,16 +604,7 @@
         // pos is on a newline. The next line is the target line.
         // There is at least 1 more range available.
         pos++;
-        NSUInteger end = [self endOfLine:pos];
-        if( NSNotFound != end ){
-            // adjust column position
-            if( pos+column > end ){
-                pos = end;
-            }else{
-                pos = pos + column;
-            }
-        }
-        // If "end == NSNotFound" the current line is blankline
+		return [self nextPositionFrom:pos matchingColumn:column];
     }
     return pos; 
 }

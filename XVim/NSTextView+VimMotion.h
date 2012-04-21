@@ -197,6 +197,7 @@ typedef struct _XVimWordInfo{
 /**
  * Returns column number of the position "index"
  * Column number starts from 0
+ * Tabs are converted according to tab width
  **/
 - (NSUInteger)columnNumber:(NSUInteger)index;
 
