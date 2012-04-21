@@ -72,8 +72,6 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
-	[super becameHandlerInWindow:window];
-	
 	if (_begin == NSNotFound)
 	{
 		DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
@@ -96,6 +94,8 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 	}
 	
 	[self updateSelectionInWindow:window];
+	
+	[super becameHandlerInWindow:window];
 }
     
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
