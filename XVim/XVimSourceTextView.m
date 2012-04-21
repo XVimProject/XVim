@@ -119,6 +119,8 @@
             // Observe DVTSourceScrollTextView notification
             [scrollView setPostsFrameChangedNotifications:YES];
             [[NSNotificationCenter defaultCenter] addObserver:cmdline selector:@selector(didFrameChanged:) name:NSViewFrameDidChangeNotification  object:scrollView];
+			
+			[window registerWithScrollView:scrollView];
         }else{
             ERROR_LOG(@"DVTSourceTExtScrollView not found.");
         }
@@ -129,6 +131,8 @@
 
 -  (void)keyDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
+	NSScrollView* scrollView = [base enclosingScrollView]; // DVTSourceTextScrollView
+	[scrollView setHasHorizontalScroller:NO];
 	
     XVimWindow* window = [base viewWithTag:XVIM_TAG];
     if( nil == window ){

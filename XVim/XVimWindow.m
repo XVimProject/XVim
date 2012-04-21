@@ -239,4 +239,27 @@
 	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
 }
 
+- (void)registerWithScrollView:(NSScrollView*)scrollView
+{
+	[scrollView addObserver:self
+				 forKeyPath:@"hasHorizontalScroller"
+					options:NSKeyValueObservingOptionNew
+					context:nil];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath 
+					  ofObject:(id)object 
+						change:(NSDictionary *)change 
+					   context:(void *)context
+{
+	if (keyPath == @"hasHorizontalScroller")
+	{
+		NSScrollView *scrollView = object;
+		if ([scrollView hasHorizontalScroller])
+		{
+			[scrollView setHasHorizontalScroller:NO];
+		}
+	}
+}
+
 @end

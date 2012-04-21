@@ -59,4 +59,6 @@
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 
+- (void)registerWithScrollView:(NSScrollView*)scrollView;
+
 @end
