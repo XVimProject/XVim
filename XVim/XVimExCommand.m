@@ -569,8 +569,8 @@
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
 {
     DVTSourceTextView* view = [window sourceView];
-    DVTFoldingTextStorage* storage = [view textStorage];
-    TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
+    //DVTFoldingTextStorage* storage = [view textStorage];
+    //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
     NSUInteger begin = [view selectedRange].location;
     NSUInteger end = [view selectedRange].location + [view selectedRange].length-1;
