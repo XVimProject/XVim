@@ -358,7 +358,7 @@
 	
 	NSUInteger cursorLocation = [window cursorLocation];
 	NSUInteger searchLocation = cursorLocation;
-    NSRange found;
+    NSRange found=NSMakeRange(0, 0);
     for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
         found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:YES inWindow:window];
 		searchLocation = found.location;
