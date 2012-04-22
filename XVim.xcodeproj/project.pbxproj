@@ -348,8 +348,6 @@
 				A222B5E31514DFD5005E8802 /* Operators */,
 				A2FF17CF1502B291003FE648 /* XVimMotionEvaluator.h */,
 				A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */,
-				F15805C51530B4000031175A /* XVimWindowEvaluator.h */,
-				F15805C61530B4000031175A /* XVimWindowEvaluator.m */,
 				A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */,
 				A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */,
 				A2F4A33C14F00B25006DA5A5 /* XVimNormalEvaluator.h */,
@@ -392,6 +390,8 @@
 		C34490D0154280CA00F60E09 /* Argument */ = {
 			isa = PBXGroup;
 			children = (
+				F15805C51530B4000031175A /* XVimWindowEvaluator.h */,
+				F15805C61530B4000031175A /* XVimWindowEvaluator.m */,
 				F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */,
 				F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */,
 				C3E8F113154267BA007410ED /* XVimMarkSetEvaluator.h */,

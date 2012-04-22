@@ -538,7 +538,8 @@
 }
 
 - (XVimEvaluator*)C_w:(XVimWindow*)window{
-    return [[XVimWindowEvaluator alloc] init];
+    return [[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"]
+												 parent:self];
 }
 
 - (XVimEvaluator*)x:(XVimWindow*)window{

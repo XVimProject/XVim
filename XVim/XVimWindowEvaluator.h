@@ -6,8 +6,8 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "XVimEvaluator.h"
+#import "XVimArgumentEvaluator.h"
 
-@interface XVimWindowEvaluator : XVimEvaluator
+@interface XVimWindowEvaluator : XVimArgumentEvaluator
 
 @end
