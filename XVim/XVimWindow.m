@@ -14,6 +14,9 @@
 #import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "IDEWorkspaceController.h"
+#import "IDEEditorArea.h"
+#import "IDEEditorModeViewController.h"
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -58,6 +61,13 @@
 	}
 }
 
+- (DVTSourceTextView*)sourceView{
+    if([NSStringFromClass([[[self window] firstResponder] class]) isEqualToString:@"DVTSourceTextView"]){
+        return (DVTSourceTextView*)[[self window] firstResponder];
+    }
+    return nil;
+}
+
 - (XVimEvaluator*)currentEvaluator{
     return _currentEvaluator;
 }
@@ -71,7 +81,11 @@
 }
 
 - (NSRange)selectedRange{
-    return [[self sourceView] selectedRange];
+    if( [self sourceView] == nil ){
+        return NSMakeRange(0, 0);
+    }else{
+        return [[self sourceView] selectedRange];
+    }
 }
 
 - (NSUInteger)cursorLocation 

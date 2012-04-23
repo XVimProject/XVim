@@ -39,6 +39,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
+#import "XVimEditorArea.h"
 
 static XVim* s_instance = nil;
 
@@ -89,13 +90,14 @@ static XVim* s_instance = nil;
     //Comment out if you do not need to trace method calls of the specific classes or specify 
     // a class name in which you are interested in.
 
-    //[Logger registerTracing:@"DVTSourceTextView"];
+    //[Logger registerTracing:@"DVTBorderedView"];
     //[Logger registerTracing:@"DVTTextFinder"];
     //[Logger registerTracing:@"DVTIncrementalFindBar"];
 }
 
 + (void) hook
 {
+    [XVimEditorArea hook];
 	[XVimSourceTextView hook];
 	[XVimSourceCodeEditor hook];
 }

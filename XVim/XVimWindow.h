@@ -21,7 +21,7 @@
 
 @property NSInteger tag;
 
-@property(retain) DVTSourceTextView* sourceView;
+@property(readonly) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
 
 @property(retain) XVimCommandLine* commandLine;

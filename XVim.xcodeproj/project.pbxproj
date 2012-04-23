@@ -22,6 +22,7 @@
 		A2A6BA2E152A544C00F0EB5F /* XVimSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */; };
 		A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A736351527484B0051E8E4 /* XVimExCommand.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
+		A2ADAB831545C18F0093A908 /* XVimEditorArea.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADAB821545C18F0093A908 /* XVimEditorArea.m */; };
 		A2AF5E18152EA92C00E13833 /* NSTextView+VimMotion.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AF5E17152EA92C00E13833 /* NSTextView+VimMotion.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
@@ -103,6 +104,10 @@
 		A2A736351527484B0051E8E4 /* XVimExCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimExCommand.m; path = XVim/XVimExCommand.m; sourceTree = SOURCE_ROOT; };
 		A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandLine.h; path = XVim/XVimCommandLine.h; sourceTree = SOURCE_ROOT; };
 		A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLine.m; path = XVim/XVimCommandLine.m; sourceTree = SOURCE_ROOT; };
+		A2ADAB811545C18F0093A908 /* XVimEditorArea.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEditorArea.h; path = XVim/XVimEditorArea.h; sourceTree = SOURCE_ROOT; };
+		A2ADAB821545C18F0093A908 /* XVimEditorArea.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEditorArea.m; path = XVim/XVimEditorArea.m; sourceTree = SOURCE_ROOT; };
+		A2ADAB881545CC540093A908 /* IDEWorkspaceController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEWorkspaceController.h; path = XVim/IDEWorkspaceController.h; sourceTree = SOURCE_ROOT; };
+		A2ADAB8B1545DA8C0093A908 /* DVTBorderedView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTBorderedView.h; path = XVim/DVTBorderedView.h; sourceTree = SOURCE_ROOT; };
 		A2AF5E16152EA92C00E13833 /* NSTextView+VimMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSTextView+VimMotion.h"; path = "XVim/NSTextView+VimMotion.h"; sourceTree = SOURCE_ROOT; };
 		A2AF5E17152EA92C00E13833 /* NSTextView+VimMotion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSTextView+VimMotion.m"; path = "XVim/NSTextView+VimMotion.m"; sourceTree = SOURCE_ROOT; };
 		A2B4BABB14D59F6600D817B0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -405,20 +410,24 @@
 		C38A5B481527C9EE00E1448D /* Xcode */ = {
 			isa = PBXGroup;
 			children = (
+				A2ADAB881545CC540093A908 /* IDEWorkspaceController.h */,
 				F1E0B3BC1539F9C900ED0C7E /* IDEEditorMultipleContext.h */,
 				F11C83E71539F1BF00719D68 /* IDEEditorGeniusMode.h */,
 				F1B350D71539EC0700A7A7FD /* IDEEditorModeViewController.h */,
-				F11F0BF61531621E002F0795 /* IDEEditorArea.h */,
 				F196C36C15315564000581EE /* IDEWorkspaceTabController.h */,
-				C38A5B3F15272B0500E1448D /* XVimSourceTextView.h */,
-				C38A5B4015272B0500E1448D /* XVimSourceTextView.m */,
+				C38A5B561527D25C00E1448D /* DVTCompletionController.h */,
 				C38A5B511527CF5900E1448D /* DVTFoldingTextStorage.h */,
 				C38A5B521527CF5900E1448D /* DVTFontAndColorsTheme.h */,
+				F11F0BF61531621E002F0795 /* IDEEditorArea.h */,
+				A2ADAB811545C18F0093A908 /* XVimEditorArea.h */,
+				A2ADAB821545C18F0093A908 /* XVimEditorArea.m */,
+				C38A5B5B1527D58500E1448D /* DVTSourceTextView.h */,
+				C38A5B3F15272B0500E1448D /* XVimSourceTextView.h */,
+				C38A5B4015272B0500E1448D /* XVimSourceTextView.m */,
+				C38A5B581527D53200E1448D /* IDESourceCodeEditor.h */,
 				C38A5B4515272DCC00E1448D /* XVimSourceCodeEditor.h */,
 				C38A5B4615272DCD00E1448D /* XVimSourceCodeEditor.m */,
-				C38A5B561527D25C00E1448D /* DVTCompletionController.h */,
-				C38A5B581527D53200E1448D /* IDESourceCodeEditor.h */,
-				C38A5B5B1527D58500E1448D /* DVTSourceTextView.h */,
+				A2ADAB8B1545DA8C0093A908 /* DVTBorderedView.h */,
 			);
 			name = Xcode;
 			sourceTree = "<group>";
@@ -533,6 +542,7 @@
 				C3E8F11115426787007410ED /* XVimMarkMotionEvaluator.m in Sources */,
 				C3E8F115154267BA007410ED /* XVimMarkSetEvaluator.m in Sources */,
 				C3E8F11815427AE6007410ED /* XVimArgumentEvaluator.m in Sources */,
+				A2ADAB831545C18F0093A908 /* XVimEditorArea.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
