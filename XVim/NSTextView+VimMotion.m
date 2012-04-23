@@ -642,7 +642,7 @@
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert(nil != info, @"Specify info");
     
-    NSInteger pos = index;
+    NSUInteger pos = index;
     info->isFirstWordInALine = NO;
     info->lastEndOfLine = NSNotFound;
     info->lastEndOfWord = NSNotFound;
@@ -1302,6 +1302,11 @@
     [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
+// TODO: Fix the warnings
+// There are too many warning in following codes.
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wuninitialized"
+#pragma GCC diagnostic ignored "-Wconversion"
 ////////////////////
 /// Text Object ////
 ////////////////////
@@ -1393,7 +1398,6 @@
 
 // The following code is from xVim by WarWithinMe.
 // These will be integreted into NSTextView category.
-
 // ==========
 // NSStringHelper
 void initNSStringHelper(NSStringHelper* h, NSString* string, NSUInteger strLen)
@@ -2033,4 +2037,5 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
     
     return result;
 }
+#pragma GCC diagnostic pop
 @end

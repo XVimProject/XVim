@@ -155,7 +155,7 @@ static Logger* s_defaultLogger = nil;
     NSMutableString* text = [[[NSMutableString alloc] init ] autorelease];
     if (numClasses > 0 )
     {
-        classes = malloc(sizeof(Class) * numClasses);
+        classes = malloc(sizeof(Class) * (NSUInteger)numClasses);
         numClasses = objc_getClassList(classes, numClasses);
         // Enumerate Classes
         for( int i = 0 ; i < numClasses ; i++ ){

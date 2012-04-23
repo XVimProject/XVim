@@ -249,7 +249,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 + (XVimKeyStroke*)keyStrokeOptionsFromEvent:(NSEvent*)event into:(NSMutableArray*)options
 {
 	XVimKeyStroke *primaryKeyStroke = nil;
-	int modifierFlags = event.modifierFlags & (NSShiftKeyMask | NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
+	NSUInteger modifierFlags = event.modifierFlags & (NSShiftKeyMask | NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
 	unichar unmodifiedKeyCode = [[event charactersIgnoringModifiers] characterAtIndex:0];
 	unichar modifiedKeyCode = [[event characters] characterAtIndex:0];
 	
@@ -304,7 +304,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 }
 
 - (id)initWithKeyCode:(unichar)keyCode
-		modifierFlags:(int)modifierFlags
+		modifierFlags:(NSUInteger)modifierFlags
 {
 	if (self = [super init])
 	{
@@ -317,7 +317,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 // Constructs a key stroke from an event
 - (id)initWithEvent:(NSEvent*)event 
 				keyCode:(unichar)keyCode 
-		  modifierFlags:(int)modifierFlags
+		  modifierFlags:(NSUInteger)modifierFlags
 {
 	if (self = [self initWithKeyCode:keyCode modifierFlags:modifierFlags])
 	{
@@ -335,7 +335,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 	{
 		unichar c = self.keyCode;
 		NSString *characters = [NSString stringWithCharacters:&c length:1];
-		int mflags = self.modifierFlags;
+		NSUInteger mflags = self.modifierFlags;
 		
 		event = [NSEvent keyEventWithType:NSKeyDown 
 								 location:NSMakePoint(0, 0)
@@ -352,7 +352,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 	return event;
 }
 
-static NSString* toSelectorString(unichar charcode, int modifierFlags)
+static NSString* toSelectorString(unichar charcode, NSUInteger modifierFlags)
 {
 	// S- Shift
 	// C- Control
@@ -388,7 +388,7 @@ static NSString* toSelectorString(unichar charcode, int modifierFlags)
 	return [self toSelectorString];
 }
 
-static SEL getSelector(unichar charcode, int modifierFlags)
+static SEL getSelector(unichar charcode, NSUInteger modifierFlags)
 {
 	NSString* keyString = toSelectorString(charcode, modifierFlags);
 	SEL selector = NSSelectorFromString([keyString stringByAppendingString:@":"]);
@@ -429,7 +429,7 @@ static SEL getSelector(unichar charcode, int modifierFlags)
 	NSUInteger endi = starti;
 	NSString *keyString = NULL;
 	
-	int modifierFlags = 0;
+	NSUInteger modifierFlags = 0;
 	if ([string characterAtIndex:starti] == '<')
 	{
 		// Find modifier flags, if any

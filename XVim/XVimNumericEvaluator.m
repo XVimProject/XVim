@@ -26,7 +26,7 @@
 		
         if (numericArgHead) {
             NSString* numStr = [keyStr substringFromIndex:3];
-            NSInteger n = [numStr integerValue]; 
+            NSUInteger n = (NSUInteger)[numStr integerValue]; 
 			NSUInteger newHead = [numericArgHead unsignedIntegerValue];
             newHead*=10; //FIXME: consider integer overflow
             newHead+=n;
@@ -41,7 +41,7 @@
                 // Maybe handled by XVimNormalEvaluator
             }else{
                 NSString* numStr = [keyStr substringFromIndex:3];
-                NSInteger n = [numStr integerValue]; 
+                NSUInteger n = (NSUInteger)[numStr integerValue]; 
 				[context setNumericArgHead:n];
 				[context appendArgument:numStr];
                 return self;
