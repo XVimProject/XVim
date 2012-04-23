@@ -271,12 +271,15 @@ static XVim* s_instance = nil;
         [yankRegister appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
     }else{
         // There are 10 numbered registers
-        for (NSInteger i = self.numberedRegisters.count - 2; i >= 0; --i){
+        for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
             XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
             XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
             
             [next clear];
             [next appendText:prev.text];
+            if( i == 0 ){
+                break;
+            }
         }
         
         XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];

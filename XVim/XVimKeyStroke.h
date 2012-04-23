@@ -28,12 +28,12 @@
 + (void)fromString:(NSString *)string to:(NSMutableArray *)keystrokes;
 
 - (id)initWithKeyCode:(unichar)keyCode
-		modifierFlags:(int)modifierFlags;
+		modifierFlags:(NSUInteger)modifierFlags;
 
 // Constructs a key stroke from an event
 - (id)initWithEvent:(NSEvent*)event 
 				keyCode:(unichar)keyCode 
-		  modifierFlags:(int)modifierFlags;
+		  modifierFlags:(NSUInteger)modifierFlags;
 
 // Generates an event from this key stroke
 - (NSEvent*)toEvent;
@@ -57,6 +57,6 @@
 - (BOOL)classImplements:(Class)class;
 
 @property (nonatomic) unichar keyCode;
-@property (nonatomic) int modifierFlags;
+@property (nonatomic) NSUInteger modifierFlags;
 @property (nonatomic, readonly) BOOL isNumeric;
 @end

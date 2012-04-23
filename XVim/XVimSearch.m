@@ -332,7 +332,7 @@
     BOOL global = options.gdefault;
     BOOL confirmation = NO;
     if ([ex_command length] >= 3) {
-        for(int i=1;i<[ex_command length];++i) {
+        for(NSUInteger i=1;i<[ex_command length];++i) {
             char current = [ex_command characterAtIndex:i];
             if (current == '/' && previous != '\\') {
                 component++;

@@ -614,7 +614,7 @@
                 parsing++;
                 count++;
             }
-            addr = [[NSString stringWithCharacters:tmp length:count] intValue];
+            addr = [[NSString stringWithCharacters:tmp length:count] unsignedIntValue];
             if( 0 == addr ){
                 addr = NSNotFound;
             }
@@ -656,7 +656,7 @@
                 parsing++;
                 count++;
             }
-            n = [[NSString stringWithCharacters:tmp length:count] intValue];
+            n = [[NSString stringWithCharacters:tmp length:count] unsignedIntValue];
         }
         
         // Calc the address from base

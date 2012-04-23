@@ -36,7 +36,7 @@
     return nil;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(BOOL)type inWindow:(XVimWindow*)window
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     if( nil != _parent ){
         return [[self motionEvaluator] commonMotion:motion Type:type inWindow:window];
