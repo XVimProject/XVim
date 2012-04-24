@@ -584,6 +584,14 @@
     return nil;
 }
 
+- (XVimEvaluator*)Y:(XVimWindow*)window{
+	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithYankRegister:[self yankRegister]];
+    XVimYankEvaluator* yank = [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"]
+									   operatorAction:operatorAction 
+										   withParent:self];
+    return [yank y:window];
+}
+
 - (XVimEvaluator*)y:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithYankRegister:[self yankRegister]];
     return [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"]
