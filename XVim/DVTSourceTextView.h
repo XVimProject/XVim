@@ -282,8 +282,9 @@
 - (void)_drawInsertionPointInRect:(NSRect)rect color:(NSColor*)aColor;
 - (void)_drawInsertionPointInRect_:(NSRect)rect color:(NSColor*)aColor;
 
-- (void)doCommandBySelector:(SEL)aSelector;
-- (void)doCommandBySelector_:(SEL)aSelector;
+- (BOOL)becomeFirstResponder;
+- (BOOL)becomeFirstResponder_;
+
 
 
 @end

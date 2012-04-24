@@ -8,10 +8,11 @@
 
 #import "XVimCommandField.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 #import "Logger.h"
 
 @interface XVimCommandField() {
-	id<XVimCommandFieldDelegate> _delegate;
+	XVimWindow<XVimCommandFieldDelegate>* _delegate;
 	BOOL _absorbFocusEvent;
 }
 @end
@@ -36,7 +37,7 @@
 	return YES;
 }
 
-- (void)setDelegate:(id<XVimCommandFieldDelegate>)delegate
+- (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate
 {
 	_delegate = delegate;
 }
@@ -81,7 +82,7 @@
 {
 	// Redirect to window -> XVimCommandLineEvaluator -> Back to here via handleKeyStroke
 	// This is to get macro recording and key mapping support
-	[_delegate commandFieldKeyDown:self event:event];
+	[_delegate handleKeyEvent:event];
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window

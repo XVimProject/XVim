@@ -21,7 +21,7 @@
 
 @property NSInteger tag;
 
-@property(readonly) DVTSourceTextView* sourceView;
+@property(strong) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
 
 @property(retain) XVimCommandLine* commandLine;
@@ -50,7 +50,6 @@
 
 // XVimCommandFieldDelegate
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
-- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event;
 
 // XVimPlaybackHandler
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;

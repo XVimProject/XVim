@@ -29,6 +29,9 @@
     // Hook viewDidMoveToSuperview
     [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(viewDidMoveToSuperview_)];
     
+    // Hook viewDidMoveToSuperview
+    [Hooker hookMethod:@selector(becomeFirstResponder) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(becomeFirstResponder) ) keepingOriginalWith:@selector(becomeFirstResponder_)];
+    
     // Hook keyDown:
     [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(keyDown:) ) keepingOriginalWith:@selector(keyDown_:)];   
     
@@ -196,5 +199,14 @@
 	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
 }
 
+- (BOOL)becomeFirstResponder{
+	DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    BOOL b = [base becomeFirstResponder_];
+    if( [base becomeFirstResponder_] ){
+        window.sourceView = base;
+    }
+    return b;
+}
 @end
 

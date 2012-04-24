@@ -61,13 +61,6 @@
 	}
 }
 
-- (DVTSourceTextView*)sourceView{
-    if([NSStringFromClass([[[self window] firstResponder] class]) isEqualToString:@"DVTSourceTextView"]){
-        return (DVTSourceTextView*)[[self window] firstResponder];
-    }
-    return nil;
-}
-
 - (XVimEvaluator*)currentEvaluator{
     return _currentEvaluator;
 }
@@ -170,11 +163,6 @@
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField
 {
 	[self setEvaluator:nil];
-}
-
-- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event
-{
-	[[self sourceView] keyDown:event];
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{

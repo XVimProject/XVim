@@ -71,19 +71,35 @@
         _status.borderSides = 0;
         _status.shadowSides = 0;
         [_status setAllInactiveBordersToColor:[NSColor clearColor]];
+        
+		// Box
+		_statusBarBackgroundBox = [[NSBox alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+		[_statusBarBackgroundBox setBorderType:NSNoBorder];
+		[_statusBarBackgroundBox setBoxType:NSBoxCustom];
+		[_statusBarBackgroundBox setFillColor:[NSColor clearColor]];
+		[self addSubview:_statusBarBackgroundBox];
+        
         // Status View
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
         [paragraph setAlignment:NSRightTextAlignment];
         _statusString = [[NSTextField alloc] init];
         [_status addSubview:_statusString];
         [self addSubview:_status];
-        [_statusString setAlignment:NSRightTextAlignment];
+        [_statusString setAlignment:NSLeftTextAlignment];
         [_statusString setEditable:NO];
         [_statusString setSelectable:NO];
         [_statusString setTextColor:[NSColor windowFrameTextColor]];
         [_statusString setBackgroundColor:[NSColor clearColor]];
-        [_statusString setStringValue:@"testString"];
         
+		// Argument View
+		_argument = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
+        [_argument setAlignment:NSLeftTextAlignment];
+        [_argument setEditable:NO];
+        [_argument setBordered:NO];
+        [_argument setSelectable:NO];
+        [[_argument cell] setFocusRingType:NSFocusRingTypeNone];
+        [_argument setBackgroundColor:[NSColor clearColor]];
+        [self addSubview:_argument];
         self.tag = XVIM_CMDLINE_TAG;
     }
     return self;
@@ -140,15 +156,23 @@
 
 - (void)layoutCmdline:(NSView*) parent{
     NSRect frame = [parent frame];
+	CGFloat statusMargin = 2;
+	CGFloat argumentSize = 100;
+    
     [_static setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
     [_command setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
     [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_error setFrameOrigin:NSMakePoint(0, COMMAND_FIELD_HEIGHT)];
+    [_statusBarBackgroundBox setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT)];
+    [_statusBarBackgroundBox setFrameOrigin:NSMakePoint(0,COMMAND_FIELD_HEIGHT)];
     [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT)];
     [_status setFrameOrigin:NSMakePoint(0,COMMAND_FIELD_HEIGHT)];
-    [[[_status subviews] objectAtIndex:0] setFrame:NSMakeRect(0,0,frame.size.width,STATUS_BAR_HEIGHT)]; 
+    [[[_status subviews] objectAtIndex:0] setFrame:NSMakeRect(statusMargin,0,frame.size.width,STATUS_BAR_HEIGHT)]; 
+    [_argument setFrameSize:NSMakeSize(argumentSize, COMMAND_FIELD_HEIGHT)];
+    [_argument setFrameOrigin:NSMakePoint(frame.size.width - argumentSize,STATUS_BAR_HEIGHT)];
+    
     NSView *border,*nsview;
     for( NSView* v in [parent subviews] ){
         if( [NSStringFromClass([v class]) isEqualToString:@"DVTBorderedView"] ){

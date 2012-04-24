@@ -38,6 +38,7 @@
     if( nil == window ){
         XVimWindow* window = [[[XVimWindow alloc] init] autorelease];
         window.commandLine = cmd;
+        cmd.commandField.delegate = window;
         [layoutView addSubview:window];
     }
 }
