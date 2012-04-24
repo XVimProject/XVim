@@ -21,7 +21,7 @@
 
 - (XVimEvaluator*)f:(XVimWindow*)window{
     // Does not work correctly.
-    // This seems because the when XCode change the content of DVTSourceTextView
+    // This seems because the when Xcode change the content of DVTSourceTextView
     // ( for example when the file shown in the view is changed )
     // it makes the content empty first but does not set selectedRange.
     // This cause assertion is NSTextView+VimMotion's ASSERT_VALID_RANGE_WITH_EOF.

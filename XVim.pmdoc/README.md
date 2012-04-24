@@ -5,9 +5,9 @@ is at
 
     build/release/XVim.xcplugin (relative to pmdoc)
 
-XCode default build setting make a product into somewhat specified by DrivedData dir which
+Xcode default build setting make a product into somewhat specified by DrivedData dir which
 is not under XVim project directory.
-To make XCode output a product into under "build" dir you have to specify the following setting from XCode menu.
+To make Xcode output a product into under "build" dir you have to specify the following setting from Xcode menu.
 
     File - Project Settings -> "Advanced" in "Build" Tab -> Select "Locations Specified by Targets" for "Build Location"
 
@@ -15,4 +15,4 @@ Build XVim with "release" configuration make XVim plugin into the directory abov
 
 
 Know better solution? Let me know please!
-( I want to make XVim installer package automatically when build the project by XCode )
+( I want to make XVim installer package automatically when build the project by Xcode )
