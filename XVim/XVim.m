@@ -6,26 +6,26 @@
 //  Copyright 2012 JugglerShu.Net. All rights reserved.
 //
 
+// This is the main class of XVim
+// The main role of XVim class is followings.
+//    - create hooks.
+//    - provide methods used by all over the XVim features.
+//
+// Hooks:
+// The plugin entry point is "load" but does little thing.
+// The important method after that is hook method.
+// In this method we create hooks necessary for XVim initializing.
+// The most important hook is hook for IDEEditorArea and DVTSourceTextView.
+// These hook setup command line and intercept key input to the editors.
+//
+// Methods:
+// XVim is a singleton instance and holds objects which can be used by all the features in XVim.
+// See the implementation to know what kind of objects it has. They are not difficult to understand.
+// 
+
+
+
 #import "XVim.h"
-
-// Xcode View hieralchy
-//
-//  IDESourceCodeEdiorContainerView
-//           |
-//           |- DVTSourceTextScrollView    <-- enclosingScrollView from DVTSourceView
-//                     |- NSClipView
-//                     |      |- DVTSourceTextView
-//                     |- DVTMarkedScroller <- vertical scrollbar
-//                     |- NSScroller <- horizontal scrollbar
-//                     |- DVTTextSidebarView <- area to display line number or debug point
-//                     
-
-//
-//  DVTSourceTextView
-//         |- DVTFoldingTextStorage (textStorage property)
-//                    |- DVTFontAndColorsTheme (fontAndColorsTheme property)
-//
-
 #import "Logger.h"
 #import "Hooker.h"
 #import "XVimSearch.h"
@@ -66,8 +66,6 @@ static XVim* s_instance = nil;
 
 + (void) load { 
     // Entry Point of the Plugin.
-    // Hook methods ( mainly of DVTSourceTextView" )
-    
     [Logger defaultLogger].level = LogTrace;
     TRACE_LOG(@"XVim loaded");
 	
