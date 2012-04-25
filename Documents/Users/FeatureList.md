@@ -1,63 +1,68 @@
 # Feature List
 
-Feature list here is not complete list but main features XVim is supporting.
+We try to keep this up to date, but sometimes implementation can get ahead of
+documentation. If a command is missing, just try it in XVim first - it might
+already be there!
 
-So some commands not listed here may already be implemented.
-
-If you feel unconfortable with some commands
-wait for the implemenation patiently or let me know through the XVim issue page.
+If you've tried it and it's actually missing, feel free to create an issue and a
+friendly contributor will pick it up eventually.
 
 ## Motion
-b,B,f,F,g,G,h,j,k,l,w,W,t,T,0,$,^,%,+,-,{,},(,),n,N,',`,M,H,L
+b, B, f, F, gg, G, h, j, k, l, w, W, t, T, 0, $, ^, %, +, -, {, }, (, ), n, N, ', `, M, H, L
 
-Comma and Semicolon are also supported
+Comma and semicolon are supported
+Toggle inclusive/exclusive by v is supported
 
-Motion with mark is supported.
-Numeric argument is supported.
-Toggle Inclusive/Exclusive by v is supported
+## Mark
+
+File-local marks are supported.
+Global marks are not yet supported.
 
 ## Scroll
 
-C-d,C-f,C-u,C-b,zz,zb,zt
-
-Numeric argument is supported.
+C-d, C-f, C-u, C-b, zz, zb, zt
 
 ## Jumps
-C-o,C-i
+C-o, C-i
 
 ## Insert
-a,A,i,I,o,O
+a, A, i, I, o, O
 
-Numeric argument is supported.
+## Yank, put and change
 
+d, dd, D, y, yy, Y, c, cc, C, r, s, x, X
 
-## Change
+## Line join
 
-d,dd,D,y,yy,c,C,r,s,x,X,J,>,>>,<,<<
+J
 
-Numeric argument is supported.
+## Shift block
 
+Normal mode: >, >>, <, <<
+Visual mode: >, <
+
+## Case change operations
+
+Normal mode: ~, gu, gU, g~
+Visual mode: u, U, ~, gu, gU
 
 ## Undo
 
-u,C-r
-
-Numeric argument is supported.
+u, C-r
 
 ## Visual
-v,V
+v, V
 
 Ctrl-v is not supported now.
-(v,V in visual mode to toggle or escape from visual mode is supported)
+(v, V in visual mode to toggle or escape from visual mode is supported)
 
-The navigation is Visual Mode is not works greatly. Still in construction...
+Visual block mode is currently not supported.
 
 ## Search and Replace
 
-/,?,#,*,g*,g#,:s
+/, ?, #, *, g*, g#, :s, n, N
 
-Regex is supporeted in search command but it is ICU regex and not Vim''s one.
-':s' is partially supported.
+Regex search is supported using the ICU regex format.
 
 ## Text Object
 
@@ -66,11 +71,13 @@ ab, aB, a(, a), a{, a}, a[, a], a>, a<, a", a', aw, aW
 
 ## Recording
 
-q,@
+q, @
 
-Repeat command by '.' is also supported
+## Dot command
 
-## Cmdline
+The dot command ('.') is supported
+
+## Ex commands
 
  Command   | Note
 -----------|-----
@@ -97,6 +104,9 @@ Repeat command by '.' is also supported
   [no]wrap |
   [no]wrapscan |
   [no]errorbells |
+  [no]incsearch |
+  [no]gdefault |
+  [no]smartcase |
 
 
 ## Key mapping
@@ -122,6 +132,6 @@ Example:
     set wrapscan
     nmap n e
 
-# Know problems
+# Known problems
  See XVim issue page.
 

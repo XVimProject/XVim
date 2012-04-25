@@ -1,7 +1,7 @@
 XVim
 =======
 
-XVim is a plugin for Xcode to enable Vim keybindings in it.
+XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 
 INSTALL
@@ -10,30 +10,32 @@ INSTALL
 From Installer Package
 --------
 
-[Download XVim_X.XX.pkg](https://github.com/JugglerShu/XVim/downloads) and install it. Do not change the install directory.
-Then restart Xcode. That's it!
+[Download XVim_X.XX.pkg](https://github.com/JugglerShu/XVim/downloads) and install it. Do not change the install directory. Then restart Xcode. That's it!
 
-You also can donwload daily built package from http://programming.jugglershu.net/xvim. If you have any problem with released package try this. It may be fixed already.
+Alternatively, you can download a daily build from http://programming.jugglershu.net/xvim. 
+XVim moves quickly, so you may find that many features and bug fixes already exist in the latest and greatest version.
 
 From Source Code
 -----------------
 
-Download source code and just build XVim.xcodeproj.
-It automatically build the plugin and installs into the proper directory.
+Download source code and build XVim.xcodeproj. 
+It automatically build and installs the plugin into the correct directory.
 
 Uninstall
 =============
-Delete following directory
+Delete the following directory:
 
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
+Feature list
+=============
+See separate FeatureList.md
     
 Contributions
 =============
-Any suggestions,bug reports or feature requests are welcome.
-I really appreciate if you send a pull request for improvement.
-Also I can assign you as "collaborators" of this repository.
-Let me know if you have any interests.
+Any suggestions, bug reports or feature requests are welcome.
+Any pull requests are very much appreciated.
+If you are interested in contributing I can assign you as a collaborator of this repository.
 
 
 For Japanese Users/Developsers(日本の開発者のみなさまへ）
@@ -44,16 +46,16 @@ For Japanese Users/Developsers(日本の開発者のみなさまへ）
 抵抗のある方も少なからずいるのではなかと思っています。
 ぜひ日本語でリクエストを出したり、コメントを書いてください。必要な場合はこちらで英訳します。
 あと、英語の意味分からないなどある場合も聞いてください。
-(What I wrote here is to tell Japanese users/developers NOT TO HESITETE to communicate in Japanese in this project. I'll translate them if needed.)
+(What I wrote here is to tell Japanese users/developers NOT TO HESITATE to communicate in Japanese in this project. I'll translate them if needed.)
 
 
 Donations
 ===========
 If you think the plugin is useful please donate.
-Since I do not intend make money from this project I decided to donate all the donation
+Since I do not intend make money from this project I decided to donate all donations
 to this project to the people who are suffering from the damage of Tohoku earthquake and tsunami in 2011 in Japan.
 
-To reduce fee of trasfer please donate directly through Paypal donation site below.
+To reduce the transfer fee please donate directly through Paypal donation site below.
 
 https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
