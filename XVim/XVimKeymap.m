@@ -34,6 +34,17 @@
 	[_absorbedKeys removeAllObjects];
 	_node = nil;
 }
+
+- (NSString*)toString
+{
+	NSString *ret = @"";
+	for (XVimKeyStroke *keyStroke in _absorbedKeys)
+	{
+		ret = [ret stringByAppendingString:[keyStroke toString]];
+	}
+	return ret;
+}
+
 @end
 
 @interface XVimKeymapNode : NSObject {

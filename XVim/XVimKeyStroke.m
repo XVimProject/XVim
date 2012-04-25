@@ -139,6 +139,136 @@ static char* keynames[] = {
     "DEL"
 };
 
+static char* readable_keynames[] = {
+    "NUL",
+    "SOH",
+    "STX",
+    "ETX",
+    "EOT",
+    "ENQ",
+    "ACK",
+    "BEL",
+    "BS",
+    "HT",
+    "NL",
+    "VT",
+    "NP",
+    "CR",
+    "SO",
+    "SI",
+    "DLE",
+    "DC1",
+    "DC2",
+    "DC3",
+    "DC4",
+    "NAK",
+    "SYN",
+    "ETB",
+    "CAN",
+    "EM",
+    "SUB",
+    "ESC",
+    "FS",
+    "GS",
+    "RS",
+    "US",
+    "SPACE",
+    "!",
+    "\"",
+    "#",
+    "$",
+    "%",
+    "&",
+    "'",
+    "(",
+    ")",
+    "*",
+    "+",
+    ",",
+    "-",
+    ".",
+    "/",
+    "0",
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    ":",
+    ";",
+    "<",
+    "=",
+    ">",
+    "?",
+    "@",
+    "A",
+    "B",
+    "C",
+    "D",
+    "E",
+    "F",
+    "G",
+    "H",
+    "I",
+    "J",
+    "K",
+    "L",
+    "M",
+    "N",
+    "O",
+    "P",
+    "Q",
+    "R",
+    "S",
+    "T",
+    "U",
+    "V",
+    "W",
+    "X",
+    "Y",
+    "Z",
+    "[",
+    "\\",
+    "]",
+    "^",
+    "_",
+    "`",
+    "a",
+    "b",
+    "c",
+    "d",
+    "e",
+    "f",
+    "g",
+    "h",
+    "i",
+    "j",
+    "k",
+    "l",
+    "m",
+    "n",
+    "o",
+    "p",
+    "q",
+    "r",
+    "s",
+    "t",
+    "u",
+    "v",
+    "w",
+    "x",
+    "y",
+    "z",
+    "{", // {
+    "|", // |
+    "}", // }
+    "~", // ~
+    "DEL"
+};
 static NSMutableDictionary *s_keyCodeToSelectorString = NULL;
 static NSMutableDictionary *s_stringToKeyCode = NULL;
 
@@ -380,12 +510,39 @@ static NSString* toSelectorString(unichar charcode, NSUInteger modifierFlags)
 	return keyStr;
 }
 
+- (NSString*) toString 
+{
+	unichar charcode = self.keyCode;
+	NSUInteger modifierFlags = self.modifierFlags;
+	
+	NSMutableString* keyStr = [[[NSMutableString alloc] init] autorelease];
+	if( modifierFlags & NSControlKeyMask ){
+		[keyStr appendString:@"C-"];
+	}
+	if( modifierFlags & NSAlternateKeyMask ){
+		[keyStr appendString:@"M-"];
+	}
+	if( modifierFlags & NSCommandKeyMask ){
+		[keyStr appendString:@"D-"];
+	}
+	
+	if (charcode <= 127)
+	{
+		NSString *keyname = [NSString stringWithCString:readable_keynames[charcode] encoding:NSASCIIStringEncoding];
+		if (keyname) { 
+			[keyStr appendString:keyname];
+		}
+	}
+	
+	return keyStr;
+}
+
 - (NSString*) toSelectorString {
 	return toSelectorString(self.keyCode, self.modifierFlags);
 }
 
 - (NSString*)description {
-	return [self toSelectorString];
+	return [self toString];
 }
 
 static SEL getSelector(unichar charcode, NSUInteger modifierFlags)

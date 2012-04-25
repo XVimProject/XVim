@@ -94,7 +94,14 @@
 			[self handleKeyStroke:keyStroke];
 		}
 	}
+	
+	NSString* argString = [_keymapContext toString];
+	if ([argString length] == 0)
+	{
+		argString = [_currentEvaluator argumentDisplayString];
+	}
     
+	[self setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     return YES;
 }
@@ -107,7 +114,6 @@
 	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister];
 	
 	[self setEvaluator:nextEvaluator];
-	[self setArgumentString:[_currentEvaluator argumentDisplayString]];
 }
 
 - (void)handleTextInsertion:(NSString*)text {

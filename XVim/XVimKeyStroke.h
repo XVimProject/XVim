@@ -41,6 +41,9 @@
 // Creates the selector string from this key stroke
 - (NSString*)toSelectorString;
 
+// Creates a human-readable string
+- (NSString*)toString;
+
 // Returns the selector for this object
 - (SEL)selector;
 

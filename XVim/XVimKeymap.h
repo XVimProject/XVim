@@ -12,6 +12,7 @@
 
 @interface XVimKeymapContext : NSObject
 - (void)clear;
+- (NSString*)toString;
 @end
 
 @interface XVimKeymap : NSObject
