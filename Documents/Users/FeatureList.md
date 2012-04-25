@@ -112,13 +112,16 @@ The dot command ('.') is supported.
 ## Key mapping
 
 XVim supports five map commands: map, nmap, vmap, imap, omap.
-A map command can change any one keystroke into one or more key strokes.
+A map command can change one or more keystrokes into one or more key strokes.
+
+Note: For multi-key mapping timeout is not supported.
 
 Examples: 
 
     nmap n e
     imap ' <Esc>
     nmap u 5jiInsert some text<Esc>
+    nmap ,w :w<cr>
 
 
 ## .xvimrc
