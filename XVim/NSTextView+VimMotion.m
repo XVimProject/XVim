@@ -16,7 +16,7 @@
 /////////////////////////
 // support methods     //
 /////////////////////////
-
+#ifdef debug
 // Most of the support methods take index as current interest position and index can be at EOF
 // The following macros asserts the range of index.
 // WITH_EOF permits the index at EOF position.
@@ -27,7 +27,12 @@
 // Some methods assume that "index" is at valid cursor position in Normal mode.
 // See isValidCursorPosition's description the condition of the valid cursor position.
 #define ASSERT_VALID_CURSOR_POS(x) NSAssert( [self isValidCursorPosition:x], @"index can not be invalid cursor position" )
-
+j
+#else
+#define ASSERT_VALID_RANGE_WITH_EOF(x)
+#define ASSERT_VALID_RANGE_WITHOUT_EOF(x)
+#define ASSERT_VALID_CURSOR_POS(x)
+#endif
 
 /**
  * Determine if the position specified with "index" is EOF.
