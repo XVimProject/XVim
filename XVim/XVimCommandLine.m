@@ -13,17 +13,18 @@
 #import "DVTSourceTextView.h"
 #import "DVTFoldingTextStorage.h"
 #import "DVTFontAndColorsTheme.h"
-#import "DVTBorderedView.h"
+#import "DVTChooserView.h"
+#import "DVTFondAndColorTheme.h"
 
-#define STATUS_BAR_HEIGHT 24
-#define COMMAND_FIELD_HEIGHT 18
+#define STATUS_BAR_HEIGHT 20.0
+#define COMMAND_FIELD_HEIGHT 18.0
 
 
 @interface XVimCommandLine() {
 @private
     XVimCommandField* _command;
     NSTextField* _static;
-    DVTBorderedView* _status;
+    DVTChooserView* _status;
     NSTextField* _statusString;
     NSTextField* _argument;
     NSTextField* _error;
@@ -37,8 +38,10 @@
 - (id) init{
     self = [super initWithFrame:NSMakeRect(0, 0, 100, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT)];
     if (self) {
+        [self setBoundsOrigin:NSMakePoint(0,0)];
+        
         // Static Message ( This is behind the command view if the command is active)
-        _static = [[NSTextField alloc] init];
+        _static = [[NSTextField alloc] initWithFrame:NSMakeRect(0,0,100,COMMAND_FIELD_HEIGHT)];
         [_static setEditable:NO];
         [_static setBordered:NO];
         [_static setSelectable:NO];
@@ -47,7 +50,7 @@
         [self addSubview:_static];
         
         // Error Message
-        _error = [[NSTextField alloc] init];
+        _error = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_error setEditable:NO];
         [_error setBordered:NO];
         [_error setSelectable:NO];
@@ -57,7 +60,7 @@
         [self addSubview:_error];
         
         // Command View
-        _command = [[XVimCommandField alloc] init];
+        _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_command setEditable:NO];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
         [_command setTextColor:[NSColor textColor]];
@@ -65,12 +68,12 @@
         [_command setHidden:YES];
         [self addSubview:_command];
         
-        _status= [NSClassFromString(@"IDEGlassBarView") performSelector:@selector(alloc)];
+        
+        _status= [NSClassFromString(@"DVTChooserView") performSelector:@selector(alloc)];
         _status = [_status init];
-        [_status setAllBordersToColor:[NSColor clearColor]];
-        _status.borderSides = 0;
-        _status.shadowSides = 0;
-        [_status setAllInactiveBordersToColor:[NSColor clearColor]];
+        [_status setSubviews:[NSArray array]];
+        _status.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
+        [_status setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
         
 		// Box
 		_statusBarBackgroundBox = [[NSBox alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
@@ -83,13 +86,14 @@
         NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
         [paragraph setAlignment:NSRightTextAlignment];
         _statusString = [[NSTextField alloc] init];
-        [_status addSubview:_statusString];
         [self addSubview:_status];
-        [_statusString setAlignment:NSLeftTextAlignment];
+        [_status addSubview:_statusString positioned:NSWindowAbove relativeTo:nil];
+        [_statusString setBordered:NO];
         [_statusString setEditable:NO];
         [_statusString setSelectable:NO];
         [_statusString setTextColor:[NSColor windowFrameTextColor]];
         [_statusString setBackgroundColor:[NSColor clearColor]];
+        [_statusString setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
         
 		// Argument View
 		_argument = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
@@ -101,6 +105,8 @@
         [_argument setBackgroundColor:[NSColor clearColor]];
         [self addSubview:_argument];
         self.tag = XVIM_CMDLINE_TAG;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
     }
     return self;
 }
@@ -158,22 +164,33 @@
     NSRect frame = [parent frame];
 	CGFloat statusMargin = 2;
 	CGFloat argumentSize = 100;
+    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+    [NSClassFromString(@"DVTFontAndColorTheme") addObserver:self forKeyPath:@"currentTheme" options:NSKeyValueObservingOptionNew context:nil];
+    [self setBoundsOrigin:NSMakePoint(0,0)];
     
+    // Layout command area
+    [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
+    [_error setFrameOrigin:NSMakePoint(0, 0)];
     [_static setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
+    [_static setBackgroundColor:[theme sourceTextBackgroundColor]];
     [_command setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
-    [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
-    [_error setFrameOrigin:NSMakePoint(0, COMMAND_FIELD_HEIGHT)];
+    [_command setTextColor:[theme sourcePlainTextColor]];
+    [_command setBackgroundColor:[theme sourceTextBackgroundColor]];
+    
+    // Layout status area
     [_statusBarBackgroundBox setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT)];
     [_statusBarBackgroundBox setFrameOrigin:NSMakePoint(0,COMMAND_FIELD_HEIGHT)];
     [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT)];
     [_status setFrameOrigin:NSMakePoint(0,COMMAND_FIELD_HEIGHT)];
-    [[[_status subviews] objectAtIndex:0] setFrame:NSMakeRect(statusMargin,0,frame.size.width,STATUS_BAR_HEIGHT)]; 
-    [_argument setFrameSize:NSMakeSize(argumentSize, COMMAND_FIELD_HEIGHT)];
-    [_argument setFrameOrigin:NSMakePoint(frame.size.width - argumentSize,STATUS_BAR_HEIGHT)];
+    [_statusString setFrame:NSMakeRect(statusMargin,0,frame.size.width,STATUS_BAR_HEIGHT)]; 
     
-    NSView *border,*nsview;
+    [_argument setFrameSize:NSMakeSize(argumentSize, STATUS_BAR_HEIGHT)];
+    [_argument setFrameOrigin:NSMakePoint(frame.size.width - argumentSize,COMMAND_FIELD_HEIGHT)];
+    
+    NSView *border = nil;
+    NSView *nsview = nil;
     for( NSView* v in [parent subviews] ){
         if( [NSStringFromClass([v class]) isEqualToString:@"DVTBorderedView"] ){
             border = v;
@@ -181,7 +198,7 @@
             nsview = v;
         }
     }
-    if( [border isHidden] ){
+    if( nsview != nil && border != nil && [border isHidden] ){
         self.frame = NSMakeRect(0, 0, parent.frame.size.width, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT);
         nsview.frame = NSMakeRect(0, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-STATUS_BAR_HEIGHT-COMMAND_FIELD_HEIGHT);
     }else{
@@ -193,6 +210,8 @@
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if( [keyPath isEqualToString:@"hidden"]) {
         [self layoutCmdline:[self superview]];
+    }else if( [keyPath isEqualToString:@"DVTFontAndColorCurrentTheme"] ){
+        [self layoutCmdline:[self superview]];
     }
 }
 
@@ -201,4 +220,7 @@
     [self layoutCmdline:[notification object]];
 }
 
+- (void)fontAndColorSourceTextSettingsChanged:(NSNotification*)notification{
+    [self layoutCmdline:[self superview]];
+}
 @end

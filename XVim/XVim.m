@@ -88,7 +88,7 @@ static XVim* s_instance = nil;
     //Comment out if you do not need to trace method calls of the specific classes or specify 
     // a class name in which you are interested in.
 
-    //[Logger registerTracing:@"DVTBorderedView"];
+    //[Logger registerTracing:@"DVTTextStorage"];
     //[Logger registerTracing:@"DVTTextFinder"];
     //[Logger registerTracing:@"DVTIncrementalFindBar"];
 }
@@ -208,10 +208,19 @@ static XVim* s_instance = nil;
 			_keymaps[i] = [[XVimKeymap alloc] init];
 		}
 		[XVimKeyStroke initKeymaps];
+        
+        // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
+        //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveNotification:) name:nil object:nil];
 	}
 	return self;
 }
 
+
+-(void)receiveNotification:(NSNotification*)notification{
+    if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
+        TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
+    }
+}
 -(void)dealloc{
     [_options release];
     [_searcher release];

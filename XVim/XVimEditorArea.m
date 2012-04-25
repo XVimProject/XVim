@@ -12,6 +12,8 @@
 #import "Logger.h"
 #import "XVimCommandLine.h"
 #import "XVimWindow.h"
+#import "DVTBorderedView.h"
+#import "DVTChooserView.h"
 
 @implementation XVimEditorArea
 /**
@@ -29,6 +31,7 @@
 
 +(void)hook{
     Class c = NSClassFromString(@"IDEEditorArea");
+    
     [Hooker hookMethod:@selector(viewDidInstall) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidInstall) ) keepingOriginalWith:@selector(viewDidInstall_)];
 }
 
@@ -48,9 +51,12 @@
         [[NSNotificationCenter defaultCenter] addObserver:cmd selector:@selector(didFrameChanged:) name:NSViewFrameDidChangeNotification  object:layoutView];
         if( [[layoutView subviews] count] > 0 ){
             // This is a little hacky but first object in the subview is "border" view.
-            NSView* editorView = [[layoutView subviews] objectAtIndex:0];
+            DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
             // We need to know if border view is hidden or not to place editors and command line correctly.
-            [editorView addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
+            [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
+            
+            //NSView* view = [[layoutView subviews] objectAtIndex:0];
+            
         }
     }
     

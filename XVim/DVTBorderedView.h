@@ -9,7 +9,26 @@
 #import <Cocoa/Cocoa.h>
 
 @interface DVTBorderedView : NSView
-
+{
+    NSColor *_topBorderColor;
+    NSColor *_bottomBorderColor;
+    NSColor *_leftBorderColor;
+    NSColor *_rightBorderColor;
+    NSColor *_topInactiveBorderColor;
+    NSColor *_bottomInactiveBorderColor;
+    NSColor *_leftInactiveBorderColor;
+    NSColor *_rightInactiveBorderColor;
+    NSColor *_shadowColor;
+    NSColor *_backgroundColor;
+    NSColor *_inactiveBackgroundColor;
+    NSGradient *_backgroundGradient;
+    NSGradient *_inactiveBackgroundGradient;
+    NSView *_contentView;
+    int _verticalContentViewResizingMode;
+    int _horizontalContentViewResizingMode;
+    int _borderSides;
+    int _shadowSides;
+}
 @property int verticalContentViewResizingMode; // @synthesize verticalContentViewResizingMode=_verticalContentViewResizingMode;
 @property(copy) NSColor *topInactiveBorderColor; // @synthesize topInactiveBorderColor=_topInactiveBorderColor;
 @property(copy) NSColor *topBorderColor; // @synthesize topBorderColor=_topBorderColor;
@@ -25,7 +44,12 @@
 @property(assign) NSView *contentView; // @synthesize contentView=_contentView;
 @property(copy) NSColor *bottomInactiveBorderColor; // @synthesize bottomInactiveBorderColor=_bottomInactiveBorderColor;
 @property(copy) NSColor *bottomBorderColor; // @synthesize bottomBorderColor=_bottomBorderColor;
+
+// This property seems to take bit flag
+// 1:left,  2:right  4:top  8:bottom 
+// So 0x03 means left and right to boe bordered
 @property int borderSides; // @synthesize borderSides=_borderSides;
+
 @property(copy) NSGradient *backgroundGradient; // @synthesize backgroundGradient=_backgroundGradient;
 @property(copy) NSColor *backgroundColor; // @synthesize backgroundColor=_backgroundColor;
 - (void)_windowKeyMainStateChanged:(id)arg1;
