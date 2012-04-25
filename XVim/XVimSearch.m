@@ -92,6 +92,9 @@
 {
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
+	if (!self.lastSearchCmd) {
+		return NSMakeRange(NSNotFound,0);
+	}
 	
 	XVimOptions *options = [[XVim instance] options];
 
@@ -139,6 +142,10 @@
 
 - (NSRange)searchBackwardFrom:(NSUInteger)from inWindow:(XVimWindow*)window
 {
+	if (!self.lastSearchCmd) {
+		return NSMakeRange(NSNotFound,0);
+	}
+	
     // opts = (NSBackwardsSearch | NSRegularExpressionSearch) is not supported by [NSString rangeOfString:opts]
     // What we do instead is a search for all occurences and then
     // use the range of the last match. Not very efficient, but i don't think
