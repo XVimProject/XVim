@@ -4,19 +4,17 @@ We try to keep this up to date, but sometimes implementation can get ahead of
 documentation. If a command is missing, just try it in XVim first - it might
 already be there!
 
-If you've tried it and it's actually missing, feel free to create an issue and a
+If you've tried a command and it really is missing, feel free to create an issue and a
 friendly contributor will pick it up eventually.
 
 ## Motion
 b, B, f, F, gg, G, h, j, k, l, w, W, t, T, 0, $, ^, %, +, -, {, }, (, ), n, N, ', `, M, H, L
 
-Comma and semicolon are supported
-Toggle inclusive/exclusive by v is supported
+Comma and semicolon are supported. Toggle inclusive/exclusive by v is supported.
 
 ## Mark
 
-File-local marks are supported.
-Global marks are not yet supported.
+File-local marks are supported. Global marks are not yet supported.
 
 ## Scroll
 
@@ -39,11 +37,13 @@ J
 ## Shift block
 
 Normal mode: >, >>, <, <<
+
 Visual mode: >, <
 
 ## Case change operations
 
 Normal mode: ~, gu, gU, g~
+
 Visual mode: u, U, ~, gu, gU
 
 ## Undo
@@ -75,7 +75,7 @@ q, @
 
 ## Dot command
 
-The dot command ('.') is supported
+The dot command ('.') is supported.
 
 ## Ex commands
 
