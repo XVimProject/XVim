@@ -19,6 +19,8 @@
 
 @interface XVimMotionEvaluator : XVimNumericEvaluator 
 
+- (XVimEvaluator*)h:(XVimWindow*)window;
+
 // Override this method to implement operations on motions.
 // There could be from < to (This means backwards motion)
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;

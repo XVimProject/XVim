@@ -798,5 +798,14 @@ NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
+- (XVimEvaluator*)DEL:(XVimWindow*)window
+{
+	return [self h:window];
+}
+
+- (XVimEvaluator*)ForwardDelete:(XVimWindow*)window
+{
+	return [self x:window];
+}
 
 @end
