@@ -60,6 +60,11 @@
 	return [_parent modeString];
 }
 
+- (BOOL)isRelatedTo:(XVimEvaluator*)other
+{
+	return [super isRelatedTo:other] || other == _parent;
+}
+
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
     return [_parent withNewContext];
 }

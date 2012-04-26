@@ -131,6 +131,11 @@
 	return @"";
 }
 
+- (BOOL)isRelatedTo:(XVimEvaluator*)other
+{
+	return other == self;
+}
+
 - (XVimEvaluator*)D_d:(XVimWindow*)window{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.

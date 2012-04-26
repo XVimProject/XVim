@@ -77,6 +77,8 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (NSString*)modeString;
 
+- (BOOL)isRelatedTo:(XVimEvaluator*)other;
+
 ////////////////////////////////////////////////
 // Context convenience functions
 

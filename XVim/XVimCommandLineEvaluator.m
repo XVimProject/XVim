@@ -116,7 +116,7 @@
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
 {
-	return [_parent withNewContext];
+	return nil;
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
@@ -152,6 +152,11 @@
 - (NSString*)modeString
 {
 	return [_parent modeString];
+}
+
+- (BOOL)isRelatedTo:(XVimEvaluator*)other
+{
+	return [super isRelatedTo:other] || other == _parent;
 }
 
 - (XVimEvaluator*)C_p:(XVimWindow*)window{
