@@ -550,6 +550,8 @@
     // accidentally joining the next line into the current line.
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
+	if (idx == s.length) { return nil; }
+	
     for( NSUInteger i = 0 ; idx < s.length && i < [self numericArg]; i++,idx++ ){
         if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
             // if at the end of line, and are just doing a single x it's like doing X
