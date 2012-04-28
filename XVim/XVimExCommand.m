@@ -799,14 +799,15 @@
 		
         // Jump to location
         NSUInteger pos = [srcView positionAtLineNumber:exarg.lineBegin column:0];
-        if( NSNotFound != pos ){
-            NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
-            if( NSNotFound == pos_wo_space ){
-                pos_wo_space = pos;
-            }
-            [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-            [srcView scrollTo:[window cursorLocation]];
+        if( NSNotFound == pos ){
+            pos = [srcView positionAtLineNumber:[srcView numberOfLines] column:0];
         }
+        NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
+        if( NSNotFound == pos_wo_space ){
+            pos_wo_space = pos;
+        }
+        [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
+        [srcView scrollTo:[window cursorLocation]];
         return;
     }
     
