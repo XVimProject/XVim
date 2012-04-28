@@ -171,6 +171,11 @@
 		--insertionPoint;
 	}
 	[sourceView setSelectedRange:NSMakeRange(insertionPoint, 0)];
+	
+	NSRange r = [[window sourceView] selectedRange];
+	NSValue *v =[NSValue valueWithRange:r];
+	[[window getLocalMarks] setValue:v forKey:@"."];
+
 	[[window sourceView] adjustCursorPosition];
 }
 

@@ -36,20 +36,18 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
-    NSString* keyStr = [keyStroke toSelectorString];
+    NSString* keyStr = [keyStroke toString];
 	if ([keyStr length] != 1) {
-        return nil;
-    }
-    unichar c = [keyStr characterAtIndex:0];
-    if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z'))) ) {
         return nil;
     }
 
 	NSValue* v = [[window getLocalMarks] valueForKey:keyStr];
-	NSRange r = [v rangeValue];
 	if (v == nil) {
+		[window errorMessage:@"Mark not set" ringBell:YES];
 		return nil;
 	}
+	
+	NSRange r = [v rangeValue];
 	DVTSourceTextView* view = [window sourceView];
 	NSString* s = [[view textStorage] string];
 	if (r.location > [s length]) {
