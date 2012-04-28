@@ -10,7 +10,11 @@
 #import "XVimTildeEvaluator.h"
 #import "XVimLowercaseEvaluator.h"
 #import "XVimUppercaseEvaluator.h"
+#import "XVimInsertEvaluator.h"
+#import "XVimMarkMotionEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
+#import "NSTextView+VimMotion.h"
 
 @implementation XVimGActionEvaluator
 
@@ -29,6 +33,23 @@
     // know more about this to implement robust one.
     //[NSApp sendAction:@selector(openQuickly:) to:nil from:self];
     return nil;
+}
+
+- (XVimEvaluator*)i:(XVimWindow*)window
+{
+	NSUInteger markLocation = [XVimMarkMotionEvaluator markLocationForMark:@"." inWindow:window];
+	if (markLocation == NSNotFound) { return nil; }
+	
+	DVTSourceTextView *view = [window sourceView];
+	
+	NSUInteger insertionPoint = markLocation;
+	[view setSelectedRangeWithBoundsCheck:insertionPoint To:insertionPoint];
+    if (!([view isEOF:insertionPoint] || [view isNewLine:insertionPoint]))
+	{
+		[view moveForward:self];
+    } 
+	
+	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
 - (XVimEvaluator*)u:(XVimWindow*)window {

@@ -124,7 +124,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
-    if (nextEvaluator) {
+    if ([nextEvaluator isRelatedTo:self]) {
         [self updateSelectionInWindow:window];   
     }
     return nextEvaluator;
@@ -281,6 +281,11 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 - (XVimEvaluator*)P:(XVimWindow*)window{
     // Looks P works as p in Visual Mode.. right?
     return [self p:window];
+}
+
+- (XVimEvaluator*)s:(XVimWindow*)window {
+	// As far as I can tell this is equivalent to change
+	return [self c:window];
 }
 
 

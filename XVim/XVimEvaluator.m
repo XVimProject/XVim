@@ -38,7 +38,12 @@
 	return self;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window {
+- (void)becameHandlerInWindow:(XVimWindow*)window 
+{
+}
+
+- (void)endHandlerInWindow:(XVimWindow*)window
+{
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
@@ -129,6 +134,11 @@
 - (NSString*)modeString
 {
 	return @"";
+}
+
+- (BOOL)isRelatedTo:(XVimEvaluator*)other
+{
+	return other == self;
 }
 
 - (XVimEvaluator*)D_d:(XVimWindow*)window{

@@ -35,34 +35,44 @@
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
-    NSString* keyStr = [keyStroke toSelectorString];
-	if ([keyStr length] != 1) {
-        return nil;
-    }
-    unichar c = [keyStr characterAtIndex:0];
-    if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z'))) ) {
-        return nil;
++ (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window
+{
+	if ([mark length] != 1) {
+        return NSNotFound;
     }
 
-	NSValue* v = [[window getLocalMarks] valueForKey:keyStr];
-	NSRange r = [v rangeValue];
+	NSValue* v = [[window getLocalMarks] valueForKey:mark];
 	if (v == nil) {
-		return nil;
+		[window errorMessage:@"Mark not set" ringBell:YES];
+		return NSNotFound;
 	}
+	
+	NSRange r = [v rangeValue];
 	DVTSourceTextView* view = [window sourceView];
 	NSString* s = [[view textStorage] string];
 	if (r.location > [s length]) {
 		// mark is past end of file do nothing
+		return NSNotFound;
+	}
+	
+    NSUInteger to = r.location;
+	return to;
+}
+
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
+{
+    NSString* keyStr = [keyStroke toString];
+	NSUInteger to = [[self class] markLocationForMark:keyStr inWindow:window];
+	if (to == NSNotFound)
+	{
 		return nil;
 	}
 	
     NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = r.location;
 	MOTION_TYPE motionType = CHARACTERWISE_EXCLUSIVE;
 	
 	if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
-		to = [view firstNonBlankInALine:to];
+		to = [[window sourceView] firstNonBlankInALine:to];
 		motionType = LINEWISE;
 	}
 	

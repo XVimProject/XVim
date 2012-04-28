@@ -308,6 +308,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 		map(@"Down", 63233);
 		map(@"Left", 63234);
 		map(@"Right", 63235);
+		map(@"ForwardDelete", 63272);
 	}
 }
 
@@ -333,6 +334,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 		map(@"DOWN", 63233);
 		map(@"LEFT", 63234);
 		map(@"RIGHT", 63235);
+		map(@"FORWARD_DELETE", 63272);
 		
 		// Between space and del (non-inclusive), add ascii names
 		for (int i = 33; i < 127; ++i)

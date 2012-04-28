@@ -97,13 +97,12 @@
     // A cursor should not be on the new line break letter in Vim(Except empty line).
     // So the root solution is to prohibit a cursor be on the newline break letter.
     NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
-    if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
-        return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    if (!([view isEOF:idx] || [view isNewLine:idx]))
+	{
+		[view moveForward:self];
     } 
-    [view moveForward:self];
 	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
@@ -550,6 +549,8 @@
     // accidentally joining the next line into the current line.
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
+	if (idx == s.length) { return nil; }
+	
     for( NSUInteger i = 0 ; idx < s.length && i < [self numericArg]; i++,idx++ ){
         if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
             // if at the end of line, and are just doing a single x it's like doing X
@@ -606,7 +607,7 @@
 															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
 	{
 		XVim *xvim = [XVim instance];
-		XVimRegister *xregister = rname == @"@" ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
+		XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
 		
         if (xregister && xregister.isReadOnly == NO) {
 			return [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy]
@@ -798,5 +799,14 @@ NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
+- (XVimEvaluator*)DEL:(XVimWindow*)window
+{
+	return [self h:window];
+}
+
+- (XVimEvaluator*)ForwardDelete:(XVimWindow*)window
+{
+	return [self x:window];
+}
 
 @end

@@ -44,11 +44,16 @@
 	return self;
 }
 
-- (void)setEvaluator:(XVimEvaluator*)evaluator {
+- (void)setEvaluator:(XVimEvaluator*)evaluator 
+{
+	if (!evaluator) {
+		evaluator = [[XVimNormalEvaluator alloc] init];
+	}
+		
 	if (evaluator != _currentEvaluator)
 	{
-		if( nil == evaluator ){
-			evaluator = [[XVimNormalEvaluator alloc] init];
+		if (_currentEvaluator) {
+			[_currentEvaluator endHandlerInWindow:self];
 		}
 		
 		_currentEvaluator = evaluator;
@@ -120,7 +125,6 @@
 	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke inWindow:self];
 	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister];
 	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister];
-	
 	[self setEvaluator:nextEvaluator];
 }
 

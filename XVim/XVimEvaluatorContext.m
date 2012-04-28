@@ -34,7 +34,7 @@
 + (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg
 {
 	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
-	instance->_numericArgTail = 1;
+	instance->_numericArgTail = numericArg;
 	return instance;
 }
 

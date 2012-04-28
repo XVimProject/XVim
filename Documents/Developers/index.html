@@ -39,10 +39,10 @@ When the plugin is loaded, the class method "load" in principle class( XVim clas
 This ( "load" method in XVim.m" ) is the entry point of the plugin and we setup hooks here.
 
 <h3>Hooks</h3>
-So in "load" method we hooks some methods. Here is all the hooks we should know.
+After "load" method we hook some methods. XVim "hook" method does it.
 The hooking is kind of replacing methods with other methods.
-For example, keyDown: method in DVTSourceTextView is replaced with keyDown: method in DVTSourceTextViewHook class (which is our class).
-What happend to the original method is that it is renamed. In this case it is renamed to XVimKeyDown method.
+For example, keyDown: method in DVTSourceTextView is replaced with keyDown: method in XVimSourceTextView class (which is our class).
+What happend to the original method is that it is renamed. In this case it is renamed to KeyDown_ method.
 So the following picture describes the methods after hook is done to keyDown: method in DVTSourceTextView class.
 
 <h4>initWithCoder</h4>
@@ -51,12 +51,46 @@ As explained, we hook keyDown: and forward it to "Operations" part (which is a o
 
 
 <h4>keyDown: and Evaluators</h4>
-Will be writen later
+On each keyDown evet we forward the key input information to Evaluators. Evaluators keep current state of key input and does some operation on the current text view.
+When a evaluator evaluate key input but still need some key input to complete the operation it will return next evaluator as its return value.
 
 <h2>Xcode internal classes</h2>
 You can find internal classes or methods <a href="https://github.com/probablycorey/xcode-class-dump/tree/master/docs">here</a>
 This is help to understand its internal and functions.
 Especially the class DVTSourceTextView has a lot of methods and can be reusable to implement Vi operations.
+
+
+<h2>Xcode reversing</h2>
+Here's some information I got from reversing Xcode.
+
+<h3>IDEWorkspaceWindow</h3>
+IDEWorkspaceWindow is a window class for Xcode. This is the window you are seeing when you are using Xcode.
+Much of operations on IDEWorkspaceWindow is taken by IDEWorkspaceWindowController.
+In XVim we hook some methods of some views. If you want to access to current window's controller you use following code.
+
+[NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector("workspaceWindowControllerForWindow")];
+
+<h3>IDEEditorArea</h3>
+IDEEditroArea is area which includes editors (primary, assistant, debug are, and so on ).
+In other words IDEEditorArea is center part of Xcode window ( if you show all the views in the window ).
+It has several views and we can access them through this class.
+So if you want to make changes to views in primary, asssitant editor or debug area you will use this class to get them.
+
+<h3>DVTChooserView</h3>
+This class can be used as thick border in Xcode. The navgation bar top of the editors are using this class.
+We can reuse this if we want to have such bar. Codes looks like this.
+
+[[NSClassFromString(@"DVTChooserView") performSelector:@"alloc"] init];
+
+If you want to add string inside it you can add some subviews in it.
+But before doing it you have to make subviews in the DVTChooserView clear.
+Some initial views in subviews in DVTChooserView hide the view we add.
+
+
+<h3>Notifications</h3>
+Xcode also uses a lot of notifications whose name has prefix with "DVT" or "IDE".
+This is really usuful when we want to know Xcode events.
+The example is when user changes preference. As example see XVimCommandLine class how its color is changed using its notification.
 
 
 </body>

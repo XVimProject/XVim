@@ -239,7 +239,8 @@
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
-- (XVimEvaluator*)h:(XVimWindow*)window{
+- (XVimEvaluator*)h:(XVimWindow*)window
+{
     NSUInteger from = [[window sourceView] selectedRange].location;
     NSUInteger to = [[window sourceView] prev:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
     return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
