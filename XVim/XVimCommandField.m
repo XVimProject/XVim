@@ -50,7 +50,6 @@
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag
 {
-    if(flag){
         color = [color colorWithAlphaComponent:0.5];
         NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
         NSUInteger glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
@@ -62,9 +61,10 @@
             rect.size.width=glyphRect.size.width;
         
         NSRectFillUsingOperation( rect, NSCompositeSourceOver);
-    } else {
-        [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:NO];
-    }
+}
+
+- (void)updateInsertionPointStateAndRestartTimer:(BOOL)restartFlag{
+    
 }
 
 - (void)hide

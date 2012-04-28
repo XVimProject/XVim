@@ -14,7 +14,6 @@
 @implementation XVimStatusLine{
     DVTChooserView* _background;
     NSTextView* _status;
-    NSTextView* _argument;
 }
 
 @synthesize tag;
@@ -31,14 +30,6 @@
         
         [self addSubview:_background];
         [self addSubview:_status];
-        
-		// Argument View
-		_argument = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
-        [_argument setEditable:NO];
-        [_argument setSelectable:NO];
-        [_argument setBackgroundColor:[NSColor clearColor]];
-        [_argument alignRight:self];
-        [self addSubview:_argument];
         
         self.tag = XVIM_STATUSLINE_TAG;
     }
@@ -59,7 +50,6 @@
     [self setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_background setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_status setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
-    [_argument setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [[[container subviews] objectAtIndex:0] setFrame:NSMakeRect(0, STATUS_LINE_HEIGHT, parent.size.width, parent.size.height-STATUS_LINE_HEIGHT)];
 }
     

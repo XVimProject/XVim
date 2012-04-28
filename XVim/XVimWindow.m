@@ -140,7 +140,8 @@
 
 - (void)setArgumentString:(NSString*)string
 {
-    // Where should we put arugment string? command line? or status line?
+	XVimCommandLine *commandLine = self.commandLine;
+	[commandLine setArgumentString:string];
 }
 
 - (void)setStaticString:(NSString*)string

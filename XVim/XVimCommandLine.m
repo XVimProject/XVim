@@ -24,6 +24,7 @@
     XVimCommandField* _command;
     NSTextField* _static;
     NSTextField* _error;
+    NSTextField* _argument;
     NSTimer* _errorTimer;
 }
 @end
@@ -63,6 +64,16 @@
         [_command setHidden:YES];
         [self addSubview:_command];
         
+		// Argument View
+		_argument = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, COMMAND_FIELD_HEIGHT)];
+        [_argument setAlignment:NSRightTextAlignment];
+        [_argument setEditable:NO];
+        [_argument setBordered:NO];
+        [_argument setSelectable:NO];
+        [[_argument cell] setFocusRingType:NSFocusRingTypeNone];
+        [_argument setBackgroundColor:[NSColor clearColor]];
+        [self addSubview:_argument];
+        
         self.tag = XVIM_CMDLINE_TAG;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
@@ -89,6 +100,10 @@
 - (void)setStaticString:(NSString*)string
 {
 	[_static setStringValue:string];
+}
+
+- (void)setArgumentString:(NSString*)string{
+    [_argument setStringValue:string];
 }
 
 - (void)errorMessage:(NSString*)string
@@ -122,6 +137,7 @@
     [_command setTextColor:[theme sourcePlainTextColor]];
     [_command setBackgroundColor:[theme sourceTextBackgroundColor]];
     [_command setInsertionPointColor:[theme sourceTextInsertionPointColor]];
+    [_argument setTextColor:[theme sourcePlainTextColor]];
     
     // Layout command area
     [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
@@ -130,6 +146,8 @@
     [_static setFrameOrigin:NSMakePoint(0, 0)];
     [_command setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
+    [_argument setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
+    [_argument setFrameOrigin:NSMakePoint(0, 0)];
     
     NSView *border = nil;
     NSView *nsview = nil;
