@@ -66,7 +66,6 @@
         
 		// Argument View
 		_argument = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, COMMAND_FIELD_HEIGHT)];
-        [_argument setAlignment:NSRightTextAlignment];
         [_argument setEditable:NO];
         [_argument setBordered:NO];
         [_argument setSelectable:NO];
@@ -138,6 +137,8 @@
     [_command setBackgroundColor:[theme sourceTextBackgroundColor]];
     [_command setInsertionPointColor:[theme sourceTextInsertionPointColor]];
     [_argument setTextColor:[theme sourcePlainTextColor]];
+	
+	CGFloat argumentSize = MIN(frame.size.width, 100);
     
     // Layout command area
     [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
@@ -146,8 +147,8 @@
     [_static setFrameOrigin:NSMakePoint(0, 0)];
     [_command setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
-    [_argument setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
-    [_argument setFrameOrigin:NSMakePoint(0, 0)];
+    [_argument setFrameSize:NSMakeSize(argumentSize, COMMAND_FIELD_HEIGHT)];
+    [_argument setFrameOrigin:NSMakePoint(frame.size.width - argumentSize, 0)];
     
     NSView *border = nil;
     NSView *nsview = nil;
