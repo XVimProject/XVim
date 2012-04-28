@@ -139,7 +139,9 @@
     self.startRange = [window selectedRange];
 }
 
-- (void)onFinishInsert:(XVimWindow*)window {
+- (void)endHandlerInWindow:(XVimWindow*)window 
+{
+	[super endHandlerInWindow:window];
 	DVTSourceTextView *sourceView = [window sourceView];
 	
     if( !_insertedEventsAbort ){
@@ -169,6 +171,7 @@
 		--insertionPoint;
 	}
 	[sourceView setSelectedRange:NSMakeRange(insertionPoint, 0)];
+	[[window sourceView] adjustCursorPosition];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
@@ -203,24 +206,18 @@
         }
     }
     
-    if( self != nextEvaluator ){
-        [[window sourceView] adjustCursorPosition];
-    }
     return nextEvaluator;
 }
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window{
-    [self onFinishInsert:window];
     return nil;
 }
 
 - (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window{
-    [self onFinishInsert:window];
     return nil;
 }
 
 - (XVimEvaluator*)C_c:(XVimWindow*)window{
-    [self onFinishInsert:window];
     return nil;
 }
 

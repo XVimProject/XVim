@@ -38,7 +38,12 @@
 	return self;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window {
+- (void)becameHandlerInWindow:(XVimWindow*)window 
+{
+}
+
+- (void)endHandlerInWindow:(XVimWindow*)window
+{
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
