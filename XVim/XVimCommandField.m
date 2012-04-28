@@ -60,6 +60,7 @@
         rect.size.width =rect.size.height/2;
         if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
             rect.size.width=glyphRect.size.width;
+        
         NSRectFillUsingOperation( rect, NSCompositeSourceOver);
     } else {
         [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:NO];

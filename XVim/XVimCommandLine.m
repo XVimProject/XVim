@@ -113,20 +113,23 @@
 
 - (void)layoutCmdline:(NSView*) parent{
     NSRect frame = [parent frame];
-    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
     [NSClassFromString(@"DVTFontAndColorTheme") addObserver:self forKeyPath:@"currentTheme" options:NSKeyValueObservingOptionNew context:nil];
     [self setBoundsOrigin:NSMakePoint(0,0)];
+    
+    // Set colors
+    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+    [_static setBackgroundColor:[theme sourceTextBackgroundColor]];
+    [_command setTextColor:[theme sourcePlainTextColor]];
+    [_command setBackgroundColor:[theme sourceTextBackgroundColor]];
+    [_command setInsertionPointColor:[theme sourceTextInsertionPointColor]];
     
     // Layout command area
     [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_error setFrameOrigin:NSMakePoint(0, 0)];
     [_static setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
-    [_static setBackgroundColor:[theme sourceTextBackgroundColor]];
     [_command setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_command setFrameOrigin:NSMakePoint(0, 0)];
-    [_command setTextColor:[theme sourcePlainTextColor]];
-    [_command setBackgroundColor:[theme sourceTextBackgroundColor]];
     
     NSView *border = nil;
     NSView *nsview = nil;
