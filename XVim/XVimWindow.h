@@ -21,12 +21,12 @@
 
 @property NSInteger tag;
 
-@property(retain) DVTSourceTextView* sourceView;
+@property(strong) DVTSourceTextView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
 
 @property(retain) XVimCommandLine* commandLine;
 
-- (void)setStatusString:(NSString*)string;
+- (void)setModeString:(NSString*)string;
 - (void)setStaticString:(NSString*)string;
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)clearErrorMessage;
@@ -50,7 +50,6 @@
 
 // XVimCommandFieldDelegate
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
-- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event;
 
 // XVimPlaybackHandler
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;

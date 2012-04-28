@@ -13,6 +13,7 @@
 #import "Logger.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
+#import "XVimStatusLine.h"
 
 @implementation XVimSourceTextView
 
@@ -26,11 +27,8 @@
     // Hook setSelectedRange:affinity:stillSelecting:
     [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(setSelectedRange_:affinity:stillSelecting:)];
     
-    // Hook initWithCoder:
-    [Hooker hookMethod:@selector(initWithCoder:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(initWithCoder:) ) keepingOriginalWith:@selector(initWithCoder_:)];
-    
-    // Hook viewDidMoveToSuperview
-    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(viewDidMoveToSuperview_)];
+    // Hook becomeFirstResponder  
+    [Hooker hookMethod:@selector(becomeFirstResponder) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(becomeFirstResponder) ) keepingOriginalWith:@selector(becomeFirstResponder_)];
     
     // Hook keyDown:
     [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(keyDown:) ) keepingOriginalWith:@selector(keyDown_:)];   
@@ -58,9 +56,15 @@
     
     // Hook _drawInsertionPointInRect for Drawing Caret       
     [Hooker hookMethod:@selector(_drawInsertionPointInRect:color:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(_drawInsertionPointInRect:color:)) keepingOriginalWith:@selector(_drawInsertionPointInRect_:color:)];
-    
-    // Hook doCommandBySelector:
-    [Hooker hookMethod:@selector(doCommandBySelector:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(doCommandBySelector:)) keepingOriginalWith:@selector(doCommandBySelector_:)];    
+}
+
++ (XVimWindow*)xvimWindowForSourceTextView:(DVTSourceTextView*)view{
+    return [[[view window] contentView] viewWithTag:XVIM_TAG];
+}
+
++ (XVimStatusLine*)xvimStatusLineForSourceTextView:(DVTSourceTextView*)view{
+    // I think we should have better way to bind source view and its status line...
+    return [[[view enclosingScrollView] superview] viewWithTag:XVIM_STATUSLINE_TAG];
 }
 
 - (void)setSelectedRange:(NSRange)charRange {
@@ -72,7 +76,7 @@
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
     if (window) 
 	{
 		charRange = [window restrictSelectedRange:charRange];
@@ -81,65 +85,14 @@
     return;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    // New DVTSourceTextView is being created. (Remember that "self" is DVTSourceTextView object since this is hooked method )
-    // What we do here is to create XVim object
-    // which corresponds to this object
-    // and set it as a (hidden) subview of this DVTSourceTextView.
-    
-    // Call original method
-    [base initWithCoder_:aDecoder];
-    
-    XVimWindow* window = [[XVimWindow alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)]; // XVimWindow is dummy NSView object. This is not worked as a view. Just because to keep this object as subview in DVTSourceTextView 
-    // Bind DVTSourceTextView and XVimWindow object by tagging    
-    window.tag = XVIM_TAG;
-    [base addSubview:window];
-    return (id)base;
-}
-
-- (void)viewDidMoveToSuperview{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-	XVimWindow* window = [base viewWithTag:XVIM_TAG];
-    if( nil != window ){
-        TRACE_LOG(@"XVimWindow object found");
-        XVimCommandLine* cmdline = [[[XVimCommandLine alloc] initWithWindow:window] autorelease];
-        window.commandLine = cmdline; 
-        window.sourceView = base;
-        
-        // Try to find parent scroll view
-        NSScrollView* scrollView = [base enclosingScrollView]; // DVTSourceTextScrollView
-        if( nil != scrollView ){
-            
-            [[scrollView contentView] setCopiesOnScroll:NO];
-            // Add status bar in DVTSourceTextScrollView
-            [scrollView addSubview:cmdline positioned:NSWindowAbove relativeTo:nil];
-            // Observe DVTSourceScrollTextView notification
-            [scrollView setPostsFrameChangedNotifications:YES];
-            [[NSNotificationCenter defaultCenter] addObserver:cmdline selector:@selector(didFrameChanged:) name:NSViewFrameDidChangeNotification  object:scrollView];
-			
-			[window registerWithScrollView:scrollView];
-        }else{
-            ERROR_LOG(@"DVTSourceTExtScrollView not found.");
-        }
-    }else{
-        ERROR_LOG(@"XVimWindow object not found.");
-    }
-}
-
 -  (void)keyDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	NSScrollView* scrollView = [base enclosingScrollView]; // DVTSourceTextScrollView
-	[scrollView setHasHorizontalScroller:NO];
-	
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
     if( nil == window ){
         [base keyDown_:theEvent];
         return;
     }
-    
+   
     // On some configuration when the " is opened, the string is still empty because the user
     // needs to type the space button or any other character before the quote is made persistent
     NSString* ignMod =  [theEvent charactersIgnoringModifiers];
@@ -161,8 +114,7 @@
 
 -  (void)mouseDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
 	if (window)
 	{
 		[window beginMouseEvent:theEvent];
@@ -192,8 +144,7 @@
 
 - (void)drawRect:(NSRect)dirtyRect{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
     [base drawRect_:dirtyRect];
 	[window drawRect:dirtyRect];
 }
@@ -213,16 +164,14 @@
 
 - (BOOL)shouldDrawInsertionPoint{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
 	return [window shouldDrawInsertionPoint];
 }
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
 	[window drawInsertionPointInRect:aRect color:aColor];
 	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
 }
@@ -230,8 +179,7 @@
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    XVimWindow* window = [base viewWithTag:XVIM_TAG];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
 	if (flag)
 	{
 		[window drawInsertionPointInRect:rect color:color];
@@ -239,11 +187,14 @@
 	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
 }
 
-- (void)doCommandBySelector:(SEL)aSelector{
+- (BOOL)becomeFirstResponder{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
-    TRACE_LOG(@"SELECTOR : ", NSStringFromSelector(aSelector));
-    [base doCommandBySelector_:aSelector];
+    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    BOOL b = [base becomeFirstResponder_];
+    if( [base becomeFirstResponder_] ){
+        window.sourceView = base;
+    }
+    return b;
 }
 
 @end

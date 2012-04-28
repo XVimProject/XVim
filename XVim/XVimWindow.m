@@ -14,6 +14,10 @@
 #import "DVTSourceTextView.h"
 #import "NSTextView+VimMotion.h"
 #import "Logger.h"
+#import "IDEWorkspaceController.h"
+#import "IDEEditorArea.h"
+#import "IDEEditorModeViewController.h"
+#import "XVimSourceTextView.h"
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -57,7 +61,7 @@
 		
 		[_keymapContext clear];
 		
-		[self setStatusString:[evaluator modeString]];
+		[self setModeString:[evaluator modeString]];
 		[self setArgumentString:[evaluator argumentDisplayString]];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
 	}
@@ -76,7 +80,11 @@
 }
 
 - (NSRange)selectedRange{
-    return [[self sourceView] selectedRange];
+    if( [self sourceView] == nil ){
+        return NSMakeRange(0, 0);
+    }else{
+        return [[self sourceView] selectedRange];
+    }
 }
 
 - (NSUInteger)cursorLocation 
@@ -124,10 +132,10 @@
 	[[self sourceView] insertText:text];
 }
 
-- (void)setStatusString:(NSString*)string
+- (void)setModeString:(NSString*)string
 {
 	XVimCommandLine *commandLine = self.commandLine;
-	[commandLine setStatusString:string];
+	[commandLine setModeString:string];
 }
 
 - (void)setArgumentString:(NSString*)string
@@ -166,11 +174,6 @@
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField
 {
 	[self setEvaluator:nil];
-}
-
-- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event
-{
-	[[self sourceView] keyDown:event];
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{

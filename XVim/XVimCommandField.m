@@ -8,10 +8,11 @@
 
 #import "XVimCommandField.h"
 #import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 #import "Logger.h"
 
 @interface XVimCommandField() {
-	id<XVimCommandFieldDelegate> _delegate;
+	XVimWindow<XVimCommandFieldDelegate>* _delegate;
 	BOOL _absorbFocusEvent;
 }
 @end
@@ -36,7 +37,7 @@
 	return YES;
 }
 
-- (void)setDelegate:(id<XVimCommandFieldDelegate>)delegate
+- (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate
 {
 	_delegate = delegate;
 }
@@ -49,7 +50,6 @@
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag
 {
-    if(flag){
         color = [color colorWithAlphaComponent:0.5];
         NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
         NSUInteger glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
@@ -59,10 +59,12 @@
         rect.size.width =rect.size.height/2;
         if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
             rect.size.width=glyphRect.size.width;
+        
         NSRectFillUsingOperation( rect, NSCompositeSourceOver);
-    } else {
-        [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:NO];
-    }
+}
+
+- (void)updateInsertionPointStateAndRestartTimer:(BOOL)restartFlag{
+    
 }
 
 - (void)hide
@@ -81,7 +83,7 @@
 {
 	// Redirect to window -> XVimCommandLineEvaluator -> Back to here via handleKeyStroke
 	// This is to get macro recording and key mapping support
-	[_delegate commandFieldKeyDown:self event:event];
+	[_delegate handleKeyEvent:event];
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window

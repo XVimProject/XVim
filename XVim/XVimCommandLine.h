@@ -9,21 +9,17 @@
 #import <AppKit/AppKit.h>
 #import "XVimCommandField.h"
 
-@class XVimWindow;
-
+#define XVIM_CMDLINE_TAG 1208
 @interface XVimCommandLine : NSView
 @property NSInteger tag;
 
-- (id)initWithWindow:(XVimWindow*)window;
-
-- (void)setStatusString:(NSString*)string;
-- (void)setArgumentString:(NSString*)string;
+- (id)init;
+- (void)setModeString:(NSString*)string;
 - (void)setStaticString:(NSString*)string;
+- (void)setArgumentString:(NSString*)string;
 - (void)errorMessage:(NSString*)string;
+- (void)didFrameChanged:(NSNotification*)notification;
 
 - (XVimCommandField*)commandField;
-
-- (void)layoutDVTSourceTextScrollViewSubviews:(NSScrollView*) view;
-- (void)didFrameChanged:(NSNotification*)notification;
 
 @end

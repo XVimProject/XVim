@@ -6,26 +6,26 @@
 //  Copyright 2012 JugglerShu.Net. All rights reserved.
 //
 
+// This is the main class of XVim
+// The main role of XVim class is followings.
+//    - create hooks.
+//    - provide methods used by all over the XVim features.
+//
+// Hooks:
+// The plugin entry point is "load" but does little thing.
+// The important method after that is hook method.
+// In this method we create hooks necessary for XVim initializing.
+// The most important hook is hook for IDEEditorArea and DVTSourceTextView.
+// These hook setup command line and intercept key input to the editors.
+//
+// Methods:
+// XVim is a singleton instance and holds objects which can be used by all the features in XVim.
+// See the implementation to know what kind of objects it has. They are not difficult to understand.
+// 
+
+
+
 #import "XVim.h"
-
-// Xcode View hieralchy
-//
-//  IDESourceCodeEdiorContainerView
-//           |
-//           |- DVTSourceTextScrollView    <-- enclosingScrollView from DVTSourceView
-//                     |- NSClipView
-//                     |      |- DVTSourceTextView
-//                     |- DVTMarkedScroller <- vertical scrollbar
-//                     |- NSScroller <- horizontal scrollbar
-//                     |- DVTTextSidebarView <- area to display line number or debug point
-//                     
-
-//
-//  DVTSourceTextView
-//         |- DVTFoldingTextStorage (textStorage property)
-//                    |- DVTFontAndColorsTheme (fontAndColorsTheme property)
-//
-
 #import "Logger.h"
 #import "Hooker.h"
 #import "XVimSearch.h"
@@ -39,6 +39,9 @@
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
+#import "XVimEditorArea.h"
+#import "XVimSourceTextScrollView.h"
+
 
 static XVim* s_instance = nil;
 
@@ -63,16 +66,23 @@ static XVim* s_instance = nil;
 @synthesize options = _options;
 @synthesize editor = _editor;
 
++(void)receiveNotification:(NSNotification*)notification{
+    if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
+        TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
+    }
+}
+
 + (void) load { 
     // Entry Point of the Plugin.
-    // Hook methods ( mainly of DVTSourceTextView" )
-    
     [Logger defaultLogger].level = LogTrace;
     TRACE_LOG(@"XVim loaded");
 	
 	// Allocate singleton instance
 	s_instance = [[XVim alloc] init];
 	[s_instance parseRcFile];
+    
+    // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
+    [[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
     
     // Do the hooking after the App has finished launching,
     // Otherwise, we may miss some classes.
@@ -89,15 +99,17 @@ static XVim* s_instance = nil;
     //Comment out if you do not need to trace method calls of the specific classes or specify 
     // a class name in which you are interested in.
 
-    //[Logger registerTracing:@"DVTSourceTextView"];
+    //[Logger registerTracing:@"DVTTextStorage"];
     //[Logger registerTracing:@"DVTTextFinder"];
     //[Logger registerTracing:@"DVTIncrementalFindBar"];
 }
 
 + (void) hook
 {
+    [XVimEditorArea hook];
 	[XVimSourceTextView hook];
 	[XVimSourceCodeEditor hook];
+    [XVimSourceTextScrollView hook];
 }
 
 + (XVim*)instance
@@ -208,9 +220,11 @@ static XVim* s_instance = nil;
 			_keymaps[i] = [[XVimKeymap alloc] init];
 		}
 		[XVimKeyStroke initKeymaps];
+        
 	}
 	return self;
 }
+
 
 -(void)dealloc{
     [_options release];

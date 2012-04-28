@@ -12,6 +12,7 @@
 #import "Hooker.h"
 #import "Logger.h"
 #import "XVim.h"
+#import "XVimStatusLine.h"
 
 @implementation XVimSourceCodeEditor
 

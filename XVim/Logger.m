@@ -206,7 +206,17 @@ static Logger* s_defaultLogger = nil;
     [Logger traceViewInfoImpl:obj subView:sub prefix:@""];
 }
 
-+ (void) inspectClass:(Class)cls{
-    
++ (void)traceView:(NSView*)view depth:(NSUInteger)depth{
+    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
+    for( NSUInteger i = 0 ; i < depth; i++ ){
+        [str appendString:@"   "];
+    }
+    [str appendString:@"%p:%@ (Tag:%d)"];
+    NSLog(str, view, NSStringFromClass([view class]), 
+          [view tag]); 
+    for(NSView* v in [view subviews] ){
+        [self traceView:v depth:depth+1];
+    }
 }
+
 @end

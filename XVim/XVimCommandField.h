@@ -14,12 +14,11 @@
 
 @protocol XVimCommandFieldDelegate
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
-- (void)commandFieldKeyDown:(XVimCommandField*)commandField event:(NSEvent*)event;
 @end
 
 @interface XVimCommandField : NSTextView
 
-- (void)setDelegate:(id<XVimCommandFieldDelegate>)delegate;
+- (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate;
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
 - (void)show;
 - (void)hide;

@@ -11,9 +11,11 @@
 @class IDEEditorContext;
 @class IDEEditorModeViewController;
 
-@interface IDEEditorArea : NSObject
+@interface IDEEditorArea : NSViewController
 - (int)editorMode;
 - (IDEEditorContext*)primaryEditorContext;
 - (IDEEditorContext*)lastActiveEditorContext;
 - (IDEEditorModeViewController*)editorModeViewController;
+- (void)viewDidInstall;
+- (void)viewDidInstall_;
 @end
