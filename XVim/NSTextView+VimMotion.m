@@ -1,8 +1,7 @@
-// {aaa}
+//
 //  Created by Shuichiro Suzuki on 2/25/12.
 //  Copyright (c) 2012 JugglerShu.Net. All 
 //
-// aaa {aaaaaa}
 
 #import "NSTextView+VimMotion.h"
 #import "NSString+VimHelper.h"
