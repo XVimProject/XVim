@@ -440,27 +440,29 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
     DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
+	
+	_mode = MODE_LINE;
+    [self updateSelectionInWindow:window];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftRight:self];
     }
-    NSRange r = [[window sourceView] selectedRange];
-    r.length = 0;
-    [view setSelectedRange:r];
+	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:_operationRange.location]];
+	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
     return nil;
 }
 
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
     DVTSourceTextView* view = [window sourceView];
+	
+	_mode = MODE_LINE;
+    [self updateSelectionInWindow:window];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftLeft:self];
     }
-    NSRange r = [[window sourceView] selectedRange];
-    r.length = 0;
-    [view setSelectedRange:r];
+	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:_operationRange.location]];
+	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
     return nil;
 }
 

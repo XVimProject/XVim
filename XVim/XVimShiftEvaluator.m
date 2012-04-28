@@ -72,13 +72,14 @@
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
 	DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
+	NSUInteger lineNumber = [view lineNumber:MIN(from, to)];
 	[view selectOperationTargetFrom:from To:to Type:type];
 	if( _unshift ){
 		[view shiftLeft:self];
 	}else{
 		[view shiftRight:self];
 	}
-	NSUInteger cursorLocation = [view firstNonBlankInALine:MIN(from, to)];
+	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:lineNumber]];
 	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
 	return nil;
 }
