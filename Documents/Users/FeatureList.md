@@ -16,6 +16,9 @@ Comma and semicolon are supported. Toggle inclusive/exclusive by v is supported.
 
 File-local marks are supported. Global marks are not yet supported.
 
+The '.' mark (last insertion point) is supported.
+gi (insert mode at last insertion point) is supported.
+
 ## Scroll
 
 C-d, C-f, C-u, C-b, zz, zb, zt
