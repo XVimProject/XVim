@@ -382,8 +382,11 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 {
 	XVimKeyStroke *primaryKeyStroke = nil;
 	NSUInteger modifierFlags = event.modifierFlags & (NSShiftKeyMask | NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
-	unichar unmodifiedKeyCode = [[event charactersIgnoringModifiers] characterAtIndex:0];
-	unichar modifiedKeyCode = [[event characters] characterAtIndex:0];
+	NSString *charactersIgnoringModifiers = [event charactersIgnoringModifiers];
+	NSString *characters = [event characters];
+	
+	unichar unmodifiedKeyCode = [charactersIgnoringModifiers characterAtIndex:0];
+	unichar modifiedKeyCode = [characters length] > 0 ? [characters characterAtIndex:0] : unmodifiedKeyCode;
 	
 	if (modifierFlags & (NSControlKeyMask | NSCommandKeyMask))
 	{
