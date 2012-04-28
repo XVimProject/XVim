@@ -608,7 +608,7 @@
 															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
 	{
 		XVim *xvim = [XVim instance];
-		XVimRegister *xregister = rname == @"@" ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
+		XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
 		
         if (xregister && xregister.isReadOnly == NO) {
 			return [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy]
