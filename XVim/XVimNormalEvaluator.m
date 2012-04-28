@@ -97,13 +97,12 @@
     // A cursor should not be on the new line break letter in Vim(Except empty line).
     // So the root solution is to prohibit a cursor be on the newline break letter.
     NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
-    if ([view isEOF:idx] || [[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]] ) {
-        return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    if (!([view isEOF:idx] || [view isNewLine:idx]))
+	{
+		[view moveForward:self];
     } 
-    [view moveForward:self];
 	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 

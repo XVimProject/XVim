@@ -19,4 +19,6 @@ typedef enum {
 			   parent:(XVimMotionEvaluator*)parent
 		 markOperator:(XVimMarkOperator)markOperator;
 
++ (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window;
+
 @end
