@@ -61,7 +61,9 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (void)becameHandlerInWindow:(XVimWindow*)window;
 
-- (void)endHandlerInWindow:(XVimWindow*)window;
+- (void)willEndHandlerInWindow:(XVimWindow*)window;
+
+- (void)didEndHandlerInWindow:(XVimWindow*)window;
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
 

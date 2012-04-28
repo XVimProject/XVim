@@ -54,6 +54,7 @@
 // XVimPlaybackHandler
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;
 - (void)handleTextInsertion:(NSString*)text;
+- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;

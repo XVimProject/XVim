@@ -373,12 +373,8 @@
 	return pos;
 }
 
-/**
- * Returns position at line number "num" and column number "column"
- * If the "column" exceeds the end of line it returns position of  the end of line.
- * Line number starts from 1.
- **/
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num
+{
     NSAssert(0 != num, @"line number starts from 1");
     
     // Primitive search to find line number
@@ -395,11 +391,17 @@
     }
     
     if( num != 0 ){
-        // Coundn't find the line
+        // Couldn't find the line
         return NSNotFound;
     }
 	
-	return [self nextPositionFrom:pos matchingColumn:column];
+	return pos;
+}
+	
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
+	NSUInteger idx = [self positionAtLineNumber:num];
+	if (idx == NSNotFound) { return NSNotFound; }
+	return [self nextPositionFrom:idx matchingColumn:column];
 }
 
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.

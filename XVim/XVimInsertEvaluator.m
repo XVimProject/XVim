@@ -139,9 +139,9 @@
     self.startRange = [window selectedRange];
 }
 
-- (void)endHandlerInWindow:(XVimWindow*)window 
+- (void)willEndHandlerInWindow:(XVimWindow*)window 
 {
-	[super endHandlerInWindow:window];
+	[super willEndHandlerInWindow:window];
 	DVTSourceTextView *sourceView = [window sourceView];
 	
     if( !_insertedEventsAbort ){

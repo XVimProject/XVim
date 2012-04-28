@@ -202,6 +202,12 @@ typedef struct _XVimWordInfo{
 - (NSUInteger)columnNumber:(NSUInteger)index;
 
 /**
+ * Returns position at line number "num" and column number 0
+ * Line number starts from 1.
+ **/
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num;
+
+/**
  * Returns position at line number "num" and column number "column"
  * If the "column" exceeds the end of line it returns position of  the end of line.
  * Line number starts from 1.

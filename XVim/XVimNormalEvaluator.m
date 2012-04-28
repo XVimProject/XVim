@@ -768,7 +768,7 @@
 
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
 // This can always be changed to a set of valid keys in the future if need be.
-NSArray *_invalidRepeatKeys;
+static NSArray *_invalidRepeatKeys;
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =

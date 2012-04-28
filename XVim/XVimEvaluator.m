@@ -42,7 +42,11 @@
 {
 }
 
-- (void)endHandlerInWindow:(XVimWindow*)window
+- (void)willEndHandlerInWindow:(XVimWindow*)window
+{
+}
+
+- (void)didEndHandlerInWindow:(XVimWindow*)window
 {
 }
 

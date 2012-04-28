@@ -7,10 +7,12 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimVisualMode.h"
 
 @class XVimKeyStroke;
 
 @protocol XVimPlaybackHandler<NSObject>
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;
 - (void)handleTextInsertion:(NSString*)text;
+- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 @end

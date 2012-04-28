@@ -9,6 +9,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimNormalEvaluator.h"
+#import "XVimVisualEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "DVTSourceTextView.h"
@@ -25,7 +26,7 @@
 	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	BOOL _handlingMouseEvent;
 }
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister;
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 - (void)setArgumentString:(NSString*)string;
 @end
 
@@ -44,6 +45,14 @@
 	return self;
 }
 
+- (void)willSetEvaluator:(XVimEvaluator*)evaluator
+{
+	if (evaluator != _currentEvaluator && _currentEvaluator)
+	{
+		[_currentEvaluator willEndHandlerInWindow:self];
+	}
+}
+
 - (void)setEvaluator:(XVimEvaluator*)evaluator 
 {
 	if (!evaluator) {
@@ -53,7 +62,7 @@
 	if (evaluator != _currentEvaluator)
 	{
 		if (_currentEvaluator) {
-			[_currentEvaluator endHandlerInWindow:self];
+			[_currentEvaluator didEndHandlerInWindow:self];
 		}
 		
 		_currentEvaluator = evaluator;
@@ -122,9 +131,14 @@
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self clearErrorMessage];
     XVim *xvim = [XVim instance];
-	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke inWindow:self];
-	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister];
-	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister];
+	XVimEvaluator* currentEvaluator = _currentEvaluator;
+	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke inWindow:self];
+	
+	[self willSetEvaluator:nextEvaluator];
+	
+	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister fromEvaluator:currentEvaluator];
+	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister fromEvaluator:currentEvaluator];
+	
 	[self setEvaluator:nextEvaluator];
 }
 
@@ -132,6 +146,15 @@
 	[[self sourceView] insertText:text];
 }
 
+
+- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
+{
+	XVimEvaluator *evaluator = [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:mode withRange:range];
+	[self willSetEvaluator:evaluator];
+	[self setEvaluator:evaluator];
+}
+
+	
 - (void)setModeString:(NSString*)string
 {
 	XVimCommandLine *commandLine = self.commandLine;
@@ -173,6 +196,7 @@
 
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField
 {
+	[self willSetEvaluator:nil];
 	[self setEvaluator:nil];
 }
 
@@ -199,8 +223,9 @@
     }
 }
 
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister{
-    switch ([_currentEvaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator
+{
+    switch ([evaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
         case REGISTER_APPEND:
             [xregister appendKeyEvent:keyStroke];
             break;
@@ -225,6 +250,7 @@
 {
 	_handlingMouseEvent = NO;
 	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
+	[self willSetEvaluator:next];
 	[self setEvaluator:next];
 }
 

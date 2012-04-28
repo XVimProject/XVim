@@ -140,6 +140,7 @@
 		A2F8F3D2154835370041FBCC /* DVTChooserView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTChooserView.h; path = XVim/DVTChooserView.h; sourceTree = SOURCE_ROOT; };
 		A2FF17CF1502B291003FE648 /* XVimMotionEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMotionEvaluator.h; path = XVim/XVimMotionEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotionEvaluator.m; path = XVim/XVimMotionEvaluator.m; sourceTree = SOURCE_ROOT; };
+		C320BAB4154BEE07000744F4 /* XVimVisualMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimVisualMode.h; path = XVim/XVimVisualMode.h; sourceTree = SOURCE_ROOT; };
 		C324BDFF15390E8500C13558 /* XVimGVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimGVisualEvaluator.h; path = XVim/XVimGVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C324BE0015390E8500C13558 /* XVimGVisualEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimGVisualEvaluator.m; path = XVim/XVimGVisualEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimKeymapProvider.h; path = XVim/XVimKeymapProvider.h; sourceTree = SOURCE_ROOT; };
@@ -322,6 +323,7 @@
 				A2B4BAC214D59F6600D817B0 /* Supporting Files */,
 				C3552DA6153AC6F800D57577 /* XVimHistoryHandler.h */,
 				C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */,
+				C320BAB4154BEE07000744F4 /* XVimVisualMode.h */,
 			);
 			name = XVim;
 			path = XVim_lite2;

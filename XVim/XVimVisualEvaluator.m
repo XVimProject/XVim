@@ -6,6 +6,7 @@
 #import "XVimVisualEvaluator.h"
 #import "NSTextView+VimMotion.h"
 #import "XVimWindow.h"
+#import "XVimKeyStroke.h"
 #import "Logger.h"
 #import "XVimEqualEvaluator.h"
 #import "XVimDeleteEvaluator.h"
@@ -17,6 +18,7 @@
 #import "XVimGVisualEvaluator.h"
 #import "XVimRegisterEvaluator.h"
 #import "XVimCommandLineEvaluator.h"
+#import "XVimMarkSetEvaluator.h"
 #import "XVimExCommand.h"
 #import "XVimSearch.h"
 #import "XVimOptions.h"
@@ -36,6 +38,7 @@
     if (self) {
         _mode = mode;
 		_begin = NSNotFound;
+		_operationRange.location = NSNotFound;
     }
     return self;
 }
@@ -45,8 +48,8 @@
 			withRange:(NSRange)range 
 {
 	if (self = [self initWithContext:context mode:mode]) {
-		_begin = range.location;
-		_insertion = MAX(_begin, range.location + range.length - 1);
+		_begin = NSNotFound;
+		_operationRange = range;
 	}
 	return self;
 }
@@ -72,9 +75,21 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
-	if (_begin == NSNotFound)
-	{
-		DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
+	
+	DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
+	
+	// Select operation range passed to constructor
+	if (_operationRange.location != NSNotFound) {
+		if (_mode == MODE_CHARACTER) {
+			_begin = _operationRange.location;
+			_insertion = MAX(_begin, _operationRange.location + _operationRange.length - 1);
+		} else {
+			_begin = [view positionAtLineNumber:_operationRange.location];
+			_insertion = [view positionAtLineNumber:_operationRange.location + _operationRange.length];
+		}
+	} 
+	
+	if (_begin == NSNotFound) {
 		NSRange cur = [view selectedRange];
 		if( _mode == MODE_CHARACTER ){
 			_begin = cur.location;
@@ -94,10 +109,15 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 	}
 	
 	[self updateSelectionInWindow:window];
-	
 	[super becameHandlerInWindow:window];
 }
     
+- (void)didEndHandlerInWindow:(XVimWindow*)window
+{
+	[super didEndHandlerInWindow:window];
+	[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
+}
+
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
 {
 	return [keymapProvider keymapForMode:MODE_VISUAL];
@@ -164,6 +184,15 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     }
     [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end+1];
 	[view scrollTo:[window cursorLocation]];
+	
+	if (_mode == MODE_CHARACTER) {
+		_operationRange = [window selectedRange];
+	} else {
+		NSRange selectedRange = [window selectedRange];
+		NSUInteger startLine = [view lineNumber:selectedRange.location];
+		NSUInteger endLine = [view lineNumber:selectedRange.location + selectedRange.length];
+		_operationRange = NSMakeRange(startLine, endLine - startLine);
+	}
 }
 
 - (XVimEvaluator*)C_b:(XVimWindow*)window{
@@ -245,6 +274,12 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 																	 withParent:self
 																	  inclusive:NO];
 	return evaluator;
+}
+ 
+- (XVimEvaluator*)m:(XVimWindow*)window{
+    // 'm{letter}' sets a local mark.
+	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
+												  parent:self];
 }
 
 - (XVimEvaluator*)p:(XVimWindow*)window{
@@ -515,4 +550,31 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     [self updateSelectionInWindow:window];
     return [self withNewContext];
 }
+
+static NSArray *_invalidRepeatKeys;
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
+    if (_invalidRepeatKeys == nil){
+        _invalidRepeatKeys =
+        [[NSArray alloc] initWithObjects:
+         [NSValue valueWithPointer:@selector(m:)],
+         [NSValue valueWithPointer:@selector(C_r:)],
+         [NSValue valueWithPointer:@selector(v:)],
+         [NSValue valueWithPointer:@selector(V:)],
+         [NSValue valueWithPointer:@selector(C_v:)],
+         [NSValue valueWithPointer:@selector(COLON:)],
+         [NSValue valueWithPointer:@selector(QUESTION:)],
+         [NSValue valueWithPointer:@selector(SLASH:)],
+         nil];
+    }
+    NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
+    if (xregister.isRepeat) {
+        if ([keyStroke classImplements:[XVimVisualEvaluator class]]) {
+            if ([_invalidRepeatKeys containsObject:keySelector] == NO) {
+                return REGISTER_REPLACE;
+            }
+        }
+    }
+    return [super shouldRecordEvent:keyStroke inRegister:xregister];
+}
+
 @end
