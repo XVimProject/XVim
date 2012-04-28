@@ -16,7 +16,6 @@
 #import "DVTChooserView.h"
 #import "DVTFondAndColorTheme.h"
 
-#define STATUS_BAR_HEIGHT 20.0
 #define COMMAND_FIELD_HEIGHT 18.0
 
 
@@ -24,11 +23,7 @@
 @private
     XVimCommandField* _command;
     NSTextField* _static;
-    DVTChooserView* _status;
-    NSTextField* _statusString;
-    NSTextField* _argument;
     NSTextField* _error;
-	NSBox* _statusBarBackgroundBox;
     NSTimer* _errorTimer;
 }
 @end
@@ -36,7 +31,7 @@
 @implementation XVimCommandLine
 @synthesize tag = _tag;
 - (id) init{
-    self = [super initWithFrame:NSMakeRect(0, 0, 100, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT)];
+    self = [super initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
     if (self) {
         [self setBoundsOrigin:NSMakePoint(0,0)];
         
@@ -68,42 +63,6 @@
         [_command setHidden:YES];
         [self addSubview:_command];
         
-        
-        _status= [NSClassFromString(@"DVTChooserView") performSelector:@selector(alloc)];
-        _status = [_status init];
-        [_status setSubviews:[NSArray array]];
-        _status.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
-        [_status setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
-        
-		// Box
-		_statusBarBackgroundBox = [[NSBox alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
-		[_statusBarBackgroundBox setBorderType:NSNoBorder];
-		[_statusBarBackgroundBox setBoxType:NSBoxCustom];
-		[_statusBarBackgroundBox setFillColor:[NSColor clearColor]];
-		[self addSubview:_statusBarBackgroundBox];
-        
-        // Status View
-        NSMutableParagraphStyle* paragraph = [[[NSMutableParagraphStyle alloc] init] autorelease];
-        [paragraph setAlignment:NSRightTextAlignment];
-        _statusString = [[NSTextField alloc] init];
-        [self addSubview:_status];
-        [_status addSubview:_statusString positioned:NSWindowAbove relativeTo:nil];
-        [_statusString setBordered:NO];
-        [_statusString setEditable:NO];
-        [_statusString setSelectable:NO];
-        [_statusString setTextColor:[NSColor windowFrameTextColor]];
-        [_statusString setBackgroundColor:[NSColor clearColor]];
-        [_statusString setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
-        
-		// Argument View
-		_argument = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_BAR_HEIGHT/2)];
-        [_argument setAlignment:NSLeftTextAlignment];
-        [_argument setEditable:NO];
-        [_argument setBordered:NO];
-        [_argument setSelectable:NO];
-        [[_argument cell] setFocusRingType:NSFocusRingTypeNone];
-        [_argument setBackgroundColor:[NSColor clearColor]];
-        [self addSubview:_argument];
         self.tag = XVIM_CMDLINE_TAG;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
@@ -112,10 +71,7 @@
 }
 
 - (void)dealloc{
-	[_statusBarBackgroundBox release];
     [_command release];
-	[_argument release];
-    [_status release];
     [_static release];
     [_error release];
     [super dealloc];
@@ -125,14 +81,9 @@
     [_error setHidden:YES];
 }
 
-- (void)setStatusString:(NSString*)string
+- (void)setModeString:(NSString*)string
 {
-    [_statusString setStringValue:string];
-}
-
-- (void)setArgumentString:(NSString*)string
-{
-	[_argument setStringValue:string];
+    [_static setStringValue:string];
 }
 
 - (void)setStaticString:(NSString*)string
@@ -162,8 +113,6 @@
 
 - (void)layoutCmdline:(NSView*) parent{
     NSRect frame = [parent frame];
-	CGFloat statusMargin = 2;
-	CGFloat argumentSize = 100;
     DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
     [NSClassFromString(@"DVTFontAndColorTheme") addObserver:self forKeyPath:@"currentTheme" options:NSKeyValueObservingOptionNew context:nil];
     [self setBoundsOrigin:NSMakePoint(0,0)];
@@ -179,16 +128,6 @@
     [_command setTextColor:[theme sourcePlainTextColor]];
     [_command setBackgroundColor:[theme sourceTextBackgroundColor]];
     
-    // Layout status area
-    [_statusBarBackgroundBox setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT)];
-    [_statusBarBackgroundBox setFrameOrigin:NSMakePoint(0,COMMAND_FIELD_HEIGHT)];
-    [_status setFrameSize:NSMakeSize(frame.size.width, STATUS_BAR_HEIGHT)];
-    [_status setFrameOrigin:NSMakePoint(0,COMMAND_FIELD_HEIGHT)];
-    [_statusString setFrame:NSMakeRect(statusMargin,0,frame.size.width,STATUS_BAR_HEIGHT)]; 
-    
-    [_argument setFrameSize:NSMakeSize(argumentSize, STATUS_BAR_HEIGHT)];
-    [_argument setFrameOrigin:NSMakePoint(frame.size.width - argumentSize,COMMAND_FIELD_HEIGHT)];
-    
     NSView *border = nil;
     NSView *nsview = nil;
     for( NSView* v in [parent subviews] ){
@@ -199,11 +138,11 @@
         }
     }
     if( nsview != nil && border != nil && [border isHidden] ){
-        self.frame = NSMakeRect(0, 0, parent.frame.size.width, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT);
-        nsview.frame = NSMakeRect(0, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-STATUS_BAR_HEIGHT-COMMAND_FIELD_HEIGHT);
+        self.frame = NSMakeRect(0, 0, parent.frame.size.width, +COMMAND_FIELD_HEIGHT);
+        nsview.frame = NSMakeRect(0, COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-COMMAND_FIELD_HEIGHT);
     }else{
-        self.frame = NSMakeRect(0, border.frame.size.height, parent.frame.size.width, STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT);
-        nsview.frame = NSMakeRect(0, border.frame.size.height+STATUS_BAR_HEIGHT+COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-border.frame.size.height-STATUS_BAR_HEIGHT-COMMAND_FIELD_HEIGHT);
+        self.frame = NSMakeRect(0, border.frame.size.height, parent.frame.size.width, COMMAND_FIELD_HEIGHT);
+        nsview.frame = NSMakeRect(0, border.frame.size.height+COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-border.frame.size.height-COMMAND_FIELD_HEIGHT);
     }
 }
 

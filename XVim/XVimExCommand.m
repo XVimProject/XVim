@@ -889,7 +889,8 @@
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     // Write any debug code.
-    [window setStaticString:@"testmessage"];
+    [Logger traceView:[[[window sourceView] window] contentView] depth:0];
+    
     //NSMenu* menu = [NSApp mainMenu];
     //[self debugMenu:menu :0];
     //[[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 

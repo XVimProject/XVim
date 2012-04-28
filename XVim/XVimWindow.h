@@ -26,7 +26,7 @@
 
 @property(retain) XVimCommandLine* commandLine;
 
-- (void)setStatusString:(NSString*)string;
+- (void)setModeString:(NSString*)string;
 - (void)setStaticString:(NSString*)string;
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)clearErrorMessage;

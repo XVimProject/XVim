@@ -17,8 +17,7 @@
 
 - (id)init;
 
-- (void)setStatusString:(NSString*)string;
-- (void)setArgumentString:(NSString*)string;
+- (void)setModeString:(NSString*)string;
 - (void)setStaticString:(NSString*)string;
 - (void)errorMessage:(NSString*)string;
 - (void)didFrameChanged:(NSNotification*)notification;

@@ -40,6 +40,8 @@
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
 #import "XVimEditorArea.h"
+#import "XVimSourceTextScrollView.h"
+
 
 static XVim* s_instance = nil;
 
@@ -64,6 +66,12 @@ static XVim* s_instance = nil;
 @synthesize options = _options;
 @synthesize editor = _editor;
 
++(void)receiveNotification:(NSNotification*)notification{
+    if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
+        TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
+    }
+}
+
 + (void) load { 
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
@@ -72,6 +80,9 @@ static XVim* s_instance = nil;
 	// Allocate singleton instance
 	s_instance = [[XVim alloc] init];
 	[s_instance parseRcFile];
+    
+    // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
+    [[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
     
     // Do the hooking after the App has finished launching,
     // Otherwise, we may miss some classes.
@@ -98,6 +109,7 @@ static XVim* s_instance = nil;
     [XVimEditorArea hook];
 	[XVimSourceTextView hook];
 	[XVimSourceCodeEditor hook];
+    [XVimSourceTextScrollView hook];
 }
 
 + (XVim*)instance
@@ -209,18 +221,11 @@ static XVim* s_instance = nil;
 		}
 		[XVimKeyStroke initKeymaps];
         
-        // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
-        //[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(receiveNotification:) name:nil object:nil];
 	}
 	return self;
 }
 
 
--(void)receiveNotification:(NSNotification*)notification{
-    if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
-        TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
-    }
-}
 -(void)dealloc{
     [_options release];
     [_searcher release];

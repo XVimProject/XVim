@@ -9,7 +9,9 @@
 #import <Cocoa/Cocoa.h>
 
 @class DVTSourceTextView;
+@class XVimStatusLine;
 
 @interface XVimSourceTextView : NSObject
 + (void)hook;
++ (XVimStatusLine*)xvimStatusLineForSourceTextView:(DVTSourceTextView*)view;
 @end

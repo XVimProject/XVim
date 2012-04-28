@@ -13,6 +13,7 @@
 #import "Logger.h"
 #import "NSTextView+VimMotion.h"
 #import "DVTSourceTextView.h"
+#import "XVimStatusLine.h"
 
 @implementation XVimSourceTextView
 
@@ -26,10 +27,7 @@
     // Hook setSelectedRange:affinity:stillSelecting:
     [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(setSelectedRange_:affinity:stillSelecting:)];
     
-    // Hook viewDidMoveToSuperview
-    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(viewDidMoveToSuperview_)];
-    
-    // Hook viewDidMoveToSuperview
+    // Hook becomeFirstResponder  
     [Hooker hookMethod:@selector(becomeFirstResponder) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(becomeFirstResponder) ) keepingOriginalWith:@selector(becomeFirstResponder_)];
     
     // Hook keyDown:
@@ -64,6 +62,11 @@
     return [[[view window] contentView] viewWithTag:XVIM_TAG];
 }
 
++ (XVimStatusLine*)xvimStatusLineForSourceTextView:(DVTSourceTextView*)view{
+    // I think we should have better way to bind source view and its status line...
+    return [[[view enclosingScrollView] superview] viewWithTag:XVIM_STATUSLINE_TAG];
+}
+
 - (void)setSelectedRange:(NSRange)charRange {
     // Call original method
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
@@ -82,21 +85,6 @@
     return;
 }
 
-- (void)viewDidMoveToSuperview{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
-    if( nil != window ){
-        NSScrollView* scrollView = [base enclosingScrollView]; // DVTSourceTextScrollView
-        if( nil != scrollView ){
-            [[scrollView contentView] setCopiesOnScroll:NO];
-        }else{
-            ERROR_LOG(@"DVTSourceTExtScrollView not found.");
-        }
-    }else{
-        ERROR_LOG(@"XVimWindow object not found.");
-    }
-}
-
 -  (void)keyDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
@@ -104,7 +92,7 @@
         [base keyDown_:theEvent];
         return;
     }
-    
+   
     // On some configuration when the " is opened, the string is still empty because the user
     // needs to type the space button or any other character before the quote is made persistent
     NSString* ignMod =  [theEvent charactersIgnoringModifiers];

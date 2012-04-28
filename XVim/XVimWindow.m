@@ -17,6 +17,7 @@
 #import "IDEWorkspaceController.h"
 #import "IDEEditorArea.h"
 #import "IDEEditorModeViewController.h"
+#import "XVimSourceTextView.h"
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -55,7 +56,7 @@
 		
 		[_keymapContext clear];
 		
-		[self setStatusString:[evaluator modeString]];
+		[self setModeString:[evaluator modeString]];
 		[self setArgumentString:[evaluator argumentDisplayString]];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
 	}
@@ -127,16 +128,15 @@
 	[[self sourceView] insertText:text];
 }
 
-- (void)setStatusString:(NSString*)string
+- (void)setModeString:(NSString*)string
 {
 	XVimCommandLine *commandLine = self.commandLine;
-	[commandLine setStatusString:string];
+	[commandLine setModeString:string];
 }
 
 - (void)setArgumentString:(NSString*)string
 {
-	XVimCommandLine *commandLine = self.commandLine;
-	[commandLine setArgumentString:string];
+    // Where should we put arugment string? command line? or status line?
 }
 
 - (void)setStaticString:(NSString*)string
