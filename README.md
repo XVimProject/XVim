@@ -41,10 +41,10 @@ So if you have any problem wit Xcode 4.2 feel free to make issues.
 Bug reports
 =============
 Unfortunately XVim sometimes leads Xcode's crash. We are working on eliminate all the cause of crashes but its really hard work.
-Your Bug reports with following information is really usuful to fix the problems.
- * Crash information ( Xcode shows threds stack trace when crashes. Copy them. )
+Your bug reports with following information is really usuful to fix the problems.
+ * Crash information ( Xcode shows thraeds stack trace when crashes. Copy them. )
  * The operation you did ( series of key strokes or mouse clicks )
- * The text you operate on
+ * The text you operated on
  * Xcode version ( 4.3 or 4.2 ... )
  * XVim version ( Version number or the revision you build or the date of the daylybuild package )
 
