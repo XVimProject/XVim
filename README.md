@@ -30,13 +30,29 @@ Delete the following directory:
 Feature list
 =============
 See separate FeatureList.md
-    
+
+Support Xcode Versions
+=============
+We are developing XVim with Xcode 4.3 at the moment.
+We recomend you to use XVim with XCode 4.3.
+But it should work on 4.2 too and we want to support it as possible as we can.
+So if you have any problem wit Xcode 4.2 feel free to make issues.
+
+Bug reports
+=============
+Unfortunately XVim sometimes leads Xcode's crash. We are working on eliminate all the cause of crashes but its really hard work.
+Your Bug reports with following information is really usuful to fix the problems.
+ * Crash information ( Xcode shows threds stack trace when crashes. Copy them. )
+ * The operation you did ( series of key strokes or mouse clicks )
+ * The text you operate on
+ * Xcode version ( 4.3 or 4.2 ... )
+ * XVim version ( Version number or the revision you build or the date of the daylybuild package )
+
 Contributions
 =============
 Any suggestions, bug reports or feature requests are welcome.
 Any pull requests are very much appreciated.
 If you are interested in contributing I can assign you as a collaborator of this repository.
-
 
 For Japanese Users/Developsers(日本の開発者のみなさまへ）
 ==================================================
@@ -71,7 +87,6 @@ https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 この場合、こちらにメッセージなどが来ることはありませんので、
 メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim )にいただけると、開発のモチベーションにつながります。
-
 
 Contributors
 ============
