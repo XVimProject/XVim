@@ -7,94 +7,35 @@
 //
 
 #import "XVimWindowEvaluator.h"
-#import "XVimSourceView.h"
-#import "Logger.h"
-#import "XVim.h"
-
-#import "IDEEditorModeViewController.h"
-#import "IDEWorkspaceTabController.h"
-#import "IDEEditorMultipleContext.h"
-#import "IDESourceCodeEditor.h"
-#import "IDEEditorGeniusMode.h"
-#import "IDEEditorArea.h"
-
-@interface XVimWindowEvaluator()
-- (void)addEditorWindow;
-- (void)removeEditorWindow;
-@end
+#import "XVimWindowManager.h"
 
 @implementation XVimWindowEvaluator
 
-- (void)addEditorWindow{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
-    IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
-    IDEEditorArea *editorArea = [workspaceTabController editorArea];
-    if ([editorArea editorMode] != 1){
-        [workspaceTabController changeToGeniusEditor:self];
-    }else {
-        [workspaceTabController addAssistantEditor:self];
-    }
-}
-
-- (void)removeEditorWindow{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
-    IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
-    IDEEditorArea *editorArea = [workspaceTabController editorArea];
-    if ([editorArea editorMode] != 1){
-        [workspaceTabController changeToGeniusEditor:self];
-    }
-    
-    IDEEditorGeniusMode *geniusMode = (IDEEditorGeniusMode*)[editorArea editorModeViewController];
-    if ([geniusMode canRemoveAssistantEditor] == NO){
-        [workspaceTabController changeToStandardEditor:self];
-    }else {
-        [workspaceTabController removeAssistantEditor:self];
-    }
-}
-
-- (XVimEvaluator*)n:(id)arg{
-    [self addEditorWindow];
+- (XVimEvaluator*)n:(id)arg
+{
+    [[XVimWindowManager instance] addEditorWindow];
     return nil;
 }
 
-- (XVimEvaluator*)o:(id)arg{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
-    IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
-    IDEEditorArea *editorArea = [workspaceTabController editorArea];
-    if ([editorArea editorMode] != 1){
-        [workspaceTabController changeToGeniusEditor:self];
-    }
-
-    IDEEditorGeniusMode *geniusMode = (IDEEditorGeniusMode*)[editorArea editorModeViewController];
-    IDEEditorMultipleContext *multipleContext = [geniusMode alternateEditorMultipleContext];
-    if ([multipleContext canCloseEditorContexts]){
-        [multipleContext closeAllEditorContextsKeeping:[multipleContext selectedEditorContext]];
-    }
+- (XVimEvaluator*)o:(id)arg
+{
+	[[XVimWindowManager instance] closeAllButActive];
     return nil;
 }
 
 - (XVimEvaluator*)s:(id)arg{
-    [self addEditorWindow];
+    [[XVimWindowManager instance] addEditorWindowHorizontal];
     
-    // Change to horizontal
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
-    IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
-    [workspaceTabController changeToAssistantLayout_BH:self];
     return nil;
 }
 
 - (XVimEvaluator*)q:(id)arg{
-    [self removeEditorWindow];
+    [[XVimWindowManager instance] removeEditorWindow];
     return nil;
 }
 
 - (XVimEvaluator*)v:(id)arg{
-    [self addEditorWindow];
-    
-    // Change to vertical
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)[XVim instance].editor;
-    IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
-    [workspaceTabController changeToAssistantLayout_BV:self];
+    [[XVimWindowManager instance] addEditorWindowVertical];
     return nil;
 }
 

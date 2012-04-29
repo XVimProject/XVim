@@ -11,8 +11,8 @@
 #import "XVimWindow.h"
 #import "Hooker.h"
 #import "Logger.h"
-#import "XVim.h"
 #import "XVimStatusLine.h"
+#import "XVimWindowManager.h"
 
 @implementation DVTSourceCodeEditorHook
 
@@ -38,8 +38,7 @@
 - (id)initWithNibName:(NSString*)nibName bundle:(NSBundle*)nibBundle document:(NSDocument*)nibDocument{
 	IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self;
     [editor initWithNibName_:nibName bundle:nibBundle document:nibDocument];
-
-    [XVim instance].editor = (DVTSourceCodeEditorHook*)editor;
+	[XVimWindowManager createWithEditor:editor];
     return (id)editor;
 }
 
