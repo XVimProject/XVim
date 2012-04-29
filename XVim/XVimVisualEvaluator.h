@@ -7,12 +7,7 @@
 //
 
 #import "XVimMotionEvaluator.h"
-
-typedef enum{
-    MODE_CHARACTER, // for 'v'
-    MODE_LINE, // for 'V'
-    MODE_BLOCK // for 'CTRL-V'. may be implemented later...
-}VISUAL_MODE;
+#import "XVimVisualMode.h"
 
 @interface XVimVisualEvaluator : XVimMotionEvaluator {
     // _begin may be greater than _insertion ( in case of backward selection )
@@ -20,6 +15,7 @@ typedef enum{
     NSUInteger _insertion; //  Current cursor position
     NSUInteger _selection_begin; // Begining of selection (This is differ from _begin when its MODE_LINE)
     NSUInteger _selection_end;  // End of selection (This is differ from _insertion when its MODE_LINE)
+	NSRange _operationRange;
     VISUAL_MODE _mode;
 }
 - (NSUInteger) insertionPointInWindow:(XVimWindow*)window;
@@ -29,7 +25,7 @@ typedef enum{
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
 				 mode:(VISUAL_MODE)mode 
-			withRange:(NSRange)range;
+			withRange:(NSRange)range; // Range is line numbers if mode == MODE_LINE
 
 - (void)updateSelectionInWindow:(XVimWindow*)window;
 

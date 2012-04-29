@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimVisualMode.h"
 
 typedef enum {
     REGISTER_IGNORE,
@@ -24,6 +25,7 @@ typedef enum {
 -(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count;
 -(void) appendKeyEvent:(XVimKeyStroke*)keyStroke;
 -(void) appendText:(NSString*)text;
+-(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 -(void) clear;
 
 @property (readonly, strong) NSMutableString *text;

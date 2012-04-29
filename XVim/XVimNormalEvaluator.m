@@ -20,14 +20,11 @@
 #import "XVimWindowEvaluator.h"
 #import "XVimGActionEvaluator.h"
 #import "XVimMarkSetEvaluator.h"
-#import "NSTextView+VimMotion.h"
-#import "DVTSourceTextView.h"
+#import "XVimSourceView.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
-#import "NSTextView+VimMotion.h"
 #import "NSString+VimHelper.h"
-#import "DVTCompletionController.h"
 #import "XVimKeymapProvider.h"
 #import "Logger.h"
 #import "XVimCommandLineEvaluator.h"
@@ -96,22 +93,22 @@
    // next line. it appends to the current line
     // A cursor should not be on the new line break letter in Vim(Except empty line).
     // So the root solution is to prohibit a cursor be on the newline break letter.
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange begin = [view selectedRange];
     NSUInteger idx = begin.location;
     if (!([view isEOF:idx] || [view isNewLine:idx]))
 	{
-		[view moveForward:self];
+		[view moveForward];
     } 
 	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
 - (XVimEvaluator*)A:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger end = [view tailOfLine:r.location];
     [view setSelectedRange:NSMakeRange(end,0)];
-    [view scrollTo:[window cursorLocation]];
+    [view scrollTo:[window insertionPoint]];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
@@ -136,7 +133,7 @@
 // 'C' works similar to 'D' except that once it's done deleting
 // it should go into insert mode
 - (XVimEvaluator*)C:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange range = [view selectedRange];
     NSUInteger count = [self numericArg];
     NSUInteger to = range.location;
@@ -154,7 +151,7 @@
         [view setSelectedRangeWithBoundsCheck:range.location To:eol+1];
         if( ![view isEOF:range.location] ){
 			// cut with selection with {EOF,0} cause exception. This is a little strange since  setSelectedRange with {EOF,0} does not cause any exception...
-            [view del:self intoYankRegister:[self yankRegister]]; 
+            [view deleteTextIntoYankRegister:[self yankRegister]]; 
         }
     }
     
@@ -181,7 +178,7 @@
 }
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange range = [view selectedRange];
     NSUInteger count = [self numericArg];
     NSString *text = [view string];
@@ -215,7 +212,7 @@
  
     if (length > 0){
         [view setSelectedRange:NSMakeRange(from, length)];
-        [view del:self intoYankRegister:[self yankRegister]];
+        [view deleteTextIntoYankRegister:[self yankRegister]];
         
         // Bounds check
         if (from == range.location && ![view isBlankLine:from]){
@@ -258,14 +255,14 @@
 // of the line joined in should be stripped and then one space should be inserted 
 // between the joined lines
 - (XVimEvaluator*)J:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger repeat = [self numericArg];
     //if( 1 != repeat ){ repeat--; }
     NSRange r = [view selectedRange];
     BOOL addSpace = YES;
     for( NSUInteger i = 0 ; i < repeat ; i++ ){
         if( [view isBlankLine:r.location] ){
-            [view deleteForward:self];
+            [view deleteForward];
             continue;
         }
         
@@ -282,7 +279,7 @@
         }
         
         [view setSelectedRange:NSMakeRange(nextnewline,0)];
-        [view deleteForward:self];
+        [view deleteForward];
         NSRange cursorAfterConcatenate = [view selectedRange]; // After concatenate, the cursor position get back to this pos.
         if( addSpace ){
             [view insertText:@" "];
@@ -293,14 +290,14 @@
         if( NSNotFound == nonblank ){
             if( ![view isNewLine:curLocation] && [view isEOF:curLocation]){
                 [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]];
-                [view delete:self];
+                [view deleteText];
             }else{
                 // Blank line. Nothing todo
             }
         }else{
             if( curLocation != nonblank ){
                 [view setSelectedRangeWithBoundsCheck:[view selectedRange].location To:nonblank];
-                [view delete:self];
+                [view deleteText];
             }else{
                 // No white spaces in next line.
             }
@@ -319,16 +316,16 @@
 }
 
 - (XVimEvaluator*)o:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger l = [view selectedRange].location;
     NSUInteger tail = [view tailOfLine:l];
     [view setSelectedRange:NSMakeRange(tail,0)];
-    [view insertNewline:self];
+    [view insertNewline];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
 - (XVimEvaluator*)O:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger l = [view selectedRange].location;
     NSUInteger head = [view headOfLine:l];
     if( NSNotFound == head ){
@@ -336,11 +333,11 @@
     }
     if( 0 != head ){
         [view setSelectedRange:NSMakeRange(head-1,0)];
-        [view insertNewline:self];
+        [view insertNewline];
     }else{
         
         [view setSelectedRange:NSMakeRange(head,0)];
-        [view insertNewline:self];
+        [view insertNewline];
         NSUInteger prev = [view prevLine:[view selectedRange].location column:0 count:1 option:MOTION_OPTION_NONE];
         [view setSelectedRange:NSMakeRange(prev,0)];
     }
@@ -365,7 +362,7 @@
     
     // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
     // because dw is not working quite right it seems
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger loc = [view selectedRange].location;
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
@@ -379,14 +376,14 @@
                 if( NSNotFound == newline ){
                     // add newline at EOF
                     [view setSelectedRange:NSMakeRange([[view string]length], 0)];
-                    [view insertNewline:self];
+                    [view insertNewline];
                 }else{
                     [view setSelectedRange:NSMakeRange(newline+1, 0)];
                 }
             }
         } else {
 			if (![view isNewLine:loc]) {
-				[view moveForward:self];
+				[view moveForward];
 			}
         }
 		
@@ -409,7 +406,7 @@
 - (XVimEvaluator*)P:(XVimWindow*)window{
     // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
     // the line boundary and then paste the data in.
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
         unichar uc = [text characterAtIndex:[text length] -1];
@@ -460,9 +457,9 @@
 }
 
 - (XVimEvaluator*)C_r:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [[view undoManager] redo];
+		[view redo];
     }
     // Redo should not keep anything selected
     NSRange r = [view selectedRange];
@@ -480,7 +477,7 @@
 }
 
 - (XVimEvaluator*)s:(XVimWindow*)window{
-    NSTextView *view = [window sourceView];
+    XVimSourceView *view = [window sourceView];
     NSRange r = [view selectedRange];
 	
 	// Set range to replace, ensuring we don't run over the end of the buffer
@@ -494,7 +491,7 @@
 	// Xcode crashes if we cut a zero length selection
 	if (replacementRange.length > 0)
 	{
-		[view cut:self]; // Can't use del here since we may want to wind up at end of line
+		[view cutText]; // Can't use del here since we may want to wind up at end of line
 	}
 	
     return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
@@ -502,9 +499,9 @@
 }
 
 - (XVimEvaluator*)u:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [[view undoManager] undo];
+        [view undo];
     }
 
     // Undo should not keep anything selected
@@ -542,8 +539,8 @@
 }
 
 - (XVimEvaluator*)x:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
+    XVimSourceView* view = [window sourceView];
+    NSString* s = [view string];
     // note: in vi you are not supposed to move beyond the end of a line when doing "x" operations
     // it's that way on purpose. this allows you to hit a bunch of x's in a row and not worry about 
     // accidentally joining the next line into the current line.
@@ -556,21 +553,21 @@
             // if at the end of line, and are just doing a single x it's like doing X
             if ([self numericArg] == 1) {
                 if (idx > 0 && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]]) {
-                    [view moveBackwardAndModifySelection:self]; 
+                    [view moveBackwardAndModifySelection]; 
                 }
             }
             break;
         }
-        [view moveForwardAndModifySelection:self];
+        [view moveForwardAndModifySelection];
     }
-    [view del:self intoYankRegister:[self yankRegister]];
+    [view deleteTextIntoYankRegister:[self yankRegister]];
     return nil;
 }
 
 // like 'x" but it goes backwards instead of forwards
 - (XVimEvaluator*)X:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
-    NSMutableString* s = [[view textStorage] mutableString];
+    XVimSourceView* view = [window sourceView];
+    NSString* s = [view string];
     // note: in vi you are not supposed to move beyond the start of a line when doing "X" operations
     // it's that way on purpose. this allows you to hit a bunch of X's in a row and not worry about 
     // accidentally joining the current line up into the previous line.
@@ -579,9 +576,9 @@
     for( NSUInteger i = 0 ; idx > 0 && i < [self numericArg]; i++,idx-- ){
         if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]])
             break;
-        [view moveBackwardAndModifySelection:self]; 
+        [view moveBackwardAndModifySelection]; 
     }
-    [view del:self intoYankRegister:[self yankRegister]];
+    [view deleteTextIntoYankRegister:[self yankRegister]];
     return nil;
 }
 
@@ -668,7 +665,7 @@
 }
 
 - (XVimEvaluator*)HT:(XVimWindow*)window{
-    [[window sourceView] selectNextPlaceholder:self];
+    [[window sourceView] selectNextPlaceholder];
     return nil;
 }
 
@@ -697,15 +694,15 @@
 																completion:^ XVimEvaluator* (NSString *command)
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
-							   DVTSourceTextView *sourceView = [window sourceView];
+							   XVimSourceView *sourceView = [window sourceView];
 							   NSRange found = [searcher executeSearch:command 
 															   display:[command substringFromIndex:1] 
-																  from:[window cursorLocation] 
+																  from:[window insertionPoint] 
 															  inWindow:window];
 							   //Move cursor and show the found string
 							   if (found.location != NSNotFound) {
 								   [sourceView setSelectedRange:NSMakeRange(found.location, 0)];
-								   [sourceView scrollTo:[window cursorLocation]];
+								   [sourceView scrollTo:[window insertionPoint]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
 								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
@@ -717,10 +714,10 @@
                                XVimOptions *options = [[XVim instance] options];
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
-                                   DVTSourceTextView *sourceView = [window sourceView];
+                                   XVimSourceView *sourceView = [window sourceView];
                                    NSRange found = [searcher executeSearch:command 
 																   display:[command substringFromIndex:1]
-																	  from:[window cursorLocation] 
+																	  from:[window insertionPoint] 
 																  inWindow:window];
                                    //Move cursor and show the found string
                                    if (found.location != NSNotFound) {
@@ -747,7 +744,7 @@
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
 	NSRange replacementRange = [view selectedRange];
 	replacementRange.length = [self numericArg];
 	[view clampRangeToEndOfLine:&replacementRange];
@@ -759,16 +756,16 @@
 {
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
-    [view scrollTo:[window cursorLocation]];
+    [view scrollTo:[window insertionPoint]];
     return [self withNewContext];
 }
 
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
 // This can always be changed to a set of valid keys in the future if need be.
-NSArray *_invalidRepeatKeys;
+static NSArray *_invalidRepeatKeys;
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =

@@ -9,15 +9,11 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimNormalEvaluator.h"
+#import "XVimVisualEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
-#import "DVTSourceTextView.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "Logger.h"
-#import "IDEWorkspaceController.h"
-#import "IDEEditorArea.h"
-#import "IDEEditorModeViewController.h"
-#import "XVimSourceTextView.h"
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -25,7 +21,7 @@
 	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	BOOL _handlingMouseEvent;
 }
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister;
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 - (void)setArgumentString:(NSString*)string;
 @end
 
@@ -44,6 +40,14 @@
 	return self;
 }
 
+- (void)willSetEvaluator:(XVimEvaluator*)evaluator
+{
+	if (evaluator != _currentEvaluator && _currentEvaluator)
+	{
+		[_currentEvaluator willEndHandlerInWindow:self];
+	}
+}
+
 - (void)setEvaluator:(XVimEvaluator*)evaluator 
 {
 	if (!evaluator) {
@@ -53,7 +57,7 @@
 	if (evaluator != _currentEvaluator)
 	{
 		if (_currentEvaluator) {
-			[_currentEvaluator endHandlerInWindow:self];
+			[_currentEvaluator didEndHandlerInWindow:self];
 		}
 		
 		_currentEvaluator = evaluator;
@@ -63,7 +67,7 @@
 		
 		[self setModeString:[evaluator modeString]];
 		[self setArgumentString:[evaluator argumentDisplayString]];
-		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
+		[[self sourceView] updateInsertionPointStateAndRestartTimer];
 	}
 }
 
@@ -75,19 +79,7 @@
     return _localMarks;
 }
 
-- (NSString*)sourceText{
-    return [[self sourceView] string];
-}
-
-- (NSRange)selectedRange{
-    if( [self sourceView] == nil ){
-        return NSMakeRange(0, 0);
-    }else{
-        return [[self sourceView] selectedRange];
-    }
-}
-
-- (NSUInteger)cursorLocation 
+- (NSUInteger)insertionPoint
 {
 	return [[self currentEvaluator] insertionPointInWindow:self];
 }
@@ -122,9 +114,14 @@
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self clearErrorMessage];
     XVim *xvim = [XVim instance];
-	XVimEvaluator* nextEvaluator = [_currentEvaluator eval:keyStroke inWindow:self];
-	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister];
-	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister];
+	XVimEvaluator* currentEvaluator = _currentEvaluator;
+	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke inWindow:self];
+	
+	[self willSetEvaluator:nextEvaluator];
+	
+	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister fromEvaluator:currentEvaluator];
+	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister fromEvaluator:currentEvaluator];
+	
 	[self setEvaluator:nextEvaluator];
 }
 
@@ -132,6 +129,15 @@
 	[[self sourceView] insertText:text];
 }
 
+
+- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
+{
+	XVimEvaluator *evaluator = [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:mode withRange:range];
+	[self willSetEvaluator:evaluator];
+	[self setEvaluator:evaluator];
+}
+
+	
 - (void)setModeString:(NSString*)string
 {
 	XVimCommandLine *commandLine = self.commandLine;
@@ -173,6 +179,7 @@
 
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField
 {
+	[self willSetEvaluator:nil];
 	[self setEvaluator:nil];
 }
 
@@ -199,8 +206,9 @@
     }
 }
 
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister{
-    switch ([_currentEvaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator
+{
+    switch ([evaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
         case REGISTER_APPEND:
             [xregister appendKeyEvent:keyStroke];
             break;
@@ -225,6 +233,7 @@
 {
 	_handlingMouseEvent = NO;
 	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
+	[self willSetEvaluator:next];
 	[self setEvaluator:next];
 }
 
@@ -250,29 +259,6 @@
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
 {
 	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
-}
-
-- (void)registerWithScrollView:(NSScrollView*)scrollView
-{
-	[scrollView addObserver:self
-				 forKeyPath:@"hasHorizontalScroller"
-					options:NSKeyValueObservingOptionNew
-					context:nil];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-					  ofObject:(id)object 
-						change:(NSDictionary *)change 
-					   context:(void *)context
-{
-	if (keyPath == @"hasHorizontalScroller")
-	{
-		NSScrollView *scrollView = object;
-		if ([scrollView hasHorizontalScroller])
-		{
-			[scrollView setHasHorizontalScroller:NO];
-		}
-	}
 }
 
 @end

@@ -7,10 +7,9 @@
 //
 
 #import "XVimCommandLineEvaluator.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimKeymapProvider.h"
 #import "XVimWindow.h"
-#import "DVTSourceTextView.h"
 #import "XVimCommandField.h"
 #import "XVimKeyStroke.h"
 #import "XVimHistoryHandler.h"
@@ -58,7 +57,7 @@
 {
 	XVimCommandField *commandField = [window commandField];
 	[commandField absorbFocusEvent];
-	[[window window] makeFirstResponder:[window sourceView]];
+	[[window window] makeFirstResponder:[[window sourceView] view]];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
@@ -177,8 +176,8 @@
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window
 {
-    DVTSourceTextView *sourceView = [window sourceView];
-    [sourceView scrollTo:[window cursorLocation]];
+    XVimSourceView *sourceView = [window sourceView];
+    [sourceView scrollTo:[window insertionPoint]];
 	return [_parent withNewContext];
 }
 

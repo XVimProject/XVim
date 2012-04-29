@@ -18,9 +18,8 @@
 #import "XVimCharacterSearch.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "NSString+VimHelper.h"
-#import "DVTSourceTextView.h"
 
 
 
@@ -86,7 +85,7 @@
 // You do not need to use this if this is not proper to express the motion.
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange begin = [view selectedRange];
     NSUInteger motionFrom = begin.location;
     
@@ -223,7 +222,7 @@
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger end;
     if( [self numericMode] ){
         end = [view positionAtLineNumber:[self numericArg] column:0];
@@ -284,14 +283,14 @@
 
 - (XVimEvaluator*)n:(XVimWindow*)window{
 	XVimSearch* searcher = [[XVim instance] searcher];
-    NSRange r = [searcher searchNextFrom:[window cursorLocation] inWindow:window];
+    NSRange r = [searcher searchNextFrom:[window insertionPoint] inWindow:window];
 	[searcher selectSearchResult:r inWindow:window];
     return nil;
 }
 
 - (XVimEvaluator*)N:(XVimWindow*)window{
 	XVimSearch* searcher = [[XVim instance] searcher];
-    NSRange r = [searcher searchPrevFrom:[window cursorLocation] inWindow:window];
+    NSRange r = [searcher searchPrevFrom:[window insertionPoint] inWindow:window];
 	[searcher selectSearchResult:r inWindow:window];
     return nil;
 }
@@ -357,7 +356,7 @@
 - (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
 	XVimSearch* searcher = [[XVim instance] searcher];
 	
-	NSUInteger cursorLocation = [window cursorLocation];
+	NSUInteger cursorLocation = [window insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found=NSMakeRange(0, 0);
     for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
@@ -401,7 +400,7 @@
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
 // Note: CARET always moves to start of the current line ignoring any numericArg.
 - (XVimEvaluator*)CARET:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger head = [view headOfLineWithoutSpaces:r.location];
     if( NSNotFound == head ){
@@ -422,8 +421,8 @@
 - (XVimEvaluator*)PERCENT:(XVimWindow*)window {
     // find matching bracketing character and go to it
     // as long as the nesting level matches up
-    NSTextView* view = [window sourceView];
-    NSString* s = [[view textStorage] string];
+    XVimSourceView* view = [window sourceView];
+    NSString* s = [view string];
     NSRange at = [view selectedRange]; 
     if (at.location >= s.length-1) {
         // [window statusMessage:@"leveled match not found" :ringBell TRUE]
@@ -529,7 +528,7 @@
 }
 
 - (XVimEvaluator*)PLUS:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger to = [view nextLine:r.location column:0 count:[self numericArg] option:MOTION_OPTION_NONE];
     NSUInteger to_wo_space= [view nextNonBlankInALine:to];
@@ -546,7 +545,7 @@
 }
 
 - (XVimEvaluator*)MINUS:(XVimWindow*)window{
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger to = [view prevLine:r.location column:0 count:[self numericArg] option:MOTION_OPTION_NONE];
     NSUInteger to_wo_space= [view nextNonBlankInALine:to];
@@ -568,7 +567,7 @@
 }
 
 - (XVimEvaluator*)LBRACE:(XVimWindow*)window{ // {
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger paragraph_head = [view paragraphsBackward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
 	
@@ -580,7 +579,7 @@
 }
 
 - (XVimEvaluator*)RBRACE:(XVimWindow*)window{ // }
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger paragraph_head = [view paragraphsForward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
 	
@@ -593,7 +592,7 @@
 
 
 - (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window{ // (
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger sentence_head = [view sentencesBackward:begin count:[self numericArg]option:MOTION_OPTION_NONE];
     if( NSNotFound != sentence_head  ){
@@ -604,7 +603,7 @@
 }
 
 - (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window{ // )
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger begin = [view selectedRange].location;
     NSUInteger sentence_head = [view sentencesForward:begin count:[self numericArg]option:MOTION_OPTION_NONE];
     if( NSNotFound != sentence_head  ){
@@ -616,7 +615,7 @@
 
 - (XVimEvaluator*)COMMA:(XVimWindow*)window{
 	XVimCharacterSearch* charSearcher = [[XVim instance] characterSearcher];
-    NSTextView *view = [window sourceView];
+    XVimSourceView *view = [window sourceView];
     NSUInteger location = [view selectedRange].location;
     
 	for (NSUInteger i = 0;;) {
@@ -652,7 +651,7 @@
 - (XVimEvaluator*)SEMICOLON:(XVimWindow*)window
 {
 	XVimCharacterSearch* charSearcher = [[XVim instance] characterSearcher];
-    NSTextView *view = [window sourceView];
+    XVimSourceView *view = [window sourceView];
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
         location = [charSearcher searchNextCharacterFrom:location inWindow:window];

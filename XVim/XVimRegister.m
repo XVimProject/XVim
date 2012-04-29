@@ -10,9 +10,11 @@
 #import "XVimEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimPlaybackHandler.h"
-#import <CoreServices/CoreServices.h>
 
-@interface XVimRegister()
+@interface XVimRegister() {
+	NSRange _selectedRange;
+	VISUAL_MODE _visualMode;
+}
 @property (readwrite) BOOL isPlayingBack;
 @property (strong) NSMutableArray *keyEventsAndInsertedText;
 @end
@@ -96,6 +98,7 @@
     }
 
     _nonNumericKeyCount = 0;
+	_selectedRange.location = NSNotFound;
     [self.text setString:@""];
     [self.keyEventsAndInsertedText removeAllObjects];
 }
@@ -126,8 +129,23 @@
     [self.keyEventsAndInsertedText addObject:text];
 }
 
+-(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range
+ {
+	if (self.isPlayingBack){
+		return;
+	}
+	_selectedRange = range;
+	_visualMode = mode;
+}
+
 -(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count{
     self.isPlayingBack = YES;
+	
+	if (_selectedRange.location != NSNotFound)
+	{
+		[handler handleVisualMode:_visualMode withRange:_selectedRange];
+	}
+	
     for (NSUInteger i = 0; i < count; ++i) {
         [self.keyEventsAndInsertedText enumerateObjectsUsingBlock:^(id eventOrText, NSUInteger index, BOOL *stop){        
             if ([eventOrText isKindOfClass:[XVimKeyStroke class]]){

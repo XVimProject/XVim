@@ -1,12 +1,12 @@
 //
-//  NSTextView+VimMotion.h
+//  XVimSourceView.h
 //  XVim
 //
 //  Created by Shuichiro Suzuki on 2/25/12.
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimMotionType.h"
 
 @class XVimRegister;
@@ -58,8 +58,15 @@ typedef struct _XVimWordInfo{
     NSUInteger lastEndOfWord;
 }XVimWordInfo;
 
+@class DVTSourceTextView;
 
-@interface NSTextView (VimMotion)
+@interface XVimSourceView : NSObject
+
+- (id)initWithSourceView:(DVTSourceTextView*)sourceView;
+
+- (NSView*)view;
+
+- (NSString*)string;
 
 // Support Methods
 
@@ -202,6 +209,12 @@ typedef struct _XVimWordInfo{
 - (NSUInteger)columnNumber:(NSUInteger)index;
 
 /**
+ * Returns position at line number "num" and column number 0
+ * Line number starts from 1.
+ **/
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num;
+
+/**
  * Returns position at line number "num" and column number "column"
  * If the "column" exceeds the end of line it returns position of  the end of line.
  * Line number starts from 1.
@@ -211,16 +224,60 @@ typedef struct _XVimWordInfo{
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
 - (NSUInteger)skipWhiteSpace:(NSUInteger)index;
 
-// Deletes the selected range and adjusts cursor position
-- (void)del:(id)sender intoYankRegister:(XVimRegister*)xregister;
+// Indentation
+- (void)indentCharacterRange:(NSRange)range;
+- (void)shiftLeft;
+- (void)shiftRight;
+
+- (long long)currentLineNumber;
+
+- (void)copyText;
+- (void)deleteText;
+- (void)cutText;
+- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister; // Deletes the selected range and adjusts cursor position
+- (void)undo;
+- (void)redo;
+- (void)moveUp;
+- (void)moveDown;
+- (void)moveForward;
+- (void)moveForwardAndModifySelection;
+- (void)moveBackward;
+- (void)moveBackwardAndModifySelection;
+- (void)moveToBeginningOfLine;
+- (void)moveToEndOfLine;
+- (void)deleteForward;
+- (void)insertText:(NSString*)text;
+- (void)insertText:(NSString*)text replacementRange:(NSRange)range;
+- (void)keyDown:(NSEvent*)event;
+- (void)insertNewline;
+
+- (NSColor *)insertionPointColor;
 
 // Clamps range to end of line
 - (void)clampRangeToEndOfLine:(NSRange*)range;
-
 // Clamps range to buffer
 - (void)clampRangeToBuffer:(NSRange*)range;
 
+// Completions
+- (void)hideCompletions;
+
+// Selects the next tab-complete area
+- (void)selectNextPlaceholder;
+
+// Shows the yellow find indicator for given range
+- (void)showFindIndicatorForRange:(NSRange)range;
+
+- (void)updateInsertionPointStateAndRestartTimer;
+- (void)setWrapsLines:(BOOL)wraps;
+
+// Drawing
+- (NSUInteger)glyphIndexForPoint:(NSPoint)point;
+- (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex;
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
+
 // Selection
+- (NSRange)selectedRange;
+- (void)setSelectedRange:(NSRange)range;
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to;
 - (void)setSelectedRangeWithBoundsCheck:(NSUInteger)from To:(NSUInteger)to;
 - (NSUInteger)lineNumber:(NSUInteger)index;

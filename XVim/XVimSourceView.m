@@ -1,16 +1,30 @@
-//
-//  Created by Shuichiro Suzuki on 2/25/12.
-//  Copyright (c) 2012 JugglerShu.Net. All 
-//
-
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "NSString+VimHelper.h"
 #import "DVTSourceTextView.h"
 #import "DVTFoldingTextStorage.h"
 #import "Logger.h"
 #import "XVim.h"
 
-@implementation NSTextView (VimMotion)
+@interface XVimSourceView() {
+	__weak DVTSourceTextView *_view;
+}
+@end
+
+@implementation XVimSourceView
+
+- (id)initWithSourceView:(DVTSourceTextView*)sourceView
+{
+	if (self = [super init])
+	{
+		_view = sourceView;
+	}
+	return self;
+}
+
+- (NSView*)view
+{
+	return _view;
+}
 
 /////////////////////////
 // support methods     //
@@ -152,13 +166,6 @@
         [self setSelectedRange:NSMakeRange([self selectedRange].location-1,0)];
     }
     return;
-}
-
-- (void)del:(id)sender intoYankRegister:(XVimRegister*)xregister
-{
-	[self cut:sender];
-	[self adjustCursorPosition];
-    [[XVim instance] onDeleteOrYank:xregister];
 }
 
 /**
@@ -352,7 +359,7 @@
  **/
 - (NSUInteger)columnNumber:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[self textStorage];
+	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[_view textStorage];
 	return [textStorage columnForPositionConvertingTabs:index];
 }
 
@@ -372,12 +379,8 @@
 	return pos;
 }
 
-/**
- * Returns position at line number "num" and column number "column"
- * If the "column" exceeds the end of line it returns position of  the end of line.
- * Line number starts from 1.
- **/
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num
+{
     NSAssert(0 != num, @"line number starts from 1");
     
     // Primitive search to find line number
@@ -394,11 +397,17 @@
     }
     
     if( num != 0 ){
-        // Coundn't find the line
+        // Couldn't find the line
         return NSNotFound;
     }
 	
-	return [self nextPositionFrom:pos matchingColumn:column];
+	return pos;
+}
+	
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
+	NSUInteger idx = [self positionAtLineNumber:num];
+	if (idx == NSNotFound) { return NSNotFound; }
+	return [self nextPositionFrom:idx matchingColumn:column];
 }
 
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
@@ -421,11 +430,6 @@
         }
     }
     return newLines;
-}
-
-- (NSUInteger)numberOfLines{
-    DVTSourceTextView* storage = (DVTSourceTextView*)[self textStorage];
-    return [storage numberOfLines]; //  This is DVTSourceTextStorage method
 }
 
 ////////////////
@@ -993,8 +997,8 @@
 #define XVimSubPoint(a,b) NSMakePoint(a.x-b.x,a.y-b.y)  // Is there such macro in Cocoa?
 
 - (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count{ // C-d
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
     
     NSRect visibleRect = [scrollView contentView].bounds;
     CGFloat halfSize = visibleRect.size.height/2.0f;
@@ -1003,17 +1007,17 @@
     NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + scrollSize ); // This may beyond the end of document (intentionally)
     
     // Cursor position relative to left-top origin shold be kept after scroll ( Exception is when it scrolls beyond the end of document)
-    NSRect currentInsertionRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
+    NSRect currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
     NSPoint relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
     
     // Cursor Position after scroll
     NSPoint cursorAfterScroll = XVimAddPoint(scrollPoint,relativeInsertionPoint);
     
     // Nearest character index to the cursor position after scroll
-    NSUInteger cursorIndexAfterScroll= [[self layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
+    NSUInteger cursorIndexAfterScroll= [[_view layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
     // We do not want to change the insert point relative position from top of visible rect
     // We have to calc the distance between insertion point befor/after scrolling to keep the position.
-    NSRect insertionRectAfterScroll = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
+    NSRect insertionRectAfterScroll = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
     NSPoint relativeInsertionPointAfterScroll = XVimSubPoint(insertionRectAfterScroll.origin, scrollPoint);
     CGFloat heightDiff = relativeInsertionPointAfterScroll.y - relativeInsertionPoint.y;
     scrollPoint.y += heightDiff;
@@ -1029,8 +1033,8 @@
 }
 
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count{ // C-u
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
     
     NSRect visibleRect = [scrollView contentView].bounds;
     CGFloat halfSize = visibleRect.size.height/2.0f;
@@ -1039,17 +1043,17 @@
     NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y - scrollSize ); // This may beyond the head of document (intentionally)
     
     // Cursor position relative to visible rect origin should be kept after scroll ( Exception is when it scrolls beyond the end of document)
-    NSRect currentInsertionRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
+    NSRect currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
     NSPoint relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
     
     // Cursor Position after scroll
     NSPoint cursorAfterScroll = XVimAddPoint(scrollPoint,relativeInsertionPoint);
     
     // Nearest character index to the cursor position after scroll
-    NSUInteger cursorIndexAfterScroll= [[self layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
+    NSUInteger cursorIndexAfterScroll= [[_view layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
     // We do not want to change the insert point relative position from top of visible rect
     // We have to calc the distance between insertion point befor/after scrolling to keep the position.
-    NSRect insertionRectAfterScroll = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
+    NSRect insertionRectAfterScroll = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
     NSPoint relativeInsertionPointAfterScroll = XVimSubPoint(insertionRectAfterScroll.origin, scrollPoint);
     CGFloat heightDiff = relativeInsertionPointAfterScroll.y - relativeInsertionPoint.y;
     scrollPoint.y += heightDiff;
@@ -1070,7 +1074,7 @@
     [self setSelectedRange:NSMakeRange(index,0)];
     
     for( int i = 0 ; i < count; i++ ){
-        [self pageDown:self];
+        [_view pageDown:self];
     }
     // Find first non blank character at the line
     // If there is not the end of line is the target position
@@ -1083,7 +1087,7 @@
     [self setSelectedRange:NSMakeRange(index,0)];
     
     for( int i = 0 ; i < count; i++ ){
-        [self pageUp:self];
+        [_view pageUp:self];
     }
     // Find first non blank character at the line
     // If there is not the end of line is the target position
@@ -1091,9 +1095,9 @@
 }
 
 - (NSUInteger)scrollBottom:(NSNumber*)count{ // zb / z-
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint bottom = NSMakePoint(0.0f, NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f);
     bottom.y -= NSHeight([[scrollView contentView] bounds]);
     if( bottom.y < 0.0 ){
@@ -1105,9 +1109,9 @@
 }
 
 - (NSUInteger)scrollCenter:(NSNumber*)count{ // zz / z.
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint center = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
     center.y -= NSHeight([[scrollView contentView] bounds]) / 2.0f;
     if( center.y < 0.0 ){
@@ -1119,9 +1123,9 @@
 }
 
 - (NSUInteger)scrollTop:(NSNumber*)count{ // zt / z<CR>
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint top = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
     [[scrollView contentView] scrollToPoint:top];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
@@ -1136,12 +1140,12 @@
     
     // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll
     // to the appropriate glyph due to non contiguous layout
-    NSRange glyphRange = [[self layoutManager] glyphRangeForCharacterRange:characterRange actualCharacterRange:NULL];
-    [[self layoutManager] ensureLayoutForGlyphRange:NSMakeRange(0, glyphRange.location + glyphRange.length)];
+    NSRange glyphRange = [[_view layoutManager] glyphRangeForCharacterRange:characterRange actualCharacterRange:NULL];
+    [[_view layoutManager] ensureLayoutForGlyphRange:NSMakeRange(0, glyphRange.location + glyphRange.length)];
     
-    NSTextContainer *container = [self textContainer];
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:glyphRange inTextContainer:container];
+    NSTextContainer *container = [_view textContainer];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:glyphRange inTextContainer:container];
 
     CGFloat glyphLeft = NSMidX(glyphRect) - NSWidth(glyphRect) / 2.0f;
     CGFloat glyphRight = NSMidX(glyphRect) + NSWidth(glyphRect) / 2.0f;
@@ -1185,9 +1189,9 @@
 }
 
 - (NSUInteger)cursorBottom:(NSNumber*)count{ // L
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint bottom = [[scrollView contentView] bounds].origin;
     bottom.y += [[scrollView contentView] bounds].size.height - NSHeight(glyphRect) / 2.0f;
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:bottom], 0 };
@@ -1197,7 +1201,7 @@
 }
 
 - (NSUInteger)cursorCenter:(NSNumber*)count{ // M
-    NSScrollView *scrollView = [self enclosingScrollView];
+    NSScrollView *scrollView = [_view enclosingScrollView];
     NSPoint center = [[scrollView contentView] bounds].origin;
     center.y += [[scrollView contentView] bounds].size.height / 2;
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:center], 0 };
@@ -1207,9 +1211,9 @@
 }
 
 - (NSUInteger)cursorTop:(NSNumber*)count{ // H
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
     NSPoint top = [[scrollView contentView] bounds].origin;
     top.y += NSHeight(glyphRect) / 2.0f;
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
@@ -1299,10 +1303,195 @@
 	return NSMakeRange(from, to - from);
 }
 
-
 - (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
 	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
     [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
+}
+
+//////////////////////////////////////////////////////////////////////// 
+// Pass-through functions to NSTextView or DVTSourceTextView
+
+- (NSUInteger)numberOfLines{
+    XVimSourceView* storage = [_view textStorage];
+    return [storage numberOfLines]; //  This is DVTSourceTextStorage method
+}
+
+- (NSString *)string
+{
+	return [_view string];
+}
+
+- (void)indentCharacterRange:(NSRange)range
+{
+	[[_view textStorage] indentCharacterRange:range undoManager:[_view undoManager]];
+}
+
+- (void)shiftLeft
+{
+	[_view shiftLeft:self];
+}
+
+- (void)shiftRight
+{
+	[_view shiftRight:self];
+}
+
+- (long long)currentLineNumber
+{
+	return [_view _currentLineNumber];
+}
+
+- (NSUInteger)glyphIndexForPoint:(NSPoint)point
+{
+	NSUInteger glyphIndex = [[_view layoutManager] glyphIndexForPoint:point inTextContainer:[_view textContainer]];
+	return glyphIndex;
+}
+
+- (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex
+{
+	NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[_view textContainer]];
+	return glyphRect;
+}
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
+{
+	[_view _drawInsertionPointInRect_:rect color:color];
+}
+
+- (void)hideCompletions
+{
+	[[_view completionController] hideCompletions];
+}
+
+- (void)selectNextPlaceholder
+{
+	[_view selectNextPlaceholder:self];
+}
+
+- (void)deleteText
+{
+	[_view delete:self];
+}
+
+- (void)cutText
+{
+	[_view cut:self];
+}
+
+- (void)copyText
+{
+	[_view copy:self];
+}
+
+- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister
+{
+	[_view cut:self];
+	[self adjustCursorPosition];
+    [[XVim instance] onDeleteOrYank:xregister];
+}
+
+- (void)moveUp
+{
+	[_view moveUp:self];
+}
+
+- (void)moveDown
+{
+	[_view moveDown:self];
+}
+
+- (void)moveForward
+{
+	[_view moveForward:self];
+}
+
+- (void)moveForwardAndModifySelection
+{
+	[_view moveForwardAndModifySelection:self];
+}
+
+- (void)moveBackward
+{
+	[_view moveBackward:self];
+}
+
+- (void)moveBackwardAndModifySelection
+{
+	[_view moveBackwardAndModifySelection:self];
+}
+	 
+- (void)moveToBeginningOfLine
+{
+	[_view moveToBeginningOfLine:self];
+}
+
+- (void)moveToEndOfLine
+{
+	[_view moveToEndOfLine:self];
+}
+
+- (void)deleteForward
+{
+	[_view deleteForward:self];
+}
+
+- (void)insertText:(NSString*)text
+{
+	[_view insertText:text];
+}
+- (void)insertText:(NSString*)text replacementRange:(NSRange)range
+{
+	[_view insertText:text replacementRange:range];
+}
+
+- (void)insertNewline
+{
+	[_view insertNewline:self];
+}
+
+- (void)keyDown:(NSEvent*)event
+{
+	[_view keyDown_:event];
+}
+
+- (void)undo
+{
+	[[_view undoManager] undo];
+}
+
+- (void)redo
+{
+	[[_view undoManager] redo];
+}
+
+- (void)setWrapsLines:(BOOL)wraps
+{
+	[_view setWrapsLines:wraps];
+}
+
+- (void)updateInsertionPointStateAndRestartTimer
+{
+	[_view updateInsertionPointStateAndRestartTimer:YES];
+}
+
+- (NSColor*)insertionPointColor
+{
+	return [_view insertionPointColor];
+}
+
+- (void)showFindIndicatorForRange:(NSRange)range
+{
+	[_view showFindIndicatorForRange:range];
+}
+
+- (NSRange)selectedRange
+{
+	return [_view selectedRange];
+}
+
+- (void)setSelectedRange:(NSRange)range
+{
+	[_view setSelectedRange:range];
 }
 
 // TODO: Fix the warnings

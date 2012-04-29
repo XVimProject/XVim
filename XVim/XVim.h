@@ -15,7 +15,6 @@
 @class XVimSearch;
 @class XVimCharacterSearch;
 @class XVimExCommand;
-@class XVimSourceCodeEditor;
 @class XVimHistoryHandler;
 
 @interface XVim : NSObject<XVimKeymapProvider>
@@ -26,7 +25,6 @@
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimCharacterSearch* characterSearcher;
 @property (strong) XVimExCommand* excmd;
-@property (weak) XVimSourceCodeEditor* editor;
 
 @property (strong, readonly) NSDictionary* registers;
 @property (weak) XVimRegister *repeatRegister;

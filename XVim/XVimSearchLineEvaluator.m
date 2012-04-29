@@ -37,7 +37,7 @@
     NSString *searchChar = [NSString stringWithCharacters:&key length:1];
     [charSearcher setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
 
-    NSTextView *view = (NSTextView*)[window sourceView];
+    XVimSourceView *view = [window sourceView];
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
         location = [charSearcher searchNextCharacterFrom:location inWindow:window];

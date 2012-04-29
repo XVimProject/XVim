@@ -6,15 +6,15 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "XVimSourceCodeEditor.h"
+#import "DVTSourceCodeEditorHook.h"
 #import "IDESourceCodeEditor.h"
 #import "XVimWindow.h"
 #import "Hooker.h"
 #import "Logger.h"
-#import "XVim.h"
 #import "XVimStatusLine.h"
+#import "XVimWindowManager.h"
 
-@implementation XVimSourceCodeEditor
+@implementation DVTSourceCodeEditorHook
 
 + (void) hook
 {
@@ -38,8 +38,7 @@
 - (id)initWithNibName:(NSString*)nibName bundle:(NSBundle*)nibBundle document:(NSDocument*)nibDocument{
 	IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self;
     [editor initWithNibName_:nibName bundle:nibBundle document:nibDocument];
-
-    [XVim instance].editor = (XVimSourceCodeEditor*)editor;
+	[XVimWindowManager createWithEditor:editor];
     return (id)editor;
 }
 

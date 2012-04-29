@@ -27,21 +27,16 @@
 
 #import "XVim.h"
 #import "Logger.h"
-#import "Hooker.h"
 #import "XVimSearch.h"
 #import "XVimCharacterSearch.h"
 #import "XVimExCommand.h"
-#import "XVimSourceTextView.h"
-#import "XVimSourceCodeEditor.h"
 #import "XVimKeymap.h"
 #import "XVimMode.h"
 #import "XVimRegister.h"
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
-#import "XVimEditorArea.h"
-#import "XVimSourceTextScrollView.h"
-
+#import "XVimHookManager.h"
 
 static XVim* s_instance = nil;
 
@@ -64,7 +59,6 @@ static XVim* s_instance = nil;
 @synthesize characterSearcher = _characterSearcher;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
-@synthesize editor = _editor;
 
 +(void)receiveNotification:(NSNotification*)notification{
     if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
@@ -72,7 +66,8 @@ static XVim* s_instance = nil;
     }
 }
 
-+ (void) load { 
++ (void) load 
+{ 
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
     TRACE_LOG(@"XVim loaded");
@@ -82,34 +77,15 @@ static XVim* s_instance = nil;
 	[s_instance parseRcFile];
     
     // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
-    [[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
+    //[[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
     
     // Do the hooking after the App has finished launching,
     // Otherwise, we may miss some classes.
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-    [notificationCenter addObserver: [XVim class]
+    [notificationCenter addObserver: [XVimHookManager class]
                                   selector: @selector( hook )
                                    name: NSApplicationDidFinishLaunchingNotification
                                  object: nil];
-
-    //The following codes helps reverse engineering the instance methods behaviour.
-    //All the instance methods of a class passed to registerTracing are logged when they are called.
-    //Since all the method calls an object of the class are logged
-    //it has impact on the performance.
-    //Comment out if you do not need to trace method calls of the specific classes or specify 
-    // a class name in which you are interested in.
-
-    //[Logger registerTracing:@"DVTTextStorage"];
-    //[Logger registerTracing:@"DVTTextFinder"];
-    //[Logger registerTracing:@"DVTIncrementalFindBar"];
-}
-
-+ (void) hook
-{
-    [XVimEditorArea hook];
-	[XVimSourceTextView hook];
-	[XVimSourceCodeEditor hook];
-    [XVimSourceTextScrollView hook];
 }
 
 + (XVim*)instance

@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimOperatorEvaluator.h"
 #import "XVimOperatorAction.h"
 #import "XVimTextObjectEvaluator.h"
