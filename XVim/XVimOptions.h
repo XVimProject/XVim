@@ -15,6 +15,7 @@
 @property BOOL incsearch;
 @property BOOL gdefault;
 @property BOOL smartcase;
+@property (copy) NSString *guioptions;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

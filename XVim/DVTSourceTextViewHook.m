@@ -15,6 +15,8 @@
 #import "DVTSourceTextView.h"
 #import "XVimSourceView.h"
 #import "XVimStatusLine.h"
+#import "XVim.h"
+#import "XVimOptions.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -57,6 +59,11 @@
     
     // Hook _drawInsertionPointInRect for Drawing Caret       
     [Hooker hookMethod:@selector(_drawInsertionPointInRect:color:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(_drawInsertionPointInRect:color:)) keepingOriginalWith:@selector(_drawInsertionPointInRect_:color:)];
+	
+    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(viewDidMoveToSuperview_)];
+    [Hooker hookMethod:@selector(observeValueForKeyPath:ofObject:change:context:) 
+			   ofClass:c withMethod:class_getInstanceMethod([self class], @selector(observeValueForKeyPath:ofObject:change:context:) ) 
+   keepingOriginalWith:@selector(observeValueForKeyPath_:ofObject:change:context:)];
 }
 
 + (XVimWindow*)xvimWindowForSourceTextView:(DVTSourceTextView*)view{
@@ -196,6 +203,56 @@
         window.sourceView = [[XVimSourceView alloc] initWithSourceView:base];
     }
     return b;
+}
+
+- (void)viewDidMoveToSuperview {
+	DVTSourceTextView *base = (DVTSourceTextView*)self;
+    [base viewDidMoveToSuperview_];
+	
+	// Hide scroll bars according to options
+	XVimOptions *options = [[XVim instance] options];
+	NSString *guioptions = options.guioptions;
+	NSScrollView * scrollView = [base enclosingScrollView];
+	if ([guioptions rangeOfString:@"r"].location == NSNotFound)
+	{
+		[scrollView addObserver:self
+					 forKeyPath:@"hasVerticalScroller"
+						options:NSKeyValueObservingOptionNew
+						context:nil];
+		[scrollView setHasVerticalScroller:NO];
+	}
+	if ([guioptions rangeOfString:@"b"].location == NSNotFound)
+	{
+		[scrollView addObserver:self
+					 forKeyPath:@"hasHorizontalScroller"
+						options:NSKeyValueObservingOptionNew
+						context:nil];
+		[scrollView setHasHorizontalScroller:NO];
+	}
+
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath 
+					  ofObject:(id)object 
+						change:(NSDictionary *)change 
+					   context:(void *)context
+{	
+	if (keyPath == @"hasVerticalScroller")
+	{
+		NSScrollView *scrollView = object;
+		if ([scrollView hasVerticalScroller])
+		{
+			[scrollView setHasVerticalScroller:NO];
+		}
+	}
+	if (keyPath == @"hasHorizontalScroller")
+	{
+		NSScrollView *scrollView = object;
+		if ([scrollView hasHorizontalScroller])
+		{
+			[scrollView setHasHorizontalScroller:NO];
+		}
+	}
 }
 
 @end

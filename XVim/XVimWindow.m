@@ -13,6 +13,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "XVimSourceView.h"
+#import "XVimOptions.h"
 #import "Logger.h"
 
 @interface XVimWindow() {
@@ -262,3 +263,4 @@
 }
 
 @end
+

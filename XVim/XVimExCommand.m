@@ -842,6 +842,10 @@
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
         // "set XXX=YYY" form
+		NSUInteger idx = [setCommand rangeOfString:@"="].location;
+		NSString *name = [[setCommand substringToIndex:idx] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		NSString *value = [[setCommand substringFromIndex:idx + 1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		[options setOption:name value:value];
         
     }else if( [setCommand hasPrefix:@"no"] ){
         // "set noXXX" form

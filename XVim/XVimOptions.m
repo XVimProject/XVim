@@ -21,6 +21,7 @@
 @synthesize incsearch = _incsearch;
 @synthesize gdefault = _gdefault;
 @synthesize smartcase = _smartcase;
+@synthesize guioptions = _guioptions;
 
 - (id)init{
     if( self = [super init] ){
@@ -42,6 +43,7 @@
         _incsearch = YES;
 		_gdefault = NO;
 		_smartcase = NO;
+		_guioptions = @"rb";
     }
     return self;
 }

@@ -285,6 +285,9 @@
 - (BOOL)becomeFirstResponder;
 - (BOOL)becomeFirstResponder_;
 
-
+- (void)observeValueForKeyPath_:(NSString *)keyPath 
+					   ofObject:(id)object 
+						 change:(NSDictionary *)change 
+						context:(void *)context;
 
 @end

@@ -110,7 +110,18 @@ The dot command ('.') is supported.
   [no]incsearch |
   [no]gdefault |
   [no]smartcase |
+  guioptions | See below
 
+## guioptions
+
+A limited subset of Vim options is implemented.
+
+Option | Effect
+-------|--------
+r | Show vertical scrollbar
+b | Show horizontal scrollbar
+
+These changes only take effect on startup, meaning this option is only effective if used from within your .xvimrc.
 
 ## Key mapping
 
@@ -136,6 +147,7 @@ Example:
 
     set ignorecase
     set wrapscan
+    set guioptions=r
     nmap n e
 
 # Known problems
