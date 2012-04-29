@@ -7,9 +7,8 @@
 //
 
 #import "XVimSearch.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "NSString+VimHelper.h"
-#import "DVTSourceTextView.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimOptions.h"
@@ -98,7 +97,7 @@
 	
 	XVimOptions *options = [[XVim instance] options];
 
-    DVTSourceTextView* srcView = [window sourceView];
+    XVimSourceView* srcView = [window sourceView];
     NSUInteger search_base = from;
     NSRange found = {NSNotFound, 0};
 
@@ -152,7 +151,7 @@
     // optimization is warranted until slowness is experienced at the user level.
 	XVimOptions *options = [[XVim instance] options];
 	
-    DVTSourceTextView* srcView = [window sourceView];
+    XVimSourceView* srcView = [window sourceView];
     NSUInteger search_base = from;
     NSRange found = {NSNotFound, 0};
     
@@ -218,7 +217,7 @@
 
 - (NSRange)searchCurrentWordFrom:(NSUInteger)from forward:(BOOL)forward matchWholeWord:(BOOL)wholeWord inWindow:(XVimWindow*)window
 {
-    NSTextView *view = (NSTextView*)[window sourceView];
+    XVimSourceView *view = [window sourceView];
 
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
@@ -294,7 +293,7 @@
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
     
-    NSTextView* srcView = (NSTextView*)[window sourceView];
+    XVimSourceView* srcView = [window sourceView];
     NSRange found = {NSNotFound, 0};
     
     
@@ -403,9 +402,9 @@
 	
 	// Move cursor and show the found string
     if(valid) {
-		NSTextView* srcView = [window sourceView];
+		XVimSourceView* srcView = [window sourceView];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-		[srcView scrollTo:[window cursorLocation]];
+		[srcView scrollTo:[window insertionPoint]];
         [srcView showFindIndicatorForRange:found];
     }else{
         [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", self.lastSearchDisplayString] ringBell:TRUE];

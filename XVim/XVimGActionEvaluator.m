@@ -14,7 +14,7 @@
 #import "XVimMarkMotionEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 
 @implementation XVimGActionEvaluator
 
@@ -40,13 +40,13 @@
 	NSUInteger markLocation = [XVimMarkMotionEvaluator markLocationForMark:@"." inWindow:window];
 	if (markLocation == NSNotFound) { return nil; }
 	
-	DVTSourceTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	
 	NSUInteger insertionPoint = markLocation;
 	[view setSelectedRangeWithBoundsCheck:insertionPoint To:insertionPoint];
     if (!([view isEOF:insertionPoint] || [view isNewLine:insertionPoint]))
 	{
-		[view moveForward:self];
+		[view moveForward];
     } 
 	
 	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];

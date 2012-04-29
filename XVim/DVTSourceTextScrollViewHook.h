@@ -8,6 +8,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface XVimSourceTextScrollView : NSScrollView
+@interface DVTSourceTextScrollViewHook : NSScrollView
 +(void)hook;
 @end

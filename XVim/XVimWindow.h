@@ -11,7 +11,7 @@
 #import "XVimCommandLine.h"
 #import "XVimPlaybackHandler.h"
 
-@class DVTSourceTextView;
+@class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
 
@@ -21,7 +21,7 @@
 
 @property NSInteger tag;
 
-@property(strong) DVTSourceTextView* sourceView;
+@property(strong) XVimSourceView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
 
 @property(retain) XVimCommandLine* commandLine;
@@ -32,9 +32,7 @@
 - (void)clearErrorMessage;
 - (XVimCommandField*)commandField;
 
-- (NSString*)sourceText;
-- (NSRange)selectedRange;
-- (NSUInteger)cursorLocation; // Same as selectedRange.location
+- (NSUInteger)insertionPoint;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (void)beginMouseEvent:(NSEvent*)event;
@@ -58,7 +56,5 @@
 
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
-
-- (void)registerWithScrollView:(NSScrollView*)scrollView;
 
 @end

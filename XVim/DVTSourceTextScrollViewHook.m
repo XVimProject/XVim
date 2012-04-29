@@ -6,13 +6,13 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimSourceTextScrollView.h"
+#import "DVTSourceTextScrollViewHook.h"
 #import "DVTSourceTextScrollView.h"
 #import "Hooker.h"
 #import "Logger.h"
 #import "XVimStatusLine.h"
 
-@implementation XVimSourceTextScrollView
+@implementation DVTSourceTextScrollViewHook
 +(void)hook{
     Class c = NSClassFromString(@"DVTSourceTextScrollView");
     
@@ -46,6 +46,6 @@
     base = [base initWithFrame:frameRect];
     
     [Logger traceView:self depth:0];
-    return (XVimSourceTextScrollView*)base;
+    return (DVTSourceTextScrollViewHook*)base;
 }
 @end

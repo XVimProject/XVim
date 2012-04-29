@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "XVimEditorArea.h"
+#import "DVTEditorAreaHook.h"
 #import "IDEEditorArea.h"
 #import "Hooker.h"
 #import "Logger.h"
@@ -15,7 +15,7 @@
 #import "DVTBorderedView.h"
 #import "DVTChooserView.h"
 
-@implementation XVimEditorArea
+@implementation DVTEditorAreaHook
 /**
  * IDEEditorArea is a area including primary editor and assistant editor and debug area (The view right of the navigator)
  * This class hooks IDEEditorArea and does some works.

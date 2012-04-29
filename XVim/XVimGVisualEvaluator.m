@@ -7,14 +7,13 @@
 //
 
 #import "XVimGVisualEvaluator.h"
-#import "NSTextView+VimMotion.h"
-#import "DVTSourceTextView.h"
+#import "XVimSourceView.h"
 #import "XVimWindow.h"
 
 @implementation XVimGVisualEvaluator
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view lowercaseRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
@@ -22,7 +21,7 @@
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view uppercaseRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
@@ -30,7 +29,7 @@
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view toggleCaseForRange:r];
 	return nil;

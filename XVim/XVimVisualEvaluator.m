@@ -4,14 +4,13 @@
 //
 
 #import "XVimVisualEvaluator.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 #import "XVimEqualEvaluator.h"
 #import "XVimDeleteEvaluator.h"
 #import "XVimYankEvaluator.h"
-#import "DVTSourceTextView.h"
 #import "XVimKeymapProvider.h"
 #import "XVimTextObjectEvaluator.h"
 #import "XVimSelectAction.h"
@@ -130,17 +129,17 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
 {
-    DVTSourceTextView* sourceView = [window sourceView];
+    XVimSourceView* sourceView = [window sourceView];
 	
 	NSUInteger glyphIndex = [self insertionPointInWindow:window];
-	NSRect glyphRect = [[sourceView layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1) inTextContainer:[sourceView textContainer]];
+	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
 	
 	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
 	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
-    DVTSourceTextView* v = [window sourceView];
+    XVimSourceView* v = [window sourceView];
     [v setSelectedRange:NSMakeRange(_insertion, 0)]; // temporarily cancel the current selection
     [v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
@@ -153,7 +152,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 
 - (void)updateSelectionInWindow:(XVimWindow*)window
 {
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     if( _mode == MODE_CHARACTER ){
 		
 		if (_begin <= _insertion)
@@ -183,7 +182,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
         // later
     }
     [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end+1];
-	[view scrollTo:[window cursorLocation]];
+	[view scrollTo:[window insertionPoint]];
 	
 	if (_mode == MODE_CHARACTER) {
 		_operationRange = [window selectedRange];
@@ -287,11 +286,11 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     // the line boundary and then paste the data in.
     // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
     //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
-    NSTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     [self updateSelectionInWindow:window];
     // Keep currently selected string
     NSString* current = [[view string] substringWithRange:[view selectedRange]];
-    [view delete:self];
+    [view deleteText];
     NSUInteger loc = [view selectedRange].location;
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
@@ -300,7 +299,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
             if( [view isBlankLine:loc] && ![view isEOF:loc]){
                 [view setSelectedRange:NSMakeRange(loc+1,0)];
             }else{
-                [view insertNewline:self];
+                [view insertNewline];
             }
         }
         
@@ -326,7 +325,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	[self updateSelectionInWindow:window];
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view lowercaseRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
@@ -335,7 +334,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
 	[self updateSelectionInWindow:window];
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view uppercaseRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
@@ -430,7 +429,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
                                XVimExCommand *excmd = [[XVim instance] excmd];
                                [excmd executeCommand:command inWindow:window];
 
-							   DVTSourceTextView *sourceView = [window sourceView];
+							   XVimSourceView *sourceView = [window sourceView];
                                [sourceView setSelectedRange:NSMakeRange(_insertion, 0)];
                                return nil;
                            }
@@ -445,7 +444,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 	_mode = MODE_LINE;
     [self updateSelectionInWindow:window];
     for( int i = 0; i < [self numericArg]; i++ ){
-        [view shiftRight:self];
+        [view shiftRight];
     }
 	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:_operationRange.location]];
 	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
@@ -454,12 +453,12 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
 	
 	_mode = MODE_LINE;
     [self updateSelectionInWindow:window];
     for( int i = 0; i < [self numericArg]; i++ ){
-        [view shiftLeft:self];
+        [view shiftLeft];
     }
 	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:_operationRange.location]];
 	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
@@ -475,10 +474,10 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 																completion:^ XVimEvaluator* (NSString *command)
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
-							   DVTSourceTextView *sourceView = [window sourceView];
+							   XVimSourceView *sourceView = [window sourceView];
 							   NSRange found = [searcher executeSearch:command 
 															   display:[command substringFromIndex:1]
-																  from:[window cursorLocation] 
+																  from:[window insertionPoint] 
 															  inWindow:window];
 							   //Move cursor and show the found string
 							   if (found.location != NSNotFound) {
@@ -489,7 +488,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
                                        _insertion = found.location + command.length - 1;
                                    }
                                    [self updateSelectionInWindow:window];
-								   [sourceView scrollTo:[window cursorLocation]];
+								   [sourceView scrollTo:[window insertionPoint]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
 								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
@@ -501,10 +500,10 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
                                XVimOptions *options = [[XVim instance] options];
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
-                                   DVTSourceTextView *sourceView = [window sourceView];
+                                   XVimSourceView *sourceView = [window sourceView];
                                    NSRange found = [searcher executeSearch:command 
 																   display:[command substringFromIndex:1]
-																	  from:[window cursorLocation] 
+																	  from:[window insertionPoint] 
 																  inWindow:window];
                                    //Move cursor and show the found string
                                    if (found.location != NSNotFound) {
@@ -538,7 +537,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	[self updateSelectionInWindow:window];
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view selectedRange];
 	[view toggleCaseForRange:r];
 	return nil;

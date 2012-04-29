@@ -7,17 +7,16 @@
 //
 
 #import "XVimWindowEvaluator.h"
-#import "NSTextView+VimMotion.h"
-#import "DVTSourceTextView.h"
-#import "XVimSourceCodeEditor.h"
+#import "XVimSourceView.h"
+#import "Logger.h"
+#import "XVim.h"
+
 #import "IDEEditorModeViewController.h"
 #import "IDEWorkspaceTabController.h"
 #import "IDEEditorMultipleContext.h"
 #import "IDESourceCodeEditor.h"
 #import "IDEEditorGeniusMode.h"
 #import "IDEEditorArea.h"
-#import "Logger.h"
-#import "XVim.h"
 
 @interface XVimWindowEvaluator()
 - (void)addEditorWindow;

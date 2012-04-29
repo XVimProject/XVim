@@ -8,8 +8,7 @@
 
 #import "XVimCharacterSearch.h"
 #import "XVimWindow.h"
-#import "NSTextView+VimMotion.h"
-#import "DVTSourceTextView.h"
+#import "XVimSourceView.h"
 
 @interface XVimCharacterSearch()
 @property (strong) NSString *searchCharacter;
@@ -39,8 +38,8 @@
 
 - (NSUInteger)searchCharacterForwardFrom:(NSUInteger)start inWindow:(XVimWindow*)window
 {
-	NSTextView *view = (NSTextView*)[window sourceView];
-	NSString* s = [[view textStorage] string];
+	XVimSourceView *view = [window sourceView];
+	NSString* s = [view string];
 	NSRange at = NSMakeRange(start, 0); 
 	if (at.location >= s.length-1) {
 		return NSNotFound;
@@ -70,8 +69,8 @@
 
 - (NSUInteger)searchCharacterBackwardFrom:(NSUInteger)start inWindow:(XVimWindow*)window
 {
-	NSTextView *view = [window sourceView];
-	NSString* s = [[view textStorage] string];
+	XVimSourceView *view = [window sourceView];
+	NSString* s = [view string];
 	NSRange at = NSMakeRange(start, 0); 
 	if (at.location >= s.length-1) {
 		return NSNotFound;

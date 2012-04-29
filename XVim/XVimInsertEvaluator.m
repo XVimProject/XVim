@@ -7,13 +7,11 @@
 //
 
 #import "XVimInsertEvaluator.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
-#import "DVTSourceTextView.h"
-#import "DVTCompletionController.h"
 #import "XVimKeymapProvider.h"
 #import "XVimVisualEvaluator.h"
 
@@ -89,8 +87,8 @@
 	}
 	else
 	{
-		DVTSourceTextView *sourceView = [window sourceView];
-		[sourceView _drawInsertionPointInRect_:rect color:color];
+		XVimSourceView *sourceView = [window sourceView];
+		[sourceView drawInsertionPointInRect:rect color:color];
 	}
 }
 
@@ -113,7 +111,8 @@
         textRange = NSMakeRange(endRange.location, self.startRange.location - endRange.location);
     }
     
-    NSString *text = [[window sourceText] substringWithRange:textRange];
+	XVimSourceView *sourceView = [window sourceView];
+    NSString *text = [[sourceView string] substringWithRange:textRange];
     return text;
     
 }
@@ -142,7 +141,7 @@
 - (void)willEndHandlerInWindow:(XVimWindow*)window 
 {
 	[super willEndHandlerInWindow:window];
-	DVTSourceTextView *sourceView = [window sourceView];
+	XVimSourceView *sourceView = [window sourceView];
 	
     if( !_insertedEventsAbort ){
         NSString *text = [self getInsertedTextInWindow:window];
@@ -159,7 +158,7 @@
     }else if(self.lastInsertedText.length > 0){
         [xvim.repeatRegister appendText:self.lastInsertedText];
     }
-    [[sourceView completionController] hideCompletions];
+    [sourceView hideCompletions];
 	
 	// Set selection to one-before-where-we-were
 	NSUInteger insertionPoint = [self insertionPointInWindow:window];
@@ -197,8 +196,8 @@
         if (_oneCharMode == TRUE) {
             NSRange save = [[window sourceView] selectedRange];
             for (NSUInteger i = 0; i < [self numericArg]; ++i) {
-                [[window sourceView] deleteForward:self];
-                [[window sourceView] keyDown_:event];
+                [[window sourceView] deleteForward];
+                [[window sourceView] keyDown:event];
                 
                 save.location += 1;
                 [[window sourceView] setSelectedRange:save];
@@ -207,7 +206,7 @@
             [[window sourceView] setSelectedRange:save];
             nextEvaluator = nil;
         } else {
-            [[window sourceView] keyDown_:event];
+            [[window sourceView] keyDown:event];
         }
     }
     

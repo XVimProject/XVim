@@ -12,13 +12,8 @@
 #import "XVimVisualEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
-#import "DVTSourceTextView.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "Logger.h"
-#import "IDEWorkspaceController.h"
-#import "IDEEditorArea.h"
-#import "IDEEditorModeViewController.h"
-#import "XVimSourceTextView.h"
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -72,7 +67,7 @@
 		
 		[self setModeString:[evaluator modeString]];
 		[self setArgumentString:[evaluator argumentDisplayString]];
-		[[self sourceView] updateInsertionPointStateAndRestartTimer:YES];
+		[[self sourceView] updateInsertionPointStateAndRestartTimer];
 	}
 }
 
@@ -84,19 +79,7 @@
     return _localMarks;
 }
 
-- (NSString*)sourceText{
-    return [[self sourceView] string];
-}
-
-- (NSRange)selectedRange{
-    if( [self sourceView] == nil ){
-        return NSMakeRange(0, 0);
-    }else{
-        return [[self sourceView] selectedRange];
-    }
-}
-
-- (NSUInteger)cursorLocation 
+- (NSUInteger)insertionPoint
 {
 	return [[self currentEvaluator] insertionPointInWindow:self];
 }
@@ -276,29 +259,6 @@
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
 {
 	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
-}
-
-- (void)registerWithScrollView:(NSScrollView*)scrollView
-{
-	[scrollView addObserver:self
-				 forKeyPath:@"hasHorizontalScroller"
-					options:NSKeyValueObservingOptionNew
-					context:nil];
-}
-
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-					  ofObject:(id)object 
-						change:(NSDictionary *)change 
-					   context:(void *)context
-{
-	if (keyPath == @"hasHorizontalScroller")
-	{
-		NSScrollView *scrollView = object;
-		if ([scrollView hasHorizontalScroller])
-		{
-			[scrollView setHasHorizontalScroller:NO];
-		}
-	}
 }
 
 @end

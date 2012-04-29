@@ -9,9 +9,8 @@
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimWindow.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "Logger.h"
-#import "DVTSourceTextView.h"
 
 @interface XVimDeleteEvaluator() {
 	BOOL _insertModeAtCompletion;
@@ -46,7 +45,7 @@
     if ([self numericArg] < 1) 
         return nil;
     
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
@@ -61,7 +60,7 @@
     if ([self numericArg] < 1) 
         return nil;
         
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
@@ -109,7 +108,7 @@
 }
 
 - (XVimEvaluator*)j:(XVimWindow*)window{
-    DVTSourceTextView *view = [window sourceView];
+    XVimSourceView *view = [window sourceView];
     NSUInteger from = [view selectedRange].location;
     NSUInteger headOfLine = [view headOfLine:from];
     if (headOfLine != NSNotFound){
@@ -142,7 +141,7 @@
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
-    DVTSourceTextView *view = [window sourceView];
+    XVimSourceView *view = [window sourceView];
     NSUInteger to = [view selectedRange].location;
     NSUInteger endOfLine = [view endOfLine:to];
     if (endOfLine != NSNotFound){
@@ -196,7 +195,7 @@
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     
     BOOL eof = [view isEOF:to];
     BOOL eol = [view isEOL:to];
@@ -210,12 +209,12 @@
         // delete the current line even though it's "behind us" (sort of)
         // this is vi behavior.
         [view setSelectedRange:NSMakeRange(eof && blank ? from - 1 : from, 1)];
-        [view del:self intoYankRegister:_yankRegister];
+        [view deleteTextIntoYankRegister:_yankRegister];
         return nil;
     }
     
     [view selectOperationTargetFrom:from To:to Type:type];
-    [view del:self intoYankRegister:_yankRegister];
+    [view deleteTextIntoYankRegister:_yankRegister];
     
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
@@ -223,15 +222,15 @@
         if( type == LINEWISE ){
             // 'cc' deletes the lines but need to keep the last newline.
             // So insertNewline as 'O' does before entering insert mode
-            if( [view _currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
-                [view moveToBeginningOfLine:self];
-                [view insertNewline:self];
-                [view moveUp:self];
+            if( [view currentLineNumber] == 1 ){    // _currentLineNumber is implemented in DVTSourceTextView
+                [view moveToBeginningOfLine];
+                [view insertNewline];
+                [view moveUp];
             }
             else {
-                [view moveUp:self];
-                [view moveToEndOfLine:self];
-                [view insertNewline:self];
+                [view moveUp];
+                [view moveToEndOfLine];
+                [view insertNewline];
             }
         }
 		else {

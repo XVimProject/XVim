@@ -9,8 +9,7 @@
 #import "XVimSelectAction.h"
 #import "XVimVisualEvaluator.h"
 #import "XVimWindow.h"
-#import "DVTSourceTextView.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 
 @implementation XVimSelectAction
 
@@ -19,7 +18,7 @@
 							 Type:(MOTION_TYPE)type 
 						 inWindow:(XVimWindow*)window
 {
-	NSTextView *view = [window sourceView];
+	XVimSourceView *view = [window sourceView];
 	NSRange r = [view getOperationRangeFrom:from To:to Type:type];
 	return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 												   mode:MODE_CHARACTER 

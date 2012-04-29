@@ -8,13 +8,14 @@
 
 #import "XVimEvaluator.h"
 #import "XVimMotionEvaluator.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 #import "XVimWindow.h"
 #import "XVimKeymapProvider.h"
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
+#import "XVimSourceView.h"
 
 @interface XVimEvaluator() {
 	XVimEvaluatorContext *_context;
@@ -117,12 +118,12 @@
 
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
 {
-	DVTSourceTextView *sourceView = [window sourceView];
+	XVimSourceView *sourceView = [window sourceView];
 	
 	color = [color colorWithAlphaComponent:0.5];
 	NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-	NSUInteger glyphIndex = [[sourceView layoutManager] glyphIndexForPoint:aPoint inTextContainer:[sourceView textContainer]];
-	NSRect glyphRect = [[sourceView layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[sourceView textContainer]];
+	NSUInteger glyphIndex = [sourceView glyphIndexForPoint:aPoint];
+	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
 	
 	[color set];
 	rect.size.width =rect.size.height/2;

@@ -8,10 +8,9 @@
 
 #import "XVimExCommand.h"
 #import "XVimWindow.h"
-#include "XVim.h"
-#include "XVimSearch.h"
-#import "DVTSourceTextView.h"
-#import "NSTextView+VimMotion.h"
+#import "XVim.h"
+#import "XVimSearch.h"
+#import "XVimSourceView.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
@@ -568,7 +567,7 @@
 // This method correnspons parsing part of get_address in ex_cmds.c
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
 {
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     //DVTFoldingTextStorage* storage = [view textStorage];
     //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
@@ -715,7 +714,7 @@
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
 	
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     for(;;){
         NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
         if( NSNotFound == addr ){
@@ -795,7 +794,7 @@
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
-		DVTSourceTextView* srcView = [window sourceView];
+		XVimSourceView* srcView = [window sourceView];
 		
         // Jump to location
         NSUInteger pos = [srcView positionAtLineNumber:exarg.lineBegin column:0];
@@ -807,7 +806,7 @@
             pos_wo_space = pos;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [srcView scrollTo:[window cursorLocation]];
+        [srcView scrollTo:[window insertionPoint]];
         return;
     }
     
@@ -838,7 +837,7 @@
 - (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    DVTSourceTextView* srcView = [window sourceView];
+    XVimSourceView* srcView = [window sourceView];
 	XVimOptions* options = [[XVim instance] options];
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
@@ -891,12 +890,6 @@
 }
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
-    // Write any debug code.
-    [Logger traceView:[[[window sourceView] window] contentView] depth:0];
-    
-    //NSMenu* menu = [NSApp mainMenu];
-    //[self debugMenu:menu :0];
-    //[[_xvim cmdLine] ask:@"teststring" owner:self handler:@selector(test:) option:ASKING_OPTION_NONE]; 
 }
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window

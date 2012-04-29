@@ -7,7 +7,7 @@
 //
 
 #import "XVimGMotionEvaluator.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
@@ -19,7 +19,7 @@
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
     //TODO: Must deal numeric arg as linenumber
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger location = [view nextLine:0 column:0 count:[self numericArg] - 1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE inWindow:window];
 }
@@ -27,7 +27,7 @@
 - (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
 	XVimSearch* searcher = [[XVim instance] searcher];
 	
-	NSUInteger cursorLocation = [window cursorLocation];
+	NSUInteger cursorLocation = [window insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found;
     for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){

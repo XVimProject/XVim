@@ -6,16 +6,17 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "XVimSourceTextView.h"
+#import "DVTSourceTextViewHook.h"
 #import "XVimEvaluator.h"
 #import "XVimWindow.h"
 #import "Hooker.h"
 #import "Logger.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 #import "DVTSourceTextView.h"
+#import "XVimSourceView.h"
 #import "XVimStatusLine.h"
 
-@implementation XVimSourceTextView
+@implementation DVTSourceTextViewHook
 
 + (void)hook
 {
@@ -76,7 +77,7 @@
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
     if (window) 
 	{
 		charRange = [window restrictSelectedRange:charRange];
@@ -87,7 +88,7 @@
 
 -  (void)keyDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
     if( nil == window ){
         [base keyDown_:theEvent];
         return;
@@ -114,7 +115,7 @@
 
 -  (void)mouseDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
 	if (window)
 	{
 		[window beginMouseEvent:theEvent];
@@ -144,7 +145,7 @@
 
 - (void)drawRect:(NSRect)dirtyRect{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
     [base drawRect_:dirtyRect];
 	[window drawRect:dirtyRect];
 }
@@ -164,14 +165,14 @@
 
 - (BOOL)shouldDrawInsertionPoint{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
 	return [window shouldDrawInsertionPoint];
 }
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
 	[window drawInsertionPointInRect:aRect color:aColor];
 	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
 }
@@ -179,7 +180,7 @@
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
 	if (flag)
 	{
 		[window drawInsertionPointInRect:rect color:color];
@@ -189,10 +190,10 @@
 
 - (BOOL)becomeFirstResponder{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [XVimSourceTextView xvimWindowForSourceTextView:base];
+    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
     BOOL b = [base becomeFirstResponder_];
     if( [base becomeFirstResponder_] ){
-        window.sourceView = base;
+        window.sourceView = [[XVimSourceView alloc] initWithSourceView:base];
     }
     return b;
 }

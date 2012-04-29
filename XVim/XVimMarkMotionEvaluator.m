@@ -10,7 +10,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
-#import "NSTextView+VimMotion.h"
+#import "XVimSourceView.h"
 
 @interface XVimMarkMotionEvaluator() {
 	XVimMarkOperator _markOperator;
@@ -48,8 +48,8 @@
 	}
 	
 	NSRange r = [v rangeValue];
-	DVTSourceTextView* view = [window sourceView];
-	NSString* s = [[view textStorage] string];
+	XVimSourceView* view = [window sourceView];
+	NSString* s = [view string];
 	if (r.location > [s length]) {
 		// mark is past end of file do nothing
 		return NSNotFound;

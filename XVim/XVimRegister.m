@@ -10,7 +10,6 @@
 #import "XVimEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimPlaybackHandler.h"
-#import <CoreServices/CoreServices.h>
 
 @interface XVimRegister() {
 	NSRange _selectedRange;

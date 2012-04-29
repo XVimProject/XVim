@@ -7,9 +7,7 @@
 //
 
 #import "XVimEqualEvaluator.h"
-#import "NSTextView+VimMotion.h"
-#import "DVTSourceTextView.h"
-#import "DVTFoldingTextStorage.h"
+#import "XVimSourceView.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimWindow.h"
 #import "Logger.h"
@@ -21,7 +19,7 @@
     if ([self numericArg] < 1) 
         return nil;
     
-    DVTSourceTextView* view = [window sourceView];
+    XVimSourceView* view = [window sourceView];
     NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
@@ -41,13 +39,13 @@
 
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
-	DVTSourceTextView* view = [window sourceView];
+	XVimSourceView* view = [window sourceView];
 	[view selectOperationTargetFrom:from To:to Type:type];
-	[view copy:self];
+	[view copy];
     [[XVim instance] onDeleteOrYank:_yankRegister];
 
 	// Indent
-	[[view textStorage] indentCharacterRange: [view selectedRange] undoManager:[view undoManager]];
+	[view indentCharacterRange: [view selectedRange]];
 	[view setSelectedRange:NSMakeRange(from<to?from:to, 0)];
 	return nil;
 }
