@@ -161,9 +161,16 @@
  **/
 - (void)adjustCursorPosition{
     // If the current cursor position is not valid for normal mode move it.
-    if( ![self isValidCursorPosition:[self selectedRange].location] ){
-        // Here current cursor position is never at 0. We can substract 1.
-        [self setSelectedRange:NSMakeRange([self selectedRange].location-1,0)];
+    if( ![self isValidCursorPosition:[_view selectedRange].location] ){
+        NSRange currentRange = [_view selectedRange];
+        [_view selectPreviousPlaceholder:nil];
+        NSRange prevPlaceHolder = [_view selectedRange];
+        if( currentRange.location != prevPlaceHolder.location && currentRange.location == (prevPlaceHolder.location + prevPlaceHolder.length) ){
+            //The condition here means that just before current insertion point is a placeholder.
+            //So we select the the place holder and its already selected by "selectedPreviousPlaceholder" above
+        }else{
+            [_view setSelectedRange:NSMakeRange(currentRange.location-1, 0)];
+        }
     }
     return;
 }

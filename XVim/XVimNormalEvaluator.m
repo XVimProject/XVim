@@ -759,6 +759,7 @@
     XVimSourceView* view = [window sourceView];
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
+    [view adjustCursorPosition];
     [view scrollTo:[window insertionPoint]];
     return [self withNewContext];
 }

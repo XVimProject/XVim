@@ -290,4 +290,8 @@
 						 change:(NSDictionary *)change 
 						context:(void *)context;
 
+- (NSRange)rangeOfPlaceholderFromCharacterIndex:(unsigned long long)arg1 forward:(BOOL)arg2 wrap:(BOOL)arg3 limit:(unsigned long long)arg4;
+- (void)selectFirstPlaceholderInCharacterRange:(NSRange)newRange; // This is completing text view method.
+- (void)selectPreviousPlaceholder:(id)arg1;
+
 @end
