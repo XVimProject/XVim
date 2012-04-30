@@ -187,9 +187,9 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 	[view scrollTo:[window insertionPoint]];
 	
 	if (_mode == MODE_CHARACTER) {
-		_operationRange = [window selectedRange];
+		_operationRange = [[window sourceView] selectedRange];
 	} else {
-		NSRange selectedRange = [window selectedRange];
+		NSRange selectedRange = [[window sourceView] selectedRange];
 		NSUInteger startLine = [view lineNumber:selectedRange.location];
 		NSUInteger endLine = [view lineNumber:selectedRange.location + selectedRange.length];
 		_operationRange = NSMakeRange(startLine, endLine - startLine);

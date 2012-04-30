@@ -69,12 +69,12 @@
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
 	[super becameHandlerInWindow:window];
-    self.startRange = [window selectedRange];
+    self.startRange = [[window sourceView] selectedRange];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
-	NSRange range = [window selectedRange];
+	NSRange range = [[window sourceView] selectedRange];
 	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																			  mode:MODE_CHARACTER 
 																	  withRange:range];
@@ -105,12 +105,13 @@
 }
 
 - (NSString*)getInsertedTextInWindow:(XVimWindow*)window {
-    NSRange endRange = [window selectedRange];
+	NSRange startRange = self.startRange;
+    NSRange endRange = [[window sourceView] selectedRange];
     NSRange textRange;
-    if (endRange.location > self.startRange.location){
-        textRange = NSMakeRange(self.startRange.location, endRange.location - self.startRange.location);
+    if (endRange.location > startRange.location){
+        textRange = NSMakeRange(startRange.location, endRange.location - startRange.location);
     }else{
-        textRange = NSMakeRange(endRange.location, self.startRange.location - endRange.location);
+        textRange = NSMakeRange(endRange.location, startRange.location - endRange.location);
     }
     
 	XVimSourceView *sourceView = [window sourceView];
@@ -137,7 +138,7 @@
     }
     
     // Store off the new start range
-    self.startRange = [window selectedRange];
+    self.startRange = [[window sourceView] selectedRange];
 }
 
 - (void)willEndHandlerInWindow:(XVimWindow*)window 
@@ -190,7 +191,7 @@
         self.movementKeyPressed = NO;
         
         // Store off the new start range
-        self.startRange = [window selectedRange];
+        self.startRange = [[window sourceView] selectedRange];
     }
     
     if (nextEvaluator != nil){

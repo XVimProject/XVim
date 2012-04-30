@@ -92,7 +92,7 @@
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
-	NSRange range = [window selectedRange];
+	NSRange range = [[window sourceView] selectedRange];
 	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																											mode:MODE_CHARACTER 
 																									withRange:range];
