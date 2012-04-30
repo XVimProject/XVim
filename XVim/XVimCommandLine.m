@@ -96,11 +96,6 @@
     [_static setStringValue:string];
 }
 
-- (void)setStaticString:(NSString*)string
-{
-	[_static setStringValue:string];
-}
-
 - (void)setArgumentString:(NSString*)string{
     [_argument setStringValue:string];
 }

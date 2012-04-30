@@ -23,6 +23,7 @@
 	XVimKeymapContext* _keymapContext;
 	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	BOOL _handlingMouseEvent;
+	NSString *_staticString;
 }
 - (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 - (void)setArgumentString:(NSString*)string;
@@ -36,6 +37,7 @@
 - (id) initWithFrame:(NSRect)frameRect{
     if (self = [super initWithFrame:frameRect]) {
         _tag = XVIM_TAG;
+		_staticString = @"";
 		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
 		_keymapContext = [[XVimKeymapContext alloc] init];
@@ -68,7 +70,7 @@
 		
 		[_keymapContext clear];
 		
-		[self setModeString:[evaluator modeString]];
+		[self setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
 		[self setArgumentString:[evaluator argumentDisplayString]];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer];
 	}
@@ -155,8 +157,7 @@
 
 - (void)setStaticString:(NSString*)string
 {
-	XVimCommandLine *commandLine = self.commandLine;
-	[commandLine setStaticString:string];
+	_staticString = [string copy];
 }
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
