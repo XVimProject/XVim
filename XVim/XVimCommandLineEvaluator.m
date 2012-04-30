@@ -8,6 +8,7 @@
 
 #import "XVimCommandLineEvaluator.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 #import "XVimKeymapProvider.h"
 #import "XVimWindow.h"
 #import "XVimCommandField.h"

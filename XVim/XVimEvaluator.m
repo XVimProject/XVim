@@ -9,13 +9,13 @@
 #import "XVimEvaluator.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 #import "XVimWindow.h"
 #import "XVimKeymapProvider.h"
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
-#import "XVimSourceView.h"
 
 @interface XVimEvaluator() {
 	XVimEvaluatorContext *_context;

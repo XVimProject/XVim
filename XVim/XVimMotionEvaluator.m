@@ -19,6 +19,8 @@
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
 
 

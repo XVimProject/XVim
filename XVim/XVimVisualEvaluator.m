@@ -5,6 +5,8 @@
 
 #import "XVimVisualEvaluator.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"

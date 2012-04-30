@@ -13,6 +13,8 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "XVimOptions.h"
 #import "Logger.h"
 

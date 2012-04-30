@@ -21,6 +21,8 @@
 #import "XVimGActionEvaluator.h"
 #import "XVimMarkSetEvaluator.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"

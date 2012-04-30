@@ -11,6 +11,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 
 @interface XVimMarkMotionEvaluator() {
 	XVimMarkOperator _markOperator;

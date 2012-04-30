@@ -10,6 +10,8 @@
 #import "XVimInsertEvaluator.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "Logger.h"
 
 @interface XVimDeleteEvaluator() {

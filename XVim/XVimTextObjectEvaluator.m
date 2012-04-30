@@ -9,6 +9,7 @@
 #import "XVimTextObjectEvaluator.h"
 #import "XVimOperatorAction.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymapProvider.h"

@@ -9,6 +9,7 @@
 #import "XVimCharacterSearch.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 
 @interface XVimCharacterSearch()
 @property (strong) NSString *searchCharacter;

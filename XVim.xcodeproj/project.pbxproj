@@ -59,6 +59,8 @@
 		C3E8F11815427AE6007410ED /* XVimArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F11715427AE6007410ED /* XVimArgumentEvaluator.m */; };
 		C3EC83091534355600F84712 /* XVimSelectAction.m in Sources */ = {isa = PBXBuildFile; fileRef = C3EC83081534355600F84712 /* XVimSelectAction.m */; };
 		C3FA1A1D1532648700059BF6 /* XVimWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FA1A1C1532648700059BF6 /* XVimWindow.m */; };
+		C3FD41DC154E7E3400B076DB /* XVimSourceView+Vim.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */; };
+		C3FD41E0154E822300B076DB /* XVimSourceView+Xcode.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FD41DF154E822300B076DB /* XVimSourceView+Xcode.m */; };
 		F100DC2E150BB6BC002C703C /* XVimRegisterEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */; };
 		F15805C71530B4000031175A /* XVimWindowEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F15805C61530B4000031175A /* XVimWindowEvaluator.m */; };
 		F17D013B150861DC00A8111B /* XVimRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = F17D013A150861DC00A8111B /* XVimRegister.m */; };
@@ -201,6 +203,10 @@
 		C3EC83081534355600F84712 /* XVimSelectAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimSelectAction.m; path = XVim/XVimSelectAction.m; sourceTree = SOURCE_ROOT; };
 		C3FA1A1B1532648700059BF6 /* XVimWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimWindow.h; path = XVim/XVimWindow.h; sourceTree = SOURCE_ROOT; };
 		C3FA1A1C1532648700059BF6 /* XVimWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimWindow.m; path = XVim/XVimWindow.m; sourceTree = SOURCE_ROOT; };
+		C3FD41DA154E7E3400B076DB /* XVimSourceView+Vim.h */ = {isa = PBXFileReference; fileEncoding = 4; name = "XVimSourceView+Vim.h"; path = "XVim/XVimSourceView+Vim.h"; sourceTree = SOURCE_ROOT; };
+		C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimSourceView+Vim.m"; path = "XVim/XVimSourceView+Vim.m"; sourceTree = SOURCE_ROOT; };
+		C3FD41DE154E822300B076DB /* XVimSourceView+Xcode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XVimSourceView+Xcode.h"; path = "XVim/XVimSourceView+Xcode.h"; sourceTree = SOURCE_ROOT; };
+		C3FD41DF154E822300B076DB /* XVimSourceView+Xcode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimSourceView+Xcode.m"; path = "XVim/XVimSourceView+Xcode.m"; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegisterEvaluator.m; path = XVim/XVimRegisterEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F11C83E71539F1BF00719D68 /* IDEEditorGeniusMode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEEditorGeniusMode.h; path = XVim/IDEEditorGeniusMode.h; sourceTree = SOURCE_ROOT; };
@@ -424,6 +430,8 @@
 				A2A6BA2C152A544B00F0EB5F /* XVimSearch.h */,
 				A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */,
 				A2F4A34014F00B35006DA5A5 /* Evaluators */,
+				C3FD41DA154E7E3400B076DB /* XVimSourceView+Vim.h */,
+				C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */,
 			);
 			name = Vim;
 			sourceTree = "<group>";
@@ -450,6 +458,8 @@
 				A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */,
 				C3C1073F154D07F000C49741 /* XVimWindowManager.h */,
 				C3C10740154D07F000C49741 /* XVimWindowManager.m */,
+				C3FD41DE154E822300B076DB /* XVimSourceView+Xcode.h */,
+				C3FD41DF154E822300B076DB /* XVimSourceView+Xcode.m */,
 			);
 			name = "Xcode+Vim";
 			sourceTree = "<group>";
@@ -609,6 +619,8 @@
 				A2C05D9A154AE9A400ACCDDC /* DVTSourceTextScrollViewHook.m in Sources */,
 				C345DDBB154CE12A009F232E /* XVimHookManager.m in Sources */,
 				C3C10741154D07F000C49741 /* XVimWindowManager.m in Sources */,
+				C3FD41DC154E7E3400B076DB /* XVimSourceView+Vim.m in Sources */,
+				C3FD41E0154E822300B076DB /* XVimSourceView+Xcode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -9,6 +9,7 @@
 #import "XVimYankEvaluator.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 #import "Logger.h"
 #import "XVim.h"
 

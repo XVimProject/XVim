@@ -8,6 +8,7 @@
 
 #import "XVimGVisualEvaluator.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 #import "XVimWindow.h"
 
 @implementation XVimGVisualEvaluator

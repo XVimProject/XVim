@@ -9,6 +9,7 @@
 #import "XVimUppercaseEvaluator.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 
 @implementation XVimUppercaseEvaluator
 

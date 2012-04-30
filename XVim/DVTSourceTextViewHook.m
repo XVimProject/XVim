@@ -200,7 +200,7 @@
     XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
     BOOL b = [base becomeFirstResponder_];
     if( [base becomeFirstResponder_] ){
-        window.sourceView = [[XVimSourceView alloc] initWithSourceView:base];
+        window.sourceView = [[XVimSourceView alloc] initWithView:base];
     }
     return b;
 }

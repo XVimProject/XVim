@@ -10,6 +10,7 @@
 #import "XVimVisualEvaluator.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
 
 @implementation XVimSelectAction
 
