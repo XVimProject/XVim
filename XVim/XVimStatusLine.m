@@ -45,13 +45,13 @@
     [super dealloc];
 }
 
-#define STATUS_LINE_HEIGHT 18
+#define STATUS_LINE_HEIGHT 18 
 - (void)layoutStatus:(NSView*)container{
     [Logger traceView:container depth:0];
     NSRect parent = [container frame];
     [self setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_background setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
-    [_status setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
+    [_status setFrame:NSMakeRect(0, -2, parent.size.width, STATUS_LINE_HEIGHT)];
     // This is heuristic way...
     if( [NSStringFromClass([container class]) isEqualToString:@"IDEComparisonEditorAutoLayoutView"] ){
         // Nothing ( Maybe AutoLayout view does the job "automatically")
