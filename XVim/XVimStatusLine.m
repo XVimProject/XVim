@@ -28,6 +28,7 @@
         [_background setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
         _status = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
         _status.backgroundColor = [NSColor clearColor];
+        [_status setEditable:NO];
         
         [self addSubview:_background];
         [self addSubview:_status];
