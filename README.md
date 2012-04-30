@@ -29,7 +29,7 @@ Delete the following directory:
 
 Feature list
 =============
-See separate FeatureList.md
+See separate [FeatureList.md](https://github.com/JugglerShu/XVim/blob/master/Documents/Users/FeatureList.md)
 
 Support Xcode Versions
 =============
