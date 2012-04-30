@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "DVTSourceCodeEditorHook.h"
+#import "IDESourceCodeEditorHook.h"
 #import "IDESourceCodeEditor.h"
 #import "XVimWindow.h"
 #import "Hooker.h"
@@ -14,7 +14,7 @@
 #import "XVimStatusLine.h"
 #import "XVimWindowManager.h"
 
-@implementation DVTSourceCodeEditorHook
+@implementation IDESourceCodeEditorHook
 
 + (void) hook
 {

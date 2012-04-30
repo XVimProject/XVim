@@ -7,19 +7,21 @@
 //
 
 #import "XVimHookManager.h"
-#import "DVTEditorAreaHook.h"
+#import "IDEEditorAreaHook.h"
 #import "DVTSourceTextViewHook.h"
-#import "DVTSourceCodeEditorHook.h"
+#import "IDESourceCodeEditorHook.h"
 #import "DVTSourceTextScrollViewHook.h"
+#import "IDEEditorHook.h"
 
 @implementation XVimHookManager
 
 + (void)hook
 {
-    [DVTEditorAreaHook hook];
+    [IDEEditorAreaHook hook];
 	[DVTSourceTextViewHook hook];
-	[DVTSourceCodeEditorHook hook];
-    [DVTSourceTextScrollViewHook hook];
+	[IDESourceCodeEditorHook hook];
+    //[DVTSourceTextScrollViewHook hook];
+    [IDEEditorHook hook];
 }
 
 @end

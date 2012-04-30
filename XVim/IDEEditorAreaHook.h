@@ -1,12 +1,14 @@
 //
-//  XVimSourceCodeEditor.h
+//  XVimEditorArea.h
 //  XVim
 //
-//  Created by Tomas Lundell on 31/03/12.
+//  Created by Shuichiro Suzuki on 4/23/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-@interface DVTSourceCodeEditorHook : NSObject
+
+@interface IDEEditorAreaHook : NSObject
 + (void)hook;
+
 @end

@@ -14,31 +14,9 @@
 
 @implementation DVTSourceTextScrollViewHook
 +(void)hook{
-    Class c = NSClassFromString(@"DVTSourceTextScrollView");
-    
-    // Hook setSelectedRange:
-    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(viewDidMoveToSuperview_)];
+    //Class c = NSClassFromString(@"DVTSourceTextScrollView");
 }
 
-- (void)viewDidMoveToSuperview{
-    // I do not like use this method to insert status line.
-    // But this is easier.
-    // Idealy we should hook IDESourceCodeEditor and IDEComparisonEditor respectively.
-    // They are view controllers for source code editors.
-    // Their view structers are a little different so we have to write code to layout the views for each of them.
-    // Maybe later.
-    DVTSourceTextScrollView* base = (DVTSourceTextScrollView*)self;
-    [base viewDidMoveToSuperview_];
-    // Add status line
-    NSView* container = [self superview];
-    if( [container viewWithTag:XVIM_STATUSLINE_TAG] == nil ){
-        [container setPostsFrameChangedNotifications:YES];
-        XVimStatusLine* status = [[[XVimStatusLine alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)] autorelease];
-        [[NSNotificationCenter defaultCenter] addObserver:status selector:@selector(didContainerFrameChanged:) name:NSViewFrameDidChangeNotification object:container];
-        [container addSubview:status];
-        [status layoutStatus:container];
-    }
-}
 
 // I tried to hook this method to install status line but did not work
 - (id)initWithFrame:(NSRect)frameRect{

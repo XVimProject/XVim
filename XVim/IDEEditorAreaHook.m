@@ -6,7 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "DVTEditorAreaHook.h"
+#import "IDEEditorAreaHook.h"
 #import "IDEEditorArea.h"
 #import "Hooker.h"
 #import "Logger.h"
@@ -15,7 +15,7 @@
 #import "DVTBorderedView.h"
 #import "DVTChooserView.h"
 
-@implementation DVTEditorAreaHook
+@implementation IDEEditorAreaHook
 /**
  * IDEEditorArea is a area including primary editor and assistant editor and debug area (The view right of the navigator)
  * This class hooks IDEEditorArea and does some works.
@@ -54,7 +54,6 @@
             DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
             // We need to know if border view is hidden or not to place editors and command line correctly.
             [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
-            
             //NSView* view = [[layoutView subviews] objectAtIndex:0];
             
         }
@@ -68,6 +67,8 @@
         cmd.commandField.delegate = window;
         [layoutView addSubview:window];
     }
+    
+    
 }
 
 @end

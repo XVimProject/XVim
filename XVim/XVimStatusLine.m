@@ -9,6 +9,7 @@
 #import "XVimStatusLine.h"
 #import "DVTChooserView.h"
 #import "IDESourceCodeEditor.h"
+#import "Logger.h"
 
 
 @implementation XVimStatusLine{
@@ -46,11 +47,19 @@
 
 #define STATUS_LINE_HEIGHT 18
 - (void)layoutStatus:(NSView*)container{
+    [Logger traceView:container depth:0];
     NSRect parent = [container frame];
     [self setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_background setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_status setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
-    [[[container subviews] objectAtIndex:0] setFrame:NSMakeRect(0, STATUS_LINE_HEIGHT, parent.size.width, parent.size.height-STATUS_LINE_HEIGHT)];
+    // This is heuristic way...
+    if( [NSStringFromClass([container class]) isEqualToString:@"IDEComparisonEditorAutoLayoutView"] ){
+        // Nothing ( Maybe AutoLayout view does the job "automatically")
+    }else{
+        if( [container subviews].count > 0 ){
+            [[[container subviews] objectAtIndex:0] setFrame:NSMakeRect(0, STATUS_LINE_HEIGHT, parent.size.width, parent.size.height-STATUS_LINE_HEIGHT)];
+        }
+    }
 }
     
 - (void)didContainerFrameChanged:(NSNotification*)notification{
@@ -60,6 +69,13 @@
     [self layoutStatus:container];
      
 }
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    if( [keyPath isEqualToString:@"document"] ){
+        [_status setString:[[[object document] fileURL] path]];
+    }
+}
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     // Drawing code here.
