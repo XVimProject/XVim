@@ -23,11 +23,13 @@
 - (void)didSetupEditor{
     IDEEditor* editor = (IDEEditor*)self;
     [editor didSetupEditor_];
-    NSView* container;
+    NSView* container = nil;
     if( [NSStringFromClass([editor class]) isEqualToString:@"IDESourceCodeComparisonEditor"] ){
         container = [editor layoutView];
     }else{
-        container = [editor containerView];
+        if ([editor respondsToSelector:@selector(containerView)]) {
+            container = [editor containerView];
+        }
     }
     if( container != nil && [container viewWithTag:XVIM_STATUSLINE_TAG] == nil ){
         [container setPostsFrameChangedNotifications:YES];
