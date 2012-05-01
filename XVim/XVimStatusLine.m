@@ -11,6 +11,7 @@
 #import "IDESourceCodeEditor.h"
 #import "Logger.h"
 
+#define STATUS_LINE_HEIGHT 18 
 
 @implementation XVimStatusLine{
     DVTChooserView* _background;
@@ -26,7 +27,7 @@
         _background = [[NSClassFromString(@"DVTChooserView") performSelector:@selector(alloc)] init];
         _background.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
         [_background setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
-        _status = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
+        _status = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
         _status.backgroundColor = [NSColor clearColor];
         [_status setEditable:NO];
         
@@ -46,9 +47,7 @@
     [super dealloc];
 }
 
-#define STATUS_LINE_HEIGHT 18 
 - (void)layoutStatus:(NSView*)container{
-    [Logger traceView:container depth:0];
     NSRect parent = [container frame];
     [self setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_background setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
