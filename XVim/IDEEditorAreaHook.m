@@ -7,13 +7,12 @@
 //
 
 #import "IDEEditorAreaHook.h"
-#import "IDEEditorArea.h"
+#import "IDEKit.h"
 #import "Hooker.h"
 #import "Logger.h"
 #import "XVimCommandLine.h"
 #import "XVimWindow.h"
-#import "DVTBorderedView.h"
-#import "DVTChooserView.h"
+#import "DVTKit.h"
 
 @implementation IDEEditorAreaHook
 /**

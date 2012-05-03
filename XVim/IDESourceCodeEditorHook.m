@@ -7,7 +7,7 @@
 //
 
 #import "IDESourceCodeEditorHook.h"
-#import "IDESourceCodeEditor.h"
+#import "IDEKit.h"
 #import "XVimWindow.h"
 #import "Hooker.h"
 #import "Logger.h"

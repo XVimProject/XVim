@@ -7,8 +7,7 @@
 //
 
 #import "XVimSourceView+Xcode.h"
-#import "DVTSourceTextView.h"
-#import "DVTFoldingTextStorage.h"
+#import "DVTKit.h"
 
 @implementation XVimSourceView(Xcode)
 

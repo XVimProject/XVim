@@ -10,11 +10,7 @@
 #import "XVimCommandField.h"
 #import "Logger.h"
 #import "XVimWindow.h"
-#import "DVTSourceTextView.h"
-#import "DVTFoldingTextStorage.h"
-#import "DVTFontAndColorsTheme.h"
-#import "DVTChooserView.h"
-#import "DVTFondAndColorTheme.h"
+#import "DVTKit.h"
 
 #define COMMAND_FIELD_HEIGHT 18.0
 

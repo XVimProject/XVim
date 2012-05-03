@@ -11,5 +11,5 @@ OutDir = "XcodeClasses/"
 
 LibraryPaths.each{|file|
 	output = OutDir + File.basename(file, ".*")
-	puts `class-dump -C "DVT.*|IDE.*" #{XcodePath}#{file} > #{output}.h`
+	puts `class-dump -I -C "DVT.*|IDE.*" #{XcodePath}#{file} > #{output}.h`
 }

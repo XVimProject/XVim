@@ -8,12 +8,7 @@
 
 #import "XVimWindowManager.h"
 
-#import "IDEEditorModeViewController.h"
-#import "IDEWorkspaceTabController.h"
-#import "IDEEditorMultipleContext.h"
-#import "IDESourceCodeEditor.h"
-#import "IDEEditorGeniusMode.h"
-#import "IDEEditorArea.h"
+#import "IDEKit.h"
 
 static XVimWindowManager *_instance = nil;
 

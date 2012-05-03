@@ -7,8 +7,8 @@
 //
 
 #import "XVimStatusLine.h"
-#import "DVTChooserView.h"
-#import "IDESourceCodeEditor.h"
+#import "DVTKit.h"
+#import "IDEKit.h"
 #import "Logger.h"
 
 #define STATUS_LINE_HEIGHT 18 

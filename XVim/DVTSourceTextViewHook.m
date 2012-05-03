@@ -12,7 +12,7 @@
 #import "Hooker.h"
 #import "Logger.h"
 #import "XVimSourceView.h"
-#import "DVTSourceTextView.h"
+#import "DVTKit.h"
 #import "XVimSourceView.h"
 #import "XVimStatusLine.h"
 #import "XVim.h"
