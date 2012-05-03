@@ -28,10 +28,15 @@
             NSString* numStr = [keyStr substringFromIndex:3];
             NSUInteger n = (NSUInteger)[numStr integerValue]; 
 			NSUInteger newHead = [numericArgHead unsignedIntegerValue];
-            newHead*=10; //FIXME: consider integer overflow
-            newHead+=n;
-			[context setNumericArgHead:newHead];
-			[context appendArgument:numStr];
+            // prevent integer overflow
+            if(newHead <= floor(UINT_MAX/10)){
+                newHead*=10; 
+                newHead+=n;
+                [context setNumericArgHead:newHead];
+                [context appendArgument:numStr];
+            }
+            
+			
 			
             return self;
         }
