@@ -7,7 +7,12 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import "IDEKit.h"
 
 @interface IDEEditorHook : NSViewController
 +(void) hook;
+@end
+
+@interface IDEEditor(Hook)
+- (void)didSetupEditor_;
 @end

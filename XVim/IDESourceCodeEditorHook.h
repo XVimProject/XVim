@@ -7,6 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "IDESourceEditor.h"
 @interface IDESourceCodeEditorHook : NSObject
 + (void)hook;
+@end
+
+@interface IDESourceCodeEditor(Hook)
+- (id)initWithNibName_:nibName bundle:nibBundle document:nibDocument;
 @end

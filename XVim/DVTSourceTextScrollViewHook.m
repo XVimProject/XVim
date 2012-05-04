@@ -19,11 +19,15 @@
 
 
 // I tried to hook this method to install status line but did not work
+// This is not currently 
 - (id)initWithFrame:(NSRect)frameRect{
+    /*
     DVTSourceTextScrollView* base = (DVTSourceTextScrollView*)self;
     base = [base initWithFrame:frameRect];
     
     [Logger traceView:self depth:0];
     return (DVTSourceTextScrollViewHook*)base;
+     */
+    return nil;
 }
 @end

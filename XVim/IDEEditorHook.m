@@ -8,6 +8,7 @@
 
 #import "IDEEditorHook.h"
 #import "IDEKit.h"
+#import "IDESourceEditor.h"
 #import "Hooker.h"
 #import "Logger.h"
 #import "XVimStatusLine.h"
@@ -26,10 +27,10 @@
     
     NSView* container = nil;
     if( [NSStringFromClass([editor class]) isEqualToString:@"IDESourceCodeComparisonEditor"] ){
-        container = [editor layoutView];
+        container = [(IDESourceCodeComparisonEditor*)editor layoutView];
     }
     else if( [NSStringFromClass([editor class]) isEqualToString:@"IDESourceCodeEditor"] ){
-        container = [editor containerView];
+        container = [(IDESourceCodeEditor*)editor containerView];
     }else{
         return;
     }

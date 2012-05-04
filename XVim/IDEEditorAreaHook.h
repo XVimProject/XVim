@@ -7,8 +7,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "IDEKit.h"
 
 @interface IDEEditorAreaHook : NSObject
 + (void)hook;
+@end
 
+
+@interface IDEEditorArea(Hook)
+- (void)viewDidInstall_;
 @end

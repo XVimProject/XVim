@@ -7,6 +7,7 @@
 //
 
 #import "XVimSourceView+Xcode.h"
+#import "DVTSourceTextViewHook.h"
 #import "DVTKit.h"
 
 @implementation XVimSourceView(Xcode)
@@ -19,7 +20,7 @@
 - (NSUInteger)columnNumber:(NSUInteger)index
 {
 	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[[self xview] textStorage];
-	return [textStorage columnForPositionConvertingTabs:index];
+	return (NSUInteger)[textStorage columnForPositionConvertingTabs:index];
 }
 
 - (long long)currentLineNumber

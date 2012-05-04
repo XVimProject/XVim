@@ -29,11 +29,9 @@
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
 		A2C05D9A154AE9A400ACCDDC /* DVTSourceTextScrollViewHook.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C05D99154AE9A400ACCDDC /* DVTSourceTextScrollViewHook.m */; };
-		A2C2603F1552E8710060FE4A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2C2603E1552E8700060FE4A /* QuartzCore.framework */; };
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
 		A2D48B1F15347B5C0088AB71 /* NSString+VimHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */; };
-		A2E94CDF1552F37C00AFB702 /* AddressBook.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E94CDE1552F37C00AFB702 /* AddressBook.framework */; };
 		A2F4A33E14F00B25006DA5A5 /* XVimNormalEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */; };
 		A2F4A34314F00BD3006DA5A5 /* XVimVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34214F00BD3006DA5A5 /* XVimVisualEvaluator.m */; };
 		A2F4A34614F00D69006DA5A5 /* XVimSearchLineEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34514F00D69006DA5A5 /* XVimSearchLineEvaluator.m */; };
@@ -134,14 +132,12 @@
 		A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOptions.m; path = XVim/XVimOptions.m; sourceTree = SOURCE_ROOT; };
 		A2C05D98154AE9A400ACCDDC /* DVTSourceTextScrollViewHook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTSourceTextScrollViewHook.h; path = XVim/DVTSourceTextScrollViewHook.h; sourceTree = SOURCE_ROOT; };
 		A2C05D99154AE9A400ACCDDC /* DVTSourceTextScrollViewHook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVTSourceTextScrollViewHook.m; path = XVim/DVTSourceTextScrollViewHook.m; sourceTree = SOURCE_ROOT; };
-		A2C2603E1552E8700060FE4A /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		A2C4E79614E7F35300751199 /* Hooker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hooker.h; path = XVim/Hooker.h; sourceTree = "<group>"; };
 		A2C4E79714E7F35300751199 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim/Hooker.m; sourceTree = "<group>"; };
 		A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEvaluator.h; path = XVim/XVimEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimEvaluator.m; path = XVim/XVimEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2D48B1D15347B5C0088AB71 /* NSString+VimHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+VimHelper.h"; path = "XVim/NSString+VimHelper.h"; sourceTree = SOURCE_ROOT; };
 		A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+VimHelper.m"; path = "XVim/NSString+VimHelper.m"; sourceTree = SOURCE_ROOT; };
-		A2E94CDE1552F37C00AFB702 /* AddressBook.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AddressBook.framework; path = System/Library/Frameworks/AddressBook.framework; sourceTree = SDKROOT; };
 		A2F4A33C14F00B25006DA5A5 /* XVimNormalEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimNormalEvaluator.h; path = XVim/XVimNormalEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimNormalEvaluator.m; path = XVim/XVimNormalEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2F4A34114F00BD3006DA5A5 /* XVimVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimVisualEvaluator.h; path = XVim/XVimVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -225,8 +221,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A2E94CDF1552F37C00AFB702 /* AddressBook.framework in Frameworks */,
-				A2C2603F1552E8710060FE4A /* QuartzCore.framework in Frameworks */,
 				A2420B3E14DDE59B008741DA /* AppKit.framework in Frameworks */,
 				A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */,
 			);
@@ -278,8 +272,6 @@
 		A2B4BABA14D59F6600D817B0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				A2E94CDE1552F37C00AFB702 /* AddressBook.framework */,
-				A2C2603E1552E8700060FE4A /* QuartzCore.framework */,
 				A2B4BABB14D59F6600D817B0 /* Cocoa.framework */,
 				A2B4BABD14D59F6600D817B0 /* Other Frameworks */,
 			);
@@ -688,7 +680,7 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "XVim/XVim-Prefix.pch";
-				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
@@ -702,7 +694,7 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "XVim/XVim-Prefix.pch";
-				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
