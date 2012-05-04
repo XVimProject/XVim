@@ -595,7 +595,15 @@
     }
     return pos; 
 }
-
+void logchar(unichar x, NSString* s);
+void logchar(unichar x, NSString* s){
+    TRACE_LOG(@"%@ character: %c", s, x);
+    TRACE_LOG(@"iswhitespace() = %d", isWhiteSpace(x));
+    TRACE_LOG(@"isnewline() = %d", isNewLine(x));
+    TRACE_LOG(@"isNonBlank() = %d", isNonBlank(x));
+    TRACE_LOG(@"isKeyword() = %d", isKeyword(x));
+//    TRACE_LOG(@"isnewline()", isNewLine(x));
+}
 
 /** 
  From Vim help: word and WORD
@@ -616,7 +624,14 @@
  operator and the last word moved over is at the end of a line, the end of 
  that word becomes the end of the operated text, not the first word in the 
  next line. 
- **/
+this is a tes"(&&. 
+test case 
+}  // something else
+
+test
+case    
+
+**/
 
 /**
  * Returns position of next head of word.
@@ -670,6 +685,8 @@
         //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
         //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
         //    - newline and newline(blankline) 
+        
+        logchar(curChar, @"curChar");
         if( ( [self isEOF:i] ) ||
            ((isWhiteSpace(lastChar) || isNewLine(lastChar)) && isNonBlank(curChar))   ||
            ( opt != BIGWORD && isKeyword(lastChar) && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(curChar))   ||
@@ -692,6 +709,7 @@
         }
         
         if( 0 == count ){
+            TRACE_LOG(@"i = %d", i);
             pos = i;
             break;
         }
