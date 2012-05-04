@@ -105,13 +105,22 @@
 }
 
 - (NSString*)getInsertedTextInWindow:(XVimWindow*)window {
-	NSRange startRange = self.startRange;
-    NSRange endRange = [[window sourceView] selectedRange];
+    XVimSourceView* view = [window sourceView];
+    NSUInteger startLoc = self.startRange.location;
+    NSUInteger endLoc = [view selectedRange].location;
     NSRange textRange;
-    if (endRange.location > startRange.location){
-        textRange = NSMakeRange(startRange.location, endRange.location - startRange.location);
+    // If some text are deleted while editing startLoc could be out of range of the view's string.
+    if( ( startLoc >= [[view string] length] ) ){
+        startLoc = [[view string] length] - 1;
+    }
+    
+    // Is this really what we want to do?
+    // This means just moving cursor forward or backward and escape from insert mode generates the inserted test this method return.
+    //    -> The answer is 'OK'. see onMovementKeyPressed: method how it treats the inserted text.
+    if (endLoc > startLoc ){
+        textRange = NSMakeRange(startLoc, endLoc - startLoc);
     }else{
-        textRange = NSMakeRange(endRange.location, startRange.location - endRange.location);
+        textRange = NSMakeRange(endLoc , startLoc - endLoc);
     }
     
 	XVimSourceView *sourceView = [window sourceView];
@@ -128,6 +137,8 @@
 }
 
 - (void)onMovementKeyPressed:(XVimWindow*)window {
+    // TODO: we also have to handle when cursor is movieng by mouse clicking.
+    //       it should have the same effect on movementKeyPressed property.
     _insertedEventsAbort = YES;
     if (!self.movementKeyPressed){
         self.movementKeyPressed = YES;
