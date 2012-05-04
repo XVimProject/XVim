@@ -157,7 +157,11 @@
     if (from + 1 < [string length] && from > 0){
         unichar curChar = [[[window sourceView] string] characterAtIndex:from];
         unichar nextChar = [[[window sourceView] string] characterAtIndex:from+1];
-        if( [[window sourceView] isBlankLine:from] || (isNonBlank(curChar) != isNonBlank(nextChar)) || (isKeyword(curChar) != isKeyword(nextChar)) || (isWhiteSpace(curChar) && isWhiteSpace(nextChar))){
+        if( [[window sourceView] isBlankLine:from]              ||  // blank line
+            (isNonBlank(curChar) != isNonBlank(nextChar))       ||  // next character is different than current
+            (isKeyword(curChar) != isKeyword(nextChar))         ||  // character != punctuation
+            (isWhiteSpace(curChar) && isWhiteSpace(nextChar))   ||  // both are whitespace.
+            (isWhiteSpace(curChar) && isNewLine(nextChar))){        // whitespace and newline
             // Increase count by one such that the last end of word is properly set
             realCount += 1;
         }

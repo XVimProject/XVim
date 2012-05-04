@@ -96,6 +96,7 @@
  * Determine if the position specified with "index" is EOL.
  **/
 - (BOOL) isEOL:(NSUInteger)index{
+    TRACE_LOG(@"%u", index);
     ASSERT_VALID_RANGE_WITH_EOF(index);
     return [self isEOF:index] == NO && [self isNewLine:index] == NO && [self isNewLine:index+1];
 }
@@ -624,13 +625,6 @@ void logchar(unichar x, NSString* s){
  operator and the last word moved over is at the end of a line, the end of 
  that word becomes the end of the operated text, not the first word in the 
  next line. 
-this is a tes"(&&. 
-test case 
-}  // something else
-
-test
-case    
-
 **/
 
 /**
@@ -653,16 +647,23 @@ case
         return index;
     }
     
+    NSUInteger eolCheck = NSNotFound;
     BOOL newLineStarts = NO;
     NSString* str = [self string];
     unichar lastChar= [str characterAtIndex:index];
     for(NSUInteger i = index+1 ; i <= [[self string] length]; i++ ){
         // Each time we encounter new word decrement "counter".
         // Remember blankline is a word
+        unichar curChar; 
+
         
-        unichar curChar;
         if( ![self isEOF:i] ){
             curChar = [str characterAtIndex:i];
+        }else {
+            //EOF found so return this position.
+            info->lastEndOfLine = i-1;
+            info->lastEndOfWord = i-1;
+            return i-1;
         } 
         
         // End of line is one of following 2 cases. We must keep this to operate 'word' special case.
@@ -686,6 +687,7 @@ case
         //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
         //    - newline and newline(blankline) 
         
+        TRACE_LOG(@"Character at: %u", i);
         logchar(curChar, @"curChar");
         if( ( [self isEOF:i] ) ||
            ((isWhiteSpace(lastChar) || isNewLine(lastChar)) && isNonBlank(curChar))   ||
@@ -701,6 +703,15 @@ case
                 info->isFirstWordInALine = NO;
             }
         }
+        
+        if([self isWhiteSpace:i] && isNonBlank(lastChar)) eolCheck = [self skipWhiteSpace:i];
+        if (eolCheck != NSNotFound && [self isEOL:eolCheck] && i != eolCheck) {
+            TRACE_LOG(@"lastendofline set: %d, to: %c", i-1, [str characterAtIndex:i-1]);
+            info->lastEndOfLine = (i-1 > 0 ? i-1 : 0); 
+            lastChar = [str characterAtIndex:eolCheck-1];
+            curChar = [str characterAtIndex:eolCheck];            
+            eolCheck = NSNotFound;
+        } 
         
         lastChar = curChar;
         if( isNewLine(curChar) && opt == LEFT_RIGHT_NOWRAP ){
