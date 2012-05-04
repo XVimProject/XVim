@@ -68,6 +68,12 @@ static XVim* s_instance = nil;
 
 + (void) load 
 { 
+    NSBundle* app = [NSBundle mainBundle];
+    NSString* identifier = [app bundleIdentifier];
+    
+    if( ![identifier isEqualToString:@"com.apple.dt.Xcode"] ){
+        return;
+    }
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
     TRACE_LOG(@"XVim loaded");
