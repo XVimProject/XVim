@@ -29,7 +29,7 @@
             NSUInteger n = (NSUInteger)[numStr integerValue]; 
 			NSUInteger newHead = [numericArgHead unsignedIntegerValue];
             // prevent integer overflow
-            if(newHead <= floor(NSUIntegerMax/10) - 9){
+            if(newHead <= floor((NSUIntegerMax - n) / 10)){
                 newHead*=10; 
                 newHead+=n;
                 [context setNumericArgHead:newHead];
