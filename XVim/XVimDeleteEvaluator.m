@@ -75,9 +75,9 @@
         XVimWordInfo info;
         NSUInteger from = [[window sourceView] selectedRange].location;
         NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
-        if( info.isFirstWordInALine ){
+        if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
             return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
-        }else{
+        } else {
             if( info.lastEndOfWord != NSNotFound){
                 return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE inWindow:window];   
             }else{
@@ -95,9 +95,9 @@
         XVimWordInfo info;
         NSUInteger from = [[window sourceView] selectedRange].location;
         NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
-        if( info.isFirstWordInALine ){
+        if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
             return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
-        }else{
+        } else {
             if( info.lastEndOfWord != NSNotFound){
                 return [self _motionFixedFrom:from To:info.lastEndOfWord Type:CHARACTERWISE_INCLUSIVE inWindow:window];   
             }else{

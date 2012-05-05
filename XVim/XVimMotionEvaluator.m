@@ -163,9 +163,9 @@
         }
     }
     NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:MOTION_OPTION_NONE info:&info];
-    if (info.isFirstWordInALine){
+    if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
         to = info.lastEndOfLine;
-    }else if( info.lastEndOfWord != NSNotFound){
+    } else if (info.lastEndOfWord != NSNotFound) {
         to = info.lastEndOfWord;
     }
     return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE inWindow:window];
@@ -186,9 +186,9 @@
         }
     }
     NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:BIGWORD info:&info];
-    if (info.isFirstWordInALine){
+    if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
         to = info.lastEndOfLine;
-    }else if( info.lastEndOfWord != NSNotFound){
+    } else if (info.lastEndOfWord != NSNotFound) {
         to = info.lastEndOfWord;
     }
     return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE inWindow:window];
