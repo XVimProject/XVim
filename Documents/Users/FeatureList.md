@@ -24,7 +24,9 @@ gi (insert mode at last insertion point) is supported.
 C-d, C-f, C-u, C-b, zz, zb, zt
 
 ## Jumps
-C-o, C-i
+C-o, C-i, gd
+
+If you want to open the file under the cursor you can use 'gd' instead of 'gf' in XVim environment.
 
 ## Insert
 a, A, i, I, o, O
@@ -67,6 +69,18 @@ Visual block mode is currently not supported.
 
 Regex search is supported using the ICU regex format.
 
+Substitution does not work as Vim does. When you input command following
+
+    :%s/xxxx/yyyy/
+
+XVim does replace the first occurence of xxxx IN THE FILE (not each line ).
+If you want to replace all the occurence of xxxx with yyyy in the file you can specify
+
+    :%s/xxxx/yyyy/g
+    
+Currently replacing first occurence of xxxx with yyyy each line is not available
+
+
 ## Text Object
 
 ib, iB, i(, i), i{, i}, i[, i], i>, i<, i", i', iw, iW
@@ -87,9 +101,6 @@ The dot command ('.') is supported.
   :w[rite] | 
   :wq      | 
   :q[uit]  |
-  :debug   |
-  :run     | This is XVim original command to invoke Xcodes 'run' command
-  :make    | This is XVim original command to invoke Xcodes 'build' command
   :s[ubstitute]|
   :set     | See Options for supported variables
   :map     | Maps globally across XVim, in all modes
@@ -97,6 +108,16 @@ The dot command ('.') is supported.
   :vmap    | Maps visual mode
   :imap    | Maps insert mode
   :omap    | Maps operator pending mode
+
+## XVim original commands
+
+ Command   | Note
+-----------|-----
+  :run     | Invoke Xcode's 'run' command
+  :make    | Invoke Xcode's 'build' command
+  :xhelp   | Show quick help for current insertion point
+  :xccmd   | Invoke arbitrary command in Xcode's actions in its menu. Takes one argument as its action to invoke. Actions [here](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/MenuActionList.txt) are available.
+  
 
 
 ## Options
