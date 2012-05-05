@@ -101,8 +101,6 @@ The dot command ('.') is supported.
   :w[rite] | 
   :wq      | 
   :q[uit]  |
-  :run     | This is XVim original command to invoke Xcodes 'run' command
-  :make    | This is XVim original command to invoke Xcodes 'build' command
   :s[ubstitute]|
   :set     | See Options for supported variables
   :map     | Maps globally across XVim, in all modes
