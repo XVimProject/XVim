@@ -34,19 +34,23 @@
         return;
     }
     
-    if( container != nil && [container viewWithTag:XVIM_STATUSLINE_TAG] == nil ){
-        // Insert status line
-        [container setPostsFrameChangedNotifications:YES];
-        XVimStatusLine* status = [[[XVimStatusLine alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)] autorelease];
-        [container addSubview:status];
+    if (container != nil) {
+		XVimStatusLine *status = [XVimStatusLine associateOf:container];
+		if (status == nil) {
+			// Insert status line
+			[container setPostsFrameChangedNotifications:YES];
+			status = [[[XVimStatusLine alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)] autorelease];
+			[container addSubview:status];
+			[status associateWith:container];
         
-        // Layout
-        [[NSNotificationCenter defaultCenter] addObserver:status selector:@selector(didContainerFrameChanged:) name:NSViewFrameDidChangeNotification object:container];
-        [status layoutStatus:container];
-        [container performSelector:@selector(invalidateLayout)];
-        
-        // To notify contents of editor is changed
-        [editor addObserver:status forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
+			// Layout
+			[[NSNotificationCenter defaultCenter] addObserver:status selector:@selector(didContainerFrameChanged:) name:NSViewFrameDidChangeNotification object:container];
+			[status layoutStatus:container];
+			[container performSelector:@selector(invalidateLayout)];
+			
+			// To notify contents of editor is changed
+			[editor addObserver:status forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
+		}
     }
 }
 @end

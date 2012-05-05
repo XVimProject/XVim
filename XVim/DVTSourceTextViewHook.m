@@ -66,15 +66,6 @@
    keepingOriginalWith:@selector(observeValueForKeyPath_:ofObject:change:context:)];
 }
 
-+ (XVimWindow*)xvimWindowForSourceTextView:(DVTSourceTextView*)view{
-    return [[[view window] contentView] viewWithTag:XVIM_TAG];
-}
-
-+ (XVimStatusLine*)xvimStatusLineForSourceTextView:(DVTSourceTextView*)view{
-    // I think we should have better way to bind source view and its status line...
-    return [[[view enclosingScrollView] superview] viewWithTag:XVIM_STATUSLINE_TAG];
-}
-
 - (void)setSelectedRange:(NSRange)charRange {
     // Call original method
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
@@ -84,7 +75,7 @@
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
     if (window) 
 	{
 		charRange = [window restrictSelectedRange:charRange];
@@ -95,7 +86,7 @@
 
 -  (void)keyDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
     if( nil == window ){
         [base keyDown_:theEvent];
         return;
@@ -122,7 +113,7 @@
 
 -  (void)mouseDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
 	if (window)
 	{
 		[window beginMouseEvent:theEvent];
@@ -152,7 +143,7 @@
 
 - (void)drawRect:(NSRect)dirtyRect{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
     [base drawRect_:dirtyRect];
 	[window drawRect:dirtyRect];
 }
@@ -172,14 +163,14 @@
 
 - (BOOL)shouldDrawInsertionPoint{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
 	return [window shouldDrawInsertionPoint];
 }
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
 	[window drawInsertionPointInRect:aRect color:aColor];
 	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
 }
@@ -187,7 +178,7 @@
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
 	if (flag)
 	{
 		[window drawInsertionPointInRect:rect color:color];
@@ -197,7 +188,7 @@
 
 - (BOOL)becomeFirstResponder{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [DVTSourceTextViewHook xvimWindowForSourceTextView:base];
+    XVimWindow* window = [XVimWindow associateOf:base];
     BOOL b = [base becomeFirstResponder_];
     if( [base becomeFirstResponder_] ){
         window.sourceView = [[XVimSourceView alloc] initWithView:base];
@@ -208,6 +199,13 @@
 - (void)viewDidMoveToSuperview {
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     [base viewDidMoveToSuperview_];
+	
+    // Create XVimWindow object
+    XVimWindow* window = [XVimWindow associateOf:base];
+    if( nil == window ){
+        window = [[[XVimWindow alloc] init] autorelease];
+		[window associateWith:base];
+    }
 	
 	// Hide scroll bars according to options
 	XVimOptions *options = [[XVim instance] options];

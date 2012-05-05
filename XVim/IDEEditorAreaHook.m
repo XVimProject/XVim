@@ -14,6 +14,7 @@
 #import "XVimWindow.h"
 #import "DVTBorderedView.h"
 #import "DVTChooserView.h"
+#import "XVim.h"
 
 @implementation IDEEditorAreaHook
 /**
@@ -42,11 +43,13 @@
     object_getInstanceVariable(self, "_editorAreaAutoLayoutView", (void**)&layoutView); // The view contains editors and border view
     
     // Check if we already have command line in the _editorAreaAutoLayoutView.
-    XVimCommandLine* cmd = (XVimCommandLine*)[layoutView viewWithTag:XVIM_CMDLINE_TAG];
+    XVimCommandLine* cmd = [XVimCommandLine associateOf:layoutView];
     if( nil == cmd ){
-        // We do not have commnad line yet.
+        // We do not have command line yet.
         cmd = [[[XVimCommandLine alloc] init] autorelease];
+		[[XVim instance] setCommandLine:cmd];
         [layoutView addSubview:cmd];
+		
         // This notification is to resize command line view according to the editor area size.
         [[NSNotificationCenter defaultCenter] addObserver:cmd selector:@selector(didFrameChanged:) name:NSViewFrameDidChangeNotification  object:layoutView];
         if( [[layoutView subviews] count] > 0 ){
@@ -58,16 +61,6 @@
             
         }
     }
-    
-    // We need to insert XVimWindow object. It handles all the input to the editors in the tab.
-    NSView* window = [layoutView viewWithTag:XVIM_TAG];
-    if( nil == window ){
-        XVimWindow* window = [[[XVimWindow alloc] init] autorelease];
-        window.commandLine = cmd;
-        cmd.commandField.delegate = window;
-        [layoutView addSubview:window];
-    }
-    
     
 }
 

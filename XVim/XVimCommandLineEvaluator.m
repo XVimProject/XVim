@@ -50,22 +50,24 @@
 
 - (void)takeFocusFromWindow:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [window commandField];
-	[[window window] makeFirstResponder:commandField];
+	XVimCommandField *commandField = [[XVim instance] commandField];
+	[commandField setDelegate:window];
+	[[[[window sourceView] view] window] makeFirstResponder:commandField];
 }
 
 - (void)relinquishFocusToWindow:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [window commandField];
+	XVimCommandField *commandField = [[XVim instance] commandField];
 	[commandField absorbFocusEvent];
-	[[window window] makeFirstResponder:[[window sourceView] view]];
+	[commandField setDelegate:nil];
+	[[[[window sourceView] view] window] makeFirstResponder:[[window sourceView] view]];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
 {
 	XVimEvaluator* next = self;
 	
-	XVimCommandField *commandField = [window commandField];
+	XVimCommandField *commandField = [[XVim instance] commandField];
 	if ([keyStroke instanceResponds:self])
 	{
 		next = [self performSelector:[keyStroke selector] withObject:window];
@@ -108,7 +110,7 @@
 {
 	[super becameHandlerInWindow:window];
 	
-	XVimCommandField *commandField = [window commandField];
+	XVimCommandField *commandField = [[XVim instance] commandField];
     [commandField setString:_firstLetter];
     [commandField moveToEndOfLine:self];
 	[self takeFocusFromWindow:window];
@@ -169,7 +171,7 @@
 
 - (XVimEvaluator*)CR:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [window commandField];
+	XVimCommandField *commandField = [[XVim instance] commandField];
 	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	[_history addEntry:command];
 	return _onComplete(command);
@@ -184,7 +186,7 @@
 
 - (XVimEvaluator*)Up:(XVimWindow*)window
 {
-	XVimCommandField *commandField = window.commandField;
+	XVimCommandField *commandField = [[XVim instance] commandField];
 	XVim *xvim = [XVim instance];
 	
 	if (_historyNo == 0) {
@@ -207,7 +209,7 @@
 
 - (XVimEvaluator*)Down:(XVimWindow*)window
 {
-	XVimCommandField *commandField = window.commandField;
+	XVimCommandField *commandField = [[XVim instance] commandField];
 	XVim *xvim = [XVim instance];
 	
 	if (_historyNo == 0) {

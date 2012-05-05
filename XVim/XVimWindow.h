@@ -15,22 +15,10 @@
 @class XVimEvaluator;
 @class XVimRegister;
 
-#define XVIM_TAG 1209 // This is Shu's birthday!
-
-@interface XVimWindow : NSTextView <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
-
-@property NSInteger tag;
+@interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property(strong) XVimSourceView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
-
-@property(retain) XVimCommandLine* commandLine;
-
-- (void)setModeString:(NSString*)string;
-- (void)setStaticString:(NSString*)string;
-- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
-- (void)clearErrorMessage;
-- (XVimCommandField*)commandField;
 
 - (NSUInteger)insertionPoint;
 
@@ -56,5 +44,8 @@
 
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
+
+- (void)associateWith:(id)object;
++ (XVimWindow*)associateOf:(id)object;
 
 @end

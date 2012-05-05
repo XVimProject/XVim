@@ -10,6 +10,7 @@
 #import "DVTChooserView.h"
 #import "IDESourceCodeEditor.h"
 #import "Logger.h"
+#import <objc/runtime.h>
 
 #define STATUS_LINE_HEIGHT 18 
 
@@ -17,8 +18,6 @@
     DVTChooserView* _background;
     NSTextView* _status;
 }
-
-@synthesize tag;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -33,8 +32,6 @@
         
         [self addSubview:_background];
         [self addSubview:_status];
-        
-        self.tag = XVIM_STATUSLINE_TAG;
     }
     
     return self;
@@ -80,6 +77,18 @@
 {
     // Drawing code here.
     
+}
+
+static char s_associate_key = 0;
+
++ (XVimStatusLine*)associateOf:(id)object
+{
+	return (XVimStatusLine*)objc_getAssociatedObject(object, &s_associate_key);
+}
+
+- (void)associateWith:(id)object
+{
+	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

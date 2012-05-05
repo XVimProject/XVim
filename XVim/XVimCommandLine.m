@@ -15,6 +15,7 @@
 #import "DVTFontAndColorsTheme.h"
 #import "DVTChooserView.h"
 #import "DVTFondAndColorTheme.h"
+#import <objc/runtime.h>
 
 #define COMMAND_FIELD_HEIGHT 18.0
 
@@ -30,8 +31,8 @@
 @end
 
 @implementation XVimCommandLine
-@synthesize tag = _tag;
-- (id) init{
+- (id) init
+{
     self = [super initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
     if (self) {
         [self setBoundsOrigin:NSMakePoint(0,0)];
@@ -72,8 +73,6 @@
         [[_argument cell] setFocusRingType:NSFocusRingTypeNone];
         [_argument setBackgroundColor:[NSColor clearColor]];
         [self addSubview:_argument];
-        
-        self.tag = XVIM_CMDLINE_TAG;
         
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
     }
@@ -179,4 +178,17 @@
 - (void)fontAndColorSourceTextSettingsChanged:(NSNotification*)notification{
     [self layoutCmdline:[self superview]];
 }
+
+static char s_associate_key = 0;
+
++ (XVimCommandLine*)associateOf:(id)object
+{
+	return (XVimCommandLine*)objc_getAssociatedObject(object, &s_associate_key);
+}
+
+- (void)associateWith:(id)object
+{
+	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
+}
+
 @end
