@@ -108,7 +108,11 @@
     XVimSourceView* view = [window sourceView];
     NSUInteger startLoc = self.startRange.location;
     NSUInteger endLoc = [view selectedRange].location;
-    NSRange textRange;
+    NSRange textRange = NSMakeRange(NSNotFound, 0);
+    
+    if( [[view string] length] == 0 ){
+        return @"";
+    }
     // If some text are deleted while editing startLoc could be out of range of the view's string.
     if( ( startLoc >= [[view string] length] ) ){
         startLoc = [[view string] length] - 1;

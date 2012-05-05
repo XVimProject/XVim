@@ -112,66 +112,17 @@
 - (XVimEvaluator*)j:(XVimWindow*)window{
     XVimSourceView *view = [window sourceView];
     NSUInteger from = [view selectedRange].location;
-    NSUInteger headOfLine = [view headOfLine:from];
-    if (headOfLine != NSNotFound){
-        from = headOfLine;
-    }
+    NSUInteger to = [view nextLine:from column:[view columnNumber:from] count:[self numericArg] option:MOTION_OPTION_NONE];
 
-    NSUInteger to = from;
-    NSUInteger start = headOfLine == NSNotFound ? 1 : 0;
-    for (NSUInteger i = start; i < [self numericArg]; ++i){
-        to = [view nextNewLine:to];
-    }
-
-    NSUInteger endOfLine = [view endOfLine:++to];
-    if (endOfLine != NSNotFound){
-        to = endOfLine;
-    }
-
-    MOTION_TYPE motion;
-    if (_insertModeAtCompletion) {
-        if ([view isBlankLine:to]) {
-            motion = CHARACTERWISE_EXCLUSIVE;
-        }else{
-            motion = CHARACTERWISE_INCLUSIVE;
-        }
-    }else{
-        motion = LINEWISE;   
-    }
-
-    return [self _motionFixedFrom:from To:to Type:motion inWindow:window];
+    return [self _motionFixedFrom:from To:to Type:LINEWISE inWindow:window];
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
     XVimSourceView *view = [window sourceView];
     NSUInteger to = [view selectedRange].location;
-    NSUInteger endOfLine = [view endOfLine:to];
-    if (endOfLine != NSNotFound){
-        to = endOfLine;
-    }
+    NSUInteger from = [view prevLine:to column:[view columnNumber:to] count:[self numericArg] option:MOTION_OPTION_NONE];
 
-    NSUInteger from = to;
-    for (NSUInteger i = 0; i < [self numericArg]; ++i){
-        from = [view prevNewLine:from];
-    }
-
-    NSUInteger headOfLine = [view headOfLine:from];
-    if (headOfLine != NSNotFound) {
-        from = headOfLine;
-    }
-
-    MOTION_TYPE motion;
-    if (_insertModeAtCompletion) {
-        if ([view isBlankLine:to]) {
-            motion = CHARACTERWISE_EXCLUSIVE;
-        }else{
-            motion = CHARACTERWISE_INCLUSIVE;
-        }
-    }else{
-        motion = LINEWISE;   
-    }
-
-    return [self _motionFixedFrom:from To:to Type:motion inWindow:window];
+    return [self _motionFixedFrom:from To:to Type:LINEWISE inWindow:window];
 }
 
 
@@ -205,6 +156,9 @@
     BOOL last = [view isLastCharacter:to];
     BOOL exclusive = type == CHARACTERWISE_EXCLUSIVE;
     TRACE_LOG(@"from: %d to: %d eof: %d eol: %d", from, to, eof, eol);
+    if( from == 0 && [[view string] length] == 0 ){
+        return nil;
+    }
     if(from == to && (((eol || last) && exclusive) || eof)){
         // edge case:
         // if repeat is only one and we are at the end of a file at an empty line
