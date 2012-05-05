@@ -9,6 +9,8 @@
 #import "XVimStatusLine.h"
 #import "DVTChooserView.h"
 #import "IDESourceCodeEditor.h"
+#import "DVTFondAndColorTheme.h"
+#import "NSInsetTextView.h"
 #import "Logger.h"
 #import <objc/runtime.h>
 
@@ -16,7 +18,7 @@
 
 @implementation XVimStatusLine{
     DVTChooserView* _background;
-    NSTextView* _status;
+    NSInsetTextView* _status;
 }
 
 - (id)initWithFrame:(NSRect)frame
@@ -26,7 +28,7 @@
         _background = [[NSClassFromString(@"DVTChooserView") performSelector:@selector(alloc)] init];
         _background.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
         [_background setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
-        _status = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
+        _status = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
         _status.backgroundColor = [NSColor clearColor];
         [_status setEditable:NO];
         
@@ -44,11 +46,22 @@
     [super dealloc];
 }
 
-- (void)layoutStatus:(NSView*)container{
+- (void)layoutStatus:(NSView*)container
+{
+    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+	NSFont *sourceFont = [theme sourcePlainTextFont];
+	
+	// Calculate inset
+	CGFloat horizontalInset = 0;
+	CGFloat verticalInset = MAX((STATUS_LINE_HEIGHT - [sourceFont pointSize]) / 2, 0);
+	CGSize inset = CGSizeMake(horizontalInset, verticalInset);
+	
     NSRect parent = [container frame];
     [self setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_background setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
-    [_status setFrame:NSMakeRect(0, -2, parent.size.width, STATUS_LINE_HEIGHT)];
+    [_status setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
+	[_status setFont:sourceFont];
+	[_status setInset:inset];
     // This is heuristic way...
     if( [NSStringFromClass([container class]) isEqualToString:@"IDEComparisonEditorAutoLayoutView"] ){
         // Nothing ( Maybe AutoLayout view does the job "automatically")
