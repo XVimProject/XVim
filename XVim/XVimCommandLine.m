@@ -123,7 +123,7 @@
 	NSFont *sourceFont = [theme sourcePlainTextFont];
 	
 	// Calculate inset
-	CGFloat horizontalInset = 2;
+	CGFloat horizontalInset = 0;
 	CGFloat verticalInset = MAX((COMMAND_FIELD_HEIGHT - [sourceFont pointSize]) / 2, 0);
 	CGSize inset = CGSizeMake(horizontalInset, verticalInset);
     
