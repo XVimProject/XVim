@@ -14,7 +14,6 @@
 
 @interface DVTSourceTextViewHook : NSObject
 + (void)hook;
-+ (XVimStatusLine*)xvimStatusLineForSourceTextView:(DVTSourceTextView*)view;
 @end
 
 @interface DVTSourceTextView(Hook)

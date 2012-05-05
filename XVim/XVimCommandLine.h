@@ -9,9 +9,7 @@
 #import <AppKit/AppKit.h>
 #import "XVimCommandField.h"
 
-#define XVIM_CMDLINE_TAG 1208
 @interface XVimCommandLine : NSView
-@property NSInteger tag;
 
 - (id)init;
 - (void)setModeString:(NSString*)string;
@@ -21,4 +19,6 @@
 
 - (XVimCommandField*)commandField;
 
++ (XVimCommandLine*)associateOf:(id)object;
+- (void)associateWith:(id)object;
 @end

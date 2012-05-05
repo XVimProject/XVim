@@ -7,6 +7,7 @@
 //
 
 #import <AppKit/AppKit.h>
+#import "NSInsetTextView.h"
 
 @class XVimKeyStroke;
 @class XVimWindow;
@@ -16,7 +17,7 @@
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
 @end
 
-@interface XVimCommandField : NSTextView
+@interface XVimCommandField : NSInsetTextView
 
 - (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate;
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;

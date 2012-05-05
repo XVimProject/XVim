@@ -8,9 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-#define XVIM_STATUSLINE_TAG 1210
-
 @interface XVimStatusLine : NSView
 - (void)layoutStatus:(NSView*)container;
-@property  NSInteger tag;
+
++ (XVimStatusLine*)associateOf:(id)object;
+- (void)associateWith:(id)object;
 @end

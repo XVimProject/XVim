@@ -36,6 +36,7 @@
 		A2F4A34314F00BD3006DA5A5 /* XVimVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34214F00BD3006DA5A5 /* XVimVisualEvaluator.m */; };
 		A2F4A34614F00D69006DA5A5 /* XVimSearchLineEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34514F00D69006DA5A5 /* XVimSearchLineEvaluator.m */; };
 		A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */; };
+		C308865A1554C8380024161D /* NSInsetTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = C30886591554C8380024161D /* NSInsetTextView.m */; };
 		C324BE0115390E8500C13558 /* XVimGVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C324BE0015390E8500C13558 /* XVimGVisualEvaluator.m */; };
 		C33484F7154032170050AA76 /* XVimEvaluatorContext.m in Sources */ = {isa = PBXBuildFile; fileRef = C33484F6154032170050AA76 /* XVimEvaluatorContext.m */; };
 		C345DDBB154CE12A009F232E /* XVimHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C345DDBA154CE12A009F232E /* XVimHookManager.m */; };
@@ -146,6 +147,8 @@
 		A2F4A34514F00D69006DA5A5 /* XVimSearchLineEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimSearchLineEvaluator.m; path = XVim/XVimSearchLineEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2FF17CF1502B291003FE648 /* XVimMotionEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMotionEvaluator.h; path = XVim/XVimMotionEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotionEvaluator.m; path = XVim/XVimMotionEvaluator.m; sourceTree = SOURCE_ROOT; };
+		C30886581554C8380024161D /* NSInsetTextView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NSInsetTextView.h; path = XVim/NSInsetTextView.h; sourceTree = SOURCE_ROOT; };
+		C30886591554C8380024161D /* NSInsetTextView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NSInsetTextView.m; path = XVim/NSInsetTextView.m; sourceTree = SOURCE_ROOT; };
 		C320BAB4154BEE07000744F4 /* XVimVisualMode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimVisualMode.h; path = XVim/XVimVisualMode.h; sourceTree = SOURCE_ROOT; };
 		C324BDFF15390E8500C13558 /* XVimGVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimGVisualEvaluator.h; path = XVim/XVimGVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C324BE0015390E8500C13558 /* XVimGVisualEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimGVisualEvaluator.m; path = XVim/XVimGVisualEvaluator.m; sourceTree = SOURCE_ROOT; };
@@ -433,6 +436,8 @@
 			children = (
 				A2D48B1D15347B5C0088AB71 /* NSString+VimHelper.h */,
 				A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */,
+				C30886581554C8380024161D /* NSInsetTextView.h */,
+				C30886591554C8380024161D /* NSInsetTextView.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -605,6 +610,7 @@
 				C3FD41DC154E7E3400B076DB /* XVimSourceView+Vim.m in Sources */,
 				C3FD41E0154E822300B076DB /* XVimSourceView+Xcode.m in Sources */,
 				A26ACC4E154F2D6800B27D69 /* IDEEditorHook.m in Sources */,
+				C308865A1554C8380024161D /* NSInsetTextView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -10,15 +10,15 @@
 #import "DVTKit.h"
 #import "IDEKit.h"
 #import "Logger.h"
+#import "NSInsetTextView.h"
+#import <objc/runtime.h>
 
 #define STATUS_LINE_HEIGHT 18 
 
 @implementation XVimStatusLine{
     DVTChooserView* _background;
-    NSTextView* _status;
+    NSInsetTextView* _status;
 }
-
-@synthesize tag;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -27,14 +27,12 @@
         _background = [[NSClassFromString(@"DVTChooserView") performSelector:@selector(alloc)] init];
         _background.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
         [_background setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
-        _status = [[NSTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
+        _status = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
         _status.backgroundColor = [NSColor clearColor];
         [_status setEditable:NO];
         
         [self addSubview:_background];
         [self addSubview:_status];
-        
-        self.tag = XVIM_STATUSLINE_TAG;
     }
     
     return self;
@@ -47,11 +45,22 @@
     [super dealloc];
 }
 
-- (void)layoutStatus:(NSView*)container{
+- (void)layoutStatus:(NSView*)container
+{
+    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+	NSFont *sourceFont = [theme sourcePlainTextFont];
+	
+	// Calculate inset
+	CGFloat horizontalInset = 0;
+	CGFloat verticalInset = MAX((STATUS_LINE_HEIGHT - [sourceFont pointSize]) / 2, 0);
+	CGSize inset = CGSizeMake(horizontalInset, verticalInset);
+	
     NSRect parent = [container frame];
     [self setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
     [_background setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
-    [_status setFrame:NSMakeRect(0, -2, parent.size.width, STATUS_LINE_HEIGHT)];
+    [_status setFrame:NSMakeRect(0, 0, parent.size.width, STATUS_LINE_HEIGHT)];
+	[_status setFont:sourceFont];
+	[_status setInset:inset];
     // This is heuristic way...
     if( [NSStringFromClass([container class]) isEqualToString:@"IDEComparisonEditorAutoLayoutView"] ){
         // Nothing ( Maybe AutoLayout view does the job "automatically")
@@ -80,6 +89,18 @@
 {
     // Drawing code here.
     
+}
+
+static char s_associate_key = 0;
+
++ (XVimStatusLine*)associateOf:(id)object
+{
+	return (XVimStatusLine*)objc_getAssociatedObject(object, &s_associate_key);
+}
+
+- (void)associateWith:(id)object
+{
+	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

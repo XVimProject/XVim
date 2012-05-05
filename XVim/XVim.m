@@ -37,6 +37,7 @@
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
 #import "XVimHookManager.h"
+#import "XVimCommandLine.h"
 
 static XVim* s_instance = nil;
 
@@ -59,6 +60,7 @@ static XVim* s_instance = nil;
 @synthesize characterSearcher = _characterSearcher;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
+@synthesize commandLine = _commandLine;
 
 +(void)receiveNotification:(NSNotification*)notification{
     if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
@@ -68,6 +70,12 @@ static XVim* s_instance = nil;
 
 + (void) load 
 { 
+    NSBundle* app = [NSBundle mainBundle];
+    NSString* identifier = [app bundleIdentifier];
+    
+    if( ![identifier isEqualToString:@"com.apple.dt.Xcode"] ){
+        return;
+    }
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
     TRACE_LOG(@"XVim loaded");
@@ -287,5 +295,27 @@ static XVim* s_instance = nil;
     
     return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
 }
+
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:message];
+    if (ringBell) {
+        [self ringBell];
+    }
+    return;
+}
+
+- (void)clearErrorMessage
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:@""];
+}
+
+- (XVimCommandField*)commandField 
+{
+	XVimCommandLine *commandLine = self.commandLine;
+	return [commandLine commandField];
+}
+
 
 @end
