@@ -65,14 +65,14 @@
 			[_currentEvaluator didEndHandlerInWindow:self];
 		}
 		
-		_currentEvaluator = evaluator;
-		[evaluator becameHandlerInWindow:self];
-		
 		[_keymapContext clear];
 		
 		[self setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
 		[self setArgumentString:[evaluator argumentDisplayString]];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer];
+		
+		_currentEvaluator = evaluator;
+		[evaluator becameHandlerInWindow:self];
 	}
 }
 

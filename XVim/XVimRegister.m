@@ -40,6 +40,7 @@
         _displayName = [NSString stringWithString:displayName];
         _nonNumericKeyCount = 0;
         _isPlayingBack = NO;
+		_selectedRange.location = NSNotFound;
     }
     return self;
 }
