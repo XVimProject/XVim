@@ -667,45 +667,71 @@ void logchar(unichar x, NSString* s){
         } 
         
         //parse the next character. 
-        if(newLineStarts && isNewLine(curChar) /*&& !foundNonBlanks*/){
-            //two newlines in a row.
-            TRACE_LOG(@"newline and newline");
-            inWord = FALSE;
-            --count;
-            info->lastEndOfWord = i-1;
-        }else if(inWord && isNewLine(curChar)){
-            TRACE_LOG(@"inword and newline");
-            //from word to newline
-            newLineStarts = TRUE;
-            inWord = FALSE;
-            foundNonBlanks = FALSE;
-            info->lastEndOfLine = i-1;
-            info->lastEndOfWord = i-1;
-        }else if(isNewLine(curChar)){
-            TRACE_LOG(@"foundNEWLINE");
-            newLineStarts = TRUE;
-            inWord = FALSE;
-        }else if(!inWord && isNonBlank(curChar)){
-            TRACE_LOG(@"not inword and not blank");
-            // keyword to word boundary. 
-            logchar(curChar, @"curchar");
-            inWord = TRUE;
-            newLineStarts = FALSE;
-            --count;
-        }else if(inWord && !isNonBlank(curChar)){
-            TRACE_LOG(@"inword and blank");
-            newLineStarts = FALSE;
-            inWord = FALSE;
-            info->lastEndOfLine = i-1;
-            info->lastEndOfWord = i-1;
-        }else if(inWord && isNonBlank(curChar) ){
-            TRACE_LOG(@"inword and non blank");
-            inWord = TRUE;
-            newLineStarts = FALSE;
-            if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
+        if(newLineStarts){
+            if(isNewLine(curChar)){
+                //two newlines in a row.
+                TRACE_LOG(@"newline to newline");
+                inWord = FALSE;
+                if(info->findEndOfWord){
+                    --count;
+                    info->lastEndOfWord = i; 
+                    info->lastEndOfLine = i; 
+                }
+            }else if(isNonBlank(curChar)){
+                TRACE_LOG(@"newline to nonblank");
+                inWord = TRUE;
                 --count;
+                newLineStarts = FALSE;
+                info->isFirstWordInALine = FALSE;
+            }else {
+                TRACE_LOG(@"newline to blank");
+                inWord = FALSE; 
+                newLineStarts = FALSE;
+                info->isFirstWordInALine = FALSE;
+            }
+        }else if(inWord){
+            if(isNewLine(curChar)){
+                TRACE_LOG(@"inword to newline");
+                //from word to newline
+                newLineStarts = TRUE;
+                inWord = FALSE;
+                foundNonBlanks = FALSE;
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
+            }else if(isNonBlank(curChar)){
+                TRACE_LOG(@"inword to non blank: %d, %c", [str characterAtIndex:i], [str characterAtIndex:i] );
+                inWord = TRUE;
+                newLineStarts = FALSE;
+                if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
+                    --count;
+                    info->lastEndOfLine = i-1;
+                    info->lastEndOfWord = i-1;
+                }
+            }else if(!isNonBlank(curChar)){
+                TRACE_LOG(@"inword to blank");
+                newLineStarts = FALSE;
+                inWord = FALSE;
+                info->lastEndOfLine = i-1;
+                info->lastEndOfWord = i-1;
+            }
+        }else { //on a blank character that is not a newline
+            if(isNewLine(curChar)){
+                //not in word
+                TRACE_LOG(@"foundNEWLINE");
+                newLineStarts = TRUE;
+                info->isFirstWordInALine = TRUE;
+                info->lastEndOfLine = info->lastEndOfWord;
+                inWord = FALSE;
+            }else if(isNonBlank(curChar)){
+                TRACE_LOG(@"not inword and not blank");
+                // blank to word boundary. 
+                logchar(curChar, @"curchar");
+                inWord = TRUE;
+                newLineStarts = FALSE;
+                --count;
+            }else{
+                //is blank character
+                //nothing to do here.
             }
         }
         

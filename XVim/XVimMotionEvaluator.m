@@ -152,6 +152,7 @@
     NSUInteger realCount = [self numericArg];
 
     XVimWordInfo info;
+    info.findEndOfWord = TRUE;
     NSUInteger from = [[window sourceView] selectedRange].location;
     NSString *string = [[window sourceView] string];
     if (from + 1 < [string length] && from > 0){
