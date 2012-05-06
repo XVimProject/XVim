@@ -10,10 +10,9 @@ INSTALL
 From Installer Package
 --------
 
-[Download XVim_X.XX.pkg](https://github.com/JugglerShu/XVim/downloads) and install it. Do not change the install directory. Then restart Xcode. That's it!
+Download a daily build from http://programming.jugglershu.net/xvim . Usually the latest one is the best choise for you.
 
-Alternatively, you can download a daily build from http://programming.jugglershu.net/xvim. 
-XVim moves quickly, so you may find that many features and bug fixes already exist in the latest and greatest version.
+Install it. Do not change the install directory. Then restart Xcode. That's it!
 
 From Source Code
 -----------------
