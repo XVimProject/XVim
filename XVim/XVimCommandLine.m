@@ -123,6 +123,7 @@
 	CGSize inset = CGSizeMake(horizontalInset, verticalInset);
     
     // Set colors
+	[_static setTextColor:[theme sourcePlainTextColor]];
     [_static setBackgroundColor:[theme sourceTextBackgroundColor]];
 	[_static setFont:sourceFont];
     [_command setTextColor:[theme sourcePlainTextColor]];
