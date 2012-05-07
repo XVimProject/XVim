@@ -96,7 +96,6 @@
  * Determine if the position specified with "index" is EOL.
  **/
 - (BOOL) isEOL:(NSUInteger)index{
-    TRACE_LOG(@"%u", index);
     ASSERT_VALID_RANGE_WITH_EOF(index);
     return [self isEOF:index] == NO && [self isNewLine:index] == NO && [self isNewLine:index+1];
 }
@@ -596,14 +595,6 @@
     }
     return pos; 
 }
-void logchar(unichar x, NSString* s);
-void logchar(unichar x, NSString* s){
-    TRACE_LOG(@"%@ character: %c", s, x);
-    TRACE_LOG(@"iswhitespace() = %d", isWhiteSpace(x));
-    TRACE_LOG(@"isnewline() = %d", isNewLine(x));
-    TRACE_LOG(@"isNonBlank() = %d", isNonBlank(x));
-    TRACE_LOG(@"isKeyword() = %d", isKeyword(x));
-}
 
 /** 
  From Vim help: word and WORD
@@ -627,7 +618,7 @@ void logchar(unichar x, NSString* s){
 **/
 
 /**
- * Returns position of next head of word.
+ * Returns position of the head of count words forward and an info structure that handles the end of word boundaries.
  * @param index
  * @param count
  * @param option MOTION_OPTION_NONE or BIGWORD
@@ -651,7 +642,6 @@ void logchar(unichar x, NSString* s){
     BOOL inWord = isNonBlank(lastChar);
     BOOL newLineStarts = isNewLine(lastChar);
     BOOL foundNonBlanks = inWord;
-    TRACE_LOG(@"starting conditions: inword: %d, Newline: %d", inWord, newLineStarts);
     for(NSUInteger i = index+1 ; i <= [[self string] length]; i++ ){
         // Each time we encounter new word decrement "counter".
         // Remember blankline is a word
@@ -670,28 +660,24 @@ void logchar(unichar x, NSString* s){
         if(newLineStarts){
             if(isNewLine(curChar)){
                 //two newlines in a row.
-                TRACE_LOG(@"newline to newline");
                 inWord = FALSE;
-                if(info->findEndOfWord){
+                if(!info->findEndOfWord){
                     --count;
-                    info->lastEndOfWord = i; 
-                    info->lastEndOfLine = i; 
+                    info->lastEndOfWord = i-1; 
+                    info->lastEndOfLine = i-1; 
                 }
             }else if(isNonBlank(curChar)){
-                TRACE_LOG(@"newline to nonblank");
                 inWord = TRUE;
                 --count;
                 newLineStarts = FALSE;
                 info->isFirstWordInALine = FALSE;
             }else {
-                TRACE_LOG(@"newline to blank");
                 inWord = FALSE; 
                 newLineStarts = FALSE;
                 info->isFirstWordInALine = FALSE;
             }
         }else if(inWord){
             if(isNewLine(curChar)){
-                TRACE_LOG(@"inword to newline");
                 //from word to newline
                 newLineStarts = TRUE;
                 inWord = FALSE;
@@ -699,7 +685,6 @@ void logchar(unichar x, NSString* s){
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
             }else if(isNonBlank(curChar)){
-                TRACE_LOG(@"inword to non blank: %d, %c", [str characterAtIndex:i], [str characterAtIndex:i] );
                 inWord = TRUE;
                 newLineStarts = FALSE;
                 if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
@@ -708,7 +693,6 @@ void logchar(unichar x, NSString* s){
                     info->lastEndOfWord = i-1;
                 }
             }else if(!isNonBlank(curChar)){
-                TRACE_LOG(@"inword to blank");
                 newLineStarts = FALSE;
                 inWord = FALSE;
                 info->lastEndOfLine = i-1;
@@ -717,15 +701,12 @@ void logchar(unichar x, NSString* s){
         }else { //on a blank character that is not a newline
             if(isNewLine(curChar)){
                 //not in word
-                TRACE_LOG(@"foundNEWLINE");
                 newLineStarts = TRUE;
                 info->isFirstWordInALine = TRUE;
                 info->lastEndOfLine = info->lastEndOfWord;
                 inWord = FALSE;
             }else if(isNonBlank(curChar)){
-                TRACE_LOG(@"not inword and not blank");
                 // blank to word boundary. 
-                logchar(curChar, @"curchar");
                 inWord = TRUE;
                 newLineStarts = FALSE;
                 --count;
@@ -742,7 +723,6 @@ void logchar(unichar x, NSString* s){
         }
         
         if( 0 == count ){
-            TRACE_LOG(@"i = %d", i);
             pos = i;
             break;
         }
