@@ -603,7 +603,6 @@ void logchar(unichar x, NSString* s){
     TRACE_LOG(@"isnewline() = %d", isNewLine(x));
     TRACE_LOG(@"isNonBlank() = %d", isNonBlank(x));
     TRACE_LOG(@"isKeyword() = %d", isKeyword(x));
-//    TRACE_LOG(@"isnewline()", isNewLine(x));
 }
 
 /** 
@@ -647,15 +646,16 @@ void logchar(unichar x, NSString* s){
         return index;
     }
     
-    NSUInteger eolCheck = NSNotFound;
-    BOOL newLineStarts = NO;
     NSString* str = [self string];
     unichar lastChar= [str characterAtIndex:index];
+    BOOL inWord = isNonBlank(lastChar);
+    BOOL newLineStarts = isNewLine(lastChar);
+    BOOL foundNonBlanks = inWord;
+    TRACE_LOG(@"starting conditions: inword: %d, Newline: %d", inWord, newLineStarts);
     for(NSUInteger i = index+1 ; i <= [[self string] length]; i++ ){
         // Each time we encounter new word decrement "counter".
         // Remember blankline is a word
         unichar curChar; 
-
         
         if( ![self isEOF:i] ){
             curChar = [str characterAtIndex:i];
@@ -666,52 +666,48 @@ void logchar(unichar x, NSString* s){
             return i-1;
         } 
         
-        // End of line is one of following 2 cases. We must keep this to operate 'word' special case.
-        //    - Last character of Non-Blankline
-        //    - First character of Blankline 
-        if(  [self isEOF:i] ||  (isNonBlank(lastChar) && isNewLine(curChar)) || [self isBlankLine:i - 1]){
-            info->lastEndOfLine = i - 1;
-        }
-        
-        if( [self isEOF:i] || (isNonBlank(lastChar) && isWhiteSpace(curChar)) || (!isWhiteSpace(lastChar) && (isKeyword(lastChar) != isKeyword(curChar)))){
-            info->lastEndOfWord = i - 1;
-        }
-        
-        if( isNewLine(lastChar) ){
+        //parse the next character. 
+        if(newLineStarts && isNewLine(curChar) /*&& !foundNonBlanks*/){
+            //two newlines in a row.
+            TRACE_LOG(@"newline and newline");
+            inWord = FALSE;
+            --count;
+            info->lastEndOfWord = i-1;
+        }else if(inWord && isNewLine(curChar)){
+            TRACE_LOG(@"inword and newline");
+            //from word to newline
             newLineStarts = TRUE;
-        }
-        // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
-        //    - Any and EOF
-        //    - Whitespace(including newline) and Non-Blank
-        //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
-        //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
-        //    - newline and newline(blankline) 
-        
-        TRACE_LOG(@"Character at: %u", i);
-        logchar(curChar, @"curChar");
-        if( ( [self isEOF:i] ) ||
-           ((isWhiteSpace(lastChar) || isNewLine(lastChar)) && isNonBlank(curChar))   ||
-           ( opt != BIGWORD && isKeyword(lastChar) && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(curChar))   ||
-           ( opt != BIGWORD && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(curChar) && isKeyword(curChar) )  ||
-           ( isNewLine(lastChar) && [self isBlankLine:i] ) 
-           ){
-            count--;
-            if( newLineStarts ){
-                info->isFirstWordInALine = YES;
-                newLineStarts = NO;
-            }else{
-                info->isFirstWordInALine = NO;
+            inWord = FALSE;
+            foundNonBlanks = FALSE;
+            info->lastEndOfLine = i-1;
+            info->lastEndOfWord = i-1;
+        }else if(isNewLine(curChar)){
+            TRACE_LOG(@"foundNEWLINE");
+            newLineStarts = TRUE;
+            inWord = FALSE;
+        }else if(!inWord && isNonBlank(curChar)){
+            TRACE_LOG(@"not inword and not blank");
+            // keyword to word boundary. 
+            logchar(curChar, @"curchar");
+            inWord = TRUE;
+            newLineStarts = FALSE;
+            --count;
+        }else if(inWord && !isNonBlank(curChar)){
+            TRACE_LOG(@"inword and blank");
+            newLineStarts = FALSE;
+            inWord = FALSE;
+            info->lastEndOfLine = i-1;
+            info->lastEndOfWord = i-1;
+        }else if(inWord && isNonBlank(curChar) ){
+            TRACE_LOG(@"inword and non blank");
+            inWord = TRUE;
+            newLineStarts = FALSE;
+            if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
+                --count;
+                info->lastEndOfLine = i-1;
+                info->lastEndOfWord = i-1;
             }
         }
-        
-        if([self isWhiteSpace:i] && isNonBlank(lastChar)) eolCheck = [self skipWhiteSpace:i];
-        if (eolCheck != NSNotFound && [self isEOL:eolCheck] && i != eolCheck) {
-            TRACE_LOG(@"lastendofline set: %d, to: %c", i-1, [str characterAtIndex:i-1]);
-            info->lastEndOfLine = (i-1 > 0 ? i-1 : 0); 
-            lastChar = [str characterAtIndex:eolCheck-1];
-            curChar = [str characterAtIndex:eolCheck];            
-            eolCheck = NSNotFound;
-        } 
         
         lastChar = curChar;
         if( isNewLine(curChar) && opt == LEFT_RIGHT_NOWRAP ){
