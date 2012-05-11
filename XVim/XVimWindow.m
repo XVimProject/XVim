@@ -31,6 +31,7 @@
 
 @implementation XVimWindow
 @synthesize sourceView = _sourceView;
+@synthesize commandLine = _commandLine;
 
 - (id)init 
 {
@@ -43,6 +44,17 @@
 	return self;
 }
 
+- (void)dealloc
+{
+    [_keymapContext release];
+    [_localMarks release];
+    [_staticString release];
+    [_currentEvaluator release];
+    [_sourceView release];
+    _commandLine = nil;
+    [super dealloc];
+}
+
 - (void)willSetEvaluator:(XVimEvaluator*)evaluator
 {
 	if (evaluator != _currentEvaluator && _currentEvaluator)
@@ -51,25 +63,25 @@
 	}
 }
 
-- (void)setEvaluator:(XVimEvaluator*)evaluator 
+- (void)setEvaluator:(XVimEvaluator*)evaluator
 {
 	if (!evaluator) {
 		evaluator = [[XVimNormalEvaluator alloc] init];
 	}
-		
+
 	if (evaluator != _currentEvaluator)
 	{
 		if (_currentEvaluator) {
 			[_currentEvaluator didEndHandlerInWindow:self];
 		}
-		
+
 		[_keymapContext clear];
-		
-		XVimCommandLine *commandLine = [[XVim instance] commandLine];
-		[commandLine setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
-		[commandLine setArgumentString:[evaluator argumentDisplayString]];
+
+		[self.commandLine setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
+		[self.commandLine setArgumentString:[evaluator argumentDisplayString]];
 		[[self sourceView] updateInsertionPointStateAndRestartTimer];
-		
+
+        [_currentEvaluator release];
 		_currentEvaluator = evaluator;
 		[evaluator becameHandlerInWindow:self];
 	}
@@ -103,30 +115,29 @@
 			[self handleKeyStroke:keyStroke];
 		}
 	}
-	
+
 	NSString* argString = [_keymapContext toString];
 	if ([argString length] == 0)
 	{
 		argString = [_currentEvaluator argumentDisplayString];
 	}
-    
-	XVimCommandLine *commandLine = [[XVim instance] commandLine];
-	[commandLine setArgumentString:argString];
-    [commandLine setNeedsDisplay:YES];
+
+	[self.commandLine setArgumentString:argString];
+    [self.commandLine setNeedsDisplay:YES];
     return YES;
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
-    [[XVim instance] clearErrorMessage];
+    [self clearErrorMessage];
     XVim *xvim = [XVim instance];
 	XVimEvaluator* currentEvaluator = _currentEvaluator;
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke inWindow:self];
-	
+
 	[self willSetEvaluator:nextEvaluator];
-	
+
 	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister fromEvaluator:currentEvaluator];
 	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister fromEvaluator:currentEvaluator];
-	
+
 	[self setEvaluator:nextEvaluator];
 }
 
@@ -226,6 +237,22 @@
 {
 	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
 }
+
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:message];
+    if (ringBell) {
+        [[XVim instance] ringBell];
+    }
+    return;
+}
+
+- (void)clearErrorMessage
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:@""];
+}
+
 
 static char s_associate_key = 0;
 

@@ -27,43 +27,52 @@
 @end
 
 @implementation XVimCommandLine
-- (id) init
+
+- (id)init
 {
     self = [super initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
     if (self) {
         [self setBoundsOrigin:NSMakePoint(0,0)];
-        
+
         // Static Message ( This is behind the command view if the command is active)
-        _static = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0,0,100,COMMAND_FIELD_HEIGHT)];
+        _static = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_static setEditable:NO];
         [_static setSelectable:NO];
-        [_static setBackgroundColor:[NSColor textBackgroundColor]]; 
+        [_static setBackgroundColor:[NSColor textBackgroundColor]];
+        [_static setHidden:NO];
+        _static.autoresizingMask = NSViewWidthSizable;
         [self addSubview:_static];
-        
+
         // Error Message
         _error = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_error setEditable:NO];
         [_error setSelectable:NO];
-        [_error setBackgroundColor:[NSColor redColor]]; 
+        [_error setBackgroundColor:[NSColor redColor]];
         [_error setHidden:YES];
+        _error.autoresizingMask = NSViewWidthSizable;
         [self addSubview:_error];
-        
+
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_command setEditable:NO];
         [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
         [_command setTextColor:[NSColor textColor]];
-        [_command setBackgroundColor:[NSColor textBackgroundColor]]; 
+        [_command setBackgroundColor:[NSColor textBackgroundColor]];
         [_command setHidden:YES];
+        _command.autoresizingMask = NSViewWidthSizable;
         [self addSubview:_command];
-        
+
 		// Argument View
 		_argument = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, COMMAND_FIELD_HEIGHT)];
         [_argument setEditable:NO];
         [_argument setSelectable:NO];
         [_argument setBackgroundColor:[NSColor clearColor]];
+        [_argument setHidden:NO];
+        _argument.autoresizingMask = NSViewWidthSizable;
         [self addSubview:_argument];
-        
+
+        self.autoresizesSubviews = YES;
+
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
     }
     return self;
@@ -73,16 +82,24 @@
     [_command release];
     [_static release];
     [_error release];
+    [_argument release];
     [super dealloc];
 }
 
-- (void)errorMsgExpired{
+- (void)viewDidMoveToSuperview
+{
+    [self layoutCmdline:[self superview]];
+}
+
+- (void)errorMsgExpired
+{
     [_error setHidden:YES];
 }
 
 - (void)setModeString:(NSString*)string
 {
     [_static setString:string];
+    [self layoutCmdline:[self superview]];
 }
 
 - (void)setArgumentString:(NSString*)string{
