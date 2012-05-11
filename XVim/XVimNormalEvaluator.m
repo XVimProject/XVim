@@ -707,7 +707,7 @@
 								   [sourceView scrollTo:[window insertionPoint]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
-								   [[XVim instance] errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
+								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
 							   }
 							   return nil;
 						   }

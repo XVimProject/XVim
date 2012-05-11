@@ -17,8 +17,9 @@
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
-@property(strong) XVimSourceView* sourceView;
+@property(retain) XVimSourceView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
+@property(assign) XVimCommandLine *commandLine;
 
 - (NSUInteger)insertionPoint;
 
@@ -44,6 +45,9 @@
 
 - (void)recordIntoRegister:(XVimRegister*)xregister;
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
+
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
+- (void)clearErrorMessage;
 
 - (void)associateWith:(id)object;
 + (XVimWindow*)associateOf:(id)object;

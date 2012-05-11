@@ -45,10 +45,10 @@
 
 	NSValue* v = [[window getLocalMarks] valueForKey:mark];
 	if (v == nil) {
-		[[XVim instance] errorMessage:@"Mark not set" ringBell:YES];
+		[window errorMessage:@"Mark not set" ringBell:YES];
 		return NSNotFound;
 	}
-	
+
 	NSRange r = [v rangeValue];
 	XVimSourceView* view = [window sourceView];
 	NSString* s = [view string];

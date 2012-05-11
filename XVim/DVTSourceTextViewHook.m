@@ -189,9 +189,26 @@
 - (BOOL)becomeFirstResponder{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [XVimWindow associateOf:base];
+
     BOOL b = [base becomeFirstResponder_];
-    if( [base becomeFirstResponder_] ){
-        window.sourceView = [[XVimSourceView alloc] initWithView:base];
+    if (b) {
+        if (!window.sourceView)
+            window.sourceView = [[XVimSourceView alloc] initWithView:base];
+
+        // XXX: Dirty hack to get command line view as being starting to receive KB/Mouse events.
+        //      There might be a better way to connect corresponding command line view with source view.
+        NSView *v = base;
+        while ([v superview]) {
+            if ([NSStringFromClass([v class]) isEqualToString:@"DVTLayoutView_ML"]) {
+                for (NSView *subView in v.subviews) {
+                    if ([subView isKindOfClass:[XVimCommandLine class]]) {
+                        window.commandLine = (XVimCommandLine *)subView;
+                    }
+                }
+                break;
+            }
+            v = [v superview];
+        }
     }
     return b;
 }

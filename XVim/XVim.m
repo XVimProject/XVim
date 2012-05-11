@@ -60,7 +60,6 @@ static XVim* s_instance = nil;
 @synthesize characterSearcher = _characterSearcher;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
-@synthesize commandLine = _commandLine;
 
 +(void)receiveNotification:(NSNotification*)notification{
     if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
@@ -292,30 +291,8 @@ static XVim* s_instance = nil;
 	{
 		return yankRegister.text;
 	}
-    
+
     return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
 }
-
-- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
-	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:message];
-    if (ringBell) {
-        [self ringBell];
-    }
-    return;
-}
-
-- (void)clearErrorMessage
-{
-	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:@""];
-}
-
-- (XVimCommandField*)commandField 
-{
-	XVimCommandLine *commandLine = self.commandLine;
-	return [commandLine commandField];
-}
-
 
 @end
