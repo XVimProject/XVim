@@ -596,7 +596,6 @@
     return pos; 
 }
 
-
 /** 
  From Vim help: word and WORD
  *word*
@@ -616,10 +615,10 @@
  operator and the last word moved over is at the end of a line, the end of 
  that word becomes the end of the operated text, not the first word in the 
  next line. 
- **/
+**/
 
 /**
- * Returns position of next head of word.
+ * Returns position of the head of count words forward and an info structure that handles the end of word boundaries.
  * @param index
  * @param count
  * @param option MOTION_OPTION_NONE or BIGWORD
@@ -638,50 +637,82 @@
         return index;
     }
     
-    BOOL newLineStarts = NO;
     NSString* str = [self string];
     unichar lastChar= [str characterAtIndex:index];
+    BOOL inWord = isNonBlank(lastChar);
+    BOOL newLineStarts = isNewLine(lastChar);
+    BOOL foundNonBlanks = inWord;
     for(NSUInteger i = index+1 ; i <= [[self string] length]; i++ ){
         // Each time we encounter new word decrement "counter".
         // Remember blankline is a word
+        unichar curChar; 
         
-        unichar curChar;
         if( ![self isEOF:i] ){
             curChar = [str characterAtIndex:i];
+        }else {
+            //EOF found so return this position.
+            info->lastEndOfLine = i-1;
+            info->lastEndOfWord = i-1;
+            return i-1;
         } 
         
-        // End of line is one of following 2 cases. We must keep this to operate 'word' special case.
-        //    - Last character of Non-Blankline
-        //    - First character of Blankline 
-        if(  [self isEOF:i] ||  (isNonBlank(lastChar) && isNewLine(curChar)) || [self isBlankLine:i - 1]){
-            info->lastEndOfLine = i - 1;
-        }
-        
-        if( [self isEOF:i] || (isNonBlank(lastChar) && isWhiteSpace(curChar)) || (!isWhiteSpace(lastChar) && (isKeyword(lastChar) != isKeyword(curChar)))){
-            info->lastEndOfWord = i - 1;
-        }
-        
-        if( isNewLine(lastChar) ){
-            newLineStarts = TRUE;
-        }
-        // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
-        //    - Any and EOF
-        //    - Whitespace(including newline) and Non-Blank
-        //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
-        //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
-        //    - newline and newline(blankline) 
-        if( ( [self isEOF:i] ) ||
-           ((isWhiteSpace(lastChar) || isNewLine(lastChar)) && isNonBlank(curChar))   ||
-           ( opt != BIGWORD && isKeyword(lastChar) && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(curChar))   ||
-           ( opt != BIGWORD && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(curChar) && isKeyword(curChar) )  ||
-           ( isNewLine(lastChar) && [self isBlankLine:i] ) 
-           ){
-            count--;
-            if( newLineStarts ){
-                info->isFirstWordInALine = YES;
-                newLineStarts = NO;
+        //parse the next character. 
+        if(newLineStarts){
+            if(isNewLine(curChar)){
+                //two newlines in a row.
+                inWord = FALSE;
+                if(!info->findEndOfWord){
+                    --count;
+                    info->lastEndOfWord = i-1; 
+                    info->lastEndOfLine = i-1; 
+                }
+            }else if(isNonBlank(curChar)){
+                inWord = TRUE;
+                --count;
+                newLineStarts = FALSE;
+                info->isFirstWordInALine = FALSE;
+            }else {
+                inWord = FALSE; 
+                newLineStarts = FALSE;
+                info->isFirstWordInALine = FALSE;
+            }
+        }else if(inWord){
+            if(isNewLine(curChar)){
+                //from word to newline
+                newLineStarts = TRUE;
+                inWord = FALSE;
+                foundNonBlanks = FALSE;
+                info->lastEndOfLine = i-1;
+                info->lastEndOfWord = i-1;
+            }else if(isNonBlank(curChar)){
+                inWord = TRUE;
+                newLineStarts = FALSE;
+                if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
+                    --count;
+                    info->lastEndOfLine = i-1;
+                    info->lastEndOfWord = i-1;
+                }
+            }else if(!isNonBlank(curChar)){
+                newLineStarts = FALSE;
+                inWord = FALSE;
+                info->lastEndOfLine = i-1;
+                info->lastEndOfWord = i-1;
+            }
+        }else { //on a blank character that is not a newline
+            if(isNewLine(curChar)){
+                //not in word
+                newLineStarts = TRUE;
+                info->isFirstWordInALine = TRUE;
+                info->lastEndOfLine = info->lastEndOfWord;
+                inWord = FALSE;
+            }else if(isNonBlank(curChar)){
+                // blank to word boundary. 
+                inWord = TRUE;
+                newLineStarts = FALSE;
+                --count;
             }else{
-                info->isFirstWordInALine = NO;
+                //is blank character
+                //nothing to do here.
             }
         }
         
