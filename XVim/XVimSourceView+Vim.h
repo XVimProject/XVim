@@ -66,6 +66,7 @@ typedef struct _XVimWordInfo{
     BOOL isFirstWordInALine;
     NSUInteger lastEndOfLine;
     NSUInteger lastEndOfWord;
+    BOOL findEndOfWord;
 }XVimWordInfo;
 
 
