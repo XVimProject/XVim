@@ -50,14 +50,14 @@
 
 - (void)takeFocusFromWindow:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [[XVim instance] commandField];
+	XVimCommandField *commandField = window.commandLine.commandField;
 	[commandField setDelegate:window];
 	[[[[window sourceView] view] window] makeFirstResponder:commandField];
 }
 
 - (void)relinquishFocusToWindow:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [[XVim instance] commandField];
+	XVimCommandField *commandField = window.commandLine.commandField;
 	[commandField absorbFocusEvent];
 	[commandField setDelegate:nil];
 	[[[[window sourceView] view] window] makeFirstResponder:[[window sourceView] view]];
@@ -66,8 +66,8 @@
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
 {
 	XVimEvaluator* next = self;
-	
-	XVimCommandField *commandField = [[XVim instance] commandField];
+
+	XVimCommandField *commandField = window.commandLine.commandField;
 	if ([keyStroke instanceResponds:self])
 	{
 		next = [self performSelector:[keyStroke selector] withObject:window];
@@ -109,8 +109,8 @@
 - (void)becameHandlerInWindow:(XVimWindow*)window
 {
 	[super becameHandlerInWindow:window];
-	
-	XVimCommandField *commandField = [[XVim instance] commandField];
+
+	XVimCommandField *commandField = window.commandLine.commandField;
     [commandField setString:_firstLetter];
     [commandField moveToEndOfLine:self];
 	[self takeFocusFromWindow:window];
@@ -171,7 +171,7 @@
 
 - (XVimEvaluator*)CR:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [[XVim instance] commandField];
+	XVimCommandField *commandField = window.commandLine.commandField;
 	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	[_history addEntry:command];
 	return _onComplete(command);
@@ -186,13 +186,13 @@
 
 - (XVimEvaluator*)Up:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [[XVim instance] commandField];
+	XVimCommandField *commandField = window.commandLine.commandField;
 	XVim *xvim = [XVim instance];
-	
+
 	if (_historyNo == 0) {
 		_currentCmd = [[commandField string] copy];
 	}
-	
+
 	_historyNo++;
 	NSString* cmd = [_history entry:_historyNo withPrefix:_currentCmd];
 	if( nil == cmd ) {
@@ -203,15 +203,15 @@
 		[commandField setString:cmd];
 		[commandField moveToEndOfLine:self];
 	}
-	
+
 	return self;
 }
 
 - (XVimEvaluator*)Down:(XVimWindow*)window
 {
-	XVimCommandField *commandField = [[XVim instance] commandField];
+	XVimCommandField *commandField = window.commandLine.commandField;
 	XVim *xvim = [XVim instance];
-	
+
 	if (_historyNo == 0) {
 		// Nothing
 	} else {

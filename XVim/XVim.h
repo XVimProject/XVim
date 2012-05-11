@@ -27,13 +27,6 @@
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimCharacterSearch* characterSearcher;
 @property (strong) XVimExCommand* excmd;
-
-@property (retain) XVimCommandLine* commandLine;
-- (XVimCommandField*)commandField;
-
-- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
-- (void)clearErrorMessage;
-
 @property (strong, readonly) NSDictionary* registers;
 @property (weak) XVimRegister *repeatRegister;
 @property (weak) XVimRegister *recordingRegister;
