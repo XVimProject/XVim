@@ -43,7 +43,7 @@
 {
 	XVimSourceView* view = [window sourceView];
 	[view selectOperationTargetFrom:from To:to Type:type];
-	[view copy];
+	[view copyText];
     [[XVim instance] onDeleteOrYank:_yankRegister];
 
 	// Indent
