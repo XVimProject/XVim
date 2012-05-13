@@ -59,13 +59,11 @@
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\c" withString:@""];
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\C" withString:@""];
     
-    // In vim \< matches the start of a word and \> matches the end of a word.
+    // In vim \< matches the start of a word and \> matches the end of vims definition of a word.
     // Using NSRegularExpression with NSRegularExpressionUseUnicodeWordBoundaries
-    // \b matches word boundaries, but for some reason it does not properly handle : or .
-    // so add it to the search. This is not ideal but it mostly works. Please see
-    // the NSRegularExpression documentation for more info on this regular exrpression.
-    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\<" withString:@"(:|\\.|\\b)"];
-    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\>" withString:@"(:|\\.|\\b)"];
+    // \b matches word boundaries.
+    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\<" withString:@"(\\b)"];
+    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\>" withString:@"(\\b)"];
     
     // in vi, if there's no search string. use the last one specified. like you do for 'n'
     if( [searchCmd length] > 1 ){
