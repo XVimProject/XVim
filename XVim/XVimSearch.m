@@ -21,6 +21,8 @@
 @synthesize lastSearchCmd = _lastSearchCmd;
 @synthesize lastSearchDisplayString = _lastSearchDisplayString;
 @synthesize lastReplacementString = _lastReplacementString;
+@synthesize matchEnd = _matchEnd;
+@synthesize matchStart = _matchStart;
 
 - (id)init
 {
@@ -59,11 +61,21 @@
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\c" withString:@""];
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\C" withString:@""];
     
+    if([searchCmd  rangeOfString:@"\\<"].location != NSNotFound){
+        self.matchStart = TRUE;
+    }else {
+        self.matchStart = FALSE;
+    }
+    if([searchCmd rangeOfString:@"\\>"].location != NSNotFound){
+        self.matchEnd = TRUE;
+    }else {
+        self.matchEnd = FALSE;
+    }
     // In vim \< matches the start of a word and \> matches the end of vims definition of a word.
     // Using NSRegularExpression with NSRegularExpressionUseUnicodeWordBoundaries
     // \b matches word boundaries.
-    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\<" withString:@"(\\b)"];
-    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\>" withString:@"(\\b)"];
+    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\<" withString:@"(:|\\.|\\b)"];
+    searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\>" withString:@"(:|\\.|\\b)"];
     
     // in vi, if there's no search string. use the last one specified. like you do for 'n'
     if( [searchCmd length] > 1 ){
@@ -133,7 +145,19 @@
         [window errorMessage:[NSString stringWithFormat:
                              @"Search wrapped for '%@'",self.lastSearchDisplayString] ringBell:TRUE];
     }
-    
+    if((self.matchStart || self.matchEnd) && found.location != NSNotFound){
+        //figure out the true start and end of the word because the NSRegularExpression engine treats
+        // . and : characters are part of the larger word and will not match on a \b regular expression search. 
+        unichar firstChar = [[srcView string] characterAtIndex:found.location];
+        unichar lastChar = [[srcView string] characterAtIndex:(found.location + found.length - 1)];
+        if (self.matchStart && (firstChar == '.' || firstChar == ':')) {
+            found.location++;
+            found.length--;
+        }
+        if(self.matchEnd && (lastChar == '.' || lastChar == ':')){
+            found.length--;
+        }
+    }
     return found;
 }
 
@@ -179,7 +203,8 @@
     if (search_base > 0) {
         for (NSTextCheckingResult *match in matches) { // get last match in area before search_base
             NSRange tmp = [match range];
-            if (tmp.location >= search_base)
+            // handle the case where the search string includes a . or : in the first location
+            if (tmp.location >= search_base || (self.matchStart && tmp.location+1 >= search_base))
                 break;
             found = tmp;
         }
@@ -192,7 +217,21 @@
             [window errorMessage:[NSString stringWithFormat: @"Search wrapped for '%@'",self.lastSearchDisplayString] ringBell:FALSE];
         }
     }
-	 
+    
+    if((self.matchStart || self.matchEnd) && found.location != NSNotFound){
+        //figure out the true start and end of the word because the NSRegularExpression engine treats
+        // . and : characters are part of the larger word and will not match on a \b regular expression search. 
+        unichar firstChar = [[srcView string] characterAtIndex:found.location];
+        unichar lastChar = [[srcView string] characterAtIndex:(found.location + found.length - 1)];
+        if (self.matchStart && (firstChar == '.' || firstChar == ':')) {
+            found.location++;
+            found.length--;
+        }
+        if(self.matchEnd && (lastChar == '.' || lastChar == ':')){
+            found.length--;
+        }
+    }    
+    
     return found;
 }
 

@@ -25,6 +25,9 @@ typedef enum {
 @property (strong) NSString* lastSearchCmd;
 @property (strong) NSString* lastSearchDisplayString;
 @property (strong) NSString* lastReplacementString;
+@property BOOL matchStart;
+@property BOOL matchEnd;
+
 
 - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window;
 - (NSRange)searchNextFrom:(NSUInteger)from inWindow:(XVimWindow*)window;
