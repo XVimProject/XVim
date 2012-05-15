@@ -519,6 +519,21 @@
     return pos;
 }
 
+- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column
+{
+    // pos is at the line number "num" and column 0
+    NSUInteger end = [self endOfLine:pos];
+    if( NSNotFound == end ){
+        return pos;
+    }
+	
+	// Primitive search until the column number matches
+	while (pos < end) {
+		if ([self columnNumber:pos] == column) { break; }
+		++pos;
+	}
+	return pos;
+}
 
 /**
  * Returns the position when a cursor goes to upper line.
@@ -1050,22 +1065,6 @@
     [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
-- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column
-{
-    // pos is at the line number "num" and column 0
-    NSUInteger end = [self endOfLine:pos];
-    if( NSNotFound == end ){
-        return pos;
-    }
-	
-	// Primitive search until the column number matches
-	while (pos < end) {
-		if ([self columnNumber:pos] == column) { break; }
-		++pos;
-	}
-	return pos;
-}
-
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num
 {
     NSAssert(0 != num, @"line number starts from 1");
@@ -1149,6 +1148,10 @@
 ////////////////////
 /// Text Object ////
 ////////////////////
+static NSCharacterSet* get_search_set( unichar c, NSCharacterSet* set, NSCharacterSet*);
+static NSInteger seek_backwards(NSString*,NSInteger,NSCharacterSet*);
+static NSInteger seek_forwards(NSString*,NSInteger,NSCharacterSet*);
+
 - (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSString* string = [self string];
     NSInteger maxIndex = [string length] - 1;

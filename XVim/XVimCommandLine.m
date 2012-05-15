@@ -24,6 +24,7 @@
     NSInsetTextView* _argument;
     NSTimer* _errorTimer;
 }
+- (void)layoutCmdline:(NSView*)view;
 @end
 
 @implementation XVimCommandLine

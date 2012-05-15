@@ -14,9 +14,6 @@
 #import "XVimStatusLine.h"
 #import "XVimWindowManager.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-W"
-
 @implementation IDESourceCodeEditorHook
 
 + (void) hook
