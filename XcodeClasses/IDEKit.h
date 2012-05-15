@@ -220,12 +220,12 @@ typedef struct {
 - (void)handleFailureInFunction:(id)arg1 fileName:(id)arg2 lineNumber:(long long)arg3 messageFormat:(id)arg4 arguments:(struct __va_list_tag [1])arg5;
 - (void)handleFailureInMethod:(SEL)arg1 object:(id)arg2 fileName:(id)arg3 lineNumber:(long long)arg4 messageFormat:(id)arg5 arguments:(struct __va_list_tag [1])arg6;
 @end
-
+/*
 @protocol DVTCancellableToken <NSObject>
 @property(readonly, getter=isCancelled) BOOL cancelled;
 - (void)cancel;
 @end
-
+*/
 @protocol DVTCompletingTextViewDelegate <NSTextViewDelegate>
 
 @optional
@@ -283,7 +283,7 @@ typedef struct {
 - (BOOL)dvtFindBar:(id)arg1 validateUserInterfaceItem:(id)arg2;
 - (void)dvtFindBar:(id)arg1 didWrap:(BOOL)arg2 reverse:(BOOL)arg3;
 @end
-
+/*
 @protocol DVTInvalidation <NSObject>
 @property(readonly) DVTStackBacktrace *invalidationBacktrace;
 @property(readonly, nonatomic, getter=isValid) BOOL valid;
@@ -293,7 +293,7 @@ typedef struct {
 @protocol DVTIssueDisplayingView <NSObject>
 @property(copy) NSDictionary *issueInfoDictionary;
 @end
-
+*/
 @protocol DVTMessageBubbleAnnotationDelegate <DVTTextAnnotationDelegate>
 
 @optional
@@ -315,7 +315,7 @@ typedef struct {
 - (BOOL)outlineView:(id)arg1 insertText:(id)arg2;
 - (BOOL)outlineView:(id)arg1 doCommandBySelector:(SEL)arg2;
 @end
-
+/*
 @protocol DVTPreferenceSet <NSObject>
 + (id)titleForNewPreferenceSetFromTemplate;
 + (id)preferenceSetsListHeader;
@@ -340,7 +340,7 @@ typedef struct {
 @protocol DVTProgressReporting <NSObject>
 @property(readonly) long long progress;
 @end
-
+*/
 @protocol DVTReplacementViewDelegate <NSObject>
 
 @optional
@@ -356,14 +356,14 @@ typedef struct {
 @optional
 @property(readonly) NSScrollView *scopeBarsAdjustableScrollView;
 @end
-
+/*
 @protocol DVTSourceCodeComparisonAnnotationContext <NSObject>
 @property(readonly) DVTDiffSession *diffSession;
 @property(readonly) DVTDiffDescriptor *diffDescriptor;
 @property(readonly) int dataSourceType;
 @property(readonly) NSURL *documentURL;
 @end
-
+*/
 @protocol DVTSplitViewDelegate <NSSplitViewDelegate>
 
 @optional
@@ -468,14 +468,14 @@ typedef struct {
 @protocol DVTTextCompletionItemInfoProvider
 - (void)infoViewControllerForCompletionItemName:(id)arg1 displayText:(id)arg2 completionBlock:(id)arg3;
 @end
-
+/*
 @protocol DVTTextFindable <NSObject>
 - (id)findStringMatchingDescriptor:(id)arg1 backwards:(BOOL)arg2 from:(id)arg3 to:(id)arg4;
 
 @optional
 @property unsigned long long supportedMatchingOptions;
 @end
-
+*/
 @protocol DVTTextReplacable <NSObject>
 - (BOOL)replaceFindResults:(id)arg1 withString:(id)arg2 withError:(id *)arg3;
 
@@ -563,7 +563,7 @@ typedef struct {
 @protocol IDEBuildFolderLocationSheetControllerDelegate <NSObject>
 - (void)buildFolderLocationSheetDidEndWithBuildLocationStyle:(int)arg1 sharedBuildFolderName:(id)arg2 customBuildLocationType:(int)arg3 customBuildProductsPath:(id)arg4 customBuildIntermediatesPath:(id)arg5;
 @end
-
+/*
 @protocol IDEBuildable <NSObject>
 @property(readonly) NSString *legacyIdentifier;
 @property(readonly) NSSet *namesOfLinkedBinaries;
@@ -593,7 +593,7 @@ typedef struct {
 - (id)filePathForBuildParameters:(id)arg1;
 - (id)productTypeIdentifier;
 @end
-
+*/
 @protocol IDECapsuleListViewDataSource <NSObject>
 - (id)capsuleListView:(id)arg1 viewControllerForRow:(long long)arg2;
 - (long long)numberOfObjectsInCapsuleListView:(id)arg1;
@@ -1022,13 +1022,13 @@ typedef struct {
 @protocol IDEPreBuildSavingDelegate <NSObject>
 - (void)performBlockAfterPreBuildSave:(id)arg1;
 @end
-
+/*
 @protocol IDEReadOnlyItem <NSObject>
 @property(readonly) NSURL *readOnlyItemURL;
 @property(readonly) int readOnlyStatus;
 - (BOOL)makeWritableWithError:(id *)arg1;
 @end
-
+*/
 @protocol IDERefactoringExpressionSource
 - (id)refactoringExpressionUsingContextMenu:(BOOL)arg1;
 @end
@@ -1712,7 +1712,7 @@ typedef struct {
 
 @end
 
-@interface IDEAboutWindowController : NSWindowController <NSWindowRestoration>
+@interface IDEAboutWindowController : NSWindowController /*<NSWindowRestoration>*/
 {
     NSTextField *_appNameLabel;
     NSTextField *_copyrightMultilineLabel;
@@ -12137,7 +12137,7 @@ typedef struct {
 
 @end
 
-@interface IDEOrganizerWindowController : NSWindowController <NSToolbarDelegate, NSWindowRestoration, NSWindowDelegate, IDEEditorAreaContainer, DVTStatefulObject, DVTStateRepositoryDelegate, DVTReplacementViewDelegate>
+@interface IDEOrganizerWindowController : NSWindowController <NSToolbarDelegate, /*NSWindowRestoration,*/ NSWindowDelegate, IDEEditorAreaContainer, DVTStatefulObject, DVTStateRepositoryDelegate, DVTReplacementViewDelegate>
 {
     DVTReplacementView *_contentReplacementView;
     NSArray *_sources;
@@ -12566,7 +12566,7 @@ typedef struct {
 
 @end
 
-@interface IDEPreferencesController : NSWindowController <NSToolbarDelegate, NSWindowRestoration, DVTStatefulObject, DVTStateRepositoryDelegate, DVTReplacementViewDelegate>
+@interface IDEPreferencesController : NSWindowController <NSToolbarDelegate, /*NSWindowRestoration,*/ DVTStatefulObject, DVTStateRepositoryDelegate, DVTReplacementViewDelegate>
 {
     DVTReplacementView *_paneReplacementView;
     DVTExtension *_currentExtension;
@@ -16371,7 +16371,7 @@ typedef struct {
 @property(readonly) NSString *navigableItem_name;
 @end
 
-@interface IDESourceControlSSLAuthenticationWindowController : NSWindowController <NSURLConnectionDelegate>
+@interface IDESourceControlSSLAuthenticationWindowController : NSWindowController /*<NSURLConnectionDelegate>*/
 {
     NSTextField *messageTextField;
     NSTextField *infoTextField;

@@ -25,6 +25,11 @@
 #import "XVimOptions.h"
 #import "XVim.h"
 
+@interface XVimVisualEvaluator(){
+    
+}
+- (XVimEvaluator*)ESC:(XVimWindow*)window;
+@end
 @implementation XVimVisualEvaluator 
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window

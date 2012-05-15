@@ -3773,9 +3773,12 @@ typedef union {
 
 @end
 
+
 @interface DVTMutableOrderedSet : NSMutableSet
 {
+#ifdef __MAC_10_7
     NSMutableOrderedSet *_orderedSet;
+#endif
 }
 
 + (id)setWithCapacity:(unsigned long long)arg1;

@@ -106,12 +106,14 @@
 		return NSMakeRange(NSNotFound,0);
 	}
 	
-	XVimOptions *options = [[XVim instance] options];
 
+    NSRange found = {NSNotFound, 0};
+#ifdef __MAC_10_7
+    XVimOptions *options = [[XVim instance] options];
+    
     XVimSourceView* srcView = [window sourceView];
     NSUInteger search_base = from;
-    NSRange found = {NSNotFound, 0};
-
+    
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
 	{
@@ -158,6 +160,7 @@
             found.length--;
         }
     }
+#endif
     return found;
 }
 
@@ -172,11 +175,12 @@
     // What we do instead is a search for all occurences and then
     // use the range of the last match. Not very efficient, but i don't think
     // optimization is warranted until slowness is experienced at the user level.
+
+    NSRange found = {NSNotFound, 0};
+#ifdef __MAC_10_7    
 	XVimOptions *options = [[XVim instance] options];
-	
     XVimSourceView* srcView = [window sourceView];
     NSUInteger search_base = from;
-    NSRange found = {NSNotFound, 0};
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
@@ -231,7 +235,7 @@
             found.length--;
         }
     }    
-    
+#endif
     return found;
 }
 
@@ -255,6 +259,8 @@
 
 - (NSRange)searchCurrentWordFrom:(NSUInteger)from forward:(BOOL)forward matchWholeWord:(BOOL)wholeWord inWindow:(XVimWindow*)window
 {
+    NSRange found = {NSNotFound,0};
+#ifdef __MAC_10_7
     XVimSourceView *view = [window sourceView];
 
     NSRange begin = [view selectedRange];
@@ -322,7 +328,7 @@
          (forward && searchStart != begin.location))){
 			found = [self searchNextFrom:found.location inWindow:window];
     }
-
+#endif
     return found;
 }
 
@@ -331,9 +337,11 @@
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
     
-    XVimSourceView* srcView = [window sourceView];
     NSRange found = {NSNotFound, 0};
     
+#ifdef __MAC_10_7    
+    
+    XVimSourceView* srcView = [window sourceView];
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
@@ -361,7 +369,7 @@
         // The following method is undoable
         [srcView insertText:self.lastReplacementString replacementRange:found];
     }
-    
+#endif    
     return found;
 }
 

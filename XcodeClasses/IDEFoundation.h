@@ -109,7 +109,7 @@ typedef struct {
 } CDStruct_a94d320b;
 
 #pragma mark -
-
+ 
 /*
  * File: /Developer/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework/Versions/A/IDEFoundation
  * UUID: 1A2C2BAD-91CE-31A1-A739-37F928BBF1B9
@@ -126,7 +126,7 @@ typedef struct {
 @property(readonly) IDEActivityLogSection *integrityLog;
 - (void)analyzeModelIntegrity;
 @end
-
+/*
 @protocol DVTCancellableToken <NSObject>
 @property(readonly, getter=isCancelled) BOOL cancelled;
 - (void)cancel;
@@ -142,7 +142,7 @@ typedef struct {
 - (id)customDataOwnershipsForGrouping:(id)arg1;
 - (id)customDataSpecifiersForGrouping:(id)arg1 ownership:(id)arg2;
 @end
-
+*/
 @protocol DVTDirectoryBasedCustomDataStoreDelegate <NSObject>
 
 @optional
@@ -151,13 +151,13 @@ typedef struct {
 - (void)customDataStore:(id)arg1 writeData:(id)arg2 toFilePath:(id)arg3 completionQueue:(id)arg4 completionBlock:(id)arg5;
 - (void)customDataStore:(id)arg1 makeFilePathsWritable:(id)arg2 completionQueue:(id)arg3 completionBlock:(id)arg4;
 @end
-
+/*
 @protocol DVTInvalidation <NSObject>
 @property(readonly) DVTStackBacktrace *invalidationBacktrace;
 @property(readonly, nonatomic, getter=isValid) BOOL valid;
 - (void)invalidate;
 @end
-
+*/
 @protocol DVTObservingToken <DVTCancellableToken>
 @end
 
@@ -7874,7 +7874,7 @@ typedef struct {
 
 @end
 
-@interface IDESourceControlRepository : IDESourceControlTree <NSURLConnectionDelegate>
+@interface IDESourceControlRepository : IDESourceControlTree /* <NSURLConnectionDelegate> */
 {
     struct __SCNetworkReachability *_reachabilityRef;
     NSMutableArray *_workingTrees;

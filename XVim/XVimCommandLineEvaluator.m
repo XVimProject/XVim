@@ -25,6 +25,10 @@
 	OnKeyPressHandler _onKeyPress;
 	NSUInteger _historyNo;
 }
+
+- (XVimEvaluator*) Up:(XVimWindow*)window;
+- (XVimEvaluator*) Down:(XVimWindow*)window;
+
 @end
 
 @implementation XVimCommandLineEvaluator

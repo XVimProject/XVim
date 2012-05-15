@@ -60,26 +60,26 @@
 - (void)dvtFindBar:(id)arg1 didUpdateCurrentResult:(id)arg2;
 - (void)dvtFindBar:(id)arg1 didUpdateResults:(id)arg2;
 @end
-
+/*
 @protocol DVTInvalidation <NSObject>
 @property(readonly) DVTStackBacktrace *invalidationBacktrace;
 @property(readonly, nonatomic, getter=isValid) BOOL valid;
 - (void)invalidate;
 @end
-
+*/
 @protocol DVTMessageBubbleAnnotationDelegate <DVTTextAnnotationDelegate>
 
 @optional
 - (void)didClickMessageBubbleForAnnotation:(id)arg1 onIcon:(BOOL)arg2 inTextView:(id)arg3 event:(id)arg4;
 @end
-
+/*
 @protocol DVTScopeBarContentController <NSObject>
 @property(readonly) double preferredViewHeight;
 
 @optional
 - (void)didPressDismissOnScopeBar:(id)arg1;
 @end
-
+*/
 @protocol DVTSourceExpressionSource <NSObject, DVTInvalidation>
 @property(readonly, nonatomic) DVTSourceExpression *mouseOverExpression;
 @property(readonly, nonatomic) struct CGRect currentSelectionFrame;
@@ -152,21 +152,21 @@
 - (void)didBeginRolloverOnAnnotation:(id)arg1 inTextSidebarView:(id)arg2 event:(id)arg3;
 - (void)didClickAnnotation:(id)arg1 inTextSidebarView:(id)arg2 event:(id)arg3;
 @end
-
+/*
 @protocol DVTTextFindable <NSObject>
 - (id)findStringMatchingDescriptor:(id)arg1 backwards:(BOOL)arg2 from:(id)arg3 to:(id)arg4;
 
 @optional
 @property unsigned long long supportedMatchingOptions;
 @end
-
+*/
 @protocol DVTTextReplacable <NSObject>
 - (BOOL)replaceFindResults:(id)arg1 withString:(id)arg2 withError:(id *)arg3;
 
 @optional
 - (BOOL)replaceTextWithContentsOfURL:(id)arg1 error:(id *)arg2;
 @end
-
+/*
 @protocol IDEBlueprint <NSObject, IDEIntegrityLogDataSource>
 @property(readonly) NSString *blueprintIdentifier;
 @property(readonly) NSString *name;
@@ -201,7 +201,7 @@
 - (id)defaultConfigurationName;
 - (id)availableConfigurationNames;
 @end
-
+*/
 @protocol IDEBlueprintProvider <NSObject>
 - (id)testableProdiver;
 - (id)blueprintForName:(id)arg1;
@@ -241,11 +241,11 @@
 @optional
 - (BOOL)editorWantsAnnotationsFromProviderClass:(Class)arg1;
 @end
-
+/*
 @protocol IDEDocumentStructureProviding <NSObject>
 @property(readonly) NSArray *ideTopLevelStructureObjects;
 @end
-
+*/
 @protocol IDEEditorDelegate <NSObject>
 
 @optional
@@ -256,7 +256,7 @@
 - (id)geniusResult_identifierForGeniusCategory;
 - (id)geniusResult_identifierForManualCategory;
 @end
-
+/*
 @protocol IDEIntegrityLogDataSource
 @property(readonly) IDEActivityLogSection *integrityLog;
 - (void)analyzeModelIntegrity;
@@ -265,7 +265,7 @@
 @protocol IDEOpenQuicklyInitialStringProvider <NSObject>
 @property(readonly) NSString *openQuicklyInitialString;
 @end
-
+*/
 @protocol IDEOpenQuicklyJumpToSupport <NSObject>
 - (id)currentEditorContext;
 - (id)documentLocationForOpenQuicklyQuery:(id)arg1;
