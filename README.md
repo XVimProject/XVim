@@ -75,7 +75,7 @@ To reduce the transfer fee please donate directly through Paypal donation site b
 https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 Since no messages are sent to me(us) when you donate from above
-it is appreciated to write a message on [Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim ).
+it is appreciated to write a message on [Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-messages-to-XVim ).
 It will really motivate me(us)!
 
 このプロジェクト、プラグインがよいと思われましたら寄付をいただけると非常にうれしいです。
@@ -85,7 +85,7 @@ It will really motivate me(us)!
 https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
 この場合、こちらにメッセージなどが来ることはありませんので、
-メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-massges-to-XVim )にいただけると、開発のモチベーションにつながります。
+メッセージを[Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-messages-to-XVim )にいただけると、開発のモチベーションにつながります。
 
 Contributors
 ============
