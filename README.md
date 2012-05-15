@@ -12,11 +12,10 @@ INSTALL
 From Installer Package
 --------
 
-Download a daily build from http://programming.jugglershu.net/xvim . Usually the latest one is the best choise for you.
-
-Install it. Do not change the install directory. Then restart Xcode. That's it!
+Download a daily build from http://programming.jugglershu.net/xvim . Usually the latest one is the best choice for you.
 
 ( For Xcode 4.2 for Snow Leopard you can not use the installer package. See below to install from source code. )
+Install it without changing the installation directory and then restart Xcode. That's it!
 
 From Source Code
 -----------------
@@ -40,20 +39,19 @@ See separate [FeatureList.md](https://github.com/JugglerShu/XVim/blob/master/Doc
 
 Support Xcode Versions
 =============
-We are developing XVim with Xcode 4.3 at the moment.
-We recomend you to use XVim with XCode 4.3.
-But it should work on 4.2 too and we want to support it as possible as we can.
-So if you have any problem wit Xcode 4.2 feel free to make issues.
+We are developing XVim with Xcode 4.3 at the moment, So we recommend you use XVim with XCode 4.3. 
+Though, it should work on 4.2 too and we want to support that as much as possible.
+So if you have any problems with Xcode 4.2 feel free to create a new issue.
 
 Bug reports
 =============
-Unfortunately XVim sometimes leads Xcode's crash. We are working on eliminate all the cause of crashes but its really hard work.
+Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs but it's really hard work.
 Your bug reports with following information is really usuful to fix the problems.
- * Crash information ( Xcode shows thraeds stack trace when crashes. Copy them. )
- * The operation you did ( series of key strokes or mouse clicks )
- * The text you operated on
+ * Crash information ( Xcode shows threads stack trace when crashes. Copy them. )
+ * The operations you did to cause the crash ( series of key strokes or mouse clicks )
+ * The text you were manipulating
  * Xcode version ( 4.3 or 4.2 ... )
- * XVim version ( Version number or the revision you build or the date of the daylybuild package )
+ * XVim version ( Version number of the revision you built or the date of the daylybuild package )
 
 Contributions
 =============
@@ -75,8 +73,7 @@ For Japanese Users/Developsers(日本の開発者のみなさまへ）
 Donations
 ===========
 If you think the plugin is useful please donate.
-Since I do not intend make money from this project I decided to donate all donations
-to this project to the people who are suffering from the damage of Tohoku earthquake and tsunami in 2011 in Japan.
+Since I do not intend make money from this project I decided to donate all donations I recieve to the people who are suffering from the damage of the 2011 Tohoku earthquake and tsunami in Japan.
 
 To reduce the transfer fee please donate directly through Paypal donation site below.
 
