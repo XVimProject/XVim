@@ -14,11 +14,17 @@ Download a daily build from http://programming.jugglershu.net/xvim . Usually the
 
 Install it. Do not change the install directory. Then restart Xcode. That's it!
 
+( For Xcode 4.2 for Snow Leopard you can not use the installer package. See below to install from source code. )
+
 From Source Code
 -----------------
 
 Download source code and build XVim.xcodeproj. 
 It automatically build and installs the plugin into the correct directory.
+
+If you are building it with Xcode 4.2 for Snow Leopard change the build setting. Open project editing page and set "Mac OS X Deployment Target" to "10.6" and build it.
+
+Then restart Xcode.
 
 Uninstall
 =============
