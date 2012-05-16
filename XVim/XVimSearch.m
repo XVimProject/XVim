@@ -321,7 +321,7 @@
     }
 
     NSString *searchString = [(forward ? @"/" : @"?") stringByAppendingString:escapedSearchWord];
-    NSRange found = [self executeSearch:searchString display:searchWord from:from inWindow:window];
+    found = [self executeSearch:searchString display:searchWord from:from inWindow:window];
 
     if (found.location != NSNotFound &&
         ((!forward && begin.location != wordRange.location) ||
