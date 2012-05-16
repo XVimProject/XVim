@@ -17,6 +17,7 @@
 #import "XVimStatusLine.h"
 #import "XVim.h"
 #import "XVimOptions.h"
+#import "IDEKit.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -194,21 +195,10 @@
     if (b) {
         if (!window.sourceView)
             window.sourceView = [[XVimSourceView alloc] initWithView:base];
-
-        // XXX: Dirty hack to get command line view as being starting to receive KB/Mouse events.
-        //      There might be a better way to connect corresponding command line view with source view.
-        NSView *v = base;
-        while ([v superview]) {
-            if ([NSStringFromClass([v class]) isEqualToString:@"DVTLayoutView_ML"]) {
-                for (NSView *subView in v.subviews) {
-                    if ([subView isKindOfClass:[XVimCommandLine class]]) {
-                        window.commandLine = (XVimCommandLine *)subView;
-                    }
-                }
-                break;
-            }
-            v = [v superview];
-        }
+        [Logger traceView:[[base window] contentView] depth:0];
+        IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[base window]];
+        IDEEditorArea* editorArea = [wc editorArea];
+        window.commandLine = [XVimCommandLine associateOf:editorArea];
     }
     return b;
 }

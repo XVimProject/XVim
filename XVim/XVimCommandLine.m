@@ -75,6 +75,7 @@
         self.autoresizesSubviews = YES;
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
+        
     }
     return self;
 }

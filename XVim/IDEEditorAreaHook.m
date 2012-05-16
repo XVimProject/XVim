@@ -42,23 +42,27 @@
     object_getInstanceVariable(self, "_editorAreaAutoLayoutView", (void**)&layoutView); // The view contains editors and border view
 
     // Check if we already have command line in the _editorAreaAutoLayoutView.
-    XVimCommandLine *cmd = [[XVimCommandLine alloc] init];
-    [layoutView addSubview:cmd];
-
-    // This notification is to resize command line view according to the editor area size.
-    [[NSNotificationCenter defaultCenter] addObserver:cmd
-                                             selector:@selector(didFrameChanged:)
-                                                 name:NSViewFrameDidChangeNotification
-                                               object:layoutView];
-    if ([[layoutView subviews] count] > 0) {
-        // This is a little hacky but first object in the subview is "border" view.
-        DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
-        // We need to know if border view is hidden or not to place editors and command line correctly.
-        [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
-        //NSView* view = [[layoutView subviews] objectAtIndex:0];
-
+    if( [XVimCommandLine associateOf:base] == nil ){
+        XVimCommandLine *cmd = [[[XVimCommandLine alloc] init] autorelease];
+        // TODO: Make XVimWindowManager to treat ssociation between commnad line view and DVTSourceTextView (or IDEEditorArea )
+        // Calling directory [XVimCommandLine associateOf:] instance method requires knowledge what kind of object is used when assicateWith: method is called. What they need is just [XVimWindowManager cmdLineForView:(NSView*)] method.
+        [cmd associateWith:base];
+        [layoutView addSubview:cmd];
+        
+        // This notification is to resize command line view according to the editor area size.
+        [[NSNotificationCenter defaultCenter] addObserver:cmd
+                                                 selector:@selector(didFrameChanged:)
+                                                     name:NSViewFrameDidChangeNotification
+                                                   object:layoutView];
+        if ([[layoutView subviews] count] > 0) {
+            // This is a little hacky but first object in the subview is "border" view.
+            DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
+            // We need to know if border view is hidden or not to place editors and command line correctly.
+            [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
+            //NSView* view = [[layoutView subviews] objectAtIndex:0];
+            
+        }
     }
-    [cmd release];
 }
 
 @end
