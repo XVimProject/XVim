@@ -659,10 +659,16 @@
 		A2B4BAC814D59F6600D817B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/SharedFrameworks,
+					/Applications/Xcode.app/Contents/Frameworks,
+					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
+					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -688,12 +694,18 @@
 		A2B4BAC914D59F6600D817B0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					/Applications/Xcode.app/Contents/SharedFrameworks,
+					/Applications/Xcode.app/Contents/Frameworks,
+					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
+					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
+				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
@@ -711,9 +723,17 @@
 		A2B4BACB14D59F6600D817B0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
+					/Applications/Xcode.app/Contents/Frameworks,
+					/Applications/Xcode.app/Contents/SharedFrameworks,
+				);
+				"FRAMEWORK_SEARCH_PATHS[arch=*]" = (
+					"$(inherited)",
 					/Developer/Applications/Xcode.app/Contents/Frameworks,
+					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
+					/Applications/Xcode.app/Contents/Frameworks,
 					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
 				);
 				GCC_ENABLE_OBJC_GC = supported;
@@ -723,6 +743,7 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
+				USER_HEADER_SEARCH_PATHS = "$(inherited) /Developer/Applications/Xcode.app/Contents/Frameworks /Developer/Applications/Xcode.app/Contents/SharedFrameworks /Applications/Xcode.app/Contents/Frameworks /Applications/Xcode.app/Contents/SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Debug;
@@ -730,6 +751,7 @@
 		A2B4BACC14D59F6600D817B0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Developer/Applications/Xcode.app/Contents/Frameworks,
@@ -742,6 +764,7 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
+				USER_HEADER_SEARCH_PATHS = "$(inherited) /Developer/Applications/Xcode.app/Contents/Frameworks /Developer/Applications/Xcode.app/Contents/SharedFrameworks /Applications/Xcode.app/Contents/Frameworks /Applications/Xcode.app/Contents/SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Release;
