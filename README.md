@@ -4,6 +4,8 @@ XVim
 XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 
+(I'm looking for a job now. See HIREME.md.... Sorry if this is inappropriate to be here)
+
 INSTALL
 =======
 
