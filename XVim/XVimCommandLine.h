@@ -18,7 +18,4 @@
 - (void)didFrameChanged:(NSNotification*)notification;
 
 - (XVimCommandField*)commandField;
-
-+ (XVimCommandLine*)associateOf:(id)object;
-- (void)associateWith:(id)object;
 @end

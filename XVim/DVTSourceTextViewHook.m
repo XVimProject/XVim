@@ -18,6 +18,8 @@
 #import "XVim.h"
 #import "XVimOptions.h"
 #import "IDEKit.h"
+#import "IDEEditorArea+XVim.h"
+#import "DVTSourceTextView+XVim.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -195,10 +197,7 @@
     if (b) {
         if (!window.sourceView)
             window.sourceView = [[XVimSourceView alloc] initWithView:base];
-        [Logger traceView:[[base window] contentView] depth:0];
-        IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[base window]];
-        IDEEditorArea* editorArea = [wc editorArea];
-        window.commandLine = [XVimCommandLine associateOf:editorArea];
+        window.commandLine = [base commandLine];
     }
     return b;
 }

@@ -14,6 +14,7 @@
 #import "XVimWindow.h"
 #import "DVTKit.h"
 #import "XVim.h"
+#import "IDEEditorArea+XVim.h"
 
 @implementation IDEEditorAreaHook
 /**
@@ -23,8 +24,6 @@
  * This class has private instance variable named "_editorAreaAutoLayoutView" which is the view
  * contains source code editores and border view between editors and debug area.
  * We insert command line view between editors and debug area.
- * And also to handle all the input to editors we insert XVimWindow object into this view as invisible view.
- * All the input to the editors (DVTSourceTextView) or command line view is forward to XVimWindow class.
  *
  * IDEEdiatorArea exists in every Xcode tabs so if you have 4 tabs in a Xcode window there are 4 command line and XVimWindow views we insert.
  **/
@@ -37,32 +36,10 @@
 
 - (void)viewDidInstall{
     IDEEditorArea* base = (IDEEditorArea*)self;
-    NSView* layoutView;
     [base viewDidInstall_];
-    object_getInstanceVariable(self, "_editorAreaAutoLayoutView", (void**)&layoutView); // The view contains editors and border view
 
-    // Check if we already have command line in the _editorAreaAutoLayoutView.
-    if( [XVimCommandLine associateOf:base] == nil ){
-        XVimCommandLine *cmd = [[[XVimCommandLine alloc] init] autorelease];
-        // TODO: Make XVimWindowManager to treat ssociation between commnad line view and DVTSourceTextView (or IDEEditorArea )
-        // Calling directory [XVimCommandLine associateOf:] instance method requires knowledge what kind of object is used when assicateWith: method is called. What they need is just [XVimWindowManager cmdLineForView:(NSView*)] method.
-        [cmd associateWith:base];
-        [layoutView addSubview:cmd];
-        
-        // This notification is to resize command line view according to the editor area size.
-        [[NSNotificationCenter defaultCenter] addObserver:cmd
-                                                 selector:@selector(didFrameChanged:)
-                                                     name:NSViewFrameDidChangeNotification
-                                                   object:layoutView];
-        if ([[layoutView subviews] count] > 0) {
-            // This is a little hacky but first object in the subview is "border" view.
-            DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
-            // We need to know if border view is hidden or not to place editors and command line correctly.
-            [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
-            //NSView* view = [[layoutView subviews] objectAtIndex:0];
-            
-        }
-    }
+    // Setup Command Line
+    [base setupCommandLine];
 }
 
 @end
