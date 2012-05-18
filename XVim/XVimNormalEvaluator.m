@@ -763,7 +763,8 @@
     [view setSelectedRange:r];
     [view adjustCursorPosition];
     [view scrollTo:[window insertionPoint]];
-    return [self withNewContext];
+    return nil;
+    //return [self withNewContext];
 }
 
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
