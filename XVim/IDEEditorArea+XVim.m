@@ -19,7 +19,7 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     // Check if we already have command line in the _editorAreaAutoLayoutView.
     if( nil == [self commandLine] ){
         XVimCommandLine *cmd = [[[XVimCommandLine alloc] init] autorelease];
-        objc_setAssociatedObject(self, KEY_COMMAND_LINE, cmd, OBJC_ASSOCIATION_RETAIN);
+        objc_setAssociatedObject( self, (void*)KEY_COMMAND_LINE, cmd, OBJC_ASSOCIATION_RETAIN);
         [layoutView addSubview:cmd];
         
         // This notification is to resize command line view according to the editor area size.
@@ -40,6 +40,6 @@ static const char* KEY_COMMAND_LINE = "commandLine";
 }
 
 - (XVimCommandLine*)commandLine{
-    return objc_getAssociatedObject(self, KEY_COMMAND_LINE);
+    return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
 }
 @end
