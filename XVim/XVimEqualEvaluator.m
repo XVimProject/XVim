@@ -43,8 +43,10 @@
 {
 	XVimSourceView* view = [window sourceView];
 	[view selectOperationTargetFrom:from To:to Type:type];
-	[view copyText];
-    [[XVim instance] onDeleteOrYank:_yankRegister];
+    if( from < [[view string] length] ){
+        [view copyText];
+        [[XVim instance] onDeleteOrYank:_yankRegister];
+    }
 
 	// Indent
 	[view indentCharacterRange: [view selectedRange]];
