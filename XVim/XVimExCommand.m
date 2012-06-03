@@ -882,6 +882,7 @@
     [NSApp terminate:self];
 }
 
+/*
 - (void)debugMenu:(NSMenu*)menu :(int)depth{
     NSMutableString* tabs = [[[NSMutableString alloc] init] autorelease];
     for( int i = 0 ; i < depth; i++ ){
@@ -894,6 +895,7 @@
         [self debugMenu:[item submenu] :depth+1];
     }
 }
+ */
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
 }

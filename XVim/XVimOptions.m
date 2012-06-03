@@ -22,6 +22,7 @@
 @synthesize gdefault = _gdefault;
 @synthesize smartcase = _smartcase;
 @synthesize guioptions = _guioptions;
+@synthesize debug = _debug;
 
 - (id)init{
     if( self = [super init] ){

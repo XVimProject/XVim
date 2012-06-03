@@ -45,6 +45,7 @@ static XVim* s_instance = nil;
 	XVimHistoryHandler *_exCommandHistory;
 	XVimHistoryHandler *_searchHistory;
 	XVimKeymap* _keymaps[MODE_COUNT];
+    NSFileHandle* _logFile;
 }
 - (void)parseRcFile;
 @property (strong) NSArray *numberedRegisters;
@@ -197,6 +198,7 @@ static XVim* s_instance = nil;
         _recordingRegister = nil;
         _lastPlaybackRegister = nil;
         _repeatRegister = [_registers valueForKey:@"repeat"];
+        _logFile = nil;
         
 		for (int i = 0; i < MODE_COUNT; ++i)
 		{
@@ -214,6 +216,7 @@ static XVim* s_instance = nil;
     [_searcher release];
 	[_characterSearcher release];
     [_excmd release];
+    [_logFile release];
 	[super dealloc];
 }
 
@@ -229,6 +232,25 @@ static XVim* s_instance = nil;
 	}
 }
 
+- (void)writeToLogfile:(NSString*)str{
+    if( ![[self.options getOption:@"debug"] boolValue] ){
+        return;
+    }
+    
+    NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
+    NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
+     if( nil == _logFile){
+        NSFileManager* fm = [NSFileManager defaultManager];
+         if( [fm fileExistsAtPath:logPath] ){
+            [fm removeItemAtPath:logPath error:nil];
+        }
+        [fm createFileAtPath:logPath contents:nil attributes:nil];
+         _logFile = [[NSFileHandle fileHandleForWritingAtPath:logPath] retain]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
+        [_logFile seekToEndOfFile];
+    }
+    
+    [_logFile writeData:[str dataUsingEncoding:NSUTF8StringEncoding]];
+}
 - (XVimKeymap*)keymapForMode:(int)mode {
 	return _keymaps[mode];
 }

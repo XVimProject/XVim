@@ -178,6 +178,7 @@
 	XVimCommandField *commandField = window.commandLine.commandField;
 	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	[_history addEntry:command];
+    [[XVim instance] writeToLogfile:[@"ExCommand " stringByAppendingFormat:@"%@\n", command]];
 	return _onComplete(command);
 }
 
