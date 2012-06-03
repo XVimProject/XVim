@@ -53,6 +53,10 @@ Your bug reports with following information is really usuful to fix the problems
  * Xcode version ( 4.3 or 4.2 ... )
  * XVim version ( Version number of the revision you built or the date of the daylybuild package )
 
+There is also a logging feature in XVim. You can turn it on by the command ":set debug". After the command all the key input is logged in "$HOME/.xvimlog".
+To trun it off execute ":set nodebug". Write "set debug" in .xvimrc to turn it always on.
+This log file also really helpful to find out the cause of problems.
+
 Contributions
 =============
 Any suggestions, bug reports or feature requests are welcome.
