@@ -915,7 +915,10 @@
  the macros ".IP", ".LP", etc.  (These are nroff macros, so the dot must be in
  the first column).  A section boundary is also a paragraph boundary.
  Note that a blank line (only containing white space) is NOT a paragraph
- boundary.
+ boundary. 
+ 
+ Note: if MOPT_PARA_BOUND_BLANKLINE is passed in then blank lines with whitespace are paragraph boundaries. This is to get propper function for the delete a paragraph command(dap).
+ 
  Also note that this does not include a '{' or '}' in the first column.  When
  the '{' flag is in 'cpoptions' then '{' in the first column is used as a
  paragraph boundary |posix|.
@@ -935,7 +938,16 @@
     for( ; pos < s.length && NSNotFound == paragraph_head ; pos++,prevpos++ ){
         unichar c = [s characterAtIndex:pos];
         unichar prevc = [s characterAtIndex:prevpos];
-        if( isNewLine(c) && isNewLine(prevc)){
+        if(isNewLine(prevc) && !isNewLine(c)){
+            if([self nextNonBlankInALine:pos] == NSNotFound && opt == MOPT_PARA_BOUND_BLANKLINE){
+                paragraph_found++;
+                if(count == paragraph_found){
+                    paragraph_head = pos;
+                    break;
+                }
+            }
+        }
+        if( (isNewLine(c) && isNewLine(prevc)) ){
             if( newlines_skipped ){
                 paragraph_found++;
                 if( count  == paragraph_found ){
