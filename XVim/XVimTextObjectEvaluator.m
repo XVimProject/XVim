@@ -98,6 +98,23 @@
 	return [self executeActionForRange:r inWindow:window];
 }
 
+-(XVimEvaluator*)p:(XVimWindow*)window
+{
+    NSUInteger start = [self insertionPointInWindow:window];
+    if(start != 0){
+        start = [window.sourceView paragraphsBackward:[self insertionPointInWindow:window] count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+    }
+    NSUInteger starts_end = [window.sourceView paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+    NSUInteger end = [window.sourceView paragraphsForward:[self insertionPointInWindow:window] count:[self numericArg] option:MOPT_PARA_BOUND_BLANKLINE];
+    
+    if(starts_end != end){
+        start = starts_end;
+    }
+    
+    NSRange r = NSMakeRange(start, end - start);
+	return [self executeActionForRange:r inWindow:window];
+}
+
 - (XVimEvaluator*)w:(XVimWindow*)window
 {
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
