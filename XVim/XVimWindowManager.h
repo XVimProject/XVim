@@ -18,4 +18,6 @@
 - (void)addEditorWindowHorizontal;
 - (void)removeEditorWindow;
 - (void)closeAllButActive;
+- (void)setHorizontal;
+- (void)setVertical;
 @end

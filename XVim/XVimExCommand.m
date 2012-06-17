@@ -8,6 +8,8 @@
 
 #import "XVimExCommand.h"
 #import "XVimWindow.h"
+#import "XVimWindow+Xcode.h"
+#import "XVimWindowManager.h"
 #import "XVim.h"
 #import "XVimSearch.h"
 #import "XVimSourceView.h"
@@ -46,6 +48,7 @@
         // You can change the method name as needed ( Since Vim's one is not always suitable )
         
         _excommands = [[NSArray alloc] initWithObjects:
+                       CMD(@"A", @"switchToAlternate:inWindow:"),
                        CMD(@"append", @"append:inWindow:"),
                        CMD(@"abbreviate", @"abbreviate:inWindow:"),
                        CMD(@"abclear", @"abclear:inWindow:"),
@@ -513,7 +516,7 @@
                        CMD(@"vnoremap", @"map:inWindow:"),
                        CMD(@"vnew", @"splitview:inWindow:"),
                        CMD(@"vnoremenu", @"menu:inWindow:"),
-                       CMD(@"vsplit", @"splitview:inWindow:"),
+                       CMD(@"vsplit", @"vsplitview:inWindow:"),
                        CMD(@"vunmap", @"unmap:inWindow:"),
                        CMD(@"vunmenu", @"menu:inWindow:"),
                        CMD(@"write", @"write:inWindow:"),
@@ -786,6 +789,7 @@
 // This method corresponds to do_one_cmd in ex_docmd.c in Vim
 - (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
 {
+    [window.sourceView takeFocus];
     // cmd INCLUDE ":" character
     
     if( [cmd length] == 0 ){
@@ -911,7 +915,6 @@
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
-
 - (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
 	NSString *argString = args.arg;
@@ -982,6 +985,25 @@
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
+}
+
+-(void)only:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ [XVimWindowManager instance] closeAllButActive ];
+}
+-(void)splitview:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ [XVimWindowManager instance] addEditorWindowHorizontal ];
+}
+-(void)vsplitview:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ [XVimWindowManager instance] addEditorWindowVertical ];
+}
+
+
+-(void)switchToAlternate:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ window.sourceView jumpToAlternateFile ];
 }
 
 - (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window

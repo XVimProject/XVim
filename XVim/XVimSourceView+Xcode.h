@@ -20,8 +20,16 @@
 
  **/
 
+@class DVTSourceTextView, IDESourceCodeEditor, IDEEditorContext, IDEEditorMultipleContext, IDEWorkspaceWindowController, IDEWorkspaceWindow;
+
 @interface XVimSourceView(Xcode)
 
+@property (weak) DVTSourceTextView *xview;
+@property (weak) IDESourceCodeEditor *sourceCodeEditor;
+@property (weak) IDEEditorContext *editorContext;
+@property (weak) IDEEditorMultipleContext *editorMultipleContext;
+@property (weak) IDEWorkspaceWindow *window;
+@property (weak) IDEWorkspaceWindowController *windowController;
 // Indentation
 - (void)shiftLeft;
 - (void)shiftRight;
@@ -55,4 +63,8 @@
 // Sets the wrapline option
 - (void)setWrapsLines:(BOOL)wraps;
 
+-(void)splitEditor:(BOOL)vertical;
+-(void)jumpToAlternateFile;
+-(void)closeOtherEditors;
+-(void)takeFocus;
 @end
