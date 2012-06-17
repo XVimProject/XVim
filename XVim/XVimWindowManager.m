@@ -88,6 +88,7 @@ static XVimWindowManager *_instance = nil;
     if ([multipleContext canCloseEditorContexts]){
         [multipleContext closeAllEditorContextsKeeping:[multipleContext selectedEditorContext]];
     }
+    [ workspaceTabController changeToStandardEditor:self];
 }
 
 - (void)setHorizontal

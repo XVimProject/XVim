@@ -21,6 +21,7 @@
  
  **/
 
+
 @interface XVimSourceView : NSObject
 
 - (id)initWithView:(NSView*)view;
