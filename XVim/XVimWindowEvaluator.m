@@ -38,5 +38,9 @@
     [[XVimWindowManager instance] addEditorWindowVertical];
     return nil;
 }
+- (XVimEvaluator*)C_w:(id)arg{
+    [XVIM_WINDOWMANAGER jumpToOtherEditor];
+    return nil;
+}
 
 @end

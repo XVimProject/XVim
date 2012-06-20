@@ -20,4 +20,7 @@
 - (void)closeAllButActive;
 - (void)setHorizontal;
 - (void)setVertical;
+-(void)jumpToOtherEditor;
 @end
+
+#define XVIM_WINDOWMANAGER ([XVimWindowManager instance])
