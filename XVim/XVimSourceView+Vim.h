@@ -242,7 +242,9 @@ typedef struct _XVimWordInfo{
 - (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
-    
+- (NSUInteger)lineForward:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)lineBackward:(NSUInteger)index count:(NSUInteger)count;
+
 // Text Object
 - (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
