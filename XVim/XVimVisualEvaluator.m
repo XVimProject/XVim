@@ -219,7 +219,6 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     return self;
 }
 
-
 - (XVimEvaluator*)a:(XVimWindow*)window
 {
     [self updateSelectionInWindow:window];
