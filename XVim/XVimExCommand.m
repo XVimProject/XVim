@@ -887,7 +887,7 @@
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :q
-    [NSApp terminate:self];
+    [ [XVimWindowManager instance] removeEditorWindow ];
 }
 
 /*

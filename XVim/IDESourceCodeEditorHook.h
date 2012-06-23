@@ -13,5 +13,5 @@
 @end
 
 @interface IDESourceCodeEditor(Hook)
-- (id)initWithNibName_:nibName bundle:nibBundle document:nibDocument;
+-(void)didSetupEditor2_;
 @end
