@@ -189,6 +189,16 @@
 	return [_parent withNewContext];
 }
 
+- (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window
+{
+  return [self ESC:window];
+}
+
+- (XVimEvaluator*)C_c:(XVimWindow*)window
+{
+  return [self ESC:window];
+}
+
 - (XVimEvaluator*)Up:(XVimWindow*)window
 {
 	XVimCommandField *commandField = window.commandLine.commandField;
