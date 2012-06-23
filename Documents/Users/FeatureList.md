@@ -21,7 +21,7 @@ gi (insert mode at last insertion point) is supported.
 
 ## Scroll
 
-C-d, C-f, C-u, C-b, zz, zb, zt
+C-d, C-f, C-e, C-u, C-b, C-y, zz, zb, zt
 
 ## Jumps
 C-o, C-i, gd
