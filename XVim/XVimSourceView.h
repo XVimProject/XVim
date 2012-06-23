@@ -58,6 +58,8 @@
 // Scrolling
 - (NSUInteger)halfPageDown:(NSUInteger)index count:(NSUInteger)count;
 - (NSUInteger)halfPageUp:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)lineDown:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)lineUp:(NSUInteger)index count:(NSUInteger)count;
 - (void)pageUp;
 - (void)pageDown;
 - (void)scrollTo:(NSUInteger)location;

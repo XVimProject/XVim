@@ -1152,6 +1152,16 @@
     return [self firstNonBlankInALine:cursorIndexAfterScroll];
 }
 
+- (NSUInteger)lineForward:(NSUInteger)index count:(NSUInteger)count
+{ // C-e
+  return [self lineDown:index count:count];
+}
+
+- (NSUInteger)lineBackward:(NSUInteger)index count:(NSUInteger)count
+{ // C-y
+  return [self lineUp:index count:count];
+}
+
 // TODO: Fix the warnings
 // There are too many warning in following codes.
 #pragma GCC diagnostic push
