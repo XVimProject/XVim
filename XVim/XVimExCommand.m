@@ -50,9 +50,9 @@
         _excommands = [[NSArray alloc] initWithObjects:
                        ///////////// CUSTOM VIM EX COMMANDS ///////////
                        CMD(@"clean", @"clean:inWindow:"),
+                       CMD(@"A", @"switchToAlternate:inWindow:"),
                        ///////////// STANDARD VIM EX COMMANDS ///////////
                        
-                       CMD(@"A", @"switchToAlternate:inWindow:"),
                        CMD(@"append", @"append:inWindow:"),
                        CMD(@"abbreviate", @"abbreviate:inWindow:"),
                        CMD(@"abclear", @"abclear:inWindow:"),
@@ -906,6 +906,19 @@
  */
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
+}
+
+-(void)copen:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ XVIM_WINDOWMANAGER changeToIssuesNavigator ];
+}
+-(void)cnext:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ XVIM_WINDOWMANAGER selectNextIssue ];
+}
+-(void)cprevious:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ XVIM_WINDOWMANAGER selectPreviousIssue ];
 }
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window

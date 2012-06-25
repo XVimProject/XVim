@@ -139,5 +139,9 @@
 {
     [self.window makeFirstResponder:self.view ];
 }
+-(void)jumpToSymbol
+{
+    [self.sourceCodeEditor jumpToDefinition:self ];
+}
 
 @end

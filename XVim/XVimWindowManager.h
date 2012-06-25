@@ -41,6 +41,9 @@ typedef enum {
 -(void)jumpToEditorUp;
 -(void)jumpToEditorLeft;
 -(void)jumpToEditorRight;
+-(void)changeToIssuesNavigator;
+-(void)selectNextIssue;
+-(void)selectPreviousIssue;
 @end
 
 #define XVIM_WINDOWMANAGER ([XVimWindowManager instance])
