@@ -532,6 +532,11 @@
     return nil;
 }
 
+- (XVimEvaluator*)C_RSQUAREBRACKET:(XVimWindow*)window{
+    [[window sourceView] jumpToSymbol ];
+    return nil;
+}
+
 - (XVimEvaluator*)v:(XVimWindow*)window{
     return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 												   mode:MODE_CHARACTER];
@@ -820,6 +825,12 @@ static NSArray *_invalidRepeatKeys;
 - (XVimEvaluator*)ForwardDelete:(XVimWindow*)window
 {
 	return [self x:window];
+}
+
+- (XVimEvaluator*)S_C_A:(XVimWindow*)window
+{
+	[[window sourceView] jumpToAlternateFile];
+    return nil;
 }
 
 @end

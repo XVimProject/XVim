@@ -186,7 +186,7 @@ static DirectionDecisions
 {
     IDESourceCodeEditor *editor = _editor;
     IDEWorkspaceTabController *workspaceTabController = [editor workspaceTabController];
-    [workspaceTabController changeToAssistantLayout_BV:self];
+    [workspaceTabController changeToAssistantLayout_RV:self];
 }
 
 
@@ -226,6 +226,7 @@ static DirectionDecisions
         {
             IDEEditorContext* nextContext = [ sortedEditorContexts objectAtIndex:(idxOfActiveContext - 1) ] ;
             [ nextContext takeFocus ];
+            [ self.editor jumpToSelection:self ];
         }
     }
     
@@ -265,6 +266,7 @@ static DirectionDecisions
         {
             IDEEditorContext* nextContext = [ sortedEditorContexts objectAtIndex:(idxOfActiveContext + 1) ] ;
             [ nextContext takeFocus ];
+            [ self.editor jumpToSelection:self ];
         }
     }
 }
@@ -305,6 +307,7 @@ static DirectionDecisions
         {
             IDEEditorContext* nextContext = [ sortedEditorContexts objectAtIndex:((idxOfActiveContext - 1) % [sortedEditorContexts count] )] ;
             [ nextContext takeFocus ];
+            [ self.editor jumpToSelection:self ];
         }
     }
     
@@ -335,10 +338,29 @@ static DirectionDecisions
         {
             IDEEditorContext* nextContext = [ sortedEditorContexts objectAtIndex:((idxOfActiveContext + 1) % [sortedEditorContexts count] )] ;
             [ nextContext takeFocus ];
+            [ self.editor jumpToSelection:self ];
         }
     }
 }
+-(void)changeToIssuesNavigator
+{
+    [self.workspaceTabController changeToIssuesNavigator:self ];
+}
+-(void)selectNextIssue
+{
+    [ self.activeContext jumpToNextIssue:self];
+}
+-(void)selectPreviousIssue
+{
+    [ self.activeContext jumpToPreviousIssue:self];
+}
 @end
+
+
+/////////////////////////////////////////////////// End of Implementation //////////////////////////////////////////////////////////
+
+
+
 
 
 NSInteger yContextSort(id ctx1, id ctx2, void *context)
