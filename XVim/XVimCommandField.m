@@ -47,11 +47,6 @@
 	_absorbFocusEvent = YES;
 }
 
--(void)moveToBeginningOfLine:(id)sender
-{
-
-}
-
 
 - (void)hide
 {
