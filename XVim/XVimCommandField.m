@@ -47,25 +47,11 @@
 	_absorbFocusEvent = YES;
 }
 
-// Drawing Caret
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag
+-(void)moveToBeginningOfLine:(id)sender
 {
-        color = [color colorWithAlphaComponent:0.5];
-        NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-        NSUInteger glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
-        NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
-        
-        [color set];
-        rect.size.width =rect.size.height/2;
-        if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
-            rect.size.width=glyphRect.size.width;
-        
-        NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+
 }
 
-- (void)updateInsertionPointStateAndRestartTimer:(BOOL)restartFlag{
-    
-}
 
 - (void)hide
 {
