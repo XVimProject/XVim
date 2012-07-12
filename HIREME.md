@@ -23,7 +23,7 @@ Job I'm looking for is
 
 Any other factors are negotiatable.
 
-Here's my LikdIn profile.
+Here's my LinkedIn profile.
 http://www.linkedin.com/pub/shuichiro-suzuki/1b/6b7/590
 
 If you have any interest send me an email to shu@jugglershu.net please.
