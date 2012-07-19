@@ -171,14 +171,12 @@
 }
 
 - (XVimEvaluator*)C_y:(XVimWindow*)window{
-  NSLog(@"Ctrl-y\n");
     NSUInteger next = [[window sourceView] lineBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
     [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;
 }
 
 - (XVimEvaluator*)C_e:(XVimWindow*)window{
-  NSLog(@"Ctrl-e\n");
     NSUInteger next = [[window sourceView] lineForward:[[window sourceView] selectedRange].location count:[self numericArg]];
     [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
     return nil;

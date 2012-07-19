@@ -263,6 +263,23 @@
     return self;
 }
 
+// TODO - I think I'll have to grab the glyph above/below using rectangles, etc.
+- (XVimEvaluator*)C_y:(XVimWindow*)window{
+  NSLog(@"XVimInsertEvaluator [line 267] - C_y called");
+  [self insertionPointInWindow:window];
+  
+  
+  [[window sourceView] insertText:@"###"];
+  return self;
+}
+
+// TODO - C_e is mapped to "end of paragraph" by default in Xcode - not sure how to preclude this from happening after XVim does the insertion
+- (XVimEvaluator*)C_e:(XVimWindow*)window{
+  NSLog(@"XVimInsertEvaluator [line 272] - C_e called");
+  [[window sourceView] insertText:@"%%%"];
+  return self;
+}
+
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     // Do not record key strokes for insert. Instead we will directly append the inserted text into the register.
     NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
