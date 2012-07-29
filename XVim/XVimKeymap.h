@@ -13,6 +13,7 @@
 @interface XVimKeymapContext : NSObject
 - (void)clear;
 - (NSString*)toString;
+- (NSMutableArray *)absorbedKeys;
 @end
 
 @interface XVimKeymap : NSObject
