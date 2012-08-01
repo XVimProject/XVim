@@ -23,6 +23,7 @@
 @synthesize smartcase = _smartcase;
 @synthesize guioptions = _guioptions;
 @synthesize debug = _debug;
+@synthesize timeoutlen = _timeoutlen;
 
 - (id)init{
     if( self = [super init] ){
@@ -35,6 +36,7 @@
          @"incsearch",@"is",
          @"gdefault",@"gd",
          @"smartcase",@"scs",
+         @"timeoutlen",@"tm",
          nil];
         
         // Default values
@@ -45,6 +47,7 @@
 		_gdefault = NO;
 		_smartcase = NO;
 		_guioptions = @"rb";
+        _timeoutlen = @"1000";
     }
     return self;
 }

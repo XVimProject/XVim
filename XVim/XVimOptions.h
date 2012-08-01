@@ -17,6 +17,7 @@
 @property BOOL smartcase;
 @property BOOL debug;
 @property (copy) NSString *guioptions;
+@property (copy) NSString *timeoutlen;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

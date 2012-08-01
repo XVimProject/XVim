@@ -108,13 +108,20 @@
 	NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions 
 												 withPrimary:primaryKeyStroke
 												 withContext:_keymapContext];
-	if (keystrokes)
+    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+    if (keystrokes)
 	{
 		for (XVimKeyStroke *keyStroke in keystrokes)
 		{
 			[self handleKeyStroke:keyStroke];
 		}
-	}
+	} else {
+        XVimOptions *options = [[XVim instance] options];
+        NSTimeInterval delay = [options.timeoutlen integerValue] / 1000.0;
+        if (delay > 0) {
+            [self performSelector:@selector(handleTimeout) withObject:nil afterDelay:delay];
+        }
+    }
 
 	NSString* argString = [_keymapContext toString];
 	if ([argString length] == 0)
@@ -125,6 +132,13 @@
 	[self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     return YES;
+}
+
+- (void)handleTimeout {
+    for (XVimKeyStroke *keyStroke in [_keymapContext absorbedKeys]) {
+        [self handleKeyStroke:keyStroke];
+    }
+    [_keymapContext clear];
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
