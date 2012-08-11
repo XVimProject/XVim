@@ -33,6 +33,8 @@
 @synthesize lastInsertedText = _lastInsertedText;
 @synthesize movementKeyPressed = _movementKeyPressed;
 
+
+
 - (id)initWithContext:(XVimEvaluatorContext*)context
 {
     return [self initWithContext:context oneCharMode:NO];
@@ -223,12 +225,16 @@
             save.location -= 1;
             [[window sourceView] setSelectedRange:save];
             nextEvaluator = nil;
-        } else {
+        } else if ([self windowShouldReceive:keySelector]) {
             [[window sourceView] keyDown:event];
         }
     }
-    
     return nextEvaluator;
+}
+
+- (BOOL)windowShouldReceive:(SEL)keySelector {
+  return ![NSStringFromSelector(keySelector) isEqualToString:@"C_e:"] ||
+         ![NSStringFromSelector(keySelector) isEqualToString:@"C_y:"];
 }
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window{
