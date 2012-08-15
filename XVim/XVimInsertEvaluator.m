@@ -233,8 +233,9 @@
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {
-  return ![NSStringFromSelector(keySelector) isEqualToString:@"C_e:"] ||
-         ![NSStringFromSelector(keySelector) isEqualToString:@"C_y:"];
+  BOOL b = YES ^ ([NSStringFromSelector(keySelector) isEqualToString:@"C_e:"] ||
+                  [NSStringFromSelector(keySelector) isEqualToString:@"C_y:"]);
+  return b;
 }
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window{
@@ -269,20 +270,25 @@
     return self;
 }
 
-// TODO - I think I'll have to grab the glyph above/below using rectangles, etc.
+- (void)insertCharForC_yC_e:(XVimWindow *)window desiredCharIndex:(NSUInteger)desiredCharIndex {
+    unichar u = [[[window sourceView] string] characterAtIndex:desiredCharIndex];
+    NSString *charToInsert = [NSString stringWithFormat:@"%c", u];
+    [[window sourceView] insertText:charToInsert];
+}
+
 - (XVimEvaluator*)C_y:(XVimWindow*)window{
-  NSLog(@"XVimInsertEvaluator [line 267] - C_y called");
-  [self insertionPointInWindow:window];
-  
-  
-  [[window sourceView] insertText:@"###"];
+  NSUInteger cursorIndex = [[window sourceView] selectedRange].location;
+  NSUInteger columnIndex = [[window sourceView] columnNumber:cursorIndex];
+  NSUInteger desiredCharIndex = [[window sourceView] prevLine:cursorIndex column:columnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
+  [self insertCharForC_yC_e:window desiredCharIndex:desiredCharIndex];
   return self;
 }
 
-// TODO - C_e is mapped to "end of paragraph" by default in Xcode - not sure how to preclude this from happening after XVim does the insertion
 - (XVimEvaluator*)C_e:(XVimWindow*)window{
-  NSLog(@"XVimInsertEvaluator [line 272] - C_e called");
-  [[window sourceView] insertText:@"%%%"];
+  NSUInteger cursorIndex = [[window sourceView] selectedRange].location;
+  NSUInteger columnIndex = [[window sourceView] columnNumber:cursorIndex];
+  NSUInteger desiredCharIndex = [[window sourceView] nextLine:cursorIndex column:columnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
+  [self insertCharForC_yC_e:window desiredCharIndex:desiredCharIndex];
   return self;
 }
 
