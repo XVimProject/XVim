@@ -78,8 +78,8 @@
 {
 	NSRange range = [[window sourceView] selectedRange];
 	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-																			  mode:MODE_CHARACTER 
-																	  withRange:range];
+																			  mode:MODE_CHARACTER
+                                                                         withRange:range];
 }
 
 // Move to insert mode, have it call insertion point on sourceView
@@ -158,7 +158,7 @@
     self.startRange = [[window sourceView] selectedRange];
 }
 
-- (void)willEndHandlerInWindow:(XVimWindow*)window 
+- (void)willEndHandlerInWindow:(XVimWindow*)window
 {
 	[super willEndHandlerInWindow:window];
 	XVimSourceView *sourceView = [window sourceView];
@@ -183,7 +183,7 @@
 	// Set selection to one-before-where-we-were
 	NSUInteger insertionPoint = [self insertionPointInWindow:window];
 	NSUInteger headOfLine = [sourceView headOfLine:insertionPoint];
-	if (insertionPoint > 0 
+	if (insertionPoint > 0
 		&& headOfLine != insertionPoint && headOfLine != NSNotFound
 		&& !_oneCharMode)
 	{
@@ -194,7 +194,7 @@
 	NSRange r = [[window sourceView] selectedRange];
 	NSValue *v =[NSValue valueWithRange:r];
 	[[window getLocalMarks] setValue:v forKey:@"."];
-
+    
 	[[window sourceView] adjustCursorPosition];
 }
 
@@ -233,9 +233,9 @@
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {
-  BOOL b = YES ^ ([NSStringFromSelector(keySelector) isEqualToString:@"C_e:"] ||
-                  [NSStringFromSelector(keySelector) isEqualToString:@"C_y:"]);
-  return b;
+    BOOL b = YES ^ ([NSStringFromSelector(keySelector) isEqualToString:@"C_e:"] ||
+                    [NSStringFromSelector(keySelector) isEqualToString:@"C_y:"]);
+    return b;
 }
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window{
@@ -270,26 +270,32 @@
     return self;
 }
 
-- (void)insertCharForC_yC_e:(XVimWindow *)window desiredCharIndex:(NSUInteger)desiredCharIndex {
-    unichar u = [[[window sourceView] string] characterAtIndex:desiredCharIndex];
-    NSString *charToInsert = [NSString stringWithFormat:@"%c", u];
-    [[window sourceView] insertText:charToInsert];
-}
-
 - (XVimEvaluator*)C_y:(XVimWindow*)window{
-  NSUInteger cursorIndex = [[window sourceView] selectedRange].location;
-  NSUInteger columnIndex = [[window sourceView] columnNumber:cursorIndex];
-  NSUInteger desiredCharIndex = [[window sourceView] prevLine:cursorIndex column:columnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
-  [self insertCharForC_yC_e:window desiredCharIndex:desiredCharIndex];
-  return self;
+    [self C_yC_eHelper:window forC_y:YES];
+    return self;
 }
 
 - (XVimEvaluator*)C_e:(XVimWindow*)window{
-  NSUInteger cursorIndex = [[window sourceView] selectedRange].location;
-  NSUInteger columnIndex = [[window sourceView] columnNumber:cursorIndex];
-  NSUInteger desiredCharIndex = [[window sourceView] nextLine:cursorIndex column:columnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
-  [self insertCharForC_yC_e:window desiredCharIndex:desiredCharIndex];
-  return self;
+    [self C_yC_eHelper:window forC_y:NO];
+    return self;
+}
+
+- (void)C_yC_eHelper:(XVimWindow *)window forC_y:(BOOL)handlingC_y {
+    NSUInteger currentCursorIndex = [[window sourceView] selectedRange].location;
+    NSUInteger currentColumnIndex = [[window sourceView] columnNumber:currentCursorIndex];
+    NSUInteger newCharIndex;
+    if (handlingC_y) {
+        newCharIndex = [[window sourceView] prevLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
+    } else {
+        newCharIndex = [[window sourceView] nextLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
+    }
+    NSUInteger newColumnIndex = [[window sourceView] columnNumber:newCharIndex];
+    NSLog(@"Old column: %ld\tNew column: %ld", currentColumnIndex, newColumnIndex);
+    if (currentColumnIndex == newColumnIndex) {
+        unichar u = [[[window sourceView] string] characterAtIndex:newCharIndex];
+        NSString *charToInsert = [NSString stringWithFormat:@"%c", u];
+        [[window sourceView] insertText:charToInsert];
+    }
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
