@@ -80,6 +80,9 @@ If you want to replace all the occurence of xxxx with yyyy in the file you can s
     
 Currently replacing first occurence of xxxx with yyyy each line is not available
 
+## Insert mode commands
+
+C-y, C-e
 
 ## Text Object
 
