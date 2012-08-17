@@ -426,7 +426,15 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     return nil;
 }
 
-- (XVimEvaluator*)COLON:(XVimWindow*)window{
+- (XVimEvaluator*)C_c:(XVimWindow*)window{
+  return [self ESC:window];
+}
+
+- (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window{
+  return [self ESC:window];
+}
+
+  - (XVimEvaluator*)COLON:(XVimWindow*)window{
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[self contextCopy]
 																	 parent:self 
 															   firstLetter:@":'<,'>" 

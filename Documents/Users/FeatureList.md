@@ -21,7 +21,7 @@ gi (insert mode at last insertion point) is supported.
 
 ## Scroll
 
-C-d, C-f, C-u, C-b, zz, zb, zt
+C-d, C-f, C-e, C-u, C-b, C-y, zz, zb, zt
 
 ## Jumps
 C-o, C-i, gd
@@ -80,6 +80,9 @@ If you want to replace all the occurence of xxxx with yyyy in the file you can s
     
 Currently replacing first occurence of xxxx with yyyy each line is not available
 
+## Insert mode commands
+
+C-y, C-e
 
 ## Text Object
 

@@ -53,6 +53,7 @@
 - (void)insertText:(NSString*)text;
 - (void)insertText:(NSString*)text replacementRange:(NSRange)range;
 - (void)insertNewline;
+
 - (NSColor *)insertionPointColor;
 
 // Scrolling
