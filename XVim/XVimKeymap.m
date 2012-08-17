@@ -45,6 +45,10 @@
 	return ret;
 }
 
+- (NSMutableArray *)absorbedKeys {
+    return _absorbedKeys;
+}
+
 @end
 
 @interface XVimKeymapNode : NSObject {

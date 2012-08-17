@@ -132,6 +132,7 @@ The dot command ('.') is supported.
   [no]gdefault |
   [no]smartcase |
   guioptions | See below
+  timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
 
 ## guioptions
 
@@ -149,7 +150,7 @@ These changes only take effect on startup, meaning this option is only effective
 XVim supports five map commands: map, nmap, vmap, imap, omap.
 A map command can change one or more keystrokes into one or more key strokes.
 
-Note: For multi-key mapping timeout is not supported.
+Note: The default timeout value for multi-key mapping completion is 1 seconds (1000 milliseconds). You can change it using 'timeoutlen' option.
 
 Examples: 
 
