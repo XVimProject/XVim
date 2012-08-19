@@ -23,8 +23,6 @@
 // See the implementation to know what kind of objects it has. They are not difficult to understand.
 // 
 
-
-
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimSearch.h"
@@ -62,6 +60,7 @@ static XVim* s_instance = nil;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
 
+// For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{
     if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
         TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
@@ -73,6 +72,7 @@ static XVim* s_instance = nil;
     NSBundle* app = [NSBundle mainBundle];
     NSString* identifier = [app bundleIdentifier];
     
+    // Load only into Xcode
     if( ![identifier isEqualToString:@"com.apple.dt.Xcode"] ){
         return;
     }
@@ -96,8 +96,7 @@ static XVim* s_instance = nil;
                                  object: nil];
 }
 
-+ (XVim*)instance
-{
++ (XVim*)instance {
 	return s_instance;
 }
 
@@ -105,10 +104,8 @@ static XVim* s_instance = nil;
 // XVim Instance Methods /////
 //////////////////////////////
 
-- (id)init
-{
-	if (self = [super init])
-	{
+- (id)init {
+	if (self = [super init]) {
 		_excmd = [[XVimExCommand alloc] init];
 		_exCommandHistory = [[XVimHistoryHandler alloc] init];
 		_searchHistory = [[XVimHistoryHandler alloc] init];
@@ -118,8 +115,7 @@ static XVim* s_instance = nil;
 		// From the vim documentation:
 		// There are nine types of registers:
 		// *registers* *E354*
-		_registers =
-        [NSDictionary dictionaryWithObjectsAndKeys:
+		_registers = [NSDictionary dictionaryWithObjectsAndKeys:
 		 // 1. The unnamed register ""
 		 [[XVimRegister alloc] initWithDisplayName:@"\""] ,@"DQUOTE", 
 		 // 2. 10 numbered registers "0 to "9 
@@ -180,9 +176,8 @@ static XVim* s_instance = nil;
 		 // additional "hidden" register to store text for '.' command
 		 [[XVimRegister alloc] initWithDisplayName:@"repeat"] ,@"repeat", 
 		 nil];
-
-        _numberedRegisters =
-        [NSArray arrayWithObjects:
+        
+        _numberedRegisters = [NSArray arrayWithObjects:
          [_registers valueForKey:@"NUM0"],
          [_registers valueForKey:@"NUM1"],
          [_registers valueForKey:@"NUM2"],
@@ -200,12 +195,10 @@ static XVim* s_instance = nil;
         _repeatRegister = [_registers valueForKey:@"repeat"];
         _logFile = nil;
         
-		for (int i = 0; i < MODE_COUNT; ++i)
-		{
+		for (int i = 0; i < MODE_COUNT; ++i) {
 			_keymaps[i] = [[XVimKeymap alloc] init];
 		}
 		[XVimKeyStroke initKeymaps];
-        
 	}
 	return self;
 }
@@ -226,8 +219,7 @@ static XVim* s_instance = nil;
     NSString *keymapData = [[NSString alloc] initWithContentsOfFile:keymapPath 
                                                            encoding:NSUTF8StringEncoding
 															  error:NULL];
-	for (NSString *string in [keymapData componentsSeparatedByString:@"\n"])
-	{
+	for (NSString *string in [keymapData componentsSeparatedByString:@"\n"]){
 		[self.excmd executeCommand:[@":" stringByAppendingString:string] inWindow:nil];
 	}
 }
@@ -237,20 +229,21 @@ static XVim* s_instance = nil;
         return;
     }
     
-    NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
-    NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
-     if( nil == _logFile){
+    if( nil == _logFile){
+        NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
+        NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
         NSFileManager* fm = [NSFileManager defaultManager];
-         if( [fm fileExistsAtPath:logPath] ){
+        if( [fm fileExistsAtPath:logPath] ){
             [fm removeItemAtPath:logPath error:nil];
         }
         [fm createFileAtPath:logPath contents:nil attributes:nil];
-         _logFile = [[NSFileHandle fileHandleForWritingAtPath:logPath] retain]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
+        _logFile = [[NSFileHandle fileHandleForWritingAtPath:logPath] retain]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
         [_logFile seekToEndOfFile];
     }
     
     [_logFile writeData:[str dataUsingEncoding:NSUTF8StringEncoding]];
 }
+
 - (XVimKeymap*)keymapForMode:(int)mode {
 	return _keymaps[mode];
 }
@@ -259,13 +252,11 @@ static XVim* s_instance = nil;
     return [self.registers valueForKey:name];
 }
 
-- (XVimHistoryHandler*)exCommandHistory
-{
+- (XVimHistoryHandler*)exCommandHistory {
     return _exCommandHistory;
 }
 
-- (XVimHistoryHandler*)searchHistory
-{
+- (XVimHistoryHandler*)searchHistory {
 	return _searchHistory;
 }
 
@@ -307,10 +298,8 @@ static XVim* s_instance = nil;
     }
 }
 
-- (NSString*)pasteText:(XVimRegister*)yankRegister
-{
-	if (yankRegister)
-	{
+- (NSString*)pasteText:(XVimRegister*)yankRegister {
+	if (yankRegister) {
 		return yankRegister.text;
 	}
 

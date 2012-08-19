@@ -18,6 +18,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
+#import "XVimTester.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -556,6 +557,8 @@
                        CMD(@"X", @"X:inWindow:"),
                        CMD(@"~", @"sub:inWindow:"),
                        
+                       CMD(@"xvimtest", @"xvimtest:inWindow:"), // Run xvim test(for developing purpose)
+                       
 					   nil];
     }
     return self;
@@ -898,6 +901,11 @@
  */
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
+}
+
+- (void)xvimtest:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    XVimTester* tester = [[XVimTester alloc] initWithWindow:window];
+    [tester runTest];
 }
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window

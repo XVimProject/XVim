@@ -41,14 +41,12 @@
 
 @implementation XVimNormalEvaluator
 
-- (id)init
-{
+- (id)init {
 	[super initWithContext:[[XVimEvaluatorContext alloc] init]];
 	return self;
 }
 	 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-{
+- (id)initWithContext:(XVimEvaluatorContext*)context {
 	[super initWithContext:context];
 	return self;
 }
@@ -63,8 +61,7 @@
     return self;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window
-{	
+- (void)becameHandlerInWindow:(XVimWindow*)window {
 	[[window sourceView] adjustCursorPosition];
 	[super becameHandlerInWindow:window];
 	
@@ -79,8 +76,7 @@
     return @"";
 }
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_NORMAL];
 }
 
