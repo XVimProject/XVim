@@ -653,7 +653,7 @@
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] initWithYankRegister:[self yankRegister]];
+    XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     return [[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="]
 										operatorAction:operatorAction 
 											withParent:self];
