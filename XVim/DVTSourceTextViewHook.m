@@ -20,6 +20,7 @@
 #import "IDEKit.h"
 #import "IDEEditorArea+XVim.h"
 #import "DVTSourceTextView+XVim.h"
+#import "NSEvent+VimHelper.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -95,15 +96,7 @@
         return;
     }
    
-    // On some configuration when the " is opened, the string is still empty because the user
-    // needs to type the space button or any other character before the quote is made persistent
-    NSString* ignMod =  [theEvent charactersIgnoringModifiers];
-    if (ignMod == nil || [ignMod length] == 0) {
-        [base keyDown_:theEvent];
-        return;
-    }
-    
-    unichar charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+    unichar charcode = [theEvent unmodifiedKeyCode];
     [Logger logWithLevel:LogDebug format:@"Obj:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode];
     NSString* eventlog = [theEvent description];
     NSString* log = [eventlog stringByAppendingString:@"\n"];
@@ -156,9 +149,9 @@
 
 - (BOOL) performKeyEquivalent:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-	
+    
     METHOD_TRACE_LOG();
-    unichar charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+    unichar charcode = [theEvent unmodifiedKeyCode];
     TRACE_LOG(@"keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ ASCII:%d", [theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
     if( [[base window] firstResponder] != base){
         return NO;

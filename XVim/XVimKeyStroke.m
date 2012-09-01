@@ -7,6 +7,7 @@
 //
 
 #import "XVimKeyStroke.h"
+#import "NSEvent+VimHelper.h"
 
 static char* keynames[] = {
     "NUL",
@@ -382,11 +383,9 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 {
 	XVimKeyStroke *primaryKeyStroke = nil;
 	NSUInteger modifierFlags = event.modifierFlags & (NSShiftKeyMask | NSAlternateKeyMask | NSControlKeyMask | NSCommandKeyMask);
-	NSString *charactersIgnoringModifiers = [event charactersIgnoringModifiers];
-	NSString *characters = [event characters];
 	
-	unichar unmodifiedKeyCode = [charactersIgnoringModifiers characterAtIndex:0];
-	unichar modifiedKeyCode = [characters length] > 0 ? [characters characterAtIndex:0] : unmodifiedKeyCode;
+    unichar unmodifiedKeyCode = [event unmodifiedKeyCode];
+    unichar modifiedKeyCode = [event modifiedKeyCode];
 	
 	if (modifierFlags & (NSControlKeyMask | NSCommandKeyMask))
 	{
