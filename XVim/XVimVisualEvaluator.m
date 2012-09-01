@@ -412,7 +412,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
     [self updateSelectionInWindow:window];
 	
-	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] initWithYankRegister:[self yankRegister]];
+	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithContext:[self contextCopy]
 																 operatorAction:operatorAction 
 																	 withParent:self];
