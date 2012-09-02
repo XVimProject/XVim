@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimTaskRunner.h"
 
 // This file corresponds Vim's ex_cmds.h
 // Wondering if we can reuse ex_*.* files in Vim...
