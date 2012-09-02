@@ -25,7 +25,7 @@
     self = [super initWithFrame:frame];
     if (self) {
         _background = [[NSClassFromString(@"DVTChooserView") performSelector:@selector(alloc)] init];
-        _background.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
+        _background.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView
         [_background setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
         _status = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
         _status.backgroundColor = [NSColor clearColor];

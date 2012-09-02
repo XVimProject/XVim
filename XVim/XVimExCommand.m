@@ -8,6 +8,8 @@
 
 #import "XVimExCommand.h"
 #import "XVimWindow.h"
+#import "XVimWindow+Xcode.h"
+#import "XVimWindowManager.h"
 #import "XVim.h"
 #import "XVimSearch.h"
 #import "XVimSourceView.h"
@@ -20,7 +22,7 @@
 #import "XVimOptions.h"
 
 @implementation XVimExArg
-@synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
+@synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
 
 @implementation XVimExCmdname
@@ -46,6 +48,11 @@
         // You can change the method name as needed ( Since Vim's one is not always suitable )
         
         _excommands = [[NSArray alloc] initWithObjects:
+                       ///////////// CUSTOM VIM EX COMMANDS ///////////
+                       CMD(@"clean", @"clean:inWindow:"),
+                       CMD(@"A", @"switchToAlternate:inWindow:"),
+                       ///////////// STANDARD VIM EX COMMANDS ///////////
+                       
                        CMD(@"append", @"append:inWindow:"),
                        CMD(@"abbreviate", @"abbreviate:inWindow:"),
                        CMD(@"abclear", @"abclear:inWindow:"),
@@ -513,7 +520,7 @@
                        CMD(@"vnoremap", @"map:inWindow:"),
                        CMD(@"vnew", @"splitview:inWindow:"),
                        CMD(@"vnoremenu", @"menu:inWindow:"),
-                       CMD(@"vsplit", @"splitview:inWindow:"),
+                       CMD(@"vsplit", @"vsplitview:inWindow:"),
                        CMD(@"vunmap", @"unmap:inWindow:"),
                        CMD(@"vunmenu", @"menu:inWindow:"),
                        CMD(@"write", @"write:inWindow:"),
@@ -741,16 +748,25 @@
     }
     
     if( exarg.lineBegin == NSNotFound ){
+        exarg.noRangeSpecified = YES;
         // No range expression found. Use current line as range
         exarg.lineBegin = [view lineNumber:[view selectedRange].location];
         exarg.lineEnd =  exarg.lineBegin;
+    }
+    else
+    {
+        exarg.noRangeSpecified = NO;
     }
     
     // 4. parse command
     // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    while( isAlpha(*parsing) || *parsing == '!' ){
+    if (*parsing == '!') {
+        parsing++; count++;
+    }
+    else
+    while( isAlpha(*parsing) ){
         parsing++;
         count++;
     }
@@ -786,6 +802,7 @@
 // This method corresponds to do_one_cmd in ex_docmd.c in Vim
 - (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
 {
+    [window.sourceView takeFocus];
     // cmd INCLUDE ":" character
     
     if( [cmd length] == 0 ){
@@ -866,6 +883,7 @@
     }                
 }
 
+
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :w
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
@@ -879,7 +897,7 @@
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :q
-    [NSApp terminate:self];
+    [ [XVimWindowManager instance] removeEditorWindow ];
 }
 
 /*
@@ -900,18 +918,48 @@
 {
 }
 
+-(void)copen:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ XVIM_WINDOWMANAGER changeToIssuesNavigator ];
+}
+-(void)cnext:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ XVIM_WINDOWMANAGER selectNextIssue ];
+}
+-(void)cprevious:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ XVIM_WINDOWMANAGER selectPreviousIssue ];
+}
+
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     TRACE_LOG(@"registers: %@", [[XVim instance] registers])
 }
 
+-(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    if ( ! args.noRangeSpecified )
+    {
+        NSString* selectedText = [ window.sourceView selectedText ];
+        NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
+        if (scriptReturn != nil)
+        {
+            [ window.sourceView replaceText:scriptReturn ];
+        }
+    }
+    else
+    {
+        [XVimTaskRunner runScriptInTerminal:args.arg ];
+    }
+}
+- (void)clean:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ NSApp sendAction:@selector(cleanActiveRunContext:) to:nil from:self ];
+}
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
-    NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-    NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
-    [[NSApplication sharedApplication] sendEvent:keyPress];
+    [ NSApp sendAction:@selector(buildActiveRunContext:) to:nil from:self ];
 }
-
 - (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
 	NSString *argString = args.arg;
@@ -982,6 +1030,25 @@
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
+}
+
+-(void)only:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ [XVimWindowManager instance] closeAllButActive ];
+}
+-(void)splitview:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ [XVimWindowManager instance] addEditorWindowHorizontal ];
+}
+-(void)vsplitview:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ [XVimWindowManager instance] addEditorWindowVertical ];
+}
+
+
+-(void)switchToAlternate:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ window.sourceView jumpToAlternateFile ];
 }
 
 - (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window

@@ -24,10 +24,10 @@
 			withMethod:class_getInstanceMethod([self class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
    keepingOriginalWith:@selector(textView_:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
     
-	[Hooker hookMethod:@selector(initWithNibName:bundle:document:) 
+	[Hooker hookMethod:@selector(didSetupEditor)
 			   ofClass:delegate 
-			withMethod:class_getInstanceMethod([self class], @selector(initWithNibName:bundle:document:)) 
-   keepingOriginalWith:@selector(initWithNibName_:bundle:document:)];
+			withMethod:class_getInstanceMethod([self class], @selector(didSetupEditor))
+   keepingOriginalWith:@selector(didSetupEditor2_)];
 }
 
 - (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
@@ -35,11 +35,13 @@
     return newSelectedCharRanges;
 }
 
-- (id)initWithNibName:(NSString*)nibName bundle:(NSBundle*)nibBundle document:(NSDocument*)nibDocument{
+- (void)didSetupEditor
+{
 	IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self;
-    [editor initWithNibName_:nibName bundle:nibBundle document:nibDocument];
-	[XVimWindowManager createWithEditor:editor];
-    return (id)editor;
+    [editor didSetupEditor2_];
+    if (editor.isPrimaryEditor) {
+        [XVimWindowManager createWithEditor:editor];
+    }
 }
 
 @end

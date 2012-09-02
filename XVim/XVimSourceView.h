@@ -21,6 +21,7 @@
  
  **/
 
+
 @interface XVimSourceView : NSObject
 
 - (id)initWithView:(NSView*)view;
@@ -52,6 +53,8 @@
 - (void)deleteForward;
 - (void)insertText:(NSString*)text;
 - (void)insertText:(NSString*)text replacementRange:(NSRange)range;
+- (void)replaceText:(NSString*)text;
+- (NSString*)selectedText;
 - (void)insertNewline;
 
 - (NSColor *)insertionPointColor;
