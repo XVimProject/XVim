@@ -22,7 +22,7 @@
 #import "XVimOptions.h"
 
 @implementation XVimExArg
-@synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
+@synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
 
 @implementation XVimExCmdname
@@ -748,9 +748,14 @@
     }
     
     if( exarg.lineBegin == NSNotFound ){
+        exarg.noRangeSpecified = YES;
         // No range expression found. Use current line as range
         exarg.lineBegin = [view lineNumber:[view selectedRange].location];
         exarg.lineEnd =  exarg.lineBegin;
+    }
+    else
+    {
+        exarg.noRangeSpecified = NO;
     }
     
     // 4. parse command
@@ -933,10 +938,19 @@
 
 -(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
-    NSString* selectedText = [ window.sourceView selectedText ];
-    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
-    [ window.sourceView replaceText:scriptReturn ];
-
+    if ( ! args.noRangeSpecified )
+    {
+        NSString* selectedText = [ window.sourceView selectedText ];
+        NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
+        if (scriptReturn != nil)
+        {
+            [ window.sourceView replaceText:scriptReturn ];
+        }
+    }
+    else
+    {
+        [XVimTaskRunner runScriptInTerminal:args.arg ];
+    }
 }
 - (void)clean:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
