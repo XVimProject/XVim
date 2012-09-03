@@ -27,9 +27,6 @@
 {
     Class c = NSClassFromString(@"DVTSourceTextView");
     
-    // Hook setSelectedRange:
-    [Hooker hookMethod:@selector(setSelectedRange:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(setSelectedRange:) ) keepingOriginalWith:@selector(setSelectedRange_:)];
-    
     // Hook setSelectedRange:affinity:stillSelecting:
     [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(setSelectedRange_:affinity:stillSelecting:)];
     
@@ -69,18 +66,10 @@
    keepingOriginalWith:@selector(observeValueForKeyPath_:ofObject:change:context:)];
 }
 
-- (void)setSelectedRange:(NSRange)charRange {
-    // Call original method
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [base setSelectedRange_:charRange];
-    return;
-}
-
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [XVimWindow associateOf:base];
-    if (window) 
-	{
+    if (window){
 		charRange = [window restrictSelectedRange:charRange];
 	}
     [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];

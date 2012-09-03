@@ -45,14 +45,14 @@
 	[super initWithContext:[[XVimEvaluatorContext alloc] init]];
 	return self;
 }
-	 
+
 - (id)initWithContext:(XVimEvaluatorContext*)context {
 	[super initWithContext:context];
 	return self;
 }
 
 -(id)initWithContext:(XVimEvaluatorContext*)context
-		playbackRegister:(XVimRegister*)xregister
+    playbackRegister:(XVimRegister*)xregister
 {
 	self = [super initWithContext:context];
     if (self) {
@@ -88,7 +88,7 @@
 
 - (XVimEvaluator*)a:(XVimWindow*)window{
     // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
-   // next line. it appends to the current line
+    // next line. it appends to the current line
     // A cursor should not be on the new line break letter in Vim(Except empty line).
     // So the root solution is to prohibit a cursor be on the newline break letter.
     XVimSourceView* view = [window sourceView];
@@ -199,7 +199,7 @@
             --count;
         }
     }
-
+    
     NSUInteger from = range.location;
     NSUInteger head = [view headOfLine:range.location];
     if (head != NSNotFound && [self numericArg] > 1 && !isWhiteSpace([text characterAtIndex:from])){
@@ -219,7 +219,7 @@
     if (![view isEOF:to]){
         length -= 1;
     }
- 
+    
     if (length > 0){
         [view setSelectedRange:NSMakeRange(from, length)];
         [view deleteTextIntoYankRegister:[self yankRegister]];
@@ -319,7 +319,7 @@
 
 // Should be moved to XVimMotionEvaluator
 
- - (XVimEvaluator*)m:(XVimWindow*)window{
+- (XVimEvaluator*)m:(XVimWindow*)window{
     // 'm{letter}' sets a local mark.
 	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
 												  parent:self];
@@ -454,14 +454,14 @@
     XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"]
 																  parent:self
 															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) {
-		XVimRegister *xregister = [[XVim instance] findRegister:rname];
-        if (xregister && xregister.isReadOnly == NO) {
-            [window recordIntoRegister:xregister];
-        } else {
-            [[XVim instance] ringBell];
-        }
-		return nil;
-	}];
+                                                                  XVimRegister *xregister = [[XVim instance] findRegister:rname];
+                                                                  if (xregister && xregister.isReadOnly == NO) {
+                                                                      [window recordIntoRegister:xregister];
+                                                                  } else {
+                                                                      [[XVim instance] ringBell];
+                                                                  }
+                                                                  return nil;
+                                                              }];
 	
 	return eval;
 }
@@ -513,7 +513,7 @@
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [view undo];
     }
-
+    
     // Undo should not keep anything selected
     NSRange r = [view selectedRange];
     [view setSelectedRange:NSMakeRange(r.location, 0)];
@@ -595,8 +595,8 @@
 - (XVimEvaluator*)Y:(XVimWindow*)window{
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithYankRegister:[self yankRegister]];
     XVimYankEvaluator* yank = [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"]
-									   operatorAction:operatorAction 
-										   withParent:self];
+                                                          operatorAction:operatorAction 
+                                                              withParent:self];
     return [yank y:window];
 }
 
@@ -612,18 +612,18 @@
     XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"]
 																  parent:self
 															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
-	{
-		XVim *xvim = [XVim instance];
-		XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
-		
-        if (xregister && xregister.isReadOnly == NO) {
-			return [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy]
-											   playbackRegister:xregister];
-        } else {
-			[xvim ringBell];
-			return nil;
-		}
-	}];
+                           {
+                               XVim *xvim = [XVim instance];
+                               XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
+                               
+                               if (xregister && xregister.isReadOnly == NO) {
+                                   return [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy]
+                                                                      playbackRegister:xregister];
+                               } else {
+                                   [xvim ringBell];
+                                   return nil;
+                               }
+                           }];
 	
 	return eval;
 }
@@ -631,20 +631,20 @@
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window
 {
     XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""]
-																									 parent:self
-																								 completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
-	{
-		XVimRegister *xregister = [[XVim instance] findRegister:rname];
-        if (xregister.isReadOnly == NO)
-		{
-			[context setYankRegister:xregister];
-			[context appendArgument:rname];
-            return [[XVimNormalEvaluator alloc] initWithContext:context];
-        }
-            
-		[[XVim instance] ringBell];
-		return nil;
-	}];
+                                                                  parent:self
+                                                              completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
+                           {
+                               XVimRegister *xregister = [[XVim instance] findRegister:rname];
+                               if (xregister.isReadOnly == NO)
+                               {
+                                   [context setYankRegister:xregister];
+                                   [context appendArgument:rname];
+                                   return [[XVimNormalEvaluator alloc] initWithContext:context];
+                               }
+                               
+                               [[XVim instance] ringBell];
+                               return nil;
+                           }];
 	return eval;
 }
 
@@ -682,15 +682,15 @@
 - (XVimEvaluator*)COLON:(XVimWindow*)window{
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																	 parent:self 
-															   firstLetter:@":" 
-																   history:[[XVim instance] exCommandHistory]
-																completion:^ XVimEvaluator* (NSString* command) 
+                                                                firstLetter:@":" 
+                                                                    history:[[XVim instance] exCommandHistory]
+                                                                 completion:^ XVimEvaluator* (NSString* command) 
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
                                [excmd executeCommand:command inWindow:window];
                                return nil;
                            }
-                                                                onKeyPress:nil];
+                                                                 onKeyPress:nil];
 	
 	return eval;
 }
@@ -699,9 +699,9 @@
 {
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																	 parent:self 
-															   firstLetter:firstLetter
-																   history:[[XVim instance] searchHistory]
-																completion:^ XVimEvaluator* (NSString *command)
+                                                                firstLetter:firstLetter
+                                                                    history:[[XVim instance] searchHistory]
+                                                                 completion:^ XVimEvaluator* (NSString *command)
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
 							   XVimSourceView *sourceView = [window sourceView];
@@ -719,7 +719,7 @@
 							   }
 							   return nil;
 						   }
-                                                                onKeyPress:^void(NSString *command)
+                                                                 onKeyPress:^void(NSString *command)
                            {
                                XVimOptions *options = [[XVim instance] options];
                                if (options.incsearch){

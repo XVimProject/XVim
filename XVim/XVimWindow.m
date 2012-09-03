@@ -3,7 +3,6 @@
 //  XVim
 //
 //  Created by Tomas Lundell on 9/04/12.
-//  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
 #import "XVimWindow.h"
@@ -33,9 +32,8 @@
 @synthesize sourceView = _sourceView;
 @synthesize commandLine = _commandLine;
 
-- (id)init 
-{
-    if (self = [super init]) {
+- (id)init{
+    if (self = [super init]){
 		_staticString = @"";
 		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
@@ -44,8 +42,7 @@
 	return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc{
     [_keymapContext release];
     [_localMarks release];
     [_staticString release];
@@ -55,16 +52,13 @@
     [super dealloc];
 }
 
-- (void)willSetEvaluator:(XVimEvaluator*)evaluator
-{
-	if (evaluator != _currentEvaluator && _currentEvaluator)
-	{
+- (void)willSetEvaluator:(XVimEvaluator*)evaluator {
+	if (evaluator != _currentEvaluator && _currentEvaluator){
 		[_currentEvaluator willEndHandlerInWindow:self];
 	}
 }
 
-- (void)setEvaluator:(XVimEvaluator*)evaluator
-{
+- (void)setEvaluator:(XVimEvaluator*)evaluator {
 	if (!evaluator) {
 		evaluator = [[XVimNormalEvaluator alloc] init];
 	}
