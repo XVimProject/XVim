@@ -16,6 +16,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymapProvider.h"
 #import "XVimVisualEvaluator.h"
+#import "XVimDeleteEvaluator.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -280,6 +281,17 @@
     return self;
 }
 
+- (XVimEvaluator*)C_w:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
+    
+	XVimDeleteAction *action = [[XVimDeleteAction alloc] initWithYankRegister: nil
+														 insertModeAtCompletion:FALSE];
+    [action motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    
+    return self;
+}
+    
 - (void)C_yC_eHelper:(XVimWindow *)window forC_y:(BOOL)handlingC_y {
     NSUInteger currentCursorIndex = [[window sourceView] selectedRange].location;
     NSUInteger currentColumnIndex = [[window sourceView] columnNumber:currentCursorIndex];

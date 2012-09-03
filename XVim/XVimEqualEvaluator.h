@@ -12,8 +12,5 @@
 @interface XVimEqualEvaluator : XVimOperatorEvaluator
 @end
 
-@interface XVimEqualAction : XVimOperatorAction {
-	__weak XVimRegister* _yankRegister;
-}
-- (id)initWithYankRegister:(XVimRegister*)xregister;
+@interface XVimEqualAction : XVimOperatorAction
 @end
