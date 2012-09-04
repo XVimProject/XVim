@@ -10,4 +10,5 @@
 
 @interface XVimTaskRunner : NSObject
 +(NSString*) runScript:(NSString*)scriptName withInput:(NSString*)input;
++(void) runScriptInTerminal:(NSString*)scriptAndArgs;
 @end

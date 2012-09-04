@@ -59,6 +59,7 @@
 @property (retain) NSString* arg;
 @property (retain) NSString* cmd;
 @property BOOL forceit;
+@property BOOL noRangeSpecified;
 @property NSUInteger lineBegin; // line1
 @property NSUInteger lineEnd; // line2
 @property NSUInteger addr_count;
