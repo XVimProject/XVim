@@ -750,7 +750,11 @@
     // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    while( isAlpha(*parsing) || *parsing == '!' ){
+    if (*parsing == '!') {
+        parsing++; count++;
+    }
+    else
+    while( isAlpha(*parsing) ){
         parsing++;
         count++;
     }
@@ -866,6 +870,7 @@
     }                
 }
 
+
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :w
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
@@ -905,6 +910,17 @@
     TRACE_LOG(@"registers: %@", [[XVim instance] registers])
 }
 
+-(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    NSString* selectedText = [ window.sourceView selectedText ];
+    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
+    [ window.sourceView replaceText:scriptReturn ];
+
+}
+- (void)clean:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ NSApp sendAction:@selector(cleanActiveRunContext:) to:nil from:self ];
+}
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
