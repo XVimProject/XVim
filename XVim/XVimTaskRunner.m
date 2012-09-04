@@ -33,6 +33,9 @@
 #endif
 #endif
 
+@interface XVimTaskRunner ()
++(NSString*)_createTempCommandFileWithContents:(NSString*)contents;
+@end
 
 @implementation XVimTaskRunner
 
@@ -59,22 +62,13 @@
     if (!scriptAndArgs || [ scriptAndArgs length ] == 0) {
         return nil;
     }
-
-    NSArray* unexpandedCommandAndArgs = [ scriptAndArgs componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSMutableArray* commandAndArgs = [NSMutableArray arrayWithCapacity:[unexpandedCommandAndArgs count]];
-    [ unexpandedCommandAndArgs enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        [commandAndArgs addObject:[(NSString*)obj stringByExpandingTildeInPath]];
-    } ];
     
-    NSString* command = [ [commandAndArgs objectAtIndex:0] stringByExpandingTildeInPath ];
+    NSString* commandFile = [ self _createTempCommandFileWithContents:scriptAndArgs ];
+    NSArray* arguments = [ NSArray arrayWithObjects:@"-l",commandFile, nil];
     
-    [task setLaunchPath: command];
-
-    if ( [ commandAndArgs count ] > 1)
-    {
-        NSArray *arguments = [ commandAndArgs subarrayWithRange:NSMakeRange(1, ([commandAndArgs count] - 1))];
-        [task setArguments: arguments];
-    }
+    [task setLaunchPath:@"/bin/bash"];
+    [task setArguments: arguments];
+    
     NSPipe *outputPipe = [NSPipe pipe];
     [task setStandardOutput: outputPipe];
     NSPipe *inputPipe = [NSPipe pipe];
@@ -90,9 +84,7 @@
         inputFile = [inputPipe fileHandleForWriting];
     }
     
-    NSMutableDictionary *environment = [NSMutableDictionary dictionary];
-	[environment addEntriesFromDictionary:[[NSProcessInfo processInfo] environment]];
-	[environment addEntriesFromDictionary:[task environment]];
+    NSMutableDictionary *environment = [NSMutableDictionary dictionaryWithDictionary:[task environment]];
 	[environment setObject:@"YES" forKey:@"NSUnbufferedIO"];
 	[task setEnvironment:environment];
 
@@ -143,11 +135,32 @@
         }
     }
     @catch (NSException *exception) {
-        ERROR_LOG(@"Command %@ does not exist", command);
+        ERROR_LOG(@"Command %@ does not exist", [task launchPath]);
     }
     return returnString;
 
 }
+
++(void) runScriptInTerminal:(NSString*)scriptAndArgs
+{
+    DEBUG_LOG(@"Going to run %@",scriptAndArgs);
+    NSTask *task = AUTORELEASE([[NSTask alloc] init]);
+    [task setLaunchPath:@"/usr/bin/open" ];
+
+    NSString* script = [ NSString stringWithFormat:@"clear\n%@", scriptAndArgs ];
+    NSString* tempCommandFile = [ self _createTempCommandFileWithContents:script ];
+    if (tempCommandFile != nil)
+    {
+        [ task setArguments:[NSArray arrayWithObject:tempCommandFile]];
+        @try {
+            [ task launch ];
+        }
+        @catch (NSException *exception) {
+            ERROR_LOG(@"Command %@ does not exist", [task launchPath]);
+        }
+    }
+}
+
 
 +(NSString*)_createTempCommandFileWithContents:(NSString*)contents
 {
@@ -180,18 +193,4 @@
     return filePath;
 }
 
-
-+(void) runScriptInTerminal:(NSString*)scriptAndArgs
-{
-    NSTask *task = AUTORELEASE([[NSTask alloc] init]);
-    [task setLaunchPath:@"/usr/bin/open" ];
-
-    NSString* script = [ NSString stringWithFormat:@"clear\n%@", scriptAndArgs ];
-    NSString* tempCommandFile = [ self _createTempCommandFileWithContents:script ];
-    if (tempCommandFile != nil)
-    {
-        [ task setArguments:[NSArray arrayWithObject:tempCommandFile]];
-        [ task launch ];
-    }
-}
 @end
