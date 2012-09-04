@@ -64,7 +64,7 @@
     }
     
     NSString* commandFile = [ self _createTempCommandFileWithContents:scriptAndArgs ];
-    NSArray* arguments = [ NSArray arrayWithObjects:@"-l",commandFile, nil];
+    NSArray* arguments = [ NSArray arrayWithObjects:commandFile, nil];
     
     [task setLaunchPath:@"/bin/bash"];
     [task setArguments: arguments];
