@@ -18,6 +18,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
+#import "XVimQuickfixWindowController.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
@@ -917,10 +918,11 @@
 
 -(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
+    NSString* scriptReturn;
     if ( ! args.noRangeSpecified )
     {
         NSString* selectedText = [ window.sourceView selectedText ];
-        NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
+        scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
         if (scriptReturn != nil)
         {
             [ window.sourceView replaceText:scriptReturn ];
@@ -928,13 +930,20 @@
     }
     else
     {
-        [XVimTaskRunner runScriptInTerminal:args.arg ];
+        //run script and display the results in the "quickfix" window
+        XVimQuickfixWindowController* quickfix = [[XVimQuickfixWindowController alloc] initWithWindowNibName:@"XVimQuickfixWindowController"];
+        scriptReturn = [XVimTaskRunner runScript:args.arg withInput:nil];
+        [[quickfix window] setTitle:@"quickfix"];
+        [[quickfix quickfixWindow] insertText:scriptReturn];
+        
+        [quickfix showWindow:self];
     }
 }
 - (void)clean:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     [ NSApp sendAction:@selector(cleanActiveRunContext:) to:nil from:self ];
 }
+
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];

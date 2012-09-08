@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		69EA3C0A15FBE3410043526A /* XVimQuickfixWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69EA3C0815FBE3410043526A /* XVimQuickfixWindowController.m */; };
+		69EA3C0B15FBE3410043526A /* XVimQuickfixWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 69EA3C0915FBE3410043526A /* XVimQuickfixWindowController.xib */; };
 		A216F3A1156560FE00AD2529 /* IDEEditorArea+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */; };
 		A216F3A51565658F00AD2529 /* IDEFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A31565658E00AD2529 /* IDEFoundation.framework */; };
 		A216F3A61565658F00AD2529 /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A41565658E00AD2529 /* IDEKit.framework */; };
@@ -92,6 +94,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		69EA3C0715FBE3410043526A /* XVimQuickfixWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimQuickfixWindowController.h; path = XVim/XVimQuickfixWindowController.h; sourceTree = SOURCE_ROOT; };
+		69EA3C0815FBE3410043526A /* XVimQuickfixWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimQuickfixWindowController.m; path = XVim/XVimQuickfixWindowController.m; sourceTree = SOURCE_ROOT; };
+		69EA3C0915FBE3410043526A /* XVimQuickfixWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = XVimQuickfixWindowController.xib; path = XVim/XVimQuickfixWindowController.xib; sourceTree = SOURCE_ROOT; };
 		A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEEditorArea+XVim.h"; path = "XVim/IDEEditorArea+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEEditorArea+XVim.m"; path = "XVim/IDEEditorArea+XVim.m"; sourceTree = SOURCE_ROOT; };
 		A216F3A31565658E00AD2529 /* IDEFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEFoundation.framework; path = ../../../../Developer/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework; sourceTree = "<group>"; };
@@ -256,6 +261,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		693F661A15F6F6D300CF6961 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				69EA3C0915FBE3410043526A /* XVimQuickfixWindowController.xib */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
 		A222B5E31514DFD5005E8802 /* Operators */ = {
 			isa = PBXGroup;
 			children = (
@@ -322,6 +335,7 @@
 		A2B4BAC114D59F6600D817B0 /* XVim */ = {
 			isa = PBXGroup;
 			children = (
+				693F661A15F6F6D300CF6961 /* Resources */,
 				C345DDB8154CCF79009F232E /* Xcode+Hook */,
 				C345DDB7154CCF1F009F232E /* Xcode+XVim */,
 				C345DDB6154CCE7E009F232E /* Helpers */,
@@ -470,6 +484,8 @@
 				C30886591554C8380024161D /* NSInsetTextView.m */,
 				EDCD64A715F37ED200600D68 /* XVimTaskRunner.h */,
 				EDCD64A815F37ED200600D68 /* XVimTaskRunner.m */,
+				69EA3C0715FBE3410043526A /* XVimQuickfixWindowController.h */,
+				69EA3C0815FBE3410043526A /* XVimQuickfixWindowController.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -555,7 +571,7 @@
 		A2B4BAAF14D59F6600D817B0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0440;
 			};
 			buildConfigurationList = A2B4BAB214D59F6600D817B0 /* Build configuration list for PBXProject "XVim" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -580,6 +596,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A24782C614D6F6DC003B6433 /* InfoPlist.strings in Resources */,
+				69EA3C0B15FBE3410043526A /* XVimQuickfixWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -651,6 +668,7 @@
 				A257C28F156567250098CA09 /* DVTSourceTextView+XVim.m in Sources */,
 				ED31D3AC15F2B02A008FA96B /* NSEvent+VimHelper.m in Sources */,
 				EDCD64A915F37ED200600D68 /* XVimTaskRunner.m in Sources */,
+				69EA3C0A15FBE3410043526A /* XVimQuickfixWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -740,6 +758,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					/Developer/Library/Xcode/PrivatePlugins,
 					/Developer/Library/PrivateFrameworks,
@@ -764,6 +783,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					/Developer/Applications/Xcode.app/Contents/Frameworks,
 					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
