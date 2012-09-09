@@ -344,6 +344,10 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 			NSString *string = [NSString stringWithCharacters:&c length:1];
 			map(string, i);
 		}
+
+        // Map the last key - "DEL"
+        NSString *string = [NSString stringWithCString:keynames[127] encoding:NSASCIIStringEncoding];
+        map([string uppercaseString], 127);
 	}
 }
 
