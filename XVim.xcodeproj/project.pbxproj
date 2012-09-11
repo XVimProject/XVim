@@ -10,8 +10,8 @@
 		A216F3A1156560FE00AD2529 /* IDEEditorArea+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */; };
 		A216F3A51565658F00AD2529 /* IDEFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A31565658E00AD2529 /* IDEFoundation.framework */; };
 		A216F3A61565658F00AD2529 /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A41565658E00AD2529 /* IDEKit.framework */; };
-		A216F3A9156565AB00AD2529 /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A7156565AA00AD2529 /* DVTFoundation.framework */; };
-		A216F3AA156565AB00AD2529 /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A8156565AB00AD2529 /* DVTKit.framework */; };
+		A216F3A9156565AB00AD2529 /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A7156565AA00AD2529 /* DVTKit.framework */; };
+		A216F3AA156565AB00AD2529 /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A8156565AB00AD2529 /* DVTFoundation.framework */; };
 		A222B5E11514DFCD005E8802 /* XVimOperatorEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */; };
 		A2277ED414F80BCB00A6B70C /* XVimDeleteEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */; };
 		A2277ED814F80BFE00A6B70C /* XVimShiftEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ED714F80BFE00A6B70C /* XVimShiftEvaluator.m */; };
@@ -93,10 +93,10 @@
 /* Begin PBXFileReference section */
 		A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEEditorArea+XVim.h"; path = "XVim/IDEEditorArea+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEEditorArea+XVim.m"; path = "XVim/IDEEditorArea+XVim.m"; sourceTree = SOURCE_ROOT; };
-		A216F3A31565658E00AD2529 /* IDEFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEFoundation.framework; path = ../../../../Developer/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework; sourceTree = "<group>"; };
-		A216F3A41565658E00AD2529 /* IDEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEKit.framework; path = ../../../../Developer/Applications/Xcode.app/Contents/Frameworks/IDEKit.framework; sourceTree = "<group>"; };
-		A216F3A7156565AA00AD2529 /* DVTFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTFoundation.framework; path = ../../../../Developer/Applications/Xcode.app/Contents/SharedFrameworks/DVTFoundation.framework; sourceTree = "<group>"; };
-		A216F3A8156565AB00AD2529 /* DVTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTKit.framework; path = ../../../../Developer/Applications/Xcode.app/Contents/SharedFrameworks/DVTKit.framework; sourceTree = "<group>"; };
+		A216F3A31565658E00AD2529 /* IDEFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEFoundation.framework; path = ../../../../Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework; sourceTree = "<group>"; };
+		A216F3A41565658E00AD2529 /* IDEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEKit.framework; path = ../../../../Applications/Xcode.app/Contents/Frameworks/IDEKit.framework; sourceTree = "<group>"; };
+		A216F3A7156565AA00AD2529 /* DVTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTKit.framework; path = ../../../../Applications/Xcode.app/Contents/SharedFrameworks/DVTKit.framework; sourceTree = "<group>"; };
+		A216F3A8156565AB00AD2529 /* DVTFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTFoundation.framework; path = ../../../../Applications/Xcode.app/Contents/SharedFrameworks/DVTFoundation.framework; sourceTree = "<group>"; };
 		A222B5DF1514DFCD005E8802 /* XVimOperatorEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorEvaluator.h; path = XVim/XVimOperatorEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorEvaluator.m; path = XVim/XVimOperatorEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2277ED214F80BCB00A6B70C /* XVimDeleteEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimDeleteEvaluator.h; path = XVim/XVimDeleteEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -241,8 +241,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A216F3A9156565AB00AD2529 /* DVTFoundation.framework in Frameworks */,
-				A216F3AA156565AB00AD2529 /* DVTKit.framework in Frameworks */,
+				A216F3A9156565AB00AD2529 /* DVTKit.framework in Frameworks */,
+				A216F3AA156565AB00AD2529 /* DVTFoundation.framework in Frameworks */,
 				A216F3A51565658F00AD2529 /* IDEFoundation.framework in Frameworks */,
 				A216F3A61565658F00AD2529 /* IDEKit.framework in Frameworks */,
 				A2420B3E14DDE59B008741DA /* AppKit.framework in Frameworks */,
@@ -285,8 +285,8 @@
 		A2B4BAAD14D59F6600D817B0 = {
 			isa = PBXGroup;
 			children = (
-				A216F3A7156565AA00AD2529 /* DVTFoundation.framework */,
-				A216F3A8156565AB00AD2529 /* DVTKit.framework */,
+				A216F3A7156565AA00AD2529 /* DVTKit.framework */,
+				A216F3A8156565AB00AD2529 /* DVTFoundation.framework */,
 				A216F3A31565658E00AD2529 /* IDEFoundation.framework */,
 				A216F3A41565658E00AD2529 /* IDEKit.framework */,
 				A2C4E78F14E7EA0B00751199 /* Support */,
