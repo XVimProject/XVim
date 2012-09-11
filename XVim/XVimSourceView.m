@@ -341,6 +341,17 @@
 	[_view insertText:text replacementRange:range];
 }
 
+
+-(void)replaceText:(NSString*)text
+{
+    [ self insertText:text replacementRange:[_view selectedRange]];
+}
+
+- (NSString*)selectedText
+{
+    return [[ _view string ] substringWithRange:[ _view selectedRange ]];
+}
+
 - (void)insertNewline
 {
 	[_view insertNewline:self];

@@ -18,9 +18,10 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
+#import "XVimQuickfixWindowController.h"
 
 @implementation XVimExArg
-@synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
+@synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
 
 @implementation XVimExCmdname
@@ -741,16 +742,25 @@
     }
     
     if( exarg.lineBegin == NSNotFound ){
+        exarg.noRangeSpecified = YES;
         // No range expression found. Use current line as range
         exarg.lineBegin = [view lineNumber:[view selectedRange].location];
         exarg.lineEnd =  exarg.lineBegin;
+    }
+    else
+    {
+        exarg.noRangeSpecified = NO;
     }
     
     // 4. parse command
     // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    while( isAlpha(*parsing) || *parsing == '!' ){
+    if (*parsing == '!') {
+        parsing++; count++;
+    }
+    else
+    while( isAlpha(*parsing) ){
         parsing++;
         count++;
     }
@@ -866,6 +876,7 @@
     }                
 }
 
+
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :w
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
@@ -903,6 +914,34 @@
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     TRACE_LOG(@"registers: %@", [[XVim instance] registers])
+}
+
+-(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    NSString* scriptReturn;
+    if ( ! args.noRangeSpecified )
+    {
+        NSString* selectedText = [ window.sourceView selectedText ];
+        scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
+        if (scriptReturn != nil)
+        {
+            [ window.sourceView replaceText:scriptReturn ];
+        }
+    }
+    else
+    {
+        //run script and display the results in the "quickfix" window
+        XVimQuickfixWindowController* quickfix = [[XVimQuickfixWindowController alloc] initWithWindowNibName:@"XVimQuickfixWindowController"];
+        scriptReturn = [XVimTaskRunner runScript:args.arg withInput:nil];
+        [[quickfix window] setTitle:@"quickfix"];
+        [[quickfix quickfixWindow] insertText:scriptReturn];
+        
+        [quickfix showWindow:self];
+    }
+}
+- (void)clean:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    [ NSApp sendAction:@selector(cleanActiveRunContext:) to:nil from:self ];
 }
 
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
