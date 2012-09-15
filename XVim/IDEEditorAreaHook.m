@@ -39,6 +39,7 @@
     [base viewDidInstall_];
 
     // Setup Command Line
+    [XVimWindow registerAsWindow:base];
     [base setupCommandLine];
 }
 

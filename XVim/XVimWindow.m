@@ -261,17 +261,14 @@
     [commandLine errorMessage:@""];
 }
 
-
-static char s_associate_key = 0;
-
-+ (XVimWindow*)associateOf:(id)object
-{
-	return (XVimWindow*)objc_getAssociatedObject(object, &s_associate_key);
+static const char* KEY_WINDOW = "xvimwindow";
++ (XVimWindow*)windowOf:(id)object {
+	return (XVimWindow*)objc_getAssociatedObject(object, KEY_WINDOW);
 }
 
-- (void)associateWith:(id)object
-{
-	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
++ (void)registerAsWindow:(id)object{
+    XVimWindow* w = [[[XVimWindow alloc] init] autorelease];
+	objc_setAssociatedObject(object, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

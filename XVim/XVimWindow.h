@@ -48,7 +48,7 @@
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)clearErrorMessage;
 
-- (void)associateWith:(id)object;
-+ (XVimWindow*)associateOf:(id)object;
++ (XVimWindow*)windowOf:(id)object;
++ (void)registerAsWindow:(id)object;
 
 @end

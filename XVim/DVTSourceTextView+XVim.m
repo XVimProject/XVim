@@ -8,11 +8,20 @@
 
 #import "DVTSourceTextView+XVim.h"
 #import "IDEEditorArea+XVim.h"
+#import "XVimWindow.h"
 
 @implementation DVTSourceTextView (XVim)
-- (XVimCommandLine*)commandLine{
+- (IDEEditorArea*)editorArea{
     IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[self window]];
-    IDEEditorArea* editorArea = [wc editorArea];
-    return [editorArea commandLine];
+    return [wc editorArea];
+}
+
+- (XVimCommandLine*)commandLine{
+    return [[self editorArea] commandLine];
+}
+
+
+- (XVimWindow*)xvimWindow{
+    return [[self editorArea] xvimWindow];
 }
 @end

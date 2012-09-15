@@ -332,8 +332,8 @@
 				A24782B814D6F56E003B6433 /* XVim.m */,
 				C345DDB8154CCF79009F232E /* Event Dispatchers */,
 				A2F4A34014F00B35006DA5A5 /* Event Handlers(Evaluators) */,
-				C345DDB7154CCF1F009F232E /* Xcode Dependent Manipulations */,
-				C345DDB4154CCE5E009F232E /* XCode Independent Manipulations */,
+				C345DDB7154CCF1F009F232E /* Xcode Dependent Classes */,
+				C345DDB4154CCE5E009F232E /* XCode Independent Classes */,
 				A26DC88315DF339A00779CB4 /* Testing */,
 				C38A5B481527C9EE00E1448D /* Xcode Class Definitions */,
 				A2B4BAC214D59F6600D817B0 /* Supporting Files */,
@@ -432,7 +432,7 @@
 			name = Argument;
 			sourceTree = "<group>";
 		};
-		C345DDB4154CCE5E009F232E /* XCode Independent Manipulations */ = {
+		C345DDB4154CCE5E009F232E /* XCode Independent Classes */ = {
 			isa = PBXGroup;
 			children = (
 				C345DDB6154CCE7E009F232E /* Strings */,
@@ -463,7 +463,7 @@
 				C3FD41DA154E7E3400B076DB /* XVimSourceView+Vim.h */,
 				C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */,
 			);
-			name = "XCode Independent Manipulations";
+			name = "XCode Independent Classes";
 			sourceTree = "<group>";
 		};
 		C345DDB6154CCE7E009F232E /* Strings */ = {
@@ -479,7 +479,7 @@
 			name = Strings;
 			sourceTree = "<group>";
 		};
-		C345DDB7154CCF1F009F232E /* Xcode Dependent Manipulations */ = {
+		C345DDB7154CCF1F009F232E /* Xcode Dependent Classes */ = {
 			isa = PBXGroup;
 			children = (
 				A2ABFE1115497A3C002220E8 /* XVimStatusLine.h */,
@@ -499,7 +499,7 @@
 				A257C28D156567250098CA09 /* DVTSourceTextView+XVim.h */,
 				A257C28E156567250098CA09 /* DVTSourceTextView+XVim.m */,
 			);
-			name = "Xcode Dependent Manipulations";
+			name = "Xcode Dependent Classes";
 			sourceTree = "<group>";
 		};
 		C345DDB8154CCF79009F232E /* Event Dispatchers */ = {

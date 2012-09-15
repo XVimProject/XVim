@@ -9,7 +9,13 @@
 #import "IDEKit.h"
 #import "XVimCommandLine.h"
 
+/*
+ * This is the extension of IDEEditorArea class in Xcode.
+ * The IDEEditorArea is the area including source text view and debugging area.
+ * See IDEKit.h to refer original IDEEditorArea class.
+ */
 @interface IDEEditorArea (XVim)
+- (XVimWindow*)xvimWindow;
 - (void)setupCommandLine;
 - (XVimCommandLine*)commandLine;
 @end

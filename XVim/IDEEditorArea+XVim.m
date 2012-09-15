@@ -8,9 +8,19 @@
 
 #import <objc/runtime.h>
 #import "IDEEditorArea+XVim.h"
+#import "XvimWindow.h"
 
 static const char* KEY_COMMAND_LINE = "commandLine";
+
 @implementation IDEEditorArea (XVim)
+
+- (XVimWindow*)xvimWindow{
+    return [XVimWindow windowOf:self];
+}
+
+- (XVimCommandLine*)commandLine{
+    return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
+}
 
 - (void)setupCommandLine{
     NSView* layoutView;
@@ -39,7 +49,4 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     
 }
 
-- (XVimCommandLine*)commandLine{
-    return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
-}
 @end
