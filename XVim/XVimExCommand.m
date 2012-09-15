@@ -129,6 +129,7 @@
                        CMD(@"colder", @"qf_age:inWindow:"),
                        CMD(@"colorscheme", @"colorscheme:inWindow:"),
                        CMD(@"command", @"command:inWindow:"),
+                       CMD(@"commit", @"commit:inWindow:"),    // Source control commit (XVim Original)
                        CMD(@"comclear", @"comclear:inWindow:"),
                        CMD(@"compiler", @"compiler:inWindow:"),
                        CMD(@"continue", @"continue:inWindow:"),
@@ -146,7 +147,7 @@
                        CMD(@"cwindow", @"cwindow:inWindow:"),
                        CMD(@"delete", @"operators:inWindow:"),
                        CMD(@"delmarks", @"delmarks:inWindow:"),
-                       CMD(@"debug", @"debug:inWindow:"),
+                       CMD(@"debug", @"debug:inWindow:"),  // This currently works as XVim debug command
                        CMD(@"debuggreedy", @"debuggreedy:inWindow:"),
                        CMD(@"delcommand", @"delcommand:inWindow:"),
                        CMD(@"delfunction", @"delfunction:inWindow:"),
@@ -829,6 +830,9 @@
 ///////////////////
 //   Commands    //
 ///////////////////
+- (void)commit:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(commitCommand:) to:nil from:self];
+}
 
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
