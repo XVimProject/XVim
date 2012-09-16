@@ -87,9 +87,6 @@
    
     unichar charcode = [theEvent unmodifiedKeyCode];
     [Logger logWithLevel:LogDebug format:@"Obj:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode];
-    NSString* eventlog = [theEvent description];
-    NSString* log = [eventlog stringByAppendingString:@"\n"];
-    [[XVim instance] writeToLogfile:log];
     
     if( [window handleKeyEvent:theEvent] ){
         return;

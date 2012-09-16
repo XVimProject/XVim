@@ -12,10 +12,19 @@
 #import <Foundation/Foundation.h>
 
 #define LOGGER_DEFAULT_NAME @"LoggerDefaultName"
+
 static Logger* s_defaultLogger = nil;
+
+
+@interface Logger(){
+    NSFileHandle* _logFile;
+}
+@end
+
 
 @implementation Logger
 @synthesize level,name;
+
 + (Logger*) defaultLogger{
     if( s_defaultLogger == nil ){
 #ifdef DEBUG
@@ -26,8 +35,6 @@ static Logger* s_defaultLogger = nil;
     }
     return s_defaultLogger;
 }
-
-
 
 - (void) forwardInvocationForLogger:(NSInvocation*) invocation{
     NSString* selector = NSStringFromSelector([invocation selector]);
@@ -66,12 +73,10 @@ static Logger* s_defaultLogger = nil;
     // Set forwardInvocation:
     Method myinv = class_getClassMethod([Logger class], @selector(forwardInvocationForLogger:));
     class_addMethod(c, @selector(forwardInvocation:), class_getMethodImplementation([Logger class], @selector(forwardInvocationForLogger:)), method_getTypeEncoding(myinv));
-    
 }
 
 
-- (id)init
-{
+- (id)init {
     return [self initWithName:LOGGER_DEFAULT_NAME];
 }
 
@@ -88,10 +93,21 @@ static Logger* s_defaultLogger = nil;
 }
 
 - (void) write:(NSString*)fmt :(va_list)args{
+    va_list args2;
+    va_copy(args2, args);
+    
+    // Write to stderr
     NSLogv(fmt, args);
+    
+    // Write to file
+    if( nil != _logFile) {
+        NSString* msg = [[NSString alloc] initWithFormat: fmt arguments: args2];
+        [_logFile writeData:[msg dataUsingEncoding:NSUTF8StringEncoding]];
+        [_logFile writeData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
+    }
+    
+    va_end(args2);
 }
-
-
 
 - (void) logWithLevel:(LogLevel)l format:(NSString *)format :(va_list)args{
     if ( l < self.level ){
@@ -131,8 +147,23 @@ static Logger* s_defaultLogger = nil;
      va_end(argumentList); 
 }
 
-+ (void) traceMethodList:(NSString*)class{
+- (void) setLogFile:(NSString *)path{
+    [_logFile closeFile];
+    [_logFile release];
+    _logFile = nil;
     
+    if( nil != path){
+        NSFileManager* fm = [NSFileManager defaultManager];
+        if( ![fm fileExistsAtPath:path] ){
+            [fm createFileAtPath:path contents:nil attributes:nil];
+        }
+        _logFile = [[NSFileHandle fileHandleForWritingAtPath:path] retain]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
+        [_logFile seekToEndOfFile];
+    }
+    
+}
+
++ (void) traceMethodList:(NSString*)class{
     Class c = NSClassFromString(class);
     if( nil == c ){
         DEBUG_LOG(@"Can't find class : %@", class);
