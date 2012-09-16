@@ -47,7 +47,7 @@ typedef enum LogLevel_t{
 - (id) initWithName:(NSString *)n level:(LogLevel)l;
 
 - (void) logWithLevel:(LogLevel)level format:(NSString*)format, ...;
-
+- (void) setLogFile:(NSString*)path;
 
 // Support Functions
 + (void) traceMethodList:(NSString*)class;

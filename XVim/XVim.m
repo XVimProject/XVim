@@ -78,11 +78,13 @@ static XVim* s_instance = nil;
     }
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
-    TRACE_LOG(@"XVim loaded");
 	
 	// Allocate singleton instance
 	s_instance = [[XVim alloc] init];
+    [s_instance.options addObserver:s_instance forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
 	[s_instance parseRcFile];
+    
+    TRACE_LOG(@"XVim loaded");
     
     // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
     //[[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
@@ -220,6 +222,19 @@ static XVim* s_instance = nil;
 	[super dealloc];
 }
 
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    if( [keyPath isEqualToString:@"debug"]) {
+        if( [s_instance options].debug ){
+            NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
+            NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
+            [[Logger defaultLogger] setLogFile:logPath];
+        }else{
+            [[Logger defaultLogger] setLogFile:nil];
+        }
+    }
+}
+    
 - (void)parseRcFile {
     NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
     NSString *keymapPath = [homeDir stringByAppendingString: @"/.xvimrc"]; 
@@ -233,6 +248,7 @@ static XVim* s_instance = nil;
 }
 
 - (void)writeToLogfile:(NSString*)str{
+    return;
     if( ![[self.options getOption:@"debug"] boolValue] ){
         return;
     }
