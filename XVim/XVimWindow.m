@@ -17,6 +17,7 @@
 #import "XVimOptions.h"
 #import "Logger.h"
 #import <objc/runtime.h>
+#import "IDEEditorArea+XVim.h" // This is Xcode dependent. Must be moved.
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -30,7 +31,7 @@
 
 @implementation XVimWindow
 @synthesize sourceView = _sourceView;
-@synthesize commandLine = _commandLine;
+@synthesize editorArea = _editorArea;
 
 - (id)init{
     if (self = [super init]){
@@ -48,10 +49,12 @@
     [_staticString release];
     [_currentEvaluator release];
     [_sourceView release];
-    _commandLine = nil;
     [super dealloc];
 }
 
+- (XVimCommandLine*)commandLine{
+    return [_editorArea commandLine];
+}
 - (void)willSetEvaluator:(XVimEvaluator*)evaluator {
 	if (evaluator != _currentEvaluator && _currentEvaluator){
 		[_currentEvaluator willEndHandlerInWindow:self];
@@ -95,6 +98,8 @@
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
+    DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, _currentEvaluator,event.description);
+    
 	NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
 	XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
 	XVimKeymap* keymap = [_currentEvaluator selectKeymapWithProvider:[XVim instance]];
@@ -265,9 +270,20 @@ static const char* KEY_WINDOW = "xvimwindow";
 + (XVimWindow*)windowOf:(id)object {
 	return (XVimWindow*)objc_getAssociatedObject(object, KEY_WINDOW);
 }
+// TODO:
+// This method is highly dependent on Xcode class.
+// Must be moved or depend on abstraction layer's method.
+- (void)setForcusOnFirstTextView{
+    IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[[self.sourceView view] window]];
+    IDEEditorArea* editorArea = [wc editorArea];
+    IDEEditorModeViewController *cont = [editorArea editorModeViewController];
+    IDEEditorContext* context = [cont primaryEditorContext];
+    [context takeFocus];
+}
 
 + (void)registerAsWindow:(id)object{
     XVimWindow* w = [[[XVimWindow alloc] init] autorelease];
+    w.editorArea = object;
 	objc_setAssociatedObject(object, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
 }
 

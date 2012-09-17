@@ -373,7 +373,11 @@
 
 - (void)setSelectedRange:(NSRange)range
 {
-	[_view setSelectedRange:range];
+    @try{
+        [_view setSelectedRange:range];
+    }@catch (NSException *exception) {
+        ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
+    }
 }
 
 @end

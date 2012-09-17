@@ -19,6 +19,7 @@
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
 #import "XVimTester.h"
+#import "IDEKit.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -312,7 +313,9 @@
                        CMD(@"mzfile", @"mzfile:inWindow:"),
                        CMD(@"next", @"next:inWindow:"),
                        CMD(@"nbkey", @"nbkey:inWindow:"),
+                       CMD(@"ncounterpart", @"ncounterpart:inWindow:"),    // XVim Original
                        CMD(@"new", @"splitview:inWindow:"),
+                       CMD(@"nissue", @"nissue:inWindow:"),    // XVim Original
                        CMD(@"nmap", @"nmap:inWindow:"),
                        CMD(@"nmapclear", @"mapclear:inWindow:"),
                        CMD(@"nmenu", @"menu:inWindow:"),
@@ -339,10 +342,12 @@
                        CMD(@"ounmap", @"unmap:inWindow:"),
                        CMD(@"ounmenu", @"menu:inWindow:"),
                        CMD(@"print", @"print:inWindow:"),
+                       CMD(@"pcounterpart", @"pcounterpart:inWindow:"),    // XVim Original (This overrides original Vim's :pc command)
                        CMD(@"pclose", @"pclose:inWindow:"),
                        CMD(@"perl", @"perl:inWindow:"),
                        CMD(@"perldo", @"perldo:inWindow:"),
                        CMD(@"pedit", @"pedit:inWindow:"),
+                       CMD(@"pissue", @"pissue:inWindow:"),    // XVim Original
                        CMD(@"pop", @"tag:inWindow:"),
                        CMD(@"popup", @"popup:inWindow:"),
                        CMD(@"ppop", @"ptag:inWindow:"),
@@ -1009,6 +1014,28 @@
 - (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
+}
+
+- (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
+}
+
+- (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
+}
+
+- (void)ncounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    // To make forcus proper
+    // We must make forcus back to editor first then invoke the command.
+    // This is because I do not know how to move focus on newly visible text editor by invoking this command.
+    // Without this focus manipulation the focus after the command does not goes to the text editor
+    [window setForcusOnFirstTextView];
+    [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
+}
+
+- (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusOnFirstTextView];
+    [NSApp sendAction:@selector(jumpToPreviousCounterpart:) to:nil from:self];
 }
 
 - (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window

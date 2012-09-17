@@ -22,10 +22,14 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
 }
 
-- (void)setupCommandLine{
+- (NSView*)textViewArea{
     NSView* layoutView;
     object_getInstanceVariable(self, "_editorAreaAutoLayoutView", (void**)&layoutView); // The view contains editors and border view
+    return layoutView;
+}
 
+- (void)setupCommandLine{
+    NSView* layoutView = [self textViewArea];
     // Check if we already have command line in the _editorAreaAutoLayoutView.
     if( nil == [self commandLine] ){
         XVimCommandLine *cmd = [[[XVimCommandLine alloc] init] autorelease];

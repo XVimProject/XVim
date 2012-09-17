@@ -24,14 +24,17 @@
 @class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
+@class IDEEditorArea; // Xcode dependent(fixit!)
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property(retain) XVimSourceView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
-@property(assign) XVimCommandLine *commandLine;
+@property(retain) IDEEditorArea* editorArea; // Xcode dependent(fixit!)
+
 
 - (NSUInteger)insertionPoint;
+- (XVimCommandLine*)commandLine;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (void)beginMouseEvent:(NSEvent*)event;
@@ -61,5 +64,8 @@
 
 + (XVimWindow*)windowOf:(id)object;
 + (void)registerAsWindow:(id)object;
+
+
+- (void)setForcusOnFirstTextView;
 
 @end

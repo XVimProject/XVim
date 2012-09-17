@@ -85,8 +85,11 @@
         return;
     }
    
+    /*
+     * 
+     */
     unichar charcode = [theEvent unmodifiedKeyCode];
-    [Logger logWithLevel:LogDebug format:@"Obj:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode];
+    DEBUG_LOG(@"DVTSourceTextView:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
     
     if( [window handleKeyEvent:theEvent] ){
         return;
@@ -177,9 +180,8 @@
 
     BOOL b = [base becomeFirstResponder_];
     if (b) {
-        if (!window.sourceView)
-            window.sourceView = [[XVimSourceView alloc] initWithView:base];
-        window.commandLine = [base commandLine];
+        DEBUG_LOG(@"DVTSourceTextView:%p became first responder", self);
+        window.sourceView = [[XVimSourceView alloc] initWithView:base];
     }
     return b;
 }
