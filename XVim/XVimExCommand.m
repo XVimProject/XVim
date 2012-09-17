@@ -310,6 +310,7 @@
                        CMD(@"mzscheme", @"mzscheme:inWindow:"),
                        CMD(@"mzfile", @"mzfile:inWindow:"),
                        CMD(@"next", @"next:inWindow:"),
+                       CMD(@"nissue", @"nissue:inWindow:"),    // XVim Original
                        CMD(@"nbkey", @"nbkey:inWindow:"),
                        CMD(@"new", @"splitview:inWindow:"),
                        CMD(@"nmap", @"nmap:inWindow:"),
@@ -342,6 +343,7 @@
                        CMD(@"perl", @"perl:inWindow:"),
                        CMD(@"perldo", @"perldo:inWindow:"),
                        CMD(@"pedit", @"pedit:inWindow:"),
+                       CMD(@"pissue", @"pissue:inWindow:"),    // XVim Original
                        CMD(@"pop", @"tag:inWindow:"),
                        CMD(@"popup", @"popup:inWindow:"),
                        CMD(@"ppop", @"ptag:inWindow:"),
@@ -1001,6 +1003,14 @@
 - (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
+}
+
+- (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
+}
+
+- (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
 }
 
 - (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window
