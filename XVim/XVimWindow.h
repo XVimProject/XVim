@@ -21,6 +21,7 @@
 @property(readonly) XVimEvaluator *currentEvaluator;
 @property(assign) XVimCommandLine *commandLine;
 
+
 - (NSUInteger)insertionPoint;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;
@@ -51,5 +52,8 @@
 
 - (void)associateWith:(id)object;
 + (XVimWindow*)associateOf:(id)object;
+
+
+- (void)setForcusOnFirstTextView;
 
 @end

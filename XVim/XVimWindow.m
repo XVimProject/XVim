@@ -18,6 +18,7 @@
 #import "XVimOptions.h"
 #import "Logger.h"
 #import <objc/runtime.h>
+#import "IDEEditorArea+XVim.h" // This is Xcode dependent. Must be moved.
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -267,6 +268,16 @@
     [commandLine errorMessage:@""];
 }
 
+// TODO:
+// This method is highly dependent on Xcode class.
+// Must be moved or depend on abstraction layer's method.
+- (void)setForcusOnFirstTextView{
+    IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[[self.sourceView view] window]];
+    IDEEditorArea* editorArea = [wc editorArea];
+    IDEEditorModeViewController *cont = [editorArea editorModeViewController];
+    IDEEditorContext* context = [cont primaryEditorContext];
+    [context takeFocus];
+}
 
 static char s_associate_key = 0;
 

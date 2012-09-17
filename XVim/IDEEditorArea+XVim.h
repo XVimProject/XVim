@@ -10,6 +10,7 @@
 #import "XVimCommandLine.h"
 
 @interface IDEEditorArea (XVim)
+- (NSView*)textViewArea;
 - (void)setupCommandLine;
 - (XVimCommandLine*)commandLine;
 @end

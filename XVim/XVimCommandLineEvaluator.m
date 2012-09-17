@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+#import "Logger.h"
 #import "XVimCommandLineEvaluator.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
@@ -64,7 +65,8 @@
 	XVimCommandField *commandField = window.commandLine.commandField;
 	[commandField absorbFocusEvent];
 	[commandField setDelegate:nil];
-	[[[[window sourceView] view] window] makeFirstResponder:[[window sourceView] view]];
+    TRACE_LOG(@"makefirst");
+    [window setForcusOnFirstTextView];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
