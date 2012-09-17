@@ -17,7 +17,7 @@
 }
 
 - (XVimCommandLine*)commandLine{
-    return [[self editorArea] commandLine];
+    return [[self xvimWindow] commandLine];
 }
 
 

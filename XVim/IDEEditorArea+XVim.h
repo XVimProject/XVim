@@ -17,5 +17,4 @@
 @interface IDEEditorArea (XVim)
 - (XVimWindow*)xvimWindow;
 - (void)setupCommandLine;
-- (XVimCommandLine*)commandLine;
 @end

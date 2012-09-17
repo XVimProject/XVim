@@ -10,6 +10,17 @@
 #import "XVimCommandLine.h"
 #import "XVimPlaybackHandler.h"
 
+/*
+ *
+ * ----------------------   -----------------------
+ *    XVimWindow class   ->  XVimWindow + Xcode
+ * ----------------------   -----------------------
+ *                           IDEEditorArea class
+ *                          -----------------------
+ *
+ * XVimWindow uses XVimWindow + Xcode category.
+ * XVimWindow + Xcode category depends on Xcode class (IDEEditorArea)
+ */
 @class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
