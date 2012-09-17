@@ -310,9 +310,9 @@
                        CMD(@"mzscheme", @"mzscheme:inWindow:"),
                        CMD(@"mzfile", @"mzfile:inWindow:"),
                        CMD(@"next", @"next:inWindow:"),
-                       CMD(@"nissue", @"nissue:inWindow:"),    // XVim Original
                        CMD(@"nbkey", @"nbkey:inWindow:"),
                        CMD(@"new", @"splitview:inWindow:"),
+                       CMD(@"nissue", @"nissue:inWindow:"),    // XVim Original
                        CMD(@"nmap", @"nmap:inWindow:"),
                        CMD(@"nmapclear", @"mapclear:inWindow:"),
                        CMD(@"nmenu", @"menu:inWindow:"),
