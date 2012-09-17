@@ -120,7 +120,10 @@ The dot command ('.') is supported.
   :make    | Invoke Xcode's 'build' command
   :xhelp   | Show quick help for current insertion point
   :xccmd   | Invoke arbitrary command in Xcode's actions in its menu. Takes one argument as its action to invoke. Actions [here](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/MenuActionList.txt) are available.
-  
+  :nissue  | Invoke "jump to next issue". ":ni" does the samse.
+  :pissue  | Invoke "jump to previous issue". ":pi" does the same.
+  :ncounterpart | Invoke "jump to next counterpart". ":nc" does the same.
+  :pcounterpart | Invoke "jump to previous counterpart". ":pc" does the same.
 
 
 ## Options
