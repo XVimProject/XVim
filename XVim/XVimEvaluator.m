@@ -85,11 +85,6 @@
     return REGISTER_APPEND;
 }
 
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window {
-    NSRange range = [[window sourceView] selectedRange];
-    return range.location + range.length;
-}
-
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
 	NSRange range = [[window sourceView] selectedRange];

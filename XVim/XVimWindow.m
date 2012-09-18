@@ -108,7 +108,8 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (NSUInteger)insertionPoint
 {
-	return [[self currentEvaluator] insertionPointInWindow:self];
+    return [self.sourceView insertionPoint];
+	//return [[self currentEvaluator] insertionPointInWindow:self];
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{

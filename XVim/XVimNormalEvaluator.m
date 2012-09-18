@@ -770,7 +770,7 @@
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
     [view adjustCursorPosition];
-    [view scrollTo:[window insertionPoint]];
+    [view scrollTo:[[window sourceView]insertionPoint]];
     return nil;
     //return [self withNewContext];
 }

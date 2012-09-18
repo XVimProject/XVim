@@ -20,11 +20,6 @@
 	return self;
 }
 
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
-{
-    return [_parent insertionPointInWindow:window];
-}
-
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
 {
 	return [_parent drawRect:rect inWindow:window];

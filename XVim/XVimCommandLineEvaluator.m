@@ -137,11 +137,6 @@
 	return [super restrictSelectedRange:range inWindow:window];
 }
 
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
-{
-	return [_parent insertionPointInWindow:window];
-}
-
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
 {
 	[_parent drawRect:rect inWindow:window];

@@ -5,6 +5,7 @@
 //  Created by Shuichiro Suzuki on 2/25/12.
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
+#import "XVimTextViewProtocol.h"
 
 /**
  
@@ -21,7 +22,7 @@
  
  **/
 
-@interface XVimSourceView : NSObject
+@interface XVimSourceView : NSObject <XVimTextViewProtocol>
 
 - (id)initWithView:(NSView*)view;
 

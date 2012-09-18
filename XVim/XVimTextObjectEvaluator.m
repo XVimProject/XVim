@@ -37,11 +37,6 @@
 	return self;
 }
 
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window
-{
-    return [_parent insertionPointInWindow:window];
-}
-
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
 {
 	return [_parent drawRect:rect inWindow:window];
@@ -88,24 +83,24 @@
 
 - (XVimEvaluator*)b:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], [self numericArg], _inclusive, '(', ')');
+	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '(', ')');
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)B:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], [self numericArg], _inclusive, '{', '}');
+	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '{', '}');
 	return [self executeActionForRange:r inWindow:window];
 }
 
 -(XVimEvaluator*)p:(XVimWindow*)window
 {
-    NSUInteger start = [self insertionPointInWindow:window];
+    NSUInteger start = [window insertionPoint];
     if(start != 0){
-        start = [window.sourceView paragraphsBackward:[self insertionPointInWindow:window] count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+        start = [window.sourceView paragraphsBackward:[window insertionPoint] count:1 option:MOPT_PARA_BOUND_BLANKLINE];
     }
     NSUInteger starts_end = [window.sourceView paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
-    NSUInteger end = [window.sourceView paragraphsForward:[self insertionPointInWindow:window] count:[self numericArg] option:MOPT_PARA_BOUND_BLANKLINE];
+    NSUInteger end = [window.sourceView paragraphsForward:[window insertionPoint] count:[self numericArg] option:MOPT_PARA_BOUND_BLANKLINE];
     
     if(starts_end != end){
         start = starts_end;
@@ -118,20 +113,20 @@
 - (XVimEvaluator*)w:(XVimWindow*)window
 {
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
-    NSRange r = [window.sourceView currentWord:[self insertionPointInWindow:window] count:[self numericArg] option:opt];
+    NSRange r = [window.sourceView currentWord:[window insertionPoint] count:[self numericArg] option:opt];
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)W:(XVimWindow*)window
 {
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
-    NSRange r = [window.sourceView currentWord:[self insertionPointInWindow:window] count:[self numericArg] option:opt|BIGWORD];
+    NSRange r = [window.sourceView currentWord:[window insertionPoint] count:[self numericArg] option:opt|BIGWORD];
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)LSQUAREBRACKET:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], [self numericArg], _inclusive, '[', ']');
+	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '[', ']');
 	return [self executeActionForRange:r inWindow:window];
 }
 
@@ -152,7 +147,7 @@
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window
 {
-	NSRange r = xv_current_block([window.sourceView string], [self insertionPointInWindow:window], [self numericArg], _inclusive, '<', '>');
+	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '<', '>');
 	return [self executeActionForRange:r inWindow:window];
 }
 
@@ -173,13 +168,13 @@
 
 - (XVimEvaluator*)SQUOTE:(XVimWindow*)window
 {
-	NSRange r = xv_current_quote([window.sourceView string], [self insertionPointInWindow:window], [self numericArg], _inclusive, '\'');
+	NSRange r = xv_current_quote([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '\'');
 	return [self executeActionForRange:r inWindow:window];
 }
 
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window
 {
-	NSRange r = xv_current_quote([window.sourceView string], [self insertionPointInWindow:window], [self numericArg], _inclusive, '"');
+	NSRange r = xv_current_quote([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '"');
 	return [self executeActionForRange:r inWindow:window];
 }
 

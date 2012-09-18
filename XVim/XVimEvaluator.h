@@ -71,8 +71,6 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
 
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
-
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window;
 
 - (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;

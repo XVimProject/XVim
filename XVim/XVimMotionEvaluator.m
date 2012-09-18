@@ -64,7 +64,7 @@
 {
 	if (!_preserveColumn)
 	{
-		_column = [[window sourceView] columnNumber:[self insertionPointInWindow:window]]; // TODO: Keep column somewhere else
+		_column = [[window sourceView] columnNumber:[window insertionPoint]]; // TODO: Keep column somewhere else
 	}
 	_preserveColumn = NO;
 }

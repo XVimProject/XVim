@@ -36,8 +36,6 @@ typedef void (^OnKeyPressHandler) (NSString* command);
 
 - (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
 
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window;
-
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window;
 
 - (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;

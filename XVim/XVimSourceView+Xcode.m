@@ -12,74 +12,60 @@
 
 @implementation XVimSourceView(Xcode)
 
-- (DVTSourceTextView*)xview
-{
+- (DVTSourceTextView*)xview {
 	return (DVTSourceTextView*)[self view];
 }
 
-- (NSUInteger)columnNumber:(NSUInteger)index
-{
+- (NSUInteger)columnNumber:(NSUInteger)index {
 	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[[self xview] textStorage];
 	return (NSUInteger)[textStorage columnForPositionConvertingTabs:index];
 }
 
-- (long long)currentLineNumber
-{
+- (long long)currentLineNumber {
 	return [[self xview] _currentLineNumber];
 }
 
-- (NSUInteger)numberOfLines{
-    DVTFoldingTextStorage* storage = [[self xview] textStorage];
+- (NSUInteger)numberOfLines{ DVTFoldingTextStorage* storage = [[self xview] textStorage];
     return [storage numberOfLines]; //  This is DVTSourceTextStorage method
 }
 
-- (void)shiftLeft
-{
+- (void)shiftLeft {
 	[[self xview] shiftLeft:self];
 }
 
-- (void)shiftRight
-{
+- (void)shiftRight {
 	[[self xview] shiftRight:self];
 }
 
-- (void)indentCharacterRange:(NSRange)range
-{
+- (void)indentCharacterRange:(NSRange)range {
 	[[[self xview] textStorage] indentCharacterRange:range undoManager:[[self xview] undoManager]];
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
-{
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
 	[[self xview] _drawInsertionPointInRect_:rect color:color];
 }
 
-- (void)hideCompletions
-{
+- (void)hideCompletions {
 	[[[self xview] completionController] hideCompletions];
 }
 
-- (void)selectNextPlaceholder
-{
+- (void)selectNextPlaceholder {
 	[[self xview] selectNextPlaceholder:self];
 }
 
-- (void)selectPreviousPlaceholder
-{
+- (void)selectPreviousPlaceholder {
 	[[self xview] selectPreviousPlaceholder:self];
 }
 
-- (void)keyDown:(NSEvent*)event
-{
+- (void)keyDown:(NSEvent*)event {
 	[[self xview] keyDown_:event];
 }
 
-- (void)setWrapsLines:(BOOL)wraps
-{
+- (void)setWrapsLines:(BOOL)wraps {
 	[[self xview] setWrapsLines:wraps];
 }
 
-- (void)updateInsertionPointStateAndRestartTimer
-{
+- (void)updateInsertionPointStateAndRestartTimer {
 	[[self xview] updateInsertionPointStateAndRestartTimer:YES];
 }
 

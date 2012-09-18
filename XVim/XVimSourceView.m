@@ -9,23 +9,23 @@
 
 @implementation XVimSourceView
 
-- (id)initWithView:(NSView*)view
-{
-	if (self = [super init])
-	{
+- (id)initWithView:(NSView*)view {
+	if (self = [super init]) {
 		_view = (NSTextView*)view;
 	}
 	return self;
 }
 
-- (NSView*)view
-{
+- (NSView*)view {
 	return _view;
 }
     
-- (NSString *)string
-{
+- (NSString *)string {
 	return [_view string];
+}
+
+- (NSUInteger)insertionPoint{
+    return self.selectedRange.location + self.selectedRange.length;
 }
 
 

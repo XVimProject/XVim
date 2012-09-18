@@ -9,6 +9,7 @@
 #import "XVimMode.h"
 #import "XVimCommandLine.h"
 #import "XVimPlaybackHandler.h"
+#import "XVimTextViewProtocol.h"
 
 /*
  * This class manages 1 window. (The term "window" here is different from NSWindow)
@@ -23,13 +24,12 @@
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
-//------- old impelementation will be replaced with other methods-----
-@property(retain) XVimSourceView* sourceView;
+@property(retain) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
 @property(readonly) XVimEvaluator *currentEvaluator;
 @property(retain) IDEEditorArea* editorArea;
 
 
-- (NSUInteger)insertionPoint;
+- (NSUInteger)insertionPoint; // Should be removed. This should be accessed via sourceView::insertionPoint
 - (XVimCommandLine*)commandLine;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;

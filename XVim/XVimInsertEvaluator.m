@@ -182,7 +182,7 @@
     [sourceView hideCompletions];
 	
 	// Set selection to one-before-where-we-were
-	NSUInteger insertionPoint = [self insertionPointInWindow:window];
+	NSUInteger insertionPoint = [window insertionPoint];
 	NSUInteger headOfLine = [sourceView headOfLine:insertionPoint];
 	if (insertionPoint > 0
 		&& headOfLine != insertionPoint && headOfLine != NSNotFound

@@ -10,6 +10,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
+#import "XVimSourceView.h"
 
 @implementation XVimMarkSetEvaluator
 
