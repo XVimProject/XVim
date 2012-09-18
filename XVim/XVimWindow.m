@@ -280,12 +280,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     [commandLine errorMessage:@""];
 }
 
-- (void)setForcusOnFirstTextView{
-    IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[[self.sourceView view] window]];
-    IDEEditorArea* editorArea = [wc editorArea];
-    IDEEditorModeViewController *cont = [editorArea editorModeViewController];
-    IDEEditorContext* context = [cont primaryEditorContext];
-    [context takeFocus];
+- (void)setForcusBackToSourceView{
+    [[[self.sourceView view] window] makeFirstResponder:[self.sourceView view]];
 }
 
 @end

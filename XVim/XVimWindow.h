@@ -57,10 +57,9 @@
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)clearErrorMessage;
 
-- (void)setForcusOnFirstTextView;
-
 + (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea*)editorArea;
 + (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea;
 
+- (void)setForcusBackToSourceView;
 
 @end
