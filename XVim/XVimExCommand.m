@@ -1037,6 +1037,7 @@
 
 - (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
     SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
+    [window setForcusBackToSourceView];
     [NSApp sendAction:sel  to:nil from:self];
 }
 @end
