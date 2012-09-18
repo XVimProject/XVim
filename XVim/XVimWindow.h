@@ -54,6 +54,6 @@
 + (XVimWindow*)associateOf:(id)object;
 
 
-- (void)setForcusOnFirstTextView;
+- (void)setForcusBackToSourceView;
 
 @end

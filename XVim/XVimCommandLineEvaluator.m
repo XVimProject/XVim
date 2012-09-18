@@ -65,8 +65,7 @@
 	XVimCommandField *commandField = window.commandLine.commandField;
 	[commandField absorbFocusEvent];
 	[commandField setDelegate:nil];
-    TRACE_LOG(@"makefirst");
-    [window setForcusOnFirstTextView];
+    [window setForcusBackToSourceView];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window

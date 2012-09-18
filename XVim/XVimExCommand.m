@@ -1021,12 +1021,12 @@
     // We must make forcus back to editor first then invoke the command.
     // This is because I do not know how to move focus on newly visible text editor by invoking this command.
     // Without this focus manipulation the focus after the command does not goes to the text editor
-    [window setForcusOnFirstTextView];
+    [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
 - (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [window setForcusOnFirstTextView];
+    [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(jumpToPreviousCounterpart:) to:nil from:self];
 }
 

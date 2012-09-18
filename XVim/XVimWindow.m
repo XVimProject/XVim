@@ -271,12 +271,8 @@
 // TODO:
 // This method is highly dependent on Xcode class.
 // Must be moved or depend on abstraction layer's method.
-- (void)setForcusOnFirstTextView{
-    IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[[self.sourceView view] window]];
-    IDEEditorArea* editorArea = [wc editorArea];
-    IDEEditorModeViewController *cont = [editorArea editorModeViewController];
-    IDEEditorContext* context = [cont primaryEditorContext];
-    [context takeFocus];
+- (void)setForcusBackToSourceView{
+    [[[self.sourceView view] window] makeFirstResponder:[self.sourceView view]];
 }
 
 static char s_associate_key = 0;
