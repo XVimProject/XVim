@@ -439,8 +439,6 @@
 				C320BAB4154BEE07000744F4 /* XVimVisualMode.h */,
 				C3552DA6153AC6F800D57577 /* XVimHistoryHandler.h */,
 				C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */,
-				C3FA1A1B1532648700059BF6 /* XVimWindow.h */,
-				C3FA1A1C1532648700059BF6 /* XVimWindow.m */,
 				C36C1045153104EC00CE1D62 /* XVimMotionType.h */,
 				C39DC81315326F5500185390 /* XVimCharacterSearch.h */,
 				C39DC81415326F5500185390 /* XVimCharacterSearch.m */,
@@ -482,6 +480,8 @@
 		C345DDB7154CCF1F009F232E /* Xcode Dependent Classes */ = {
 			isa = PBXGroup;
 			children = (
+				C3FA1A1B1532648700059BF6 /* XVimWindow.h */,
+				C3FA1A1C1532648700059BF6 /* XVimWindow.m */,
 				A2ABFE1115497A3C002220E8 /* XVimStatusLine.h */,
 				A2ABFE1215497A3C002220E8 /* XVimStatusLine.m */,
 				A2AF5E16152EA92C00E13833 /* XVimSourceView.h */,

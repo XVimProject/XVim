@@ -17,7 +17,7 @@
 #import "XVimOptions.h"
 #import "Logger.h"
 #import <objc/runtime.h>
-#import "IDEEditorArea+XVim.h" // This is Xcode dependent. Must be moved.
+#import "IDEEditorArea+XVim.h"
 
 @interface XVimWindow() {
 	XVimEvaluator* _currentEvaluator;
@@ -26,21 +26,34 @@
 	BOOL _handlingMouseEvent;
 	NSString *_staticString;
 }
+- (id)initWithIDEEditorArea:(IDEEditorArea*)editorArea;
+- (void)setEvaluator:(XVimEvaluator*)evaluator;
 - (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 @end
 
 @implementation XVimWindow
 @synthesize sourceView = _sourceView;
 @synthesize editorArea = _editorArea;
+static const char* KEY_WINDOW = "xvimwindow";
 
-- (id)init{
++ (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea *)editorArea {
+	return (XVimWindow*)objc_getAssociatedObject(editorArea, KEY_WINDOW);
+}
+
++ (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea{
+    XVimWindow* w = [[[XVimWindow alloc] initWithIDEEditorArea:editorArea] autorelease];
+	objc_setAssociatedObject(editorArea, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
+}
+
+- (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
     if (self = [super init]){
 		_staticString = @"";
 		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
 		_keymapContext = [[XVimKeymapContext alloc] init];
+        self.editorArea = editorArea;
 	}
-	return self;
+    return self;
 }
 
 - (void)dealloc{
@@ -49,6 +62,7 @@
     [_staticString release];
     [_currentEvaluator release];
     [_sourceView release];
+    self.editorArea = nil;
     [super dealloc];
 }
 
@@ -266,25 +280,12 @@
     [commandLine errorMessage:@""];
 }
 
-static const char* KEY_WINDOW = "xvimwindow";
-+ (XVimWindow*)windowOf:(id)object {
-	return (XVimWindow*)objc_getAssociatedObject(object, KEY_WINDOW);
-}
-// TODO:
-// This method is highly dependent on Xcode class.
-// Must be moved or depend on abstraction layer's method.
 - (void)setForcusOnFirstTextView{
     IDEWorkspaceWindowController* wc = [NSClassFromString(@"IDEWorkspaceWindowController") performSelector:@selector(workspaceWindowControllerForWindow:) withObject:[[self.sourceView view] window]];
     IDEEditorArea* editorArea = [wc editorArea];
     IDEEditorModeViewController *cont = [editorArea editorModeViewController];
     IDEEditorContext* context = [cont primaryEditorContext];
     [context takeFocus];
-}
-
-+ (void)registerAsWindow:(id)object{
-    XVimWindow* w = [[[XVimWindow alloc] init] autorelease];
-    w.editorArea = object;
-	objc_setAssociatedObject(object, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

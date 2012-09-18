@@ -11,26 +11,22 @@
 #import "XVimPlaybackHandler.h"
 
 /*
+ * This class manages 1 window. (The term "window" here is different from NSWindow)
+ * A window has several text views and one command line view.
  *
- * ----------------------   -----------------------
- *    XVimWindow class   ->  XVimWindow + Xcode
- * ----------------------   -----------------------
- *                           IDEEditorArea class
- *                          -----------------------
- *
- * XVimWindow uses XVimWindow + Xcode category.
- * XVimWindow + Xcode category depends on Xcode class (IDEEditorArea)
  */
+
 @class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
-@class IDEEditorArea; // Xcode dependent(fixit!)
+@class IDEEditorArea;
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
+//------- old impelementation will be replaced with other methods-----
 @property(retain) XVimSourceView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
-@property(retain) IDEEditorArea* editorArea; // Xcode dependent(fixit!)
+@property(retain) IDEEditorArea* editorArea;
 
 
 - (NSUInteger)insertionPoint;
@@ -46,7 +42,6 @@
 - (BOOL)shouldDrawInsertionPoint;
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
-- (void)setEvaluator:(XVimEvaluator*)evaluator;
 
 // XVimCommandFieldDelegate
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
@@ -62,10 +57,10 @@
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)clearErrorMessage;
 
-+ (XVimWindow*)windowOf:(id)object;
-+ (void)registerAsWindow:(id)object;
-
-
 - (void)setForcusOnFirstTextView;
+
++ (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea*)editorArea;
++ (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea;
+
 
 @end

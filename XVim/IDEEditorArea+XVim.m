@@ -15,7 +15,7 @@ static const char* KEY_COMMAND_LINE = "commandLine";
 @implementation IDEEditorArea (XVim)
 
 - (XVimWindow*)xvimWindow{
-    return [XVimWindow windowOf:self];
+    return [XVimWindow windowOfIDEEditorArea:self];
 }
 
 - (XVimCommandLine*)commandLine{

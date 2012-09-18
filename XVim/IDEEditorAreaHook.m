@@ -39,7 +39,7 @@
     [base viewDidInstall_];
 
     // Setup Command Line
-    [XVimWindow registerAsWindow:base];
+    [XVimWindow createWindowForIDEEditorArea:base];
     [base setupCommandLine];
 }
 
