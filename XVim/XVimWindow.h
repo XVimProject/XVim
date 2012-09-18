@@ -14,7 +14,8 @@
 /*
  * This class manages 1 window. (The term "window" here is different from NSWindow)
  * A window has several text views and one command line view.
- *
+ * All the key input (or mouse input or some other event if needed ) must be passed to
+ * the associated XVimWindow object first and it handles the event.
  */
 
 @class XVimSourceView;
