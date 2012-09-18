@@ -69,6 +69,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (XVimCommandLine*)commandLine{
     return [_editorArea commandLine];
 }
+
 - (void)willSetEvaluator:(XVimEvaluator*)evaluator {
 	if (evaluator != _currentEvaluator && _currentEvaluator){
 		[_currentEvaluator willEndHandlerInWindow:self];
@@ -106,10 +107,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     return _localMarks;
 }
 
-- (NSUInteger)insertionPoint
-{
+- (NSUInteger)insertionPoint {
     return [self.sourceView insertionPoint];
-	//return [[self currentEvaluator] insertionPointInWindow:self];
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
@@ -174,15 +173,13 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 
-- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
-{
+- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range; {
 	XVimEvaluator *evaluator = [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:mode withRange:range];
 	[self willSetEvaluator:evaluator];
 	[self setEvaluator:evaluator];
 }
 
-- (void)commandFieldLostFocus:(XVimCommandField*)commandField
-{
+- (void)commandFieldLostFocus:(XVimCommandField*)commandField {
 	[commandField setDelegate:nil];
 	[self willSetEvaluator:nil];
 	[self setEvaluator:nil];
@@ -211,8 +208,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     }
 }
 
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator
-{
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator {
     switch ([evaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
         case REGISTER_APPEND:
             [xregister appendKeyEvent:keyStroke];
@@ -229,13 +225,11 @@ static const char* KEY_WINDOW = "xvimwindow";
     }
 }
 
-- (void)beginMouseEvent:(NSEvent*)event
-{
+- (void)beginMouseEvent:(NSEvent*)event {
 	_handlingMouseEvent = YES;
 }
 
-- (void)endMouseEvent:(NSEvent*)event
-{
+- (void)endMouseEvent:(NSEvent*)event {
 	_handlingMouseEvent = NO;
 	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
 	[self willSetEvaluator:next];
@@ -251,19 +245,35 @@ static const char* KEY_WINDOW = "xvimwindow";
 	return range;
 }
 
-- (void)drawRect:(NSRect)rect
-{
+- (void)drawRect:(NSRect)rect {
 	[_currentEvaluator drawRect:rect inWindow:self];
 }
 
-- (BOOL)shouldDrawInsertionPoint
-{
+- (BOOL)shouldDrawInsertionPoint {
 	return [_currentEvaluator shouldDrawInsertionPointInWindow:self];
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
-{
-	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
+	float heightRatio = [_currentEvaluator insertionPointHeightRatio];
+    float widthRatio = [_currentEvaluator insertionPointWidthRatio];
+    float alphaRatio = [_currentEvaluator insertionPointAlphaRatio];
+    
+	XVimSourceView *sourceView = [self sourceView];
+	color = [color colorWithAlphaComponent:alphaRatio];
+	NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+	NSUInteger glyphIndex = [sourceView glyphIndexForPoint:aPoint];
+	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
+	
+	[color set];
+	rect.size.width =rect.size.height/2;
+	if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
+		rect.size.width=glyphRect.size.width;
+	
+	rect.origin.y += (1 - heightRatio) * rect.size.height;
+	rect.size.height *= heightRatio;
+    rect.size.width *= widthRatio;
+	
+	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
 }
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
@@ -275,8 +285,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     return;
 }
 
-- (void)clearErrorMessage
-{
+- (void)clearErrorMessage {
 	XVimCommandLine *commandLine = self.commandLine;
     [commandLine errorMessage:@""];
 }

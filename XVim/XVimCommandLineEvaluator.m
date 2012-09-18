@@ -147,8 +147,8 @@
 	return NO;
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
-{
+- (float)insertionPointHeightRatio{
+    return 0.0;
 }
 
 - (NSString*)modeString

@@ -167,8 +167,7 @@
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
-	if (flag)
-	{
+	if (flag) {
 		[window drawInsertionPointInRect:rect color:color];
 	}
 	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];

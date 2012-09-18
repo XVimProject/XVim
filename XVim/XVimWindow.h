@@ -29,7 +29,7 @@
 @property(retain) IDEEditorArea* editorArea;
 
 
-- (NSUInteger)insertionPoint; // Should be removed. This should be accessed via sourceView::insertionPoint
+- (NSUInteger)insertionPoint; // May be removed. This should be accessed via sourceView::insertionPoint
 - (XVimCommandLine*)commandLine;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;

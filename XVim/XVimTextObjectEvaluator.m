@@ -47,9 +47,8 @@
 	return [_parent shouldDrawInsertionPointInWindow:window];
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
-{
-	return [_parent drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.5];
+- (float)insertionPointHeightRatio{
+    return 0.5;
 }
 
 - (NSString*)modeString

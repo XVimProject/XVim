@@ -75,7 +75,9 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
+- (float)insertionPointHeightRatio;
+- (float)insertionPointWidthRatio;
+- (float)insertionPointAlphaRatio;
 
 - (NSString*)modeString;
 

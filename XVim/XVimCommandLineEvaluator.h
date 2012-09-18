@@ -40,8 +40,6 @@ typedef void (^OnKeyPressHandler) (NSString* command);
 
 - (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio;
-
 - (NSString*)modeString;
 
 @end
