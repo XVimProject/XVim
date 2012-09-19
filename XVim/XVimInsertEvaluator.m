@@ -83,22 +83,6 @@
                                                                          withRange:range];
 }
 
-// Move to insert mode, have it call insertion point on sourceView
-/*
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color inWindow:(XVimWindow*)window heightRatio:(float)heightRatio
-{
-	if (_oneCharMode)
-	{
-		[super drawInsertionPointInRect:rect color:color inWindow:window heightRatio:.25];
-	}
-	else
-	{
-		XVimSourceView *sourceView = [window sourceView];
-		[sourceView drawInsertionPointInRect:rect color:color];
-	}
-}
- */
-
 - (float)insertionPointHeightRatio{
     if(_oneCharMode){
         return 0.25;
@@ -107,10 +91,16 @@
 }
 
 - (float)insertionPointWidthRatio{
-    return 0.20;
+    if(_oneCharMode){
+        return 1.0;
+    }
+    return 0.15;
 }
 
 - (float)insertionPointAlphaRatio{
+    if(_oneCharMode){
+        return 0.5;
+    }
     return 1.0;
 }
 
