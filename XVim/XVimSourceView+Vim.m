@@ -4,7 +4,6 @@
 //
 //  Created by Tomas Lundell on 30/04/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
-//   aaaaaaaaaaaa
 
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
@@ -30,6 +29,8 @@
 #define ASSERT_VALID_RANGE_WITHOUT_EOF(x)
 #define ASSERT_VALID_CURSOR_POS(x)
 #endif
+
+#define charat(x) [[self string] characterAtIndex:(x)]
 
 @implementation XVimSourceView(Vim)
 
@@ -477,6 +478,21 @@
             }
         }
         
+        if(charat(prev) == '>' && prev){
+            //possible autocomplete glyph that we should skip.
+            if(charat(prev - 1) == '#'){
+                NSUInteger findstart = prev;
+                while (--findstart ) {
+                    if(charat(findstart) == '#'){
+                        if(charat(findstart - 1) == '<'){
+                            prev = findstart - 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
         // Now the position can be move to the prev
         pos = prev;
     }   
@@ -746,24 +762,94 @@
 }
 
 
+// From the index start look forward or back wards to find the end or start of the placeholder boundary
+// note this does not do anything other that find the position of the < or the > that demarcates the placeholder
+// return NSNotFound if unsucessful or current character is not the beginning or end of a placeholder.
+-(NSUInteger) findPlaceholderBoundaryFromIndex:(NSUInteger)index forward:(BOOL)forward{
+    NSUInteger curPlace = index;
+    // search forward through the string to find the closing #> but only if it starts with <#
+    NSLog(@"char: %c", charat(curPlace));
+    if(forward && charat(curPlace) == '<'){
+        // return if this is not a placeholder token
+        if(charat(++curPlace) != '#'){ return NSNotFound; }
+        
+        // if we are not at the eof and not at the eol
+        while(true){
+            if([self isEOF:curPlace] || [self isEOL:curPlace]) return NSNotFound;
+            if(charat(curPlace) == '#' ){
+                if([self isEOL:++curPlace]) return NSNotFound;
+                if([self isEOF:curPlace]) return NSNotFound;
+                
+                if(charat(curPlace) == '>'){
+                    return curPlace;
+                }else{
+                    ++curPlace;
+                    continue; //not a placeholder
+                }
+            }
+            
+            ++curPlace;
+        }
+    }else if (!forward && charat(curPlace) == '>'){
+        if(charat(--curPlace) != '#'){ return NSNotFound; }
+        while(true){
+            if([self isEOF:curPlace] || [self isEOL:curPlace] || curPlace == 0){ return NSNotFound; }
+            if(charat(curPlace) == '#' ){
+                if([self isEOL:--curPlace]) return NSNotFound;
+                if([self isEOL:curPlace]) return NSNotFound;
+                
+                if(charat(curPlace) == '<'){
+                    return curPlace;
+                }else{
+                    --curPlace;
+                    continue; //not a placeholder
+                }
+            }
+            
+            --curPlace;
+        }
+    }
+    
+    return NSNotFound;
+}
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( 1 >= index)
+    if( 1 >= index )
         return 0;
-    
+    NSUInteger indexBoundary;
     NSUInteger pos = index-1;
-    unichar lastChar= [[self string] characterAtIndex:pos];
+    unichar lastChar = [[self string] characterAtIndex:pos];
+    
     for(NSUInteger i = pos-1 ; ; i-- ){
         // Each time we encounter head of a word decrement "counter".
         // Remember blankline is a word
         
         unichar curChar = [[self string] characterAtIndex:i];
+        
+        //check the character if it might be the start of a placeholder before doing a more intensive search.
+        if(lastChar == '>'){
+            indexBoundary = [self findPlaceholderBoundaryFromIndex:i+1 forward:NO];
+        }else{
+            indexBoundary = NSNotFound;
+        }
+        
+        // this branch handles the case that we found a placeholder.
+        // must update the pointer into the string and update the current character found to be at the current index.
+        if(indexBoundary != NSNotFound){
+            count--;
+            i = indexBoundary;
+            if (count == 0) {
+                pos = i;
+                break;
+            }
+            curChar = [[self string] characterAtIndex:i];
+        }
         // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
         //    - Whitespace(including newline) and Non-Blank
         //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
         //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
         //    - newline and newline(blankline) 
-        if( 
+        else if(
            ((isWhiteSpace(curChar) || isNewLine(curChar)) && isNonBlank(lastChar))   ||
            ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(lastChar))   ||
            ( opt != BIGWORD && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(lastChar) && isKeyword(lastChar) )  ||
