@@ -177,13 +177,15 @@
         ERROR_LOG(@"Could not create temporary file for command");
         return nil;
     }
-    free(tempFileNameCString);
     NSFileHandle* fh = AUTORELEASE([[NSFileHandle alloc] initWithFileDescriptor:fileDescriptor closeOnDealloc:NO]);
     [ fh writeData:[ contents dataUsingEncoding:NSUTF8StringEncoding]];
     [ fh closeFile ];
     
     NSFileManager* fileManager = AUTORELEASE([[NSFileManager alloc] init]);
+    
     NSString* filePath = [ fileManager stringWithFileSystemRepresentation:tempFileNameCString length:strlen(tempFileNameCString)];
+    free(tempFileNameCString);
+    
     NSError* error = nil;
     if (![ fileManager setAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithShort:0700] forKey:NSFilePosixPermissions] ofItemAtPath:filePath error:&error ])
     {
