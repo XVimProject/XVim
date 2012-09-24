@@ -11,16 +11,20 @@
 #import "DVTKit.h"
 
 @implementation XVimSourceView(Xcode)
+@dynamic selectedLineRange;
 
 - (DVTSourceTextView*)xview
 {
 	return (DVTSourceTextView*)[self view];
 }
+- (DVTFoldingTextStorage*)xTextStorage
+{
+	return (DVTFoldingTextStorage*)[[self xview] textStorage];
+}
 
 - (NSUInteger)columnNumber:(NSUInteger)index
 {
-	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[[self xview] textStorage];
-	return (NSUInteger)[textStorage columnForPositionConvertingTabs:index];
+	return (NSUInteger)[[self xTextStorage] columnForPositionConvertingTabs:index];
 }
 
 - (long long)currentLineNumber
@@ -29,8 +33,7 @@
 }
 
 - (NSUInteger)numberOfLines{
-    DVTFoldingTextStorage* storage = [[self xview] textStorage];
-    return [storage numberOfLines]; //  This is DVTSourceTextStorage method
+    return [[self xTextStorage] numberOfLines]; //  This is DVTSourceTextStorage method
 }
 
 - (void)shiftLeft
@@ -45,7 +48,7 @@
 
 - (void)indentCharacterRange:(NSRange)range
 {
-	[[[self xview] textStorage] indentCharacterRange:range undoManager:[[self xview] undoManager]];
+	[[self xTextStorage] indentCharacterRange:range undoManager:[[self xview] undoManager]];
 }
 
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
@@ -83,4 +86,23 @@
 	[[self xview] updateInsertionPointStateAndRestartTimer:YES];
 }
 
+
+-(NSRange)selectedLineRange
+{
+    return [ [self xTextStorage] lineRangeForCharacterRange:self.selectedRange ];
+}
+
+-(void)setSelectedLineRange:(NSRange)selectedLineRange
+{
+    if (selectedLineRange.location >= [ self numberOfLines ])
+    {
+        selectedLineRange.location = MAX(0,[ self numberOfLines ]-1);
+    }
+    if ((selectedLineRange.location + selectedLineRange.length) > [ self numberOfLines])
+    {
+        selectedLineRange.length = ([self numberOfLines] - selectedLineRange.location);
+    }
+    NSRange charRange = [[self xTextStorage] characterRangeForLineRange:selectedLineRange];
+    [ [ self xview ] setSelectedRange:charRange];
+}
 @end

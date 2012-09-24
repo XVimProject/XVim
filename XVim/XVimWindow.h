@@ -49,6 +49,9 @@
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)clearErrorMessage;
 
+- (void)showQuickfixWithString:(NSString *)message;
+- (void)closeQuickfix;
+
 - (void)associateWith:(id)object;
 + (XVimWindow*)associateOf:(id)object;
 

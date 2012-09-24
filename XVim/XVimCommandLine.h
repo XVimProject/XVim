@@ -15,6 +15,7 @@
 - (void)setModeString:(NSString*)string;
 - (void)setArgumentString:(NSString*)string;
 - (void)errorMessage:(NSString*)string;
+- (void)quickFixWithString:(NSString*)string;
 - (void)didFrameChanged:(NSNotification*)notification;
 
 - (XVimCommandField*)commandField;

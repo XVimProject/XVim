@@ -21,6 +21,7 @@
  **/
 
 @interface XVimSourceView(Xcode)
+@property (assign) NSRange selectedLineRange ;
 
 // Indentation
 - (void)shiftLeft;

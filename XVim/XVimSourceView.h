@@ -32,8 +32,8 @@
 - (NSString*)string;
 
 // Selection
-- (NSRange)selectedRange;
-- (void)setSelectedRange:(NSRange)range;
+@property (assign) NSRange selectedRange;
+@property (assign) NSRange selectedLineRange;
 
 // NSTextView functions
 - (void)copyText;

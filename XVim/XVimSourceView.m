@@ -8,6 +8,8 @@
 @end
 
 @implementation XVimSourceView
+@dynamic selectedRange;
+@dynamic selectedLineRange;
 
 - (id)initWithView:(NSView*)view
 {

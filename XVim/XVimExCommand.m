@@ -23,6 +23,9 @@
 @synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
 
+// Maximum time in seconds for a 'bang' command to run before being killed as taking too long
+static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
+
 @implementation XVimExCmdname
 @synthesize cmdName,methodName;
 
@@ -917,20 +920,36 @@
 
 -(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
-    if ( ! args.noRangeSpecified )
-    {
-        NSString* selectedText = [ window.sourceView selectedText ];
-        NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText ];
+        NSUInteger firstFilteredLine = args.lineBegin ;
+    NSString* selectedText = nil;
+    if (!args.noRangeSpecified && args.lineBegin != NSNotFound && args.lineEnd != NSNotFound)
+        {
+            selectedText = args.noRangeSpecified ? nil:[ window.sourceView selectedText ];
+            window.sourceView.selectedLineRange = NSMakeRange(args.lineBegin-1, args.lineEnd - args.lineBegin + 1);
+            DEBUG_LOG(@"Selected line range = %@", NSStringFromRange(window.sourceView.selectedLineRange));
+        }
+        NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS ];
+        
         if (scriptReturn != nil)
         {
-            [ window.sourceView replaceText:scriptReturn ];
+            if (args.noRangeSpecified)
+            {
+                // No text range was specified -- open quickfix window to display the result
+                [ window showQuickfixWithString:scriptReturn ];
+            }
+            else
+            {
+                // A text range was specified -- replace the range with the output of the command
+                [ window.sourceView replaceText:scriptReturn ];
+                if (firstFilteredLine != NSNotFound)
+                {
+                    window.sourceView.selectedLineRange = NSMakeRange(firstFilteredLine-1,1);
+                }
+            }
         }
-    }
-    else
-    {
-        [XVimTaskRunner runScriptInTerminal:args.arg ];
-    }
 }
+
+
 - (void)clean:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
     [ NSApp sendAction:@selector(cleanActiveRunContext:) to:nil from:self ];

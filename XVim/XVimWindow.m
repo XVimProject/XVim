@@ -267,6 +267,18 @@
     [commandLine errorMessage:@""];
 }
 
+- (void)showQuickfixWithString:(NSString *)message {
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine quickFixWithString:message];
+    return;
+}
+
+- (void)closeQuickfix
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine quickFixWithString:nil ];
+}
+
 
 static char s_associate_key = 0;
 
