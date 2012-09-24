@@ -62,21 +62,8 @@
 
 static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
 
-- (NSString*)modeString
-{
+- (NSString*)modeString {
 	return MODE_STRINGS[_mode];
-}
-
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
-{
-    // This is quick hack. When unsupported keys are pressed in Visual mode we have to set selection
-    // because in "eval::" method we cancel the selection temporarily to handle motion.
-    // Because methods handles supporeted keys call motionFixedFrom:To: method to update the selection
-    // we do not need to call updateSelection.
-    // Since this method is called when unsupported keys are pressed I use here to call updateSelection but its not clear why we call this here.
-    // We should make another process for this.
-    [self updateSelectionInWindow:window]; 
-    return self;
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
@@ -119,22 +106,14 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
      */
 }
     
-- (void)didEndHandlerInWindow:(XVimWindow*)window
-{
+- (void)didEndHandlerInWindow:(XVimWindow*)window {
 	[super didEndHandlerInWindow:window];
 	[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     [[window sourceView] endSelection];
 }
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_VISUAL];
-}
-
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
-	//return NO;
-    return YES;
 }
 
 - (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
@@ -149,84 +128,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
-   // XVimSourceView* v = [window sourceView];
-    //[v setSelectedRange:NSMakeRange([window insertionPoint], 0)]; // temporarily cancel the current selection
-    //[v adjustCursorPosition];
     XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
-    if ([nextEvaluator isRelatedTo:self]) {
-        [self updateSelectionInWindow:window];   
-    }
     return nextEvaluator;
-}
-
-
-- (void)updateSelectionInWindow:(XVimWindow*)window
-{
-    /*
-    XVimSourceView* view = [window sourceView];
-    if( _mode == MODE_CHARACTER ){
-		
-		if (_begin <= _insertion)
-		{
-			_selection_begin = _begin;
-			_selection_end = _insertion;
-		}
-		else
-		{
-			_selection_begin = _insertion;
-			_selection_end = _begin;
-		}
-		
-    }else if( _mode == MODE_LINE ){
-        NSUInteger begin = _begin;
-        NSUInteger end = _insertion;
-        if( _begin > _insertion ){
-            begin = _insertion;
-            end = _begin;
-        }
-        _selection_begin = [view headOfLine:begin];
-        if( NSNotFound == _selection_begin ){
-            _selection_begin = begin;
-        }
-        _selection_end = [view tailOfLine:end];
-    }else if( _mode == MODE_BLOCK){
-        // later
-    }
-    [view setSelectedRangeWithBoundsCheck:_selection_begin To:_selection_end+1];
-	[view scrollTo:[window insertionPoint]];
-	
-	if (_mode == MODE_CHARACTER) {
-		_operationRange = [[window sourceView] selectedRange];
-	} else {
-		NSRange selectedRange = [[window sourceView] selectedRange];
-		NSUInteger startLine = [view lineNumber:selectedRange.location];
-		NSUInteger endLine = [view lineNumber:selectedRange.location + selectedRange.length];
-		_operationRange = NSMakeRange(startLine, endLine - startLine);
-	}
-     */
-}
-
-- (XVimEvaluator*)C_b:(XVimWindow*)window{
-    NSUInteger insertion = [[window sourceView] pageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] moveCursor:insertion];
-    return self;
-}
-
-- (XVimEvaluator*)C_d:(XVimWindow*)window{
-    NSUInteger insertion = [[window sourceView] halfPageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] moveCursor:insertion];
-    return self;
-}
-
-- (XVimEvaluator*)C_f:(XVimWindow*)window{
-    NSUInteger insertion = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] moveCursor:insertion];
-    return self;
 }
 
 - (XVimEvaluator*)a:(XVimWindow*)window
 {
-    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"a"]
 																 operatorAction:action 
@@ -236,7 +143,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)c:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
 														 insertModeAtCompletion:YES];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithContext:[self contextCopy]
@@ -247,7 +153,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
 														 insertModeAtCompletion:NO];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithContext:[self contextCopy]
@@ -259,7 +164,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
 														 insertModeAtCompletion:NO];	
     XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithContext:[self contextCopy]
@@ -277,7 +181,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)i:(XVimWindow*)window
 {
-    [self updateSelectionInWindow:window];
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"]
 																 operatorAction:action 
@@ -298,7 +201,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
     //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
     XVimSourceView* view = [window sourceView];
-    [self updateSelectionInWindow:window];
     // Keep currently selected string
     NSString* current = [[view string] substringWithRange:[view selectedRange]];
     [view deleteText];
@@ -335,46 +237,45 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
-	[self updateSelectionInWindow:window];
 	XVimSourceView *view = [window sourceView];
-	NSRange r = [view selectedRange];
-	[view lowercaseRange:r];
-	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	[view lowerCase];
+    [view moveCursor:view.selectionBegin];
+    [view endSelection];
 	return nil;
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
-	[self updateSelectionInWindow:window];
 	XVimSourceView *view = [window sourceView];
-	NSRange r = [view selectedRange];
-	[view uppercaseRange:r];
-	[view setSelectedRange:NSMakeRange(r.location, 0)];
+	[view upperCase];
+    [view moveCursor:view.selectionBegin];
+    [view endSelection];
 	return nil;
 }
 
-- (XVimEvaluator*)C_u:(XVimWindow*)window{
-    [[window sourceView] moveCursor: [[window sourceView] halfPageBackward:[[window sourceView] selectedRange].location count:[self numericArg]]];
-    [self updateSelectionInWindow:window];
-    return self;
-}
-
 - (XVimEvaluator*)v:(XVimWindow*)window{
-    if( _mode == MODE_CHARACTER ){
-        // go to normal mode
+	XVimSourceView *view = [window sourceView];
+    if( view.selectionMode == MODE_CHARACTER ){
         return  [self ESC:window];
     }
-    _mode = MODE_CHARACTER;
-    [self updateSelectionInWindow:window];
+    [view changeSelectionMode:MODE_CHARACTER];
     return self;
 }
 
 - (XVimEvaluator*)V:(XVimWindow*)window{
-    if( MODE_LINE == _mode ){
-        // go to normal mode
+	XVimSourceView *view = [window sourceView];
+    if( view.selectionMode == MODE_LINE){
         return  [self ESC:window];
     }
-    _mode = MODE_LINE;
-    [self updateSelectionInWindow:window];
+    [view changeSelectionMode:MODE_LINE];
+    return self;
+}
+
+- (XVimEvaluator*)C_v:(XVimWindow*)window{
+	XVimSourceView *view = [window sourceView];
+    if( view.selectionMode == MODE_BLOCK){
+        return  [self ESC:window];
+    }
+    [view changeSelectionMode:MODE_BLOCK];
     return self;
 }
 
@@ -387,7 +288,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)y:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
 	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithYankRegister:[self yankRegister]];
     XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithContext:[self contextCopy]
 															   operatorAction:operatorAction 
@@ -414,7 +314,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-    [self updateSelectionInWindow:window];
 	
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithContext:[self contextCopy]
@@ -461,7 +360,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
 	
 	_mode = MODE_LINE;
-    [self updateSelectionInWindow:window];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftRight];
     }
@@ -475,7 +373,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     XVimSourceView* view = [window sourceView];
 	
 	_mode = MODE_LINE;
-    [self updateSelectionInWindow:window];
     for( int i = 0; i < [self numericArg]; i++ ){
         [view shiftLeft];
     }

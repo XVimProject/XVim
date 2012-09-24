@@ -29,4 +29,12 @@
 - (void)endSelection;
 - (void)moveCursor:(NSUInteger)pos;
 
+// Case changes. These functions are all range checked.
+- (void)toggleCase;
+- (void)upperCase;
+- (void)lowerCase;
+- (void)toggleCaseForRange:(NSRange)range;
+- (void)upperCaseForRange:(NSRange)range;
+- (void)lowerCaseForRange:(NSRange)range;
+
 @end

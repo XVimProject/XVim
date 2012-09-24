@@ -33,41 +33,6 @@
 
 @implementation XVimSourceView(Vim)
 
-- (void)toggleCaseForRange:(NSRange)range {
-	
-    NSString* text = [self string];
-	[self clampRangeToBuffer:&range];
-	
-	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
-	for (NSUInteger i = 0; i < range.length; ++i) {
-		NSRange currentRange = NSMakeRange(i, 1);
-		NSString *currentCase = [substring substringWithRange:currentRange];
-		NSString *upperCase = [currentCase uppercaseString];
-		
-		NSRange replaceRange = NSMakeRange(i, 1);
-		if ([currentCase isEqualToString:upperCase]){
-			[substring replaceCharactersInRange:replaceRange withString:[currentCase lowercaseString]];
-		}else{
-			[substring replaceCharactersInRange:replaceRange withString:upperCase];
-		}	
-	}
-	
-	[self insertText:substring replacementRange:range];
-}
-
-- (void)uppercaseRange:(NSRange)range {
-    NSString* s = [self string];
-	[self clampRangeToBuffer:&range];
-	
-	[self insertText:[[s substringWithRange:range] uppercaseString] replacementRange:range];
-}
-
-- (void)lowercaseRange:(NSRange)range {
-    NSString* s = [self string];
-	[self clampRangeToBuffer:&range];
-	
-	[self insertText:[[s substringWithRange:range] lowercaseString] replacementRange:range];
-}
 
 - (void)deleteTextIntoYankRegister:(XVimRegister*)xregister
 {

@@ -304,9 +304,5 @@ unichar characterAtIndex(NSStringHelper*, NSInteger index);
 - (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (NSUInteger)lineNumber:(NSUInteger)index;
 
-// Case changes. These functions are all range checked.
-- (void)toggleCaseForRange:(NSRange)range;
-- (void)uppercaseRange:(NSRange)range;
-- (void)lowercaseRange:(NSRange)range;
 
 @end

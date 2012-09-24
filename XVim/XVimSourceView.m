@@ -26,6 +26,7 @@
 @interface XVimSourceView() {
 	__weak NSTextView *_view;
 }
+- (NSRange)_currentSelection;
 @end
 
 @implementation XVimSourceView
@@ -68,6 +69,14 @@
 
 - (NSUInteger)insertionLine{
     return [(XVimSourceView*)_view lineNumber:_insertionPoint];
+}
+
+- (NSRange)_currentSelection{
+    if( _selectionMode == MODE_VISUAL_NONE){
+        return NSMakeRange(_insertionPoint, 1);
+    }else{
+        return NSMakeRange(_selectionAreaStart, _selectionAreaStart);
+    }
 }
 
 //////////////////
@@ -143,6 +152,47 @@
     [(DVTSourceTextView*)_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
 }
 
+- (void)toggleCase{
+    [self toggleCaseForRange:[self _currentSelection]];
+}
+
+- (void)upperCase{
+    [self upperCaseForRange:[self _currentSelection]];
+}
+
+- (void)lowerCase{
+    [self lowerCaseForRange:[self _currentSelection]];
+}
+
+- (void)toggleCaseForRange:(NSRange)range {
+    NSString* text = [self string];
+	
+	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
+	for (NSUInteger i = 0; i < range.length; ++i) {
+		NSRange currentRange = NSMakeRange(i, 1);
+		NSString *currentCase = [substring substringWithRange:currentRange];
+		NSString *upperCase = [currentCase uppercaseString];
+		
+		NSRange replaceRange = NSMakeRange(i, 1);
+		if ([currentCase isEqualToString:upperCase]){
+			[substring replaceCharactersInRange:replaceRange withString:[currentCase lowercaseString]];
+		}else{
+			[substring replaceCharactersInRange:replaceRange withString:upperCase];
+		}	
+	}
+	
+	[self insertText:substring replacementRange:range];
+}
+
+- (void)upperCaseForRange:(NSRange)range {
+    NSString* s = [self string];
+	[self insertText:[[s substringWithRange:range] uppercaseString] replacementRange:range];
+}
+
+- (void)lowerCaseForRange:(NSRange)range {
+    NSString* s = [self string];
+	[self insertText:[[s substringWithRange:range] lowercaseString] replacementRange:range];
+}
 
 //////////////////////////////
 // Selection (Visual Mode)  //
@@ -168,6 +218,14 @@
     [self moveCursor:_insertionPoint]; // turn selection off
 }
 
+- (void)changeSelectionMode:(VISUAL_MODE)mode{
+    if( mode == MODE_VISUAL_NONE){
+        [self endSelection];
+    }
+    _selectionMode = mode;
+    [self moveCursor:_insertionPoint];
+    return;
+}
 
 // Scrolling  //
 ////////////////

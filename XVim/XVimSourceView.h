@@ -43,6 +43,8 @@
 - (NSRange)selectedRange;
 - (void)setSelectedRange:(NSRange)range;
 
+- (void)changeSelectionMode:(VISUAL_MODE)mode;
+
 // NSTextView functions
 - (void)copyText;
 - (void)deleteText;

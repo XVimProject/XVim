@@ -29,7 +29,7 @@
 {
 	XVimSourceView *view = [window sourceView];
 	NSRange r = [view getOperationRangeFrom:from To:to Type:type];
-	[view lowercaseRange:r];
+	[view lowerCaseForRange:r];
 	[view setSelectedRange:NSMakeRange(r.location, 0)];
 	return nil;
 }
