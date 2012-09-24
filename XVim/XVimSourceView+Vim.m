@@ -1108,6 +1108,20 @@
 	return [self nextPositionFrom:idx matchingColumn:column];
 }
 
+- (NSUInteger)maxColumnAtLineNumber:(NSUInteger)num{
+    // Column starts from 0
+    NSUInteger firstIdx = [self positionAtLineNumber:num];
+    if( NSNotFound == firstIdx ){
+        //There no such line in the text.
+        return NSNotFound;
+    }
+    NSUInteger eol = [self endOfLine:firstIdx];
+    if( NSNotFound == eol ){
+        return NSNotFound;
+    }
+    return eol-firstIdx;
+}
+
 ////////////////
 // Scrolling  //
 ////////////////

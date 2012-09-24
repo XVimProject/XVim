@@ -43,6 +43,9 @@
 - (BOOL)shouldDrawInsertionPoint;
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
+- (void)mouseDown:(NSEvent*)event;
+- (void)mouseUp:(NSEvent*)event;
+- (void)mouseDragged:(NSEvent*)event;
 
 // XVimCommandFieldDelegate
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;

@@ -529,18 +529,16 @@
 }
 
 - (XVimEvaluator*)v:(XVimWindow*)window{
-    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-												   mode:MODE_CHARACTER];
+    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_CHARACTER];
 }
 
 - (XVimEvaluator*)V:(XVimWindow*)window{
-    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-												   mode:MODE_LINE]; 
+    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_LINE];
 }
 
 - (XVimEvaluator*)C_v:(XVimWindow*)window{
     // Block selection
-    return nil;
+    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_BLOCK];
 }
 
 - (XVimEvaluator*)C_w:(XVimWindow*)window{
@@ -767,10 +765,13 @@
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.
     XVimSourceView* view = [window sourceView];
+    [view moveCursor:to];
+    /*
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];
     [view adjustCursorPosition];
     [view scrollTo:[[window sourceView]insertionPoint]];
+     */
     return nil;
     //return [self withNewContext];
 }

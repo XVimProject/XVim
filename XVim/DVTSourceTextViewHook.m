@@ -85,9 +85,6 @@
         return;
     }
    
-    /*
-     * 
-     */
     unichar charcode = [theEvent unmodifiedKeyCode];
     DEBUG_LOG(@"DVTSourceTextView:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
     
@@ -102,30 +99,21 @@
 -  (void)mouseDown:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
-	if (window)
-	{
-		[window beginMouseEvent:theEvent];
-	}
-   
-	[base mouseDown_:theEvent]; // this loops until it gets a mouse up
-
-    if (window)
-	{
-		[window endMouseEvent:theEvent];
-    }
-	
-	return;
+    [window mouseDown:theEvent];
+    return;
 }
 
 -  (void)mouseUp:(NSEvent *)theEvent{
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [base mouseUp_:theEvent];
+    XVimWindow* window = [base xvimWindow];
+    [window mouseUp:theEvent];
 	return;
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [base mouseDragged_:theEvent];
+    XVimWindow* window = [base xvimWindow];
+    [window mouseDragged:theEvent];
     return;
 }
 

@@ -235,10 +235,37 @@ static const char* KEY_WINDOW = "xvimwindow";
 	[self setEvaluator:next];
 }
 
-- (NSRange)restrictSelectedRange:(NSRange)range
-{
-	if (_handlingMouseEvent)
-	{
+- (void)mouseDown:(NSEvent *)event{
+    NSPoint point = event.locationInWindow;
+    NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
+    TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
+    NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
+    [self.sourceView endSelection];
+    [self.sourceView moveCursor:index];
+}
+
+- (void)mouseUp:(NSEvent *)event{
+    NSPoint point = event.locationInWindow;
+    NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
+    TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
+    NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
+    [self.sourceView moveCursor:index];
+}
+
+- (void)mouseDragged:(NSEvent *)event{
+    NSPoint point = event.locationInWindow;
+    NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
+    TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
+    NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
+    
+    if(self.sourceView.selectionMode == MODE_VISUAL_NONE){
+        [self.sourceView startSelection:MODE_CHARACTER];
+    }
+    [self.sourceView moveCursor:index];
+}
+
+- (NSRange)restrictSelectedRange:(NSRange)range {
+	if (_handlingMouseEvent) {
 		range = [_currentEvaluator restrictSelectedRange:range inWindow:self];
 	}
 	return range;
@@ -259,8 +286,9 @@ static const char* KEY_WINDOW = "xvimwindow";
     
 	XVimSourceView *sourceView = [self sourceView];
 	color = [color colorWithAlphaComponent:alphaRatio];
-	NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-	NSUInteger glyphIndex = [sourceView glyphIndexForPoint:aPoint];
+	//NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+	//NSUInteger glyphIndex = [sourceView glyphIndexForPoint:aPoint];
+    NSUInteger glyphIndex = [sourceView insertionPoint];
 	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
 	
 	[color set];

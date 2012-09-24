@@ -216,6 +216,13 @@ typedef struct _XVimWordInfo{
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
+/**
+ * Returns maximum column number at the line
+ * If the line is blankline or the line specified exceed the document it returns NSNotFound
+ * The position of maxmum column is just before the newline or EOF( means never count newline as a column )
+ **/
+- (NSUInteger)maxColumnAtLineNumber:(NSUInteger)num;
+    
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
 - (NSUInteger)skipWhiteSpace:(NSUInteger)index;
 

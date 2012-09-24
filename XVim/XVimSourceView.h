@@ -23,16 +23,23 @@
  **/
 
 @interface XVimSourceView : NSObject <XVimTextViewProtocol>
+@property(readonly) NSUInteger insertionPoint;
+@property(readonly) NSUInteger insertionColumn;
+@property(readonly) NSUInteger insertionPreservedColumn;
+@property(readonly) NSUInteger insertionLine;
+@property(readonly) NSUInteger selectionBegin;
+@property(readonly) NSUInteger selectionAreaStart;
+@property(readonly) NSUInteger selectionAreaEnd;
+@property(readonly) VISUAL_MODE selectionMode;
+@property(readonly) NSString* string;
 
-- (id)initWithView:(NSView*)view;
 
-// Returns the attached view
+- (id)initWithView:(NSView*)view; // TODO: may be this shoulde NSTextView
+
+// Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
 - (NSView*)view;
 
-// Returns the internal string
-- (NSString*)string;
-
-// Selection
+// Selection ( DO NOT USE IN NEWLY CREATED CODE (except in XVimWindow class))
 - (NSRange)selectedRange;
 - (void)setSelectedRange:(NSRange)range;
 

@@ -1,6 +1,27 @@
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
+#import "DVTKit.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
+
+/*
+ * XVimSourceView represent a text view used in XVim.
+ * This is a layer above the actuall text view used in Xcode(DVTSourceTextView)
+ * XVimSourceView keeps consistensy between VIM state and DVTSourceTextView.
+ * All the evaluators(event handlers) send a request to XVimSourceView via XVimWIndow 
+ * and complete its event.
+ * So evaluators should NOT directly operate on DVTSourceTextView.
+ */
+
+#define LOG_STATE TRACE_LOG(@"_view.range loc:%d len:%d | mode %d | ip %d | begin %d | areaS %d | areaE %d", \
+                            [_view selectedRange].location, \
+                            [_view selectedRange].length,  \
+                            _selectionMode,            \
+                            _insertionPoint,           \
+                            _selectionBegin,           \
+                            _selectionAreaStart,       \
+                            _selectionAreaEnd)
 
 @interface XVimSourceView() {
 	__weak NSTextView *_view;
@@ -8,14 +29,27 @@
 @end
 
 @implementation XVimSourceView
+@synthesize selectionBegin = _selectionBegin;
+@synthesize selectionAreaStart = _selectionAreaStart;
+@synthesize selectionAreaEnd = _selectionAreaEnd;
+@synthesize insertionPoint = _insertionPoint;
+@synthesize selectionMode = _selectionMode;
 
 - (id)initWithView:(NSView*)view {
 	if (self = [super init]) {
 		_view = (NSTextView*)view;
+        _selectionBegin = NSNotFound;
+        _selectionAreaStart = NSNotFound;
+        _selectionAreaEnd = NSNotFound;
+        _selectionMode = MODE_VISUAL_NONE;
+        _insertionPoint = [_view selectedRange].location + [_view selectedRange].length;
 	}
 	return self;
 }
 
+////////////////
+// Properties //
+////////////////
 - (NSView*)view {
 	return _view;
 }
@@ -24,29 +58,131 @@
 	return [_view string];
 }
 
-- (NSUInteger)insertionPoint{
-    return self.selectedRange.location + self.selectedRange.length;
+- (NSArray*)selectedRanges{
+    return [_view selectedRanges];
+}
+
+- (NSUInteger)insertionColumn{
+    return [(XVimSourceView*)_view columnNumber:_insertionPoint];
+}
+
+- (NSUInteger)insertionLine{
+    return [(XVimSourceView*)_view lineNumber:_insertionPoint];
+}
+
+//////////////////
+// Operations   //
+//////////////////
+- (void)moveCursor:(NSUInteger)pos{
+    if( pos > [_view string].length){
+        DEBUG_LOG(@"Position specified exceeds the length of the text");
+        pos = [_view string].length;
+    }
+    
+    _insertionPoint = pos;
+    if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
+        _selectionBegin = NSNotFound;
+        _selectionAreaStart = NSNotFound;
+        _selectionAreaEnd = NSNotFound;
+        [_view setSelectedRange:NSMakeRange(_insertionPoint,0)];
+    }
+    else { // its in selecting mode
+        if( _selectionMode == MODE_CHARACTER){
+            _selectionAreaStart = MIN(_insertionPoint,_selectionBegin);
+            _selectionAreaEnd = MAX(_insertionPoint,_selectionBegin);
+            [_view setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart)];
+        }else if(_selectionMode == MODE_LINE ){
+            NSUInteger min = MIN(_insertionPoint,_selectionBegin);
+            NSUInteger max = MAX(_insertionPoint,_selectionBegin);
+            _selectionAreaStart = [self firstOfLine:min];
+            _selectionAreaEnd = [self tailOfLine:max];
+            [_view setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart)];
+        }else if( _selectionMode == MODE_BLOCK){
+            // Find Out Block Rect
+            // We have to compare the line number and column number of start and end postion of selection.
+            NSUInteger columnBegin = [self columnNumber:_selectionBegin];
+            NSUInteger lineBegin = [self lineNumber:_selectionBegin];
+            NSUInteger columnEnd = [self columnNumber:_insertionPoint];
+            NSUInteger lineEnd= [self lineNumber:_insertionPoint];
+            
+            // Define the block as a rect by line and column number
+            NSUInteger top = MIN(lineBegin,lineEnd);
+            NSUInteger bottom = MAX(lineBegin,lineEnd);
+            NSUInteger left = MIN(columnBegin, columnEnd);
+            NSUInteger right = MAX(columnBegin, columnEnd);
+            
+            // Set _selectionAreaStart as left-top position of the block. But we do not use them in block selection
+            _selectionAreaStart = [self positionAtLineNumber:top column:left];
+            // Set _selectionAreaEnd as right-bottom position of the block. But we do not use them in block selection
+            _selectionAreaEnd = [self positionAtLineNumber:bottom column:right];
+            
+            // For each line select the area (columnBegi,columnEnd) unless it does not excceds tail of line.
+            // NASelectionArray seems to be definded in Xcode but can't find it in Cocoa library... make it manually.
+            // This is an argument of setSelectedRanges method.
+            NSRange* ranges = malloc((bottom-top+1) * sizeof(NSRange));
+            NSUInteger count = 0;
+            for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
+                NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
+                if( maxColumn != NSNotFound && maxColumn >= left){ // Only when the line has a column inside the rect add the range
+                    NSUInteger start = [self positionAtLineNumber:top+i column:left];
+                    NSUInteger end = [self positionAtLineNumber:top+i column:right];
+                    ranges[count].location = start;
+                    ranges[count].length = end - start + 1;
+                    count++;
+                }
+            }
+            if( 0 == count ){
+                DEBUG_LOG(@"Something wrong. There must be at lease one range in ranges");
+            }
+            id rangeArray = [[[NSClassFromString(@"NSSelectionArray") alloc] initWithRanges:ranges count:count] autorelease];
+            [(DVTSourceTextView*)_view setSelectedRanges:rangeArray affinity:1 stillSelecting:YES];
+            free(ranges);
+        }
+    }
+    
+    [(DVTSourceTextView*)_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
 }
 
 
-////////////////
+//////////////////////////////
+// Selection (Visual Mode)  //
+//////////////////////////////
+
+- (void)startSelection:(VISUAL_MODE)mode{
+    //NSAssert(_selectionBegin== NSNotFound, @"beginSelection should be called after endSelection");
+    _selectionBegin= _insertionPoint;
+    _selectionMode = mode;
+    if( [_view selectedRange].length != 0 ){
+        _selectionAreaStart = [_view selectedRange].location;
+        _selectionBegin = _selectionAreaStart;
+        _selectionAreaEnd = [_view selectedRange].length + [_view selectedRange].location;
+    }else{
+        [self moveCursor:_insertionPoint]; // Update selection;
+    }
+    TRACE_LOG( @"Selection Started: mode:%d ip:%d begin:%d areaStart:%d areaEnd:%d", _selectionMode, _insertionPoint, _selectionBegin, _selectionAreaStart, _selectionAreaEnd);
+}
+
+- (void)endSelection{
+    //NSAssert(_selectionBegin!= NSNotFound, @"endSelection should be called after beginSelection");
+    _selectionMode = MODE_VISUAL_NONE;
+    [self moveCursor:_insertionPoint]; // turn selection off
+}
+
+
 // Scrolling  //
 ////////////////
 #define XVimAddPoint(a,b) NSMakePoint(a.x+b.x,a.y+b.y)  // Is there such macro in Cocoa?
 #define XVimSubPoint(a,b) NSMakePoint(a.x-b.x,a.y-b.y)  // Is there such macro in Cocoa?
 
-- (void)pageUp
-{
+- (void)pageUp {
 	[_view pageUp:self];
 }
 
-- (void)pageDown
-{
+- (void)pageDown {
 	[_view pageDown:self];
 }
 
-- (NSUInteger)lineUp:(NSUInteger)index count:(NSUInteger)count
-{ // C-y
+- (NSUInteger)lineUp:(NSUInteger)index count:(NSUInteger)count { // C-y
   [_view scrollLineUp:self];
   NSRect visibleRect = [[_view enclosingScrollView] contentView].bounds;
   NSRect currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:[_view textContainer]];
@@ -59,8 +195,7 @@
   return index;
 }
 
-- (NSUInteger)lineDown:(NSUInteger)index count:(NSUInteger)count
-{ // C-e
+- (NSUInteger)lineDown:(NSUInteger)index count:(NSUInteger)count { // C-e
   [_view scrollLineDown:self];
   NSRect visibleRect = [[_view enclosingScrollView] contentView].bounds;
   NSRect currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:[_view textContainer]];
@@ -72,8 +207,7 @@
   return index;
 }
 
-- (NSUInteger)halfPageScrollHelper:(NSUInteger)index count:(NSInteger)count
-{
+- (NSUInteger)halfPageScrollHelper:(NSUInteger)index count:(NSInteger)count {
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     
@@ -111,18 +245,15 @@
 	return cursorIndexAfterScroll;
 }
 
-- (NSUInteger)halfPageDown:(NSUInteger)index count:(NSUInteger)count
-{
+- (NSUInteger)halfPageDown:(NSUInteger)index count:(NSUInteger)count {
   return [self halfPageScrollHelper:index count:(NSInteger)count];
 }
 
-- (NSUInteger)halfPageUp:(NSUInteger)index count:(NSUInteger)count
-{
+- (NSUInteger)halfPageUp:(NSUInteger)index count:(NSUInteger)count {
   return [self halfPageScrollHelper:index count:-(NSInteger)count];
 }
 
-- (NSUInteger)scrollBottom:(NSNumber*)count
-{ // zb / z-
+- (NSUInteger)scrollBottom:(NSNumber*)count { // zb / z-
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
@@ -136,8 +267,7 @@
     return [self selectedRange].location;
 }
 
-- (NSUInteger)scrollCenter:(NSNumber*)count
-{ // zz / z.
+- (NSUInteger)scrollCenter:(NSNumber*)count { // zz / z.
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
@@ -151,8 +281,7 @@
     return [self selectedRange].location;
 }
 
-- (NSUInteger)scrollTop:(NSNumber*)count
-{ // zt / z<CR>
+- (NSUInteger)scrollTop:(NSNumber*)count { // zt / z<CR>
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
@@ -162,8 +291,7 @@
     return [self selectedRange].location;
 }
 
-- (void)scrollTo:(NSUInteger)location
-{
+- (void)scrollTo:(NSUInteger)location {
 	BOOL isBlankLine = 
 		(location == [[self string] length] || isNewLine([[self string] characterAtIndex:location])) &&
 		(location == 0 || isNewLine([[self string] characterAtIndex:location-1]));
@@ -222,8 +350,7 @@
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }
 
-- (NSUInteger)cursorBottom:(NSNumber*)count
-{ // L
+- (NSUInteger)cursorBottom:(NSNumber*)count { // L
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
@@ -235,8 +362,7 @@
     return [self selectedRange].location;
 }
 
-- (NSUInteger)cursorCenter:(NSNumber*)count
-{ // M
+- (NSUInteger)cursorCenter:(NSNumber*)count { // M
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSPoint center = [[scrollView contentView] bounds].origin;
     center.y += [[scrollView contentView] bounds].size.height / 2;
@@ -246,8 +372,7 @@
     return [self selectedRange].location;
 }
 
-- (NSUInteger)cursorTop:(NSNumber*)count
-{ // H
+- (NSUInteger)cursorTop:(NSNumber*)count { // H
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
@@ -259,125 +384,107 @@
     return [self selectedRange].location;
 }
 
-- (NSUInteger)glyphIndexForPoint:(NSPoint)point
-{
+- (NSUInteger)glyphIndexForPoint:(NSPoint)point {
 	NSUInteger glyphIndex = [[_view layoutManager] glyphIndexForPoint:point inTextContainer:[_view textContainer]];
 	return glyphIndex;
 }
 
-- (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex
-{
+- (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
 	NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[_view textContainer]];
 	return glyphRect;
 }
 
-- (void)deleteText
-{
+- (void)deleteText {
 	[_view delete:self];
 }
 
-- (void)cutText
-{
+- (void)cutText {
 	[_view cut:self];
 }
 
-- (void)copyText
-{
+- (void)copyText {
 	[_view copy:self];
 }
 
-- (void)moveUp
-{
+- (void)moveUp {
 	[_view moveUp:self];
 }
 
-- (void)moveDown
-{
+- (void)moveDown {
 	[_view moveDown:self];
 }
 
-- (void)moveForward
-{
+- (void)moveForward {
 	[_view moveForward:self];
 }
 
-- (void)moveForwardAndModifySelection
-{
+- (void)moveForwardAndModifySelection {
 	[_view moveForwardAndModifySelection:self];
 }
 
-- (void)moveBackward
-{
+- (void)moveBackward {
 	[_view moveBackward:self];
 }
 
-- (void)moveBackwardAndModifySelection
-{
+- (void)moveBackwardAndModifySelection {
 	[_view moveBackwardAndModifySelection:self];
 }
 	 
-- (void)moveToBeginningOfLine
-{
+- (void)moveToBeginningOfLine {
 	[_view moveToBeginningOfLine:self];
 }
 
-- (void)moveToEndOfLine
-{
+- (void)moveToEndOfLine {
 	[_view moveToEndOfLine:self];
 }
 
-- (void)deleteForward
-{
+- (void)deleteForward {
 	[_view deleteForward:self];
 }
 
-- (void)insertText:(NSString*)text
-{
+- (void)insertText:(NSString*)text {
 	[_view insertText:text];
 }
 
-- (void)insertText:(NSString*)text replacementRange:(NSRange)range
-{
+- (void)insertText:(NSString*)text replacementRange:(NSRange)range {
 	[_view insertText:text replacementRange:range];
 }
 
-- (void)insertNewline
-{
+- (void)insertNewline {
 	[_view insertNewline:self];
 }
 
-- (void)undo
-{
+- (void)undo {
 	[[_view undoManager] undo];
 }
 
-- (void)redo
-{
+- (void)redo {
 	[[_view undoManager] redo];
 }
 
-- (NSColor*)insertionPointColor
-{
+- (NSColor*)insertionPointColor {
 	return [_view insertionPointColor];
 }
 
-- (void)showFindIndicatorForRange:(NSRange)range
-{
+- (void)showFindIndicatorForRange:(NSRange)range {
 	[_view showFindIndicatorForRange:range];
 }
 
-- (NSRange)selectedRange
-{
-	return [_view selectedRange];
+- (NSRange)selectedRange {
+    LOG_STATE;
+    return NSMakeRange(_insertionPoint, 0);
 }
 
-- (void)setSelectedRange:(NSRange)range
-{
+- (void)setSelectedRange:(NSRange)range {
+    LOG_STATE;
     @try{
-        [_view setSelectedRange:range];
+        [self moveCursor:range.location];
+        //[_view setSelectedRange:range];
+        _insertionPoint = range.location + range.length;
     }@catch (NSException *exception) {
         ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
     }
+    LOG_STATE;
 }
 
 @end

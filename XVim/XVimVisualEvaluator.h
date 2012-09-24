@@ -15,10 +15,12 @@
 // They only rely on their interface to handle them.
 @interface XVimVisualEvaluator : XVimMotionEvaluator {
     // _begin may be greater than _insertion ( in case of backward selection )
+    /*
     NSUInteger _begin;  // Position Start of the Visual mode
     NSUInteger _insertion; //  Current cursor position
     NSUInteger _selection_begin; // Begining of selection (This is differ from _begin when its MODE_LINE)
     NSUInteger _selection_end;  // End of selection (This is differ from _insertion when its MODE_LINE)
+     */
 	NSRange _operationRange;
     VISUAL_MODE _mode;
 }
