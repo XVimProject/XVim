@@ -8,7 +8,7 @@
 
 #import "XVimEvaluator.h"
 #import "XVimNumericEvaluator.h"
-#import "XVimMotionType.h"
+#import "XVimMotion.H"
 
 // This evaluator handles motions.
 // The simplest one is just "w" which will generate
@@ -24,9 +24,11 @@
 // Override this method to implement operations on motions.
 // There could be from < to (This means backwards motion)
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
 
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
+- (XVimEvaluator*)_motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
 @end
 

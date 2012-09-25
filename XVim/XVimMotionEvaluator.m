@@ -34,6 +34,9 @@
 // How the motion is treated depends on a subclass of the XVimMotionEvaluator.
 // For example, XVimDeleteEvaluator will delete the letters represented by motion.
 
+
+#define XVIM_MAKE_MOTION(MO,TY,OP,CT) [[[XVimMotion alloc] initWithMotion:MO type:TY option:OP count:CT] autorelease]
+
 @interface XVimMotionEvaluator() {
     NSUInteger _motionFrom;
     NSUInteger _motionTo;
@@ -43,10 +46,12 @@
 }
 @end
 
+
+
+
 @implementation XVimMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-{
+- (id)initWithContext:(XVimEvaluatorContext*)context {
     self = [super initWithContext:context];
     if (self) {
         _forceMotionType = NO;
@@ -55,13 +60,11 @@
     return self;
 }
 
-- (NSUInteger)column
-{
+- (NSUInteger)column {
 	return _column;
 }
 
-- (void)setColumnInWindow:(XVimWindow*)window
-{
+- (void)setColumnInWindow:(XVimWindow*)window {
 	if (!_preserveColumn)
 	{
 		_column = [[window sourceView] columnNumber:[window insertionPoint]]; // TODO: Keep column somewhere else
@@ -69,13 +72,11 @@
 	_preserveColumn = NO;
 }
 
-- (void)preserveColumn
-{
+- (void)preserveColumn {
 	_preserveColumn = YES;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window
-{
+- (void)becameHandlerInWindow:(XVimWindow*)window {
 	[super becameHandlerInWindow:window];
 	
 	if (_column == NSNotFound) {
@@ -85,8 +86,7 @@
 
 // This is helper method commonly used by many key event handlers.
 // You do not need to use this if this is not proper to express the motion.
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     XVimSourceView* view = [window sourceView];
     NSRange begin = [view selectedRange];
     NSUInteger motionFrom = begin.location;
@@ -95,6 +95,8 @@
     
 	return [self _motionFixedFrom:motionFrom To:motionTo Type:type inWindow:window];
 }
+
+
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
@@ -115,27 +117,41 @@
 	return ret;
 }
 
+-(XVimEvaluator*)_motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window
+{
+    if( _forceMotionType ){
+		if ( motion.type == LINEWISE) {
+			motion.type = CHARACTERWISE_EXCLUSIVE;
+		} else if ( motion.type == CHARACTERWISE_EXCLUSIVE ){
+            motion.type = CHARACTERWISE_INCLUSIVE;
+        } else if(motion.type == CHARACTERWISE_INCLUSIVE) {
+            motion.type = CHARACTERWISE_EXCLUSIVE;
+        }
+	}
+	return [self motionFixed:motion inWindow:window];
+}
+
 // Methods to override by subclass
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
 {
     return nil;
 }
 
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{
+    [[window sourceView] move:motion];
+    return nil;
+}
 
 ////////////KeyDown Handlers///////////////
 // Please keep it in alphabetical order ///
 ///////////////////////////////////////////
 
 - (XVimEvaluator*)b:(XVimWindow*)window{
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
-	return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)B:(XVimWindow*)window{
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:BIGWORD];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, BIGWORD, [self numericArg]) inWindow:window];
 }
 
 /*
@@ -245,11 +261,8 @@
     return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
 }
 
-- (XVimEvaluator*)h:(XVimWindow*)window
-{
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] prev:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+- (XVimEvaluator*)h:(XVimWindow*)window {
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_CHARACTER_BACKWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)H:(XVimWindow*)window{
@@ -257,27 +270,15 @@
 }
 
 - (XVimEvaluator*)j:(XVimWindow*)window{
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger column = [self column];
-	[self preserveColumn];
-	
-    NSUInteger to = [[window sourceView] nextLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger column = [self column];
-	[self preserveColumn];
-	
-    NSUInteger to = [[window sourceView] prevLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)l:(XVimWindow*)window{
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] next:from count:[self numericArg] option:LEFT_RIGHT_NOWRAP];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_CHARACTER_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)L:(XVimWindow*)window{
@@ -333,17 +334,11 @@
 }
 
 - (XVimEvaluator*)w:(XVimWindow*)window{
-    XVimWordInfo info;
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:&info];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_WORD_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)W:(XVimWindow*)window{
-    XVimWordInfo info;
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:&info];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_WORD_FORWARD, CHARACTERWISE_EXCLUSIVE, BIGWORD, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
@@ -352,12 +347,7 @@
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{
-    NSRange begin = [[window sourceView] selectedRange];
-    NSUInteger end = [[window sourceView] headOfLine:begin.location];
-    if( NSNotFound == end ){
-        return nil;
-    }
-    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_BEGINNING_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
@@ -417,12 +407,7 @@
 }
 
 - (XVimEvaluator*)DOLLAR:(XVimWindow*)window{
-    NSRange begin = [[window sourceView] selectedRange];
-    NSUInteger end = [[window sourceView] endOfLine:begin.location];
-    if( NSNotFound == end ){
-        return nil;
-    }
-    return [self _motionFixedFrom:begin.location To:end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)PERCENT:(XVimWindow*)window {
@@ -574,50 +559,20 @@
 }
 
 - (XVimEvaluator*)LBRACE:(XVimWindow*)window{ // {
-    XVimSourceView* view = [window sourceView];
-    NSUInteger begin = [view selectedRange].location;
-    NSUInteger paragraph_head = [view paragraphsBackward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
-	
-	if (paragraph_head != NSNotFound)
-	{
-		return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-	}
-	return nil;
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_PARAGRAPH_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)RBRACE:(XVimWindow*)window{ // }
-    XVimSourceView* view = [window sourceView];
-    NSUInteger begin = [view selectedRange].location;
-    NSUInteger paragraph_head = [view paragraphsForward:begin count:[self numericArg] option:MOTION_OPTION_NONE];
-	
-	if (paragraph_head != NSNotFound)
-	{
-		return [self _motionFixedFrom:begin To:paragraph_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-	}
-	return nil;
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_PARAGRAPH_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 
 - (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window{ // (
-    XVimSourceView* view = [window sourceView];
-    NSUInteger begin = [view selectedRange].location;
-    NSUInteger sentence_head = [view sentencesBackward:begin count:[self numericArg]option:MOTION_OPTION_NONE];
-    if( NSNotFound != sentence_head  ){
-        return [self _motionFixedFrom:begin To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-    }else{
-        return nil;
-    }
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_SENTENCE_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window{ // )
-    XVimSourceView* view = [window sourceView];
-    NSUInteger begin = [view selectedRange].location;
-    NSUInteger sentence_head = [view sentencesForward:begin count:[self numericArg]option:MOTION_OPTION_NONE];
-    if( NSNotFound != sentence_head  ){
-        return [self _motionFixedFrom:begin To:sentence_head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-    }else{
-        return nil;
-    }
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_SENTENCE_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)COMMA:(XVimWindow*)window{

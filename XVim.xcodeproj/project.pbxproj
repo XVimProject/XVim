@@ -16,6 +16,7 @@
 		A2277ED414F80BCB00A6B70C /* XVimDeleteEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */; };
 		A2277ED814F80BFE00A6B70C /* XVimShiftEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ED714F80BFE00A6B70C /* XVimShiftEvaluator.m */; };
 		A2277EDB14F80D5000A6B70C /* XVimYankEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277EDA14F80D5000A6B70C /* XVimYankEvaluator.m */; };
+		A23771591611CD4300FE5F8B /* XVimMotion.m in Sources */ = {isa = PBXBuildFile; fileRef = A23771581611CD4200FE5F8B /* XVimMotion.m */; };
 		A2420B3E14DDE59B008741DA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABE14D59F6600D817B0 /* AppKit.framework */; };
 		A245BFB2150123C700F048B1 /* XVim.xcplugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = A234821814E7E26A003E0FF3 /* XVim.xcplugin */; };
 		A24782BF14D6F56E003B6433 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B314D6F56E003B6433 /* Logger.m */; };
@@ -106,6 +107,8 @@
 		A2277ED914F80D5000A6B70C /* XVimYankEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimYankEvaluator.h; path = XVim/XVimYankEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2277EDA14F80D5000A6B70C /* XVimYankEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimYankEvaluator.m; path = XVim/XVimYankEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A234821814E7E26A003E0FF3 /* XVim.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XVim.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
+		A23771571611CD4200FE5F8B /* XVimMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMotion.h; path = XVim/XVimMotion.h; sourceTree = SOURCE_ROOT; };
+		A23771581611CD4200FE5F8B /* XVimMotion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotion.m; path = XVim/XVimMotion.m; sourceTree = SOURCE_ROOT; };
 		A24782B014D6F56E003B6433 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = XVim/Info.plist; sourceTree = SOURCE_ROOT; };
 		A24782B214D6F56E003B6433 /* Logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Logger.h; path = XVim/Logger.h; sourceTree = SOURCE_ROOT; };
 		A24782B314D6F56E003B6433 /* Logger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Logger.m; path = XVim/Logger.m; sourceTree = SOURCE_ROOT; };
@@ -462,6 +465,8 @@
 				A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */,
 				C3FD41DA154E7E3400B076DB /* XVimSourceView+Vim.h */,
 				C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */,
+				A23771571611CD4200FE5F8B /* XVimMotion.h */,
+				A23771581611CD4200FE5F8B /* XVimMotion.m */,
 			);
 			name = "XCode Independent Classes";
 			sourceTree = "<group>";
@@ -655,6 +660,7 @@
 				A257C28F156567250098CA09 /* DVTSourceTextView+XVim.m in Sources */,
 				A26DC88615DF33C600779CB4 /* XVimTester.m in Sources */,
 				BF07A94215EBF404006E6984 /* NSEvent+VimHelper.m in Sources */,
+				A23771591611CD4300FE5F8B /* XVimMotion.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

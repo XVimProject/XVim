@@ -30,6 +30,7 @@
 @property(readonly) NSUInteger selectionBegin;
 @property(readonly) NSUInteger selectionAreaStart;
 @property(readonly) NSUInteger selectionAreaEnd;
+@property(readonly) NSUInteger preservedColumn;
 @property(readonly) VISUAL_MODE selectionMode;
 @property(readonly) NSString* string;
 
@@ -43,7 +44,6 @@
 - (NSRange)selectedRange;
 - (void)setSelectedRange:(NSRange)range;
 
-- (void)changeSelectionMode:(VISUAL_MODE)mode;
 
 // NSTextView functions
 - (void)copyText;

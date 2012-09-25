@@ -30,11 +30,12 @@
 @end
 
 @implementation XVimSourceView
+@synthesize insertionPoint = _insertionPoint;
 @synthesize selectionBegin = _selectionBegin;
 @synthesize selectionAreaStart = _selectionAreaStart;
 @synthesize selectionAreaEnd = _selectionAreaEnd;
-@synthesize insertionPoint = _insertionPoint;
 @synthesize selectionMode = _selectionMode;
+@synthesize preservedColumn = _preservedColumn;
 
 - (id)initWithView:(NSView*)view {
 	if (self = [super init]) {
@@ -148,10 +149,190 @@
             free(ranges);
         }
     }
-    
     [(DVTSourceTextView*)_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
 }
 
+////////// Top level operation interface/////////
+- (void)move:(XVimMotion*)motion{
+    NSUInteger nextPos = _insertionPoint;
+    XVimWordInfo info;
+    switch (motion.motion) {
+        case MOTION_CHARACTER_FORWARD:
+            nextPos = [self next:_insertionPoint count:motion.count option:motion.option];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_CHARACTER_BACKWARD:
+            nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_WORD_FORWARD:
+            nextPos = [self wordsForward:_insertionPoint count:motion.count option:motion.option info:&info];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_WORD_BACKWARD:
+            nextPos = [self wordsBackward:_insertionPoint count:motion.count option:motion.option];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_LINE_FORWARD:
+            nextPos = [self nextLine:_insertionPoint column:_preservedColumn count:motion.count option:motion.option];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_LINE_BACKWARD:
+            nextPos = [self prevLine:_insertionPoint column:_preservedColumn count:motion.count option:motion.option];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_BEGINNING_OF_LINE:
+            nextPos = [self firstOfLine:_insertionPoint];
+            if( nextPos != NSNotFound){
+                [self moveCursor:nextPos];
+            }
+            break;
+        case MOTION_END_OF_LINE:
+            nextPos = [self endOfLine:_insertionPoint];
+            if( nextPos != NSNotFound){
+                [self moveCursor:nextPos];
+            }
+            break;
+        case MOTION_SENTENCE_FORWARD:
+            nextPos = [self sentencesForward:_insertionPoint count:motion.count option:motion.option];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_SENTENCE_BACKWARD:
+            nextPos = [self sentencesBackward:_insertionPoint count:motion.count option:motion.option];
+            [self moveCursor:nextPos];
+            break;
+        case MOTION_PARAGRAPH_FORWARD:
+            nextPos = [self paragraphsForward:_insertionPoint count:motion.count option:motion.option];
+            if( nextPos != NSNotFound){
+                [self moveCursor:nextPos];
+            }
+            break;
+        case MOTION_PARAGRAPH_BACKWARD:
+            nextPos = [self paragraphsBackward:_insertionPoint count:motion.count option:motion.option];
+            if( nextPos != NSNotFound){
+                [self moveCursor:nextPos];
+            }
+            break;
+    }
+}
+
+- (void)delete:(XVimMotion*)motion{
+    
+}
+
+- (void)deleteLines:(XVimMotion*)motion{
+    
+}
+
+- (void)yunk:(XVimMotion*)motion{
+    
+}
+
+- (void)yunkLines:(XVimMotion*)motion{
+    
+}
+
+- (void)swapCase:(XVimMotion*)motion{
+
+}
+
+- (void)makeLowerCase:(XVimMotion*)motion{
+    
+}
+
+- (void)makeUpperCase:(XVimMotion*)motion{
+    
+}
+
+- (void)filter:(XVimMotion*)motion{
+    
+}
+
+- (void)shiftRight:(XVimMotion*)motion{
+    
+}
+
+- (void)shiftLeft:(XVimMotion*)motion{
+    
+}
+
+////////// Premitive Operations ///////////
+- (void)moveBack:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self prev:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+    _preservedColumn = [self columnNumber:_insertionPoint];
+}
+
+- (void)moveFoward:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self next:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+    _preservedColumn = [self columnNumber:_insertionPoint];
+}
+
+- (void)moveDown:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self nextLine:_insertionPoint column:_preservedColumn count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+- (void)moveUp:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self prevLine:_insertionPoint column:_preservedColumn count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+//- (void)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info;
+
+- (void)moveWordsBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self wordsBackward:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+- (void)moveSentencesForward:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self sentencesForward:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+- (void)moveSentencesBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self sentencesBackward:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+- (void)moveParagraphsForward:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self paragraphsForward:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+- (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSUInteger nextPos = [self paragraphsBackward:_insertionPoint count:count option:opt];
+    [self moveCursor:nextPos];
+}
+
+
+// Scrolls
+- (void)scrollPageForward:(NSUInteger)count{
+    [self pageForward:_insertionPoint count:count];
+}
+
+- (void)scrollPageBackward:(NSUInteger)count{
+    [self pageBackward:_insertionPoint count:count];
+}
+
+- (void)scrollHalfPageForward:(NSUInteger)count{
+    [self halfPageForward:_insertionPoint count:count];
+}
+
+- (void)scrollHalfPageBackward:(NSUInteger)count{
+    [self halfPageBackward:_insertionPoint count:count];
+}
+
+- (void)scrollLineForward:(NSUInteger)count{
+    [self lineForward:_insertionPoint count:count];
+}
+
+- (void)scrollLineBackward:(NSUInteger)count{
+    [self lineBackward:_insertionPoint count:count];
+}
+
+//
 - (void)toggleCase{
     [self toggleCaseForRange:[self _currentSelection]];
 }
