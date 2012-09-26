@@ -462,10 +462,14 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     [[window sourceView] moveCursor:to];
     return [self withNewContext];
+}
+
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{
+    [[window sourceView] move:motion];
+    return self;
 }
 
 static NSArray *_invalidRepeatKeys;

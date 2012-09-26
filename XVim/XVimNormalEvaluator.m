@@ -776,6 +776,11 @@
     //return [self withNewContext];
 }
 
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{
+    [[window sourceView] move:motion];
+    return nil;
+}
+
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
 // This can always be changed to a set of valid keys in the future if need be.
 static NSArray *_invalidRepeatKeys;

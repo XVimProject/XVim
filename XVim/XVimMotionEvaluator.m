@@ -44,9 +44,6 @@
 }
 @end
 
-
-
-
 @implementation XVimMotionEvaluator
 
 - (id)initWithContext:(XVimEvaluatorContext*)context {
@@ -107,8 +104,7 @@
 }
 
 // Methods to override by subclass
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     return nil;
 }
 
