@@ -886,12 +886,12 @@
 - (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :wq
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
-    [NSApp terminate:self];
+    [NSApp sendAction:@selector(closeWindow:) to:nil from:self];
 }
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window
 { // :q
-    [NSApp terminate:self];
+    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
 /*
