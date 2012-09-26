@@ -27,6 +27,7 @@
 	__weak NSTextView *_view;
 }
 - (NSRange)_currentSelection;
+- (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 @end
 
 @implementation XVimSourceView
@@ -84,6 +85,10 @@
 // Operations   //
 //////////////////
 - (void)moveCursor:(NSUInteger)pos{
+    [self _moveCursor:pos preserveColumn:NO];
+}
+
+- (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
     if( pos > [_view string].length){
         DEBUG_LOG(@"Position specified exceeds the length of the text");
         pos = [_view string].length;
@@ -149,6 +154,10 @@
             free(ranges);
         }
     }
+    
+    if( !preserve ){
+        _preservedColumn = [self columnNumber:_insertionPoint];
+    }
     [(DVTSourceTextView*)_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
 }
 
@@ -175,11 +184,11 @@
             break;
         case MOTION_LINE_FORWARD:
             nextPos = [self nextLine:_insertionPoint column:_preservedColumn count:motion.count option:motion.option];
-            [self moveCursor:nextPos];
+            [self _moveCursor:nextPos preserveColumn:YES];
             break;
         case MOTION_LINE_BACKWARD:
             nextPos = [self prevLine:_insertionPoint column:_preservedColumn count:motion.count option:motion.option];
-            [self moveCursor:nextPos];
+            [self _moveCursor:nextPos preserveColumn:YES];
             break;
         case MOTION_BEGINNING_OF_LINE:
             nextPos = [self firstOfLine:_insertionPoint];

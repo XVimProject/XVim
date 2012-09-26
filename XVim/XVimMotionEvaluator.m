@@ -40,8 +40,6 @@
 @interface XVimMotionEvaluator() {
     NSUInteger _motionFrom;
     NSUInteger _motionTo;
-	NSUInteger _column;
-	BOOL _preserveColumn;
 	BOOL _forceMotionType;
 }
 @end
@@ -55,33 +53,12 @@
     self = [super initWithContext:context];
     if (self) {
         _forceMotionType = NO;
-		_column = NSNotFound;
     }
     return self;
 }
 
-- (NSUInteger)column {
-	return _column;
-}
-
-- (void)setColumnInWindow:(XVimWindow*)window {
-	if (!_preserveColumn)
-	{
-		_column = [[window sourceView] columnNumber:[window insertionPoint]]; // TODO: Keep column somewhere else
-	}
-	_preserveColumn = NO;
-}
-
-- (void)preserveColumn {
-	_preserveColumn = YES;
-}
-
 - (void)becameHandlerInWindow:(XVimWindow*)window {
 	[super becameHandlerInWindow:window];
-	
-	if (_column == NSNotFound) {
-		[self setColumnInWindow:window];
-	}
 }
 
 // This is helper method commonly used by many key event handlers.
@@ -112,8 +89,6 @@
 	}
 	
 	XVimEvaluator *ret = [self motionFixedFrom:from To:to Type:type inWindow:window];
-	[self setColumnInWindow:window];
-	
 	return ret;
 }
 
