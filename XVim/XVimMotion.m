@@ -13,6 +13,8 @@
 @synthesize type = _type;
 @synthesize option = _option;
 @synthesize count = _count;
+@synthesize position = _position;
+@synthesize character = _character;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count{
     if( self = [super init]){

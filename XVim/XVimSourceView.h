@@ -44,8 +44,13 @@
 - (NSRange)selectedRange;
 - (void)setSelectedRange:(NSRange)range;
 
+// Utility Methods - These method uses XVimTextViewProtocol to perform its role.
+- (void)moveForward;
+- (void)moveBackward;
+- (void)moveToBeginningOfLine;
+- (void)moveToEndOfLine;
 
-// NSTextView functions
+// NSTextView functions (Do not use following methods)
 - (void)copyText;
 - (void)deleteText;
 - (void)cutText;
@@ -53,12 +58,12 @@
 - (void)redo;
 - (void)moveUp;
 - (void)moveDown;
-- (void)moveForward;
+//- (void)moveForward;
 - (void)moveForwardAndModifySelection;
-- (void)moveBackward;
+//- (void)moveBackward;
 - (void)moveBackwardAndModifySelection;
-- (void)moveToBeginningOfLine;
-- (void)moveToEndOfLine;
+//- (void)moveToBeginningOfLine;
+//- (void)moveToEndOfLine;
 - (void)deleteForward;
 - (void)insertText:(NSString*)text;
 - (void)insertText:(NSString*)text replacementRange:(NSRange)range;

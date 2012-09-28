@@ -9,9 +9,12 @@
 #import <Foundation/Foundation.h>
 #import "XVimMotionType.h"
 #import "XVimMotionOption.h"
+
+#define XVIM_MAKE_MOTION(MO,TY,OP,CT) [[[XVimMotion alloc] initWithMotion:MO type:TY option:OP count:CT] autorelease]
+
 typedef enum _MOTION{
-    MOTION_CHARACTER_FORWARD,
-    MOTION_CHARACTER_BACKWARD,
+    MOTION_FORWARD,
+    MOTION_BACKWARD,
     MOTION_WORD_FORWARD,
     MOTION_WORD_BACKWARD,
     MOTION_LINE_FORWARD,
@@ -22,6 +25,9 @@ typedef enum _MOTION{
     MOTION_SENTENCE_BACKWARD,
     MOTION_PARAGRAPH_FORWARD,
     MOTION_PARAGRAPH_BACKWARD,
+    MOTION_NEXT_CHARACTER,
+    MOTION_PREV_CHARACTER,
+    MOTION_POSITION,
 }MOTION;
 
 @interface XVimMotion : NSObject
@@ -29,6 +35,8 @@ typedef enum _MOTION{
 @property MOTION_TYPE type;
 @property MOTION_OPTION option;
 @property NSUInteger count; // I do not know if the count should be here or not
+@property NSUInteger position;
+@property unichar character;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;
 @end 

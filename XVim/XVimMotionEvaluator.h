@@ -11,24 +11,16 @@
 #import "XVimMotion.H"
 
 // This evaluator handles motions.
-// The simplest one is just "w" which will generate
-// motion which represents current insertion point
-// to the begining of next word.
-// When motion is generated motionFixedFrom:To:Type: method is called.
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
 
-@interface XVimMotionEvaluator : XVimNumericEvaluator 
+@interface XVimMotionEvaluator : XVimNumericEvaluator
 
-- (XVimEvaluator*)h:(XVimWindow*)window;
-
-// Override this method to implement operations on motions.
-// There could be from < to (This means backwards motion)
 -(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
--(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
-
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
 
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
+// Override this method to implement operations on motions.
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
 - (XVimEvaluator*)_motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
 @end
 

@@ -28,6 +28,7 @@
 }
 - (NSRange)_currentSelection;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
+- (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
 @end
 
 @implementation XVimSourceView
@@ -86,6 +87,69 @@
 //////////////////
 - (void)moveCursor:(NSUInteger)pos{
     [self _moveCursor:pos preserveColumn:NO];
+}
+
+- (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
+    NSUInteger nextPos = current;
+    XVimWordInfo info;
+    switch (motion.motion) {
+        case MOTION_FORWARD:
+            nextPos = [self next:current count:motion.count option:motion.option];
+            break;
+        case MOTION_BACKWARD:
+            nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
+            break;
+        case MOTION_WORD_FORWARD:
+            nextPos = [self wordsForward:current count:motion.count option:motion.option info:&info];
+            break;
+        case MOTION_WORD_BACKWARD:
+            nextPos = [self wordsBackward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_LINE_FORWARD:
+            nextPos = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];
+            break;
+        case MOTION_LINE_BACKWARD:
+            nextPos = [self prevLine:current column:_preservedColumn count:motion.count option:motion.option];
+            break;
+        case MOTION_BEGINNING_OF_LINE:
+            nextPos = [self firstOfLine:current];
+            if( nextPos == NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_END_OF_LINE:
+            nextPos = [self endOfLine:current];
+            if( nextPos != NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_SENTENCE_FORWARD:
+            nextPos = [self sentencesForward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_SENTENCE_BACKWARD:
+            nextPos = [self sentencesBackward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_PARAGRAPH_FORWARD:
+            nextPos = [self paragraphsForward:current count:motion.count option:motion.option];
+            if( nextPos != NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_PARAGRAPH_BACKWARD:
+            nextPos = [self paragraphsBackward:current count:motion.count option:motion.option];
+            if( nextPos != NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_NEXT_CHARACTER:
+            break;
+        case MOTION_PREV_CHARACTER:
+            break;
+        case MOTION_POSITION:
+            nextPos = motion.position;
+            break;
+    }
+    return nextPos;
 }
 
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
@@ -163,66 +227,16 @@
 
 ////////// Top level operation interface/////////
 - (void)move:(XVimMotion*)motion{
-    NSUInteger nextPos = _insertionPoint;
-    XVimWordInfo info;
-    switch (motion.motion) {
-        case MOTION_CHARACTER_FORWARD:
-            nextPos = [self next:_insertionPoint count:motion.count option:motion.option];
-            [self moveCursor:nextPos];
-            break;
-        case MOTION_CHARACTER_BACKWARD:
-            nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
-            [self moveCursor:nextPos];
-            break;
-        case MOTION_WORD_FORWARD:
-            nextPos = [self wordsForward:_insertionPoint count:motion.count option:motion.option info:&info];
-            [self moveCursor:nextPos];
-            break;
-        case MOTION_WORD_BACKWARD:
-            nextPos = [self wordsBackward:_insertionPoint count:motion.count option:motion.option];
-            [self moveCursor:nextPos];
-            break;
-        case MOTION_LINE_FORWARD:
-            nextPos = [self nextLine:_insertionPoint column:_preservedColumn count:motion.count option:motion.option];
-            [self _moveCursor:nextPos preserveColumn:YES];
-            break;
+    switch( motion.motion ){
         case MOTION_LINE_BACKWARD:
-            nextPos = [self prevLine:_insertionPoint column:_preservedColumn count:motion.count option:motion.option];
-            [self _moveCursor:nextPos preserveColumn:YES];
+        case MOTION_LINE_FORWARD:
+            [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:YES];
             break;
-        case MOTION_BEGINNING_OF_LINE:
-            nextPos = [self firstOfLine:_insertionPoint];
-            if( nextPos != NSNotFound){
-                [self moveCursor:nextPos];
-            }
-            break;
-        case MOTION_END_OF_LINE:
-            nextPos = [self endOfLine:_insertionPoint];
-            if( nextPos != NSNotFound){
-                [self moveCursor:nextPos];
-            }
-            break;
-        case MOTION_SENTENCE_FORWARD:
-            nextPos = [self sentencesForward:_insertionPoint count:motion.count option:motion.option];
-            [self moveCursor:nextPos];
-            break;
-        case MOTION_SENTENCE_BACKWARD:
-            nextPos = [self sentencesBackward:_insertionPoint count:motion.count option:motion.option];
-            [self moveCursor:nextPos];
-            break;
-        case MOTION_PARAGRAPH_FORWARD:
-            nextPos = [self paragraphsForward:_insertionPoint count:motion.count option:motion.option];
-            if( nextPos != NSNotFound){
-                [self moveCursor:nextPos];
-            }
-            break;
-        case MOTION_PARAGRAPH_BACKWARD:
-            nextPos = [self paragraphsBackward:_insertionPoint count:motion.count option:motion.option];
-            if( nextPos != NSNotFound){
-                [self moveCursor:nextPos];
-            }
+        default:
+            [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:NO];
             break;
     }
+    
 }
 
 - (void)delete:(XVimMotion*)motion{
@@ -663,7 +677,7 @@
 }
 
 - (void)moveForward {
-	[_view moveForward:self];
+    [self move:XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
 }
 
 - (void)moveForwardAndModifySelection {
@@ -671,7 +685,7 @@
 }
 
 - (void)moveBackward {
-	[_view moveBackward:self];
+    [self move:XVIM_MAKE_MOTION(MOTION_BACKWARD, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
 }
 
 - (void)moveBackwardAndModifySelection {
@@ -679,11 +693,11 @@
 }
 	 
 - (void)moveToBeginningOfLine {
-	[_view moveToBeginningOfLine:self];
+    [self move:XVIM_MAKE_MOTION(MOTION_BEGINNING_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
 }
 
 - (void)moveToEndOfLine {
-	[_view moveToEndOfLine:self];
+    [self move:XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
 }
 
 - (void)deleteForward {

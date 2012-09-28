@@ -24,7 +24,6 @@
 #import "NSString+VimHelper.h"
 
 
-
 ////////////////////////////////
 // How to Implement Motion    //
 ////////////////////////////////
@@ -35,11 +34,8 @@
 // For example, XVimDeleteEvaluator will delete the letters represented by motion.
 
 
-#define XVIM_MAKE_MOTION(MO,TY,OP,CT) [[[XVimMotion alloc] initWithMotion:MO type:TY option:OP count:CT] autorelease]
 
 @interface XVimMotionEvaluator() {
-    NSUInteger _motionFrom;
-    NSUInteger _motionTo;
 	BOOL _forceMotionType;
 }
 @end
@@ -109,7 +105,6 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{
-    [[window sourceView] move:motion];
     return nil;
 }
 
@@ -160,7 +155,10 @@
     } else if (info.lastEndOfWord != NSNotFound) {
         to = info.lastEndOfWord;
     }
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    
+    // TODO: Move the implementation above to XVimSourceView
+    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
+    return [self _motionFixed:motion inWindow:window];
 }
 
 - (XVimEvaluator*)E:(XVimWindow*)window{
@@ -183,7 +181,10 @@
     } else if (info.lastEndOfWord != NSNotFound) {
         to = info.lastEndOfWord;
     }
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    
+    // TODO: Move the implementation above to XVimSourceView
+    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_INCLUSIVE, BIGWORD, [self numericArg]);
+    return [self _motionFixed:motion inWindow:window];
 }
 
 - (XVimEvaluator*)f:(XVimWindow*)window{
@@ -233,7 +234,7 @@
 }
 
 - (XVimEvaluator*)h:(XVimWindow*)window {
-    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_CHARACTER_BACKWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]) inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_BACKWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)H:(XVimWindow*)window{
@@ -249,7 +250,7 @@
 }
 
 - (XVimEvaluator*)l:(XVimWindow*)window{
-    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_CHARACTER_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]) inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]) inWindow:window];
 }
 
 - (XVimEvaluator*)L:(XVimWindow*)window{

@@ -252,12 +252,7 @@
 }
 
 - (XVimEvaluator*)I:(XVimWindow*)window{
-    NSRange range = [[window sourceView] selectedRange];
-    NSUInteger head = [[window sourceView] headOfLineWithoutSpaces:range.location];
-    if( NSNotFound == head ){
-        return [self A:window]; // If its blankline or has only whitespaces'I' works line 'A'
-    }
-    [self _motionFixedFrom:range.location To:head Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    [[window sourceView] moveToBeginningOfLine];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
@@ -814,13 +809,12 @@ static NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
-- (XVimEvaluator*)DEL:(XVimWindow*)window
-{
-	return [self h:window];
+- (XVimEvaluator*)DEL:(XVimWindow*)window {
+    [[window sourceView] moveBackward];
+	return nil;
 }
 
-- (XVimEvaluator*)ForwardDelete:(XVimWindow*)window
-{
+- (XVimEvaluator*)ForwardDelete:(XVimWindow*)window {
 	return [self x:window];
 }
 
