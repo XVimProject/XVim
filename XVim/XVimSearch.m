@@ -379,27 +379,27 @@
     // Split the string into the various components
     NSString* replaced = @"";
     NSString* replacement = @"";
-    char previous = 0;
+    unichar previous = 0;
     int component = 0;
     BOOL global = options.gdefault;
     BOOL confirmation = NO;
     if ([ex_command length] >= 3) {
         for(NSUInteger i=1;i<[ex_command length];++i) {
-            char current = [ex_command characterAtIndex:i];
+            unichar current = [ex_command characterAtIndex:i];
             if (current == '/' && previous != '\\') {
                 component++;
             } else {
                 if (component == 0) {
-                    replaced = [NSString stringWithFormat:@"%@%c",replaced,current];
+                    replaced = [NSString stringWithFormat:@"%@%C",replaced,current];
                 } else if (component == 1) {
-                    replacement = [NSString stringWithFormat:@"%@%c",replacement,current];
+                    replacement = [NSString stringWithFormat:@"%@%C",replacement,current];
                 } else {
                     if (current == 'g') {
                         global = !global;
                     } else if (current == 'c') {
                         confirmation = YES;
                     } else {
-                        ERROR_LOG("Unknown replace option %c",current);
+                        ERROR_LOG("Unknown replace option %C",current);
                     }
                 }
                 previous = current;
