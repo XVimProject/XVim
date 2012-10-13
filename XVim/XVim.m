@@ -91,9 +91,13 @@ static XVim* s_instance = nil;
     
     // Do the hooking after the App has finished launching,
     // Otherwise, we may miss some classes.
+
+    // Command line window is not setuped if hook is too late.
+    [XVimHookManager hookWhenPluginLoaded];
+
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
     [notificationCenter addObserver: [XVimHookManager class]
-                                  selector: @selector( hook )
+                                  selector: @selector( hookWhenDidFinishLaunching )
                                    name: NSApplicationDidFinishLaunchingNotification
                                  object: nil];
 }

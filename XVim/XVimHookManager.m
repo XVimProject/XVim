@@ -15,9 +15,13 @@
 
 @implementation XVimHookManager
 
-+ (void)hook
++ (void)hookWhenPluginLoaded
 {
     [IDEEditorAreaHook hook];
+}
+
++ (void)hookWhenDidFinishLaunching
+{
 	[DVTSourceTextViewHook hook];
 	[IDESourceCodeEditorHook hook];
     //[DVTSourceTextScrollViewHook hook];
