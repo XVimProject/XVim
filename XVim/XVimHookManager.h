@@ -9,5 +9,6 @@
 #import <Foundation/Foundation.h>
 
 @interface XVimHookManager : NSObject
-+ (void)hook;
++ (void)hookWhenPluginLoaded;
++ (void)hookWhenDidFinishLaunching;
 @end
