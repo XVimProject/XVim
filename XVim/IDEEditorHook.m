@@ -20,11 +20,13 @@
     [Hooker hookMethod:@selector(didSetupEditor) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(didSetupEditor) ) keepingOriginalWith:@selector(didSetupEditor_)];
 }
 
-
 - (void)didSetupEditor{
+    
     IDEEditor* editor = (IDEEditor*)self;
     [editor didSetupEditor_];
     
+    // If you do not like status line comment out folloing.
+    // ---- FROM HERE ----
     NSView* container = nil;
     if( [NSStringFromClass([editor class]) isEqualToString:@"IDESourceCodeComparisonEditor"] ){
         container = [(IDESourceCodeComparisonEditor*)editor layoutView];
@@ -53,5 +55,6 @@
 			[editor addObserver:status forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
 		}
     }
+    //---- TO HERE ----
 }
 @end
