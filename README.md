@@ -14,6 +14,8 @@ From Installer Package
 
 Download a daily build from http://programming.jugglershu.net/xvim . Usually the latest one is the best choice for you.
 
+( Sorry, daily build is not working correctly. If you want really updated version see "From Source Code" section)
+
 ( For Xcode 4.2 for Snow Leopard you can not use the installer package. See below to install from source code. )
 
 Install it without changing the installation directory and then restart Xcode. That's it!
