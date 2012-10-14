@@ -131,59 +131,12 @@
 */
 
 - (XVimEvaluator*)e:(XVimWindow*)window{
-    NSUInteger realCount = [self numericArg];
-
-    XVimWordInfo info;
-    info.findEndOfWord = TRUE;
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSString *string = [[window sourceView] string];
-    if (from + 1 < [string length] && from > 0){
-        unichar curChar = [[[window sourceView] string] characterAtIndex:from];
-        unichar nextChar = [[[window sourceView] string] characterAtIndex:from+1];
-        if( [[window sourceView] isBlankLine:from]              ||  // blank line
-            (isNonBlank(curChar) != isNonBlank(nextChar))       ||  // next character is different than current
-            (isKeyword(curChar) != isKeyword(nextChar))         ||  // character != punctuation
-            (isWhiteSpace(curChar) && isWhiteSpace(nextChar))   ||  // both are whitespace.
-            (isWhiteSpace(curChar) && isNewLine(nextChar))){        // whitespace and newline
-            // Increase count by one such that the last end of word is properly set
-            realCount += 1;
-        }
-    }
-    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:MOTION_OPTION_NONE info:&info];
-    if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
-        to = info.lastEndOfLine;
-    } else if (info.lastEndOfWord != NSNotFound) {
-        to = info.lastEndOfWord;
-    }
-    
-    // TODO: Move the implementation above to XVimSourceView
-    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
+    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_END_OF_WORD_FORWARD, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
     return [self _motionFixed:motion inWindow:window];
 }
 
 - (XVimEvaluator*)E:(XVimWindow*)window{
-    NSUInteger realCount = [self numericArg];
-    
-    XVimWordInfo info;
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSString *string = [[window sourceView] string];
-    if (from + 1 < [string length]){
-        unichar curChar = [[[window sourceView] string] characterAtIndex:from];
-        unichar nextChar = [[[window sourceView] string] characterAtIndex:from+1];
-        if (!isNonBlank(curChar) || !isNonBlank(nextChar)){
-            // Increase count by one such that the last end of word is properly set
-            realCount += 1;
-        }
-    }
-    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:BIGWORD info:&info];
-    if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
-        to = info.lastEndOfLine;
-    } else if (info.lastEndOfWord != NSNotFound) {
-        to = info.lastEndOfWord;
-    }
-    
-    // TODO: Move the implementation above to XVimSourceView
-    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_INCLUSIVE, BIGWORD, [self numericArg]);
+    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_END_OF_WORD_FORWARD, CHARACTERWISE_INCLUSIVE, BIGWORD, [self numericArg]);
     return [self _motionFixed:motion inWindow:window];
 }
 

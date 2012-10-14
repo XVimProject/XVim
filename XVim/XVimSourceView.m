@@ -9,7 +9,7 @@
  * XVimSourceView represent a text view used in XVim.
  * This is a layer above the actuall text view used in Xcode(DVTSourceTextView)
  * XVimSourceView keeps consistensy between VIM state and DVTSourceTextView.
- * All the evaluators(event handlers) send a request to XVimSourceView via XVimWIndow 
+ * All the evaluators(event handlers) send a request to XVimSourceView via XVimWindow
  * and complete its event.
  * So evaluators should NOT directly operate on DVTSourceTextView.
  */
@@ -22,6 +22,7 @@
                             _selectionBegin,           \
                             _selectionAreaStart,       \
                             _selectionAreaEnd)
+
 
 @interface XVimSourceView() {
 	__weak NSTextView *_view;
@@ -104,6 +105,12 @@
             break;
         case MOTION_WORD_BACKWARD:
             nextPos = [self wordsBackward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_END_OF_WORD_FORWARD:
+            nextPos = [self endOfWordsForward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_END_OF_WORD_BACKWARD:
+            nextPos = [self endOfWordsBackward:current count:motion.count option:motion.option];
             break;
         case MOTION_LINE_FORWARD:
             nextPos = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];

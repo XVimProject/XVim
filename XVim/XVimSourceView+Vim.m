@@ -11,6 +11,8 @@
 #import "NSString+VimHelper.h"
 #import "XVim.h"
 
+#import "XVimMotionType.h"
+
 /////////////////////////
 // support methods     //
 /////////////////////////
@@ -749,6 +751,64 @@
     }
     return pos;
 }
+
+/**
+ * Returns position of the end of count words forward.
+ *
+ * TODO: This can returns NSNotFound if its the "index" is the on the last character of the document.
+ *       This is because Vim causes an error(beeps) when type "e" at the end of document.
+ *       But currently this returns "index" as a next position to move because all evaluators does not expect NSNotFound
+ **/
+- (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSAssert( 0 != count , @"count must be greater than 0");
+    if( [self isEOF:index] || [self isLastCharacter:index]){
+        return index;
+    }
+    
+    XVimWordInfo info;
+    info.findEndOfWord = TRUE;
+    NSUInteger p = index+1; // We start searching end of word from next character
+    NSString *string = [self string];
+    while( ![self isLastCharacter:p] ){
+        unichar curChar = [string characterAtIndex:p];
+        unichar nextChar = [string characterAtIndex:p+1];
+        // Find the border of words.
+        // Vim defines "Blank Line as a word" but 'e' does not stop on blank line.
+        // Thats why we are not seeing blank line as a border of a word here (commented out the condition currently)
+        // We may add some option to specify if we count a blank line as a word here.
+        if( opt == BIGWORD ){
+            if( /*[self isBlankLine:p]                               || */// blank line
+               (isNonBlank(curChar) && !isNonBlank(nextChar))             // non blank to blank
+               ){
+                count--;
+            }
+        }else{
+            if( /*[self isBlankLine:p]                               || */// blank line
+               (isNonBlank(curChar) && !isNonBlank(nextChar))       ||   // non blank to blank
+               (isKeyword(curChar) && !isKeyword(nextChar))         ||   // keyword to non keyword
+               (isNonBlank(curChar) && !isKeyword(curChar) && isKeyword(nextChar))              // non keyword-non blank to keyword
+               ){
+                count--;
+            }
+        }
+        
+        if( 0 == count){
+            break;
+        }
+        p++;
+    }
+    
+    return p;
+}
+
+/**
+ * Returns position of the end of count words backward.
+ **/
+- (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    return index;
+}
+
 
 /*
  Definition of Sentence from gVim help
