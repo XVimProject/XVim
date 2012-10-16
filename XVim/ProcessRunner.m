@@ -4,10 +4,10 @@
 //  Licensed under the WTFPL: http://sam.zoy.org/wtfpl/
 
 #import "ProcessRunner.h"
+#include <sys/ioctl.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <util.h>
-#include <sys/ioctl.h>
 
 
 @interface ProcessRunner ()
@@ -58,7 +58,7 @@
 
     self.workingDirectory = [[NSFileManager defaultManager] currentDirectoryPath];
 
-    priority = NSIntegerMax;
+    priority    = NSIntegerMax;
 
     return self;
 }
@@ -137,8 +137,7 @@ CHAllocateCopyString(NSString *str) {
         if (argumentsArray[argCounter])
             argCounter++;
     }
-    
-    
+
     // Build Environment
     // -----------------
 
@@ -163,10 +162,11 @@ CHAllocateCopyString(NSString *str) {
 
     // Create File Handles
     // -------------------
-    
+
     if (usePty)
     {
         struct winsize ptySize = { 999, 100, 0, 0 };
+
         if (openpty(&masterfd, &slavefd, devname, NULL, &ptySize) == -1)
         {
             [NSException raise:@"OpenPtyErrorException"
@@ -177,7 +177,7 @@ CHAllocateCopyString(NSString *str) {
 
         setsid();
         ioctl(slavefd, TIOCSCTTY, NULL);
-        
+
         processOutputFileHandleRead = [[ NSFileHandle alloc ] initWithFileDescriptor:masterfd ];
     }
     else
@@ -186,10 +186,11 @@ CHAllocateCopyString(NSString *str) {
         processOutputFileHandleWrite = [ processOutputPipe fileHandleForWriting ];
         processOutputFileHandleRead = [ processOutputPipe fileHandleForReading ];
     }
+
     processInputPipe = [ NSPipe new ];
     NSFileHandle* processInputFileHandleWrite = [ processInputPipe fileHandleForWriting ];
-    NSFileHandle* processInputFileHandleRead = [ processInputPipe fileHandleForReading ];
-    
+    NSFileHandle* processInputFileHandleRead  = [ processInputPipe fileHandleForReading ];
+
     if (receivedOutputData || receivedOutputString)
     {
 
@@ -204,7 +205,7 @@ CHAllocateCopyString(NSString *str) {
         [processOutputFileHandleRead readToEndOfFileInBackgroundAndNotifyForModes:
          [NSArray arrayWithObjects:NSDefaultRunLoopMode, @"taskitwait", nil]];
     }
-    
+
 // Execution
     pid_t p = fork();
 
@@ -218,7 +219,7 @@ CHAllocateCopyString(NSString *str) {
         close([processInputFileHandleWrite fileDescriptor]);
         dup2([processInputFileHandleRead fileDescriptor], STDIN_FILENO);
         close([processInputFileHandleRead fileDescriptor]);
-        
+
         if (usePty)
         {
             close(masterfd);
@@ -231,7 +232,7 @@ CHAllocateCopyString(NSString *str) {
             close([processOutputFileHandleRead fileDescriptor]);
             dup2([processOutputFileHandleWrite fileDescriptor], STDOUT_FILENO);
             close([processOutputFileHandleWrite fileDescriptor]);
-            
+
             close(STDERR_FILENO);
         }
 
@@ -282,7 +283,7 @@ CHAllocateCopyString(NSString *str) {
 
     // Clean up
     // --------
-    
+
     free((void *)executablePath);
     free((void *)workingDirectoryPath);
 
@@ -590,7 +591,6 @@ CHAllocateCopyString(NSString *str) {
 
 
 
-
 - (BOOL)waitForOutputData:(NSData **)output errorData:(NSData **)error {
 
     NSMutableData *outdata = [NSMutableData data];
@@ -665,7 +665,7 @@ CHAllocateCopyString(NSString *str) {
         }
     }
 
-    return !outputHadAWhoopsie ;
+    return !outputHadAWhoopsie;
 }
 
 
@@ -712,6 +712,7 @@ CHAllocateCopyString(NSString *str) {
         [processOutputFileHandleRead release];
         [processOutputFileHandleWrite release];
     }
+
     [processInputPipe release];
     [inFileHandle release];
 

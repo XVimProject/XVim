@@ -70,10 +70,10 @@
 		C3FD41DC154E7E3400B076DB /* XVimSourceView+Vim.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */; };
 		C3FD41E0154E822300B076DB /* XVimSourceView+Xcode.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FD41DF154E822300B076DB /* XVimSourceView+Xcode.m */; };
 		ED31D3AC15F2B02A008FA96B /* NSEvent+VimHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BF050D7A15EBF3E100CD0D12 /* NSEvent+VimHelper.m */; };
-		ED4DCC4D162DCA6A00EFCAA6 /* XVimQuickFixView.m in Sources */ = {isa = PBXBuildFile; fileRef = ED4DCC4C162DCA6A00EFCAA6 /* XVimQuickFixView.m */; };
-		ED9D4B32160FABB20028C283 /* NS(Attributed)String+Geometrics.m in Sources */ = {isa = PBXBuildFile; fileRef = ED9D4B31160FABB20028C283 /* NS(Attributed)String+Geometrics.m */; };
+		ED48DA37162E003600B2DEA7 /* XVimQuickFixView.m in Sources */ = {isa = PBXBuildFile; fileRef = ED48DA31162E003600B2DEA7 /* XVimQuickFixView.m */; };
+		ED48DA38162E003600B2DEA7 /* ProcessRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = ED48DA33162E003600B2DEA7 /* ProcessRunner.m */; };
+		ED48DA39162E003600B2DEA7 /* NSAttributedString+Geometrics.m in Sources */ = {isa = PBXBuildFile; fileRef = ED48DA36162E003600B2DEA7 /* NSAttributedString+Geometrics.m */; };
 		EDCD64A915F37ED200600D68 /* XVimTaskRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = EDCD64A815F37ED200600D68 /* XVimTaskRunner.m */; };
-		EDF43882160F6D2E000EF145 /* ProcessRunner.mm in Sources */ = {isa = PBXBuildFile; fileRef = EDF43881160F6D2E000EF145 /* ProcessRunner.mm */; };
 		F100DC2E150BB6BC002C703C /* XVimRegisterEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */; };
 		F15805C71530B4000031175A /* XVimWindowEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F15805C61530B4000031175A /* XVimWindowEvaluator.m */; };
 		F17D013B150861DC00A8111B /* XVimRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = F17D013A150861DC00A8111B /* XVimRegister.m */; };
@@ -228,14 +228,14 @@
 		C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimSourceView+Vim.m"; path = "XVim/XVimSourceView+Vim.m"; sourceTree = SOURCE_ROOT; };
 		C3FD41DE154E822300B076DB /* XVimSourceView+Xcode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "XVimSourceView+Xcode.h"; path = "XVim/XVimSourceView+Xcode.h"; sourceTree = SOURCE_ROOT; };
 		C3FD41DF154E822300B076DB /* XVimSourceView+Xcode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimSourceView+Xcode.m"; path = "XVim/XVimSourceView+Xcode.m"; sourceTree = SOURCE_ROOT; };
-		ED4DCC4B162DCA6A00EFCAA6 /* XVimQuickFixView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XVimQuickFixView.h; sourceTree = SOURCE_ROOT; };
-		ED4DCC4C162DCA6A00EFCAA6 /* XVimQuickFixView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = XVimQuickFixView.m; sourceTree = SOURCE_ROOT; };
-		ED9D4B30160FABB20028C283 /* NS(Attributed)String+Geometrics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NS(Attributed)String+Geometrics.h"; sourceTree = SOURCE_ROOT; };
-		ED9D4B31160FABB20028C283 /* NS(Attributed)String+Geometrics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NS(Attributed)String+Geometrics.m"; sourceTree = SOURCE_ROOT; };
+		ED48DA31162E003600B2DEA7 /* XVimQuickFixView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimQuickFixView.m; path = XVim/XVimQuickFixView.m; sourceTree = SOURCE_ROOT; };
+		ED48DA32162E003600B2DEA7 /* XVimQuickFixView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimQuickFixView.h; path = XVim/XVimQuickFixView.h; sourceTree = SOURCE_ROOT; };
+		ED48DA33162E003600B2DEA7 /* ProcessRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ProcessRunner.m; path = XVim/ProcessRunner.m; sourceTree = SOURCE_ROOT; };
+		ED48DA34162E003600B2DEA7 /* ProcessRunner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ProcessRunner.h; path = XVim/ProcessRunner.h; sourceTree = SOURCE_ROOT; };
+		ED48DA35162E003600B2DEA7 /* NSAttributedString+Geometrics.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSAttributedString+Geometrics.h"; path = "XVim/NSAttributedString+Geometrics.h"; sourceTree = SOURCE_ROOT; };
+		ED48DA36162E003600B2DEA7 /* NSAttributedString+Geometrics.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSAttributedString+Geometrics.m"; path = "XVim/NSAttributedString+Geometrics.m"; sourceTree = SOURCE_ROOT; };
 		EDCD64A715F37ED200600D68 /* XVimTaskRunner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTaskRunner.h; path = XVim/XVimTaskRunner.h; sourceTree = SOURCE_ROOT; };
 		EDCD64A815F37ED200600D68 /* XVimTaskRunner.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTaskRunner.m; path = XVim/XVimTaskRunner.m; sourceTree = SOURCE_ROOT; };
-		EDF43880160F6D2E000EF145 /* ProcessRunner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessRunner.h; sourceTree = SOURCE_ROOT; };
-		EDF43881160F6D2E000EF145 /* ProcessRunner.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ProcessRunner.mm; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegisterEvaluator.m; path = XVim/XVimRegisterEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F15805C51530B4000031175A /* XVimWindowEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimWindowEvaluator.h; path = XVim/XVimWindowEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -471,10 +471,12 @@
 		C345DDB6154CCE7E009F232E /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
-				ED9D4B30160FABB20028C283 /* NS(Attributed)String+Geometrics.h */,
-				ED9D4B31160FABB20028C283 /* NS(Attributed)String+Geometrics.m */,
-				EDF43880160F6D2E000EF145 /* ProcessRunner.h */,
-				EDF43881160F6D2E000EF145 /* ProcessRunner.mm */,
+				ED48DA31162E003600B2DEA7 /* XVimQuickFixView.m */,
+				ED48DA32162E003600B2DEA7 /* XVimQuickFixView.h */,
+				ED48DA33162E003600B2DEA7 /* ProcessRunner.m */,
+				ED48DA34162E003600B2DEA7 /* ProcessRunner.h */,
+				ED48DA35162E003600B2DEA7 /* NSAttributedString+Geometrics.h */,
+				ED48DA36162E003600B2DEA7 /* NSAttributedString+Geometrics.m */,
 				BF050D7915EBF3E100CD0D12 /* NSEvent+VimHelper.h */,
 				BF050D7A15EBF3E100CD0D12 /* NSEvent+VimHelper.m */,
 				A2D48B1D15347B5C0088AB71 /* NSString+VimHelper.h */,
@@ -483,8 +485,6 @@
 				C30886591554C8380024161D /* NSInsetTextView.m */,
 				EDCD64A715F37ED200600D68 /* XVimTaskRunner.h */,
 				EDCD64A815F37ED200600D68 /* XVimTaskRunner.m */,
-				ED4DCC4B162DCA6A00EFCAA6 /* XVimQuickFixView.h */,
-				ED4DCC4C162DCA6A00EFCAA6 /* XVimQuickFixView.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -666,9 +666,9 @@
 				A257C28F156567250098CA09 /* DVTSourceTextView+XVim.m in Sources */,
 				ED31D3AC15F2B02A008FA96B /* NSEvent+VimHelper.m in Sources */,
 				EDCD64A915F37ED200600D68 /* XVimTaskRunner.m in Sources */,
-				EDF43882160F6D2E000EF145 /* ProcessRunner.mm in Sources */,
-				ED9D4B32160FABB20028C283 /* NS(Attributed)String+Geometrics.m in Sources */,
-				ED4DCC4D162DCA6A00EFCAA6 /* XVimQuickFixView.m in Sources */,
+				ED48DA37162E003600B2DEA7 /* XVimQuickFixView.m in Sources */,
+				ED48DA38162E003600B2DEA7 /* ProcessRunner.m in Sources */,
+				ED48DA39162E003600B2DEA7 /* NSAttributedString+Geometrics.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

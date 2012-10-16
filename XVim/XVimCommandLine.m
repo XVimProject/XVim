@@ -8,7 +8,7 @@
 
 #import "DVTKit.h"      
 #import "Logger.h"      
-#import "NS(Attributed)String+Geometrics.h"     
+#import "NSAttributedString+Geometrics.h"     
 #import "XVimCommandField.h"    
 #import "XVimCommandLine.h"     
 #import "XVimQuickFixView.h"    
