@@ -62,15 +62,20 @@
 }
 
 -(BOOL) isRepeat{
-    return self.displayName == @"repeat";
+    return [self.displayName isEqualToString:@"repeat"];
 }
 
 -(BOOL) isReadOnly{
-    return self.displayName == @":" ||
-    self.displayName == @"." ||
-    self.displayName == @"%" ||
-    self.displayName == @"#" ||
-    self.isRepeat;
+    BOOL readonly;
+    NSCharacterSet *readonlyTokenCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@":.%#"];
+    if ([_displayName length] == 1) {
+        unichar character = [_displayName characterAtIndex:0];
+        readonly = [readonlyTokenCharacterSet characterIsMember:character];
+    } else {
+        readonly = NO;
+    }
+    
+    return readonly || self.isRepeat;
 }
 
 -(BOOL) isEqual:(id)object{
