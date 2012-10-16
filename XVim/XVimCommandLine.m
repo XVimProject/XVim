@@ -6,13 +6,14 @@
 //  Copyright 2012 JugglerShu.Net. All rights reserved.
 //
 
-#import "XVimCommandLine.h"
-#import "XVimCommandField.h"
-#import "Logger.h"
-#import "XVimWindow.h"
-#import "DVTKit.h"
-#import "NS(Attributed)String+Geometrics.h"
-#import <objc/runtime.h>
+#import "DVTKit.h"      
+#import "Logger.h"      
+#import "NS(Attributed)String+Geometrics.h"     
+#import "XVimCommandField.h"    
+#import "XVimCommandLine.h"     
+#import "XVimQuickFixView.h"    
+#import "XVimWindow.h"  
+#import <objc/runtime.h>        
 
 #define DEFAULT_COMMAND_FIELD_HEIGHT 18.0
 
@@ -23,9 +24,9 @@
     NSInsetTextView* _static;
     NSInsetTextView* _error;
     NSInsetTextView* _argument;
-    NSInsetTextView* _quickfix;
-    NSString* _quickfixString;
-    
+    XVimQuickFixView* _quickFixScrollView;
+    NSString* _quickFixTextViewString;
+    id _quickFixObservation;
     NSTimer* _errorTimer;
 }
 - (void)layoutCmdline:(NSView*)view;
@@ -57,14 +58,10 @@
         _error.autoresizingMask = NSViewWidthSizable;
         [self addSubview:_error];
 
-        // Quickfix
-        _quickfix = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 100, DEFAULT_COMMAND_FIELD_HEIGHT)];
-        [_quickfix setEditable:NO];
-        [_quickfix setSelectable:NO];
-        [_quickfix setBackgroundColor:[NSColor redColor]];
-        [_quickfix setHidden:YES];
-        _quickfix.autoresizingMask = NSViewWidthSizable;
-        [self addSubview:_quickfix];
+        // Quickfix View
+        _quickFixScrollView = [[XVimQuickFixView alloc] initWithFrame:NSMakeRect(0, 0, 100, DEFAULT_COMMAND_FIELD_HEIGHT)];
+        [_quickFixScrollView setHidden:YES];
+        [self addSubview:_quickFixScrollView];
         
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 100, DEFAULT_COMMAND_FIELD_HEIGHT)];
@@ -94,12 +91,13 @@
 }
 
 - (void)dealloc{
+    [[ NSNotificationCenter defaultCenter ] removeObserver:_quickFixObservation];
     [_command release];
     [_static release];
     [_error release];
-    [_quickfix release];
+    [_quickFixScrollView release];
     [_argument release];
-    [ _quickfixString release ];
+    [ _quickFixTextViewString release ];
     [super dealloc];
 }
 
@@ -141,13 +139,24 @@
 -(void)quickFixWithString:(NSString*)string
 {
 	if( string && [string length] != 0 ){
-        [ _quickfixString release ];
-        _quickfixString = [ [ NSString stringWithFormat:@"%@\n\nPress a key to return to Xcode...",string ] copy ];
-		[_quickfix setString:_quickfixString ];
-		[_quickfix setHidden:NO];
+        __block XVimCommandLine* this = self;
+        _quickFixObservation = [ [ NSNotificationCenter defaultCenter ] addObserverForName:XVimNotificationQuickFixDidComplete
+                                                             object:_quickFixScrollView
+                                                              queue:nil
+                                                         usingBlock:^(NSNotification *note) {
+                                                             [this quickFixWithString:nil ];
+                                                         }];
+        [ _quickFixTextViewString release ];
+        _quickFixTextViewString = [ [ NSString stringWithFormat:@"%@\n\nPress a key to return to Xcode...",string ] copy ];
+		[_quickFixScrollView.textView setString:_quickFixTextViewString ];
+		[_quickFixScrollView setHidden:NO];
         [ self layoutCmdline:[self superview]];
+        [[_quickFixScrollView window] performSelector:@selector(makeFirstResponder:) withObject:_quickFixScrollView.textView afterDelay:0 ];
+        [_quickFixScrollView.textView performSelector:@selector(scrollToEndOfDocument:) withObject:self afterDelay:0 ];
 	}else{
-		[_quickfix setHidden:YES];
+        [[ NSNotificationCenter defaultCenter ] removeObserver:_quickFixObservation];
+        _quickFixObservation = nil;
+		[_quickFixScrollView setHidden:YES];
         [ self layoutCmdline:[self superview]];
 	}
 }
@@ -183,25 +192,25 @@
     [_argument setTextColor:[theme sourcePlainTextColor]];
 	[_argument setFont:sourceFont];
 	[_error setFont:sourceFont];
-	[_quickfix setTextColor:[theme consoleDebuggerOutputTextColor]];
-    [_quickfix setBackgroundColor:[theme consoleTextBackgroundColor]];
-	[_quickfix setFont:[theme consoleExecutableOutputTextFont]];
+	[_quickFixScrollView.textView setTextColor:[theme consoleDebuggerOutputTextColor]];
+    [_quickFixScrollView.textView setBackgroundColor:[theme consoleTextBackgroundColor]];
+	[_quickFixScrollView.textView setFont:[theme consoleExecutableOutputTextFont]];
 	
 	CGFloat argumentSize = MIN(frame.size.width, 100);
     
     // Layout command area
     [_error setFrameSize:NSMakeSize(frame.size.width, DEFAULT_COMMAND_FIELD_HEIGHT)];
     [_error setFrameOrigin:NSMakePoint(0, 0)];
-    [_quickfix setFrameOrigin:NSMakePoint(0, 0)];
-    if ( [_quickfix isHidden])
+    [_quickFixScrollView setFrameOrigin:NSMakePoint(0, 0)];
+    if ( [_quickFixScrollView isHidden])
     {
-        [_quickfix setFrameSize:NSMakeSize(frame.size.width, DEFAULT_COMMAND_FIELD_HEIGHT ) ];
+        [_quickFixScrollView setFrameSize:NSMakeSize(frame.size.width, DEFAULT_COMMAND_FIELD_HEIGHT ) ];
     }
     else
     {
-        NSSize idealQuickfixSize = [ _quickfixString sizeForWidth:frame.size.width height:(frame.size.height*0.75) font:[theme consoleExecutableOutputTextFont]];
+        NSSize idealQuickfixSize = [ _quickFixTextViewString sizeForWidth:frame.size.width height:(frame.size.height*0.5) font:[theme consoleExecutableOutputTextFont]];
         idealQuickfixSize.width = frame.size.width ;
-        [_quickfix setFrameSize:idealQuickfixSize ];
+        [_quickFixScrollView setFrameSize:idealQuickfixSize ];
         tallestSubviewHeight = idealQuickfixSize.height ;
     }
     [_static setFrameSize:NSMakeSize(frame.size.width, DEFAULT_COMMAND_FIELD_HEIGHT)];
@@ -230,7 +239,6 @@
 	
 	[_static setInset:inset];
 	[_error setInset:inset];
-	[_quickfix setInset:NSZeroSize];
 	[_argument setInset:inset];
 	[_command setInset:inset];
 }

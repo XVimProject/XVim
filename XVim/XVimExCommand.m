@@ -920,33 +920,36 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 -(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
-        NSUInteger firstFilteredLine = args.lineBegin ;
+    NSUInteger firstFilteredLine = args.lineBegin;
     NSString* selectedText = nil;
+
     if (!args.noRangeSpecified && args.lineBegin != NSNotFound && args.lineEnd != NSNotFound)
+    {
+        window.sourceView.selectedLineRange = NSMakeRange(args.lineBegin-1, args.lineEnd - args.lineBegin + 1);
+        selectedText = args.noRangeSpecified ? nil : [ window.sourceView selectedText ];
+        DEBUG_LOG(@"Selected line range = %@", NSStringFromRange(window.sourceView.selectedLineRange));
+    }
+
+    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS ];
+
+    if (scriptReturn != nil)
+    {
+        if (args.noRangeSpecified)
         {
-            selectedText = args.noRangeSpecified ? nil:[ window.sourceView selectedText ];
-            window.sourceView.selectedLineRange = NSMakeRange(args.lineBegin-1, args.lineEnd - args.lineBegin + 1);
-            DEBUG_LOG(@"Selected line range = %@", NSStringFromRange(window.sourceView.selectedLineRange));
+            // No text range was specified -- open quickfix window to display the result
+            [ window showQuickfixWithString:scriptReturn ];
         }
-        NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS ];
-        
-        if (scriptReturn != nil)
+        else
         {
-            if (args.noRangeSpecified)
+            // A text range was specified -- replace the range with the output of the command
+            [ window.sourceView replaceText:scriptReturn ];
+
+            if (firstFilteredLine != NSNotFound)
             {
-                // No text range was specified -- open quickfix window to display the result
-                [ window showQuickfixWithString:scriptReturn ];
-            }
-            else
-            {
-                // A text range was specified -- replace the range with the output of the command
-                [ window.sourceView replaceText:scriptReturn ];
-                if (firstFilteredLine != NSNotFound)
-                {
-                    window.sourceView.selectedLineRange = NSMakeRange(firstFilteredLine-1,1);
-                }
+                window.sourceView.selectedLineRange = NSMakeRange(firstFilteredLine-1,1);
             }
         }
+    }
 }
 
 

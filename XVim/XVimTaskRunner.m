@@ -34,6 +34,10 @@
 #define AUTORELEASE(object)     [(object) autorelease]
 #endif
 #endif
+#define SPACES_PER_TAB 8
+
+char* spaces(NSUInteger num);
+NSString* expandTabs(NSString* inStr);
 
 @interface XVimTaskRunner ()
 +(NSString*)_createTempCommandFileWithContents:(NSString*)contents;
@@ -65,6 +69,10 @@
 
 +(NSString*) runScript:(NSString*)scriptAndArgs withInput:(NSString*)input withTimeout:(NSTimeInterval)timeout
 {
+    // If we have no input, then this is a 'rangeless' bang command, and we will display the output
+    // in the quickfix window, which should behave something like a terminal.
+    BOOL usePty = (input==nil);
+    
     NSMutableString* returnString = [NSMutableString string];
     __block BOOL outputReceived = NO;
 
@@ -83,15 +91,31 @@
     {
         TRACE_LOG(@"Input = %@", input);
         DEBUG_LOG(@"Created temporary command file %@ for command %@", commandFile, scriptAndArgs );
-        [task.arguments addObjectsFromArray:[ NSArray arrayWithObjects:commandFile, nil]];
-
+        if (input == nil)
+        {
+            [task.arguments addObject:commandFile];
+        }
+        else
+        {
+            [task.arguments addObjectsFromArray:[ NSArray arrayWithObjects:@"-l",commandFile, nil]];
+        }
+        
         task.receivedOutputString = ^void (NSString *output) {
-            [returnString appendString:output ];
+            if (usePty)
+            {
+                [ output enumerateLinesUsingBlock:^(NSString *line, BOOL *stop) {
+                    [ returnString appendFormat:@"%@\n", expandTabs(line) ];
+                }];
+            }
+            else
+            {
+                [ returnString appendString:output ];
+            }
             outputReceived = YES;
         };
 
         @try {
-            [ task launchUsingPty:(input == nil) ];
+            [ task launchUsingPty:usePty ];
             [ task waitUntilExitWithTimeout:timeout ];
         }
         @catch (NSException *exception) {
@@ -197,3 +221,27 @@
 
 
 @end
+
+#define MAX_TAB_WIDTH 100
+static char SPACES[MAX_TAB_WIDTH+1];
+
+char* spaces(NSUInteger num)
+{
+    if (*SPACES == 0)
+    {
+        memset(SPACES, ' ',MAX_TAB_WIDTH);
+    }
+    return SPACES+MAX_TAB_WIDTH-num;
+}
+
+NSString* expandTabs(NSString* inStr)
+{
+    NSMutableString* outStr = [ NSMutableString string ];
+    NSArray* strs =[ inStr componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t"]];
+    for (NSString* str in strs)
+    {
+        NSUInteger remainder = SPACES_PER_TAB - ( [ str length ] % SPACES_PER_TAB );
+        [outStr appendFormat:@"%@%s", str, spaces(remainder)];
+    }
+    return outStr;
+}

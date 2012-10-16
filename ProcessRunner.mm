@@ -166,7 +166,8 @@ CHAllocateCopyString(NSString *str) {
     
     if (usePty)
     {
-        if (openpty(&masterfd, &slavefd, devname, NULL, NULL) == -1)
+        struct winsize ptySize = { 999, 100, 0, 0 };
+        if (openpty(&masterfd, &slavefd, devname, NULL, &ptySize) == -1)
         {
             [NSException raise:@"OpenPtyErrorException"
                         format:@"%s", strerror(errno)];
@@ -574,7 +575,10 @@ CHAllocateCopyString(NSString *str) {
             receivedOutputData(data);
 
         if (receivedOutputString)
-            receivedOutputString([[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+        {
+            NSString* outputString = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];
+            receivedOutputString(outputString);
+        }
 
         if (hasRetainedForOutput)
         {
