@@ -138,35 +138,16 @@ CHAllocateCopyString(NSString *str) {
             argCounter++;
     }
 
-    // Build Environment
-    // -----------------
-
-    const char **environmentArray = (const char**)calloc([environment count] + 1, sizeof(char*));
-    NSInteger envCounter = 0;
-
-    for (NSString *environmentKey in environment)
-    {
-        NSString *environmentValue = [environment valueForKey:environmentKey];
-
-        if (![environmentKey length] || !environmentValue)
-            continue;
-
-        NSString *environmentPair = [NSString stringWithFormat:@"%@=%@", environmentKey, environmentValue];
-
-        environmentArray[envCounter] = CHAllocateCopyString(environmentPair);
-        envCounter++;
-    }
-
     int masterfd, slavefd;
     char devname[64];
 
     // Create File Handles
     // -------------------
 
+    struct winsize ptySize = { 999, 100, 0, 0 };
+
     if (usePty)
     {
-        struct winsize ptySize = { 999, 100, 0, 0 };
-
         if (openpty(&masterfd, &slavefd, devname, NULL, &ptySize) == -1)
         {
             [NSException raise:@"OpenPtyErrorException"
@@ -174,9 +155,7 @@ CHAllocateCopyString(NSString *str) {
         }
 
         _ttyName = [[NSString alloc] initWithCString:devname encoding:NSASCIIStringEncoding ];
-
-        setsid();
-        ioctl(slavefd, TIOCSCTTY, NULL);
+        ioctl(masterfd, TIOCFLUSH, NULL);
 
         processOutputFileHandleRead = [[ NSFileHandle alloc ] initWithFileDescriptor:masterfd ];
     }
@@ -211,10 +190,7 @@ CHAllocateCopyString(NSString *str) {
 
     if (p == 0)
     {
-        //
-        // CHILD
-        // -----
-        //
+
 
         close([processInputFileHandleWrite fileDescriptor]);
         dup2([processInputFileHandleRead fileDescriptor], STDIN_FILENO);
@@ -222,6 +198,18 @@ CHAllocateCopyString(NSString *str) {
 
         if (usePty)
         {
+            setsid();
+            ioctl(slavefd, TIOCSCTTY, NULL);
+            ioctl(slavefd, TIOCNOTTY, NULL);
+            char envbuf[50];
+            setenv("TERM", "dumb", 1);
+            sprintf((char *)envbuf, "%hd", ptySize.ws_row);
+            setenv("ROWS", (char *)envbuf, 1);
+            sprintf((char *)envbuf, "%hd", ptySize.ws_row);
+            setenv("LINES", (char *)envbuf, 1);
+            sprintf((char *)envbuf, "%hd", ptySize.ws_col);
+            setenv("COLUMNS", (char *)envbuf, 1);
+
             close(masterfd);
             dup2(slavefd, STDOUT_FILENO);
             dup2(slavefd, STDERR_FILENO);
@@ -236,16 +224,8 @@ CHAllocateCopyString(NSString *str) {
             close(STDERR_FILENO);
         }
 
-        chdir(workingDirectoryPath);
 
-        //sleep(1);
-
-        int oldpriority = getpriority(PRIO_PROCESS, (id_t)getpid());
-
-        if (priority < 20 && priority > -20 && priority > oldpriority)
-            setpriority(PRIO_PROCESS, (id_t)getpid(), (int)priority);
-
-        execve(executablePath, (char * const *)argumentsArray, (char * const *)environmentArray);
+        execvp(executablePath, (char * const *)argumentsArray);
 
         // execve failed for some reason, try to quit gracefullyish
         _exit(0);
@@ -292,11 +272,6 @@ CHAllocateCopyString(NSString *str) {
 
     free(argumentsArray);
 
-    for (size_t i = 0; i < envCounter; i++)
-        free((void *)environmentArray[i]);
-
-    free(environmentArray);
-
 // Writing
     // We want to open stdin on p and write our input
     NSData *inputData = input ? : [inputString dataUsingEncoding:NSUTF8StringEncoding];
@@ -304,15 +279,12 @@ CHAllocateCopyString(NSString *str) {
     if (inputData)
     {
         [processInputFileHandleWrite writeData:inputData];
+        [ processInputFileHandleWrite closeFile ];
     }
 
     if (usePty)
     {
         close(masterfd);
-    }
-    else
-    {
-        [ processInputFileHandleWrite closeFile ];
     }
 
     return YES;
@@ -573,7 +545,9 @@ CHAllocateCopyString(NSString *str) {
         [processOutputFileHandleRead closeFile];
 
         if (receivedOutputData)
+        {
             receivedOutputData(data);
+        }
 
         if (receivedOutputString)
         {

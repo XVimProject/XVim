@@ -25,7 +25,6 @@
     NSInsetTextView* _error;
     NSInsetTextView* _argument;
     XVimQuickFixView* _quickFixScrollView;
-    NSString* _quickFixTextViewString;
     id _quickFixObservation;
     NSTimer* _errorTimer;
 }
@@ -97,7 +96,6 @@
     [_error release];
     [_quickFixScrollView release];
     [_argument release];
-    [ _quickFixTextViewString release ];
     [super dealloc];
 }
 
@@ -146,9 +144,21 @@
                                                          usingBlock:^(NSNotification *note) {
                                                              [this quickFixWithString:nil ];
                                                          }];
-        [ _quickFixTextViewString release ];
-        _quickFixTextViewString = [ [ NSString stringWithFormat:@"%@\n\nPress a key to return to Xcode...",string ] copy ];
-		[_quickFixScrollView.textView setString:_quickFixTextViewString ];
+        DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+        NSDictionary* quickFixTrailingAttributes = [ NSDictionary dictionaryWithObjectsAndKeys:
+                                                    [NSColor greenColor], NSForegroundColorAttributeName
+                                                    , nil];
+        NSDictionary* consoleAttributes = [ NSDictionary dictionaryWithObjectsAndKeys:
+                                                    [theme consoleDebuggerOutputTextColor], NSForegroundColorAttributeName
+                                                    , nil];
+        
+        NSAttributedString* quickFixTrailingPrompt = [[ NSAttributedString alloc] initWithString:@"\nPress a key..." attributes:quickFixTrailingAttributes ];
+        NSAttributedString* attrStr = [[NSAttributedString alloc] initWithString:string attributes:consoleAttributes];
+		[[_quickFixScrollView.textView textStorage ] setAttributedString:attrStr ];
+        [_quickFixScrollView.textView setTypingAttributes:quickFixTrailingAttributes];
+        [[_quickFixScrollView.textView textStorage] appendAttributedString:quickFixTrailingPrompt ];
+        [quickFixTrailingPrompt release];
+        [attrStr release];
 		[_quickFixScrollView setHidden:NO];
         [ self layoutCmdline:[self superview]];
         [[_quickFixScrollView window] performSelector:@selector(makeFirstResponder:) withObject:_quickFixScrollView.textView afterDelay:0 ];
@@ -192,7 +202,6 @@
     [_argument setTextColor:[theme sourcePlainTextColor]];
 	[_argument setFont:sourceFont];
 	[_error setFont:sourceFont];
-	[_quickFixScrollView.textView setTextColor:[theme consoleDebuggerOutputTextColor]];
     [_quickFixScrollView.textView setBackgroundColor:[theme consoleTextBackgroundColor]];
 	[_quickFixScrollView.textView setFont:[theme consoleExecutableOutputTextFont]];
 	
@@ -208,7 +217,7 @@
     }
     else
     {
-        NSSize idealQuickfixSize = [ _quickFixTextViewString sizeForWidth:frame.size.width height:(frame.size.height*0.5) font:[theme consoleExecutableOutputTextFont]];
+        NSSize idealQuickfixSize = [ [_quickFixScrollView.textView string] sizeForWidth:frame.size.width height:(frame.size.height*0.5) font:[theme consoleExecutableOutputTextFont]];
         idealQuickfixSize.width = frame.size.width ;
         [_quickFixScrollView setFrameSize:idealQuickfixSize ];
         tallestSubviewHeight = idealQuickfixSize.height ;

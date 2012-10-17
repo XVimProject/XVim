@@ -40,7 +40,7 @@ char* spaces(NSUInteger num);
 NSString* expandTabs(NSString* inStr);
 
 @interface XVimTaskRunner ()
-+(NSString*)_createTempCommandFileWithContents:(NSString*)contents;
++(NSString*)_createTempCommandFileWithContents:(NSString*)contents shell:(NSString*)shell;
 @end
 
 @implementation XVimTaskRunner
@@ -72,25 +72,26 @@ NSString* expandTabs(NSString* inStr);
     // If we have no input, then this is a 'rangeless' bang command, and we will display the output
     // in the quickfix window, which should behave something like a terminal.
     BOOL usePty = (input==nil);
-    
+
     NSMutableString* returnString = [NSMutableString string];
-    __block BOOL outputReceived = NO;
+    __block BOOL outputReceived   = NO;
 
     if (!scriptAndArgs || [ scriptAndArgs length ] == 0)
     {
         return nil;
     }
 
-    ProcessRunner *task = [ProcessRunner task];
+    ProcessRunner *task   = [ProcessRunner task];
     task.launchPath  = @"/bin/bash";
     task.inputString = input;
 
-    NSString* commandFile = [ self _createTempCommandFileWithContents:scriptAndArgs ];
+    NSString* commandFile = [ self _createTempCommandFileWithContents:scriptAndArgs shell:task.launchPath ];
 
     if (commandFile && [commandFile length])
     {
         TRACE_LOG(@"Input = %@", input);
         DEBUG_LOG(@"Created temporary command file %@ for command %@", commandFile, scriptAndArgs );
+
         if (input == nil)
         {
             [task.arguments addObject:commandFile];
@@ -99,18 +100,20 @@ NSString* expandTabs(NSString* inStr);
         {
             [task.arguments addObjectsFromArray:[ NSArray arrayWithObjects:@"-l",commandFile, nil]];
         }
-        
+
         task.receivedOutputString = ^void (NSString *output) {
             if (usePty)
             {
-                [ output enumerateLinesUsingBlock:^(NSString *line, BOOL *stop) {
-                    [ returnString appendFormat:@"%@\n", expandTabs(line) ];
-                }];
+                [ output enumerateLinesUsingBlock: ^(NSString *line, BOOL *stop) {
+                      [ returnString appendFormat:@"%@\n", expandTabs(line) ];
+                  }
+                ];
             }
             else
             {
                 [ returnString appendString:output ];
             }
+
             outputReceived = YES;
         };
 
@@ -121,6 +124,7 @@ NSString* expandTabs(NSString* inStr);
         @catch (NSException *exception) {
             ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         }
+
         if (task.terminationStatus != 0)
         {
             ERROR_LOG(@"Command %@ returned with error code %ld", scriptAndArgs, task.terminationStatus );
@@ -131,6 +135,7 @@ NSString* expandTabs(NSString* inStr);
     {
         ERROR_LOG(@"Could not create temporary command file for command %@", scriptAndArgs );
     }
+
     TRACE_LOG(@"Output = %@", returnString);
 
     return outputReceived ? returnString : nil;
@@ -158,30 +163,7 @@ NSString* expandTabs(NSString* inStr);
 
 
 
-+(void) runScriptInTerminal:(NSString*)scriptAndArgs
-{
-    DEBUG_LOG(@"Going to run %@",scriptAndArgs);
-    NSTask *task     = AUTORELEASE([[NSTask alloc] init]);
-    [task setLaunchPath:@"/usr/bin/open" ];
-
-    NSString* script = [ NSString stringWithFormat:@"clear\n%@", scriptAndArgs ];
-    NSString* tempCommandFile = [ self _createTempCommandFileWithContents:script ];
-
-    if (tempCommandFile != nil)
-    {
-        [ task setArguments:[NSArray arrayWithObject:tempCommandFile]];
-        @try {
-            [ task launch ];
-        }
-        @catch (NSException *exception) {
-            ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        }
-    }
-}
-
-
-
-+(NSString*)_createTempCommandFileWithContents:(NSString*)contents
++(NSString*)_createTempCommandFileWithContents:(NSString*)contents shell:(NSString *)shell
 {
     static NSString* commandSuffix = @".command";
     NSString *tempFileTemplate     = [@"xvim.XXXXXX" stringByAppendingString:commandSuffix];
@@ -198,7 +180,7 @@ NSString* expandTabs(NSString* inStr);
     }
 
     NSFileHandle* fh  = AUTORELEASE([[NSFileHandle alloc] initWithFileDescriptor:fileDescriptor closeOnDealloc:NO]);
-    NSString* command = [ NSString stringWithFormat:@"%@\n", contents];
+    NSString* command = [ NSString stringWithFormat:@"#!%@\n%@\n", shell,contents];
     [ fh writeData:[ command dataUsingEncoding:NSUTF8StringEncoding]];
     [ fh closeFile ];
 
@@ -225,23 +207,30 @@ NSString* expandTabs(NSString* inStr);
 #define MAX_TAB_WIDTH 100
 static char SPACES[MAX_TAB_WIDTH+1];
 
-char* spaces(NSUInteger num)
+char*
+spaces(NSUInteger num)
 {
     if (*SPACES == 0)
     {
         memset(SPACES, ' ',MAX_TAB_WIDTH);
     }
+
     return SPACES+MAX_TAB_WIDTH-num;
 }
 
-NSString* expandTabs(NSString* inStr)
+
+
+NSString*
+expandTabs(NSString* inStr)
 {
     NSMutableString* outStr = [ NSMutableString string ];
-    NSArray* strs =[ inStr componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t"]];
+    NSArray* strs = [ inStr componentsSeparatedByCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"\t"]];
+
     for (NSString* str in strs)
     {
         NSUInteger remainder = SPACES_PER_TAB - ( [ str length ] % SPACES_PER_TAB );
         [outStr appendFormat:@"%@%s", str, spaces(remainder)];
     }
+
     return outStr;
 }

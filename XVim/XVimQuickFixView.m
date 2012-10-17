@@ -35,7 +35,6 @@ NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidCom
         [_quickFixTextView setSelectable:YES];
         [_quickFixTextView setEditable:NO];
         [_quickFixTextView setBackgroundColor:[NSColor redColor]];
-        [ _quickFixTextView setString:@"  "];
         NSMutableParagraphStyle *style = [[ [NSParagraphStyle defaultParagraphStyle] mutableCopy ] autorelease];
         [ style setTabStops:[NSArray array]];
         [ style setDefaultTabInterval:70.0 ];
