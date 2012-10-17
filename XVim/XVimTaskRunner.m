@@ -125,7 +125,7 @@ NSString* expandTabs(NSString* inStr);
             ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         }
 
-        if (task.terminationStatus != 0)
+        if (!usePty && task.terminationStatus != 0)
         {
             ERROR_LOG(@"Command %@ returned with error code %ld", scriptAndArgs, task.terminationStatus );
             outputReceived = NO;
