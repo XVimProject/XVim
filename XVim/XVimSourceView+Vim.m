@@ -643,11 +643,9 @@
             if(isNewLine(curChar)){
                 //two newlines in a row.
                 inWord = FALSE;
-                if(!info->findEndOfWord){
-                    --count;
-                    info->lastEndOfWord = i-1; 
-                    info->lastEndOfLine = i-1; 
-                }
+                --count;
+                info->lastEndOfWord = i-1;
+                info->lastEndOfLine = i-1;
             }else if(isNonBlank(curChar)){
                 inWord = TRUE;
                 --count;
@@ -766,8 +764,6 @@
         return index;
     }
     
-    XVimWordInfo info;
-    info.findEndOfWord = TRUE;
     NSUInteger p = index+1; // We start searching end of word from next character
     NSString *string = [self string];
     while( ![self isLastCharacter:p] ){
@@ -806,6 +802,7 @@
  * Returns position of the end of count words backward.
  **/
 - (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    // TODO: Implement!
     return index;
 }
 

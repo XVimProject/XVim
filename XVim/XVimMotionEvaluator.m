@@ -58,18 +58,13 @@
 // You do not need to use this if this is not proper to express the motion.
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     XVimSourceView* view = [window sourceView];
-    NSRange begin = [view selectedRange];
-    NSUInteger motionFrom = begin.location;
-    
 	NSUInteger motionTo = (NSUInteger)[view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
-    
-	return [self _motionFixedFrom:motionFrom To:motionTo Type:type inWindow:window];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, type, MOTION_OPTION_NONE, [self numericArg]);
+    m.position = motionTo;
+    return [self _motionFixed:m inWindow:window];
 }
 
-
-
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
     if( _forceMotionType ){
 		if ( type == LINEWISE) {
@@ -165,25 +160,17 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"]
-																					 parent:self];
+    return [[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] parent:self];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
-    NSUInteger end;
-    if( [self numericMode] ){
-        end = [view positionAtLineNumber:[self numericArg] column:0];
-		if (end == NSNotFound) {
-			end = [view firstOfLine:[[view string] length]];
-		}
+    XVimMotion* m =XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, LEFT_RIGHT_NOWRAP, [self numericArg]);
+    if([self numericMode]){
+        m.line = [self numericArg];
     }else{
-        end = [view headOfLine:[[view string] length]];
-        if( NSNotFound == end ){
-            end = [[view string] length];
-        }
+        m.motion = MOTION_LASTLINE;
     }
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+    return [self _motionFixed:m inWindow:window];
 }
 
 - (XVimEvaluator*)h:(XVimWindow*)window {
@@ -238,16 +225,14 @@
 */
 
 - (XVimEvaluator*)t:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"t"]
-																												 parent:self];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"t"] parent:self];
     eval.forward = YES;
     eval.previous = YES;
     return eval;
 }
 
 - (XVimEvaluator*)T:(XVimWindow*)window{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"T"]
-																												 parent:self];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"T"] parent:self];
     eval.forward = NO;
     eval.previous = YES;
     return eval;
@@ -267,8 +252,7 @@
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
-    return [[XVimZEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"z"]
-																			   parent:self];
+    return [[XVimZEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"z"] parent:self];
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{
@@ -286,8 +270,7 @@
 		searchLocation = found.location;
     }
 	
-	if (![searcher selectSearchResult:found inWindow:window])
-	{
+	if (![searcher selectSearchResult:found inWindow:window]) {
 		return nil;
 	}
     
@@ -308,20 +291,17 @@
 //  the range of the document
 
 - (XVimEvaluator*)SQUOTE:(XVimWindow*)window{
-    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"]
-													 parent:self
-											   markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
+    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"] parent:self markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
 }
 
 - (XVimEvaluator*)BACKQUOTE:(XVimWindow*)window{
-    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] 
-													 parent:self
-											   markOperator:MARKOPERATOR_MOVETO];
+    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] parent:self markOperator:MARKOPERATOR_MOVETO];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
 // Note: CARET always moves to start of the current line ignoring any numericArg.
 - (XVimEvaluator*)CARET:(XVimWindow*)window{
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_FIRST_NONBLANK, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
     XVimSourceView* view = [window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger head = [view headOfLineWithoutSpaces:r.location];
@@ -445,14 +425,7 @@
 }
 
 - (XVimEvaluator*)PLUS:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
-    NSRange r = [view selectedRange];
-    NSUInteger to = [view nextLine:r.location column:0 count:[self numericArg] option:MOTION_OPTION_NONE];
-    NSUInteger to_wo_space= [view nextNonBlankInALine:to];
-    if( NSNotFound != to_wo_space){
-        to = to_wo_space;
-    }
-    return [self _motionFixedFrom:r.location To:to Type:LINEWISE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_NEXT_FIRST_NONBLANK, LINEWISE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 /* 
  * CR (return) acts like PLUS in vi
@@ -462,14 +435,7 @@
 }
 
 - (XVimEvaluator*)MINUS:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
-    NSRange r = [view selectedRange];
-    NSUInteger to = [view prevLine:r.location column:0 count:[self numericArg] option:MOTION_OPTION_NONE];
-    NSUInteger to_wo_space= [view nextNonBlankInALine:to];
-    if( NSNotFound != to_wo_space){
-        to = to_wo_space;
-    }
-    return [self _motionFixedFrom:r.location To:to Type:LINEWISE inWindow:window];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_PREV_FIRST_NONBLANK, LINEWISE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
 }
 
 

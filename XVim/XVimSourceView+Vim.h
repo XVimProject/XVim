@@ -66,7 +66,6 @@ typedef struct _XVimWordInfo{
     BOOL isFirstWordInALine;
     NSUInteger lastEndOfLine;
     NSUInteger lastEndOfWord;
-    BOOL findEndOfWord;
 }XVimWordInfo;
 
 
@@ -213,6 +212,7 @@ typedef struct _XVimWordInfo{
  * Returns position at line number "num" and column number "column"
  * If the "column" exceeds the end of line it returns position of  the end of line.
  * Line number starts from 1.
+ * If the line number specified exceeds the maximum lines in the document it returns NSNotFound.
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 

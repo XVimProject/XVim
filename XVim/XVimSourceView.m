@@ -92,6 +92,7 @@
 
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
     NSUInteger nextPos = current;
+    NSUInteger tmpPos = NSNotFound;
     XVimWordInfo info;
     switch (motion.motion) {
         case MOTION_FORWARD:
@@ -148,9 +149,40 @@
                 nextPos = current;
             }
             break;
-        case MOTION_NEXT_CHARACTER:
+        case MOTION_NEXT_FIRST_NONBLANK:
+            nextPos = [self nextLine:current column:0 count:motion.count option:motion.option];
+            tmpPos = [self nextNonBlankInALine:nextPos];
+            if( NSNotFound != tmpPos ){
+                nextPos = tmpPos;
+            }
             break;
-        case MOTION_PREV_CHARACTER:
+        case MOTION_PREV_FIRST_NONBLANK:
+            nextPos = [self prevLine:current column:0 count:motion.count option:motion.option];
+            tmpPos = [self nextNonBlankInALine:nextPos];
+            if( NSNotFound != tmpPos ){
+                nextPos = tmpPos;
+            }
+            break;
+        case MOTION_FIRST_NONBLANK:
+            nextPos = [self headOfLineWithoutSpaces:current];
+            if( NSNotFound == nextPos ){
+                nextPos = current;
+            }
+            break;
+        case MOTION_LINENUMBER:
+            nextPos = [self positionAtLineNumber:motion.line column:0];
+            if (nextPos == NSNotFound) {
+                nextPos = [self firstOfLine:[self endOfFile]];
+            }
+            break;
+        case MOTION_LASTLINE:
+            nextPos = [self firstOfLine:[self endOfFile]];
+            break;
+        case MOTION_LINE_COLUMN:
+            nextPos = [self positionAtLineNumber:motion.line column:motion.column];
+            if( NSNotFound == nextPos ){
+                nextPos = current;
+            }
             break;
         case MOTION_POSITION:
             nextPos = motion.position;
