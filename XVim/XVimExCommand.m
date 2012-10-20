@@ -1069,10 +1069,13 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     [NSApp sendAction:sel  to:nil from:self];
 }
 
+
+// Expands special ex command 'tokens', as described in cmdline-special of the vim docs
+// :., :~, :s and :gs are not supported yet
 -(void)_expandTokens:(XVimExArg *)arg contextDict:(NSDictionary *)ctx
 {
     NSError*error=nil;
-    NSRegularExpression* regex = [ NSRegularExpression regularExpressionWithPattern:@"(%|#)(:p|:~|:h|:\\.)?"
+    NSRegularExpression* regex = [ NSRegularExpression regularExpressionWithPattern:@"(%|#)(:p|:~|:h|:r|:t|:e|:\\.)*"
                                                                             options:0
                                                                               error:&error];
     NSMutableString* resultStr = [ NSMutableString string ];
@@ -1089,13 +1092,51 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                               else
                               {
                                   // % or #
-                                  NSString* matchedToken = [arg.arg substringWithRange:[ result rangeAtIndex:1 ]];
+                                  NSRange lastMatchedRange =[ result rangeAtIndex:1 ];
+                                  NSString* matchedToken = [arg.arg substringWithRange:lastMatchedRange ];
                                   NSString* substituteValue = [ ctx objectForKey:matchedToken ];
                                   if (!substituteValue)
                                   {
                                       substituteValue = matchedToken;
                                   }
-                                  
+                                  NSUInteger matchIdx = 2;
+                                  //DEBUG_LOG(@"Number of matched ranges = %d", [result numberOfRanges] );
+                                  while (matchIdx < [ result numberOfRanges]) {
+                                      NSRange nextMatchedRange = [ result rangeAtIndex:matchIdx ];
+                                      if (nextMatchedRange.location != NSNotFound)
+                                      {
+                                          NSUInteger matchedPos = lastMatchedRange.location + lastMatchedRange.length ;
+                                          // This is the REAL matched range...to my eyes, NSRegularExpression has a bug
+                                          NSRange matchedRange = NSMakeRange(matchedPos, nextMatchedRange.location+nextMatchedRange.length-matchedPos);
+                                          NSString* matchedToken = [arg.arg substringWithRange:matchedRange];
+                                          //DEBUG_LOG(@"Modifiers at range %@ = %@", NSStringFromRange(matchedRange), matchedToken );
+                                          for (NSUInteger modIdx = 1; modIdx < [matchedToken length]; modIdx++,modIdx++) {
+                                              char modifier = (char)[matchedToken characterAtIndex:modIdx ];
+                                              switch (modifier) {
+                                                  case 'p': // return full 'path' (expand tilde, etc.)
+                                                      substituteValue = [ substituteValue stringByStandardizingPath ];
+                                                      break;
+                                                  case 'h': // return 'head' of path (chop off last component)
+                                                      substituteValue = [ substituteValue stringByDeletingLastPathComponent ];
+                                                      break;
+                                                  case 'r': // 'root' of filename (remove extension)
+                                                      substituteValue = [ substituteValue stringByDeletingPathExtension ];
+                                                      break;
+                                                  case 't': // 'tail' of filename (last path component)
+                                                      substituteValue = [ substituteValue lastPathComponent ];
+                                                      break;
+                                                  case 'e': // 'extension' of filename
+                                                      substituteValue = [ substituteValue pathExtension ];
+                                                      break;
+                                                  default:
+                                                      break;
+                                              }
+                                          }
+                                  lastMatchedRange = matchedRange;
+                                      }
+                                      
+                                      matchIdx++;
+                                  }
                                   NSUInteger matchStart = [ result range ].location;
                                   NSUInteger matchLen = [ result range ].length;
                                   NSRange firstHalfRange = NSMakeRange(remainderRange.location, matchStart-remainderRange.location);
