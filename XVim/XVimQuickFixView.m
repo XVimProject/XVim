@@ -7,6 +7,7 @@
 //
 
 #import "XVimQuickFixView.h"
+#import "Logger.h"
 
 NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidComplete" ;
 
@@ -61,12 +62,24 @@ NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidCom
     return YES;
 }
 @end
+static const unichar USEFUL_KEYS[]={NSUpArrowFunctionKey,NSDownArrowFunctionKey,NSPageUpFunctionKey,NSPageDownFunctionKey, 0};
 
 @implementation XVimQuickFixTextView
 
 -(void)keyDown:(NSEvent *)theEvent
 {
-    [[ NSNotificationCenter defaultCenter ] postNotificationName:XVimNotificationQuickFixDidComplete object:[self enclosingScrollView] ];
+    // Pass-through keys to scroll up and down. Otherwise notify that we should exit quickfix
+    const unichar*i=USEFUL_KEYS;
+    unichar keyChar = [[ theEvent characters ] length]>0?[[theEvent characters] characterAtIndex:0]:0;
+    for (; *i!=0 && *i!=keyChar; ++i){;}
+    if (*i==(unichar)0)
+    {
+        [[ NSNotificationCenter defaultCenter ] postNotificationName:XVimNotificationQuickFixDidComplete object:[self enclosingScrollView] ];
+    }
+    else
+    {
+        [ super keyDown:theEvent];
+    }
 }
 
 -(BOOL)acceptsFirstResponder

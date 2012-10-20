@@ -9,6 +9,7 @@
 #import "XVimSourceView+Xcode.h"
 #import "DVTSourceTextViewHook.h"
 #import "DVTKit.h"
+#import "IDEKit.h"
 
 @implementation XVimSourceView(Xcode)
 @dynamic selectedLineRange;
@@ -104,5 +105,11 @@
     }
     NSRange charRange = [[self xTextStorage] characterRangeForLineRange:selectedLineRange];
     [ [ self xview ] setSelectedRange:charRange];
+}
+
+
+-(NSURL*)documentURL
+{
+    return [(NSDocument*)((IDEEditor*)[[ self xview] delegate]).document fileURL];
 }
 @end

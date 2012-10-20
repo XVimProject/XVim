@@ -40,7 +40,7 @@ char* spaces(NSUInteger num);
 NSString* expandTabs(NSString* inStr);
 
 @interface XVimTaskRunner ()
-+(NSString*)_createTempCommandFileWithContents:(NSString*)contents shell:(NSString*)shell;
++(NSString*)_createTempFileWithContents:(NSString*)contents shell:(NSString*)shell;
 @end
 
 @implementation XVimTaskRunner
@@ -80,18 +80,31 @@ NSString* expandTabs(NSString* inStr);
     {
         return nil;
     }
-
+    NSString* inputFile = nil;
+    if (input !=nil)
+    {
+        // We have input, write it to a temporary file ready to be re-directed to the command
+        if ((inputFile = [ self _createTempFileWithContents:input shell:nil ]) && [inputFile length])
+        {
+            scriptAndArgs = [ NSString stringWithFormat:@"%@ < \"%@\"",scriptAndArgs,inputFile ];
+        }
+        else
+        {
+            ERROR_LOG(@"Could not create temporary data file for input to command %@", scriptAndArgs);
+            return nil;
+        }
+    }
+    
     ProcessRunner *task   = [ProcessRunner task];
     task.launchPath  = @"/bin/bash";
-    task.inputString = input;
 
-    NSString* commandFile = [ self _createTempCommandFileWithContents:scriptAndArgs shell:task.launchPath ];
+    NSString* commandFile = [ self _createTempFileWithContents:scriptAndArgs shell:task.launchPath ];
 
     if (commandFile && [commandFile length])
     {
         TRACE_LOG(@"Input = %@", input);
         DEBUG_LOG(@"Created temporary command file %@ for command %@", commandFile, scriptAndArgs );
-
+        
         if (input == nil)
         {
             [task.arguments addObject:commandFile];
@@ -162,11 +175,12 @@ NSString* expandTabs(NSString* inStr);
 }
 
 
+static NSString* commandSuffix = @".command";
+static NSString* dataSuffix = @".txt";
 
-+(NSString*)_createTempCommandFileWithContents:(NSString*)contents shell:(NSString *)shell
++(NSString*)_createTempFileWithContents:(NSString*)contents shell:(NSString *)shell
 {
-    static NSString* commandSuffix = @".command";
-    NSString *tempFileTemplate     = [@"xvim.XXXXXX" stringByAppendingString:commandSuffix];
+    NSString *tempFileTemplate     = [@"xvim.XXXXXX" stringByAppendingString:(shell?commandSuffix:dataSuffix)];
     NSString *tempFilePath    = [NSTemporaryDirectory () stringByAppendingPathComponent:tempFileTemplate];
     const char *tempFileTemplateCString = [tempFilePath fileSystemRepresentation];
     char *tempFileNameCString = (char *)malloc(strlen(tempFileTemplateCString) + 1);
@@ -180,7 +194,7 @@ NSString* expandTabs(NSString* inStr);
     }
 
     NSFileHandle* fh  = AUTORELEASE([[NSFileHandle alloc] initWithFileDescriptor:fileDescriptor closeOnDealloc:NO]);
-    NSString* command = [ NSString stringWithFormat:@"#!%@\n%@\n", shell,contents];
+    NSString* command = shell ? [ NSString stringWithFormat:@"#!%@\n%@\n", shell,contents] : contents;
     [ fh writeData:[ command dataUsingEncoding:NSUTF8StringEncoding]];
     [ fh closeFile ];
 
@@ -191,7 +205,8 @@ NSString* expandTabs(NSString* inStr);
 
     NSError* error     = nil;
 
-    if (![ fileManager setAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithShort:0700] forKey:NSFilePosixPermissions] ofItemAtPath:filePath error:&error ])
+    // If this is a shell command, try to turn on execute file permissions for the temp file
+    if (shell && ![ fileManager setAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithShort:0700] forKey:NSFilePosixPermissions] ofItemAtPath:filePath error:&error ])
     {
         ERROR_LOG(@"Could not set execute permissions on temporary file for command. Error code = %lu, reason = %@", [error code], [ error localizedDescription ]);
         return nil;

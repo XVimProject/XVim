@@ -84,7 +84,7 @@ CHAllocateCopyString(NSString *str) {
     [environment addEntriesFromDictionary:[[NSProcessInfo processInfo] environment]];
 }
 
-
+static const int EXEC_FAILED=122; // as in os_unix.c
 
 - (BOOL)launchUsingPty:(BOOL)usePty
 {
@@ -199,8 +199,9 @@ CHAllocateCopyString(NSString *str) {
         if (usePty)
         {
             setsid();
+		    signal(SIGHUP, SIG_IGN);
             ioctl(slavefd, TIOCSCTTY, NULL);
-            ioctl(slavefd, TIOCNOTTY, NULL);
+            ioctl(slavefd, TIOCNOTTY, NULL); // Controlling TTY
             char envbuf[50];
             setenv("TERM", "dumb", 1);
             sprintf((char *)envbuf, "%hd", ptySize.ws_row);
@@ -211,6 +212,7 @@ CHAllocateCopyString(NSString *str) {
             setenv("COLUMNS", (char *)envbuf, 1);
 
             close(masterfd);
+            dup2(slavefd, STDIN_FILENO);
             dup2(slavefd, STDOUT_FILENO);
             dup2(slavefd, STDERR_FILENO);
             close(slavefd);
@@ -228,11 +230,8 @@ CHAllocateCopyString(NSString *str) {
         execvp(executablePath, (char * const *)argumentsArray);
 
         // execve failed for some reason, try to quit gracefullyish
-        _exit(0);
+        _exit(EXEC_FAILED);
 
-        // Uh oh, we shouldn't be here
-        abort();
-        return NO;
     }
     else
     if (p == -1)
@@ -278,7 +277,7 @@ CHAllocateCopyString(NSString *str) {
 
     if (inputData)
     {
-        [processInputFileHandleWrite writeData:inputData];
+        [ processInputFileHandleWrite writeData:inputData];
         [ processInputFileHandleWrite closeFile ];
     }
 
