@@ -10,6 +10,8 @@
 
 @interface XVimQuickFixView : NSScrollView
 @property (nonatomic,assign) NSTextView* textView;
+@property (nonatomic,readonly) NSUInteger colWidth;
 
+-(void)setString:(NSString*)str withPrompt:(NSString*)prompt;
 @end
 extern NSString* XVimNotificationQuickFixDidComplete ;

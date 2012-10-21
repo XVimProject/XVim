@@ -67,7 +67,7 @@ NSString* expandTabs(NSString* inStr);
 
 
 
-+(NSString*) runScript:(NSString*)scriptAndArgs withInput:(NSString*)input withTimeout:(NSTimeInterval)timeout
++(NSString*) runScript:(NSString*)scriptAndArgs withInput:(NSString*)input withTimeout:(NSTimeInterval)timeout runDirectory:(NSString*)rundir colWidth:(NSUInteger)colWidth
 {
     // If we have no input, then this is a 'rangeless' bang command, and we will display the output
     // in the quickfix window, which should behave something like a terminal.
@@ -97,12 +97,14 @@ NSString* expandTabs(NSString* inStr);
     
     ProcessRunner *task   = [ProcessRunner task];
     task.launchPath  = @"/bin/bash";
+    task.workingDirectory = rundir ? rundir : @"/";
+    task.outputColWidth = colWidth;
 
     NSString* commandFile = [ self _createTempFileWithContents:scriptAndArgs shell:task.launchPath ];
 
     if (commandFile && [commandFile length])
     {
-        TRACE_LOG(@"Input = %@", input);
+        //TRACE_LOG(@"Input = %@", input);
         DEBUG_LOG(@"Created temporary command file %@ for command %@", commandFile, scriptAndArgs );
         
         if (input == nil)
@@ -149,7 +151,7 @@ NSString* expandTabs(NSString* inStr);
         ERROR_LOG(@"Could not create temporary command file for command %@", scriptAndArgs );
     }
 
-    TRACE_LOG(@"Output = %@", returnString);
+    //TRACE_LOG(@"Output = %@", returnString);
 
     return outputReceived ? returnString : nil;
 
@@ -157,7 +159,7 @@ NSString* expandTabs(NSString* inStr);
 
 +(NSString*)runScript:(NSString *)scriptName withInput:(NSString *)input
 {
-    return [ self runScript:scriptName withInput:input withTimeout:0 ];
+    return [ self runScript:scriptName withInput:input withTimeout:0 runDirectory:@"/" colWidth:80 ];
 }
 
 
@@ -171,7 +173,7 @@ NSString* expandTabs(NSString* inStr);
 
 +(NSString*)runScript:(NSString *)scriptName withTimeout:(NSTimeInterval)timeout
 {
-    return [ self runScript:scriptName withInput:nil withTimeout:timeout ];
+    return [ self runScript:scriptName withInput:nil withTimeout:timeout runDirectory:@"/" colWidth:80 ];
 }
 
 

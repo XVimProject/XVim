@@ -16,6 +16,7 @@
 - (void)setArgumentString:(NSString*)string;
 - (void)errorMessage:(NSString*)string;
 - (void)quickFixWithString:(NSString*)string;
+- (NSUInteger)quickFixColWidth;
 - (void)didFrameChanged:(NSNotification*)notification;
 
 - (XVimCommandField*)commandField;

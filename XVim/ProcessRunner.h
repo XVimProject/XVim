@@ -48,6 +48,7 @@ typedef unsigned TaskitWaitMask;
     NSTimeInterval timeoutSinceOutput;
     
     NSInteger priority;
+    NSUInteger outputColWidth ;
 }
 
 + (id)task;
@@ -63,6 +64,8 @@ typedef unsigned TaskitWaitMask;
 @property (copy) NSData *input;
 @property (copy) NSString *inputString;
 @property (copy) NSString *inputPath;
+
+@property (assign) NSUInteger outputColWidth; // Only for PTY mode
 
 @property (assign) NSInteger priority;
 

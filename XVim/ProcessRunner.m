@@ -23,6 +23,7 @@
 @synthesize arguments;
 @synthesize environment;
 @synthesize workingDirectory;
+@synthesize outputColWidth;
 
 @synthesize input;
 @synthesize inputString;
@@ -55,6 +56,7 @@
 
     arguments   = [[NSMutableArray alloc] init];
     environment = [[NSMutableDictionary alloc] init];
+    outputColWidth = 100;
 
     self.workingDirectory = [[NSFileManager defaultManager] currentDirectoryPath];
 
@@ -145,6 +147,7 @@ static const int EXEC_FAILED=122; // as in os_unix.c
     // -------------------
 
     struct winsize ptySize = { 999, 100, 0, 0 };
+    ptySize.ws_col = self.outputColWidth;
 
     if (usePty)
     {
@@ -226,6 +229,7 @@ static const int EXEC_FAILED=122; // as in os_unix.c
             close(STDERR_FILENO);
         }
 
+        [[NSFileManager defaultManager] changeCurrentDirectoryPath:self.workingDirectory ];
 
         execvp(executablePath, (char * const *)argumentsArray);
 

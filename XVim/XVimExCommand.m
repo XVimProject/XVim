@@ -23,7 +23,8 @@
 @synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
 @interface XVimExCommand()
--(void)_expandTokens:(XVimExArg*) arg contextDict:(NSDictionary*)ctx;
+-(void)_expandSpecialExTokens:(XVimExArg*) arg contextDict:(NSDictionary*)ctx;
+-(NSString*)_altFilename:(NSString*)filename;
 
 @end
 // Maximum time in seconds for a 'bang' command to run before being killed as taking too long
@@ -933,12 +934,25 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         DEBUG_LOG(@"Selected line range = %@", NSStringFromRange(window.sourceView.selectedLineRange));
     }
 
-    NSDictionary* contextForExCmd = [ NSDictionary dictionaryWithObjectsAndKeys:
-                                     @"BLAHHASH", @"#"
-                                     , [[ window.sourceView documentURL ] path], @"%"
-                                     , nil];
-    [ self _expandTokens:args contextDict:contextForExCmd];
-    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg withInput:selectedText withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS ];
+    NSURL* documentURL = [ window.sourceView documentURL ];
+    NSString* runDir   = @"/";
+
+    if ([documentURL isFileURL])
+    {
+        NSString* documentPath = [documentURL path];
+        runDir = [[documentURL URLByDeletingLastPathComponent] path];
+        NSDictionary* contextForExCmd = [ NSDictionary dictionaryWithObjectsAndKeys :
+                                          [ self _altFilename:documentPath ], @"#"
+                                          , documentPath ?             documentPath : @"", @"%"
+                                          , nil];
+        [ self _expandSpecialExTokens:args contextDict:contextForExCmd];
+    }
+
+    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg
+                                              withInput:selectedText
+                                            withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS
+                                           runDirectory:runDir
+                                               colWidth:window.commandLine.quickFixColWidth];
 
     if (scriptReturn != nil)
     {
@@ -1069,10 +1083,33 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     [NSApp sendAction:sel  to:nil from:self];
 }
 
+// Really rubbish way of getting the alt filename
+-(NSString*)_altFilename:(NSString *)filename
+{
+    if (!filename)
+    {
+        return @"";
+    }
+    NSString* extension = [ filename pathExtension ];
+    if (!extension || [extension length]==0)
+    {
+        return @"";
+    }
+    if ([extension isEqualToString:@"m"] || [extension isEqualToString:@"mm"] || [extension isEqualToString:@"c"] )
+    {
+        return [[filename stringByDeletingPathExtension] stringByAppendingPathExtension:@"h" ];
+    }
+    else if ([extension isEqualToString:@"h"])
+    {
+        return [[filename stringByDeletingPathExtension] stringByAppendingPathExtension:@"m" ];
+    }
+    return @"";
+    
+}
 
 // Expands special ex command 'tokens', as described in cmdline-special of the vim docs
 // :., :~, :s and :gs are not supported yet
--(void)_expandTokens:(XVimExArg *)arg contextDict:(NSDictionary *)ctx
+-(void)_expandSpecialExTokens:(XVimExArg *)arg contextDict:(NSDictionary *)ctx
 {
     NSError*error=nil;
     NSRegularExpression* regex = [ NSRegularExpression regularExpressionWithPattern:@"(%|#)(:p|:~|:h|:r|:t|:e|:\\.)*"

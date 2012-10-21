@@ -134,9 +134,12 @@
 	}
 }
 
+static NSString* QuickFixPrompt = @"Press a key to continue...";
+
 -(void)quickFixWithString:(NSString*)string
 {
 	if( string && [string length] != 0 ){
+        // Set up observation to close the quickfix window when a key is pressed, or it loses focus
         __block XVimCommandLine* this = self;
         _quickFixObservation = [ [ NSNotificationCenter defaultCenter ] addObserverForName:XVimNotificationQuickFixDidComplete
                                                              object:_quickFixScrollView
@@ -144,22 +147,8 @@
                                                          usingBlock:^(NSNotification *note) {
                                                              [this quickFixWithString:nil ];
                                                          }];
-        DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
-        NSDictionary* quickFixTrailingAttributes = [ NSDictionary dictionaryWithObjectsAndKeys:
-                                                    [NSColor greenColor], NSForegroundColorAttributeName
-                                                    , nil];
-        NSDictionary* consoleAttributes = [ NSDictionary dictionaryWithObjectsAndKeys:
-                                                    [theme consoleDebuggerOutputTextColor], NSForegroundColorAttributeName
-                                                    , nil];
-        
-        NSAttributedString* quickFixTrailingPrompt = [[ NSAttributedString alloc] initWithString:@"\nPress a key..." attributes:quickFixTrailingAttributes ];
-        NSAttributedString* attrStr = [[NSAttributedString alloc] initWithString:string attributes:consoleAttributes];
-		[[_quickFixScrollView.textView textStorage ] setAttributedString:attrStr ];
-        [_quickFixScrollView.textView setTypingAttributes:quickFixTrailingAttributes];
-        [[_quickFixScrollView.textView textStorage] appendAttributedString:quickFixTrailingPrompt ];
-        [quickFixTrailingPrompt release];
-        [attrStr release];
-		[_quickFixScrollView setHidden:NO];
+        [ _quickFixScrollView setString:string withPrompt:QuickFixPrompt];
+		[ _quickFixScrollView setHidden:NO ];
         [ self layoutCmdline:[self superview]];
         [[_quickFixScrollView window] performSelector:@selector(makeFirstResponder:) withObject:_quickFixScrollView.textView afterDelay:0 ];
         [_quickFixScrollView.textView performSelector:@selector(scrollToEndOfDocument:) withObject:self afterDelay:0 ];
@@ -169,6 +158,11 @@
 		[_quickFixScrollView setHidden:YES];
         [ self layoutCmdline:[self superview]];
 	}
+}
+
+-(NSUInteger)quickFixColWidth
+{
+    return _quickFixScrollView.colWidth;
 }
 
 - (XVimCommandField*)commandField
@@ -204,6 +198,7 @@
 	[_error setFont:sourceFont];
     [_quickFixScrollView.textView setBackgroundColor:[theme consoleTextBackgroundColor]];
 	[_quickFixScrollView.textView setFont:[theme consoleExecutableOutputTextFont]];
+	[_quickFixScrollView.textView setTypingAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[theme consoleDebuggerOutputTextColor], NSForegroundColorAttributeName, nil] ];
 	
 	CGFloat argumentSize = MIN(frame.size.width, 100);
     

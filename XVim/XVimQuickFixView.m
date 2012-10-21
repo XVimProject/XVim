@@ -11,11 +11,15 @@
 
 NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidComplete" ;
 
-@interface XVimQuickFixTextView : NSTextView
+@interface XVimQuickFixTextView : NSTextView {
+    CGFloat _quickFixEmWidthPixels;
+}
+@property (readonly) CGFloat emWidth;
 @end
 
 @implementation XVimQuickFixView
 @dynamic textView;
+@dynamic colWidth;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -52,9 +56,28 @@ NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidCom
     return self;
 }
 
+-(void)setString:(NSString*)str withPrompt:(NSString*)prompt
+{
+    NSDictionary* quickFixTrailingAttributes = [ NSDictionary dictionaryWithObjectsAndKeys:
+                                                    [NSColor greenColor], NSForegroundColorAttributeName
+                                                    , nil];
+    NSAttributedString* quickFixTrailingPrompt = [[ NSAttributedString alloc] initWithString:prompt attributes:quickFixTrailingAttributes ];
+    NSAttributedString* attrStr = [[NSAttributedString alloc] initWithString:str attributes:[self.textView typingAttributes]];
+    [[self.textView textStorage ] setAttributedString:attrStr ];
+    [self.textView setTypingAttributes:quickFixTrailingAttributes];
+    [[self.textView textStorage] appendAttributedString:quickFixTrailingPrompt ];
+    [quickFixTrailingPrompt release];
+    [attrStr release];
+}
+
 -(NSTextView*)textView
 {
     return [ self documentView];
+}
+
+-(NSUInteger)colWidth
+{
+    return NSWidth([ self.textView bounds ])/ [(XVimQuickFixTextView*)[self textView] emWidth];
 }
 
 -(BOOL)acceptsFirstResponder
@@ -65,6 +88,20 @@ NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidCom
 static const unichar USEFUL_KEYS[]={NSUpArrowFunctionKey,NSDownArrowFunctionKey,NSPageUpFunctionKey,NSPageDownFunctionKey, 0};
 
 @implementation XVimQuickFixTextView
+@dynamic emWidth;
+
+
+-(CGFloat)emWidth
+{
+    return _quickFixEmWidthPixels ;
+}
+
+-(void)setFont:(NSFont *)obj
+{
+    NSSize emSize = [ @"m" sizeWithAttributes:[NSDictionary dictionaryWithObjectsAndKeys:obj, NSFontAttributeName, nil]];
+    _quickFixEmWidthPixels = emSize.width ;
+    [super setFont:obj];
+}
 
 -(void)keyDown:(NSEvent *)theEvent
 {
