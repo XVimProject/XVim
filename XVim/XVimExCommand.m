@@ -938,11 +938,13 @@
 		
 		[subStrings addObject:string];
 	}
-		
-	if (subStrings.count == 2)
+  
+	if (subStrings.count >= 2)
 	{
 		NSString *fromString = [subStrings objectAtIndex:0];
-		NSString *toString = [subStrings objectAtIndex:1];
+    
+    [subStrings removeObjectAtIndex:0];
+		NSString *toString = [subStrings componentsJoinedByString:@" "]; // get all args seperate by space
 		
 		NSMutableArray *fromKeyStrokes = [[NSMutableArray alloc] init];
 		[XVimKeyStroke fromString:fromString to:fromKeyStrokes];

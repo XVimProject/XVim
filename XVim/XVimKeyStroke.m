@@ -337,8 +337,8 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 		map(@"RIGHT", 63235);
 		map(@"FORWARD_DELETE", 63272);
 		
-		// Between space and del (non-inclusive), add ascii names
-		for (int i = 33; i < 127; ++i)
+		// From space to del (non-inclusive), add ascii names
+		for (int i = 32; i < 127; ++i)
 		{
 			unichar c = i;
 			NSString *string = [NSString stringWithCharacters:&c length:1];
