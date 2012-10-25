@@ -65,7 +65,7 @@ Visual block mode is currently not supported.
 
 ## Search and Replace
 
-/, ?, #, *, g*, g#, :s, n, N
+/, ?, #, \*, g*, g#, :s, n, N
 
 Regex search is supported using the ICU regex format.
 
