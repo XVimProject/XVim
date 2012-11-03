@@ -225,10 +225,12 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)beginMouseEvent:(NSEvent*)event {
+    TRACE_LOG(@"Event:%@", event.description);
 	_handlingMouseEvent = YES;
 }
 
 - (void)endMouseEvent:(NSEvent*)event {
+    TRACE_LOG(@"Event:%@", event.description);
 	_handlingMouseEvent = NO;
 	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
 	[self willSetEvaluator:next];
@@ -236,6 +238,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)mouseDown:(NSEvent *)event{
+    TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
     TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
@@ -245,6 +248,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)mouseUp:(NSEvent *)event{
+    TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
     TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );

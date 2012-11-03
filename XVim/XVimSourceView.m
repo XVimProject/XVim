@@ -14,7 +14,7 @@
  * So evaluators should NOT directly operate on DVTSourceTextView.
  */
 
-#define LOG_STATE TRACE_LOG(@"_view.range loc:%d len:%d | mode %d | ip %d | begin %d | areaS %d | areaE %d", \
+#define LOG_STATE() TRACE_LOG(@"_view.range loc:%d len:%d | mode %d | ip %d | begin %d | areaS %d | areaE %d", \
                             [_view selectedRange].location, \
                             [_view selectedRange].length,  \
                             _selectionMode,            \
@@ -28,6 +28,7 @@
 	__weak NSTextView *_view;
 }
 - (NSRange)_currentSelection;
+- (void)_setSelectedRange:(NSRange)range;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
 @end
@@ -40,14 +41,14 @@
 @synthesize selectionMode = _selectionMode;
 @synthesize preservedColumn = _preservedColumn;
 
-- (id)initWithView:(NSView*)view {
+- (id)initWithView:(NSTextView*)view {
 	if (self = [super init]) {
 		_view = (NSTextView*)view;
-        _selectionBegin = NSNotFound;
-        _selectionAreaStart = NSNotFound;
-        _selectionAreaEnd = NSNotFound;
-        _selectionMode = MODE_VISUAL_NONE;
         _insertionPoint = [_view selectedRange].location + [_view selectedRange].length;
+        _selectionMode = MODE_VISUAL_NONE;
+        _selectionBegin = _insertionPoint;
+        _selectionAreaStart = _insertionPoint;
+        _selectionAreaEnd = _insertionPoint;
 	}
 	return self;
 }
@@ -55,7 +56,7 @@
 ////////////////
 // Properties //
 ////////////////
-- (NSView*)view {
+- (NSTextView*)view {
 	return _view;
 }
     
@@ -95,6 +96,9 @@
     NSUInteger tmpPos = NSNotFound;
     XVimWordInfo info;
     switch (motion.motion) {
+        case MOTION_NONE:
+            // Do nothing
+            break;
         case MOTION_FORWARD:
             nextPos = [self next:current count:motion.count option:motion.option];
             break;
@@ -126,9 +130,10 @@
             }
             break;
         case MOTION_END_OF_LINE:
-            nextPos = [self endOfLine:current];
-            if( nextPos != NSNotFound){
-                nextPos = current;
+            tmpPos = [self nextLine:current column:_preservedColumn count:motion.count-1 option:MOTION_OPTION_NONE];
+            nextPos = [self endOfLine:tmpPos];
+            if( nextPos == NSNotFound){
+                nextPos = tmpPos;
             }
             break;
         case MOTION_SENTENCE_FORWARD:
@@ -199,22 +204,22 @@
     
     _insertionPoint = pos;
     if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
-        _selectionBegin = NSNotFound;
-        _selectionAreaStart = NSNotFound;
-        _selectionAreaEnd = NSNotFound;
-        [_view setSelectedRange:NSMakeRange(_insertionPoint,0)];
+        _selectionBegin = _insertionPoint;
+        _selectionAreaStart = _insertionPoint;
+        _selectionAreaEnd = _insertionPoint;
+        [self _setSelectedRange:NSMakeRange(_insertionPoint,0)];
     }
     else { // its in selecting mode
         if( _selectionMode == MODE_CHARACTER){
             _selectionAreaStart = MIN(_insertionPoint,_selectionBegin);
             _selectionAreaEnd = MAX(_insertionPoint,_selectionBegin);
-            [_view setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart)];
+            [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
         }else if(_selectionMode == MODE_LINE ){
             NSUInteger min = MIN(_insertionPoint,_selectionBegin);
             NSUInteger max = MAX(_insertionPoint,_selectionBegin);
             _selectionAreaStart = [self firstOfLine:min];
-            _selectionAreaEnd = [self tailOfLine:max];
-            [_view setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart)];
+            _selectionAreaEnd = [self tailOfLine:max]+1;
+            [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
         }else if( _selectionMode == MODE_BLOCK){
             // Find Out Block Rect
             // We have to compare the line number and column number of start and end postion of selection.
@@ -237,31 +242,23 @@
             // For each line select the area (columnBegi,columnEnd) unless it does not excceds tail of line.
             // NASelectionArray seems to be definded in Xcode but can't find it in Cocoa library... make it manually.
             // This is an argument of setSelectedRanges method.
-            NSRange* ranges = malloc((bottom-top+1) * sizeof(NSRange));
-            NSUInteger count = 0;
+            NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
             for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
                 NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
                 if( maxColumn != NSNotFound && maxColumn >= left){ // Only when the line has a column inside the rect add the range
                     NSUInteger start = [self positionAtLineNumber:top+i column:left];
                     NSUInteger end = [self positionAtLineNumber:top+i column:right];
-                    ranges[count].location = start;
-                    ranges[count].length = end - start + 1;
-                    count++;
+                    [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, end-start+1)]];;
                 }
             }
-            if( 0 == count ){
-                DEBUG_LOG(@"Something wrong. There must be at lease one range in ranges");
-            }
-            id rangeArray = [[[NSClassFromString(@"NSSelectionArray") alloc] initWithRanges:ranges count:count] autorelease];
-            [(DVTSourceTextView*)_view setSelectedRanges:rangeArray affinity:1 stillSelecting:YES];
-            free(ranges);
+            [_view setSelectedRanges:rangeArray];
         }
     }
     
     if( !preserve ){
         _preservedColumn = [self columnNumber:_insertionPoint];
     }
-    [(DVTSourceTextView*)_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
+    [_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
 }
 
 ////////// Top level operation interface/////////
@@ -269,6 +266,7 @@
     switch( motion.motion ){
         case MOTION_LINE_BACKWARD:
         case MOTION_LINE_FORWARD:
+            // TODO: Preserve column option can be included in motion object
             [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:YES];
             break;
         default:
@@ -279,11 +277,33 @@
 }
 
 - (void)delete:(XVimMotion*)motion{
+    if( _insertionPoint == 0 && [[self string] length] == 0 ){
+        return ;
+    }
+    // TODO: Handle special cases like "dw" crossing lines
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        NSRange r;
+        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        BOOL eof = [self isEOF:to];
+        BOOL eol = [self isEOL:to];
+        BOOL blank = [self isBlankLine:to];
+        BOOL last = [self isLastCharacter:to];
+        BOOL exclusive = motion.type == CHARACTERWISE_EXCLUSIVE;
+        if(_selectionBegin == to && (((eol || last) && exclusive) || eof)){
+            // edge case:
+            // if the motion is linewise and the last line will be deleted
+            // delete the current line even though it's "behind us" (sort of)
+            // this is vi behavior.
+            r = NSMakeRange(eof && blank ? _selectionBegin - 1 : _selectionBegin , 1);
+        }else{
+                r = [self getOperationRangeFrom:_selectionBegin To:to Type:motion.type];
+        }
+        [self _setSelectedRange:r];
+    }
     
-}
-
-- (void)deleteLines:(XVimMotion*)motion{
-    
+    [_view delete:self];
+    _insertionPoint = [_view selectedRange].location;
+    [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)yunk:(XVimMotion*)motion{
@@ -316,6 +336,32 @@
 
 - (void)shiftLeft:(XVimMotion*)motion{
     
+}
+
+- (void)insertNewlineBelow{
+    NSUInteger l = _insertionPoint;
+    // TODO: Use _insertionPoint to move cursor
+    NSUInteger tail = [self tailOfLine:l];
+    [[self view] setSelectedRange:NSMakeRange(tail,0)];
+    [[self view] insertNewline:self];
+}
+
+- (void)insertNewlineAbove{
+    NSUInteger l = _insertionPoint;
+    NSUInteger head = [self headOfLine:l];
+    if( NSNotFound == head ){
+        head = l;
+    }
+    if( 0 != head ){
+        // TODO: Use _insertionPoint to move cursor
+        [[self view] setSelectedRange:NSMakeRange(head-1,0)];
+        [[self view] insertNewline:self];
+    }else{
+        // TODO: Use _insertionPoint to move cursor
+        [[self view] setSelectedRange:NSMakeRange(head,0)];
+        [[self view] insertNewline:self];
+        [[self view] setSelectedRange:NSMakeRange(0,0)];
+    }
 }
 
 ////////// Premitive Operations ///////////
@@ -772,20 +818,46 @@
 }
 
 - (NSRange)selectedRange {
-    LOG_STATE;
+    LOG_STATE();
     return NSMakeRange(_insertionPoint, 0);
 }
 
+// _setSelectedRange is an internal method
+// This is used when you want to call [_view setSelectedRrange];
+// The difference is that this checks the bounds(range can not be include EOF) and protect from Assersion
+- (void)_setSelectedRange:(NSRange)range{
+    LOG_STATE();
+    TRACE_LOG( @"Range %d,%d", range.location, range.length);
+    if( [self isEOF:range.location] ){
+        [_view setSelectedRange:NSMakeRange(range.location,0)];
+        return;
+    }
+    if( 0 == range.length ){
+        // No need to check bounds
+    }else{
+        NSUInteger lastIndex = range.location + range.length - 1;
+        if( [self isEOF:lastIndex] ){
+            range.length--;
+        }else{
+            // No need to change the selection area
+        }
+    }
+    [_view setSelectedRange:range];
+    LOG_STATE();
+}
+
 - (void)setSelectedRange:(NSRange)range {
-    LOG_STATE;
+    LOG_STATE();
     @try{
         [self moveCursor:range.location];
-        //[_view setSelectedRange:range];
-        _insertionPoint = range.location + range.length;
+        if( 0 != range.length ){
+            [self startSelection:MODE_CHARACTER];
+            [self moveCursor:range.location + range.length];
+        }
     }@catch (NSException *exception) {
         ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
     }
-    LOG_STATE;
+    LOG_STATE();
 }
 
 @end

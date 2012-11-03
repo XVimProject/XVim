@@ -42,15 +42,15 @@ typedef enum _OPERATION_OPTION{
 // Top Level Operation Interface
 - (void)move:(XVimMotion*)motion;
 - (void)delete:(XVimMotion*)motion;
-- (void)deleteLines:(XVimMotion*)motion;
 - (void)yunk:(XVimMotion*)motion;
-- (void)yunkLines:(XVimMotion*)motion;
 - (void)swapCase:(XVimMotion*)motion; // Previously this is named "toggleCase" in XVim
 - (void)makeLowerCase:(XVimMotion*)motion; // Previously this is named "lowerCase" in XVim
 - (void)makeUpperCase:(XVimMotion*)motion; // Previously this is named "lowerCase" in XVim
 - (void)filter:(XVimMotion*)motion;
 - (void)shiftRight:(XVimMotion*)motion;
 - (void)shiftLeft:(XVimMotion*)motion;
+- (void)insertNewlineBelow;
+- (void)insertNewlineAbove;
 
 // Premitive Operations ( Avoid using following. Consider use or make Top Level Operation Interface instead )
 - (void)moveBack:(NSUInteger)count option:(MOTION_OPTION)opt;

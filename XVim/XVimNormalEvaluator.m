@@ -189,8 +189,11 @@
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
+    XVimMotion* m= XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
+    [view delete:m];
+    return nil;
+    /*
     NSRange range = [view selectedRange];
-    NSUInteger count = [self numericArg];
     NSString *text = [view string];
     NSUInteger to = range.location;
     for (; to < text.length && count > 0; ++to) {
@@ -232,6 +235,7 @@
         [view setSelectedRange:NSMakeRange(range.location, 0)];
     }
     return nil;
+     */
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -322,30 +326,13 @@
 
 - (XVimEvaluator*)o:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
-    NSUInteger l = [view selectedRange].location;
-    NSUInteger tail = [view tailOfLine:l];
-    [view setSelectedRange:NSMakeRange(tail,0)];
-    [view insertNewline];
+    [view insertNewlineBelow];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
 - (XVimEvaluator*)O:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
-    NSUInteger l = [view selectedRange].location;
-    NSUInteger head = [view headOfLine:l];
-    if( NSNotFound == head ){
-        head = l;
-    }
-    if( 0 != head ){
-        [view setSelectedRange:NSMakeRange(head-1,0)];
-        [view insertNewline];
-    }else{
-        
-        [view setSelectedRange:NSMakeRange(head,0)];
-        [view insertNewline];
-        NSUInteger prev = [view prevLine:[view selectedRange].location column:0 count:1 option:MOTION_OPTION_NONE];
-        [view setSelectedRange:NSMakeRange(prev,0)];
-    }
+    [view insertNewlineAbove];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 

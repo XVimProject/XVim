@@ -20,6 +20,4 @@
 	   operatorAction:(XVimOperatorAction*)action 
 		   withParent:(XVimEvaluator*)parent;
 
-- (XVimEvaluator*)w:(XVimWindow*)window;
-- (XVimEvaluator*)W:(XVimWindow*)window;
 @end

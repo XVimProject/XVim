@@ -21,8 +21,8 @@
 // The following macros asserts the range of index.
 // WITH_EOF permits the index at EOF position.
 // WITHOUT_EOF doesn't permit the index at EOF position.
-#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string" )
-#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string - 1" )
+#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string.   TextLength:%lu   SpecifiedIndex:%lu", [[self string] length], x)
+#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string - 1 TextLength:%lu   SpecifiedIndex:%lu", [[self string] length], x)
 
 // Some methods assume that "index" is at valid cursor position in Normal mode.
 // See isValidCursorPosition's description the condition of the valid cursor position.
@@ -36,8 +36,7 @@
 @implementation XVimSourceView(Vim)
 
 
-- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister
-{
+- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister {
 	[self cutText];
 	[self adjustCursorPosition];
     [[XVim instance] onDeleteOrYank:xregister];
@@ -1074,24 +1073,39 @@
 }
 
 - (NSRange)getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+    if( [[self string] length] == 0 ){
+        NSMakeRange(0,0); // No range
+    }
+    
     if( from > to ){
         NSUInteger tmp = from;
         from = to;
         to = tmp;
     }
+    // EOF can not be included in operation range.
+    if( [self isEOF:from] ){
+        return NSMakeRange(from, 0); // from is EOF but the length is 0 means EOF will not be included in the returned range.
+    }
+    if( [self isEOF:to] ){
+        to--; // Note that we already know that "to" is not 0 so not chekcing if its 0.
+    }
+    
+    // At this point "from" and "to" is not EOF
     
     if( type == CHARACTERWISE_EXCLUSIVE ){
+        // to will not be included.
+        to--;
     }else if( type == CHARACTERWISE_INCLUSIVE ){
-		to++;
+        // Nothing special
     }else if( type == LINEWISE ){
-        to = [self tailOfLine:to] + 1;
+        to = [self tailOfLine:to]; // Never returns EOF position because to is not EOF
         NSUInteger head = [self headOfLine:from];
         if( NSNotFound != head ){
-            from = head; 
+            from = head;
         }
     }
 	
-	return NSMakeRange(from, to - from);
+	return NSMakeRange(from, to - from + 1); // Inclusive range
 }
 
 - (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {

@@ -153,24 +153,15 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
-														 insertModeAtCompletion:NO];	
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithContext:[self contextCopy]
-																   operatorAction:action 
-																	   withParent:self
-														   insertModeAtCompletion:NO];
-    return [evaluator motionFixedFrom:[window sourceView].selectionAreaStart To:[window sourceView].selectionAreaEnd Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    [[window sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
+    return nil;
 }
 
 
+
 - (XVimEvaluator*)D:(XVimWindow*)window{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
-														 insertModeAtCompletion:NO];	
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithContext:[self contextCopy]
-																   operatorAction:action 
-																	   withParent:self
-														   insertModeAtCompletion:NO];
-    return [evaluator motionFixedFrom:[window sourceView].selectionAreaStart To:[window sourceView].selectionAreaEnd Type:LINEWISE inWindow:window];
+    [[window sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
+    return nil;
 }
 
 - (XVimEvaluator*)g:(XVimWindow*)window

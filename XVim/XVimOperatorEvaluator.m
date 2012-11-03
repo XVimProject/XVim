@@ -85,6 +85,8 @@
 	return eval;
 }
 
+
+/*
 - (XVimEvaluator*)w:(XVimWindow*)window{
     XVimWordInfo info;
     NSUInteger from = [[window sourceView] selectedRange].location;
@@ -106,7 +108,8 @@
         return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
     }
 }
-
+*/
+ 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if([keyStroke instanceResponds:self] || keyStroke.isNumeric){
         TRACE_LOG(@"REGISTER_APPEND");

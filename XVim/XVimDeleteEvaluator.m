@@ -47,9 +47,8 @@
     if ([self numericArg] < 1) 
         return nil;
     
-    XVimSourceView* view = [window sourceView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+    return [self _motionFixed:m inWindow:window];
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
@@ -61,14 +60,15 @@
     
     if ([self numericArg] < 1) 
         return nil;
-        
-    XVimSourceView* view = [window sourceView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+    
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+    return [self _motionFixed:m inWindow:window];
 }
 
 
+// TODO: Support Change word special cases
 
+/*
 - (XVimEvaluator*)w:(XVimWindow*)window{
     if( _insertModeAtCompletion ){ 
         // cw is special case of word motion
@@ -108,23 +108,35 @@
         return [super W:window];
     }
 }
+ */
 
 - (XVimEvaluator*)j:(XVimWindow*)window{
-    XVimSourceView *view = [window sourceView];
-    NSUInteger from = [view selectedRange].location;
-    NSUInteger to = [view nextLine:from column:[view columnNumber:from] count:[self numericArg] option:MOTION_OPTION_NONE];
-
-    return [self _motionFixedFrom:from To:to Type:LINEWISE inWindow:window];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]);
+    return [self _motionFixed:m inWindow:window];
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
-    XVimSourceView *view = [window sourceView];
-    NSUInteger to = [view selectedRange].location;
-    NSUInteger from = [view prevLine:to column:[view columnNumber:to] count:[self numericArg] option:MOTION_OPTION_NONE];
-
-    return [self _motionFixedFrom:from To:to Type:LINEWISE inWindow:window];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]);
+    return [self _motionFixed:m inWindow:window];
 }
 
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window {
+    //TODO: yunk to register
+    [[window sourceView] delete:motion];
+    //[[window sourceView] deleteTextIntoYankRegister: _yankRegister];
+    
+    if (_insertModeAtCompletion == TRUE) {
+        // Do not repeat the insert, that is how vim works so for
+        // example 'c3wWord<ESC>' results in Word not WordWordWord
+        if( motion.type == LINEWISE ){
+            // 'cc' deletes the lines but need to keep the last newline.
+            // So insertNewline as 'O' does before entering insert mode
+            [[window sourceView] insertNewlineAbove];
+        }
+        return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
+    }
+    return nil;
+}
 
 @end
 
@@ -135,9 +147,7 @@
 @end
 
 @implementation XVimDeleteAction
-- (id)initWithYankRegister:(XVimRegister*)xregister
-	insertModeAtCompletion:(BOOL)insertModeAtCompletion
-{
+- (id)initWithYankRegister:(XVimRegister*)xregister insertModeAtCompletion:(BOOL)insertModeAtCompletion {
 	if (self = [super init])
 	{
 		_insertModeAtCompletion = insertModeAtCompletion;
@@ -146,9 +156,10 @@
 	return self;
 }
 
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     XVimSourceView* view = [window sourceView];
+    [view deleteTextIntoYankRegister:_yankRegister];
     
     BOOL eof = [view isEOF:to];
     BOOL eol = [view isEOL:to];

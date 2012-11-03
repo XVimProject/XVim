@@ -10,9 +10,10 @@
 #import "XVimMotionType.h"
 #import "XVimMotionOption.h"
 
-#define XVIM_MAKE_MOTION(MO,TY,OP,CT) [[[XVimMotion alloc] initWithMotion:MO type:TY option:OP count:CT] autorelease]
+#define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
 
 typedef enum _MOTION{
+    MOTION_NONE,                    
     MOTION_FORWARD,                 // l
     MOTION_BACKWARD,                // h
     MOTION_WORD_FORWARD,            // w,W

@@ -34,11 +34,10 @@
 @property(readonly) VISUAL_MODE selectionMode;
 @property(readonly) NSString* string;
 
-
-- (id)initWithView:(NSView*)view; // TODO: may be this shoulde NSTextView
+- (id)initWithView:(NSTextView*)view; // TODO: may be this shoulde NSTextView
 
 // Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
-- (NSView*)view;
+- (NSTextView*)view;
 
 // Selection ( DO NOT USE IN NEWLY CREATED CODE (except in XVimWindow class))
 - (NSRange)selectedRange;
@@ -49,6 +48,7 @@
 - (void)moveBackward;
 - (void)moveToBeginningOfLine;
 - (void)moveToEndOfLine;
+
 
 // NSTextView functions (Do not use following methods)
 - (void)copyText;
