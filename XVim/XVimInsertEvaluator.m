@@ -73,6 +73,7 @@
 - (void)becameHandlerInWindow:(XVimWindow*)window{
 	[super becameHandlerInWindow:window];
     self.startRange = [[window sourceView] selectedRange];
+    [[window sourceView] setCursorMode:CURSOR_MODE_INSERT];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window

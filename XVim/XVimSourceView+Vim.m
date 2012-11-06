@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+#import "Logger.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
@@ -156,6 +157,7 @@
  * This method may changes selected range of the view.
  **/
 - (void)adjustCursorPosition{
+    METHOD_TRACE_LOG();
     // If the current cursor position is not valid for normal mode move it.
     if( ![self isValidCursorPosition:[self selectedRange].location] ){
         NSRange currentRange = [self selectedRange];

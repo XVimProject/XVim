@@ -257,6 +257,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)mouseDragged:(NSEvent *)event{
+    TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
     TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );

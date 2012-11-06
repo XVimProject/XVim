@@ -22,7 +22,13 @@
  
  **/
 
+typedef enum {
+    CURSOR_MODE_INSERT,
+    CURSOR_MODE_COMMAND
+}CURSOR_MODE;
+
 @interface XVimSourceView : NSObject <XVimTextViewProtocol>
+@property(readonly) NSString* string;
 @property(readonly) NSUInteger insertionPoint;
 @property(readonly) NSUInteger insertionColumn;
 @property(readonly) NSUInteger insertionPreservedColumn;
@@ -32,9 +38,9 @@
 @property(readonly) NSUInteger selectionAreaEnd;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) VISUAL_MODE selectionMode;
-@property(readonly) NSString* string;
+@property CURSOR_MODE cursorMode;
 
-- (id)initWithView:(NSTextView*)view; // TODO: may be this shoulde NSTextView
+- (id)initWithView:(NSTextView*)view;
 
 // Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
 - (NSTextView*)view;

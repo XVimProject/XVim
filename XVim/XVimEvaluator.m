@@ -37,6 +37,7 @@
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window {
+    [[window sourceView] setCursorMode:CURSOR_MODE_COMMAND];
 }
 
 - (void)willEndHandlerInWindow:(XVimWindow*)window {

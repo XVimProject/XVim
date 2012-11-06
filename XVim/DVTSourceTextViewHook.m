@@ -78,6 +78,7 @@
 }
 
 -  (void)keyDown:(NSEvent *)theEvent{
+    TRACE_LOG(@"Event:%@", theEvent.description);
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
     if( nil == window ){
@@ -97,6 +98,7 @@
 }
 
 -  (void)mouseDown:(NSEvent *)theEvent{
+    TRACE_LOG(@"Event:%@", theEvent.description);
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
     [window mouseDown:theEvent];
@@ -104,6 +106,7 @@
 }
 
 -  (void)mouseUp:(NSEvent *)theEvent{
+    TRACE_LOG(@"Event:%@", theEvent.description);
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
     [window mouseUp:theEvent];
@@ -111,6 +114,7 @@
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
+    TRACE_LOG(@"Event:%@", theEvent.description);
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
     [window mouseDragged:theEvent];
@@ -125,6 +129,7 @@
 }
 
 - (BOOL) performKeyEquivalent:(NSEvent *)theEvent{
+    TRACE_LOG(@"Event:%@", theEvent.description);
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     
     METHOD_TRACE_LOG();

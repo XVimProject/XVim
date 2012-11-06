@@ -31,6 +31,9 @@
 - (void)_setSelectedRange:(NSRange)range;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
+
+- (void)_syncStateFromView; // update our instance variables with _view's properties
+- (void)_syncState; // update _view's properties with our variables
 @end
 
 @implementation XVimSourceView
@@ -40,6 +43,7 @@
 @synthesize selectionAreaEnd = _selectionAreaEnd;
 @synthesize selectionMode = _selectionMode;
 @synthesize preservedColumn = _preservedColumn;
+@synthesize cursorMode = _cursorMode;
 
 - (id)initWithView:(NSTextView*)view {
 	if (self = [super init]) {
@@ -49,6 +53,7 @@
         _selectionBegin = _insertionPoint;
         _selectionAreaStart = _insertionPoint;
         _selectionAreaEnd = _insertionPoint;
+        _cursorMode = CURSOR_MODE_COMMAND;
 	}
 	return self;
 }
@@ -87,182 +92,15 @@
 //////////////////
 // Operations   //
 //////////////////
+
+////////// Top level operation interface/////////
+
 - (void)moveCursor:(NSUInteger)pos{
     [self _moveCursor:pos preserveColumn:NO];
 }
 
-- (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
-    NSUInteger nextPos = current;
-    NSUInteger tmpPos = NSNotFound;
-    XVimWordInfo info;
-    switch (motion.motion) {
-        case MOTION_NONE:
-            // Do nothing
-            break;
-        case MOTION_FORWARD:
-            nextPos = [self next:current count:motion.count option:motion.option];
-            break;
-        case MOTION_BACKWARD:
-            nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
-            break;
-        case MOTION_WORD_FORWARD:
-            nextPos = [self wordsForward:current count:motion.count option:motion.option info:&info];
-            break;
-        case MOTION_WORD_BACKWARD:
-            nextPos = [self wordsBackward:current count:motion.count option:motion.option];
-            break;
-        case MOTION_END_OF_WORD_FORWARD:
-            nextPos = [self endOfWordsForward:current count:motion.count option:motion.option];
-            break;
-        case MOTION_END_OF_WORD_BACKWARD:
-            nextPos = [self endOfWordsBackward:current count:motion.count option:motion.option];
-            break;
-        case MOTION_LINE_FORWARD:
-            nextPos = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];
-            break;
-        case MOTION_LINE_BACKWARD:
-            nextPos = [self prevLine:current column:_preservedColumn count:motion.count option:motion.option];
-            break;
-        case MOTION_BEGINNING_OF_LINE:
-            nextPos = [self firstOfLine:current];
-            if( nextPos == NSNotFound){
-                nextPos = current;
-            }
-            break;
-        case MOTION_END_OF_LINE:
-            tmpPos = [self nextLine:current column:_preservedColumn count:motion.count-1 option:MOTION_OPTION_NONE];
-            nextPos = [self endOfLine:tmpPos];
-            if( nextPos == NSNotFound){
-                nextPos = tmpPos;
-            }
-            break;
-        case MOTION_SENTENCE_FORWARD:
-            nextPos = [self sentencesForward:current count:motion.count option:motion.option];
-            break;
-        case MOTION_SENTENCE_BACKWARD:
-            nextPos = [self sentencesBackward:current count:motion.count option:motion.option];
-            break;
-        case MOTION_PARAGRAPH_FORWARD:
-            nextPos = [self paragraphsForward:current count:motion.count option:motion.option];
-            if( nextPos != NSNotFound){
-                nextPos = current;
-            }
-            break;
-        case MOTION_PARAGRAPH_BACKWARD:
-            nextPos = [self paragraphsBackward:current count:motion.count option:motion.option];
-            if( nextPos != NSNotFound){
-                nextPos = current;
-            }
-            break;
-        case MOTION_NEXT_FIRST_NONBLANK:
-            nextPos = [self nextLine:current column:0 count:motion.count option:motion.option];
-            tmpPos = [self nextNonBlankInALine:nextPos];
-            if( NSNotFound != tmpPos ){
-                nextPos = tmpPos;
-            }
-            break;
-        case MOTION_PREV_FIRST_NONBLANK:
-            nextPos = [self prevLine:current column:0 count:motion.count option:motion.option];
-            tmpPos = [self nextNonBlankInALine:nextPos];
-            if( NSNotFound != tmpPos ){
-                nextPos = tmpPos;
-            }
-            break;
-        case MOTION_FIRST_NONBLANK:
-            nextPos = [self headOfLineWithoutSpaces:current];
-            if( NSNotFound == nextPos ){
-                nextPos = current;
-            }
-            break;
-        case MOTION_LINENUMBER:
-            nextPos = [self positionAtLineNumber:motion.line column:0];
-            if (nextPos == NSNotFound) {
-                nextPos = [self firstOfLine:[self endOfFile]];
-            }
-            break;
-        case MOTION_LASTLINE:
-            nextPos = [self firstOfLine:[self endOfFile]];
-            break;
-        case MOTION_LINE_COLUMN:
-            nextPos = [self positionAtLineNumber:motion.line column:motion.column];
-            if( NSNotFound == nextPos ){
-                nextPos = current;
-            }
-            break;
-        case MOTION_POSITION:
-            nextPos = motion.position;
-            break;
-    }
-    return nextPos;
-}
-
-- (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
-    if( pos > [_view string].length){
-        DEBUG_LOG(@"Position specified exceeds the length of the text");
-        pos = [_view string].length;
-    }
-    
-    _insertionPoint = pos;
-    if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
-        _selectionBegin = _insertionPoint;
-        _selectionAreaStart = _insertionPoint;
-        _selectionAreaEnd = _insertionPoint;
-        [self _setSelectedRange:NSMakeRange(_insertionPoint,0)];
-    }
-    else { // its in selecting mode
-        if( _selectionMode == MODE_CHARACTER){
-            _selectionAreaStart = MIN(_insertionPoint,_selectionBegin);
-            _selectionAreaEnd = MAX(_insertionPoint,_selectionBegin);
-            [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
-        }else if(_selectionMode == MODE_LINE ){
-            NSUInteger min = MIN(_insertionPoint,_selectionBegin);
-            NSUInteger max = MAX(_insertionPoint,_selectionBegin);
-            _selectionAreaStart = [self firstOfLine:min];
-            _selectionAreaEnd = [self tailOfLine:max]+1;
-            [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
-        }else if( _selectionMode == MODE_BLOCK){
-            // Find Out Block Rect
-            // We have to compare the line number and column number of start and end postion of selection.
-            NSUInteger columnBegin = [self columnNumber:_selectionBegin];
-            NSUInteger lineBegin = [self lineNumber:_selectionBegin];
-            NSUInteger columnEnd = [self columnNumber:_insertionPoint];
-            NSUInteger lineEnd= [self lineNumber:_insertionPoint];
-            
-            // Define the block as a rect by line and column number
-            NSUInteger top = MIN(lineBegin,lineEnd);
-            NSUInteger bottom = MAX(lineBegin,lineEnd);
-            NSUInteger left = MIN(columnBegin, columnEnd);
-            NSUInteger right = MAX(columnBegin, columnEnd);
-            
-            // Set _selectionAreaStart as left-top position of the block. But we do not use them in block selection
-            _selectionAreaStart = [self positionAtLineNumber:top column:left];
-            // Set _selectionAreaEnd as right-bottom position of the block. But we do not use them in block selection
-            _selectionAreaEnd = [self positionAtLineNumber:bottom column:right];
-            
-            // For each line select the area (columnBegi,columnEnd) unless it does not excceds tail of line.
-            // NASelectionArray seems to be definded in Xcode but can't find it in Cocoa library... make it manually.
-            // This is an argument of setSelectedRanges method.
-            NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
-            for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
-                NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
-                if( maxColumn != NSNotFound && maxColumn >= left){ // Only when the line has a column inside the rect add the range
-                    NSUInteger start = [self positionAtLineNumber:top+i column:left];
-                    NSUInteger end = [self positionAtLineNumber:top+i column:right];
-                    [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, end-start+1)]];;
-                }
-            }
-            [_view setSelectedRanges:rangeArray];
-        }
-    }
-    
-    if( !preserve ){
-        _preservedColumn = [self columnNumber:_insertionPoint];
-    }
-    [_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
-}
-
-////////// Top level operation interface/////////
 - (void)move:(XVimMotion*)motion{
+    METHOD_TRACE_LOG();
     switch( motion.motion ){
         case MOTION_LINE_BACKWARD:
         case MOTION_LINE_FORWARD:
@@ -273,7 +111,6 @@
             [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:NO];
             break;
     }
-    
 }
 
 - (void)delete:(XVimMotion*)motion{
@@ -302,15 +139,13 @@
     }
     
     [_view delete:self];
-    _insertionPoint = [_view selectedRange].location;
+    _insertionPoint = _selectionAreaStart;
+    [self _syncState];
+    
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)yunk:(XVimMotion*)motion{
-    
-}
-
-- (void)yunkLines:(XVimMotion*)motion{
     
 }
 
@@ -822,6 +657,248 @@
     return NSMakeRange(_insertionPoint, 0);
 }
 
+- (void)setSelectedRange:(NSRange)range {
+    LOG_STATE();
+    @try{
+        [self moveCursor:range.location];
+        if( 0 != range.length ){
+            [self startSelection:MODE_CHARACTER];
+            [self moveCursor:range.location + range.length];
+        }
+    }@catch (NSException *exception) {
+        ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
+    }
+    LOG_STATE();
+}
+
+//////////////////////
+// Internal Methods //
+//////////////////////
+- (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
+    NSUInteger nextPos = current;
+    NSUInteger tmpPos = NSNotFound;
+    XVimWordInfo info;
+    switch (motion.motion) {
+        case MOTION_NONE:
+            // Do nothing
+            break;
+        case MOTION_FORWARD:
+            nextPos = [self next:current count:motion.count option:motion.option];
+            break;
+        case MOTION_BACKWARD:
+            nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
+            break;
+        case MOTION_WORD_FORWARD:
+            nextPos = [self wordsForward:current count:motion.count option:motion.option info:&info];
+            break;
+        case MOTION_WORD_BACKWARD:
+            nextPos = [self wordsBackward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_END_OF_WORD_FORWARD:
+            nextPos = [self endOfWordsForward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_END_OF_WORD_BACKWARD:
+            nextPos = [self endOfWordsBackward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_LINE_FORWARD:
+            nextPos = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];
+            break;
+        case MOTION_LINE_BACKWARD:
+            nextPos = [self prevLine:current column:_preservedColumn count:motion.count option:motion.option];
+            break;
+        case MOTION_BEGINNING_OF_LINE:
+            nextPos = [self firstOfLine:current];
+            if( nextPos == NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_END_OF_LINE:
+            tmpPos = [self nextLine:current column:_preservedColumn count:motion.count-1 option:MOTION_OPTION_NONE];
+            nextPos = [self endOfLine:tmpPos];
+            if( nextPos == NSNotFound){
+                nextPos = tmpPos;
+            }
+            break;
+        case MOTION_SENTENCE_FORWARD:
+            nextPos = [self sentencesForward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_SENTENCE_BACKWARD:
+            nextPos = [self sentencesBackward:current count:motion.count option:motion.option];
+            break;
+        case MOTION_PARAGRAPH_FORWARD:
+            nextPos = [self paragraphsForward:current count:motion.count option:motion.option];
+            if( nextPos != NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_PARAGRAPH_BACKWARD:
+            nextPos = [self paragraphsBackward:current count:motion.count option:motion.option];
+            if( nextPos != NSNotFound){
+                nextPos = current;
+            }
+            break;
+        case MOTION_NEXT_FIRST_NONBLANK:
+            nextPos = [self nextLine:current column:0 count:motion.count option:motion.option];
+            tmpPos = [self nextNonBlankInALine:nextPos];
+            if( NSNotFound != tmpPos ){
+                nextPos = tmpPos;
+            }
+            break;
+        case MOTION_PREV_FIRST_NONBLANK:
+            nextPos = [self prevLine:current column:0 count:motion.count option:motion.option];
+            tmpPos = [self nextNonBlankInALine:nextPos];
+            if( NSNotFound != tmpPos ){
+                nextPos = tmpPos;
+            }
+            break;
+        case MOTION_FIRST_NONBLANK:
+            nextPos = [self headOfLineWithoutSpaces:current];
+            if( NSNotFound == nextPos ){
+                nextPos = current;
+            }
+            break;
+        case MOTION_LINENUMBER:
+            nextPos = [self positionAtLineNumber:motion.line column:0];
+            if (nextPos == NSNotFound) {
+                nextPos = [self firstOfLine:[self endOfFile]];
+            }
+            break;
+        case MOTION_LASTLINE:
+            nextPos = [self firstOfLine:[self endOfFile]];
+            break;
+        case MOTION_LINE_COLUMN:
+            nextPos = [self positionAtLineNumber:motion.line column:motion.column];
+            if( NSNotFound == nextPos ){
+                nextPos = current;
+            }
+            break;
+        case MOTION_POSITION:
+            nextPos = motion.position;
+            break;
+    }
+    TRACE_LOG(@"nextPos: %u", nextPos);
+    return nextPos;
+}
+
+- (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
+    // This method only update the internal state(like _insertionPoint)
+    // syncState applies the variables to underlying _view at the end of this method.
+    
+    if( pos > [_view string].length){
+        DEBUG_LOG(@"Position specified exceeds the length of the text");
+        pos = [_view string].length;
+    }
+    
+    _insertionPoint = pos;
+    if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
+        _selectionBegin = _insertionPoint;
+        _selectionAreaStart = _insertionPoint;
+        _selectionAreaEnd = _insertionPoint;
+    }
+    else { // its in selecting mode
+        if( _selectionMode == MODE_CHARACTER){
+            _selectionAreaStart = MIN(_insertionPoint,_selectionBegin);
+            _selectionAreaEnd = MAX(_insertionPoint,_selectionBegin);
+        }else if(_selectionMode == MODE_LINE ){
+            NSUInteger min = MIN(_insertionPoint,_selectionBegin);
+            NSUInteger max = MAX(_insertionPoint,_selectionBegin);
+            _selectionAreaStart = [self firstOfLine:min];
+            _selectionAreaEnd = [self tailOfLine:max];
+        }else if( _selectionMode == MODE_BLOCK){
+            // Find Out Block Rect
+            // We have to compare the line number and column number of start and end postion of selection.
+            NSUInteger columnBegin = [self columnNumber:_selectionBegin];
+            NSUInteger lineBegin = [self lineNumber:_selectionBegin];
+            NSUInteger columnEnd = [self columnNumber:_insertionPoint];
+            NSUInteger lineEnd= [self lineNumber:_insertionPoint];
+            
+            // Define the block as a rect by line and column number
+            NSUInteger top = MIN(lineBegin,lineEnd);
+            NSUInteger bottom = MAX(lineBegin,lineEnd);
+            NSUInteger left = MIN(columnBegin, columnEnd);
+            NSUInteger right = MAX(columnBegin, columnEnd);
+            
+            // Set _selectionAreaStart as left-top position of the block. But we do not use them in block selection
+            _selectionAreaStart = [self positionAtLineNumber:top column:left];
+            // Set _selectionAreaEnd as right-bottom position of the block. But we do not use them in block selection
+            _selectionAreaEnd = [self positionAtLineNumber:bottom column:right];
+            
+        }
+    }
+    
+    if( !preserve ){
+        _preservedColumn = [self columnNumber:_insertionPoint];
+    }
+    
+    [self _syncState];
+}
+
+- (void)_syncStateFromView{
+    // TODO: handle block selection (if selectedRanges have multiple ranges )
+    NSRange r = [_view selectedRange];
+    if( r.length == 0 ){
+        _selectionMode = MODE_VISUAL_NONE;
+        _insertionPoint = r.location;
+        _selectionBegin = _insertionPoint;
+        _selectionAreaStart = _insertionPoint;
+        _selectionAreaEnd = _insertionPoint;
+    }else{
+        _selectionMode = MODE_CHARACTER;
+        NSSelectionAffinity affinity = [_view selectionAffinity];
+        if( affinity == NSSelectionAffinityDownstream ){
+            _selectionBegin = r.location;
+            _selectionAreaStart = _selectionBegin;
+            _insertionPoint = r.location + r.length - 1;
+            _selectionAreaEnd = _insertionPoint;
+        }else{
+            _selectionBegin = r.location + r.length - 1;
+            _selectionAreaStart = _selectionBegin;
+            _insertionPoint = r.location;
+            _selectionAreaEnd = _insertionPoint;
+        }
+    }
+    
+    // Apply it back to _view
+    [self _syncState];
+}
+
+/**
+ * Applies internal state to underlying view (_view).
+ * This update _view's property and applies the visual effect on it.
+ * All the state need to express Vim is held by this class and
+ * we use _view to express it visually.
+ **/
+- (void)_syncState{
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        [self _setSelectedRange:NSMakeRange(_insertionPoint,0)];
+    }else if( _selectionMode == MODE_CHARACTER ){
+        [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
+    }else if( _selectionMode == MODE_LINE ){
+        [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
+    }else if( _selectionMode == MODE_BLOCK ){
+        // Define the block as a rect by line and column number
+        NSUInteger top = [self lineNumber:_selectionAreaStart];
+        NSUInteger bottom = [self lineNumber:_selectionAreaEnd];
+        NSUInteger left = [self columnNumber:_selectionAreaStart];
+        NSUInteger right = [self columnNumber:_selectionAreaEnd];
+        NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
+        for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
+            NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
+            if( maxColumn != NSNotFound && maxColumn >= left){ // Only when the line has a column inside the rect add the range
+                NSUInteger start = [self positionAtLineNumber:top+i column:left];
+                NSUInteger end = [self positionAtLineNumber:top+i column:right];
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, end-start+1)]];;
+            }
+        }
+        [_view setSelectedRanges:rangeArray];
+    }
+    
+    if( _cursorMode == CURSOR_MODE_COMMAND ){
+        [self adjustCursorPosition];
+    }
+    [_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
+}
+
 // _setSelectedRange is an internal method
 // This is used when you want to call [_view setSelectedRrange];
 // The difference is that this checks the bounds(range can not be include EOF) and protect from Assersion
@@ -846,18 +923,5 @@
     LOG_STATE();
 }
 
-- (void)setSelectedRange:(NSRange)range {
-    LOG_STATE();
-    @try{
-        [self moveCursor:range.location];
-        if( 0 != range.length ){
-            [self startSelection:MODE_CHARACTER];
-            [self moveCursor:range.location + range.length];
-        }
-    }@catch (NSException *exception) {
-        ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
-    }
-    LOG_STATE();
-}
 
 @end
