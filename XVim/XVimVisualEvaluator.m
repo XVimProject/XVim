@@ -3,6 +3,7 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
+#import "XVimInsertEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
@@ -143,13 +144,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)c:(XVimWindow*)window{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
-														 insertModeAtCompletion:YES];	
-    XVimDeleteEvaluator *evaluator = [[XVimDeleteEvaluator alloc] initWithContext:[self contextCopy]
-																   operatorAction:action 
-																	   withParent:self
-														   insertModeAtCompletion:YES];
-    return [evaluator motionFixedFrom:[window sourceView].selectionAreaStart To:[window sourceView].selectionAreaEnd Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [[window sourceView] delete:m];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[self contextCopy]] autorelease];
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{

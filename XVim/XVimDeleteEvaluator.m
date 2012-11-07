@@ -26,11 +26,7 @@
 				  withParent:(XVimEvaluator*)parent
 	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
 {
-	if (self = [super initWithContext:context
-					   operatorAction:operatorAction 
-								  withParent:parent
-				])
-	{
+	if (self = [super initWithContext:context operatorAction:operatorAction withParent:parent]){
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}
 	return self;
@@ -140,6 +136,7 @@
 
 @end
 
+/*
 @interface XVimDeleteAction() {
 	__weak XVimRegister* _yankRegister;
 	BOOL _insertModeAtCompletion;
@@ -209,3 +206,4 @@
 }
 
 @end
+*/

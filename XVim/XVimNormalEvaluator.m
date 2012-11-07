@@ -120,10 +120,9 @@
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
 - (XVimEvaluator*)c:(XVimWindow*)window{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
-														 insertModeAtCompletion:TRUE];
+	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:TRUE];
     return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"c"]
-										 operatorAction:action 
+										 operatorAction:nil
 											 withParent:self
 								 insertModeAtCompletion:TRUE];
 }
@@ -179,11 +178,10 @@
 }
 
 - (XVimEvaluator*)d:(XVimWindow*)window{
-	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
-														 insertModeAtCompletion:NO];	
+	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:NO];
     return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"d"]
-										 operatorAction:action 
-											 withParent:self
+										 operatorAction:nil
+                                             withParent:self
 								 insertModeAtCompletion:FALSE];
 }
 

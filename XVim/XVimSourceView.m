@@ -122,25 +122,22 @@
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
         BOOL eof = [self isEOF:to];
-        BOOL eol = [self isEOL:to];
+        //BOOL eol = [self isEOL:to];
         BOOL blank = [self isBlankLine:to];
-        BOOL last = [self isLastCharacter:to];
-        BOOL exclusive = motion.type == CHARACTERWISE_EXCLUSIVE;
-        if(_selectionBegin == to && (((eol || last) && exclusive) || eof)){
-            // edge case:
-            // if the motion is linewise and the last line will be deleted
-            // delete the current line even though it's "behind us" (sort of)
-            // this is vi behavior.
-            r = NSMakeRange(eof && blank ? _selectionBegin - 1 : _selectionBegin , 1);
-        }else{
-                r = [self getOperationRangeFrom:_selectionBegin To:to Type:motion.type];
+        //BOOL last = [self isLastCharacter:to];
+        //BOOL exclusive = motion.type == CHARACTERWISE_EXCLUSIVE;
+        r = [self getOperationRangeFrom:_selectionBegin To:to Type:motion.type];
+        if( motion.type == LINEWISE && blank && eof){
+            if( r.location != 0 ){
+                r.location--;
+                r.length++;
+            }
         }
         [self _setSelectedRange:r];
     }
     
     [_view delete:self];
-    _insertionPoint = _selectionAreaStart;
-    [self _syncState];
+    [self _syncStateFromView];
     
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
