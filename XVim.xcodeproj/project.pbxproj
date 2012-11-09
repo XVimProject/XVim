@@ -687,7 +687,6 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
-				SDKROOT = macosx;
 			};
 			name = Debug;
 		};
@@ -710,7 +709,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				SDKROOT = macosx;
 			};
 			name = Release;
 		};
@@ -731,7 +729,6 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
-				SDKROOT = macosx.internal;
 				USER_HEADER_SEARCH_PATHS = "$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins $(DEVELOPER_DIR)/Library/PrivateFrameworks $(inherited) $(DEVELOPER_DIR)/../Frameworks $(DEVELOPER_DIR)/../SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
@@ -752,7 +749,6 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
-				SDKROOT = macosx.internal;
 				USER_HEADER_SEARCH_PATHS = "$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins $(DEVELOPER_DIR)/Library/PrivateFrameworks $(inherited) $(DEVELOPER_DIR)/../Frameworks $(DEVELOPER_DIR)/../SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
