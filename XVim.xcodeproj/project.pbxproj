@@ -735,12 +735,10 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					/Developer/Library/Xcode/PrivatePlugins,
-					/Developer/Library/PrivateFrameworks,
-					/Developer/Applications/Xcode.app/Contents/Frameworks,
-					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Applications/Xcode.app/Contents/Frameworks,
+					"$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins",
+					"$(DEVELOPER_DIR)/Library/PrivateFrameworks",
+					"$(DEVELOPER_DIR)/../SharedFrameworks",
+					"$(DEVELOPER_DIR)/../Frameworks",
 				);
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -749,7 +747,8 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
-				USER_HEADER_SEARCH_PATHS = "/Developer/Library/Xcode/PrivatePlugins /Developer/Library/PrivateFrameworks $(inherited) /Developer/Applications/Xcode.app/Contents/Frameworks /Developer/Applications/Xcode.app/Contents/SharedFrameworks /Applications/Xcode.app/Contents/Frameworks /Applications/Xcode.app/Contents/SharedFrameworks";
+				SDKROOT = macosx.internal;
+				USER_HEADER_SEARCH_PATHS = "$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins $(DEVELOPER_DIR)/Library/PrivateFrameworks $(inherited) $(DEVELOPER_DIR)/../Frameworks $(DEVELOPER_DIR)/../SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Debug;
@@ -759,10 +758,8 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
-					/Developer/Applications/Xcode.app/Contents/Frameworks,
-					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Applications/Xcode.app/Contents/Frameworks,
+					"$(DEVELOPER_DIR)/../Frameworks",
+					"$(DEVELOPER_DIR)/../SharedFrameworks",
 				);
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -771,7 +768,8 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
-				USER_HEADER_SEARCH_PATHS = "/Developer/Library/Xcode/PrivatePlugins /Developer/Library/PrivateFrameworks $(inherited) /Developer/Applications/Xcode.app/Contents/Frameworks /Developer/Applications/Xcode.app/Contents/SharedFrameworks /Applications/Xcode.app/Contents/Frameworks /Applications/Xcode.app/Contents/SharedFrameworks";
+				SDKROOT = macosx.internal;
+				USER_HEADER_SEARCH_PATHS = "$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins $(DEVELOPER_DIR)/Library/PrivateFrameworks $(inherited) $(DEVELOPER_DIR)/../Frameworks $(DEVELOPER_DIR)/../SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
 			name = Release;
