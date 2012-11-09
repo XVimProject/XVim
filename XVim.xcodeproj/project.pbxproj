@@ -285,10 +285,6 @@
 		A2B4BAAD14D59F6600D817B0 = {
 			isa = PBXGroup;
 			children = (
-				A216F3A7156565AA00AD2529 /* DVTKit.framework */,
-				A216F3A8156565AB00AD2529 /* DVTFoundation.framework */,
-				A216F3A31565658E00AD2529 /* IDEFoundation.framework */,
-				A216F3A41565658E00AD2529 /* IDEKit.framework */,
 				A2C4E78F14E7EA0B00751199 /* Support */,
 				A2F41B0F14D70BD000A0314F /* Debug */,
 				A2B4BAC114D59F6600D817B0 /* XVim */,
@@ -300,6 +296,10 @@
 		A2B4BABA14D59F6600D817B0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A216F3A7156565AA00AD2529 /* DVTKit.framework */,
+				A216F3A8156565AB00AD2529 /* DVTFoundation.framework */,
+				A216F3A31565658E00AD2529 /* IDEFoundation.framework */,
+				A216F3A41565658E00AD2529 /* IDEKit.framework */,
 				A2B4BABB14D59F6600D817B0 /* Cocoa.framework */,
 				A2B4BABD14D59F6600D817B0 /* Other Frameworks */,
 			);
@@ -669,14 +669,6 @@
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = YES;
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					/Developer/Library/Xcode/PrivatePlugins,
-					/Developer/Library/PrivateFrameworks,
-					/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Applications/Xcode.app/Contents/Frameworks,
-					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
-				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -708,14 +700,6 @@
 				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				FRAMEWORK_SEARCH_PATHS = (
-					/Developer/Library/Xcode/PrivatePlugins,
-					/Developer/Library/PrivateFrameworks,
-					/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Applications/Xcode.app/Contents/Frameworks,
-					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
-					/Developer/Applications/Xcode.app/Contents/SharedFrameworks,
-				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
