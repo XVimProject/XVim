@@ -69,6 +69,12 @@ typedef struct _XVimWordInfo{
     BOOL findEndOfWord;
 }XVimWordInfo;
 
+typedef enum {
+    XVimSortOptionReversed              = 1,
+    XVimSortOptionRemoveDuplicateLines  = 1 << 1,
+    XVimSortOptionNumericSort           = 1 << 2,
+    XVimSortOptionIgnoreCase            = 1 << 3
+} XVimSortOptions;
 
 @interface XVimSourceView(Vim)
 
@@ -301,5 +307,8 @@ unichar characterAtIndex(NSStringHelper*, NSInteger index);
 - (void)toggleCaseForRange:(NSRange)range;
 - (void)uppercaseRange:(NSRange)range;
 - (void)lowercaseRange:(NSRange)range;
+
+// Sorting
+- (void)sortLinesInRange:(NSRange)range withOptions:(XVimSortOptions)options;
 
 @end
