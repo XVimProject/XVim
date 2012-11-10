@@ -34,7 +34,7 @@
 @property(readonly) NSUInteger selectionAreaEnd;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) VISUAL_MODE selectionMode;
-@property CURSOR_MODE cursorMode;
+@property(readonly) CURSOR_MODE cursorMode;
 
 - (id)initWithView:(NSTextView*)view;
 

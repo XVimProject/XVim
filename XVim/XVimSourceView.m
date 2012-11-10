@@ -1,6 +1,7 @@
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
+#import "DVTSourceTextViewHook.h"
 #import "DVTKit.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
@@ -93,6 +94,12 @@
 //////////////////
 
 ////////// Top level operation interface/////////
+
+- (void)escapeFromInsert{
+    _cursorMode = CURSOR_MODE_COMMAND;
+    [self _syncState];
+    _preservedColumn = [self columnNumber:_insertionPoint];
+}
 
 - (void)moveCursor:(NSUInteger)pos{
     [self _moveCursor:pos preserveColumn:NO];
@@ -197,7 +204,37 @@
     [self _syncStateFromView];
 }
 
-////////// Premitive Operations ///////////
+- (void)append{
+    NSAssert(_cursorMode == CURSOR_MODE_COMMAND, @"_cursorMode shoud be CURSOR_MODE_COMMAND");
+    _cursorMode = CURSOR_MODE_INSERT;
+    if( ![self isEOF:_insertionPoint] && ![self isNewLine:_insertionPoint]){
+        _insertionPoint++;
+    }
+    [self insert];
+}
+
+- (void)insert{
+    _cursorMode = CURSOR_MODE_INSERT;
+    [self _syncState];
+}
+
+- (void)appendAtEndOfLine{
+    _cursorMode = CURSOR_MODE_INSERT;
+    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self _moveCursor:[self tailOfLine:_insertionPoint] preserveColumn:NO];
+}
+
+- (void)insertBeforeFirstNonBlank{
+    _insertionPoint = [self firstNonBlankInALine:_insertionPoint];
+    [self insert];
+}
+
+- (void)passThroughKeyDown:(NSEvent*)event{
+    [(DVTSourceTextView*)_view keyDown_:event];
+    [self _syncStateFromView];
+}
+
+////////// Premitive Operations (DO NOT USE THESE CODE!)///////////
 - (void)moveBack:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self prev:_insertionPoint count:count option:opt];
     [self moveCursor:nextPos];
@@ -658,11 +695,16 @@
 - (void)setSelectedRange:(NSRange)range {
     LOG_STATE();
     @try{
-        [self moveCursor:range.location];
+        _insertionPoint = range.location;
+        _selectionAreaStart = _insertionPoint;
+        _selectionBegin = _insertionPoint;
+        _selectionAreaEnd = _insertionPoint;
         if( 0 != range.length ){
-            [self startSelection:MODE_CHARACTER];
-            [self moveCursor:range.location + range.length];
+            _selectionAreaStart = _insertionPoint;
+            _selectionBegin = _insertionPoint;
+            _selectionAreaEnd = range.location + range.length - 1;
         }
+        [self _syncState];
     }@catch (NSException *exception) {
         ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
     }

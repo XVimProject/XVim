@@ -73,7 +73,6 @@
 - (void)becameHandlerInWindow:(XVimWindow*)window{
 	[super becameHandlerInWindow:window];
     self.startRange = [[window sourceView] selectedRange];
-    [[window sourceView] setCursorMode:CURSOR_MODE_INSERT];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
@@ -189,17 +188,6 @@
     }
     [sourceView hideCompletions];
 	
-	// Set selection to one-before-where-we-were
-	NSUInteger insertionPoint = [window insertionPoint];
-	NSUInteger headOfLine = [sourceView headOfLine:insertionPoint];
-	if (insertionPoint > 0
-		&& headOfLine != insertionPoint && headOfLine != NSNotFound
-		&& !_oneCharMode)
-	{
-		--insertionPoint;
-	}
-	[sourceView setSelectedRange:NSMakeRange(insertionPoint, 0)];
-	
 	NSRange r = [[window sourceView] selectedRange];
 	NSValue *v =[NSValue valueWithRange:r];
 	[[window getLocalMarks] setValue:v forKey:@"."];
@@ -226,7 +214,7 @@
             NSRange save = [[window sourceView] selectedRange];
             for (NSUInteger i = 0; i < [self numericArg]; ++i) {
                 [[window sourceView] deleteForward];
-                [[window sourceView] keyDown:event];
+                [[window sourceView] passThroughKeyDown:event];
                 
                 save.location += 1;
                 [[window sourceView] setSelectedRange:save];
@@ -235,7 +223,7 @@
             [[window sourceView] setSelectedRange:save];
             nextEvaluator = nil;
         } else if ([self windowShouldReceive:keySelector]) {
-            [[window sourceView] keyDown:event];
+            [[window sourceView] passThroughKeyDown:event];
         }
     }
     return nextEvaluator;
@@ -248,15 +236,16 @@
 }
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window{
+    [[window sourceView] escapeFromInsert];
     return nil;
 }
 
 - (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window{
-    return nil;
+    return [self ESC:window];
 }
 
 - (XVimEvaluator*)C_c:(XVimWindow*)window{
-    return nil;
+    return [self ESC:window];
 }
 
 - (XVimEvaluator*)Up:(XVimWindow*)window{

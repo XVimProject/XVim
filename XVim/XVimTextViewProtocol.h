@@ -33,14 +33,17 @@ typedef enum {
 @property(readonly) NSUInteger selectionAreaStart;
 @property(readonly) NSUInteger selectionAreaEnd;
 @property(readonly) VISUAL_MODE selectionMode;
-@property           CURSOR_MODE cursorMode;
+@property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) NSString* string;
 
+// Selection Mode
 - (void)startSelection:(VISUAL_MODE)mode;
 - (void)endSelection;
 - (void)changeSelectionMode:(VISUAL_MODE)mode;
 
+// Insert or Command
+- (void)escapeFromInsert;
 
 // Top Level Operation Interface
 - (void)move:(XVimMotion*)motion;
@@ -54,6 +57,13 @@ typedef enum {
 - (void)shiftLeft:(XVimMotion*)motion;
 - (void)insertNewlineBelow;
 - (void)insertNewlineAbove;
+
+- (void)append;
+- (void)insert;
+- (void)appendAtEndOfLine;
+- (void)insertBeforeFirstNonBlank;
+
+- (void)passThroughKeyDown:(NSEvent*)event;
 
 // Premitive Operations ( Avoid using following. Consider use or make Top Level Operation Interface instead )
 - (void)moveBack:(NSUInteger)count option:(MOTION_OPTION)opt;

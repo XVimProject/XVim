@@ -87,26 +87,13 @@
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a:(XVimWindow*)window{
-    // if we are at the end of a line. the 'a' acts like 'i'. it does not start inserting on
-    // next line. it appends to the current line
-    // A cursor should not be on the new line break letter in Vim(Except empty line).
-    // So the root solution is to prohibit a cursor be on the newline break letter.
-    XVimSourceView* view = [window sourceView];
-    NSRange begin = [view selectedRange];
-    NSUInteger idx = begin.location;
-    if (!([view isEOF:idx] || [view isNewLine:idx]))
-	{
-		[view moveForward];
-    } 
+    [[window sourceView] append];
 	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
 - (XVimEvaluator*)A:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
-    NSRange r = [view selectedRange];
-    NSUInteger end = [view tailOfLine:r.location];
-    [view setSelectedRange:NSMakeRange(end,0)];
-    [view scrollTo:[window insertionPoint]];
+    [view appendAtEndOfLine];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
@@ -254,7 +241,7 @@
 }
 
 - (XVimEvaluator*)I:(XVimWindow*)window{
-    [[window sourceView] moveToBeginningOfLine];
+    [[window sourceView] insertBeforeFirstNonBlank];
     return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
 }
 
