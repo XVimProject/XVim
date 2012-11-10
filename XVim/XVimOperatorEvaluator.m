@@ -24,25 +24,19 @@
 
 @implementation XVimOperatorEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-	   operatorAction:(XVimOperatorAction*) action 
-				  withParent:(XVimEvaluator*)parent
-{
-	if (self = [super initWithContext:context])
-	{
+- (id)initWithContext:(XVimEvaluatorContext*)context operatorAction:(XVimOperatorAction*) action withParent:(XVimEvaluator*)parent{
+	if (self = [super initWithContext:context]){
 		self->_operatorAction = action;
 		self->_parent = parent;
 	}
 	return self;
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window{
 	return [_parent drawRect:rect inWindow:window];
 }
 
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window{
 	return [_parent shouldDrawInsertionPointInWindow:window];
 }
 
@@ -50,13 +44,11 @@
     return 0.5;
 }
 
-- (NSString*)modeString
-{
+- (NSString*)modeString{
 	return [_parent modeString];
 }
 
-- (BOOL)isRelatedTo:(XVimEvaluator*)other
-{
+- (BOOL)isRelatedTo:(XVimEvaluator*)other{
 	return [super isRelatedTo:other] || other == _parent;
 }
 
@@ -64,52 +56,21 @@
     return [_parent withNewContext];
 }
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
 	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
 }
 
 - (XVimEvaluator*)a:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"]
-															operatorAction:_operatorAction 
-																	   withParent:_parent
-																		inclusive:YES];
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] operatorAction:_operatorAction withParent:_parent inclusive:YES];
 	return eval;
 }
 
 - (XVimEvaluator*)i:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"]
-															operatorAction:_operatorAction 
-																	   withParent:_parent
-																		inclusive:NO];
+    XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] operatorAction:_operatorAction withParent:_parent inclusive:NO];
 	return eval;
 }
 
 
-/*
-- (XVimEvaluator*)w:(XVimWindow*)window{
-    XVimWordInfo info;
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
-    if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
-        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
-    } else {
-        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-    }
-}
-
-- (XVimEvaluator*)W:(XVimWindow*)window{
-    XVimWordInfo info;
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
-    if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
-        return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
-    } else {
-        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-    }
-}
-*/
- 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if([keyStroke instanceResponds:self] || keyStroke.isNumeric){
         TRACE_LOG(@"REGISTER_APPEND");
@@ -120,9 +81,7 @@
     return REGISTER_IGNORE;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window{
 	return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
 }
-
 @end
