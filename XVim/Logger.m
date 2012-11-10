@@ -97,7 +97,8 @@ static Logger* s_defaultLogger = nil;
     va_copy(args2, args);
     
     // Write to stderr
-    NSLogv(fmt, args);
+    NSString *s = [[[NSString alloc] initWithFormat:fmt arguments:args] autorelease];
+    printf("%s\n", [[s stringByReplacingOccurrencesOfString:@"%%" withString:@"%%%%"] UTF8String]);
     
     // Write to file
     if( nil != _logFile) {

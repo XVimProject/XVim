@@ -2,7 +2,6 @@
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
 #import "DVTSourceTextViewHook.h"
-#import "DVTKit.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 
