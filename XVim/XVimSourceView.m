@@ -31,7 +31,6 @@
 - (void)_setSelectedRange:(NSRange)range;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
-
 - (void)_syncStateFromView; // update our instance variables with _view's properties
 - (void)_syncState; // update _view's properties with our variables
 @end
@@ -194,6 +193,8 @@
         [[self view] insertNewline:self];
         [[self view] setSelectedRange:NSMakeRange(0,0)];
     }
+    
+    [self _syncStateFromView];
 }
 
 ////////// Premitive Operations ///////////

@@ -15,8 +15,12 @@
  * Text views want to communicate with XVim handlers(evaluators) must implement this protocol.
  **/
 
+typedef enum {
+    CURSOR_MODE_INSERT,
+    CURSOR_MODE_COMMAND
+}CURSOR_MODE;
 
-typedef enum _OPERATION_OPTION{
+typedef enum {
     OPTION_NONE,
 }OPERATION_OPTION;
 
@@ -29,6 +33,7 @@ typedef enum _OPERATION_OPTION{
 @property(readonly) NSUInteger selectionAreaStart;
 @property(readonly) NSUInteger selectionAreaEnd;
 @property(readonly) VISUAL_MODE selectionMode;
+@property           CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) NSString* string;
 
@@ -36,8 +41,6 @@ typedef enum _OPERATION_OPTION{
 - (void)endSelection;
 - (void)changeSelectionMode:(VISUAL_MODE)mode;
 
-// Direct Motion
-- (void)moveCursor:(NSUInteger)pos; // Avoid using this method. This is here only for compatibility reason
 
 // Top Level Operation Interface
 - (void)move:(XVimMotion*)motion;
@@ -63,6 +66,9 @@ typedef enum _OPERATION_OPTION{
 - (void)moveSentencesBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsForward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
+
+// Direct Motion
+- (void)moveCursor:(NSUInteger)pos; // Avoid using this method. This is here only for compatibility reason
 
 // Case changes. These functions are all range checked.
 - (void)toggleCase;

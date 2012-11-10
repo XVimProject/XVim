@@ -22,10 +22,6 @@
  
  **/
 
-typedef enum {
-    CURSOR_MODE_INSERT,
-    CURSOR_MODE_COMMAND
-}CURSOR_MODE;
 
 @interface XVimSourceView : NSObject <XVimTextViewProtocol>
 @property(readonly) NSString* string;
