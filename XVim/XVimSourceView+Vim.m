@@ -9,6 +9,7 @@
 #import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
 #import "XVim.h"
+#import "DVTKit.h"
 
 /////////////////////////
 // support methods     //
@@ -273,6 +274,29 @@
         }
     }
     return NSNotFound;
+}
+
+/**
+ *Find and return an NSArray* with the placeholders in a current line.
+ * the placeholders are returned as NSValue* objects that encode NSRange structs.
+ * Returns an empty NSArray if there are no placeholders on the line.
+ */
+-(NSArray*)placeholdersInLine:(NSUInteger)position{
+    NSMutableArray* placeholders = [[NSMutableArray alloc] initWithCapacity:2];
+    NSUInteger p = [self headOfLine:position];
+    
+    for(NSUInteger curPos = p; curPos < [[self string] length]; curPos++){
+        NSRange retval = [(DVTCompletingTextView*)[self view] rangeOfPlaceholderFromCharacterIndex:curPos forward:YES wrap:NO limit:50];
+        if(retval.location != NSNotFound){
+            curPos = retval.location + retval.length;
+            [placeholders addObject:[NSValue valueWithRange:retval]];
+        }
+        if ([self isEOL:curPos] || [self isEOF:curPos]) {
+            return [placeholders autorelease];
+        }
+    }
+    
+    return [placeholders autorelease];
 }
 
 /**
@@ -761,77 +785,35 @@
     return pos;
 }
 
-
-// From the index start look forward or back wards to find the end or start of the placeholder boundary
-// note this does not do anything other that find the position of the < or the > that demarcates the placeholder
-// return NSNotFound if unsucessful or current character is not the beginning or end of a placeholder.
--(NSUInteger) findPlaceholderBoundaryFromIndex:(NSUInteger)index forward:(BOOL)forward{
-    NSUInteger curPlace = index;
-    // search forward through the string to find the closing #> but only if it starts with <#
-    NSLog(@"char: %c", charat(curPlace));
-    if(forward && charat(curPlace) == '<'){
-        // return if this is not a placeholder token
-        if(charat(++curPlace) != '#'){ return NSNotFound; }
-        
-        // if we are not at the eof and not at the eol
-        while(true){
-            if([self isEOF:curPlace] || [self isEOL:curPlace]) return NSNotFound;
-            if(charat(curPlace) == '#' ){
-                if([self isEOL:++curPlace]) return NSNotFound;
-                if([self isEOF:curPlace]) return NSNotFound;
-                
-                if(charat(curPlace) == '>'){
-                    return curPlace;
-                }else{
-                    ++curPlace;
-                    continue; //not a placeholder
-                }
-            }
-            
-            ++curPlace;
-        }
-    }else if (!forward && charat(curPlace) == '>'){
-        if(charat(--curPlace) != '#'){ return NSNotFound; }
-        while(true){
-            if([self isEOF:curPlace] || [self isEOL:curPlace] || curPlace == 0){ return NSNotFound; }
-            if(charat(curPlace) == '#' ){
-                if([self isEOL:--curPlace]) return NSNotFound;
-                if([self isEOL:curPlace]) return NSNotFound;
-                
-                if(charat(curPlace) == '<'){
-                    return curPlace;
-                }else{
-                    --curPlace;
-                    continue; //not a placeholder
-                }
-            }
-            
-            --curPlace;
-        }
-    }
-    
-    return NSNotFound;
-}
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( 1 >= index )
         return 0;
-    NSUInteger indexBoundary;
+    NSUInteger indexBoundary = NSNotFound;
     NSUInteger pos = index-1;
     unichar lastChar = [[self string] characterAtIndex:pos];
+    NSArray* placeholdersInLine = [self placeholdersInLine:pos];
     
     for(NSUInteger i = pos-1 ; ; i-- ){
         // Each time we encounter head of a word decrement "counter".
         // Remember blankline is a word
-        
-        unichar curChar = [[self string] characterAtIndex:i];
-        
-        //check the character if it might be the start of a placeholder before doing a more intensive search.
-        if(lastChar == '>'){
-            indexBoundary = [self findPlaceholderBoundaryFromIndex:i+1 forward:NO];
-        }else{
-            indexBoundary = NSNotFound;
+        indexBoundary = NSNotFound;
+        for (NSUInteger currentPlaceholders = 0; currentPlaceholders < [placeholdersInLine count]; currentPlaceholders++) {
+            NSValue* currentRange;
+            NSUInteger lowIndex, highIndex;
+            
+            //get the range returned from the placeholderinline function
+            currentRange = (NSValue*)[placeholdersInLine objectAtIndex:currentPlaceholders];
+            lowIndex = [currentRange rangeValue].location;
+            highIndex = [currentRange rangeValue].location + [currentRange rangeValue].length;
+            
+            // check if we are in the placeholder boundary and if we are we should break and count it as a word.
+            if(i >= lowIndex && i <= highIndex){
+                indexBoundary = lowIndex;
+                break;
+            }
         }
+        unichar curChar = [[self string] characterAtIndex:i];
         
         // this branch handles the case that we found a placeholder.
         // must update the pointer into the string and update the current character found to be at the current index.
