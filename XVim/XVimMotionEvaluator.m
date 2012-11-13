@@ -705,6 +705,14 @@
     return [self l:(XVimWindow*)window];
 }
 
+-(XVimEvaluator*)Home:(XVimWindow*)window{
+    return [self NUM0:(XVimWindow*)window];
+}
+
+-(XVimEvaluator*)End:(XVimWindow*)window{
+    return [self DOLLAR:(XVimWindow*)window];
+}
+
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if (xregister.isRepeat){
         if (xregister.nonNumericKeyCount == 1){
