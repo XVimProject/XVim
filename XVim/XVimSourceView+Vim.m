@@ -78,6 +78,51 @@
     [[XVim instance] onDeleteOrYank:xregister];
 }
 
+- (void)sortLinesInRange:(NSRange)range withOptions:(XVimSortOptions)options
+{
+    NSUInteger beginPos = [self positionAtLineNumber:range.location];
+    NSUInteger endPos = [self positionAtLineNumber:range.location + range.length];
+    NSRange characterRange = NSMakeRange(beginPos, endPos - beginPos);
+    [self clampRangeToBuffer:&characterRange];
+    NSString *str = [[self string] substringWithRange:characterRange];
+    
+    NSMutableArray *lines = [[str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
+    if ([[lines lastObject] length] == 0) {
+        [lines removeLastObject];
+    }
+    [lines sortUsingComparator:^NSComparisonResult(NSString *str1, NSString *str2) {
+        NSStringCompareOptions compareOptions = 0;
+        if (options & XVimSortOptionNumericSort) {
+            compareOptions |= NSNumericSearch;
+        }
+        if (options & XVimSortOptionIgnoreCase) {
+            compareOptions |= NSCaseInsensitiveSearch;
+        }
+        
+        if (options & XVimSortOptionReversed) {
+            return [str2 compare:str1 options:compareOptions];
+        } else {
+            return [str1 compare:str2 options:compareOptions];
+        }
+    }];
+    
+    if (options & XVimSortOptionRemoveDuplicateLines) {
+        NSMutableIndexSet *removeIndices = [NSMutableIndexSet indexSet];
+        [lines enumerateObjectsUsingBlock:^(NSString *str, NSUInteger idx, BOOL *stop) {
+            if (idx < [lines count] - 1) {
+                NSString *nextStr = [lines objectAtIndex:idx + 1];
+                if ([str isEqualToString:nextStr]) {
+                    [removeIndices addIndex:idx + 1];
+                }
+            }
+        }];
+        [lines removeObjectsAtIndexes:removeIndices];
+    }
+    
+    NSString *sortedLinesString = [[lines componentsJoinedByString:@"\n"] stringByAppendingString:@"\n"];
+    [self insertText:sortedLinesString replacementRange:characterRange];
+}
+
 /**
  * Determine if the position specified with "index" is EOF.
  **/
