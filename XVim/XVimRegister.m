@@ -31,18 +31,23 @@
     return [[NSString alloc] initWithFormat:@"\"%@: %@", self.displayName, self.text];
 }
 
--(id) initWithDisplayName:(NSString*)displayName
-{
+-(id) initWithDisplayName:(NSString*)displayName {
     self = [super init];
     if (self) {
         _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
-        _text = [NSMutableString stringWithString:@""];
+        _text = [[XVimText alloc] init];
         _displayName = [NSString stringWithString:displayName];
         _nonNumericKeyCount = 0;
         _isPlayingBack = NO;
 		_selectedRange.location = NSNotFound;
     }
     return self;
+}
+
+-(void) dealloc{
+    [_keyEventsAndInsertedText release];
+    [_text release];
+    [super dealloc];
 }
 
 -(BOOL) isAlpha{
@@ -99,8 +104,8 @@
     }
 
     _nonNumericKeyCount = 0;
-	_selectedRange.location = NSNotFound;
-    [self.text setString:@""];
+    _selectedRange.location = NSNotFound;
+    [self.text clear];
     [self.keyEventsAndInsertedText removeAllObjects];
 }
 

@@ -25,7 +25,8 @@
 	return [[self xview] _currentLineNumber];
 }
 
-- (NSUInteger)numberOfLines{ DVTFoldingTextStorage* storage = [[self xview] textStorage];
+- (NSUInteger)numberOfLines{
+    DVTFoldingTextStorage* storage = [[self xview] textStorage];
     return [storage numberOfLines]; //  This is DVTSourceTextStorage method
 }
 

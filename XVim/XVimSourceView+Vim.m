@@ -36,12 +36,13 @@
 
 @implementation XVimSourceView(Vim)
 
-
+/*
 - (void)deleteTextIntoYankRegister:(XVimRegister*)xregister {
 	[self cutText];
 	[self adjustCursorPosition];
     [[XVim instance] onDeleteOrYank:xregister];
 }
+ */
 
 /**
  * Determine if the position specified with "index" is EOF.
@@ -462,8 +463,7 @@
         return pos;
     }
     
-    for (NSUInteger i = 0; i < count && pos < [string length]; i++) 
-    {
+    for (NSUInteger i = 0; i < count && pos < [string length]; i++) {
         NSUInteger next = pos + 1;
         // If the next position is the end of docuement and current position is not a newline
         // Never move a cursor to the end of document.
@@ -472,6 +472,7 @@
         }
         
         if( opt == LEFT_RIGHT_NOWRAP && isNewLine([[self string] characterAtIndex:next]) ){
+            pos = next;
             break;
         }
         
@@ -494,10 +495,13 @@
     if( NSNotFound == end ){
         return pos;
     }
-	
+
 	// Primitive search until the column number matches
+    // If tab is included in the line the values "columnNumber" returns does not continuous.
+    // So "¥t¥t¥tabc" may rerturn 1,5,9,10,11,12 as a column numbers
 	while (pos < end) {
 		if ([self columnNumber:pos] == column) { break; }
+        if ([self columnNumber:pos] > column){ pos--; break; }
 		++pos;
 	}
 	return pos;

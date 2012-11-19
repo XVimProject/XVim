@@ -19,10 +19,8 @@
 
 @implementation XVimEvaluatorContext
 
-- (id)init
-{
-	if (self = [super init])
-	{
+- (id)init {
+	if (self = [super init]) {
 		_numericArgTail = 1;
 		_numericArgHead = nil;
 		_yankRegister = nil;
@@ -31,71 +29,59 @@
 	return self;
 }
 
-+ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg
-{
++ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg {
 	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
 	instance->_numericArgTail = numericArg;
 	return instance;
 }
 
-+ (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument
-{
++ (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument {
 	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
 	instance->_argumentString = [argument copy];
 	return instance;
 }
 
-- (XVimRegister*)yankRegister
-{
+- (XVimRegister*)yankRegister {
 	return _yankRegister;
 }
 
-- (XVimEvaluatorContext*)setYankRegister:(XVimRegister*)yankRegister
-{
+- (XVimEvaluatorContext*)setYankRegister:(XVimRegister*)yankRegister {
 	_yankRegister = yankRegister;
 	return self;
 }
 
-- (NSUInteger)numericArg
-{
+- (NSUInteger)numericArg {
 	return _numericArgTail * (_numericArgHead ? [_numericArgHead unsignedIntegerValue] : 1);
 }
 
-- (void)pushEmptyNumericArgHead
-{
+- (void)pushEmptyNumericArgHead {
 	_numericArgTail = [self numericArg];
 	_numericArgHead = nil;
 }
 
-- (void)setNumericArgHead:(NSUInteger)numericArg
-{
+- (void)setNumericArgHead:(NSUInteger)numericArg {
 	_numericArgHead = [NSNumber numberWithUnsignedInteger:numericArg];
 }
 
-- (NSNumber*)numericArgHead
-{
+- (NSNumber*)numericArgHead {
 	return _numericArgHead;
 }
 
-- (NSString*)argumentString
-{
+- (NSString*)argumentString {
 	return _argumentString;
 }
 
-- (XVimEvaluatorContext*)setArgumentString:(NSString*)argument
-{
+- (XVimEvaluatorContext*)setArgumentString:(NSString*)argument {
 	_argumentString = [argument copy];
 	return self;
 }
 
-- (XVimEvaluatorContext*)appendArgument:(NSString*)argument
-{
+- (XVimEvaluatorContext*)appendArgument:(NSString*)argument {
 	_argumentString = [_argumentString stringByAppendingString:argument];
 	return self;
 }
 
-- (XVimEvaluatorContext*)copy
-{
+- (XVimEvaluatorContext*)copy {
 	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
 	instance->_argumentString = [self->_argumentString copy];
 	instance->_numericArgTail = [self numericArg];

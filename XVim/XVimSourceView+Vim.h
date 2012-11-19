@@ -297,7 +297,7 @@ void initNSStringHelper(NSStringHelper*, NSString* string, NSUInteger strLen);
 void initNSStringHelperBackward(NSStringHelper*, NSString* string, NSUInteger strLen);
 unichar characterAtIndex(NSStringHelper*, NSInteger index);
 
-- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister; // Deletes the selected range and adjusts cursor position
+//- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister; // Deletes the selected range and adjusts cursor position
 
 // Selection
 - (void)moveCursorWithBoundsCheck:(NSUInteger)to;

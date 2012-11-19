@@ -62,7 +62,6 @@
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window {
-	[[window sourceView] adjustCursorPosition];
 	[super becameHandlerInWindow:window];
 	
     if (_playbackRegister) {
@@ -117,31 +116,8 @@
 // 'C' works similar to 'D' except that once it's done deleting
 // it should go into insert mode
 - (XVimEvaluator*)C:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
-    NSRange range = [view selectedRange];
-    NSUInteger count = [self numericArg];
-    NSUInteger to = range.location;
-    NSUInteger column = [view columnNumber:to];
-    to = [view nextLine:range.location column:column count:count-1 option:MOTION_OPTION_NONE];
-    NSUInteger eol = [view endOfLine:to];
-    
-    if (eol == NSNotFound && to != range.location){
-        // This is blank line.
-        // If the start and end point is not the same, the end position is before the blank line.
-        eol = to-1;
-    }
-    
-    if( eol != NSNotFound ){
-        [view setSelectedRangeWithBoundsCheck:range.location To:eol+1];
-        if( ![view isEOF:range.location] ){
-			// cut with selection with {EOF,0} cause exception. This is a little strange since  setSelectedRange with {EOF,0} does not cause any exception...
-            [view deleteTextIntoYankRegister:[self yankRegister]]; 
-        }
-    }
-    
-    // Go to insert 
-    NSUInteger end = [view tailOfLine:[view selectedRange].location];
-    [view setSelectedRange:NSMakeRange(end,0)];
+    [self D:window];
+    [[window sourceView] append];
     return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
 }
 
@@ -177,50 +153,6 @@
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
     [view delete:m];
     return nil;
-    /*
-    NSRange range = [view selectedRange];
-    NSString *text = [view string];
-    NSUInteger to = range.location;
-    for (; to < text.length && count > 0; ++to) {
-        unichar c = [text characterAtIndex:to];
-        if (isNewLine(c)) {
-            --count;
-        }
-    }
-    
-    NSUInteger from = range.location;
-    NSUInteger head = [view headOfLine:range.location];
-    if (head != NSNotFound && [self numericArg] > 1 && !isWhiteSpace([text characterAtIndex:from])){
-        for (; from >= head; --from){
-            unichar c = [text characterAtIndex:from-1];
-            if (isNewLine(c)){
-                --from;
-                break;
-            }
-            if (!isWhiteSpace(c)){
-                break;
-            }
-        }
-    }
-    
-    NSUInteger length = to - from;
-    if (![view isEOF:to]){
-        length -= 1;
-    }
-    
-    if (length > 0){
-        [view setSelectedRange:NSMakeRange(from, length)];
-        [view deleteTextIntoYankRegister:[self yankRegister]];
-        
-        // Bounds check
-        if (from == range.location && ![view isBlankLine:from]){
-            --range.location;
-        }
-        
-        [view setSelectedRange:NSMakeRange(range.location, 0)];
-    }
-    return nil;
-     */
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -418,19 +350,7 @@
         return nil;
     }
     
-    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"]
-																  parent:self
-															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) {
-                                                                  XVimRegister *xregister = [[XVim instance] findRegister:rname];
-                                                                  if (xregister && xregister.isReadOnly == NO) {
-                                                                      [window recordIntoRegister:xregister];
-                                                                  } else {
-                                                                      [[XVim instance] ringBell];
-                                                                  }
-                                                                  return nil;
-                                                              }];
-	
-	return eval;
+    return [[XVimRecordingRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"] parent:self];
 }
 
 - (XVimEvaluator*)C_r:(XVimWindow*)window{
@@ -515,45 +435,16 @@
 
 - (XVimEvaluator*)x:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
-    NSString* s = [view string];
-    // note: in vi you are not supposed to move beyond the end of a line when doing "x" operations
-    // it's that way on purpose. this allows you to hit a bunch of x's in a row and not worry about 
-    // accidentally joining the next line into the current line.
-    NSRange begin = [view selectedRange];
-    NSUInteger idx = begin.location;
-	if (idx == s.length) { return nil; }
-	
-    for( NSUInteger i = 0 ; idx < s.length && i < [self numericArg]; i++,idx++ ){
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx]]) {
-            // if at the end of line, and are just doing a single x it's like doing X
-            if ([self numericArg] == 1) {
-                if (idx > 0 && ![[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]]) {
-                    [view moveBackwardAndModifySelection]; 
-                }
-            }
-            break;
-        }
-        [view moveForwardAndModifySelection];
-    }
-    [view deleteTextIntoYankRegister:[self yankRegister]];
+    XVimMotion* m= XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
+    [view delete:m];
     return nil;
 }
 
 // like 'x" but it goes backwards instead of forwards
 - (XVimEvaluator*)X:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
-    NSString* s = [view string];
-    // note: in vi you are not supposed to move beyond the start of a line when doing "X" operations
-    // it's that way on purpose. this allows you to hit a bunch of X's in a row and not worry about 
-    // accidentally joining the current line up into the previous line.
-    NSRange begin = [view selectedRange];
-    NSUInteger idx = begin.location;
-    for( NSUInteger i = 0 ; idx > 0 && i < [self numericArg]; i++,idx-- ){
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:[s characterAtIndex:idx-1]])
-            break;
-        [view moveBackwardAndModifySelection]; 
-    }
-    [view deleteTextIntoYankRegister:[self yankRegister]];
+    XVimMotion* m= XVIM_MAKE_MOTION(MOTION_BACKWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
+    [view delete:m];
     return nil;
 }
 
@@ -595,13 +486,9 @@
 
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window
 {
-    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""]
-                                                                  parent:self
-                                                              completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
-                           {
+    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] parent:self completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) {
                                XVimRegister *xregister = [[XVim instance] findRegister:rname];
-                               if (xregister.isReadOnly == NO)
-                               {
+                               if (xregister.isReadOnly == NO) {
                                    [context setYankRegister:xregister];
                                    [context appendArgument:rname];
                                    return [[XVimNormalEvaluator alloc] initWithContext:context];

@@ -284,21 +284,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window{
-    XVimEvaluator* eval = [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""]
-																  parent:self
-															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)  
-						   {
-							   XVimRegister *xregister = [[XVim instance] findRegister:rname];
-							   if (xregister.isReadOnly == NO){
-								   [context setYankRegister:xregister];
-								   [context appendArgument:rname];
-								   return [self withNewContext:context];
-							   }
-							   
-							   [[XVim instance] ringBell];
-							   return nil;
-						   }];
-	return eval;
+    return [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] parent:self];
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{

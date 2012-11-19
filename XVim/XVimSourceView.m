@@ -1,4 +1,3 @@
-#import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
 #import "DVTSourceTextViewHook.h"
@@ -43,6 +42,8 @@
 @synthesize selectionMode = _selectionMode;
 @synthesize preservedColumn = _preservedColumn;
 @synthesize cursorMode = _cursorMode;
+@synthesize lastYankedText = _lastYankedText;
+@synthesize delegate = _delegate;
 
 - (id)initWithView:(NSTextView*)view {
 	if (self = [super init]) {
@@ -53,8 +54,16 @@
         _selectionAreaStart = _insertionPoint;
         _selectionAreaEnd = _insertionPoint;
         _cursorMode = CURSOR_MODE_COMMAND;
+        _lastYankedText = [[XVimText alloc] init];
+        self.delegate = nil;
 	}
 	return self;
+}
+
+- (void)dealloc{
+    [super dealloc];
+    [_lastYankedText release];
+    self.delegate = nil;
 }
 
 ////////////////
@@ -118,6 +127,34 @@
     }
 }
 
+- (void)_yankSelection:(MOTION_TYPE)type{
+    XVimText* text = [[XVimText alloc] init];
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        if( type == CHARACTERWISE_EXCLUSIVE || type == CHARACTERWISE_INCLUSIVE ){
+            text.type = TEXT_TYPE_CHARACTERS;
+        }else if( type == LINEWISE ){
+            text.type = TEXT_TYPE_LINES;
+        }
+    }else if( _selectionMode == MODE_CHARACTER){
+        text.type = TEXT_TYPE_CHARACTERS;
+    }else if( _selectionMode == MODE_LINE ){
+        text.type = TEXT_TYPE_LINES;
+    }else if( _selectionMode == MODE_BLOCK ){
+        text.type = TEXT_TYPE_BLOCK;
+    }
+    
+    NSArray* ranges = [_view selectedRanges];
+    TRACE_LOG(@"YANKED TYPE:%d", text.type);
+    for( NSValue* range in ranges ){
+        NSString* str = [[_view string] substringWithRange:range.rangeValue];
+        [text.strings addObject:str];
+        TRACE_LOG(@"YANKED STRING[%d]%@", text.strings.count, str);
+    }
+    
+    [_lastYankedText release];
+    _lastYankedText = text;
+}
+
 - (void)delete:(XVimMotion*)motion{
     if( _insertionPoint == 0 && [[self string] length] == 0 ){
         return ;
@@ -127,10 +164,7 @@
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
         BOOL eof = [self isEOF:to];
-        //BOOL eol = [self isEOL:to];
         BOOL blank = [self isBlankLine:to];
-        //BOOL last = [self isLastCharacter:to];
-        //BOOL exclusive = motion.type == CHARACTERWISE_EXCLUSIVE;
         r = [self getOperationRangeFrom:_selectionBegin To:to Type:motion.type];
         if( motion.type == LINEWISE && blank && eof){
             if( r.location != 0 ){
@@ -141,13 +175,41 @@
         [self _setSelectedRange:r];
     }
     
+    [self _yankSelection:motion.type];
     [_view delete:self];
+    if( _delegate != nil ){
+        [_delegate textDeleted:self.lastYankedText inView:self];
+    }
     [self _syncStateFromView];
-    
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
-- (void)yunk:(XVimMotion*)motion{
+- (void)yank:(XVimMotion*)motion{
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        NSRange r;
+        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        BOOL eof = [self isEOF:to];
+        BOOL blank = [self isBlankLine:to];
+        r = [self getOperationRangeFrom:_selectionBegin To:to Type:motion.type];
+        if( motion.type == LINEWISE && blank && eof){
+            if( r.location != 0 ){
+                r.location--;
+                r.length++;
+            }
+        }
+        [self _setSelectedRange:r];
+    }
+    
+    [self _yankSelection:motion.type];
+    if( _delegate != nil ){
+        [_delegate textDeleted:self.lastYankedText inView:self];
+    }
+    //[_view copy:self];
+    [self _syncStateFromView];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
+}
+
+- (void)putText:(XVimText *)text{
     
 }
 

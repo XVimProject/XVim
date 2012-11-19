@@ -8,6 +8,7 @@
 #import <Cocoa/Cocoa.h>
 #import "XVimMode.h"
 #import "XVimCommandLine.h"
+#import "XVimTextViewProtocol.h"
 #import "XVimPlaybackHandler.h"
 #import "XVimTextViewProtocol.h"
 

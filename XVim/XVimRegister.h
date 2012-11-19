@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XVimVisualMode.h"
+#import "XVimText.h"
 
 typedef enum {
     REGISTER_IGNORE,
@@ -28,8 +29,8 @@ typedef enum {
 -(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 -(void) clear;
 
-@property (readonly, strong) NSMutableString *text;
-@property (readonly, strong) NSString *displayName;
+@property (strong) XVimText *text;
+@property (readonly) NSString *displayName;
 @property (readonly) BOOL isAlpha;
 @property (readonly) BOOL isNumeric;
 @property (readonly) BOOL isRepeat;

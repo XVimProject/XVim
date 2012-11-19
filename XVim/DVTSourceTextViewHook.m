@@ -174,6 +174,7 @@
     if (b) {
         DEBUG_LOG(@"DVTSourceTextView:%p became first responder", self);
         window.sourceView = [[XVimSourceView alloc] initWithView:base];
+        window.sourceView.delegate = [XVim instance];
     }
     return b;
 }

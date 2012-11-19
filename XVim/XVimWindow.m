@@ -326,5 +326,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     [[[self.sourceView view] window] makeFirstResponder:[self.sourceView view]];
 }
 
+
 @end
 

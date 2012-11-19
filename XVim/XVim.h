@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "XVimKeymapProvider.h"
+#import "XVimTextViewProtocol.h"
 
 @class XVimKeymap;
 @class XVimOptions;
@@ -19,7 +20,7 @@
 @class XVimCommandLine;
 @class XVimCommandField;
 
-@interface XVim : NSObject<XVimKeymapProvider>
+@interface XVim : NSObject<XVimKeymapProvider, XVimTextViewDelegate>
 
 + (XVim*)instance;
 
@@ -31,6 +32,7 @@
 @property (weak) XVimRegister *repeatRegister;
 @property (weak) XVimRegister *recordingRegister;
 @property (weak) XVimRegister *lastPlaybackRegister;
+@property (readonly) XVimRegister *yankRegister;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;
@@ -38,8 +40,9 @@
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
-- (void)onDeleteOrYank:(XVimRegister*)yankRegister;
+//- (void)onDeleteOrYank:(XVimRegister*)yankRegister;
 - (NSString*)pasteText:(XVimRegister*)yankRegister;
 - (void)writeToLogfile:(NSString*)str;
-    
+- (void)setYankRegisterByName:(NSString*)regName;
+
 @end

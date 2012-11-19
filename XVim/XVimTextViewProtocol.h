@@ -8,12 +8,19 @@
 
 #import "XVimVisualMode.h"
 #import "XVimMotion.h"
+#import "XVimText.h"
 #import <Foundation/Foundation.h>
 
 /**
  * This is the interface to operate on text view used in XVim.
  * Text views want to communicate with XVim handlers(evaluators) must implement this protocol.
  **/
+
+
+@protocol XVimTextViewDelegate <NSObject>
+- (void)textYanked:(XVimText*)yankedText inView:(id)view;
+- (void)textDeleted:(XVimText*)deletedText inView:(id)view;
+@end
 
 typedef enum {
     CURSOR_MODE_INSERT,
@@ -36,19 +43,25 @@ typedef enum {
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) NSString* string;
+@property(readonly) XVimText* lastYankedText;
+
+// Delegates
+@property(strong) id<XVimTextViewDelegate> delegate;
+
 
 // Selection Mode
 - (void)startSelection:(VISUAL_MODE)mode;
 - (void)endSelection;
 - (void)changeSelectionMode:(VISUAL_MODE)mode;
 
-// Insert or Command
-- (void)escapeFromInsert;
+
+
 
 // Top Level Operation Interface
 - (void)move:(XVimMotion*)motion;
 - (void)delete:(XVimMotion*)motion;
-- (void)yunk:(XVimMotion*)motion;
+- (void)yank:(XVimMotion*)motion;
+- (void)putText:(XVimText*)text;
 - (void)swapCase:(XVimMotion*)motion; // Previously this is named "toggleCase" in XVim
 - (void)makeLowerCase:(XVimMotion*)motion; // Previously this is named "lowerCase" in XVim
 - (void)makeUpperCase:(XVimMotion*)motion; // Previously this is named "lowerCase" in XVim
@@ -58,11 +71,14 @@ typedef enum {
 - (void)insertNewlineBelow;
 - (void)insertNewlineAbove;
 
+// Insert or Command
+- (void)escapeFromInsert;
 - (void)append;
 - (void)insert;
 - (void)appendAtEndOfLine;
 - (void)insertBeforeFirstNonBlank;
 
+// for keydown in insertion
 - (void)passThroughKeyDown:(NSEvent*)event;
 
 // Premitive Operations ( Avoid using following. Consider use or make Top Level Operation Interface instead )
