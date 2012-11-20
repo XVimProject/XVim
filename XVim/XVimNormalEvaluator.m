@@ -264,82 +264,16 @@
 }
 
 - (XVimEvaluator*)p:(XVimWindow*)window{
-    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
-    // the line boundary and then paste the data in.
-    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
-    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
-    
-    // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
-    // because dw is not working quite right it seems
     XVimSourceView* view = [window sourceView];
-    NSUInteger loc = [view selectedRange].location;
-    NSString *text = [[XVim instance] pasteText:[self yankRegister]];
-    if (text.length > 0){
-        unichar uc = [text characterAtIndex:[text length] -1];
-		BOOL linewise = [[NSCharacterSet newlineCharacterSet] characterIsMember:uc];
-        if (linewise) {
-            if( [view isBlankLine:loc] && ![view isEOF:loc]){
-                [view setSelectedRange:NSMakeRange(loc+1,0)];
-            }else{
-                NSUInteger newline = [view nextNewLine:loc];
-                if( NSNotFound == newline ){
-                    // add newline at EOF
-                    [view setSelectedRange:NSMakeRange([[view string]length], 0)];
-                    [view insertNewline];
-                }else{
-                    [view setSelectedRange:NSMakeRange(newline+1, 0)];
-                }
-            }
-        } else {
-			if (![view isNewLine:loc]) {
-				[view moveForward];
-			}
-        }
-		
-		NSUInteger cursorLocation = [view selectedRange].location;
-        for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-            [view insertText:text];
-        }
-		
-		// Adjust cursor position
-		if (!linewise) {
-			cursorLocation += [text length] - 1;
-		} else {
-			cursorLocation = [view skipWhiteSpace:cursorLocation];
-		}
-		[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
-    }
+    XVimRegister* reg = [XVim instance].yankRegister;
+    [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)P:(XVimWindow*)window{
-    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
-    // the line boundary and then paste the data in.
     XVimSourceView* view = [window sourceView];
-    NSString *text = [[XVim instance] pasteText:[self yankRegister]];
-    if (text.length > 0){
-        unichar uc = [text characterAtIndex:[text length] -1];
-		BOOL linewise = [[NSCharacterSet newlineCharacterSet] characterIsMember:uc];
-        if (linewise) {
-            NSUInteger b = [view headOfLine:[view selectedRange].location];
-            if( NSNotFound != b ){
-                [view setSelectedRange:NSMakeRange(b,0)];
-            }
-        }
-		NSUInteger loc = [view selectedRange].location;
-        for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-            [view insertText:text];
-        }
-		
-		NSUInteger cursorLocation = 0;
-		if (linewise) {
-			cursorLocation = [view skipWhiteSpace:loc];
-		} else {
-			cursorLocation = loc + [text length] - 1;
-		}
-		
-		[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
-    }
+    XVimRegister* reg = [XVim instance].yankRegister;
+    [view put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     return nil;
 }
 
@@ -400,11 +334,6 @@
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [view undo];
     }
-    
-    // Undo should not keep anything selected
-    NSRange r = [view selectedRange];
-    [view setSelectedRange:NSMakeRange(r.location, 0)];
-	[view adjustCursorPosition];
     return nil;
 }
 
@@ -484,20 +413,8 @@
 	return eval;
 }
 
-- (XVimEvaluator*)DQUOTE:(XVimWindow*)window
-{
-    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] parent:self completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) {
-                               XVimRegister *xregister = [[XVim instance] findRegister:rname];
-                               if (xregister.isReadOnly == NO) {
-                                   [context setYankRegister:xregister];
-                                   [context appendArgument:rname];
-                                   return [[XVimNormalEvaluator alloc] initWithContext:context];
-                               }
-                               
-                               [[XVim instance] ringBell];
-                               return nil;
-                           }];
-	return eval;
+- (XVimEvaluator*)DQUOTE:(XVimWindow*)window {
+    return  [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] parent:self];
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{

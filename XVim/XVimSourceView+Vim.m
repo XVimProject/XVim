@@ -341,7 +341,7 @@
 /**
  * Returns position of the end of line when the cursor is at "index"
  * End of line is one of following which is found first when searching forwords from "index".
- *    - Character just before newline if its not newlin
+ *    - Character just before newline if its not newline
  *    - Character just before EOF if its not newline 
  * Blankline does not have end of line.
  * Searching starts from position "index". So the "index" could be an end of line.
@@ -488,23 +488,26 @@
     return pos;
 }
 
-- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column
-{
-    // pos is at the line number "num" and column 0
-    NSUInteger end = [self endOfLine:pos];
-    if( NSNotFound == end ){
-        return pos;
-    }
+// Note: This method may return position on the newline character.
+//       For example, blankline have only newlin character and it is column number at "0"
+- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound{
+    NSUInteger end = [self tailOfLine:pos];
 
 	// Primitive search until the column number matches
     // If tab is included in the line the values "columnNumber" returns does not continuous.
-    // So "¥t¥t¥tabc" may rerturn 1,5,9,10,11,12 as a column numbers
-	while (pos < end) {
-		if ([self columnNumber:pos] == column) { break; }
-        if ([self columnNumber:pos] > column){ pos--; break; }
+    // So "¥t¥t¥tabc" may rerturn 0,4,8,9,10,11 as a column numbers for each index.
+	while (pos <= end) {
+		if ([self columnNumber:pos] == column) { return pos; }
+        if ([self columnNumber:pos] > column){ pos--; return pos; }
 		++pos;
 	}
-	return pos;
+    
+    // No matching column is found
+    if( notfound ){
+        return NSNotFound;
+    }else{
+        return --pos;
+    }
 }
 
 /**
@@ -543,7 +546,7 @@
         return pos;
     }
 	
-	return [self nextPositionFrom:head matchingColumn:column];
+	return [self nextPositionFrom:head matchingColumn:column returnNotFound:NO];
 }
 
 /**
@@ -578,7 +581,7 @@
         // pos is on a newline. The next line is the target line.
         // There is at least 1 more range available.
         pos++;
-		return [self nextPositionFrom:pos matchingColumn:column];
+		return [self nextPositionFrom:pos matchingColumn:column returnNotFound:NO];
     }
     return pos; 
 }
@@ -1114,13 +1117,12 @@
 	return NSMakeRange(from, to - from + 1); // Inclusive range
 }
 
-- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
+- (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
 	NSRange opRange = [self getOperationRangeFrom:from To:to Type:type];
     [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num
-{
+- (NSUInteger)positionAtLineNumber:(NSUInteger)num{
     NSAssert(0 != num, @"line number starts from 1");
     
     // Primitive search to find line number
@@ -1143,11 +1145,16 @@
 	
 	return pos;
 }
-	
+
+/**
+ * Returns position of specifiled line number and column.
+ * If the specified line exceeds the number of lines in current document it returns NSNotFound.
+ * If the specified column exeeds the column number in the line it returns position of tail of the line(newline or eof)
+ **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
 	NSUInteger idx = [self positionAtLineNumber:num];
 	if (idx == NSNotFound) { return NSNotFound; }
-	return [self nextPositionFrom:idx matchingColumn:column];
+	return [self nextPositionFrom:idx matchingColumn:column returnNotFound:NO];
 }
 
 - (NSUInteger)maxColumnAtLineNumber:(NSUInteger)num{
@@ -1157,10 +1164,7 @@
         //There no such line in the text.
         return NSNotFound;
     }
-    NSUInteger eol = [self endOfLine:firstIdx];
-    if( NSNotFound == eol ){
-        return NSNotFound;
-    }
+    NSUInteger eol = [self tailOfLine:firstIdx];
     return eol-firstIdx;
 }
 

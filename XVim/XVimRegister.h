@@ -10,6 +10,12 @@
 #import "XVimVisualMode.h"
 #import "XVimText.h"
 
+typedef enum{
+    TEXT_TYPE_CHARACTERS,
+    TEXT_TYPE_BLOCK,
+    TEXT_TYPE_LINES
+}TEXT_TYPE;
+
 typedef enum {
     REGISTER_IGNORE,
     REGISTER_APPEND,
@@ -29,7 +35,8 @@ typedef enum {
 -(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 -(void) clear;
 
-@property (strong) XVimText *text;
+@property TEXT_TYPE type;
+@property (readonly) NSString *string;
 @property (readonly) NSString *displayName;
 @property (readonly) BOOL isAlpha;
 @property (readonly) BOOL isNumeric;

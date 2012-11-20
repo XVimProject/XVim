@@ -40,7 +40,6 @@
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
-//- (void)onDeleteOrYank:(XVimRegister*)yankRegister;
 - (NSString*)pasteText:(XVimRegister*)yankRegister;
 - (void)writeToLogfile:(NSString*)str;
 - (void)setYankRegisterByName:(NSString*)regName;

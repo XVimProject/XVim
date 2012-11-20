@@ -21,21 +21,23 @@
 
 @implementation XVimRegister
 
-@synthesize text = _text;
+@synthesize type = _type;
+@synthesize string = _string;
 @synthesize displayName = _displayName;
 @synthesize isPlayingBack = _isPlayingBack;
 @synthesize keyEventsAndInsertedText = _keyEventsAndInsertedText;
 @synthesize nonNumericKeyCount = _nonNumericKeyCount;
 
 -(NSString*) description{
-    return [[NSString alloc] initWithFormat:@"\"%@: %@", self.displayName, self.text];
+    return [[NSString alloc] initWithFormat:@"%@:%@", self.displayName, self.string];
 }
 
 -(id) initWithDisplayName:(NSString*)displayName {
     self = [super init];
     if (self) {
         _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
-        _text = [[XVimText alloc] init];
+        _string = [[NSMutableString alloc] init];
+        _type = TEXT_TYPE_CHARACTERS;
         _displayName = [NSString stringWithString:displayName];
         _nonNumericKeyCount = 0;
         _isPlayingBack = NO;
@@ -46,7 +48,7 @@
 
 -(void) dealloc{
     [_keyEventsAndInsertedText release];
-    [_text release];
+    [_string release];
     [super dealloc];
 }
 
@@ -105,7 +107,7 @@
 
     _nonNumericKeyCount = 0;
     _selectedRange.location = NSNotFound;
-    [self.text clear];
+    [(NSMutableString*)_string setString:@""];
     [self.keyEventsAndInsertedText removeAllObjects];
 }
 
@@ -116,9 +118,9 @@
 
     NSString *key = [keyStroke toSelectorString];
     if (key.length > 1){
-        [self.text appendString:[NSString stringWithFormat:@"<%@>", key]];
+        [(NSMutableString*)_string appendString:[NSString stringWithFormat:@"<%@>", key]];
     }else{
-        [self.text appendString:key];
+        [(NSMutableString*)_string appendString:key];
     }
     if (!keyStroke.isNumeric){
         ++_nonNumericKeyCount;
@@ -131,12 +133,11 @@
         return;
     }
 
-    [self.text appendString:text];
+    [(NSMutableString*)_string appendString:text];
     [self.keyEventsAndInsertedText addObject:text];
 }
 
--(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range
- {
+-(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range {
 	if (self.isPlayingBack){
 		return;
 	}

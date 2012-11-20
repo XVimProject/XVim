@@ -21,11 +21,17 @@
     if ([self numericArg] < 1) 
         return nil;
     
-    XVimSourceView* view = [window sourceView];
-    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+    return [self motionFixed:m inWindow:window];
+    
 }
 
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow *)window{
+    XVimSourceView* view = [window sourceView];
+    [view yank:motion];
+    return nil;
+    
+}
 @end
 
 

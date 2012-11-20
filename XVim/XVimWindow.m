@@ -79,10 +79,10 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)setEvaluator:(XVimEvaluator*)evaluator {
 	if (!evaluator) {
 		evaluator = [[XVimNormalEvaluator alloc] init];
+        [[XVim instance] setYankRegisterByName:nil];
 	}
 
-	if (evaluator != _currentEvaluator)
-	{
+	if (evaluator != _currentEvaluator) {
 		if (_currentEvaluator) {
 			[_currentEvaluator didEndHandlerInWindow:self];
 		}

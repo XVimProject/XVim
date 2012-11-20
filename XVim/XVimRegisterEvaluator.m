@@ -39,6 +39,7 @@
 
 - (void)registerFixed:(NSString*)rname inWindow:(XVimWindow*)window{
     [[XVim instance] setYankRegisterByName:rname];
+    [self.context appendArgument:rname];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -53,7 +54,7 @@
     }
 
     [self registerFixed:[keyStroke toString] inWindow:window];
-    return _parent;
+    return [_parent withNewContext:self.context];
 }
 	
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{

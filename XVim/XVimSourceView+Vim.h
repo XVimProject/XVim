@@ -210,18 +210,25 @@ typedef struct _XVimWordInfo{
 
 /**
  * Returns position at line number "num" and column number "column"
- * If the "column" exceeds the end of line it returns position of  the end of line.
  * Line number starts from 1.
  * If the line number specified exceeds the maximum lines in the document it returns NSNotFound.
+ * If the specified column exeeds the column number in the line it returns position of tail of the line(newline or eof)
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
 /**
  * Returns maximum column number at the line
- * If the line is blankline or the line specified exceed the document it returns NSNotFound
- * The position of maxmum column is just before the newline or EOF( means never count newline as a column )
+ * Column number starts from 0.
+ * If the specified line does not exist in the current document it returns NSNotFound
  **/
 - (NSUInteger)maxColumnAtLineNumber:(NSUInteger)num;
+
+/**
+ * Returns index of the position where the specified column is matched when searching from "pos" in the line.
+ * If the specified column is not found ( which means it finds end of line before finding matching column) 
+ * it returns NSNotFound if "notfound" is YES  or  it returns the position of the end of line if "notfound" is NO.
+ **/
+- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound;
     
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
 - (NSUInteger)skipWhiteSpace:(NSUInteger)index;
@@ -234,6 +241,12 @@ typedef struct _XVimWordInfo{
 
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+
+// Note: "next" method may return invalid cursor position (the position of newline)
+//       This is because to work "dl" to work properly.
+//       "l" is exclusive motion and when the "dl" is input at the last character of a line (assume the character is "x")
+//       the operation range is "x¥n" and x is deleted.
+//       "l" calls next method as a motion and then it should return the position at "¥n" to make "dl" work properly.
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;

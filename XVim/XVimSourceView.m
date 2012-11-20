@@ -26,6 +26,9 @@
 @interface XVimSourceView() {
 	__weak NSTextView *_view;
 }
+@property (strong) NSMutableString* lastYankedText;
+@property TEXT_TYPE lastYankedType;
+
 - (NSRange)_currentSelection;
 - (void)_setSelectedRange:(NSRange)range;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
@@ -43,6 +46,7 @@
 @synthesize preservedColumn = _preservedColumn;
 @synthesize cursorMode = _cursorMode;
 @synthesize lastYankedText = _lastYankedText;
+@synthesize lastYankedType = _lastYankedType;
 @synthesize delegate = _delegate;
 
 - (id)initWithView:(NSTextView*)view {
@@ -54,7 +58,8 @@
         _selectionAreaStart = _insertionPoint;
         _selectionAreaEnd = _insertionPoint;
         _cursorMode = CURSOR_MODE_COMMAND;
-        _lastYankedText = [[XVimText alloc] init];
+        _lastYankedText = [[NSMutableString alloc] init];
+        _lastYankedType = TEXT_TYPE_CHARACTERS;
         self.delegate = nil;
 	}
 	return self;
@@ -111,6 +116,7 @@
 
 - (void)moveCursor:(NSUInteger)pos{
     [self _moveCursor:pos preserveColumn:NO];
+    [self _syncState];
 }
 
 - (void)move:(XVimMotion*)motion{
@@ -128,34 +134,34 @@
 }
 
 - (void)_yankSelection:(MOTION_TYPE)type{
-    XVimText* text = [[XVimText alloc] init];
     if( _selectionMode == MODE_VISUAL_NONE ){
         if( type == CHARACTERWISE_EXCLUSIVE || type == CHARACTERWISE_INCLUSIVE ){
-            text.type = TEXT_TYPE_CHARACTERS;
+            _lastYankedType = TEXT_TYPE_CHARACTERS;
         }else if( type == LINEWISE ){
-            text.type = TEXT_TYPE_LINES;
+            _lastYankedType = TEXT_TYPE_LINES;
         }
     }else if( _selectionMode == MODE_CHARACTER){
-        text.type = TEXT_TYPE_CHARACTERS;
+        _lastYankedType = TEXT_TYPE_CHARACTERS;
     }else if( _selectionMode == MODE_LINE ){
-        text.type = TEXT_TYPE_LINES;
+        _lastYankedType = TEXT_TYPE_LINES;
     }else if( _selectionMode == MODE_BLOCK ){
-        text.type = TEXT_TYPE_BLOCK;
+        _lastYankedType = TEXT_TYPE_BLOCK;
     }
+    TRACE_LOG(@"YANKED TYPE:%d", _lastYankedType);
     
     NSArray* ranges = [_view selectedRanges];
-    TRACE_LOG(@"YANKED TYPE:%d", text.type);
+    NSMutableArray* tmp = [[[NSMutableArray alloc] init] autorelease];
     for( NSValue* range in ranges ){
         NSString* str = [[_view string] substringWithRange:range.rangeValue];
-        [text.strings addObject:str];
-        TRACE_LOG(@"YANKED STRING[%d]%@", text.strings.count, str);
+        [tmp addObject:str];
     }
     
-    [_lastYankedText release];
-    _lastYankedText = text;
+    [_lastYankedText setString:[tmp componentsJoinedByString:@"\n"]];
+    TRACE_LOG(@"YANKED STRING : %@", _lastYankedText);
 }
 
 - (void)delete:(XVimMotion*)motion{
+    NSAssert( !(_selectionMode == MODE_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
     if( _insertionPoint == 0 && [[self string] length] == 0 ){
         return ;
     }
@@ -178,13 +184,15 @@
     [self _yankSelection:motion.type];
     [_view delete:self];
     if( _delegate != nil ){
-        [_delegate textDeleted:self.lastYankedText inView:self];
+        [_delegate textDeleted:_lastYankedText  withType:_lastYankedType inView:self];
     }
-    [self _syncStateFromView];
+    _insertionPoint = _selectionAreaStart;
+    //[self _syncStateFromView];
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)yank:(XVimMotion*)motion{
+    NSAssert( !(_selectionMode == MODE_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
@@ -202,15 +210,101 @@
     
     [self _yankSelection:motion.type];
     if( _delegate != nil ){
-        [_delegate textDeleted:self.lastYankedText inView:self];
+        [_delegate textYanked:_lastYankedText  withType:_lastYankedType inView:self];
     }
-    //[_view copy:self];
+    
     [self _syncStateFromView];
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
-- (void)putText:(XVimText *)text{
+- (void)put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count{
+    // if the paste text has a eol at the end (line oriented), then we are supposed to move to
+    // the line boundary and then paste the data in.
+    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
+    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
     
+    // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
+    // because dw is not working quite right it seems
+    
+    if( _selectionMode != MODE_VISUAL_NONE ){
+        [self delete:nil];
+    }
+    
+    NSUInteger insertionPointAfterPut = _insertionPoint;
+    if( type == TEXT_TYPE_CHARACTERS ){
+        //Forward insertion point +1 if after flag if on
+        if (![self isNewLine:_insertionPoint] && after) {
+            _insertionPoint++;
+        }
+        [self moveCursor:_insertionPoint];
+        for(NSUInteger i = 0; i < count ; i++ ){
+            [_view insertText:text];
+        }
+    }else if( type == TEXT_TYPE_LINES ){
+        if( after ){
+            NSUInteger newline = [self nextNewLine:_insertionPoint];
+            if( NSNotFound == newline ){
+                // _insertionPoint is on the last line and the line does not have newline end of it.
+                // Add newline before paste the string
+                [self insertNewlineBelow];
+            }else{
+                NSUInteger pos = [self nextLine:_insertionPoint column:0 count:1 option:MOTION_OPTION_NONE];
+                [self moveCursor:pos];
+            }
+        }else{
+            NSUInteger pos = [self firstNonBlankInALine:_insertionPoint];
+            [self moveCursor:pos];
+        }
+        insertionPointAfterPut = _insertionPoint;
+        for(NSUInteger i = 0; i < count ; i++ ){
+            [_view insertText:text];
+        }
+    }else if( type == TEXT_TYPE_BLOCK ){
+        //Forward insertion point +1 if after flag if on
+        if (![self isNewLine:_insertionPoint] && after) {
+            _insertionPoint++;
+        }
+        insertionPointAfterPut = _insertionPoint;
+        
+        NSUInteger column = [self columnNumber:_insertionPoint];
+        NSUInteger startLine = [self lineNumber:_insertionPoint];
+        NSArray* lines = [text componentsSeparatedByString:@"\n"];
+        for( NSUInteger i = 0 ; i < lines.count; i++){
+            NSString* line = [lines objectAtIndex:i];
+            NSUInteger targetLine = startLine + i;
+            NSUInteger head = [self positionAtLineNumber:targetLine];
+            if( NSNotFound == head ){
+                NSAssert( [self lineNumber:_insertionPoint] == [self numberOfLines], @"_insertionPoint must be on the last line at this point");
+                [self insertNewlineBelow];
+                head = [self positionAtLineNumber:targetLine];
+            }
+            NSAssert( NSNotFound != head , @"Head of the target line must be found at this point");
+            
+            // Find next insertion point (in the next line)
+            NSUInteger max = [self maxColumnAtLineNumber:[self lineNumber:head]];
+            NSAssert( max != NSNotFound , @"Should not be NSNotFound");
+            if( column > max ){
+                // If the line does not have enough column pad it with spaces
+                NSUInteger spaces = column - max;
+                NSUInteger end = [self tailOfLine:head];
+                [self _setSelectedRange:NSMakeRange(end,0)];
+                for( NSUInteger i = 0 ; i < spaces; i++){
+                    [self insertText:@" "];
+                }
+            }
+            [self _setSelectedRange:NSMakeRange([self positionAtLineNumber:targetLine column:column],0)];
+            for(NSUInteger i = 0; i < count ; i++ ){
+                [_view insertText:line];
+            }
+        }
+        
+    }
+    
+		
+    //[self _syncStateFromView];
+    _insertionPoint = insertionPointAfterPut;
+    [self _syncState];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)swapCase:(XVimMotion*)motion{
@@ -243,6 +337,7 @@
     NSUInteger tail = [self tailOfLine:l];
     [[self view] setSelectedRange:NSMakeRange(tail,0)];
     [[self view] insertNewline:self];
+    [self _syncStateFromView];
 }
 
 - (void)insertNewlineAbove{
@@ -734,10 +829,12 @@
 
 - (void)undo {
 	[[_view undoManager] undo];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)redo {
 	[[_view undoManager] redo];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (NSColor*)insertionPointColor {
@@ -927,11 +1024,12 @@
         }
     }
     
+    [self _syncState];
+    
     if( !preserve ){
         _preservedColumn = [self columnNumber:_insertionPoint];
     }
     
-    [self _syncState];
 }
 
 - (void)_syncStateFromView{
@@ -946,16 +1044,13 @@
     }else{
         _selectionMode = MODE_CHARACTER;
         NSSelectionAffinity affinity = [_view selectionAffinity];
+        _selectionBegin = r.location;
+        _selectionAreaStart = _selectionBegin;
+        _selectionAreaEnd = r.location + r.length -1;
         if( affinity == NSSelectionAffinityDownstream ){
-            _selectionBegin = r.location;
-            _selectionAreaStart = _selectionBegin;
             _insertionPoint = r.location + r.length - 1;
-            _selectionAreaEnd = _insertionPoint;
         }else{
-            _selectionBegin = r.location + r.length - 1;
-            _selectionAreaStart = _selectionBegin;
             _insertionPoint = r.location;
-            _selectionAreaEnd = _insertionPoint;
         }
     }
     
@@ -985,10 +1080,11 @@
         NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
         for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
             NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
-            if( maxColumn != NSNotFound && maxColumn >= left){ // Only when the line has a column inside the rect add the range
+            if( maxColumn >= left){ // Only when the line has a column inside the rect add the range
                 NSUInteger start = [self positionAtLineNumber:top+i column:left];
                 NSUInteger end = [self positionAtLineNumber:top+i column:right];
-                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, end-start+1)]];;
+                // If the maxColumn is 0 (means its blankline or EOF) the range length is 0 not to include newline to select.
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, maxColumn==0 ? 0 : end-start+1)]];;
             }
         }
         [_view setSelectedRanges:rangeArray];

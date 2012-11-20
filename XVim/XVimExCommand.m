@@ -917,8 +917,7 @@
     [tester runTest];
 }
 
-- (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
+- (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window {
     TRACE_LOG(@"registers: %@", [[XVim instance] registers])
 }
 

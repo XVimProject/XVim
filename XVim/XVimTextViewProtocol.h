@@ -8,6 +8,7 @@
 
 #import "XVimVisualMode.h"
 #import "XVimMotion.h"
+#import "XVimRegister.h"
 #import "XVimText.h"
 #import <Foundation/Foundation.h>
 
@@ -18,8 +19,8 @@
 
 
 @protocol XVimTextViewDelegate <NSObject>
-- (void)textYanked:(XVimText*)yankedText inView:(id)view;
-- (void)textDeleted:(XVimText*)deletedText inView:(id)view;
+- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view;
+- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view;
 @end
 
 typedef enum {
@@ -43,7 +44,6 @@ typedef enum {
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) NSString* string;
-@property(readonly) XVimText* lastYankedText;
 
 // Delegates
 @property(strong) id<XVimTextViewDelegate> delegate;
@@ -61,7 +61,7 @@ typedef enum {
 - (void)move:(XVimMotion*)motion;
 - (void)delete:(XVimMotion*)motion;
 - (void)yank:(XVimMotion*)motion;
-- (void)putText:(XVimText*)text;
+- (void)put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)times;
 - (void)swapCase:(XVimMotion*)motion; // Previously this is named "toggleCase" in XVim
 - (void)makeLowerCase:(XVimMotion*)motion; // Previously this is named "lowerCase" in XVim
 - (void)makeUpperCase:(XVimMotion*)motion; // Previously this is named "lowerCase" in XVim

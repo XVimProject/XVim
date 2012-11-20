@@ -17,19 +17,12 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum{
-    TEXT_TYPE_CHARACTERS,
-    TEXT_TYPE_BLOCK,
-    TEXT_TYPE_LINES
-}TEXT_TYPE;
 
-@interface XVimText : NSObject
-@property TEXT_TYPE type;
-@property(readonly) NSMutableArray* strings;
+@interface XVimText : NSObject<NSCopying>
 @property(readonly) NSString* string; // This is reference to the first object in "strings"
 
 /**
- * Append string to first object of the "strings" array.
+ * Append string
  **/
 - (void)appendString:(NSString*)string;
 

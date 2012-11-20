@@ -1,5 +1,3 @@
-//
-//  XVim.m
 //  XVim
 //
 //  Created by Shuichiro Suzuki on 1/19/12.
@@ -293,20 +291,20 @@ static XVim* s_instance = nil;
 - (void)setYankRegisterByName:(NSString*)regName{
     [_yankRegister release];
     if(nil == regName){
-        _yankRegister = nil;
+        _yankRegister = [[self findRegister:@"DQUOTE"] retain];
     }else{
         _yankRegister = [[self findRegister:regName] retain];
     }
+    TRACE_LOG(@"_yankRegister : %@", _yankRegister.description);
 }
 
-- (void)textYanked:(XVimText *)yankedText inView:(id)view{
-    for( NSString* s in yankedText.strings){
-        TRACE_LOG(@"yanked text: %@", s);
-    }
+- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view{
+    TRACE_LOG(@"yanked text: %@", yankedText);
     
     // Unnamed register
     [[self findRegister:@"DQUOTE"] clear];
-    [[self findRegister:@"DQUOTE"] appendText:yankedText.string];
+    [[self findRegister:@"DQUOTE"] appendText:yankedText];
+    [self findRegister:@"DQUOTE"].type = type;
     
     
     // Don't do anything if we are recording into the register (that isn't the repeat register)
@@ -318,7 +316,8 @@ static XVim* s_instance = nil;
     // the numbered registers.
     if (_yankRegister != nil){
         [_yankRegister clear];
-        [_yankRegister appendText:yankedText.string];
+        [_yankRegister appendText:yankedText];
+        _yankRegister.type = type;
     }else{
         // There are 10 numbered registers
         // Cycle number registers
@@ -328,7 +327,8 @@ static XVim* s_instance = nil;
             XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
             XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
             [next clear];
-            [next appendText:prev.text.string];
+            [next appendText:prev.string];
+            next.type  = prev.type;
             if( i == 0 ){
                 break;
             }
@@ -336,18 +336,18 @@ static XVim* s_instance = nil;
         
         XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
         [reg clear];
-        [reg appendText:yankedText.string];
+        [reg appendText:yankedText];
+        reg.type = type;
     }
 }
 
-- (void)textDeleted:(XVimText *)deletedText inView:(id)view{
-    for( NSString* s in deletedText.strings){
-        TRACE_LOG(@"deleted text: %@", s);
-    }
+- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view{
+    TRACE_LOG(@"deleted text: %@", deletedText);
     
     // Unnamed register
     [[self findRegister:@"DQUOTE"] clear];
-    [[self findRegister:@"DQUOTE"] appendText:deletedText.string];
+    [[self findRegister:@"DQUOTE"] appendText:deletedText];
+    [self findRegister:@"DQUOTE"].type = type;
     
     
     // Don't do anything if we are recording into the register (that isn't the repeat register)
@@ -359,7 +359,8 @@ static XVim* s_instance = nil;
     // the numbered registers.
     if (_yankRegister != nil){
         [_yankRegister clear];
-        [_yankRegister appendText:deletedText.string];
+        [_yankRegister appendText:deletedText];
+        _yankRegister.type = type;
     }else{
         // There are 10 numbered registers
         // Cycle number registers
@@ -369,7 +370,8 @@ static XVim* s_instance = nil;
             XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
             XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
             [next clear];
-            [next appendText:prev.text.string];
+            [next appendText:prev.string];
+            next.type  = prev.type;
             if( i == 0 ){
                 break;
             }
@@ -377,14 +379,15 @@ static XVim* s_instance = nil;
         
         XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
         [reg clear];
-        [reg appendText:deletedText.string];
+        [reg appendText:deletedText];
+        reg.type = type;
     }
 }
 
 
 - (NSString*)pasteText:(XVimRegister*)yankRegister {
 	if (yankRegister) {
-		return yankRegister.text.string;
+		return yankRegister.string;
 	}
 
     return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];

@@ -16,6 +16,10 @@
 	return (DVTSourceTextView*)[self view];
 }
 
+/**
+ * Return column number
+ * column number starts from 0.
+ **/
 - (NSUInteger)columnNumber:(NSUInteger)index {
 	DVTFoldingTextStorage *textStorage = (DVTFoldingTextStorage*)[[self xview] textStorage];
 	return (NSUInteger)[textStorage columnForPositionConvertingTabs:index];

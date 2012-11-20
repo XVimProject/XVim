@@ -276,11 +276,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)y:(XVimWindow*)window{
-	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithYankRegister:[self yankRegister]];
-    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithContext:[self contextCopy]
-															   operatorAction:operatorAction 
-																   withParent:self];
-    return [evaluator motionFixedFrom:[window sourceView].selectionAreaStart To:[window sourceView].selectionAreaEnd Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    [[window sourceView] yank:nil];
+    return nil;
 }
 
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window{

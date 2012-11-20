@@ -9,48 +9,37 @@
 #import "XVimText.h"
 
 @implementation XVimText
-@synthesize type = _type;
-@synthesize strings = _strings;
 @synthesize string = _string;
 
 - (id)init{
     if(self = [super init]){
-        _type = TEXT_TYPE_CHARACTERS;
-        _strings = [[NSMutableArray alloc] init];
-        _string = nil;
+        _string = [[NSMutableString alloc] init];
     }
     return self;
 }
 
 - (void)dealloc{
     [super dealloc];
-    [_strings release];
+    [_string release];
 }
 
-- (NSString*)string{
-    NSAssert( _strings != nil, @"_strings should not be nil");
-    if(_strings.count == 0){
-        return @"";
-    }
-    
-    return [_strings objectAtIndex:0];
+- (NSString *)description{
+    return [self string];
 }
 
 - (void)appendString:(NSString *)string{
     NSAssert( string != nil, @"string must be not nil");
-    NSAssert( _strings != nil, @"_strings should not be nil");
-    if( _strings.count == 0){
-        [_strings addObject:@""];
-    }
-
-    NSString* firstString = [_strings objectAtIndex:0];
-    [_strings replaceObjectAtIndex:0 withObject:[firstString stringByAppendingString:string]];
+    [(NSMutableString*)_string appendString:string];
 }
 
 - (void)clear{
-    self.type = 0;
-    [_strings removeAllObjects];
-    [_string release];
-    _string = nil;
+    [((NSMutableString*)_string) setString:@""];
 }
+
+- (id)copyWithZone:(NSZone *)zone{
+    XVimText* copiedObject = [[XVimText allocWithZone:zone] init];
+    copiedObject->_string = [_string copyWithZone:zone];
+    return copiedObject;
+}
+
 @end
