@@ -14,7 +14,7 @@
 @synthesize option = _option;
 @synthesize count = _count;
 @synthesize position = _position;
-@synthesize character = _character;
+@synthesize info = _info;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count{
     if( self = [super init]){
@@ -22,7 +22,18 @@
         _type = type;
         _option = option;
         _count = count;
+        
+        _info = malloc(sizeof(XVimMotionInfo));
+        _info->reachedEndOfLine = NO;
+        _info->isFirstWordInALine = NO;
+        _info->lastEndOfLine = NSNotFound;
+        _info->lastEndOfWord = NSNotFound;
     }
     return self;
+}
+
+- (void)dealloc{
+    free(_info);
+    [super dealloc];
 }
 @end

@@ -10,6 +10,13 @@
 #import "XVimMotionType.h"
 #import "XVimMotionOption.h"
 
+typedef struct {
+    BOOL reachedEndOfLine;
+    BOOL isFirstWordInALine;
+    NSUInteger lastEndOfLine;
+    NSUInteger lastEndOfWord;
+}XVimMotionInfo;
+
 #define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
 
 typedef enum _MOTION{
@@ -46,6 +53,7 @@ typedef enum _MOTION{
 @property NSUInteger column;
 @property NSUInteger position;
 @property unichar character;
+@property XVimMotionInfo* info;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;
 @end 

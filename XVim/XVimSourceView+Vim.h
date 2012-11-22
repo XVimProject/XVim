@@ -62,11 +62,6 @@
 
 @class XVimRegister;
 
-typedef struct _XVimWordInfo{
-    BOOL isFirstWordInALine;
-    NSUInteger lastEndOfLine;
-    NSUInteger lastEndOfWord;
-}XVimWordInfo;
 
 
 @interface XVimSourceView(Vim)
@@ -104,7 +99,13 @@ typedef struct _XVimWordInfo{
  **/
 - (BOOL) isEmptyLine:(NSUInteger)index;
 
-
+/**
+ * Returns nearest valid cursor position for normal mode.
+ * This is usually convert cursor position on newline to previous character since
+ * a cursor can not be on a newline charaster if its not blankline
+ **/
+- (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index;
+    
 /**
  * Determine if the position specified with "index" is valid cursor position in normal mode.
  * Valid position is followings
@@ -241,16 +242,10 @@ typedef struct _XVimWordInfo{
 
 // Motions
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
-
-// Note: "next" method may return invalid cursor position (the position of newline)
-//       This is because to work "dl" to work properly.
-//       "l" is exclusive motion and when the "dl" is input at the last character of a line (assume the character is "x")
-//       the operation range is "x¥n" and x is deleted.
-//       "l" calls next method as a motion and then it should return the position at "¥n" to make "dl" work properly.
-- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info;
 - (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
-- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info;
+- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info;
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt; //e,E
 - (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt; //ge,gE

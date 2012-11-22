@@ -141,7 +141,7 @@
     }
     // "index" in not a blankline.
     // Then the EOF is not a valid cursor position.
-    if( index == [[self string] length] ){
+    if( [self isEOF:index] ){
         return NO;
     }
     
@@ -151,6 +151,15 @@
     }
     
     return NO;
+}
+
+- (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    // If the current cursor position is not valid for normal mode move it.
+    if( ![self isValidCursorPosition:index] ){
+        return index-1;
+    }
+    return index;
 }
 
 /**
@@ -452,7 +461,9 @@
     return pos;
 }
 
-- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info{
+    info->reachedEndOfLine = NO;
+    
     if( index == [[self string] length] )
         return [[self string] length];
     
@@ -467,12 +478,12 @@
         NSUInteger next = pos + 1;
         // If the next position is the end of docuement and current position is not a newline
         // Never move a cursor to the end of document.
-        if( next == [string length] && !isNewLine([string characterAtIndex:pos]) ){
+        if( [self isEOF:next] && !isNewLine([string characterAtIndex:pos]) ){
             break;
         }
         
         if( opt == LEFT_RIGHT_NOWRAP && isNewLine([[self string] characterAtIndex:next]) ){
-            pos = next;
+            info->reachedEndOfLine = YES;
             break;
         }
         
@@ -614,7 +625,7 @@
  * @param option MOTION_OPTION_NONE or BIGWORD
  * @param info This is used with special cases explaind above such as 'cw' or 'w' crossing over the newline.
  **/
-- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info{
+- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert(nil != info, @"Specify info");
     

@@ -35,6 +35,7 @@
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
 - (void)_syncStateFromView; // update our instance variables with _view's properties
 - (void)_syncState; // update _view's properties with our variables
+- (NSArray*)_blockSelectionArray;
 @end
 
 @implementation XVimSourceView
@@ -150,10 +151,18 @@
     TRACE_LOG(@"YANKED TYPE:%d", _lastYankedType);
     
     NSArray* ranges = [_view selectedRanges];
+    if( _lastYankedType == TEXT_TYPE_BLOCK ){
+        ranges = [self _blockSelectionArray];
+    }
     NSMutableArray* tmp = [[[NSMutableArray alloc] init] autorelease];
     for( NSValue* range in ranges ){
-        NSString* str = [[_view string] substringWithRange:range.rangeValue];
-        [tmp addObject:str];
+        if( range.rangeValue.length == 0 ){
+            // Nothing to yank
+            [tmp addObject:@""];
+        }else{
+            NSString* str = [[_view string] substringWithRange:range.rangeValue];
+            [tmp addObject:str];
+        }
     }
     
     [_lastYankedText setString:[tmp componentsJoinedByString:@"\n"]];
@@ -169,6 +178,21 @@
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        // We have to treat some special cases
+        // When a cursor get end of line with "l" motion, make the motion type to inclusive.
+        // This make you to delete the last character. (if its exclusive last character never deleted with "dl")
+        if( motion.motion == MOTION_FORWARD && motion.info->reachedEndOfLine){
+            motion.type = CHARACTERWISE_INCLUSIVE;
+        }
+        if( motion.motion == MOTION_WORD_FORWARD ){
+            if (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound) {
+                to = motion.info->lastEndOfLine;
+                motion.type = CHARACTERWISE_INCLUSIVE;
+            } else if( motion.info->lastEndOfWord != NSNotFound){
+                to = motion.info->lastEndOfWord;
+                motion.type = CHARACTERWISE_INCLUSIVE;
+            }
+        }
         BOOL eof = [self isEOF:to];
         BOOL blank = [self isBlankLine:to];
         r = [self getOperationRangeFrom:_selectionBegin To:to Type:motion.type];
@@ -398,7 +422,8 @@
 }
 
 - (void)moveFoward:(NSUInteger)count option:(MOTION_OPTION)opt{
-    NSUInteger nextPos = [self next:_insertionPoint count:count option:opt];
+    XVimMotionInfo info;
+    NSUInteger nextPos = [self next:_insertionPoint count:count option:opt info:&info];
     [self moveCursor:nextPos];
     _preservedColumn = [self columnNumber:_insertionPoint];
 }
@@ -413,7 +438,7 @@
     [self moveCursor:nextPos];
 }
 
-//- (void)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info;
+//- (void)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info;
 
 - (void)moveWordsBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self wordsBackward:_insertionPoint count:count option:opt];
@@ -875,19 +900,18 @@
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
     NSUInteger nextPos = current;
     NSUInteger tmpPos = NSNotFound;
-    XVimWordInfo info;
     switch (motion.motion) {
         case MOTION_NONE:
             // Do nothing
             break;
         case MOTION_FORWARD:
-            nextPos = [self next:current count:motion.count option:motion.option];
+            nextPos = [self next:current count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_BACKWARD:
             nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
             break;
         case MOTION_WORD_FORWARD:
-            nextPos = [self wordsForward:current count:motion.count option:motion.option info:&info];
+            nextPos = [self wordsForward:current count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_WORD_BACKWARD:
             nextPos = [self wordsBackward:current count:motion.count option:motion.option];
@@ -911,7 +935,7 @@
             }
             break;
         case MOTION_END_OF_LINE:
-            tmpPos = [self nextLine:current column:_preservedColumn count:motion.count-1 option:MOTION_OPTION_NONE];
+            tmpPos = [self nextLine:current column:0 count:motion.count-1 option:MOTION_OPTION_NONE];
             nextPos = [self endOfLine:tmpPos];
             if( nextPos == NSNotFound){
                 nextPos = tmpPos;
@@ -987,7 +1011,11 @@
         pos = [_view string].length;
     }
     
-    _insertionPoint = pos;
+    if( _cursorMode == CURSOR_MODE_COMMAND ){
+        _insertionPoint = [self convertToValidCursorPositionForNormalMode:pos];
+    }else{
+        _insertionPoint = pos;
+    }
     if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
         _selectionBegin = _insertionPoint;
         _selectionAreaStart = _insertionPoint;
@@ -1003,24 +1031,8 @@
             _selectionAreaStart = [self firstOfLine:min];
             _selectionAreaEnd = [self tailOfLine:max];
         }else if( _selectionMode == MODE_BLOCK){
-            // Find Out Block Rect
-            // We have to compare the line number and column number of start and end postion of selection.
-            NSUInteger columnBegin = [self columnNumber:_selectionBegin];
-            NSUInteger lineBegin = [self lineNumber:_selectionBegin];
-            NSUInteger columnEnd = [self columnNumber:_insertionPoint];
-            NSUInteger lineEnd= [self lineNumber:_insertionPoint];
-            
-            // Define the block as a rect by line and column number
-            NSUInteger top = MIN(lineBegin,lineEnd);
-            NSUInteger bottom = MAX(lineBegin,lineEnd);
-            NSUInteger left = MIN(columnBegin, columnEnd);
-            NSUInteger right = MAX(columnBegin, columnEnd);
-            
-            // Set _selectionAreaStart as left-top position of the block. But we do not use them in block selection
-            _selectionAreaStart = [self positionAtLineNumber:top column:left];
-            // Set _selectionAreaEnd as right-bottom position of the block. But we do not use them in block selection
-            _selectionAreaEnd = [self positionAtLineNumber:bottom column:right];
-            
+            // Nothing
+            // We use _insertionPoint and _selectionBegin to set selection to _view
         }
     }
     
@@ -1058,6 +1070,21 @@
     [self _syncState];
 }
 
+- (NSArray*)_blockSelectionArray{
+    // Define the block as a rect by line and column number
+    NSUInteger top    = MIN( [self lineNumber:_insertionPoint], [self lineNumber:_selectionBegin] );
+    NSUInteger bottom = MAX( [self lineNumber:_insertionPoint], [self lineNumber:_selectionBegin] );
+    NSUInteger left   = MIN( [self columnNumber:_insertionPoint], [self columnNumber:_selectionBegin] );
+    NSUInteger right  = MAX( [self columnNumber:_insertionPoint], [self columnNumber:_selectionBegin] );
+    NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
+    for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
+        //NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
+        NSUInteger start = [self positionAtLineNumber:top+i column:left];
+        NSUInteger end = [self positionAtLineNumber:top+i column:right];
+        [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, [self isNewLine:end] ? end-start : end-start+1)]];;
+    }
+    return rangeArray;
+}
 /**
  * Applies internal state to underlying view (_view).
  * This update _view's property and applies the visual effect on it.
@@ -1072,22 +1099,9 @@
     }else if( _selectionMode == MODE_LINE ){
         [self _setSelectedRange:NSMakeRange(_selectionAreaStart,_selectionAreaEnd-_selectionAreaStart+1)];
     }else if( _selectionMode == MODE_BLOCK ){
-        // Define the block as a rect by line and column number
-        NSUInteger top = [self lineNumber:_selectionAreaStart];
-        NSUInteger bottom = [self lineNumber:_selectionAreaEnd];
-        NSUInteger left = [self columnNumber:_selectionAreaStart];
-        NSUInteger right = [self columnNumber:_selectionAreaEnd];
-        NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
-        for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
-            NSUInteger maxColumn = [self maxColumnAtLineNumber:top+i];
-            if( maxColumn >= left){ // Only when the line has a column inside the rect add the range
-                NSUInteger start = [self positionAtLineNumber:top+i column:left];
-                NSUInteger end = [self positionAtLineNumber:top+i column:right];
-                // If the maxColumn is 0 (means its blankline or EOF) the range length is 0 not to include newline to select.
-                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(start, maxColumn==0 ? 0 : end-start+1)]];;
-            }
-        }
-        [_view setSelectedRanges:rangeArray];
+        // Find out the rect of the block
+        
+        [_view setSelectedRanges:[self _blockSelectionArray]];
     }
     
     if( _cursorMode == CURSOR_MODE_COMMAND ){

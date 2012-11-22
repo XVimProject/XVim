@@ -295,7 +295,7 @@
         return NSMakeRange(NSNotFound, 0);
     }
 
-    XVimWordInfo info;
+    XVimMotionInfo info;
     NSUInteger wordStart = searchStart;
     if (wordStart > 0){
         unichar curChar = [string characterAtIndex:wordStart];
