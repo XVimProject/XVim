@@ -363,7 +363,8 @@
             NSRange r;
             NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
             r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
-            [self _setSelectedRange:r];
+            [self toggleCaseForRange:r];
+            _insertionPoint = r.location;
         }
     }else{
         NSArray* ranges = [self _selectedRanges];
