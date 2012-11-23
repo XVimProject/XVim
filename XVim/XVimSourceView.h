@@ -61,6 +61,7 @@
 - (void)moveUp;
 - (void)moveDown;
 - (void)moveForwardAndModifySelection;
+
 - (void)moveBackwardAndModifySelection;
 - (void)deleteForward;
 - (void)insertText:(NSString*)text;

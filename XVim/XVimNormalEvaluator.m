@@ -533,7 +533,9 @@
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.
     XVimSourceView* view = [window sourceView];
-    [view moveCursor:to];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    m.position = to;
+    [view move:m];
     /*
     NSRange r = NSMakeRange(to, 0);
     [view setSelectedRange:r];

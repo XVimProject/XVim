@@ -50,8 +50,6 @@ typedef enum {
 
 
 // Selection Mode
-- (void)startSelection:(VISUAL_MODE)mode;
-- (void)endSelection;
 - (void)changeSelectionMode:(VISUAL_MODE)mode;
 
 
@@ -92,9 +90,6 @@ typedef enum {
 - (void)moveSentencesBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsForward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
-
-// Direct Motion
-- (void)moveCursor:(NSUInteger)pos; // Avoid using this method. This is here only for compatibility reason
 
 // Case changes. These functions are all range checked.
 - (void)toggleCaseForRange:(NSRange)range;

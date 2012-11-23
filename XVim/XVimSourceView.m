@@ -130,10 +130,6 @@
     _preservedColumn = [self columnNumber:_insertionPoint];
 }
 
-- (void)moveCursor:(NSUInteger)pos{
-    [self _moveCursor:pos preserveColumn:NO];
-}
-
 - (void)move:(XVimMotion*)motion{
     METHOD_TRACE_LOG();
     switch( motion.motion ){
@@ -146,6 +142,8 @@
             [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:NO];
             break;
     }
+    
+    [self _syncState];
 }
 
 - (void)_yankSelection:(MOTION_TYPE)type{
@@ -275,7 +273,7 @@
         if (![self isNewLine:_insertionPoint] && after) {
             _insertionPoint++;
         }
-        [self moveCursor:_insertionPoint];
+        [self _moveCursor:_insertionPoint preserveColumn:NO];
         for(NSUInteger i = 0; i < count ; i++ ){
             [_view insertText:text];
         }
@@ -288,11 +286,11 @@
                 [self insertNewlineBelow];
             }else{
                 NSUInteger pos = [self nextLine:_insertionPoint column:0 count:1 option:MOTION_OPTION_NONE];
-                [self moveCursor:pos];
+                [self _moveCursor:pos preserveColumn:NO];
             }
         }else{
             NSUInteger pos = [self firstNonBlankInALine:_insertionPoint];
-            [self moveCursor:pos];
+            [self _moveCursor:pos preserveColumn:NO];
         }
         insertionPointAfterPut = _insertionPoint;
         for(NSUInteger i = 0; i < count ; i++ ){
@@ -461,52 +459,52 @@
 ////////// Premitive Operations (DO NOT USE THESE CODE!)///////////
 - (void)moveBack:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self prev:_insertionPoint count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
     _preservedColumn = [self columnNumber:_insertionPoint];
 }
 
 - (void)moveFoward:(NSUInteger)count option:(MOTION_OPTION)opt{
     XVimMotionInfo info;
     NSUInteger nextPos = [self next:_insertionPoint count:count option:opt info:&info];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
     _preservedColumn = [self columnNumber:_insertionPoint];
 }
 
 - (void)moveDown:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self nextLine:_insertionPoint column:_preservedColumn count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:YES];
 }
 
 - (void)moveUp:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self prevLine:_insertionPoint column:_preservedColumn count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:YES];
 }
 
 //- (void)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info;
 
 - (void)moveWordsBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self wordsBackward:_insertionPoint count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
 }
 
 - (void)moveSentencesForward:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self sentencesForward:_insertionPoint count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
 }
 
 - (void)moveSentencesBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self sentencesBackward:_insertionPoint count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
 }
 
 - (void)moveParagraphsForward:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self paragraphsForward:_insertionPoint count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
 }
 
 - (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt{
     NSUInteger nextPos = [self paragraphsBackward:_insertionPoint count:count option:opt];
-    [self moveCursor:nextPos];
+    [self _moveCursor:nextPos preserveColumn:NO];
 }
 
 
@@ -577,32 +575,9 @@
 // Selection (Visual Mode)  //
 //////////////////////////////
 
-- (void)startSelection:(VISUAL_MODE)mode{
-    //NSAssert(_selectionBegin== NSNotFound, @"beginSelection should be called after endSelection");
-    _selectionBegin= _insertionPoint;
-    _selectionMode = mode;
-    if( [_view selectedRange].length != 0 ){
-        _selectionAreaStart = [_view selectedRange].location;
-        _selectionBegin = _selectionAreaStart;
-        _selectionAreaEnd = [_view selectedRange].length + [_view selectedRange].location;
-    }else{
-        [self moveCursor:_insertionPoint]; // Update selection;
-    }
-    TRACE_LOG( @"Selection Started: mode:%d ip:%d begin:%d areaStart:%d areaEnd:%d", _selectionMode, _insertionPoint, _selectionBegin, _selectionAreaStart, _selectionAreaEnd);
-}
-
-- (void)endSelection{
-    //NSAssert(_selectionBegin!= NSNotFound, @"endSelection should be called after beginSelection");
-    _selectionMode = MODE_VISUAL_NONE;
-    [self moveCursor:_insertionPoint]; // turn selection off
-}
-
 - (void)changeSelectionMode:(VISUAL_MODE)mode{
-    if( mode == MODE_VISUAL_NONE){
-        [self endSelection];
-    }
     _selectionMode = mode;
-    [self moveCursor:_insertionPoint];
+    [self _syncState];
     return;
 }
 
@@ -1056,7 +1031,6 @@
         _insertionPoint = pos;
     }
     
-    [self _syncState];
     
     if( !preserve ){
         _preservedColumn = [self columnNumber:_insertionPoint];
@@ -1086,6 +1060,7 @@
         }
     }
     
+    _preservedColumn = [self columnNumber:_insertionPoint];
     // Apply it back to _view
     [self _syncState];
 }
@@ -1097,6 +1072,10 @@
  * we use _view to express it visually.
  **/
 - (void)_syncState{
+    // Rest current selection
+    [self _setSelectedRange:NSMakeRange(_insertionPoint,0)];
+    
+    // And then select new selection area
     if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
         _selectionBegin = _insertionPoint;
         _selectionAreaStart = _insertionPoint;
@@ -1128,8 +1107,6 @@
 // This is used when you want to call [_view setSelectedRrange];
 // The difference is that this checks the bounds(range can not be include EOF) and protect from Assersion
 - (void)_setSelectedRange:(NSRange)range{
-    LOG_STATE();
-    TRACE_LOG( @"Range %d,%d", range.location, range.length);
     if( [self isEOF:range.location] ){
         [_view setSelectedRange:NSMakeRange(range.location,0)];
         return;

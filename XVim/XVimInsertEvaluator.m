@@ -65,8 +65,7 @@
     return self;
 }
 
-- (NSString*)modeString
-{
+- (NSString*)modeString{
 	return @"-- INSERT --";
 }
 
@@ -75,12 +74,9 @@
     self.startRange = [[window sourceView] selectedRange];
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window {
 	NSRange range = [[window sourceView] selectedRange];
-	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-																			  mode:MODE_CHARACTER
-                                                                         withRange:range];
+	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_CHARACTER withRange:range];
 }
 
 - (float)insertionPointHeightRatio{

@@ -91,7 +91,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 		[self.commandLine setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
 		[self.commandLine setArgumentString:[evaluator argumentDisplayString]];
-		[[self sourceView] updateInsertionPointStateAndRestartTimer];
+		//[[self sourceView] updateInsertionPointStateAndRestartTimer];
 
         [_currentEvaluator release];
 		_currentEvaluator = evaluator;
@@ -241,32 +241,38 @@ static const char* KEY_WINDOW = "xvimwindow";
     TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
-    TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
-    [self.sourceView endSelection];
-    [self.sourceView moveCursor:index];
+    [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    m.position = index;
+    [[self sourceView] move:m];
 }
 
 - (void)mouseUp:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
+    /*1
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
-    TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
-    [self.sourceView moveCursor:index];
+     */
+    [self endMouseEvent:event];
 }
 
 - (void)mouseDragged:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
-    TRACE_LOG(@"Window - x:%f y:%f     View - x:%f y:%f", point.x, point.y, pointInView.x, pointInView.y );
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
     
     if(self.sourceView.selectionMode == MODE_VISUAL_NONE){
-        [self.sourceView startSelection:MODE_CHARACTER];
+        [self.sourceView changeSelectionMode:MODE_CHARACTER];
     }
-    [self.sourceView moveCursor:index];
+    
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    m.position = index;
+    [[self sourceView] move:m];
+    [self endMouseEvent:event];
+     
 }
 
 - (NSRange)restrictSelectedRange:(NSRange)range {

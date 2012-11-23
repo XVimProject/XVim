@@ -79,10 +79,9 @@
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window {
-	NSRange range = [[window sourceView] selectedRange];
-	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+	return [window sourceView].selectionMode == MODE_VISUAL_NONE ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																											mode:MODE_CHARACTER 
-																									withRange:range];
+																									withRange:NSMakeRange(0,0)];
 }
 
 - (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window {

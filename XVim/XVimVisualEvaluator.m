@@ -69,8 +69,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (void)becameHandlerInWindow:(XVimWindow*)window{
 	XVimSourceView* view = [window sourceView];
-    [view startSelection:_mode];
-    [view moveCursor:view.selectedRange.location];
+    [view changeSelectionMode:_mode];
     /*
 	// Select operation range passed to constructor
 	if (_operationRange.location != NSNotFound) {
@@ -110,15 +109,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (void)didEndHandlerInWindow:(XVimWindow*)window {
 	[super didEndHandlerInWindow:window];
 	[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
-    [[window sourceView] endSelection];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_VISUAL];
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window {
     XVimSourceView* sourceView = [window sourceView];
 	
 	NSUInteger glyphIndex = [window insertionPoint];
@@ -225,18 +222,14 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+	//XVimSourceView *view = [window sourceView];
 	//[view lowerCase];
-    [view moveCursor:view.selectionBegin];
-    [view endSelection];
 	return nil;
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+	//XVimSourceView *view = [window sourceView];
 	//[view upperCase];
-    [view moveCursor:view.selectionBegin];
-    [view endSelection];
 	return nil;
 }
 
@@ -296,7 +289,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)ESC:(XVimWindow*)window{
-    [[window sourceView] endSelection];
+    [[window sourceView] changeSelectionMode:MODE_VISUAL_NONE];
     return nil;
 }
 
@@ -319,7 +312,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
                                [excmd executeCommand:command inWindow:window];
                                
 							   //XVimSourceView *sourceView = [window sourceView];
-                               [[window sourceView] endSelection];
+                               [[window sourceView] changeSelectionMode:MODE_VISUAL_NONE];
                                return nil;
                            }
                                                                  onKeyPress:nil];
@@ -432,7 +425,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
-    [[window sourceView] moveCursor:to];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    m.position = to;
+    [[window sourceView] move:m];
     return [self withNewContext];
 }
 

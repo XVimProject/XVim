@@ -126,8 +126,7 @@
 	return nil;
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window {
 	[self relinquishFocusToWindow:window];
 	return nil;
 }
