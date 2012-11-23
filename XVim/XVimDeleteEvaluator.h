@@ -17,8 +17,3 @@
 				  withParent:(XVimEvaluator*)parent
 	  insertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end
-
-@interface XVimDeleteAction : XVimOperatorAction
-- (id)initWithYankRegister:(XVimRegister*)xregister
-	insertModeAtCompletion:(BOOL)insertModeAtCompletion;
-@end

@@ -97,9 +97,6 @@ typedef enum {
 - (void)moveCursor:(NSUInteger)pos; // Avoid using this method. This is here only for compatibility reason
 
 // Case changes. These functions are all range checked.
-- (void)toggleCase;
-- (void)upperCase;
-- (void)lowerCase;
 - (void)toggleCaseForRange:(NSRange)range;
 - (void)upperCaseForRange:(NSRange)range;
 - (void)lowerCaseForRange:(NSRange)range;

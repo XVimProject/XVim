@@ -524,10 +524,7 @@
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
-	NSRange replacementRange = [view selectedRange];
-	replacementRange.length = [self numericArg];
-	[view clampRangeToEndOfLine:&replacementRange];
-	[view toggleCaseForRange:replacementRange];
+    [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 

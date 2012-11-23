@@ -226,7 +226,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
-	[view lowerCase];
+	//[view lowerCase];
     [view moveCursor:view.selectionBegin];
     [view endSelection];
 	return nil;
@@ -234,7 +234,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
-	[view upperCase];
+	//[view upperCase];
     [view moveCursor:view.selectionBegin];
     [view endSelection];
 	return nil;
@@ -427,9 +427,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
-	NSRange r = [view selectedRange];
-	[view toggleCaseForRange:r];
-    [view endSelection];
+    [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
