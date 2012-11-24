@@ -11,6 +11,3 @@
 
 @interface XVimLowercaseEvaluator : XVimOperatorEvaluator
 @end
-
-@interface XVimLowercaseAction : XVimOperatorAction
-@end	

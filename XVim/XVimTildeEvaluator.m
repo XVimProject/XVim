@@ -27,14 +27,3 @@
 }
 
 @end
-
-@implementation XVimTildeAction
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
-	XVimSourceView *view = [window sourceView];
-	NSRange r = [view getOperationRangeFrom:from To:to Type:type];
-	[view toggleCaseForRange:r];
-	[view setSelectedRange:NSMakeRange(r.location, 0)];
-    return nil;
-}
-@end

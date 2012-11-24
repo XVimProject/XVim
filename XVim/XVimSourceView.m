@@ -13,6 +13,33 @@
  * So evaluators should NOT directly operate on DVTSourceTextView.
  */
 
+/**
+ * Main Idea of this class:
+ * This class is a kind of "Model" class of Vim view.
+ * So this class hold insertion point or selection area and so on.
+ * To operate on view you first modify the values (they are usually property of this class)
+ * and call [self _syncState]
+ * _syncState method applys all the changes to the values to underlaying view class (Which is usually NSTextView)
+ * Do not operate on the underlaying view class directly like [view setSelectedRange:range].
+ * In some operation you may want to use NSTextView's method to achive its task like deleting text which may use [_view delete:self].
+ * In this case you have to call [self _syncStateFromView] to keep the values(properties) 
+ * in this class valid after you call underlaying view's operation method.
+ **/
+
+/**
+ * Rules to implement XVimSourceView class
+ *  - use "_" prefixed name to define internal(private) method.
+ *  - Do not call [_view setSelectedRange] or [self _setSelectedRange] except in [self _syncState];
+ *  - DO not call [self _syncState] from internal(private) method.
+ *
+ *  - Do not use "setSelectedRange" method to set cursor position
+ *    Use 
+ *       [self _moveCursor];
+ *       [self _syncState];
+ *    instead
+ *  - Do not change _insertionPoint variable directly. Use [self _moveCursor: preserveColumn] instead.
+ **/
+
 #define LOG_STATE() TRACE_LOG(@"_view.range loc:%d len:%d | mode %d | ip %d | begin %d | areaS %d | areaE %d", \
                             [_view selectedRange].location, \
                             [_view selectedRange].length,  \
@@ -53,6 +80,7 @@
 	if (self = [super init]) {
 		_view = (NSTextView*)view;
         _insertionPoint = [_view selectedRange].location + [_view selectedRange].length;
+        _preservedColumn = [self columnNumber:_insertionPoint];
         _selectionMode = MODE_VISUAL_NONE;
         _selectionBegin = _insertionPoint;
         _selectionAreaStart = _insertionPoint;
@@ -99,7 +127,7 @@
     if( _selectionMode == MODE_VISUAL_NONE){
         [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(_insertionPoint, 0)]];
     }else if( _selectionMode == MODE_CHARACTER){
-        [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(_insertionPoint, _selectionAreaEnd - _selectionAreaStart+1)]];
+        [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(_selectionAreaStart, _selectionAreaEnd - _selectionAreaStart+1)]];
     }else if( _selectionMode == MODE_LINE){
         [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(_selectionAreaStart, _selectionAreaEnd - _selectionAreaStart+1)]];
     }else if( _selectionMode == MODE_BLOCK){
@@ -223,7 +251,7 @@
         [_delegate textDeleted:_lastYankedText  withType:_lastYankedType inView:self];
     }
     
-    _insertionPoint = _selectionAreaStart;
+    [self _moveCursor:_insertionPoint preserveColumn:NO];
     [self _syncStateFromView];
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
@@ -337,7 +365,7 @@
         
     }
     
-    _insertionPoint = insertionPointAfterPut;
+    [self _moveCursor:insertionPointAfterPut preserveColumn:NO];
     [self _syncState];
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
@@ -356,20 +384,20 @@
             }else{
                 [self toggleCaseForRange:[self getOperationRangeFrom:_insertionPoint To:end Type:CHARACTERWISE_EXCLUSIVE]];
             }
-            _insertionPoint = end;
+            [self _moveCursor:end preserveColumn:NO];
         }else{
             NSRange r;
             NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
             r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
             [self toggleCaseForRange:r];
-            _insertionPoint = r.location;
+            [self _moveCursor:r.location preserveColumn:NO];
         }
     }else{
         NSArray* ranges = [self _selectedRanges];
         for( NSValue* val in ranges){
             [self toggleCaseForRange:[val rangeValue]];
         }
-        _insertionPoint = _selectionAreaStart;
+        [self _moveCursor:_selectionAreaStart preserveColumn:NO];
     }
 
     [self _syncState];
@@ -378,10 +406,51 @@
 }
 
 - (void)makeLowerCase:(XVimMotion*)motion{
+    if( _insertionPoint == 0 && [[self string] length] == 0 ){
+        return ;
+    }
     
+    NSString* s = [self string];
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        NSRange r;
+        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
+        [self insertText:[[s substringWithRange:r] lowercaseString] replacementRange:r];
+        [self _moveCursor:r.location preserveColumn:NO];
+    }else{
+        NSArray* ranges = [self _selectedRanges];
+        for( NSValue* val in ranges){
+            [self insertText:[[s substringWithRange:val.rangeValue] lowercaseString] replacementRange:val.rangeValue];
+        }
+        [self _moveCursor:_selectionAreaStart preserveColumn:NO];
+    }
+
+    [self _syncState];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)makeUpperCase:(XVimMotion*)motion{
+    if( _insertionPoint == 0 && [[self string] length] == 0 ){
+        return ;
+    }
+    
+    NSString* s = [self string];
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        NSRange r;
+        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
+        [self insertText:[[s substringWithRange:r] uppercaseString] replacementRange:r];
+        [self _moveCursor:r.location preserveColumn:NO];
+    }else{
+        NSArray* ranges = [self _selectedRanges];
+        for( NSValue* val in ranges){
+            [self insertText:[[s substringWithRange:val.rangeValue] uppercaseString] replacementRange:val.rangeValue];
+        }
+        [self _moveCursor:_selectionAreaStart preserveColumn:NO];
+    }
+
+    [self _syncState];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
     
 }
 
@@ -562,8 +631,6 @@
 }
 
 - (void)upperCaseForRange:(NSRange)range {
-    NSString* s = [self string];
-	[self insertText:[[s substringWithRange:range] uppercaseString] replacementRange:range];
 }
 
 - (void)lowerCaseForRange:(NSRange)range {
@@ -1030,7 +1097,6 @@
     }else{
         _insertionPoint = pos;
     }
-    
     
     if( !preserve ){
         _preservedColumn = [self columnNumber:_insertionPoint];

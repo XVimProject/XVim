@@ -11,6 +11,3 @@
 
 @interface XVimTildeEvaluator : XVimOperatorEvaluator
 @end
-
-@interface XVimTildeAction : XVimOperatorAction
-@end

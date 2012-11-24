@@ -222,14 +222,14 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
-	//XVimSourceView *view = [window sourceView];
-	//[view lowerCase];
+	XVimSourceView *view = [window sourceView];
+    [view makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
-	//XVimSourceView *view = [window sourceView];
-	//[view upperCase];
+	XVimSourceView *view = [window sourceView];
+    [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 

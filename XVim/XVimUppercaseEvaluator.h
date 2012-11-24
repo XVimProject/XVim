@@ -12,5 +12,3 @@
 @interface XVimUppercaseEvaluator : XVimOperatorEvaluator
 @end
 
-@interface XVimUppercaseAction : XVimOperatorAction
-@end
