@@ -38,8 +38,6 @@ typedef enum {
 @property(readonly) NSUInteger insertionPreservedColumn;
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger selectionBegin;
-@property(readonly) NSUInteger selectionAreaStart;
-@property(readonly) NSUInteger selectionAreaEnd;
 @property(readonly) VISUAL_MODE selectionMode;
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
@@ -58,6 +56,7 @@ typedef enum {
 // Top Level Operation Interface
 - (void)move:(XVimMotion*)motion;
 - (void)delete:(XVimMotion*)motion;
+- (void)change:(XVimMotion*)motion;
 - (void)yank:(XVimMotion*)motion;
 - (void)put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)times;
 - (void)swapCase:(XVimMotion*)motion; // Previously this is named "toggleCase" in XVim

@@ -142,7 +142,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)c:(XVimWindow*)window{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [[window sourceView] delete:m];
+    [[window sourceView] change:m];
     return [[[XVimInsertEvaluator alloc] initWithContext:[self contextCopy]] autorelease];
 }
 
@@ -279,12 +279,15 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
 	
+   /*
 	XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     XVimEqualEvaluator *evaluator = [[XVimEqualEvaluator alloc] initWithContext:[self contextCopy]
 																 operatorAction:operatorAction 
 																	 withParent:self];
 
     return [evaluator motionFixedFrom:[window sourceView].selectionAreaStart To:[window sourceView].selectionAreaEnd Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+    */
+    return nil;
 }
 
 

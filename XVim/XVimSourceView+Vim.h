@@ -69,6 +69,9 @@
 // Determine if the position specified with "index" is EOF.
 - (BOOL) isEOF:(NSUInteger)index;
 
+//Determine if the document is empty.
+- (BOOL) isEmptyDocument;
+
 // Determine if the posiion is last character of the document
 - (BOOL) isLastCharacter:(NSUInteger)index;
     
@@ -80,6 +83,9 @@
 
 // Determine if the position specified with "index" is white space.
 - (BOOL) isWhiteSpace:(NSUInteger)index;
+
+// Determine if the position is on the last line in the document
+- (BOOL) isLastLine:(NSUInteger)index;
 
 /**
  * Determine if the position specified with "index" is blankline.

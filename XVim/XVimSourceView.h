@@ -30,8 +30,6 @@
 @property(readonly) NSUInteger insertionPreservedColumn;
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger selectionBegin;
-@property(readonly) NSUInteger selectionAreaStart;
-@property(readonly) NSUInteger selectionAreaEnd;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) VISUAL_MODE selectionMode;
 @property(readonly) CURSOR_MODE cursorMode;

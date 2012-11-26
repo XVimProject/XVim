@@ -68,162 +68,199 @@
 }
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    if (window){
-		charRange = [window restrictSelectedRange:charRange];
-	}
-    [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
+    @try{
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        if (window){
+            charRange = [window restrictSelectedRange:charRange];
+        }
+        [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
     return;
 }
 
 -  (void)keyDown:(NSEvent *)theEvent{
-    TRACE_LOG(@"Event:%@", theEvent.description);
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    if( nil == window ){
+    @try{
+        TRACE_LOG(@"Event:%@", theEvent.description);
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        if( nil == window ){
+            [base keyDown_:theEvent];
+            return;
+        }
+        
+        unichar charcode = [theEvent unmodifiedKeyCode];
+        DEBUG_LOG(@"DVTSourceTextView:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
+        
+        if( [window handleKeyEvent:theEvent] ){
+            return;
+        }
+        // Call Original keyDown:
         [base keyDown_:theEvent];
         return;
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
     }
-   
-    unichar charcode = [theEvent unmodifiedKeyCode];
-    DEBUG_LOG(@"DVTSourceTextView:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
-    
-    if( [window handleKeyEvent:theEvent] ){
-        return;
-    }
-    // Call Original keyDown:
-    [base keyDown_:theEvent];
     return;
 }
 
 -  (void)mouseDown:(NSEvent *)theEvent{
-    TRACE_LOG(@"Event:%@", theEvent.description);
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    [window mouseDown:theEvent];
+    @try{
+        TRACE_LOG(@"Event:%@", theEvent.description);
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        [window mouseDown:theEvent];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
     return;
 }
 
 -  (void)mouseUp:(NSEvent *)theEvent{
-    TRACE_LOG(@"Event:%@", theEvent.description);
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    [window mouseUp:theEvent];
+    @try{
+        TRACE_LOG(@"Event:%@", theEvent.description);
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        [window mouseUp:theEvent];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
 	return;
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent {
-    TRACE_LOG(@"Event:%@", theEvent.description);
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    [window mouseDragged:theEvent];
+    @try{
+        TRACE_LOG(@"Event:%@", theEvent.description);
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        [window mouseDragged:theEvent];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
     return;
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    [base drawRect_:dirtyRect];
-	[window drawRect:dirtyRect];
+    @try{
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        [base drawRect_:dirtyRect];
+        [window drawRect:dirtyRect];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
+    return;
 }
 
 - (BOOL) performKeyEquivalent:(NSEvent *)theEvent{
     TRACE_LOG(@"Event:%@", theEvent.description);
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    
-    METHOD_TRACE_LOG();
-    unichar charcode = [theEvent unmodifiedKeyCode];
-    TRACE_LOG(@"keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ ASCII:%d", [theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
-    if( [[base window] firstResponder] != base){
-        return NO;
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    @try{
+        METHOD_TRACE_LOG();
+        unichar charcode = [theEvent unmodifiedKeyCode];
+        TRACE_LOG(@"keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ ASCII:%d", [theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
+        if( [[base window] firstResponder] != base){
+            return NO;
+        }
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
     }
-    
     return [base performKeyEquivalent_:theEvent];
 }
 
 - (BOOL)shouldDrawInsertionPoint{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-	return [window shouldDrawInsertionPoint];
+    @try{
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        return [window shouldDrawInsertionPoint];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
+    return YES;
 }
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-	[window drawInsertionPointInRect:aRect color:aColor];
-	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+    @try{
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        [window drawInsertionPointInRect:aRect color:aColor];
+        [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
 }
 
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-	if (flag) {
-		[window drawInsertionPointInRect:rect color:color];
-	}
-	[base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+    @try{
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        XVimWindow* window = [base xvimWindow];
+        if (flag) {
+            [window drawInsertionPointInRect:rect color:color];
+        }
+        [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
 }
 
 - (BOOL)becomeFirstResponder{
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
-
     BOOL b = [base becomeFirstResponder_];
-    if (b) {
-        DEBUG_LOG(@"DVTSourceTextView:%p became first responder", self);
-        window.sourceView = [[XVimSourceView alloc] initWithView:base];
-        window.sourceView.delegate = [XVim instance];
+    @try{
+        if (b) {
+            DEBUG_LOG(@"DVTSourceTextView:%p became first responder", self);
+            window.sourceView = [[XVimSourceView alloc] initWithView:base];
+            window.sourceView.delegate = [XVim instance];
+        }
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
     }
     return b;
 }
 
 - (void)viewDidMoveToSuperview {
-	DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [base viewDidMoveToSuperview_];
-	
-	// Hide scroll bars according to options
-	XVimOptions *options = [[XVim instance] options];
-	NSString *guioptions = options.guioptions;
-	NSScrollView * scrollView = [base enclosingScrollView];
-	if ([guioptions rangeOfString:@"r"].location == NSNotFound)
-	{
-		[scrollView addObserver:self
-					 forKeyPath:@"hasVerticalScroller"
-						options:NSKeyValueObservingOptionNew
-						context:nil];
-		[scrollView setHasVerticalScroller:NO];
-	}
-	if ([guioptions rangeOfString:@"b"].location == NSNotFound)
-	{
-		[scrollView addObserver:self
-					 forKeyPath:@"hasHorizontalScroller"
-						options:NSKeyValueObservingOptionNew
-						context:nil];
-		[scrollView setHasHorizontalScroller:NO];
-	}
-
+    @try{
+        DVTSourceTextView *base = (DVTSourceTextView*)self;
+        [base viewDidMoveToSuperview_];
+        
+        // Hide scroll bars according to options
+        XVimOptions *options = [[XVim instance] options];
+        NSString *guioptions = options.guioptions;
+        NSScrollView * scrollView = [base enclosingScrollView];
+        if ([guioptions rangeOfString:@"r"].location == NSNotFound) {
+            [scrollView addObserver:self
+                         forKeyPath:@"hasVerticalScroller"
+                            options:NSKeyValueObservingOptionNew
+                            context:nil];
+            [scrollView setHasVerticalScroller:NO];
+        }
+        if ([guioptions rangeOfString:@"b"].location == NSNotFound) {
+            [scrollView addObserver:self
+                         forKeyPath:@"hasHorizontalScroller"
+                            options:NSKeyValueObservingOptionNew
+                            context:nil];
+            [scrollView setHasHorizontalScroller:NO];
+        }
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+    }
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-					  ofObject:(id)object 
-						change:(NSDictionary *)change 
-					   context:(void *)context
-{	
-	if (keyPath == @"hasVerticalScroller")
-	{
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+	if (keyPath == @"hasVerticalScroller") {
 		NSScrollView *scrollView = object;
-		if ([scrollView hasVerticalScroller])
-		{
+		if ([scrollView hasVerticalScroller]) {
 			[scrollView setHasVerticalScroller:NO];
 		}
 	}
-	if (keyPath == @"hasHorizontalScroller")
-	{
+	if (keyPath == @"hasHorizontalScroller") {
 		NSScrollView *scrollView = object;
-		if ([scrollView hasHorizontalScroller])
-		{
+		if ([scrollView hasHorizontalScroller]) {
 			[scrollView setHasHorizontalScroller:NO];
 		}
 	}

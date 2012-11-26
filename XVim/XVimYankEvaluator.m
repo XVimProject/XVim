@@ -34,23 +34,3 @@
 }
 @end
 
-
-@implementation XVimYankAction
-
--(id)initWithYankRegister:(XVimRegister*)xregister {
-	if (self = [super init]) {
-		_yankRegister = xregister;
-	}
-	return self;
-}
-
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
-    XVimSourceView* view = [window sourceView];
-    [view selectOperationTargetFrom:from To:to Type:type];
-    [view copyText];
-    //[[XVim instance] onDeleteOrYank:_yankRegister];
-
-    [view setSelectedRange:NSMakeRange(from, 0)];
-    return nil;
-}
-@end

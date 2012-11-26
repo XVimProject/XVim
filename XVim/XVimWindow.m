@@ -113,34 +113,32 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, _currentEvaluator,event.description);
-    DEBUG_LOG(@"Before Event Handling  loc:%d   len:%d   ip:%d", self.sourceView.selectedRange.location, self.sourceView.selectedRange.length, [self insertionPoint]);
+    NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
+    XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
+    XVimKeymap* keymap = [_currentEvaluator selectKeymapWithProvider:[XVim instance]];
     
-	NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
-	XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
-	XVimKeymap* keymap = [_currentEvaluator selectKeymapWithProvider:[XVim instance]];
-	
-	NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions 
-												 withPrimary:primaryKeyStroke
-												 withContext:_keymapContext];
+    NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions 
+                                                 withPrimary:primaryKeyStroke
+                                                 withContext:_keymapContext];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (keystrokes) {
-		for (XVimKeyStroke *keyStroke in keystrokes) {
-			[self handleKeyStroke:keyStroke];
-		}
-	} else {
+        for (XVimKeyStroke *keyStroke in keystrokes) {
+            [self handleKeyStroke:keyStroke];
+        }
+    } else {
         XVimOptions *options = [[XVim instance] options];
         NSTimeInterval delay = [options.timeoutlen integerValue] / 1000.0;
         if (delay > 0) {
             [self performSelector:@selector(handleTimeout) withObject:nil afterDelay:delay];
         }
     }
-
-	NSString* argString = [_keymapContext toString];
-	if ([argString length] == 0) {
-		argString = [_currentEvaluator argumentDisplayString];
-	}
-
-	[self.commandLine setArgumentString:argString];
+    
+    NSString* argString = [_keymapContext toString];
+    if ([argString length] == 0) {
+        argString = [_currentEvaluator argumentDisplayString];
+    }
+    
+    [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     DEBUG_LOG(@"After Event Handling  loc:%d   len:%d   ip:%d", self.sourceView.selectedRange.location, self.sourceView.selectedRange.length, [self insertionPoint]);
     return YES;

@@ -72,17 +72,14 @@
 }
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window {
-    [[window sourceView] delete:motion];
     
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
-        if( motion.type == LINEWISE ){
-            // 'cc' deletes the lines but need to keep the last newline.
-            // So insertNewline as 'O' does before entering insert mode
-            [[window sourceView] insertNewlineAbove];
-        }
+        [[window sourceView] change:motion];
         return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
+    }else{
+        [[window sourceView] delete:motion];
     }
     return nil;
 }

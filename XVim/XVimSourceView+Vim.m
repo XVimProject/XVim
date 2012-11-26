@@ -36,20 +36,19 @@
 
 @implementation XVimSourceView(Vim)
 
-/*
-- (void)deleteTextIntoYankRegister:(XVimRegister*)xregister {
-	[self cutText];
-	[self adjustCursorPosition];
-    [[XVim instance] onDeleteOrYank:xregister];
-}
- */
-
 /**
  * Determine if the position specified with "index" is EOF.
  **/
 - (BOOL) isEOF:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     return [[self string] length] == index;
+}
+
+/**
+ * Determine if the document is empty ( size = 0 )
+ **/
+- (BOOL) isEmptyDocument{
+    return [[self string] length] == 0;
 }
 
 /**
@@ -89,6 +88,12 @@
     }
     
     return isWhiteSpace([[self string] characterAtIndex:index]);
+}
+
+// Determine if the position is on the last line in the document
+- (BOOL) isLastLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return [self lineNumber:index] == [self numberOfLines];
 }
 
 /**
@@ -1118,7 +1123,10 @@
     }else if( type == CHARACTERWISE_INCLUSIVE ){
         // Nothing special
     }else if( type == LINEWISE ){
-        to = [self tailOfLine:to]; // Never returns EOF position because to is not EOF
+        to = [self tailOfLine:to];
+        if( [self isEOF:to] ){
+            to--;
+        }
         NSUInteger head = [self headOfLine:from];
         if( NSNotFound != head ){
             from = head;

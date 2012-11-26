@@ -13,8 +13,3 @@
 - (XVimEvaluator*)y:(XVimWindow*)window;
 @end
 
-@interface XVimYankAction : XVimOperatorAction {
-	__weak XVimRegister *_yankRegister;
-}
-- (id)initWithYankRegister:(XVimRegister*)xregister;
-@end

@@ -13,6 +13,7 @@
 typedef struct {
     BOOL reachedEndOfLine;
     BOOL isFirstWordInALine;
+    BOOL deleteLastLine;
     NSUInteger lastEndOfLine;
     NSUInteger lastEndOfWord;
 }XVimMotionInfo;
