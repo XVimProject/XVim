@@ -1176,7 +1176,7 @@
             }
             break;
         case MOTION_PERCENT:
-            nextPos = [self positionAtLineNumber:[self numberOfLines] * motion.count/100];
+            nextPos = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
             if (nextPos == NSNotFound) {
                 nextPos = [self firstOfLine:[self endOfFile]];
             }
