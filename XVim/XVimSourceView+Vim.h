@@ -236,7 +236,21 @@
  * it returns NSNotFound if "notfound" is YES  or  it returns the position of the end of line if "notfound" is NO.
  **/
 - (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound;
-    
+
+/**
+ * Returns index of the position where one of the the specified characters is found when searching from "pos"
+ * to end of the line.
+ * Returns NSNotFound if no character in the set is found.
+ **/
+- (NSUInteger)nextCharacterInALine:(NSUInteger)pos inSet:(NSCharacterSet*)set;
+
+/**
+ * This does all the work need to do with vim '%' motion.
+ * Find match pair character in the line and find the corresponding pair.
+ * Returns NSNotFound if not found.
+ **/
+- (NSUInteger)positionOfMatchedPair:(NSUInteger)pos;
+
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
 - (NSUInteger)skipWhiteSpace:(NSUInteger)index;
 

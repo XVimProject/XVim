@@ -316,101 +316,14 @@
 }
 
 - (XVimEvaluator*)PERCENT:(XVimWindow*)window {
-    // find matching bracketing character and go to it
-    // as long as the nesting level matches up
-    XVimSourceView* view = [window sourceView];
-    NSString* s = [view string];
-    NSRange at = [view selectedRange]; 
-    if (at.location >= s.length-1) {
-        // [window statusMessage:@"leveled match not found" :ringBell TRUE]
-        [[XVim instance] ringBell];
-        return self;
-    }
-    NSUInteger eol = [view endOfLine:at.location];
-    if (eol == NSNotFound){
-        at.length = 1;
+    if( self.numericMode ){
+       return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_PERCENT, LINEWISE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
     }else{
-        at.length = eol - at.location + 1;
+       return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_NEXT_MATCHED_ITEM, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
     }
-
-    NSString* search_string = [s substringWithRange:at];
-    NSString* start_with;
-    NSString* look_for;
-
-    // note: these two must match up with regards to character order
-    NSString *open_chars = @"{[(";
-    NSString *close_chars = @"}])";
-    NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:[open_chars stringByAppendingString:close_chars]];
-
-    NSInteger direction = 0;
-    NSUInteger start_location = 0;
-    NSRange search = [search_string rangeOfCharacterFromSet:charset];
-    if (search.location != NSNotFound) {
-        start_location = at.location + search.location;
-        start_with = [search_string substringWithRange:search];
-        NSRange search = [open_chars rangeOfString:start_with];
-        if (search.location == NSNotFound){
-            direction = -1;
-            search = [close_chars rangeOfString:start_with];
-            look_for = [open_chars substringWithRange:search];
-        }else{
-            direction = 1;
-            look_for = [close_chars substringWithRange:search];
-        }
-    }else{
-        // src is not an open or close char
-        // vim does not produce an error msg for this so we won't either i guess
-        // [window statusMessage:@"Not a match character" :ringBell TRUE]
-        [[XVim instance] ringBell];
-        return self;
-    }
-
-    unichar start_with_c = [start_with characterAtIndex:0];
-    unichar look_for_c = [look_for characterAtIndex:0];
-    NSInteger nest_level = 0;
-
-    search.location = NSNotFound;
-    search.length = 0;
-
-    if (direction > 0) {
-        for(NSUInteger x=start_location; x < s.length; x++) {
-            if ([s characterAtIndex:x] == look_for_c) {
-                nest_level--;
-                if (nest_level == 0) { // found match at proper level
-                    search.location = x;
-                    break;
-                }
-            } else if ([s characterAtIndex:x] == start_with_c) {
-                nest_level++;
-            }
-        }
-    } else {
-        for(NSUInteger x=start_location; ; x--) {
-            if ([s characterAtIndex:x] == look_for_c) {
-                nest_level--;
-                if (nest_level == 0) { // found match at proper level
-                    search.location = x;
-                    break;
-                }
-            } else if ([s characterAtIndex:x] == start_with_c) {
-                nest_level++;
-            }
-            if( 0 == x ){
-                break;
-            }
-        }
-    }
-
-    if (search.location == NSNotFound) {
-        // [window statusMessage:@"leveled match not found" :ringBell TRUE]
-        [[XVim instance] ringBell];
-        return self;
-    }
-
-    return [self _motionFixedFrom:at.location To:search.location Type:CHARACTERWISE_INCLUSIVE inWindow:window];
 }
 
-/* 
+/*
  * Space acts like 'l' in vi. moves  cursor forward
  */
 - (XVimEvaluator*)SPACE:(XVimWindow*)window{

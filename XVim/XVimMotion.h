@@ -40,6 +40,8 @@ typedef enum _MOTION{
     MOTION_PREV_FIRST_NONBLANK,     // -
     MOTION_FIRST_NONBLANK,          // ^
     MOTION_LINENUMBER,              // [num]G
+    MOTION_PERCENT,                 // [num]%
+    MOTION_NEXT_MATCHED_ITEM,       // %
     MOTION_LASTLINE,                // G
     MOTION_LINE_COLUMN,             // For custom (Line,Column) position
     MOTION_POSITION,                // For custom position

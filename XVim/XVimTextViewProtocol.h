@@ -41,7 +41,6 @@ typedef enum {
 @property(readonly) VISUAL_MODE selectionMode;
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
-@property(readonly) NSString* string;
 
 // Delegates
 @property(strong) id<XVimTextViewDelegate> delegate;

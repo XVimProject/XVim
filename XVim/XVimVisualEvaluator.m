@@ -181,32 +181,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)p:(XVimWindow*)window{
-    // if the paste text has a eol at the end (line oriented), then we are supposed to move to 
-    // the line boundary and then paste the data in.
-    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
-    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
     XVimSourceView* view = [window sourceView];
-    // Keep currently selected string
-    NSString* current = [[view string] substringWithRange:[view selectedRange]];
-    [view deleteText];
-    NSUInteger loc = [view selectedRange].location;
-    NSString *text = [[XVim instance] pasteText:[self yankRegister]];
-    if (text.length > 0){
-        unichar uc = [text characterAtIndex:[text length] -1];
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-            if( [view isBlankLine:loc] && ![view isEOF:loc]){
-                [view setSelectedRange:NSMakeRange(loc+1,0)];
-            }else{
-                [view insertNewline];
-            }
-        }
-        
-        for(NSUInteger i = 0; i < [self numericArg]; i++ ){
-            [view insertText:text];
-        }
-        
-        [[NSPasteboard generalPasteboard] setString:current forType:NSStringPboardType];
-    }
+    XVimRegister* reg = [XVim instance].yankRegister;
+    [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 

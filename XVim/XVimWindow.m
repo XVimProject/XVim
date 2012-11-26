@@ -140,7 +140,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
-    DEBUG_LOG(@"After Event Handling  loc:%d   len:%d   ip:%d", self.sourceView.selectedRange.location, self.sourceView.selectedRange.length, [self insertionPoint]);
     return YES;
 }
 

@@ -527,6 +527,109 @@
 }
 
 /**
+ * Returns index of the position where one of the the specified characters is found when searching from "pos"
+ * to end of the line.
+ * Returns NSNotFound if no character in the set is found.
+ **/
+- (NSUInteger)nextCharacterInALine:(NSUInteger)pos inSet:(NSCharacterSet*)set{
+    NSUInteger end = [self endOfLine:pos];
+    if( NSNotFound == end ){
+        return NSNotFound;
+    }
+    return [[self string] rangeOfCharacterFromSet:set options:0 range:NSMakeRange(pos, end-pos+1)].location;
+}
+
+/**
+ * This does all the work need to do with vim '%' motion.
+ * Find match pair character in the line and find the corresponding pair.
+ * Returns NSNotFound if not found.
+ **/
+- (NSUInteger)positionOfMatchedPair:(NSUInteger)pos{
+    // find matching bracketing character and go to it
+    // as long as the nesting level matches up
+    XVimSourceView* view = self;
+    NSString* s = [view string];
+    NSRange at =  NSMakeRange(pos,0);
+    if (pos >= s.length-1) {
+        return NSNotFound;
+    }
+    NSUInteger eol = [view endOfLine:pos];
+    if (eol == NSNotFound){
+        at.length = 1;
+    }else{
+        at.length = eol - at.location + 1;
+    }
+
+    NSString* search_string = [s substringWithRange:at];
+    NSString* start_with;
+    NSString* look_for;
+
+    // note: these two must match up with regards to character order
+    NSString *open_chars = @"{[(";
+    NSString *close_chars = @"}])";
+    NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:[open_chars stringByAppendingString:close_chars]];
+
+    NSInteger direction = 0;
+    NSUInteger start_location = 0;
+    NSRange search = [search_string rangeOfCharacterFromSet:charset];
+    if (search.location != NSNotFound) {
+        start_location = at.location + search.location;
+        start_with = [search_string substringWithRange:search];
+        NSRange search = [open_chars rangeOfString:start_with];
+        if (search.location == NSNotFound){
+            direction = -1;
+            search = [close_chars rangeOfString:start_with];
+            look_for = [open_chars substringWithRange:search];
+        }else{
+            direction = 1;
+            look_for = [close_chars substringWithRange:search];
+        }
+    }else{
+        // src is not an open or close char
+        // vim does not produce an error msg for this so we won't either i guess
+        return NSNotFound;
+    }
+
+    unichar start_with_c = [start_with characterAtIndex:0];
+    unichar look_for_c = [look_for characterAtIndex:0];
+    NSInteger nest_level = 0;
+
+    search.location = NSNotFound;
+    search.length = 0;
+
+    if (direction > 0) {
+        for(NSUInteger x=start_location; x < s.length; x++) {
+            if ([s characterAtIndex:x] == look_for_c) {
+                nest_level--;
+                if (nest_level == 0) { // found match at proper level
+                    search.location = x;
+                    break;
+                }
+            } else if ([s characterAtIndex:x] == start_with_c) {
+                nest_level++;
+            }
+        }
+    } else {
+        for(NSUInteger x=start_location; ; x--) {
+            if ([s characterAtIndex:x] == look_for_c) {
+                nest_level--;
+                if (nest_level == 0) { // found match at proper level
+                    search.location = x;
+                    break;
+                }
+            } else if ([s characterAtIndex:x] == start_with_c) {
+                nest_level++;
+            }
+            if( 0 == x ){
+                break;
+            }
+        }
+    }
+
+    return search.location;
+}
+
+/**
  * Returns the position when a cursor goes to upper line.
  * @param index the position of the cursor
  * @param column the position of the column

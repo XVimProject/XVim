@@ -120,15 +120,15 @@
 }
 
 - (NSArray*)selectedRanges{
-    return [_view selectedRanges];
+    return [self _selectedRanges];
 }
 
 - (NSUInteger)insertionColumn{
-    return [(XVimSourceView*)_view columnNumber:_insertionPoint];
+    return [self columnNumber:_insertionPoint];
 }
 
 - (NSUInteger)insertionLine{
-    return [(XVimSourceView*)_view lineNumber:_insertionPoint];
+    return [self lineNumber:_insertionPoint];
 }
 
 - (NSArray*)_selectedRanges{
@@ -201,14 +201,18 @@
 
 - (void)move:(XVimMotion*)motion{
     METHOD_TRACE_LOG();
+    NSUInteger next = [self _getPositionFrom:_insertionPoint Motion:motion];
+    if( next == NSNotFound ){
+        return;
+    }
     switch( motion.motion ){
         case MOTION_LINE_BACKWARD:
         case MOTION_LINE_FORWARD:
             // TODO: Preserve column option can be included in motion object
-            [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:YES];
+            [self _moveCursor:next preserveColumn:YES];
             break;
         default:
-            [self _moveCursor:[self _getPositionFrom:_insertionPoint Motion:motion] preserveColumn:NO];
+            [self _moveCursor:next preserveColumn:NO];
             break;
     }
     
@@ -264,6 +268,9 @@
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        if( to == NSNotFound ){
+            return;
+        }
         // We have to treat some special cases
         // When a cursor get end of line with "l" motion, make the motion type to inclusive.
         // This make you to delete the last character. (if its exclusive last character never deleted with "dl")
@@ -335,6 +342,9 @@
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        if( NSNotFound == to ){
+            return;
+        }
         r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
         BOOL eof = [self isEOF:to];
         BOOL blank = [self isBlankLine:to];
@@ -457,6 +467,9 @@
         if( motion.motion == MOTION_NONE ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,LEFT_RIGHT_NOWRAP,motion.count);
             NSUInteger end = [self _getPositionFrom:_insertionPoint Motion:m];
+            if( end == NSNotFound){
+                return;
+            }
             if( m.info->reachedEndOfLine ){
                 [self toggleCaseForRange:[self getOperationRangeFrom:_insertionPoint To:end Type:CHARACTERWISE_INCLUSIVE]];
             }else{
@@ -466,6 +479,9 @@
         }else{
             NSRange r;
             NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+            if( to == NSNotFound){
+                return;
+            }
             r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
             [self toggleCaseForRange:r];
             [self _moveCursor:r.location preserveColumn:NO];
@@ -492,6 +508,9 @@
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        if( to == NSNotFound ){
+            return;
+        }
         r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
         [self insertText:[[s substringWithRange:r] lowercaseString] replacementRange:r];
         [self _moveCursor:r.location preserveColumn:NO];
@@ -516,6 +535,9 @@
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
         NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        if( to == NSNotFound ){
+            return;
+        }
         r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
         [self insertText:[[s substringWithRange:r] uppercaseString] replacementRange:r];
         [self _moveCursor:r.location preserveColumn:NO];
@@ -1061,6 +1083,10 @@
 //////////////////////
 // Internal Methods //
 //////////////////////
+/**
+ * Returns end position of the specified motion.
+ * Note that this may return NSNotFound
+ **/
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
     NSUInteger nextPos = current;
     NSUInteger tmpPos = NSNotFound;
@@ -1148,6 +1174,15 @@
             if (nextPos == NSNotFound) {
                 nextPos = [self firstOfLine:[self endOfFile]];
             }
+            break;
+        case MOTION_PERCENT:
+            nextPos = [self positionAtLineNumber:[self numberOfLines] * motion.count/100];
+            if (nextPos == NSNotFound) {
+                nextPos = [self firstOfLine:[self endOfFile]];
+            }
+            break;
+        case MOTION_NEXT_MATCHED_ITEM:
+            nextPos = [self positionOfMatchedPair:current];
             break;
         case MOTION_LASTLINE:
             nextPos = [self firstOfLine:[self endOfFile]];
