@@ -173,10 +173,10 @@
         for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
             selectionStart = [self positionAtLineNumber:top+i column:left];
             selectionEnd = [self positionAtLineNumber:top+i column:right];
-            if( [self isEOF:selectionStart] ){
-                // EOF can not be selected
-                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]];
-            }else if( [self isEOF:selectionEnd] ){
+            if( [self isEOF:selectionStart] || [self isTOL:selectionStart]){
+                // EOF or EOL can not be selected
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]]; // 0 means No selection. This information is important and used in operators like 'delete'
+            }else if( [self isEOF:selectionEnd] || [self isTOL:selectionEnd]){
                 selectionEnd--;
                 [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
             }else{
@@ -1172,6 +1172,8 @@
 // Obsolete
 // This is here because only compatibility reason
 - (void)setSelectedRange:(NSRange)range {
+    [self _setSelectedRange:range];
+    /*
     LOG_STATE();
     @try{
         _insertionPoint = range.location;
@@ -1184,6 +1186,7 @@
         ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
     }
     LOG_STATE();
+     */
 }
 
 //////////////////////
@@ -1329,6 +1332,19 @@
     DEBUG_LOG(@"New Insertion Point:%d     Preserved Column:%d", _insertionPoint, _preservedColumn);
 }
 
+- (void)_adjustCursorPosition{
+    if( ![self isValidCursorPosition:_insertionPoint] ){
+        NSRange placeholder = [(DVTSourceTextView*)_view rangeOfPlaceholderFromCharacterIndex:_insertionPoint forward:NO wrap:NO limit:0];
+        if( placeholder.location != NSNotFound && _insertionPoint == (placeholder.location + placeholder.length)){
+            //The condition here means that just before current insertion point is a placeholder.
+            //So we select the the place holder and its already selected by "selectedPreviousPlaceholder" above
+            [self _moveCursor:placeholder.location preserveColumn:NO];
+        }else{
+            [self _moveCursor:_insertionPoint-1 preserveColumn:NO];
+        }
+    }
+    
+}
 - (void)_syncStateFromView{
     // TODO: handle block selection (if selectedRanges have multiple ranges )
     NSRange r = [_view selectedRange];
@@ -1358,14 +1374,13 @@
  * we use _view to express it visually.
  **/
 - (void)_syncState{
-    // Rest current selection
-    [self _setSelectedRange:NSMakeRange(_insertionPoint,0)];
+    // Reset current selection
+    if( _cursorMode == CURSOR_MODE_COMMAND ){
+        [self _adjustCursorPosition];
+    }
     [_view setSelectedRanges:[self _selectedRanges]];
     
     
-    if( _cursorMode == CURSOR_MODE_COMMAND ){
-        [self adjustCursorPosition];
-    }
     [_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
 }
 

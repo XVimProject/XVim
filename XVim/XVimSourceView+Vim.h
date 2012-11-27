@@ -53,7 +53,7 @@
  * Head of line is the first character of a line excluding newline character.
  * This means that blankline does NOT have a head of line.
  *
- * "Tail of Line"
+ * "Tail of Line(TOL)"
  * Tail of Line is newline or EOF character at the end of a line.
  *
  *
@@ -77,6 +77,9 @@
     
 // Determine if the position specified with "index" is EOL.
 - (BOOL) isEOL:(NSUInteger)index;
+
+// Determine if the position specified with "index" is TOL.
+- (BOOL) isTOL:(NSUInteger)index;
 
 // Determine if the position specified with "index" is newline.
 - (BOOL) isNewLine:(NSUInteger)index;

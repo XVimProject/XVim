@@ -68,6 +68,14 @@
 }
 
 /**
+ * Determine if the position specified with "index" is EOL.
+ **/
+- (BOOL) isTOL:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    return [self isNewLine:index];
+}
+
+/**
  * Determine if the position specified with "index" is newline.
  **/
 - (BOOL) isNewLine:(NSUInteger)index{
