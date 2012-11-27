@@ -64,6 +64,7 @@ typedef enum {
 - (void)filter:(XVimMotion*)motion;
 - (void)shiftRight:(XVimMotion*)motion;
 - (void)shiftLeft:(XVimMotion*)motion;
+- (void)join:(NSUInteger)count;
 - (void)insertNewlineBelow;
 - (void)insertNewlineAbove;
 

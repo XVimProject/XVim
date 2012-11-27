@@ -302,13 +302,6 @@
 // Note: CARET always moves to start of the current line ignoring any numericArg.
 - (XVimEvaluator*)CARET:(XVimWindow*)window{
     return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_FIRST_NONBLANK, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg]) inWindow:window];
-    XVimSourceView* view = [window sourceView];
-    NSRange r = [view selectedRange];
-    NSUInteger head = [view headOfLineWithoutSpaces:r.location];
-    if( NSNotFound == head ){
-        head = r.location;
-    }
-    return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 }
 
 - (XVimEvaluator*)DOLLAR:(XVimWindow*)window{

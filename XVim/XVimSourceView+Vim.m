@@ -96,6 +96,19 @@
     return [self lineNumber:index] == [self numberOfLines];
 }
 
+- (BOOL) isFirstOfLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( 0 == index ){
+        return YES;
+    }
+    
+    if( [self isNewLine:index-1] ){
+        return YES;
+    }
+    
+    return NO;
+}
+
 /**
  * Determine if the position specified with "index" is blankline.
  * Blankline is one of them

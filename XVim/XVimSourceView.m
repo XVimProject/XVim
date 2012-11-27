@@ -194,9 +194,12 @@
 ////////// Top level operation interface/////////
 
 - (void)escapeFromInsert{
+    [self _syncStateFromView];
     _cursorMode = CURSOR_MODE_COMMAND;
+    if(![self isFirstOfLine:_insertionPoint]){
+        [self _moveCursor:_insertionPoint-1 preserveColumn:NO];
+    }
     [self _syncState];
-    _preservedColumn = [self columnNumber:_insertionPoint];
 }
 
 - (void)move:(XVimMotion*)motion{
@@ -552,6 +555,70 @@
     [self _syncState];
     [self changeSelectionMode:MODE_VISUAL_NONE];
     
+}
+
+- (void)joinAtLineNumber:(NSUInteger)line{
+    BOOL needSpace = NO;
+    NSUInteger headOfLine = [self positionAtLineNumber:line];
+    if( headOfLine == NSNotFound){
+        return;
+    }
+
+    NSUInteger tail = [self tailOfLine:headOfLine];
+    if( [self isEOF:tail] ){
+        // This is the last line and nothing to join
+        return;
+    }
+    
+    // Check if we need to insert space between lines.
+    NSUInteger endOfLine = [self endOfLine:headOfLine];
+    if( endOfLine != NSNotFound ){
+        // This is not blank line so we check if the last character is space or not .
+        if( ![self isWhiteSpace:endOfLine] ){
+            needSpace = YES;
+        }
+    }
+
+    // Search in next line for the position to join(skip white spaces in next line)
+    NSUInteger posToJoin = [self nextLine:headOfLine column:0 count:1 option:MOTION_OPTION_NONE];
+    NSUInteger tmp = [self nextNonBlankInALine:posToJoin];
+    if( NSNotFound == tmp ){
+        // Only white spaces are found in the next line
+        posToJoin = [self tailOfLine:posToJoin];
+    }else{
+        posToJoin = tmp;
+    }
+    if( ![self isEOF:posToJoin] && [self.string characterAtIndex:posToJoin] == ')' ){
+        needSpace = NO;
+    }
+    
+    // delete "tail" to "posToJoin" excluding the position of "posToJoin" and insert space if need.
+    if( needSpace ){
+        [_view insertText:@" " replacementRange:NSMakeRange(tail, posToJoin-tail)];
+    }else{
+        [_view insertText:@""  replacementRange:NSMakeRange(tail, posToJoin-tail)];
+    }
+
+}
+
+- (void)join:(NSUInteger)count{
+    NSUInteger start = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
+    if( _selectionMode != MODE_VISUAL_NONE ){
+        // If in selection mode ignore count
+        NSRange lastSelection = [[[self _selectedRanges] lastObject] rangeValue];
+        NSUInteger end = lastSelection.location + lastSelection.length - 1;
+        NSUInteger lineBegin = [self lineNumber:start];
+        NSUInteger lineEnd = [self lineNumber:end];
+        count = lineEnd - lineBegin ;
+    }
+    
+    for( NSUInteger i = 0; i < count ; i++ ){
+        [self joinAtLineNumber:[self lineNumber:start]];
+    }
+    
+    [self _syncStateFromView];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
+    return;
 }
 
 - (void)filter:(XVimMotion*)motion{

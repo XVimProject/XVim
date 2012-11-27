@@ -181,55 +181,7 @@
 // of the line joined in should be stripped and then one space should be inserted 
 // between the joined lines
 - (XVimEvaluator*)J:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
-    NSUInteger repeat = [self numericArg];
-    //if( 1 != repeat ){ repeat--; }
-    NSRange r = [view selectedRange];
-    BOOL addSpace = YES;
-    for( NSUInteger i = 0 ; i < repeat ; i++ ){
-        if( [view isBlankLine:r.location] ){
-            [view deleteForward];
-            continue;
-        }
-        
-        if( [view isWhiteSpace:[view endOfLine:r.location]] ){
-            // since the line is not empty, we do not need to check if its NSNotFound
-            addSpace = NO;
-        }
-        
-        NSUInteger nextnewline;
-        nextnewline = [view nextNewLine:r.location];
-        if( NSNotFound == nextnewline ){
-            // Nothing to do
-            break;
-        }
-        
-        [view setSelectedRange:NSMakeRange(nextnewline,0)];
-        [view deleteForward];
-        NSRange cursorAfterConcatenate = [view selectedRange]; // After concatenate, the cursor position get back to this pos.
-        if( addSpace ){
-            [view insertText:@" "];
-        }
-        NSUInteger curLocation = [view selectedRange].location;
-        
-        NSUInteger nonblank = [view nextNonBlankInALine:[view selectedRange].location];
-        if( NSNotFound == nonblank ){
-            if( ![view isNewLine:curLocation] && [view isEOF:curLocation]){
-                [view setSelectedRangeWithBoundsCheck:curLocation To:[view tailOfLine:curLocation]];
-                [view deleteText];
-            }else{
-                // Blank line. Nothing todo
-            }
-        }else{
-            if( curLocation != nonblank ){
-                [view setSelectedRangeWithBoundsCheck:[view selectedRange].location To:nonblank];
-                [view deleteText];
-            }else{
-                // No white spaces in next line.
-            }
-        }
-        [view setSelectedRange:cursorAfterConcatenate];
-    }
+    [[window sourceView] join:[self numericArg]];
     return nil;
 }
 
@@ -237,8 +189,7 @@
 
 - (XVimEvaluator*)m:(XVimWindow*)window{
     // 'm{letter}' sets a local mark.
-	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
-												  parent:self];
+	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] parent:self];
 }
 
 - (XVimEvaluator*)o:(XVimWindow*)window{
@@ -388,8 +339,7 @@
 									   operatorAction:nil withParent:self];
 }
 
-- (XVimEvaluator*)AT:(XVimWindow*)window
-{
+- (XVimEvaluator*)AT:(XVimWindow*)window {
     XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"]
 																  parent:self
 															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
@@ -460,8 +410,7 @@
 	return eval;
 }
 
-- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter 
-{
+- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter {
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																	 parent:self 
                                                                 firstLetter:firstLetter

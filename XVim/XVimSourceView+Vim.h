@@ -87,6 +87,9 @@
 // Determine if the position is on the last line in the document
 - (BOOL) isLastLine:(NSUInteger)index;
 
+// Determine if the position is the first of line
+- (BOOL) isFirstOfLine:(NSUInteger)index;
+
 /**
  * Determine if the position specified with "index" is blankline.
  * Blankline is one of them
@@ -212,6 +215,7 @@
  /**
  * Returns position at line number "num" and column number 0
  * Line number starts from 1.
+ * NSNotFound is retured if the specifiled line number exceeds the maxmam line number in the document.
  **/
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num;
 

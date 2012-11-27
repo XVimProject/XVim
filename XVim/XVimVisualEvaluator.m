@@ -158,22 +158,21 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return nil;
 }
 
-- (XVimEvaluator*)g:(XVimWindow*)window
-{
-	return [[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"]
-												  parent:self];
+- (XVimEvaluator*)g:(XVimWindow*)window {
+	return [[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"] parent:self];
 }
 
-- (XVimEvaluator*)i:(XVimWindow*)window
-{
+- (XVimEvaluator*)i:(XVimWindow*)window {
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"]
-																 operatorAction:action 
-																	 withParent:self
-																	  inclusive:NO];
+	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"] operatorAction:action withParent:self inclusive:NO];
 	return evaluator;
 }
- 
+
+- (XVimEvaluator*)J:(XVimWindow*)window {
+	[[window sourceView] join:[self numericArg]];
+    return nil;
+}
+
 - (XVimEvaluator*)m:(XVimWindow*)window{
     // 'm{letter}' sets a local mark.
 	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
