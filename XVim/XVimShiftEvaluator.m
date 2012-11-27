@@ -24,10 +24,7 @@
 				  withParent:(XVimEvaluator*)parent
 					 unshift:(BOOL)unshift
 {
-	if (self = [super initWithContext:context
-					   operatorAction:action 
-								  withParent:parent])
-	{
+	if (self = [super initWithContext:context operatorAction:action withParent:parent]) {
 		self->_unshift = unshift;
 	}
 	return self;
@@ -35,53 +32,32 @@
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
     if( !_unshift ){
-        XVimSourceView* view = [window sourceView];
-        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
-        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+        if ([self numericArg] < 1)
+        return nil;
+    
+        XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+        return [self _motionFixed:m inWindow:window];
     }
     return nil;
 }
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    //unshift
     if( _unshift ){
-        XVimSourceView* view = [window sourceView];
-        NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
-        return [self _motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+        if ([self numericArg] < 1)
+        return nil;
+    
+        XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+        return [self _motionFixed:m inWindow:window];
     }
     return nil;
 }
 
-@end
-
-@interface XVimShiftAction() {
-	BOOL _unshift;
-}
-@end
-
-@implementation XVimShiftAction
-
-- (id)initWithUnshift:(BOOL)unshift
-{
-	if (self = [super init])
-	{
-		self->_unshift = unshift;
-	}
-	return self;
-}
-
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
-	DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
-	NSUInteger lineNumber = [view lineNumber:MIN(from, to)];
-	[view selectOperationTargetFrom:from To:to Type:type];
-	if( _unshift ){
-		[view shiftLeft];
-	}else{
-		[view shiftRight];
-	}
-	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:lineNumber]];
-	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
-	return nil;
+- (XVimEvaluator*)_motionFixed:(XVimMotion *)motion inWindow:(XVimWindow *)window{
+    if( _unshift ){
+        [[window sourceView] shiftLeft:motion];
+    }else{
+        [[window sourceView] shiftRight:motion];
+    }
+    return nil;
 }
 @end

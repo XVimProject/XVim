@@ -17,7 +17,3 @@
 				  withParent:(XVimEvaluator*)parent
 					 unshift:(BOOL)unshift;
 @end
-
-@interface XVimShiftAction : XVimOperatorAction
-- (id)initWithUnshift:(BOOL)unshift;
-@end

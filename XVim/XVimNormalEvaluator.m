@@ -371,20 +371,12 @@
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:NO];
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@">"]
-															 operatorAction:operatorAction 
-																 withParent:self
-																	unshift:NO];
+    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@">"] operatorAction:nil withParent:self unshift:NO];
     return eval;
 }
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-	XVimOperatorAction *operatorAction = [[XVimShiftAction alloc] initWithUnshift:YES];
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"<"]
-															 operatorAction:operatorAction 
-																 withParent:self
-																	unshift:YES];
+    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"<"] operatorAction:nil withParent:self unshift:YES];
     return eval;
     
 }

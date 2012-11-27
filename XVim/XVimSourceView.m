@@ -625,12 +625,51 @@
     
 }
 
-- (void)shiftRight:(XVimMotion*)motion{
+- (void)shift:(XVimMotion*)motion right:(BOOL)right{
+    if( _insertionPoint == 0 && [[self string] length] == 0 ){
+        return ;
+    }
+    
+    NSUInteger count = 1;
+    NSUInteger insertionAfterShift = _insertionPoint;
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        if( to == NSNotFound ){
+            return;
+        }
+        NSRange r = [self getOperationRangeFrom:_insertionPoint To:to Type:LINEWISE];
+        insertionAfterShift = r.location;
+        [self _setSelectedRange:r];
+    }else{
+        count = motion.count; // Only when its visual mode we treat caunt as repeating shifting
+        insertionAfterShift = [[[self _selectedRanges] lastObject] rangeValue].location;
+        NSUInteger start = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
+        NSRange lastSelection = [[[self _selectedRanges] lastObject] rangeValue];
+        NSUInteger end = lastSelection.location + lastSelection.length - 1;
+        [self _setSelectedRange:NSMakeRange(start, end-start+1)];
+    }
+    
+    for( NSUInteger i = 0 ; i < count ; i++ ){
+        if( right ){
+            [(DVTSourceTextView*)_view shiftRight:self];
+        }else{
+            [(DVTSourceTextView*)_view shiftLeft:self];
+        }
+    }
+	NSUInteger cursorLocation = [self firstNonBlankInALine:insertionAfterShift];
+    [self _moveCursor:cursorLocation preserveColumn:NO];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self _syncState];
+    
     
 }
 
+- (void)shiftRight:(XVimMotion*)motion{
+    [self shift:motion right:YES];
+}
+
 - (void)shiftLeft:(XVimMotion*)motion{
-    
+    [self shift:motion right:NO];
 }
 
 - (void)insertNewlineBelow{

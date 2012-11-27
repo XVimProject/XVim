@@ -130,8 +130,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return nextEvaluator;
 }
 
-- (XVimEvaluator*)a:(XVimWindow*)window
-{
+- (XVimEvaluator*)a:(XVimWindow*)window {
 	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
 	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"a"]
 																 operatorAction:action 
@@ -150,8 +149,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     [[window sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
-
-
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
     [[window sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
@@ -300,27 +297,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-    DVTSourceTextView* view = (DVTSourceTextView*)[window sourceView];
-	
-	_mode = MODE_LINE;
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view shiftRight];
-    }
-	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:_operationRange.location]];
-	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
+    [[window sourceView] shiftRight:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
 
 - (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
-	
-	_mode = MODE_LINE;
-    for( int i = 0; i < [self numericArg]; i++ ){
-        [view shiftLeft];
-    }
-	NSUInteger cursorLocation = [view firstNonBlankInALine:[view positionAtLineNumber:_operationRange.location]];
-	[view setSelectedRangeWithBoundsCheck:cursorLocation To:cursorLocation];
+    [[window sourceView] shiftLeft:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
