@@ -137,7 +137,11 @@ static char* keynames[] = {
     "VERTICALLINE", // |
     "RBRACE", // }
     "TILDE", // ~
-    "DEL"
+    "DEL",
+    "HOME",
+    "END",
+    "PAGEUP",
+    "PAGEDOWN"
 };
 
 static char* readable_keynames[] = {
@@ -268,7 +272,11 @@ static char* readable_keynames[] = {
     "|", // |
     "}", // }
     "~", // ~
-    "DEL"
+    "DEL",
+    "HOME",
+    "END",
+    "PAGEUP",
+    "PAGEDOWN"
 };
 static NSMutableDictionary *s_keyCodeToSelectorString = NULL;
 static NSMutableDictionary *s_stringToKeyCode = NULL;
@@ -310,6 +318,10 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 		map(@"Left", 63234);
 		map(@"Right", 63235);
 		map(@"ForwardDelete", 63272);
+        map(@"Home", 63273);
+        map(@"End", 63275);
+        map(@"Pageup", 63276);
+        map(@"Pagedown", 63277);
 	}
 }
 
@@ -336,6 +348,10 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 		map(@"LEFT", 63234);
 		map(@"RIGHT", 63235);
 		map(@"FORWARD_DELETE", 63272);
+        map(@"HOME", 63273);
+        map(@"END", 63275);
+        map(@"PAGEUP", 63276);
+        map(@"PAGEDOWN", 63277);
 		
 		// From space to del (non-inclusive), add ascii names
 		for (int i = 32; i < 127; ++i)
