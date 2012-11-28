@@ -614,7 +614,30 @@
 }
 
 - (void)filter:(XVimMotion*)motion{
+    if( _insertionPoint == 0 && [[self string] length] == 0 ){
+        return ;
+    }
     
+    NSUInteger insertionAfterFilter = _insertionPoint;
+    NSRange filterRange;
+    if( _selectionMode == MODE_VISUAL_NONE ){
+        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
+        if( to == NSNotFound ){
+            return;
+        }
+        filterRange = [self getOperationRangeFrom:_insertionPoint To:to Type:LINEWISE];
+    }else{
+        insertionAfterFilter = [[[self _selectedRanges] lastObject] rangeValue].location;
+        NSUInteger start = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
+        NSRange lastSelection = [[[self _selectedRanges] lastObject] rangeValue];
+        NSUInteger end = lastSelection.location + lastSelection.length - 1;
+        filterRange  = NSMakeRange(start, end-start+1);
+    }
+    
+	[self indentCharacterRange: filterRange];
+    [self _syncStateFromView];
+    [self _moveCursor:insertionAfterFilter preserveColumn:NO];
+    [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (void)shift:(XVimMotion*)motion right:(BOOL)right{

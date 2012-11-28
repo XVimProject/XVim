@@ -364,10 +364,8 @@
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-    XVimOperatorAction *operatorAction = [[XVimEqualAction alloc] init];
     return [[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="]
-										operatorAction:operatorAction 
-											withParent:self];
+										operatorAction:nil withParent:self];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
