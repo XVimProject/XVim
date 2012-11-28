@@ -11,6 +11,7 @@
 #import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
 #import "XVim.h"
+#import "DVTKit.h"
 
 #import "XVimMotionType.h"
 
@@ -33,6 +34,8 @@
 #define ASSERT_VALID_RANGE_WITHOUT_EOF(x)
 #define ASSERT_VALID_CURSOR_POS(x)
 #endif
+
+#define charat(x) [[self string] characterAtIndex:(x)]
 
 @implementation XVimSourceView(Vim)
 
@@ -279,6 +282,29 @@
 }
 
 /**
+ *Find and return an NSArray* with the placeholders in a current line.
+ * the placeholders are returned as NSValue* objects that encode NSRange structs.
+ * Returns an empty NSArray if there are no placeholders on the line.
+ */
+-(NSArray*)placeholdersInLine:(NSUInteger)position{
+    NSMutableArray* placeholders = [[NSMutableArray alloc] initWithCapacity:2];
+    NSUInteger p = [self headOfLine:position];
+    
+    for(NSUInteger curPos = p; curPos < [[self string] length]; curPos++){
+        NSRange retval = [(DVTCompletingTextView*)[self view] rangeOfPlaceholderFromCharacterIndex:curPos forward:YES wrap:NO limit:50];
+        if(retval.location != NSNotFound){
+            curPos = retval.location + retval.length;
+            [placeholders addObject:[NSValue valueWithRange:retval]];
+        }
+        if ([self isEOL:curPos] || [self isEOF:curPos]) {
+            return [placeholders autorelease];
+        }
+    }
+    
+    return [placeholders autorelease];
+}
+
+/**
  * Returns position of the head of line specified by index.
  * Head of line is one of them which is found first when searching backwords from "index".
  *    - Character just after newline
@@ -478,6 +504,21 @@
             if(![self isBlankLine:prev]) {
                 // skip the newline letter at the end of line
                 prev--;
+            }
+        }
+        
+        if(charat(prev) == '>' && prev){
+            //possible autocomplete glyph that we should skip.
+            if(charat(prev - 1) == '#'){
+                NSUInteger findstart = prev;
+                while (--findstart ) {
+                    if(charat(findstart) == '#'){
+                        if(charat(findstart - 1) == '<'){
+                            prev = findstart - 1;
+                            break;
+                        }
+                    }
+                }
             }
         }
         
@@ -858,25 +899,53 @@
     return pos;
 }
 
-
 - (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( 1 >= index)
+    if( 1 >= index )
         return 0;
-    
+    NSUInteger indexBoundary = NSNotFound;
     NSUInteger pos = index-1;
-    unichar lastChar= [[self string] characterAtIndex:pos];
+    unichar lastChar = [[self string] characterAtIndex:pos];
+    NSArray* placeholdersInLine = [self placeholdersInLine:pos];
+    
     for(NSUInteger i = pos-1 ; ; i-- ){
         // Each time we encounter head of a word decrement "counter".
         // Remember blankline is a word
-        
+        indexBoundary = NSNotFound;
+        for (NSUInteger currentPlaceholders = 0; currentPlaceholders < [placeholdersInLine count]; currentPlaceholders++) {
+            NSValue* currentRange;
+            NSUInteger lowIndex, highIndex;
+            
+            //get the range returned from the placeholderinline function
+            currentRange = (NSValue*)[placeholdersInLine objectAtIndex:currentPlaceholders];
+            lowIndex = [currentRange rangeValue].location;
+            highIndex = [currentRange rangeValue].location + [currentRange rangeValue].length;
+            
+            // check if we are in the placeholder boundary and if we are we should break and count it as a word.
+            if(i >= lowIndex && i <= highIndex){
+                indexBoundary = lowIndex;
+                break;
+            }
+        }
         unichar curChar = [[self string] characterAtIndex:i];
+        
+        // this branch handles the case that we found a placeholder.
+        // must update the pointer into the string and update the current character found to be at the current index.
+        if(indexBoundary != NSNotFound){
+            count--;
+            i = indexBoundary;
+            if (count == 0) {
+                pos = i;
+                break;
+            }
+            curChar = [[self string] characterAtIndex:i];
+        }
         // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
         //    - Whitespace(including newline) and Non-Blank
         //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
         //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
         //    - newline and newline(blankline) 
-        if( 
+        else if(
            ((isWhiteSpace(curChar) || isNewLine(curChar)) && isNonBlank(lastChar))   ||
            ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(lastChar))   ||
            ( opt != BIGWORD && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(lastChar) && isKeyword(lastChar) )  ||
