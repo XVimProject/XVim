@@ -37,6 +37,7 @@
  *       [self _syncState];
  *    instead
  *  - Do not change _insertionPoint variable directly. Use [self _moveCursor: preserveColumn] instead.
+ *  - Do not use [_view insertText:(NSString*)] method. Use [self insertText: line: column:] or [_view insertText: replacementRange:]
  **/
 
 /**
@@ -70,6 +71,7 @@
 @property (strong) NSMutableString* lastYankedText;
 @property TEXT_TYPE lastYankedType;
 
+- (void)_deleteLine:(NSUInteger)lineNum;
 - (void)_setSelectedRange:(NSRange)range;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
@@ -258,7 +260,7 @@
             [tmp addObject:@""]; // add empty dummy line
         }
     }
-       [_lastYankedText setString:[tmp componentsJoinedByString:@"\n"]];
+   [_lastYankedText setString:[tmp componentsJoinedByString:@"\n"]];
     TRACE_LOG(@"YANKED STRING : %@", _lastYankedText);
 }
 
@@ -413,18 +415,17 @@
             _insertionPoint++;
         }
         insertionPointAfterPut = _insertionPoint;
-        
-        [self _setSelectedRange:NSMakeRange(_insertionPoint,0)];
-        NSUInteger column = [self columnNumber:_insertionPoint];
-        NSUInteger startLine = [self lineNumber:_insertionPoint];
+        NSUInteger insertPos = _insertionPoint;
+        NSUInteger column = [self columnNumber:insertPos];
+        NSUInteger startLine = [self lineNumber:insertPos];
         NSArray* lines = [text componentsSeparatedByString:@"\n"];
         for( NSUInteger i = 0 ; i < lines.count ; i++){
             NSString* line = [lines objectAtIndex:i];
             NSUInteger targetLine = startLine + i;
             NSUInteger head = [self positionAtLineNumber:targetLine];
             if( NSNotFound == head ){
-                NSAssert( [self lineNumber:_insertionPoint] == [self numberOfLines], @"_insertionPoint must be on the last line at this point.    lineNumber:%u    maxLine:%u",(uint)[self lineNumber:_insertionPoint], (uint)[self numberOfLines]);
-                [self insertNewlineBelow];
+                NSAssert( targetLine != 0, @"This should not be happen");
+                [self insertNewlineBelowLine:targetLine-1];
                 head = [self positionAtLineNumber:targetLine];
             }
             NSAssert( NSNotFound != head , @"Head of the target line must be found at this point");
@@ -436,16 +437,13 @@
                 // If the line does not have enough column pad it with spaces
                 NSUInteger spaces = column - max;
                 NSUInteger end = [self tailOfLine:head];
-                [self _setSelectedRange:NSMakeRange(end,0)];
                 for( NSUInteger i = 0 ; i < spaces; i++){
-                    [_view insertText:@" "];
+                    [_view insertText:@" " replacementRange:NSMakeRange(end,0)];
                 }
             }
-            [self _setSelectedRange:NSMakeRange([self positionAtLineNumber:targetLine column:column],0)];
             for(NSUInteger i = 0; i < count ; i++ ){
-                [_view insertText:line];
+                [self insertText:line line:targetLine column:column];
             }
-            [self _syncStateFromView];
         }
     }
     
@@ -666,6 +664,26 @@
     [self shift:motion right:NO];
 }
 
+- (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column{
+    NSUInteger pos = [self positionAtLineNumber:line column:column];
+    if( pos == NSNotFound ){
+        return;
+    }
+    [_view insertText:str replacementRange:NSMakeRange(pos,0)];
+}
+
+- (void)insertNewlineBelowLine:(NSUInteger)line{
+    NSAssert( line != 0, @"line number starts from 1");
+    NSUInteger pos = [self positionAtLineNumber:line];
+    if( NSNotFound == pos ){
+        return;
+    }
+    pos = [self tailOfLine:pos];
+    [_view insertText:@"\n" replacementRange:NSMakeRange(pos ,0)];
+    [self _moveCursor:pos+1 preserveColumn:NO];
+    [self _syncState];
+}
+
 - (void)insertNewlineBelow{
     NSUInteger l = _insertionPoint;
     // TODO: Use _insertionPoint to move cursor
@@ -673,6 +691,19 @@
     [[self view] setSelectedRange:NSMakeRange(tail,0)];
     [[self view] insertNewline:self];
     [self _syncStateFromView];
+}
+
+- (void)insertNewlineAboveLine:(NSUInteger)line{
+    NSAssert( line != 0, @"line number starts from 1");
+    NSUInteger pos = [self positionAtLineNumber:line];
+    if( NSNotFound == pos ){
+        return;
+    }
+    if( 1 != line ){
+        [self insertNewlineBelowLine:line-1];
+    }else{
+        [_view insertText:@"\n" replacementRange:NSMakeRange(0,0)];
+    }
 }
 
 - (void)insertNewlineAbove{
@@ -1325,6 +1356,34 @@
     }
     
     DEBUG_LOG(@"New Insertion Point:%d     Preserved Column:%d", _insertionPoint, _preservedColumn);
+}
+
+- (void)_deleteLine:(NSUInteger)lineNum{
+    NSUInteger pos = [self positionAtLineNumber:lineNum];
+    if( NSNotFound == pos ){
+        return;
+    }
+    
+    if( [self isLastLine:pos] ){
+        // To delete last line we need to delete newline char before this line
+        NSUInteger start = pos;
+        if( pos != 0 ){
+            start = pos - 1;
+        }
+        
+        // Delete upto end of line of the last line.
+        NSUInteger end = [self endOfLine:pos];
+        if( NSNotFound == end ){
+            // The last line is blank-EOF line
+            [_view insertText:@"" replacementRange:NSMakeRange(start, end-start+1)];
+        }else{
+            [_view insertText:@"" replacementRange:NSMakeRange(start, end-start)];
+        }
+    }else{
+        NSUInteger end = [self tailOfLine:pos];
+        NSAssert( end != NSNotFound, @"Only when it is last line it return NSNotFound");
+        [_view insertText:@"" replacementRange:NSMakeRange(pos, end-pos+1)]; //delete including newline
+    }
 }
 
 - (void)_adjustCursorPosition{

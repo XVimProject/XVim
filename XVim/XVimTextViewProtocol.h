@@ -65,8 +65,11 @@ typedef enum {
 - (void)shiftRight:(XVimMotion*)motion;
 - (void)shiftLeft:(XVimMotion*)motion;
 - (void)join:(NSUInteger)count;
+- (void)insertNewlineBelowLine:(NSUInteger)line;
 - (void)insertNewlineBelow;
+- (void)insertNewlineAboveLine:(NSUInteger)line;
 - (void)insertNewlineAbove;
+- (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
 
 // Insert or Command
 - (void)escapeFromInsert;
