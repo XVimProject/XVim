@@ -83,6 +83,8 @@
 // Drawing
 - (NSUInteger)glyphIndexForPoint:(NSPoint)point;
 - (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex;
- 
+
+// Debug
+- (void)dumpState;
 @end
 

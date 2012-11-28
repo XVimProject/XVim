@@ -53,8 +53,9 @@
  *  - Currently block selection does not support selecting newlines.
  *    In vim it is possible to move cursor when block selection but XVim does not support it currently (I think its not really big problem though)
  **/
-#define LOG_STATE() TRACE_LOG(@"mode:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
+#define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             _selectionMode,            \
+                            [self string].length,       \
                             _cursorMode,               \
                             _insertionPoint,           \
                             _selectionBegin,           \
@@ -372,16 +373,9 @@
 }
 
 - (void)put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count{
-    // if the paste text has a eol at the end (line oriented), then we are supposed to move to
-    // the line boundary and then paste the data in.
-    // TODO: This does not work when the text is copied from line which includes EOF since it does not have newline.
-    //       If we want to treat the behaviour correctly we should prepare registers to copy and create an attribute to keep 'linewise'
-    
-    // TODO: dw of a word at the end of a line does not subsequently 'p' back correctly but that's
-    // because dw is not working quite right it seems
-    
     if( _selectionMode != MODE_VISUAL_NONE ){
-        [self delete:nil];
+        [self delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1)];
+        after = NO;
     }
     
     NSUInteger insertionPointAfterPut = _insertionPoint;
@@ -412,11 +406,10 @@
                 [_view insertText:t];
             } else{
                 [_view insertText:text];
-            }
-        }
+            } }
     }else if( type == TEXT_TYPE_BLOCK ){
         //Forward insertion point +1 if after flag if on
-        if (![self isNewLine:_insertionPoint] && after) {
+        if (![self isNewLine:_insertionPoint] && ![self isEOF:_insertionPoint] && after) {
             _insertionPoint++;
         }
         insertionPointAfterPut = _insertionPoint;
@@ -425,12 +418,12 @@
         NSUInteger column = [self columnNumber:_insertionPoint];
         NSUInteger startLine = [self lineNumber:_insertionPoint];
         NSArray* lines = [text componentsSeparatedByString:@"\n"];
-        for( NSUInteger i = 0 ; i < lines.count; i++){
+        for( NSUInteger i = 0 ; i < lines.count ; i++){
             NSString* line = [lines objectAtIndex:i];
             NSUInteger targetLine = startLine + i;
             NSUInteger head = [self positionAtLineNumber:targetLine];
             if( NSNotFound == head ){
-                NSAssert( [self lineNumber:_insertionPoint] == [self numberOfLines], @"_insertionPoint must be on the last line at this point");
+                NSAssert( [self lineNumber:_insertionPoint] == [self numberOfLines], @"_insertionPoint must be on the last line at this point.    lineNumber:%u    maxLine:%u",(uint)[self lineNumber:_insertionPoint], (uint)[self numberOfLines]);
                 [self insertNewlineBelow];
                 head = [self positionAtLineNumber:targetLine];
             }
@@ -445,16 +438,17 @@
                 NSUInteger end = [self tailOfLine:head];
                 [self _setSelectedRange:NSMakeRange(end,0)];
                 for( NSUInteger i = 0 ; i < spaces; i++){
-                    [self insertText:@" "];
+                    [_view insertText:@" "];
                 }
             }
             [self _setSelectedRange:NSMakeRange([self positionAtLineNumber:targetLine column:column],0)];
             for(NSUInteger i = 0; i < count ; i++ ){
                 [_view insertText:line];
             }
+            [self _syncStateFromView];
         }
-        
     }
+    
     
     [self _moveCursor:insertionPointAfterPut preserveColumn:NO];
     [self _syncState];
@@ -1173,6 +1167,7 @@
 // This is here because only compatibility reason
 - (void)setSelectedRange:(NSRange)range {
     [self _setSelectedRange:range];
+    [self _syncStateFromView];
     /*
     LOG_STATE();
     @try{
@@ -1379,9 +1374,7 @@
         [self _adjustCursorPosition];
     }
     [_view setSelectedRanges:[self _selectedRanges]];
-    
-    
-    [_view scrollRangeToVisible:NSMakeRange(_insertionPoint,0)];
+    [self scrollTo:_insertionPoint];
 }
 
 // _setSelectedRange is an internal method
@@ -1410,5 +1403,8 @@
     LOG_STATE();
 }
 
+- (void)dumpState{
+    LOG_STATE();
+}
 
 @end

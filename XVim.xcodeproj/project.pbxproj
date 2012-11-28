@@ -14,6 +14,14 @@
 		A216F3A9156565AB00AD2529 /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A7156565AA00AD2529 /* DVTKit.framework */; };
 		A216F3AA156565AB00AD2529 /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A8156565AB00AD2529 /* DVTFoundation.framework */; };
 		A222B5E11514DFCD005E8802 /* XVimOperatorEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */; };
+		A223956C16653ACD00CD26AE /* DevNotes.txt in Resources */ = {isa = PBXBuildFile; fileRef = A223956316653ACD00CD26AE /* DevNotes.txt */; };
+		A223956D16653ACD00CD26AE /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = A223956416653ACD00CD26AE /* index.html */; };
+		A223956E16653ACD00CD26AE /* MenuActionList.txt in Resources */ = {isa = PBXBuildFile; fileRef = A223956516653ACD00CD26AE /* MenuActionList.txt */; };
+		A223956F16653ACD00CD26AE /* ViewTreeSample.txt in Resources */ = {isa = PBXBuildFile; fileRef = A223956616653ACD00CD26AE /* ViewTreeSample.txt */; };
+		A223957016653ACD00CD26AE /* XCodeClasses.html in Resources */ = {isa = PBXBuildFile; fileRef = A223956716653ACD00CD26AE /* XCodeClasses.html */; };
+		A223957116653ACD00CD26AE /* XVim.key in Resources */ = {isa = PBXBuildFile; fileRef = A223956816653ACD00CD26AE /* XVim.key */; };
+		A223957216653ACD00CD26AE /* XVim.pdf in Resources */ = {isa = PBXBuildFile; fileRef = A223956916653ACD00CD26AE /* XVim.pdf */; };
+		A223957316653ACD00CD26AE /* FeatureList.md in Resources */ = {isa = PBXBuildFile; fileRef = A223956B16653ACD00CD26AE /* FeatureList.md */; };
 		A2277ED414F80BCB00A6B70C /* XVimDeleteEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */; };
 		A2277ED814F80BFE00A6B70C /* XVimShiftEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277ED714F80BFE00A6B70C /* XVimShiftEvaluator.m */; };
 		A2277EDB14F80D5000A6B70C /* XVimYankEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2277EDA14F80D5000A6B70C /* XVimYankEvaluator.m */; };
@@ -103,6 +111,14 @@
 		A216F3A8156565AB00AD2529 /* DVTFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTFoundation.framework; path = ../../../../Applications/Xcode.app/Contents/SharedFrameworks/DVTFoundation.framework; sourceTree = "<group>"; };
 		A222B5DF1514DFCD005E8802 /* XVimOperatorEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorEvaluator.h; path = XVim/XVimOperatorEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorEvaluator.m; path = XVim/XVimOperatorEvaluator.m; sourceTree = SOURCE_ROOT; };
+		A223956316653ACD00CD26AE /* DevNotes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DevNotes.txt; sourceTree = "<group>"; };
+		A223956416653ACD00CD26AE /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		A223956516653ACD00CD26AE /* MenuActionList.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MenuActionList.txt; sourceTree = "<group>"; };
+		A223956616653ACD00CD26AE /* ViewTreeSample.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ViewTreeSample.txt; sourceTree = "<group>"; };
+		A223956716653ACD00CD26AE /* XCodeClasses.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = XCodeClasses.html; sourceTree = "<group>"; };
+		A223956816653ACD00CD26AE /* XVim.key */ = {isa = PBXFileReference; lastKnownFileType = file; path = XVim.key; sourceTree = "<group>"; };
+		A223956916653ACD00CD26AE /* XVim.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = XVim.pdf; sourceTree = "<group>"; };
+		A223956B16653ACD00CD26AE /* FeatureList.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FeatureList.md; sourceTree = "<group>"; };
 		A2277ED214F80BCB00A6B70C /* XVimDeleteEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimDeleteEvaluator.h; path = XVim/XVimDeleteEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimDeleteEvaluator.m; path = XVim/XVimDeleteEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2277ED614F80BFE00A6B70C /* XVimShiftEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimShiftEvaluator.h; path = XVim/XVimShiftEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -289,6 +305,37 @@
 			name = Operators;
 			sourceTree = "<group>";
 		};
+		A223956116653ACD00CD26AE /* Documents */ = {
+			isa = PBXGroup;
+			children = (
+				A223956216653ACD00CD26AE /* Developers */,
+				A223956A16653ACD00CD26AE /* Users */,
+			);
+			path = Documents;
+			sourceTree = "<group>";
+		};
+		A223956216653ACD00CD26AE /* Developers */ = {
+			isa = PBXGroup;
+			children = (
+				A223956316653ACD00CD26AE /* DevNotes.txt */,
+				A223956416653ACD00CD26AE /* index.html */,
+				A223956516653ACD00CD26AE /* MenuActionList.txt */,
+				A223956616653ACD00CD26AE /* ViewTreeSample.txt */,
+				A223956716653ACD00CD26AE /* XCodeClasses.html */,
+				A223956816653ACD00CD26AE /* XVim.key */,
+				A223956916653ACD00CD26AE /* XVim.pdf */,
+			);
+			path = Developers;
+			sourceTree = "<group>";
+		};
+		A223956A16653ACD00CD26AE /* Users */ = {
+			isa = PBXGroup;
+			children = (
+				A223956B16653ACD00CD26AE /* FeatureList.md */,
+			);
+			path = Users;
+			sourceTree = "<group>";
+		};
 		A26DC88315DF339A00779CB4 /* Testing */ = {
 			isa = PBXGroup;
 			children = (
@@ -301,6 +348,11 @@
 		A2B4BAAD14D59F6600D817B0 = {
 			isa = PBXGroup;
 			children = (
+				A223956116653ACD00CD26AE /* Documents */,
+				A216F3A7156565AA00AD2529 /* DVTKit.framework */,
+				A216F3A8156565AB00AD2529 /* DVTFoundation.framework */,
+				A216F3A31565658E00AD2529 /* IDEFoundation.framework */,
+				A216F3A41565658E00AD2529 /* IDEKit.framework */,
 				A2C4E78F14E7EA0B00751199 /* Support */,
 				A2F41B0F14D70BD000A0314F /* Debug */,
 				A2B4BAC114D59F6600D817B0 /* XVim */,
@@ -595,6 +647,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				A24782C614D6F6DC003B6433 /* InfoPlist.strings in Resources */,
+				A223956C16653ACD00CD26AE /* DevNotes.txt in Resources */,
+				A223956D16653ACD00CD26AE /* index.html in Resources */,
+				A223956E16653ACD00CD26AE /* MenuActionList.txt in Resources */,
+				A223956F16653ACD00CD26AE /* ViewTreeSample.txt in Resources */,
+				A223957016653ACD00CD26AE /* XCodeClasses.html in Resources */,
+				A223957116653ACD00CD26AE /* XVim.key in Resources */,
+				A223957216653ACD00CD26AE /* XVim.pdf in Resources */,
+				A223957316653ACD00CD26AE /* FeatureList.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

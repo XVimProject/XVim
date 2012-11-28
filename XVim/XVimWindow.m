@@ -140,6 +140,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
+    
+    [[self sourceView] dumpState];
     return YES;
 }
 

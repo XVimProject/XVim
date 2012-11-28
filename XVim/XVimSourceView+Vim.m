@@ -1388,11 +1388,11 @@
     num--; // line number starts from 1
 	
 	NSUInteger length = [[self string] length];
-    while( pos < length && num != 0){ 
+    while( pos < length && num != 0){
         if( [self isNewLine:pos] ){
             num--;
         }
-        pos++;
+        pos++; // may be EOF if EOF is blank line
     }
     
     if( num != 0 ){
@@ -1443,8 +1443,7 @@
     return [self firstNonBlankInALine:[self selectedRange].location];
 }
 
-- (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count
-{ // C-f
+- (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count { // C-f
     // FIXME: This category methods MUST NOT call setSelectedRange.
     //        Just calculate the position where the cursor should be.
     [self setSelectedRange:NSMakeRange(index,0)];
@@ -1457,8 +1456,7 @@
     return [self firstNonBlankInALine:[self selectedRange].location];
 }
 
-- (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count
-{ // C-d
+- (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count { // C-d
 	NSUInteger cursorIndexAfterScroll = [self halfPageDown:index count:count];
     return [self firstNonBlankInALine:cursorIndexAfterScroll];
 }

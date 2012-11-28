@@ -1,0 +1,21 @@
+
+### Any tips or infomation ###
+
+   When yank and put with block selection it makes inserting some spaces to pad a line.
+For example, assume we have following text,
+-----------------------
+aaaaaaa
+
+bbbbbbb
+-----------------------
+there is a blank line between two "a" and "b" lines and block selection from first "a" to first "b"
+makes ["a", "", "b"] as a selection. When yank this and put at 3rd "a" will results in padding 3 spaces
+in 2nd line to put ""(empty string). 
+The problem is that when Xcode's preference "Automatically trim trailing whitespaces" will delete the 
+spaces after putting the yanked text.
+It looks that it does not big problem but when you want to "undo" the put operation you have to type 
+"u" twice because the actions taken when we put are "Insert ["a", "", "b"] into each line" and "trim 
+trailing whitespace" and first "u" command only undo the "trim..." action.
+I tried to group them up into one action to undo with one "u" commnad but could not.
+
+
