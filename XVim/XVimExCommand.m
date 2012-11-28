@@ -434,6 +434,7 @@
                        CMD(@"snoremenu", @"menu:inWindow:"),
                        CMD(@"source", @"source:inWindow:"),
                        CMD(@"sort", @"sort:inWindow:"),
+                       CMD(@"sort!", @"sort:inWindow:"),
                        CMD(@"split", @"splitview:inWindow:"),
                        CMD(@"spellgood", @"spell:inWindow:"),
                        CMD(@"spelldump", @"spelldump:inWindow:"),
@@ -1049,4 +1050,34 @@
     [window setForcusBackToSourceView];
     [NSApp sendAction:sel  to:nil from:self];
 }
+
+- (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    XVimSourceView *view = [window sourceView];
+	NSRange range = NSMakeRange([args lineBegin], [args lineEnd] - [args lineBegin] + 1);
+    
+    NSString *cmdString = [[args cmd] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    NSString *argsString = [args arg];
+    XVimSortOptions options = 0;
+    
+    if ([cmdString characterAtIndex:[cmdString length] - 1] == '!') {
+        options |= XVimSortOptionReversed;
+    }
+    
+    if (argsString) {
+        #define STR_CONTAINS_ARG(str, arg) ([str rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:arg]].location != NSNotFound)
+        if (STR_CONTAINS_ARG(argsString, @"n")) {
+            options |= XVimSortOptionNumericSort;
+        }
+        if (STR_CONTAINS_ARG(argsString, @"i")) {
+            options |= XVimSortOptionIgnoreCase;
+        }
+        if (STR_CONTAINS_ARG(argsString, @"u")) {
+            options |= XVimSortOptionRemoveDuplicateLines;
+        }
+    }
+    
+    [view sortLinesInRange:range withOptions:options];
+}
+
 @end

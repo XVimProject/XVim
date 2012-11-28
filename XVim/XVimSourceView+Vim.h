@@ -63,6 +63,12 @@
 @class XVimRegister;
 
 
+typedef enum {
+    XVimSortOptionReversed              = 1,
+    XVimSortOptionRemoveDuplicateLines  = 1 << 1,
+    XVimSortOptionNumericSort           = 1 << 2,
+    XVimSortOptionIgnoreCase            = 1 << 3
+} XVimSortOptions;
 
 @interface XVimSourceView(Vim)
 
@@ -341,5 +347,8 @@ unichar characterAtIndex(NSStringHelper*, NSInteger index);
 - (void)selectOperationTargetFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (NSUInteger)lineNumber:(NSUInteger)index;
 
+
+// Sorting
+- (void)sortLinesInRange:(NSRange)range withOptions:(XVimSortOptions)options;
 
 @end
