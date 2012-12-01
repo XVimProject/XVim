@@ -296,8 +296,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     
 	XVimSourceView *sourceView = [self sourceView];
 	color = [color colorWithAlphaComponent:alphaRatio];
-	//NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-	//NSUInteger glyphIndex = [sourceView glyphIndexForPoint:aPoint];
     NSUInteger glyphIndex = [sourceView insertionPoint];
 	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
 	

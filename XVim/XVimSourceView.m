@@ -122,6 +122,12 @@
 	return [_view string];
 }
 
+- (NSUInteger)realLength{
+    DVTFoldingTextStorage* storage = [(DVTSourceTextView*)_view textStorage];
+    DVTTextStorage* real = storage.realStorage;
+    return real.length;
+}
+
 - (NSArray*)selectedRanges{
     return [self _selectedRanges];
 }
@@ -920,7 +926,7 @@
   if (relativeInsertionPoint.y > visibleRect.size.height) {
     [_view moveUp:self];
     NSPoint newPoint = [[_view layoutManager] boundingRectForGlyphRange:[_view selectedRange] inTextContainer:[_view textContainer]].origin;
-    index = [[_view layoutManager] glyphIndexForPoint:newPoint inTextContainer:[_view textContainer]];
+    index = [self glyphIndexForPoint:newPoint];
   }
   return index;
 }
@@ -932,42 +938,32 @@
   if (currentInsertionRect.origin.y < visibleRect.origin.y) {
     [_view moveDown:self];
     NSPoint newPoint = NSMakePoint(currentInsertionRect.origin.x, visibleRect.origin.y);
-    index = [[_view layoutManager] glyphIndexForPoint:newPoint inTextContainer:[_view textContainer]];
+    index = [self glyphIndexForPoint:newPoint];
   }
   return index;
 }
 
 - (void)scroll:(CGFloat)ratio count:(NSUInteger)count{
     NSScrollView *scrollView = [_view enclosingScrollView];
-    NSTextContainer *container = [[_view layoutManager].textContainers objectAtIndex:0];
     NSRect visibleRect = [scrollView contentView].bounds;
     CGFloat scrollSize = visibleRect.size.height * ratio * count;
     NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + scrollSize ); // This may be beyond the beginning or end of document (intentionally)
     
     // Cursor position relative to left-top origin shold be kept after scroll ( Exception is when it scrolls beyond the beginning or end of document)
-    NSRect currentInsertionRect;
-    // FIXME:
-    // boundingRectForGlyphRange: does not return currect rect if the cursor is after any place holders.
-    // This caueses misbehaviour for scrolling.
-    // I have searched some method to get right value for the range but have not found one so far.
-    currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,1) inTextContainer:container];
-    NSPoint relativeInsertionPoint = NSMakePoint(0.0,0.0);
-    if ( currentInsertionRect.origin.x == 0.0){
-        // Maybe could not get correct rect
-        // Currently no way to know where the current cursor relative position from left right top.
-    }else{
-        relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
-    }
-    
+    NSRect currentInsertionRect = [self boundingRectForGlyphIndex:_insertionPoint];
+    NSPoint relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
+    //TRACE_LOG(@"Rect:%f %f    realIndex:%d   foldedIndex:%d", currentInsertionRect.origin.x, currentInsertionRect.origin.y, _insertionPoint, index);
     
     // Cursor Position after scroll
     NSPoint cursorAfterScroll = XVimAddPoint(scrollPoint,relativeInsertionPoint);
     
     // Nearest character index to the cursor position after scroll
-    NSUInteger cursorIndexAfterScroll= [[_view layoutManager] glyphIndexForPoint:cursorAfterScroll inTextContainer:container fractionOfDistanceThroughGlyph:NULL];
+    // TODO: consider blank-EOF line. Xcode does not return blank-EOF index with following method...
+    NSUInteger cursorIndexAfterScroll= [self glyphIndexForPoint:cursorAfterScroll];
+    
     // We do not want to change the insert point relative position from top of visible rect
     // We have to calc the distance between insertion point befor/after scrolling to keep the position.
-    NSRect insertionRectAfterScroll = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(cursorIndexAfterScroll,0) inTextContainer:container];
+    NSRect insertionRectAfterScroll = [self boundingRectForGlyphIndex:cursorIndexAfterScroll];
     NSPoint relativeInsertionPointAfterScroll = XVimSubPoint(insertionRectAfterScroll.origin, scrollPoint);
     CGFloat heightDiff = relativeInsertionPointAfterScroll.y - relativeInsertionPoint.y;
     scrollPoint.y += heightDiff;
@@ -1026,7 +1022,12 @@
 }
 
 - (void)scrollTo:(NSUInteger)location {
-	BOOL isBlankLine = 
+    // Update: I do not know if we really need Following block.
+    //         It looks that they need it to call ensureLayoutForGlyphRange but do not know when it needed
+    //         What I changed was the way calc "glyphRec". Not its using [self boundingRectForGlyphIndex] which coniders
+    //         text folding when calc the rect.
+    /*
+	BOOL isBlankLine =
 		(location == [[self string] length] || isNewLine([[self string] characterAtIndex:location])) &&
 		(location == 0 || isNewLine([[self string] characterAtIndex:location-1]));
 
@@ -1038,10 +1039,10 @@
     // to the appropriate glyph due to non contiguous layout
     NSRange glyphRange = [[_view layoutManager] glyphRangeForCharacterRange:characterRange actualCharacterRange:NULL];
     [[_view layoutManager] ensureLayoutForGlyphRange:NSMakeRange(0, glyphRange.location + glyphRange.length)];
+     */
     
-    NSTextContainer *container = [_view textContainer];
     NSScrollView *scrollView = [_view enclosingScrollView];
-    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:glyphRange inTextContainer:container];
+    NSRect glyphRect = [self boundingRectForGlyphIndex:location];
 
     CGFloat glyphLeft = NSMidX(glyphRect) - NSWidth(glyphRect) / 2.0f;
     CGFloat glyphRight = NSMidX(glyphRect) + NSWidth(glyphRect) / 2.0f;
@@ -1113,18 +1114,33 @@
     NSPoint top = [[scrollView contentView] bounds].origin;
     top.y += NSHeight(glyphRect) / 2.0f;
     NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
-    
+   
     [self setSelectedRange:range];
     return [self selectedRange].location;
 }
 
+/**
+ * Takes point in view and returns its index.
+ * This method automatically convert the "folded index" to "real index"
+ * When some characters are folded( like placeholders) the pure index for a specifix point is
+ * less than really index in the string.
+ **/
 - (NSUInteger)glyphIndexForPoint:(NSPoint)point {
-	return [[_view layoutManager] glyphIndexForPoint:point inTextContainer:[_view textContainer]];
+	NSUInteger index = [[_view layoutManager] glyphIndexForPoint:point inTextContainer:[_view textContainer]];
+    DVTFoldingTextStorage* storage = [(DVTSourceTextView*)_view textStorage];
+    return [storage realLocationForFoldedLocation:index];
 }
 
 - (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
-	NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[_view textContainer]];
-	return glyphRect;
+    DVTFoldingTextStorage* storage = [(DVTSourceTextView*)_view textStorage];
+    NSUInteger foldedIndex = [storage foldedLocationForRealLocation:glyphIndex];
+    NSRect glyphRect;
+    if( [self realLength] >= glyphIndex ){ // TODO: This should be implemented in isEOF.
+        glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 0)  inTextContainer:[_view textContainer]];
+    }else{
+        glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 1)  inTextContainer:[_view textContainer]];
+    }
+    return glyphRect;
 }
 
 - (void)deleteText {
