@@ -98,8 +98,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b:(XVimWindow*)window{
-    NSUInteger next = [[window sourceView] pageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
+    [[window sourceView] scrollHalfPageBackward:[self numericArg]];
     return nil;
 }
 
@@ -123,20 +122,17 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d:(XVimWindow*)window{
-    NSUInteger next = [[window sourceView] halfPageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
+    [[window sourceView] scrollHalfPageForward:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)C_y:(XVimWindow*)window{
-    NSUInteger next = [[window sourceView] lineBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
+    [[window sourceView] scrollLineBackward:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)C_e:(XVimWindow*)window{
-    NSUInteger next = [[window sourceView] lineForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
+    [[window sourceView] scrollLineForward:[self numericArg]];
     return nil;
 }
 
@@ -157,8 +153,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f:(XVimWindow*)window{
-    NSUInteger next = [[window sourceView] pageForward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
+    [[window sourceView] scrollPageForward:[self numericArg]];
     return nil;
 }
 
@@ -243,10 +238,6 @@
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
 		[view redo];
     }
-    // Redo should not keep anything selected
-    NSRange r = [view selectedRange];
-    [view setSelectedRange:NSMakeRange(r.location, 0)];
-	[view adjustCursorPosition];
     return nil;
 }
 
@@ -290,8 +281,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u:(XVimWindow*)window{
-    NSUInteger next = [[window sourceView] halfPageBackward:[[window sourceView] selectedRange].location count:[self numericArg]];
-    [[window sourceView] setSelectedRange:NSMakeRange(next,0)];
+    [[window sourceView] scrollHalfPageBackward:[self numericArg]];
     return nil;
 }
 

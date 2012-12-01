@@ -282,7 +282,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)drawRect:(NSRect)rect {
-	[_currentEvaluator drawRect:rect inWindow:self];
+	//[_currentEvaluator drawRect:rect inWindow:self];
 }
 
 - (BOOL)shouldDrawInsertionPoint {

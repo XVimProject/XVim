@@ -849,11 +849,11 @@
 }
 
 - (void)scrollLineForward:(NSUInteger)count{
-    [self lineForward:_insertionPoint count:count];
+    [self lineDown:_insertionPoint count:count];
 }
 
 - (void)scrollLineBackward:(NSUInteger)count{
-    [self lineBackward:_insertionPoint count:count];
+    [self lineUp:_insertionPoint count:count];
 }
 
 - (void)upperCase{
@@ -912,14 +912,6 @@
 #define XVimAddPoint(a,b) NSMakePoint(a.x+b.x,a.y+b.y)  // Is there such macro in Cocoa?
 #define XVimSubPoint(a,b) NSMakePoint(a.x-b.x,a.y-b.y)  // Is there such macro in Cocoa?
 
-- (void)pageUp {
-	[_view pageUp:self];
-}
-
-- (void)pageDown {
-	[_view pageDown:self];
-}
-
 - (NSUInteger)lineUp:(NSUInteger)index count:(NSUInteger)count { // C-y
   [_view scrollLineUp:self];
   NSRect visibleRect = [[_view enclosingScrollView] contentView].bounds;
@@ -945,19 +937,28 @@
   return index;
 }
 
-- (NSUInteger)halfPageScrollHelper:(NSUInteger)index count:(NSInteger)count {
+- (void)scroll:(CGFloat)ratio count:(NSUInteger)count{
     NSScrollView *scrollView = [_view enclosingScrollView];
-    NSTextContainer *container = [_view textContainer];
-    
+    NSTextContainer *container = [[_view layoutManager].textContainers objectAtIndex:0];
     NSRect visibleRect = [scrollView contentView].bounds;
-    CGFloat halfSize = visibleRect.size.height/2.0f;
-    
-    CGFloat scrollSize = halfSize*count;
+    CGFloat scrollSize = visibleRect.size.height * ratio * count;
     NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + scrollSize ); // This may be beyond the beginning or end of document (intentionally)
     
     // Cursor position relative to left-top origin shold be kept after scroll ( Exception is when it scrolls beyond the beginning or end of document)
-    NSRect currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:container];
-    NSPoint relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
+    NSRect currentInsertionRect;
+    // FIXME:
+    // boundingRectForGlyphRange: does not return currect rect if the cursor is after any place holders.
+    // This caueses misbehaviour for scrolling.
+    // I have searched some method to get right value for the range but have not found one so far.
+    currentInsertionRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,1) inTextContainer:container];
+    NSPoint relativeInsertionPoint = NSMakePoint(0.0,0.0);
+    if ( currentInsertionRect.origin.x == 0.0){
+        // Maybe could not get correct rect
+        // Currently no way to know where the current cursor relative position from left right top.
+    }else{
+        relativeInsertionPoint = XVimSubPoint(currentInsertionRect.origin, visibleRect.origin);
+    }
+    
     
     // Cursor Position after scroll
     NSPoint cursorAfterScroll = XVimAddPoint(scrollPoint,relativeInsertionPoint);
@@ -980,15 +981,10 @@
     [[scrollView contentView] scrollToPoint:scrollPoint];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 	
-	return cursorIndexAfterScroll;
-}
-
-- (NSUInteger)halfPageDown:(NSUInteger)index count:(NSUInteger)count {
-  return [self halfPageScrollHelper:index count:(NSInteger)count];
-}
-
-- (NSUInteger)halfPageUp:(NSUInteger)index count:(NSUInteger)count {
-  return [self halfPageScrollHelper:index count:-(NSInteger)count];
+    cursorIndexAfterScroll = [self firstNonBlankInALine:cursorIndexAfterScroll];
+    [self _moveCursor:cursorIndexAfterScroll preserveColumn:NO];
+    [self _syncState];
+    
 }
 
 - (NSUInteger)scrollBottom:(NSNumber*)count { // zb / z-
@@ -1123,8 +1119,7 @@
 }
 
 - (NSUInteger)glyphIndexForPoint:(NSPoint)point {
-	NSUInteger glyphIndex = [[_view layoutManager] glyphIndexForPoint:point inTextContainer:[_view textContainer]];
-	return glyphIndex;
+	return [[_view layoutManager] glyphIndexForPoint:point inTextContainer:[_view textContainer]];
 }
 
 - (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex {

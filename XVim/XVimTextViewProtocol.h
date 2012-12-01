@@ -66,9 +66,9 @@ typedef enum {
 - (void)shiftLeft:(XVimMotion*)motion;
 - (void)join:(NSUInteger)count;
 - (void)insertNewlineBelowLine:(NSUInteger)line;
-- (void)insertNewlineBelow;
 - (void)insertNewlineAboveLine:(NSUInteger)line;
 - (void)insertNewlineAbove;
+- (void)insertNewlineBelow;
 - (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
 
 // Insert or Command
@@ -92,11 +92,6 @@ typedef enum {
 - (void)moveSentencesBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsForward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
-
-// Case changes. These functions are all range checked.
-- (void)toggleCaseForRange:(NSRange)range;
-- (void)upperCaseForRange:(NSRange)range;
-- (void)lowerCaseForRange:(NSRange)range;
 
 // Scrolls
 - (void)scrollPageForward:(NSUInteger)count;

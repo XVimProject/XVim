@@ -20,6 +20,10 @@
  If they depend only on other public functions, they should be in
  XVimSourceView+Vim.
  
+ /// INTERFACE DESIGN ROLE ///
+  - Do not define(declare) any mothod which takes index(or range) as current insertion point or base point to take an action.
+    "index" is maintained as "_insertionPoint" internally so a client of this class never pass such point.
+    (You can define a method which takes "index" to be used internally which sould be declared in .m file)
  **/
 
 
@@ -69,13 +73,8 @@
 - (NSColor *)insertionPointColor;
 
 // Scrolling
-- (NSUInteger)halfPageDown:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)halfPageUp:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)lineDown:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)lineUp:(NSUInteger)index count:(NSUInteger)count;
-- (void)pageUp;
-- (void)pageDown;
 - (void)scrollTo:(NSUInteger)location;
+- (void)scroll:(CGFloat)ratio count:(NSUInteger)count;
 
 // Shows the yellow find indicator for given range
 - (void)showFindIndicatorForRange:(NSRange)range;

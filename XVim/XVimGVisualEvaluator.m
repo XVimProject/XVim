@@ -15,24 +15,19 @@
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
-	NSRange r = [view selectedRange];
-	[view lowerCaseForRange:r];
-	[view setSelectedRange:NSMakeRange(r.location, 0)];
+    [view makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 	return nil;
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
-	NSRange r = [view selectedRange];
-	[view upperCaseForRange:r];
-	[view setSelectedRange:NSMakeRange(r.location, 0)];
+    [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 	return nil;
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
-	NSRange r = [view selectedRange];
-	[view toggleCaseForRange:r];
+    [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 	return nil;
 }
 

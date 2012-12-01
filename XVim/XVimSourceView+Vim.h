@@ -288,12 +288,10 @@ typedef enum {
 - (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
 // Scrolls
-- (NSUInteger)pageForward:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)lineForward:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)lineBackward:(NSUInteger)index count:(NSUInteger)count;
+- (void)pageForward:(NSUInteger)index count:(NSUInteger)count;
+- (void)pageBackward:(NSUInteger)index count:(NSUInteger)count;
+- (void)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
+- (void)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
 
 // Text Object
 - (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;

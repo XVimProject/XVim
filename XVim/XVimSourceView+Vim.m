@@ -1429,52 +1429,20 @@
 // Scrolling  //
 ////////////////
 
-- (NSUInteger)pageForward:(NSUInteger)index count:(NSUInteger)count
-{ // C-f
-    // FIXME: This category methods MUST NOT call setSelectedRange.
-    //        Just calculate the position where the cursor should be.
-    [self setSelectedRange:NSMakeRange(index,0)];
-    
-    for( int i = 0 ; i < count; i++ ){
-        [self pageDown];
-    }
-    // Find first non blank character at the line
-    // If there is not the end of line is the target position
-    return [self firstNonBlankInALine:[self selectedRange].location];
+- (void)pageForward:(NSUInteger)index count:(NSUInteger)count { // C-f
+	[self scroll:1.0 count:count];
 }
 
-- (NSUInteger)pageBackward:(NSUInteger)index count:(NSUInteger)count { // C-f
-    // FIXME: This category methods MUST NOT call setSelectedRange.
-    //        Just calculate the position where the cursor should be.
-    [self setSelectedRange:NSMakeRange(index,0)];
-    
-    for( int i = 0 ; i < count; i++ ){
-        [self pageUp];
-    }
-    // Find first non blank character at the line
-    // If there is not the end of line is the target position
-    return [self firstNonBlankInALine:[self selectedRange].location];
+- (void)pageBackward:(NSUInteger)index count:(NSUInteger)count { // C-b
+	[self scroll:1.0 count:count];
 }
 
-- (NSUInteger)halfPageForward:(NSUInteger)index count:(NSUInteger)count { // C-d
-	NSUInteger cursorIndexAfterScroll = [self halfPageDown:index count:count];
-    return [self firstNonBlankInALine:cursorIndexAfterScroll];
+- (void)halfPageForward:(NSUInteger)index count:(NSUInteger)count { // C-d
+	[self scroll:0.5 count:count];
 }
 
-- (NSUInteger)halfPageBackward:(NSUInteger)index count:(NSUInteger)count
-{ // C-u
-	NSUInteger cursorIndexAfterScroll = [self halfPageUp:index count:count];
-    return [self firstNonBlankInALine:cursorIndexAfterScroll];
-}
-
-- (NSUInteger)lineForward:(NSUInteger)index count:(NSUInteger)count
-{ // C-e
-  return [self lineDown:index count:count];
-}
-
-- (NSUInteger)lineBackward:(NSUInteger)index count:(NSUInteger)count
-{ // C-y
-  return [self lineUp:index count:count];
+- (void)halfPageBackward:(NSUInteger)index count:(NSUInteger)count { // C-u
+	[self scroll:-0.5 count:count];
 }
 
 // TODO: Fix the warnings

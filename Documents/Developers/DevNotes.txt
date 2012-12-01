@@ -1,6 +1,7 @@
 
 ### Any tips or infomation ###
 
+# Problem when yank and put block text #
    When yank and put with block selection it makes inserting some spaces to pad a line.
 For example, assume we have following text,
 -----------------------
@@ -17,5 +18,8 @@ It looks that it does not big problem but when you want to "undo" the put operat
 "u" twice because the actions taken when we put are "Insert ["a", "", "b"] into each line" and "trim 
 trailing whitespace" and first "u" command only undo the "trim..." action.
 I tried to group them up into one action to undo with one "u" commnad but could not.
+
+
+
 
 
