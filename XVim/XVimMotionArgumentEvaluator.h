@@ -14,8 +14,7 @@
 // When the subclass fix the motion it must call motionFixedFrom:To: method.
 @interface XVimMotionArgumentEvaluator : XVimArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimMotionEvaluator*)parent;
+- (id)initWithContext:(XVimEvaluatorContext*)context parent:(XVimMotionEvaluator*)parent;
 
 - (XVimMotionEvaluator*)motionEvaluator;
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;

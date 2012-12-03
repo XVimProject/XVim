@@ -291,10 +291,8 @@
         }
         if( motion.motion == MOTION_WORD_FORWARD ){
             if (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound) {
+                // Special cases for word move over a line break.
                 to = motion.info->lastEndOfLine;
-                motion.type = CHARACTERWISE_INCLUSIVE;
-            } else if( motion.info->lastEndOfWord != NSNotFound){
-                to = motion.info->lastEndOfWord;
                 motion.type = CHARACTERWISE_INCLUSIVE;
             }
         }
@@ -334,6 +332,11 @@
     NSUInteger insertionPointAfterDelete = _insertionPoint;
     if( _selectionMode != MODE_VISUAL_NONE ){
         insertionPointAfterDelete = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
+    }
+    // "cw" is like "ce" if the cursor is on a non-blank
+    if( motion.motion == MOTION_WORD_FORWARD && isNonBlank([[self string] characterAtIndex:_insertionPoint]) ){
+        motion.motion = MOTION_END_OF_WORD_FORWARD;
+        motion.type = CHARACTERWISE_INCLUSIVE;
     }
     [self delete:motion];
     if( motion.info->deleteLastLine){
@@ -1355,6 +1358,12 @@
             break;
         case MOTION_LASTLINE:
             nextPos = [self firstOfLine:[self endOfFile]];
+            break;
+        case TEXTOBJECT_WORD:
+        case TEXTOBJECT_BRACES:
+        case TEXTOBJECT_PARAGRAPH:
+        case TEXTOBJECT_PARENTHESES:
+        case TEXTOBJECT_SENTENCE:
             break;
         case MOTION_LINE_COLUMN:
             nextPos = [self positionAtLineNumber:motion.line column:motion.column];

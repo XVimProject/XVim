@@ -14,16 +14,10 @@
 
 @implementation XVimSelectAction
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from 
-							   To:(NSUInteger)to 
-							 Type:(MOTION_TYPE)type 
-						 inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
 	NSRange r = [view getOperationRangeFrom:from To:to Type:type];
-	return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-												   mode:MODE_CHARACTER 
-											  withRange:r];
+	return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_CHARACTER withRange:r];
 }
 
 @end

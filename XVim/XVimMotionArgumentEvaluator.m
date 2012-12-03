@@ -14,38 +14,31 @@
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimMotionEvaluator*)parent
-{
-	if (self = [super initWithContext:context parent:parent])
-	{
+- (id)initWithContext:(XVimEvaluatorContext*)context parent:(XVimMotionEvaluator*)parent {
+	if (self = [super initWithContext:context parent:parent]) {
 	}
 	return self;
 }
 
-- (XVimMotionEvaluator*)motionEvaluator
-{
+- (XVimMotionEvaluator*)motionEvaluator {
 	return (XVimMotionEvaluator*)_parent;
 }
 
--(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+-(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     if( nil != _parent ){
         return [[self motionEvaluator] motionFixedFrom:from To:to Type:type inWindow:window];
     }
     return nil;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
     if( nil != _parent ){
         return [[self motionEvaluator] commonMotion:motion Type:type inWindow:window];
     }
     return nil;
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister
-{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister {
     if (xregister.isRepeat){
         if (xregister.nonNumericKeyCount == 1){
             if([keyStroke classResponds:[XVimMotionArgumentEvaluator class]] || keyStroke.isNumeric){

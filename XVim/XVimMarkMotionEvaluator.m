@@ -21,24 +21,18 @@
 
 @implementation XVimMarkMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimMotionEvaluator*)parent
-		 markOperator:(XVimMarkOperator)markOperator
-{
-	if (self = [super initWithContext:context parent:parent])
-	{
+- (id)initWithContext:(XVimEvaluatorContext*)context parent:(XVimMotionEvaluator*)parent markOperator:(XVimMarkOperator)markOperator {
+	if (self = [super initWithContext:context parent:parent]) {
 		_markOperator = markOperator;
 	}
 	return self;
 }
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
-+ (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window
-{
++ (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window {
 	if ([mark length] != 1) {
         return NSNotFound;
     }
@@ -61,12 +55,10 @@
 	return to;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window {
     NSString* keyStr = [keyStroke toString];
 	NSUInteger to = [[self class] markLocationForMark:keyStr inWindow:window];
-	if (to == NSNotFound)
-	{
+	if (to == NSNotFound) {
 		return nil;
 	}
 	

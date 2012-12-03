@@ -32,8 +32,7 @@
 	return self;
 }
 
-- (XVimEvaluator*)c:(XVimWindow*)window
-{
+- (XVimEvaluator*)c:(XVimWindow*)window {
     if( !_insertModeAtCompletion ){
         return nil;  // 'dc' does nothing
     }

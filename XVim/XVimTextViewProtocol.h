@@ -9,7 +9,6 @@
 #import "XVimVisualMode.h"
 #import "XVimMotion.h"
 #import "XVimRegister.h"
-#import "XVimText.h"
 #import <Foundation/Foundation.h>
 
 /**

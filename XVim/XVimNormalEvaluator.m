@@ -126,28 +126,20 @@
     return nil;
 }
 
-- (XVimEvaluator*)C_y:(XVimWindow*)window{
-    [[window sourceView] scrollLineBackward:[self numericArg]];
-    return nil;
-}
-
-- (XVimEvaluator*)C_e:(XVimWindow*)window{
-    [[window sourceView] scrollLineForward:[self numericArg]];
-    return nil;
-}
-
 - (XVimEvaluator*)d:(XVimWindow*)window{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:NO];
-    return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"d"]
-										 operatorAction:nil
-                                             withParent:self
-								 insertModeAtCompletion:FALSE];
+    return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"d"] operatorAction:nil withParent:self insertModeAtCompletion:FALSE];
 }
 
 - (XVimEvaluator*)D:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
     [view delete:m];
+    return nil;
+}
+
+- (XVimEvaluator*)C_e:(XVimWindow*)window{
+    [[window sourceView] scrollLineForward:[self numericArg]];
     return nil;
 }
 
@@ -244,9 +236,7 @@
 - (XVimEvaluator*)r:(XVimWindow*)window{
 	XVimEvaluatorContext *context = [XVimEvaluatorContext contextWithNumericArg:[self numericArg]];
 	[context setArgumentString:@"r"];
-	
-    return [[XVimInsertEvaluator alloc] initWithContext:context
-											oneCharMode:YES];
+    return [[XVimInsertEvaluator alloc] initWithContext:context oneCharMode:YES];
 }
 
 - (XVimEvaluator*)s:(XVimWindow*)window{
@@ -262,13 +252,11 @@
     [view setSelectedRange:replacementRange];
 	
 	// Xcode crashes if we cut a zero length selection
-	if (replacementRange.length > 0)
-	{
+	if (replacementRange.length > 0) {
 		[view cutText]; // Can't use del here since we may want to wind up at end of line
 	}
 	
-    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-											oneCharMode:NO];
+    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] oneCharMode:NO];
 }
 
 - (XVimEvaluator*)u:(XVimWindow*)window{
@@ -299,8 +287,7 @@
 }
 
 - (XVimEvaluator*)C_w:(XVimWindow*)window{
-    return [[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"]
-												 parent:self];
+    return [[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] parent:self];
 }
 
 - (XVimEvaluator*)x:(XVimWindow*)window{
@@ -319,8 +306,7 @@
 }
 
 - (XVimEvaluator*)Y:(XVimWindow*)window{
-    XVimYankEvaluator* yank = [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"]
-                                                          operatorAction:nil withParent:self];
+    XVimYankEvaluator* yank = [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"] operatorAction:nil withParent:self];
     return [yank y:window];
 }
 
@@ -329,10 +315,13 @@
 									   operatorAction:nil withParent:self];
 }
 
+- (XVimEvaluator*)C_y:(XVimWindow*)window{
+    [[window sourceView] scrollLineBackward:[self numericArg]];
+    return nil;
+}
+
 - (XVimEvaluator*)AT:(XVimWindow*)window {
-    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"]
-																  parent:self
-															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
+    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"] parent:self completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)
                            {
                                XVim *xvim = [XVim instance];
                                XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
@@ -354,8 +343,7 @@
 }
 
 - (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-    return [[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="]
-										operatorAction:nil withParent:self];
+    return [[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="] operatorAction:nil withParent:self];
 }
 
 - (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
@@ -461,14 +449,7 @@
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = to;
     [view move:m];
-    /*
-    NSRange r = NSMakeRange(to, 0);
-    [view setSelectedRange:r];
-    [view adjustCursorPosition];
-    [view scrollTo:[[window sourceView]insertionPoint]];
-     */
     return nil;
-    //return [self withNewContext];
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{

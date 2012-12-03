@@ -117,12 +117,7 @@
 
 /*
 // Since Ctrl-b, Ctrl-d is not "motion" but "scroll" 
-// they are implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
- 
-- (XVimEvaluator*)C_b:(XVimWindow*)window{
-    return [self commonMotion:@selector(pageBackward:) Type:LINEWISE];
-}
- 
+// Do not implement it here. they are implemented in XVimNormalEvaluator and XVimVisualEvaluator respectively.
 */
 
 - (XVimEvaluator*)e:(XVimWindow*)window{

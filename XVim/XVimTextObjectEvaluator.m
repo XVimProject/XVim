@@ -24,13 +24,8 @@
 
 @implementation XVimTextObjectEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-	   operatorAction:(XVimOperatorAction*)operatorAction 
-					withParent:(XVimEvaluator*)parent
-				   inclusive:(BOOL)inclusive
-{
-	if (self = [super initWithContext:context])
-	{
+- (id)initWithContext:(XVimEvaluatorContext*)context operatorAction:(XVimOperatorAction*)operatorAction withParent:(XVimEvaluator*)parent inclusive:(BOOL)inclusive {
+	if (self = [super initWithContext:context]) {
 		self->_operatorAction = operatorAction;
 		self->_inclusive = inclusive;
 		self->_parent = parent;
@@ -38,13 +33,11 @@
 	return self;
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
+- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window {
 	return [_parent drawRect:rect inWindow:window];
 }
 
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window {
 	return [_parent shouldDrawInsertionPointInWindow:window];
 }
 
@@ -52,13 +45,11 @@
     return 0.5;
 }
 
-- (NSString*)modeString
-{
+- (NSString*)modeString {
 	return [_parent modeString];
 }
 
-- (BOOL)isRelatedTo:(XVimEvaluator*)other
-{
+- (BOOL)isRelatedTo:(XVimEvaluator*)other {
 	return [super isRelatedTo:other] || other == _parent;
 }
 
@@ -66,35 +57,29 @@
     return [_parent withNewContext];
 }
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
 }
 
-- (XVimEvaluator*)executeActionForRange:(NSRange)r inWindow:(XVimWindow*)window
-{
-	if (r.location != NSNotFound)
-	{
+- (XVimEvaluator*)executeActionForRange:(NSRange)r inWindow:(XVimWindow*)window {
+	if (r.location != NSNotFound) {
 		[window.sourceView clampRangeToBuffer:&r];
 		return [_operatorAction motionFixedFrom:r.location To:r.location+r.length Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 	}
 	return [_parent withNewContext];
 }
 
-- (XVimEvaluator*)b:(XVimWindow*)window
-{
+- (XVimEvaluator*)b:(XVimWindow*)window {
 	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '(', ')');
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)B:(XVimWindow*)window
-{
+- (XVimEvaluator*)B:(XVimWindow*)window {
 	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '{', '}');
 	return [self executeActionForRange:r inWindow:window];
 }
 
--(XVimEvaluator*)p:(XVimWindow*)window
-{
+-(XVimEvaluator*)p:(XVimWindow*)window {
     NSUInteger start = [window insertionPoint];
     if(start != 0){
         start = [window.sourceView paragraphsBackward:[window insertionPoint] count:1 option:MOPT_PARA_BOUND_BLANKLINE];
@@ -110,78 +95,65 @@
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)w:(XVimWindow*)window
-{
+- (XVimEvaluator*)w:(XVimWindow*)window {
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
     NSRange r = [window.sourceView currentWord:[window insertionPoint] count:[self numericArg] option:opt];
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)W:(XVimWindow*)window
-{
+- (XVimEvaluator*)W:(XVimWindow*)window {
+//    XVimMotion* m = XVIM_MAKE_MOTION(TEXTOBJECT_WORD, <#TYPE#>, <#OPTION#>, <#COUNT#>)
     MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
     NSRange r = [window.sourceView currentWord:[window insertionPoint] count:[self numericArg] option:opt|BIGWORD];
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)LSQUAREBRACKET:(XVimWindow*)window
-{
+- (XVimEvaluator*)LSQUAREBRACKET:(XVimWindow*)window {
 	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '[', ']');
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)RSQUAREBRACKET:(XVimWindow*)window
-{
+- (XVimEvaluator*)RSQUAREBRACKET:(XVimWindow*)window {
 	return [self LSQUAREBRACKET:window];
 }
 
-- (XVimEvaluator*)LBRACE:(XVimWindow*)window
-{
+- (XVimEvaluator*)LBRACE:(XVimWindow*)window {
 	return [self B:window];
 }
 
-- (XVimEvaluator*)RBRACE:(XVimWindow*)window
-{
+- (XVimEvaluator*)RBRACE:(XVimWindow*)window {
 	return [self B:window];
 }
 
-- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window
-{
+- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window {
 	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '<', '>');
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window
-{
+- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window {
 	return [self LESSTHAN:window];
 }
 
-- (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window
-{
+- (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window {
 	return [self b:window];
 }
 
-- (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window
-{
+- (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window {
 	return [self b:window];
 }
 
-- (XVimEvaluator*)SQUOTE:(XVimWindow*)window
-{
+- (XVimEvaluator*)SQUOTE:(XVimWindow*)window {
 	NSRange r = xv_current_quote([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '\'');
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimEvaluator*)DQUOTE:(XVimWindow*)window
-{
+- (XVimEvaluator*)DQUOTE:(XVimWindow*)window {
 	NSRange r = xv_current_quote([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '"');
 	return [self executeActionForRange:r inWindow:window];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister
-{
-    if (xregister.isRepeat && [keyStroke instanceResponds:self] ) 
-	{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister {
+    if (xregister.isRepeat && [keyStroke instanceResponds:self] ) {
 		return REGISTER_APPEND;
 	}
     

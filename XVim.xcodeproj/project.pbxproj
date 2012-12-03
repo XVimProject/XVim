@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A2100A63164E3E440094D9A0 /* XVimText.m in Sources */ = {isa = PBXBuildFile; fileRef = A2100A62164E3E440094D9A0 /* XVimText.m */; };
 		A216F3A1156560FE00AD2529 /* IDEEditorArea+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */; };
 		A216F3A51565658F00AD2529 /* IDEFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A31565658E00AD2529 /* IDEFoundation.framework */; };
 		A216F3A61565658F00AD2529 /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A216F3A41565658E00AD2529 /* IDEKit.framework */; };
@@ -101,8 +100,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		A2100A61164E3E440094D9A0 /* XVimText.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimText.h; path = XVim/XVimText.h; sourceTree = SOURCE_ROOT; };
-		A2100A62164E3E440094D9A0 /* XVimText.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimText.m; path = XVim/XVimText.m; sourceTree = SOURCE_ROOT; };
 		A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEEditorArea+XVim.h"; path = "XVim/IDEEditorArea+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEEditorArea+XVim.m"; path = "XVim/IDEEditorArea+XVim.m"; sourceTree = SOURCE_ROOT; };
 		A216F3A31565658E00AD2529 /* IDEFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEFoundation.framework; path = ../../../../Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework; sourceTree = "<group>"; };
@@ -522,8 +519,6 @@
 				C3FD41DB154E7E3400B076DB /* XVimSourceView+Vim.m */,
 				A23771571611CD4200FE5F8B /* XVimMotion.h */,
 				A23771581611CD4200FE5F8B /* XVimMotion.m */,
-				A2100A61164E3E440094D9A0 /* XVimText.h */,
-				A2100A62164E3E440094D9A0 /* XVimText.m */,
 			);
 			name = "XCode Independent Classes";
 			sourceTree = "<group>";
@@ -726,7 +721,6 @@
 				A26DC88615DF33C600779CB4 /* XVimTester.m in Sources */,
 				BF07A94215EBF404006E6984 /* NSEvent+VimHelper.m in Sources */,
 				A23771591611CD4300FE5F8B /* XVimMotion.m in Sources */,
-				A2100A63164E3E440094D9A0 /* XVimText.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

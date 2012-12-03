@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "XVimVisualMode.h"
-#import "XVimText.h"
 
 typedef enum{
     TEXT_TYPE_CHARACTERS,

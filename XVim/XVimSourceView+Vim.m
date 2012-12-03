@@ -855,9 +855,7 @@
     
     NSString* str = [self string];
     unichar lastChar= [str characterAtIndex:index];
-    BOOL inWord = isNonBlank(lastChar);
-    BOOL newLineStarts = isNewLine(lastChar);
-    BOOL foundNonBlanks = inWord;
+    BOOL wordInLineFound = NO;
     for(NSUInteger i = index+1 ; i <= [[self string] length]; i++ ){
         // Each time we encounter new word decrement "counter".
         // Remember blankline is a word
@@ -867,65 +865,66 @@
             curChar = [str characterAtIndex:i];
         }else {
             //EOF found so return this position.
-            info->lastEndOfLine = i-1;
-            info->lastEndOfWord = i-1;
+            if( isNonBlank(lastChar)){
+                info->lastEndOfLine = i-1;
+                info->lastEndOfWord = i-1;
+            }
             return i-1;
         } 
         
-        //parse the next character. 
-        if(newLineStarts){
+        //Check relation between last and current character to determine the word boundary
+        if(isNewLine(lastChar)){
             if(isNewLine(curChar)){
-                //two newlines in a row.
-                inWord = FALSE;
+                //two newlines in a row (means blank line)
+                //blank line is a word so count it.
                 --count;
                 info->lastEndOfWord = i-1;
                 info->lastEndOfLine = i-1;
+                info->isFirstWordInALine = YES;
+                wordInLineFound = YES;
             }else if(isNonBlank(curChar)){
-                inWord = TRUE;
+                // A word found
                 --count;
-                newLineStarts = FALSE;
-                info->isFirstWordInALine = FALSE;
+                info->isFirstWordInALine = YES;
+                wordInLineFound = YES;
             }else {
-                inWord = FALSE; 
-                newLineStarts = FALSE;
-                info->isFirstWordInALine = FALSE;
+                // Nothing
             }
-        }else if(inWord){
+        }else if(isNonBlank(lastChar)){
             if(isNewLine(curChar)){
                 //from word to newline
-                newLineStarts = TRUE;
-                inWord = FALSE;
-                foundNonBlanks = FALSE;
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
+                wordInLineFound = NO;
             }else if(isNonBlank(curChar)){
-                inWord = TRUE;
-                newLineStarts = FALSE;
                 if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
                     --count;
                     info->lastEndOfLine = i-1;
                     info->lastEndOfWord = i-1;
+                    info->isFirstWordInALine = NO;
+                    wordInLineFound = YES;
                 }
-            }else if(!isNonBlank(curChar)){
-                newLineStarts = FALSE;
-                inWord = FALSE;
-                info->lastEndOfLine = i-1;
+            }else{
+                // non-blank to blank
                 info->lastEndOfWord = i-1;
             }
         }else { //on a blank character that is not a newline
             if(isNewLine(curChar)){
-                //not in word
-                newLineStarts = TRUE;
-                info->isFirstWordInALine = TRUE;
+                //blank to newline boundary
                 info->lastEndOfLine = info->lastEndOfWord;
-                inWord = FALSE;
+                info->isFirstWordInALine = YES;
+                wordInLineFound = NO;
             }else if(isNonBlank(curChar)){
-                // blank to word boundary. 
-                inWord = TRUE;
-                newLineStarts = FALSE;
+                // blank to non-blank. A word found.
                 --count;
+                if( !wordInLineFound){
+                    info->isFirstWordInALine = YES;
+                    wordInLineFound = YES;
+                }else{
+                    info->isFirstWordInALine = NO;
+                }
             }else{
-                //is blank character
+                //Two blanks in a row...
                 //nothing to do here.
             }
         }

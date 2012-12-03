@@ -36,8 +36,7 @@
     return nil;
 }
 
-- (XVimEvaluator*)i:(XVimWindow*)window
-{
+- (XVimEvaluator*)i:(XVimWindow*)window {
 	NSUInteger markLocation = [XVimMarkMotionEvaluator markLocationForMark:@"." inWindow:window];
 	if (markLocation == NSNotFound) { return nil; }
 	
