@@ -165,6 +165,16 @@
     return NO;
 }
 
+// Determine if the position is non blank character
+// EOF is treated as a blank character
+- (BOOL) isNonBlank:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [self isEOF:index]){
+        return YES;
+    }
+    return isNonBlank([[self string] characterAtIndex:index]);
+}
+
 /**
  * Determine if the position specified with "index" is blankline.
  * Blankline is one of them

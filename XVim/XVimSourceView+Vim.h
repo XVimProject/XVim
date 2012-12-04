@@ -99,6 +99,10 @@ typedef enum {
 // Determine if the position is the first of line
 - (BOOL) isFirstOfLine:(NSUInteger)index;
 
+// Determine if the position is non blank character
+// EOF is treated as a blank character
+- (BOOL) isNonBlank:(NSUInteger)index;
+
 /**
  * Determine if the position specified with "index" is blankline.
  * Blankline is one of them

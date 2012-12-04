@@ -333,20 +333,21 @@
     if( _selectionMode != MODE_VISUAL_NONE ){
         insertionPointAfterDelete = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
     }
-    // "cw" is like "ce" if the cursor is on a non-blank
-    if( motion.motion == MOTION_WORD_FORWARD && isNonBlank([[self string] characterAtIndex:_insertionPoint]) ){
+    // "cw" is like "ce" if the cursor is on a word ( in this case blank line is not treated as a word )
+    if( motion.motion == MOTION_WORD_FORWARD && [self isNonBlank:_insertionPoint] ){
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
     }
     [self delete:motion];
+    _cursorMode = CURSOR_MODE_INSERT;
     if( motion.info->deleteLastLine){
-        [self insertNewlineBelow];
+        [self insertNewlineBelowLine:[self lineNumber:_insertionPoint]];
     }
     else if( insertNewline ){
-        [self insertNewlineAbove];
+        [self insertNewlineAboveLine:[self lineNumber:_insertionPoint]];
+    }else{
+        [self _moveCursor:insertionPointAfterDelete preserveColumn:NO];
     }
-    _cursorMode = CURSOR_MODE_INSERT;
-    [self _moveCursor:insertionPointAfterDelete preserveColumn:NO];
     [self changeSelectionMode:MODE_VISUAL_NONE];
     [self _syncState];
 }
