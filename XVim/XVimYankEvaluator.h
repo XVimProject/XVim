@@ -10,6 +10,6 @@
 #import "XVimOperatorAction.h"
 
 @interface XVimYankEvaluator : XVimOperatorEvaluator
-- (XVimEvaluator*)y:(XVimWindow*)window;
+- (XVimEvaluator*)y;
 @end
 

@@ -11,12 +11,11 @@
 
 @implementation XVimNumericEvaluator
 
-- (BOOL)numericMode
-{
+- (BOOL)numericMode{
 	return [[self context] numericArgHead] != nil;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     NSString* keyStr = [keyStroke toSelectorString];
 	XVimEvaluatorContext *context = [self context];
 	
@@ -35,9 +34,6 @@
                 [context setNumericArgHead:newHead];
                 [context appendArgument:numStr];
             }
-            
-			
-			
             return self;
         }
         else{
@@ -54,7 +50,6 @@
         }
     }
     
-    XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
-    return nextEvaluator;
+    return [super eval:keyStroke];
 }
 @end

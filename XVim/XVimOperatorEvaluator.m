@@ -24,20 +24,19 @@
 
 @implementation XVimOperatorEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context operatorAction:(XVimOperatorAction*) action withParent:(XVimEvaluator*)parent{
-	if (self = [super initWithContext:context]){
-		self->_operatorAction = action;
-		self->_parent = parent;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent{
+	if (self = [super initWithContext:context withWindow:window]){
+		_parent = parent;
 	}
 	return self;
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window{
-	return [_parent drawRect:rect inWindow:window];
+- (void)drawRect:(NSRect)rect{
+	return [_parent drawRect:rect];
 }
 
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window{
-	return [_parent shouldDrawInsertionPointInWindow:window];
+- (BOOL)shouldDrawInsertionPoint{
+	return [_parent shouldDrawInsertionPoint];
 }
 
 - (float)insertionPointHeightRatio{
@@ -52,7 +51,7 @@
 	return [super isRelatedTo:other] || other == _parent;
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
+- (XVimEvaluator*)defaultNextEvaluator{
     return [_parent withNewContext];
 }
 
@@ -60,13 +59,13 @@
 	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
 }
 
-- (XVimEvaluator*)a:(XVimWindow*)window {
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] operatorAction:_operatorAction withParent:_parent inclusive:YES];
+- (XVimEvaluator*)a{
+	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] withWindow:self.window withParent:_parent inclusive:YES];
 	return eval;
 }
 
-- (XVimEvaluator*)i:(XVimWindow*)window {
-    XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] operatorAction:_operatorAction withParent:_parent inclusive:NO];
+- (XVimEvaluator*)i{
+    XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] withWindow:self.window withParent:_parent inclusive:NO];
 	return eval;
 }
 
@@ -81,7 +80,9 @@
     return REGISTER_IGNORE;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window{
-	return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
+    // TODO FIXME:
+	//return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
+    return nil;
 }
 @end

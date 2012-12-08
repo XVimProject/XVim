@@ -13,16 +13,16 @@
 
 @implementation XVimLowercaseEvaluator
 
-- (XVimEvaluator*)u:(XVimWindow*)window {
+- (XVimEvaluator*)u{
     if ([self numericArg] < 1) 
         return nil;
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-    return [self _motionFixed:m inWindow:window];
+    return [self _motionFixed:m];
 }
 
--(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window {
-    [[window sourceView] makeLowerCase:motion];
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
+    [[self sourceView] makeLowerCase:motion];
     return nil;
 }
 

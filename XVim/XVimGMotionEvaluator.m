@@ -19,38 +19,37 @@
 
 @implementation XVimGMotionEvaluator
 
-- (XVimEvaluator*)g:(XVimWindow*)window{
+- (XVimEvaluator*)g{
     //TODO: Must deal numeric arg as linenumber
-    XVimSourceView* view = [window sourceView];
+    XVimSourceView* view = [self.window sourceView];
     NSUInteger location = [view nextLine:0 column:0 count:[self numericArg] - 1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE inWindow:window];
+    return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE];
 }
 
-- (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
+- (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
 	XVimSearch* searcher = [[XVim instance] searcher];
 	
-	NSUInteger cursorLocation = [window insertionPoint];
+	NSUInteger cursorLocation = [self.window insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found;
     for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
-        found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:NO inWindow:window];
+        found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:NO inWindow:self.window];
 		searchLocation = found.location;
     }
 	
-	if (![searcher selectSearchResult:found inWindow:window])
-	{
+	if (![searcher selectSearchResult:found inWindow:self.window]) {
 		return nil;
 	}
     
-	return [self _motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+	return [self _motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)ASTERISK:(XVimWindow*)window{
-	return [self searchCurrentWordInWindow:window forward:YES];
+	return [self searchCurrentWord:YES];
 }
 
 - (XVimEvaluator*)NUMBER:(XVimWindow*)window{
-	return [self searchCurrentWordInWindow:window forward:YES];
+	return [self searchCurrentWord:YES];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

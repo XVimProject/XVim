@@ -21,8 +21,8 @@
 
 @implementation XVimMarkMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context parent:(XVimMotionEvaluator*)parent markOperator:(XVimMarkOperator)markOperator {
-	if (self = [super initWithContext:context parent:parent]) {
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimMotionEvaluator*)parent markOperator:(XVimMarkOperator)markOperator {
+	if (self = [super initWithContext:context withWindow:window withParent:parent]) {
 		_markOperator = markOperator;
 	}
 	return self;
@@ -55,22 +55,22 @@
 	return to;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window {
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     NSString* keyStr = [keyStroke toString];
-	NSUInteger to = [[self class] markLocationForMark:keyStr inWindow:window];
+	NSUInteger to = [[self class] markLocationForMark:keyStr inWindow:self.window];
 	if (to == NSNotFound) {
 		return nil;
 	}
 	
-    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger from = [[self sourceView] selectedRange].location;
 	MOTION_TYPE motionType = CHARACTERWISE_EXCLUSIVE;
 	
 	if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
-		to = [[window sourceView] firstNonBlankInALine:to];
+		to = [[self sourceView] firstNonBlankInALine:to];
 		motionType = LINEWISE;
 	}
 	
-    return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType inWindow:window];
+    return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType];
 }
 
 @end

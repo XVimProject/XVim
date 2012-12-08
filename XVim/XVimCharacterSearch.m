@@ -20,10 +20,8 @@
 @synthesize shouldSearchCharacterBackward = _shouldSearchCharacterBackward;
 @synthesize shouldSearchPreviousCharacter = _shouldSearchPreviousCharacter;
 
-- (id)init
-{
-	if (self = [super init])
-	{
+- (id)init {
+	if (self = [super init]) {
 		_searchCharacter = @"";
 		_shouldSearchCharacterBackward = NO;
 		_shouldSearchPreviousCharacter = NO;
@@ -37,8 +35,7 @@
 	_shouldSearchPreviousCharacter = previous;
 }
 
-- (NSUInteger)searchCharacterForwardFrom:(NSUInteger)start inWindow:(XVimWindow*)window
-{
+- (NSUInteger)searchCharacterForwardFrom:(NSUInteger)start inWindow:(XVimWindow*)window {
 	XVimSourceView *view = [window sourceView];
 	NSString* s = [view string];
 	NSRange at = NSMakeRange(start, 0); 

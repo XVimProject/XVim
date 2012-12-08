@@ -13,17 +13,10 @@
 // insertionPoint in Visual mode is different from NSTextView's point obtained from selectedRange.
 // Evaluator should not keep these values but keep it in DVTSourceTextView+XVim extension.
 // They only rely on their interface to handle them.
-@interface XVimVisualEvaluator : XVimMotionEvaluator {
-	NSRange _operationRange;
-    VISUAL_MODE _mode;
-}
+@interface XVimVisualEvaluator : XVimMotionEvaluator 
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-				 mode:(VISUAL_MODE)mode;
-
-- (id)initWithContext:(XVimEvaluatorContext*)context
-				 mode:(VISUAL_MODE)mode 
-			withRange:(NSRange)range; // Range is line numbers if mode == MODE_LINE
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode withRange:(NSRange)range; // Range is line numbers if mode == MODE_LINE
 
 
 @end

@@ -12,7 +12,7 @@
 
 @interface XVimTextObjectEvaluator : XVimEvaluator
 - (id)initWithContext:(XVimEvaluatorContext*)context
-	   operatorAction:(XVimOperatorAction*)operatorAction 
-					withParent:(XVimEvaluator*)parent
-				   inclusive:(BOOL)inclusive;
+           withWindow:(XVimWindow *)window
+           withParent:(XVimEvaluator*)parent
+            inclusive:(BOOL)inclusive;
 @end

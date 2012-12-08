@@ -15,29 +15,18 @@
 #import "Logger.h"
 
 @interface XVimRegisterEvaluator() {
-	OnSelectRegister _onComplete;
 }
 @end
 
 @implementation XVimRegisterEvaluator
-- (id)initWithContext:(XVimEvaluatorContext *)context parent:(XVimEvaluator*)parent{
-	if (self = [super initWithContext:context parent:parent]) {
-		_parent = parent;
-		_onComplete = nil;
+- (id)initWithContext:(XVimEvaluatorContext *)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent{
+    if (self = [super initWithContext:context withWindow:window withParent:parent]) {
 	}
 	return self;
 }
 
-// Obsolete
-- (id)initWithContext:(XVimEvaluatorContext*)context parent:(XVimEvaluator*)parent completion:(OnSelectRegister)onComplete {
-	if (self = [super initWithContext:context parent:parent]) {
-		_parent = parent;
-		_onComplete = [onComplete copy];
-	}
-	return self;
-}
 
-- (void)registerFixed:(NSString*)rname inWindow:(XVimWindow*)window{
+- (void)registerFixed:(NSString*)rname{
     [[XVim instance] setYankRegisterByName:rname];
     [self.context appendArgument:rname];
 }
@@ -46,14 +35,14 @@
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window {
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
 	SEL handler = [keyStroke selectorForInstance:self];
 	if (handler){
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
-        return [self performSelector:handler withObject:window];
+        return [self performSelector:handler];
     }
 
-    [self registerFixed:[keyStroke toString] inWindow:window];
+    [self registerFixed:[keyStroke toString]];
     return [_parent withNewContext:self.context];
 }
 	
@@ -64,10 +53,10 @@
 @end
 
 @implementation XVimRecordingRegisterEvaluator
-- (void)registerFixed:(NSString*)rname inWindow:(XVimWindow*)window{
+- (void)registerFixed:(NSString*)rname{
     XVimRegister *xregister = [[XVim instance] findRegister:rname];
     if (xregister && xregister.isReadOnly == NO) {
-        [window recordIntoRegister:xregister];
+        [self.window recordIntoRegister:xregister];
     } else {
         [[XVim instance] ringBell];
     }

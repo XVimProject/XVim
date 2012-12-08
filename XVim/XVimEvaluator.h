@@ -45,43 +45,49 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 @class XVimWindow;
 @class DVTSourceTextView;
 @class XVimRegister;
+@class XVimSourceView;
+@class XVimEvaluatorContext;
 @protocol XVimKeymapProvider;
 
-@class XVimEvaluatorContext;
-
 @interface XVimEvaluator : NSObject
+@property(strong) XVimEvaluatorContext* context;
+@property(strong) XVimWindow* window;
 
-- (id)initWithContext:(XVimEvaluatorContext*)context;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window;
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
+/**
+ * @return Next evaluator. If its nil it means that this evaluator finished its task.
+ *         If its not nil next key event will be handled by the evaluator and when it finished 
+ *         "onChildComplete" will be called with the evaluator.
+ **/
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke;
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
-
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
-
-- (void)becameHandlerInWindow:(XVimWindow*)window;
-
-- (void)willEndHandlerInWindow:(XVimWindow*)window;
-
-- (void)didEndHandlerInWindow:(XVimWindow*)window;
-
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window;
-
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window;
-
-- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window;
-
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window;
-
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window;
-
+/**
+ * This method is called when "next evaluator" returned by eval: method completed its task.
+ * @return Next evaluator. If its nil it means that this evaluator finished its task and
+ *         onChildComplete: of parent evaluator will be called with this evaluator.
+ **/
+- (XVimEvaluator*)onChildComplete:(XVimEvaluator*)childEvaluator;
+   
+- (void)becameHandler;
+- (void)didEndHandler;
+- (XVimEvaluator*)defaultNextEvaluator;
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event;
+- (NSRange)restrictSelectedRange:(NSRange)range;
+- (void)drawRect:(NSRect)rect;
+- (BOOL)shouldDrawInsertionPoint;
 - (float)insertionPointHeightRatio;
 - (float)insertionPointWidthRatio;
 - (float)insertionPointAlphaRatio;
 
 - (NSString*)modeString;
-
 - (BOOL)isRelatedTo:(XVimEvaluator*)other;
+
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
+
+- (XVimSourceView*)sourceView;
+
 
 ////////////////////////////////////////////////
 // Context convenience functions

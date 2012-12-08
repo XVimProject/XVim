@@ -9,17 +9,11 @@
 #import "XVimEvaluator.h"
 #import "XVimArgumentEvaluator.h"
 
-typedef XVimEvaluator* (^OnSelectRegister) (NSString*, XVimEvaluatorContext*);
-
 @interface XVimRegisterEvaluator : XVimArgumentEvaluator
 
-- (void)registerFixed:(NSString*)rname inWindow:(XVimWindow*)window;
+- (void)registerFixed:(NSString*)rname;
 
-- (id)initWithContext:(XVimEvaluatorContext *)context parent:(XVimEvaluator*)parent;
-
-- (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimEvaluator*)parent 
-		   completion:(OnSelectRegister)onComplete;
+- (id)initWithContext:(XVimEvaluatorContext *)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent;
 
 @end
 

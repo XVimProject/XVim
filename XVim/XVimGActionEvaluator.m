@@ -19,12 +19,12 @@
 
 @implementation XVimGActionEvaluator
 
-- (XVimEvaluator*)d:(XVimWindow*)window{
+- (XVimEvaluator*)d{
     [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
     return nil;
 }
 
-- (XVimEvaluator*)f:(XVimWindow*)window{
+- (XVimEvaluator*)f{
     // Does not work correctly.
     // This seems because the when Xcode change the content of DVTSourceTextView
     // ( for example when the file shown in the view is changed )
@@ -36,34 +36,31 @@
     return nil;
 }
 
-- (XVimEvaluator*)i:(XVimWindow*)window {
-	NSUInteger markLocation = [XVimMarkMotionEvaluator markLocationForMark:@"." inWindow:window];
+- (XVimEvaluator*)i{
+	NSUInteger markLocation = [XVimMarkMotionEvaluator markLocationForMark:@"." inWindow:self.window];
 	if (markLocation == NSNotFound) { return nil; }
 	
-	XVimSourceView *view = [window sourceView];
+	XVimSourceView *view = self.sourceView;
 	
 	NSUInteger insertionPoint = markLocation;
 	[view setSelectedRangeWithBoundsCheck:insertionPoint To:insertionPoint];
-    if (!([view isEOF:insertionPoint] || [view isNewLine:insertionPoint]))
-	{
+    if (!([view isEOF:insertionPoint] || [view isNewLine:insertionPoint])){
 		[view moveForward];
     } 
 	
-	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+	return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
-- (XVimEvaluator*)u:(XVimWindow*)window {
-	return [[XVimLowercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"u"]
-											operatorAction:nil withParent:_parent];
+- (XVimEvaluator*)u{
+	return [[[XVimLowercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"u"] withWindow:self.window withParent:_parent] autorelease];
 }
 
-- (XVimEvaluator*)U:(XVimWindow*)window {
-	return [[XVimUppercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"U"]
-											operatorAction:nil withParent:_parent];
+- (XVimEvaluator*)U{
+	return [[[XVimUppercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"U"] withWindow:self.window withParent:_parent] autorelease];
 }
 
-- (XVimEvaluator*)TILDE:(XVimWindow*)window {
-	return [[XVimTildeEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"~"] operatorAction:nil withParent:_parent];
+- (XVimEvaluator*)TILDE{
+	return [[[XVimTildeEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"~"] withWindow:self.window withParent:_parent] autorelease];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

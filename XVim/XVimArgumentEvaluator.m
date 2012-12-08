@@ -10,42 +10,34 @@
 
 @implementation XVimArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimEvaluator*)parent
-{
-	if (self = [super initWithContext:context])
-	{
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent{
+	if (self = [super initWithContext:context withWindow:window]){
 		_parent = parent;
 	}
 	return self;
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
-	return [_parent drawRect:rect inWindow:window];
+- (void)drawRect:(NSRect)rect{
+	return [_parent drawRect:rect];
 }
 
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
-	return [_parent shouldDrawInsertionPointInWindow:window];
+- (BOOL)shouldDrawInsertionPoint{
+	return [_parent shouldDrawInsertionPoint];
 }
 
 - (float)insertionPointHeightRatio{
     return [_parent insertionPointHeightRatio];
 }
 
-- (NSString*)modeString
-{
+- (NSString*)modeString {
 	return [_parent modeString];
 }
 
-- (BOOL)isRelatedTo:(XVimEvaluator*)other
-{
+- (BOOL)isRelatedTo:(XVimEvaluator*)other {
 	return [super isRelatedTo:other] || other == _parent;
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)defaultNextEvaluator{
     return [_parent withNewContext];
 }
 

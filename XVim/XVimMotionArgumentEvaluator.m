@@ -14,8 +14,8 @@
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context parent:(XVimMotionEvaluator*)parent {
-	if (self = [super initWithContext:context parent:parent]) {
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimMotionEvaluator*)parent {
+	if (self = [super initWithContext:context withWindow:window withParent:parent]) {
 	}
 	return self;
 }
@@ -24,16 +24,16 @@
 	return (XVimMotionEvaluator*)_parent;
 }
 
--(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
+-(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     if( nil != _parent ){
-        return [[self motionEvaluator] motionFixedFrom:from To:to Type:type inWindow:window];
+        return [[self motionEvaluator] motionFixedFrom:from To:to Type:type];
     }
     return nil;
 }
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{
     if( nil != _parent ){
-        return [[self motionEvaluator] commonMotion:motion Type:type inWindow:window];
+        return [[self motionEvaluator] commonMotion:motion Type:type];
     }
     return nil;
 }

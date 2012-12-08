@@ -569,10 +569,9 @@ static NSString* toSelectorString(unichar charcode, NSUInteger modifierFlags)
 	return [self toString];
 }
 
-static SEL getSelector(unichar charcode, NSUInteger modifierFlags)
-{
+static SEL getSelector(unichar charcode, NSUInteger modifierFlags) {
 	NSString* keyString = toSelectorString(charcode, modifierFlags);
-	SEL selector = NSSelectorFromString([keyString stringByAppendingString:@":"]);
+	SEL selector = NSSelectorFromString([keyString stringByAppendingString:@""]);
 	return selector;
 }
 

@@ -77,6 +77,7 @@
         [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return;
 }
@@ -102,6 +103,7 @@
         return;
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return;
 }
@@ -114,6 +116,7 @@
         [window mouseDown:theEvent];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return;
 }
@@ -126,6 +129,7 @@
         [window mouseUp:theEvent];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
 	return;
 }
@@ -138,6 +142,7 @@
         [window mouseDragged:theEvent];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return;
 }
@@ -150,6 +155,7 @@
         [window drawRect:dirtyRect];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return;
 }
@@ -166,6 +172,7 @@
         }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return [base performKeyEquivalent_:theEvent];
 }
@@ -177,6 +184,7 @@
         return [window shouldDrawInsertionPoint];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return YES;
 }
@@ -190,6 +198,7 @@
         [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
 }
 
@@ -204,6 +213,7 @@
         [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
 }
 
@@ -219,6 +229,7 @@
         }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
     return b;
 }
@@ -248,6 +259,7 @@
         }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
     }
 }
 

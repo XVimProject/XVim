@@ -8,13 +8,8 @@
 
 #import "XVimEvaluator.h"
 
-@interface XVimInsertEvaluator : XVimEvaluator {
-    BOOL _insertedEventsAbort;
-    NSMutableArray* _insertedEvents;
-    BOOL _oneCharMode;
-}
+@interface XVimInsertEvaluator : XVimEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-		  oneCharMode:(BOOL)oneCharMode;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window oneCharMode:(BOOL)oneCharMode;
 
 @end

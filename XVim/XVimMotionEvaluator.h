@@ -15,12 +15,12 @@
 
 @interface XVimMotionEvaluator : XVimNumericEvaluator
 
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window;
+-(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
+- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
 
 // Override this method to implement operations on motions.
--(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
-- (XVimEvaluator*)_motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window;
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion;
+- (XVimEvaluator*)_motionFixed:(XVimMotion*)motion;
 @end
 

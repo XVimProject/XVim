@@ -18,35 +18,38 @@
 #import "XVimVisualEvaluator.h"
 
 @interface XVimEvaluator() {
-	XVimEvaluatorContext *_context;
 }
 @end
 
 @implementation XVimEvaluator
+@synthesize context = _context;
+@synthesize window = _window;
 
 - (id)init {
 	[NSException raise:@"Invalid init" format:@"Must call initWithContext"];
 	return nil;
 }
 
-- (id)initWithContext:(XVimEvaluatorContext*)context {
-	if (self = [super init]) {
-		_context = context;
-	}
-	return self;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window{
+    NSAssert( nil != window, @"window must not be nil");
+    if(self = [super init]){
+        self.context = context;
+        self.window = window;
+    }
+    return self;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window {
-    
+- (void)dealloc{
+    [super dealloc];
+    self.context = nil;
+    self.window = nil;
 }
 
-- (void)willEndHandlerInWindow:(XVimWindow*)window {
+- (XVimSourceView*)sourceView{
+    return self.window.sourceView;
 }
 
-- (void)didEndHandlerInWindow:(XVimWindow*)window {
-}
-
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     // This is default implementation of evaluator.
     // Only keyDown events are supposed to be passed here.	
     // Invokes each key event handler
@@ -55,19 +58,30 @@
 	SEL handler = [keyStroke selectorForInstance:self];
 	if (handler) {
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
-        return [self performSelector:handler withObject:window];
+        return [self performSelector:handler];
 	}
     else{
         TRACE_LOG(@"SELECTOR %@ not found", NSStringFromSelector(handler));
-        return [self defaultNextEvaluatorInWindow:window];
+        return [self defaultNextEvaluator];
     }
+    
+}
+
+- (XVimEvaluator*)onChildComplete:(XVimEvaluator*)childEvaluator{
+    return nil;
+}
+   
+- (void)becameHandler{
+}
+
+- (void)didEndHandler{
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_GLOBAL_MAP];
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
+- (XVimEvaluator*)defaultNextEvaluator{
     return nil;
 }
 
@@ -78,23 +92,24 @@
     return REGISTER_APPEND;
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window {
-	return [window sourceView].selectionMode == MODE_VISUAL_NONE ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
+	return [self sourceView].selectionMode == MODE_VISUAL_NONE ? [[[XVimNormalEvaluator alloc] init] autorelease] : [[[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+                                                                                                         withWindow:self.window
 																											mode:MODE_CHARACTER 
-																									withRange:NSMakeRange(0,0)];
+																									withRange:NSMakeRange(0,0)] autorelease];
 }
 
-- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window {
-	if (range.length == 0 && ![[window sourceView] isValidCursorPosition:range.location]) {
+- (NSRange)restrictSelectedRange:(NSRange)range{
+	if (range.length == 0 && ![[self sourceView] isValidCursorPosition:range.location]) {
 		--range.location;
 	}
 	return range;
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window {
+- (void)drawRect:(NSRect)rect{
 }
 
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window {
+- (BOOL)shouldDrawInsertionPoint{
 	return YES;
 }
 

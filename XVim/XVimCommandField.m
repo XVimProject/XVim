@@ -19,37 +19,31 @@
 
 @implementation XVimCommandField
 
-- (BOOL)becomeFirstResponder
-{
+- (BOOL)becomeFirstResponder{
 	[self show];
 	return YES;
 }
 
-- (BOOL)resignFirstResponder
-{
+- (BOOL)resignFirstResponder{
 	[self hide];
 	
-	if (!_absorbFocusEvent)
-	{
+	if (!_absorbFocusEvent){
 		[_delegate commandFieldLostFocus:self];
 	}
 	_absorbFocusEvent = NO;
 	return YES;
 }
 
-- (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate
-{
+- (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate{
 	_delegate = delegate;
 }
 
-- (void)absorbFocusEvent
-{
+- (void)absorbFocusEvent{
 	_absorbFocusEvent = YES;
 }
 
 // Drawing Caret
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag
-{
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
     if(flag) {
         color = [color colorWithAlphaComponent:0.5];
         NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
@@ -86,8 +80,7 @@
 	[_delegate handleKeyEvent:event];
 }
 
-- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
-{
+- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
 	NSEvent *event = [keyStroke toEvent];
 	[super keyDown:event];
 }

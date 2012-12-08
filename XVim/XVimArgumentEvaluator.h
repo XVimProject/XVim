@@ -15,6 +15,5 @@
     XVimEvaluator* _parent;
 }
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimEvaluator*)parent;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent;
 @end

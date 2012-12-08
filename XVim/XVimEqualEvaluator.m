@@ -17,15 +17,15 @@
 
 @implementation XVimEqualEvaluator
 
-- (XVimEvaluator*)EQUAL:(XVimWindow*)window{
+- (XVimEvaluator*)EQUAL{
     if ([self numericArg] < 1) 
         return nil;
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-    return [self _motionFixed:m inWindow:window];
+    return [self _motionFixed:m];
 }
 
-- (XVimEvaluator *)_motionFixed:(XVimMotion *)motion inWindow:(XVimWindow *)window{
-    [[window sourceView] filter:motion];
+- (XVimEvaluator *)_motionFixed:(XVimMotion *)motion{
+    [[self sourceView] filter:motion];
     return nil;
 }
 

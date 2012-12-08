@@ -164,6 +164,12 @@ static Logger* s_defaultLogger = nil;
     
 }
 
++ (void) logStackTrace:(NSException*)ex{
+    for( NSString* e in [ex callStackSymbols]){
+        TRACE_LOG(@"%@", e);
+    }
+}
+
 + (void) traceMethodList:(NSString*)class{
     Class c = NSClassFromString(class);
     if( nil == c ){

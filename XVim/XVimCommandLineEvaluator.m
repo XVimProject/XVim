@@ -27,22 +27,22 @@
 	NSUInteger _historyNo;
 }
 
-- (XVimEvaluator*) Up:(XVimWindow*)window;
-- (XVimEvaluator*) Down:(XVimWindow*)window;
+- (XVimEvaluator*) Up;
+- (XVimEvaluator*) Down;
 
 @end
 
 @implementation XVimCommandLineEvaluator
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
-			   parent:(XVimEvaluator*)parent 
+           withWindow:(XVimWindow *)window
+			   withParent:(XVimEvaluator*)parent
 		 firstLetter:(NSString*)firstLetter 
 			 history:(XVimHistoryHandler*)history
 		  completion:(OnCompleteHandler)completeHandler
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler
 {
-	if (self = [super initWithContext:context])
-	{
+	if (self = [super initWithContext:context withWindow:window]){
 		_parent = parent;
 		_firstLetter = firstLetter;
 		_history = history;
@@ -53,47 +53,39 @@
 	return self;
 }
 
-- (void)takeFocusFromWindow:(XVimWindow*)window
-{
-	XVimCommandField *commandField = window.commandLine.commandField;
-	[commandField setDelegate:window];
-	[[[[window sourceView] view] window] makeFirstResponder:commandField];
+- (void)takeFocusFromWindow{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
+	[commandField setDelegate:self.window];
+	[[[[self.window sourceView] view] window] makeFirstResponder:commandField];
 }
 
-- (void)relinquishFocusToWindow:(XVimWindow*)window
-{
-	XVimCommandField *commandField = window.commandLine.commandField;
+- (void)relinquishFocusToWindow{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField absorbFocusEvent];
 	[commandField setDelegate:nil];
-    [window setForcusBackToSourceView];
+    [self.window setForcusBackToSourceView];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
 	XVimEvaluator* next = self;
 
-	XVimCommandField *commandField = window.commandLine.commandField;
-	if ([keyStroke instanceResponds:self])
-	{
-		next = [self performSelector:[keyStroke selector] withObject:window];
+	XVimCommandField *commandField = self.window.commandLine.commandField;
+	if ([keyStroke instanceResponds:self]) {
+		next = [self performSelector:[keyStroke selector]];
 	}
-	else
-	{
-		[commandField handleKeyStroke:keyStroke inWindow:window];
+	else{
+		[commandField handleKeyStroke:keyStroke inWindow:self.window];
 		
 		// If the user deletes the : (or /?) character, bail
 		NSString *text = [commandField string];
-		if ([text length] == 0)
-		{
+		if ([text length] == 0){
 			next = nil;
         }
-		
 		_historyNo = 0; // Typing always resets history
 	}
 	
-	if (next != self)
-	{
-		[self relinquishFocusToWindow:window];
+	if (next != self){
+		[self relinquishFocusToWindow];
     } else if (_onKeyPress != nil) {
         _onKeyPress([[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]);
     }
@@ -101,48 +93,37 @@
 	return next;
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister
-{
+- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
 	return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window
-{
-	[super becameHandlerInWindow:window];
+- (void)becameHandler{
+	[super becameHandler];
 
-	XVimCommandField *commandField = window.commandLine.commandField;
+	XVimCommandField *commandField = self.window.commandLine.commandField;
     [commandField setString:_firstLetter];
     [commandField moveToEndOfLine:self];
-	[self takeFocusFromWindow:window];
+	[self takeFocusFromWindow];
 }
 
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
 	return nil;
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window {
-	[self relinquishFocusToWindow:window];
+- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
+	[self relinquishFocusToWindow];
 	return nil;
 }
 
-- (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window
-{
-	return [super restrictSelectedRange:range inWindow:window];
+- (void)drawRect:(NSRect)rect{
+	[_parent drawRect:rect];
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window
-{
-	[_parent drawRect:rect inWindow:window];
-}
-
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window
-{
+- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window{
 	return NO;
 }
 
@@ -150,53 +131,46 @@
     return 0.0;
 }
 
-- (NSString*)modeString
-{
+- (NSString*)modeString{
 	return [_parent modeString];
 }
 
-- (BOOL)isRelatedTo:(XVimEvaluator*)other
-{
+- (BOOL)isRelatedTo:(XVimEvaluator*)other{
 	return [super isRelatedTo:other] || other == _parent;
 }
 
-- (XVimEvaluator*)C_p:(XVimWindow*)window{
-    return [self Up:window];
+- (XVimEvaluator*)C_p{
+    return [self Up];
 }
 
-- (XVimEvaluator*)C_n:(XVimWindow*)window{
-    return [self Down:window];
+- (XVimEvaluator*)C_n{
+    return [self Down];
 }
 
-- (XVimEvaluator*)CR:(XVimWindow*)window
-{
-	XVimCommandField *commandField = window.commandLine.commandField;
+- (XVimEvaluator*)CR{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
 	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	[_history addEntry:command];
     [[XVim instance] writeToLogfile:[@"ExCommand " stringByAppendingFormat:@"%@\n", command]];
 	return _onComplete(command);
 }
 
-- (XVimEvaluator*)ESC:(XVimWindow*)window
-{
-    XVimSourceView *sourceView = [window sourceView];
-    [sourceView scrollTo:[window insertionPoint]];
+- (XVimEvaluator*)ESC{
+    XVimSourceView *sourceView = [self sourceView];
+    [sourceView scrollTo:[self.window insertionPoint]];
 	return [_parent withNewContext];
 }
 
-- (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window
-{
-  return [self ESC:window];
+- (XVimEvaluator*)C_LSQUAREBRACKET{
+    return [self ESC];
 }
 
-- (XVimEvaluator*)C_c:(XVimWindow*)window
-{
-  return [self ESC:window];
+- (XVimEvaluator*)C_c{
+  return [self ESC];
 }
 
-- (XVimEvaluator*)Up:(XVimWindow*)window
-{
-	XVimCommandField *commandField = window.commandLine.commandField;
+- (XVimEvaluator*)Up{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
 	XVim *xvim = [XVim instance];
 
 	if (_historyNo == 0) {
@@ -217,9 +191,8 @@
 	return self;
 }
 
-- (XVimEvaluator*)Down:(XVimWindow*)window
-{
-	XVimCommandField *commandField = window.commandLine.commandField;
+- (XVimEvaluator*)Down{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
 	XVim *xvim = [XVim instance];
 
 	if (_historyNo == 0) {

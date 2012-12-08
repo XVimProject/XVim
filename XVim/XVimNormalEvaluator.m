@@ -41,32 +41,18 @@
 
 @implementation XVimNormalEvaluator
 
-- (id)init {
-	[super initWithContext:[[XVimEvaluatorContext alloc] init]];
-	return self;
-}
-
-- (id)initWithContext:(XVimEvaluatorContext*)context {
-	[super initWithContext:context];
-	return self;
-}
-
--(id)initWithContext:(XVimEvaluatorContext*)context
-    playbackRegister:(XVimRegister*)xregister
-{
-	self = [super initWithContext:context];
+-(id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window playbackRegister:(XVimRegister*)xregister{
+	self = [super initWithContext:context withWindow:window];
     if (self) {
 		_playbackRegister = xregister;
     }
     return self;
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window {
-	[super becameHandlerInWindow:window];
-	
+- (void)becameHandler{
     if (_playbackRegister) {
 		[[XVim instance] setLastPlaybackRegister:_playbackRegister];
-        [_playbackRegister playbackWithHandler:window withRepeatCount:[self numericArg]];
+        [_playbackRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
         _playbackRegister = nil;
     }
 }
@@ -85,162 +71,161 @@
 
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
-- (XVimEvaluator*)a:(XVimWindow*)window{
-    [[window sourceView] append];
-	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+- (XVimEvaluator*)a{
+    [[self sourceView] append];
+	return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
-- (XVimEvaluator*)A:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)A{
+    XVimSourceView* view = [self sourceView];
     [view appendAtEndOfLine];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_b:(XVimWindow*)window{
-    [[window sourceView] scrollHalfPageBackward:[self numericArg]];
+- (XVimEvaluator*)C_b{
+    [[self sourceView] scrollHalfPageBackward:[self numericArg]];
     return nil;
 }
 
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
-- (XVimEvaluator*)c:(XVimWindow*)window{
+- (XVimEvaluator*)c{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:TRUE];
     return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"c"]
-										 operatorAction:nil
+                                             withWindow:self.window
 											 withParent:self
 								 insertModeAtCompletion:TRUE];
 }
 
 // 'C' works similar to 'D' except that once it's done deleting
 // it should go into insert mode
-- (XVimEvaluator*)C:(XVimWindow*)window{
-    [self D:window];
-    [[window sourceView] append];
-    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
+- (XVimEvaluator*)C{
+    [self D];
+    [[self sourceView] append];
+    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_d:(XVimWindow*)window{
-    [[window sourceView] scrollHalfPageForward:[self numericArg]];
+- (XVimEvaluator*)C_d{
+    [[self sourceView] scrollHalfPageForward:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)d:(XVimWindow*)window{
+- (XVimEvaluator*)d{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:NO];
-    return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"d"] operatorAction:nil withParent:self insertModeAtCompletion:FALSE];
+    return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"d"] withWindow:self.window withParent:self insertModeAtCompletion:FALSE];
 }
 
-- (XVimEvaluator*)D:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)D{
+    XVimSourceView* view = [self sourceView];
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
     [view delete:m];
     return nil;
 }
 
-- (XVimEvaluator*)C_e:(XVimWindow*)window{
-    [[window sourceView] scrollLineForward:[self numericArg]];
+- (XVimEvaluator*)C_e{
+    [[self sourceView] scrollLineForward:[self numericArg]];
     return nil;
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_f:(XVimWindow*)window{
-    [[window sourceView] scrollPageForward:[self numericArg]];
+- (XVimEvaluator*)C_f{
+    [[self sourceView] scrollPageForward:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"]
-												  parent:self];
+- (XVimEvaluator*)g{
+    return [[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window withParent:self];
 }
 
-- (XVimEvaluator*)i:(XVimWindow*)window{
+- (XVimEvaluator*)i{
     // Go to insert 
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
 }
 
-- (XVimEvaluator*)I:(XVimWindow*)window{
-    [[window sourceView] insertBeforeFirstNonBlank];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+- (XVimEvaluator*)I{
+    [[self sourceView] insertBeforeFirstNonBlank];
+    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
 }
 
 // For 'J' (join line) bring the line up from below. all leading whitespac 
 // of the line joined in should be stripped and then one space should be inserted 
 // between the joined lines
-- (XVimEvaluator*)J:(XVimWindow*)window{
-    [[window sourceView] join:[self numericArg]];
+- (XVimEvaluator*)J{
+    [[self sourceView] join:[self numericArg]];
     return nil;
 }
 
 // Should be moved to XVimMotionEvaluator
 
-- (XVimEvaluator*)m:(XVimWindow*)window{
+- (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] parent:self];
+	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window withParent:self];
 }
 
-- (XVimEvaluator*)o:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)o{
+    XVimSourceView* view = [self sourceView];
     [view insertNewlineBelow];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
 }
 
-- (XVimEvaluator*)O:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)O{
+    XVimSourceView* view = [self sourceView];
     [view insertNewlineAbove];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
 }
 
-- (XVimEvaluator*)C_o:(XVimWindow*)window{
+- (XVimEvaluator*)C_o{
     [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
     return nil;
 }
 
-- (XVimEvaluator*)C_i:(XVimWindow*)window{
+- (XVimEvaluator*)C_i{
     [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
     return nil;
 }
 
-- (XVimEvaluator*)p:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)p{
+    XVimSourceView* view = [self sourceView];
     XVimRegister* reg = [XVim instance].yankRegister;
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)P:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)P{
+    XVimSourceView* view = [self sourceView];
     XVimRegister* reg = [XVim instance].yankRegister;
     [view put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)q:(XVimWindow*)window{
+- (XVimEvaluator*)q{
     XVim *xvim = [XVim instance];
     if (xvim.recordingRegister != nil){
-        [window stopRecordingRegister:xvim.recordingRegister];
+        [[self window] stopRecordingRegister:xvim.recordingRegister];
         return nil;
     }
     
-    return [[XVimRecordingRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"] parent:self];
+    return [[XVimRecordingRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"] withWindow:self.window withParent:self];
 }
 
-- (XVimEvaluator*)C_r:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)C_r{
+    XVimSourceView* view = [self sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
 		[view redo];
     }
     return nil;
 }
 
-- (XVimEvaluator*)r:(XVimWindow*)window{
+- (XVimEvaluator*)r{
 	XVimEvaluatorContext *context = [XVimEvaluatorContext contextWithNumericArg:[self numericArg]];
 	[context setArgumentString:@"r"];
-    return [[XVimInsertEvaluator alloc] initWithContext:context oneCharMode:YES];
+    return [[XVimInsertEvaluator alloc] initWithContext:context withWindow:self.window oneCharMode:YES];
 }
 
-- (XVimEvaluator*)s:(XVimWindow*)window{
-    XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)s{
+    XVimSourceView *view = [self sourceView];
     NSRange r = [view selectedRange];
 	
 	// Set range to replace, ensuring we don't run over the end of the buffer
@@ -256,11 +241,11 @@
 		[view cutText]; // Can't use del here since we may want to wind up at end of line
 	}
 	
-    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] oneCharMode:NO];
+    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window oneCharMode:NO];
 }
 
-- (XVimEvaluator*)u:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)u{
+    XVimSourceView* view = [self sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
         [view undo];
     }
@@ -268,60 +253,62 @@
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
-- (XVimEvaluator*)C_u:(XVimWindow*)window{
-    [[window sourceView] scrollHalfPageBackward:[self numericArg]];
+- (XVimEvaluator*)C_u{
+    [[self sourceView] scrollHalfPageBackward:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)v:(XVimWindow*)window{
-    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_CHARACTER];
+- (XVimEvaluator*)v{
+    return [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self.window mode:MODE_CHARACTER] autorelease];
 }
 
-- (XVimEvaluator*)V:(XVimWindow*)window{
-    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_LINE];
+- (XVimEvaluator*)V{
+    return [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self.window mode:MODE_LINE] autorelease];
 }
 
-- (XVimEvaluator*)C_v:(XVimWindow*)window{
+- (XVimEvaluator*)C_v{
     // Block selection
-    return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:MODE_BLOCK];
+    return [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self.window mode:MODE_BLOCK]  autorelease];
 }
 
-- (XVimEvaluator*)C_w:(XVimWindow*)window{
-    return [[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] parent:self];
+- (XVimEvaluator*)C_w{
+    return [[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] withWindow:self.window withParent:self];
 }
 
-- (XVimEvaluator*)x:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)x{
+    XVimSourceView* view = [self sourceView];
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
     [view delete:m];
     return nil;
 }
 
 // like 'x" but it goes backwards instead of forwards
-- (XVimEvaluator*)X:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)X{
+    XVimSourceView* view = [self sourceView];
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_BACKWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
     [view delete:m];
     return nil;
 }
 
-- (XVimEvaluator*)Y:(XVimWindow*)window{
-    XVimYankEvaluator* yank = [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"] operatorAction:nil withParent:self];
-    return [yank y:window];
+- (XVimEvaluator*)Y{
+    XVimYankEvaluator* yank = [[[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"] withWindow:self.window withParent:self] autorelease];
+    return [yank y];
 }
 
-- (XVimEvaluator*)y:(XVimWindow*)window{
-    return [[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"]
-									   operatorAction:nil withParent:self];
+- (XVimEvaluator*)y{
+    return [[[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"] withWindow:self.window withParent:self] autorelease];
 }
 
-- (XVimEvaluator*)C_y:(XVimWindow*)window{
-    [[window sourceView] scrollLineBackward:[self numericArg]];
+- (XVimEvaluator*)C_y{
+    [[self sourceView] scrollLineBackward:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)AT:(XVimWindow*)window {
-    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"] parent:self completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)
+- (XVimEvaluator*)AT{
+    XVimEvaluator *eval = [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"] withWindow:self.window withParent:self] autorelease];
+    // FIXME
+    /*
+completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)
                            {
                                XVim *xvim = [XVim instance];
                                XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
@@ -335,69 +322,72 @@
                                }
                            }];
 	
+     */
 	return eval;
 }
 
-- (XVimEvaluator*)DQUOTE:(XVimWindow*)window {
-    return  [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] parent:self];
+- (XVimEvaluator*)DQUOTE{
+    return  [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] withWindow:self.window withParent:self] autorelease];
 }
 
-- (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-    return [[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="] operatorAction:nil withParent:self];
+- (XVimEvaluator*)EQUAL{
+    return [[[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="] withWindow:self.window withParent:self] autorelease];
 }
 
-- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@">"] operatorAction:nil withParent:self unshift:NO];
+- (XVimEvaluator*)GREATERTHAN{
+    XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@">"] withWindow:self.window withParent:self unshift:NO] autorelease];
     return eval;
 }
 
-- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    XVimShiftEvaluator* eval =  [[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"<"] operatorAction:nil withParent:self unshift:YES];
+- (XVimEvaluator*)LESSTHAN{
+    XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"<"] withWindow:self.window withParent:self unshift:YES] autorelease];
     return eval;
     
 }
 
-- (XVimEvaluator*)HT:(XVimWindow*)window{
-    [[window sourceView] selectNextPlaceholder];
+- (XVimEvaluator*)HT{
+    [[self sourceView] selectNextPlaceholder];
     return nil;
 }
 
-- (XVimEvaluator*)COLON:(XVimWindow*)window{
-	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-																	 parent:self 
+- (XVimEvaluator*)COLON{
+	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+                                                                 withWindow:self.window
+																	 withParent:self
                                                                 firstLetter:@":" 
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command) 
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
-                               [excmd executeCommand:command inWindow:window];
+                               [excmd executeCommand:command inWindow:self.window];
                                return nil;
                            }
-                                                                 onKeyPress:nil];
+                                                                 onKeyPress:nil] autorelease];
 	
 	return eval;
 }
 
 - (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter {
-	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-																	 parent:self 
+	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+                                                                 withWindow:self.window
+																	 withParent:self
                                                                 firstLetter:firstLetter
                                                                     history:[[XVim instance] searchHistory]
                                                                  completion:^ XVimEvaluator* (NSString *command)
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
-							   XVimSourceView *sourceView = [window sourceView];
+							   XVimSourceView *sourceView = [self sourceView];
 							   NSRange found = [searcher executeSearch:command 
 															   display:[command substringFromIndex:1] 
-																  from:[window insertionPoint] 
+																  from:[self.window insertionPoint]
 															  inWindow:window];
 							   //Move cursor and show the found string
 							   if (found.location != NSNotFound) {
 								   [sourceView setSelectedRange:NSMakeRange(found.location, 0)];
-								   [sourceView scrollTo:[window insertionPoint]];
+								   [sourceView scrollTo:[self.window insertionPoint]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
-								   [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
+								   [self.window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
 							   }
 							   return nil;
 						   }
@@ -406,10 +396,10 @@
                                XVimOptions *options = [[XVim instance] options];
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
-                                   XVimSourceView *sourceView = [window sourceView];
+                                   XVimSourceView *sourceView = [self sourceView];
                                    NSRange found = [searcher executeSearch:command 
 																   display:[command substringFromIndex:1]
-																	  from:[window insertionPoint] 
+																	  from:[self.window insertionPoint]
 																  inWindow:window];
                                    //Move cursor and show the found string
                                    if (found.location != NSNotFound) {
@@ -417,43 +407,42 @@
                                        [sourceView showFindIndicatorForRange:found];
                                    }
                                }
-                           }];
+                           }] autorelease];
 	return eval;
 }
 
-- (XVimEvaluator*)QUESTION:(XVimWindow*)window{
-	return [self executeSearch:window firstLetter:@"?"];
+- (XVimEvaluator*)QUESTION{
+	return [self executeSearch:self.window firstLetter:@"?"];
 }
 
-- (XVimEvaluator*)SLASH:(XVimWindow*)window{
-	return [self executeSearch:window firstLetter:@"/"];
+- (XVimEvaluator*)SLASH{
+	return [self executeSearch:self.window firstLetter:@"/"];
 }
 
-- (XVimEvaluator*)DOT:(XVimWindow*)window{
+- (XVimEvaluator*)DOT{
     XVimRegister *repeatRegister = [[XVim instance] findRegister:@"repeat"];
-    [repeatRegister playbackWithHandler:window withRepeatCount:[self numericArg]];
+    [repeatRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)TILDE:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)TILDE{
+    XVimSourceView* view = [self sourceView];
     [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.
-    XVimSourceView* view = [window sourceView];
+    XVimSourceView* view = [self sourceView];
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = to;
     [view move:m];
     return nil;
 }
 
-- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{
-    [[window sourceView] move:motion];
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
+    [[self sourceView] move:motion];
     return nil;
 }
 
@@ -490,20 +479,20 @@ static NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
-- (XVimEvaluator*)DEL:(XVimWindow*)window {
-    [[window sourceView] moveBackward];
+- (XVimEvaluator*)DEL{
+    [[self sourceView] moveBackward];
 	return nil;
 }
 
-- (XVimEvaluator*)ForwardDelete:(XVimWindow*)window {
-	return [self x:window];
+- (XVimEvaluator*)ForwardDelete{
+	return [self x];
 }
 
--(XVimEvaluator*)Pageup:(XVimWindow*)window{
-    return [self C_b:(XVimWindow*)window];
+-(XVimEvaluator*)Pageup{
+    return [self C_b];
 }
 
--(XVimEvaluator*)Pagedown:(XVimWindow*)window{
-    return [self C_f:(XVimWindow*)window];
+-(XVimEvaluator*)Pagedown{
+    return [self C_f];
 }
 @end

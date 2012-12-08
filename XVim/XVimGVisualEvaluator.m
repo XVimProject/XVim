@@ -13,20 +13,20 @@
 
 @implementation XVimGVisualEvaluator
 
-- (XVimEvaluator*)u:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)u{
+	XVimSourceView *view = [self sourceView];
     [view makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 	return nil;
 }
 
-- (XVimEvaluator*)U:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)U{
+	XVimSourceView *view = [self sourceView];
     [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 	return nil;
 }
 
-- (XVimEvaluator*)TILDE:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)TILDE{
+	XVimSourceView *view = [self sourceView];
     [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 	return nil;
 }

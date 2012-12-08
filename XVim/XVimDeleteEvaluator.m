@@ -22,17 +22,16 @@
 @implementation XVimDeleteEvaluator
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
-	   operatorAction:(XVimOperatorAction*)operatorAction 
-				  withParent:(XVimEvaluator*)parent
-	  insertModeAtCompletion:(BOOL)insertModeAtCompletion
-{
-	if (self = [super initWithContext:context operatorAction:operatorAction withParent:parent]){
+           withWindow:(XVimWindow *)window
+           withParent:(XVimEvaluator*)parent
+insertModeAtCompletion:(BOOL)insertModeAtCompletion{
+	if (self = [super initWithContext:context withWindow:window withParent:parent]){
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}
 	return self;
 }
 
-- (XVimEvaluator*)c:(XVimWindow*)window {
+- (XVimEvaluator*)c{
     if( !_insertModeAtCompletion ){
         return nil;  // 'dc' does nothing
     }
@@ -43,10 +42,10 @@
         return nil;
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-    return [self _motionFixed:m inWindow:window];
+    return [self _motionFixed:m];
 }
 
-- (XVimEvaluator*)d:(XVimWindow*)window{
+- (XVimEvaluator*)d{
     if( _insertModeAtCompletion ){
         return nil;  // 'cd' does nothing
     }
@@ -57,28 +56,27 @@
         return nil;
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-    return [self _motionFixed:m inWindow:window];
+    return [self _motionFixed:m];
 }
 
-- (XVimEvaluator*)j:(XVimWindow*)window{
+- (XVimEvaluator*)j{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]);
-    return [self _motionFixed:m inWindow:window];
+    return [self _motionFixed:m];
 }
 
-- (XVimEvaluator*)k:(XVimWindow*)window{
+- (XVimEvaluator*)k{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]);
-    return [self _motionFixed:m inWindow:window];
+    return [self _motionFixed:m];
 }
 
--(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window {
-    
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
-        [[window sourceView] change:motion];
-        return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
+        [[self sourceView] change:motion];
+        return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window];
     }else{
-        [[window sourceView] delete:motion];
+        [[self sourceView] delete:motion];
     }
     return nil;
 }

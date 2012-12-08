@@ -19,44 +19,41 @@
 
 @implementation XVimShiftEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-	   operatorAction:(XVimOperatorAction*)action 
-				  withParent:(XVimEvaluator*)parent
-					 unshift:(BOOL)unshift
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window withParent:(XVimEvaluator*)parent unshift:(BOOL)unshift
 {
-	if (self = [super initWithContext:context operatorAction:action withParent:parent]) {
-		self->_unshift = unshift;
+	if (self = [super initWithContext:context withWindow:window withParent:parent]) {
+		_unshift = unshift;
 	}
 	return self;
 }
 
-- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
+- (XVimEvaluator*)GREATERTHAN{
     if( !_unshift ){
         if ([self numericArg] < 1)
         return nil;
     
         XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-        return [self _motionFixed:m inWindow:window];
+        return [self _motionFixed:m];
     }
     return nil;
 }
 
-- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
+- (XVimEvaluator*)LESSTHAN{
     if( _unshift ){
         if ([self numericArg] < 1)
         return nil;
     
         XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-        return [self _motionFixed:m inWindow:window];
+        return [self _motionFixed:m];
     }
     return nil;
 }
 
-- (XVimEvaluator*)_motionFixed:(XVimMotion *)motion inWindow:(XVimWindow *)window{
+- (XVimEvaluator*)_motionFixed:(XVimMotion *)motion{
     if( _unshift ){
-        [[window sourceView] shiftLeft:motion];
+        [[self sourceView] shiftLeft:motion];
     }else{
-        [[window sourceView] shiftRight:motion];
+        [[self sourceView] shiftRight:motion];
     }
     return nil;
 }

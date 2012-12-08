@@ -153,8 +153,7 @@
 -(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count{
     self.isPlayingBack = YES;
 	
-	if (_selectedRange.location != NSNotFound)
-	{
+	if (_selectedRange.location != NSNotFound){
 		[handler handleVisualMode:_visualMode withRange:_selectedRange];
 	}
 	

@@ -27,7 +27,6 @@
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property(retain) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
-@property(readonly) XVimEvaluator *currentEvaluator;
 @property(retain) IDEEditorArea* editorArea;
 
 

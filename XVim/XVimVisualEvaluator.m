@@ -26,88 +26,39 @@
 #import "XVimOptions.h"
 #import "XVim.h"
 
+static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
+
 @interface XVimVisualEvaluator(){
-    
+	NSRange _operationRange;
+    VISUAL_MODE _mode;
 }
-- (XVimEvaluator*)ESC:(XVimWindow*)window;
+- (XVimEvaluator*)ESC;
 @end
 @implementation XVimVisualEvaluator 
 
-/*
-- (NSUInteger)insertionPointInWindow:(XVimWindow*)window {
-    return _insertion;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode {
+    return [self initWithContext:context withWindow:window mode:mode withRange:NSMakeRange(NSNotFound,0)];
 }
-*/
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-				 mode:(VISUAL_MODE)mode
-{ 
-    self = [super initWithContext:context];
-    if (self) {
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode withRange:(NSRange)range{
+	if (self = [self initWithContext:context withWindow:window]) {
         _mode = mode;
-		_operationRange.location = NSNotFound;
-    }
-    return self;
-}
-
-- (id)initWithContext:(XVimEvaluatorContext*)context
-				 mode:(VISUAL_MODE)mode 
-			withRange:(NSRange)range 
-{
-	if (self = [self initWithContext:context mode:mode]) {
 		_operationRange = range;
 	}
 	return self;
 }
 
-
-static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
-
 - (NSString*)modeString {
 	return MODE_STRINGS[_mode];
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window{
-	XVimSourceView* view = [window sourceView];
+- (void)becameHandler{
+	XVimSourceView* view = [self sourceView];
     [view changeSelectionMode:_mode];
-    /*
-	// Select operation range passed to constructor
-	if (_operationRange.location != NSNotFound) {
-		if (_mode == MODE_CHARACTER) {
-            view.selectionBegin = _operationRange.location;
-            view.insertionPoint = MAX(view.selectionBegin, _operationRange.location + _operationRange.length - 1);
-		} else {
-			_begin = [view positionAtLineNumber:_operationRange.location];
-			_insertion = [view positionAtLineNumber:_operationRange.location + _operationRange.length];
-		}
-	} 
-	
-	if (_begin == NSNotFound) {
-		NSRange cur = [view selectedRange];
-		if( _mode == MODE_CHARACTER ){
-			_begin = cur.location;
-			_insertion = cur.location;
-		}
-		if( _mode == MODE_LINE ){
-			NSUInteger head = [view headOfLine:cur.location];
-			NSUInteger end = [view endOfLine:cur.location];
-			if( NSNotFound != head && NSNotFound != end ){
-				_begin = head;
-				_insertion = end;
-			}else{
-				_begin = cur.location;
-				_insertion = cur.location;
-			}
-		}
-	}
-	
-	[self updateSelectionInWindow:window];
-	[super becameHandlerInWindow:window];
-     */
 }
     
-- (void)didEndHandlerInWindow:(XVimWindow*)window {
-	[super didEndHandlerInWindow:window];
+- (void)didEndHandler{
+	[super didEndHandler];
 	[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
 }
 
@@ -115,10 +66,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return [keymapProvider keymapForMode:MODE_VISUAL];
 }
 
-- (void)drawRect:(NSRect)rect inWindow:(XVimWindow*)window {
-    XVimSourceView* sourceView = [window sourceView];
+- (void)drawRect:(NSRect)rect{
+    XVimSourceView* sourceView = [self sourceView];
 	
-	NSUInteger glyphIndex = [window insertionPoint];
+	NSUInteger glyphIndex = [self.window insertionPoint];
 	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
 	
 	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
@@ -126,161 +77,163 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
-    XVimEvaluator *nextEvaluator = [super eval:keyStroke inWindow:window];
+    XVimEvaluator *nextEvaluator = [super eval:keyStroke];
     return nextEvaluator;
 }
 
-- (XVimEvaluator*)a:(XVimWindow*)window {
-	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"a"]
-																 operatorAction:action 
+- (XVimEvaluator*)a{
+    // FIXME
+	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
+	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"a"]
+                                                                     withWindow:self.window
 																	 withParent:self
-																	  inclusive:YES];
+                                                                       inclusive:YES] autorelease];
 	return evaluator;
 }
 
-- (XVimEvaluator*)c:(XVimWindow*)window{
+- (XVimEvaluator*)c{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [[window sourceView] change:m];
-    return [[[XVimInsertEvaluator alloc] initWithContext:[self contextCopy]] autorelease];
+    [[self sourceView] change:m];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[self contextCopy] withWindow:self.window] autorelease];
 }
 
-- (XVimEvaluator*)d:(XVimWindow*)window{
-    [[window sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
+- (XVimEvaluator*)d{
+    [[self sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
 
-- (XVimEvaluator*)D:(XVimWindow*)window{
-    [[window sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
+- (XVimEvaluator*)D{
+    [[self sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
 
-- (XVimEvaluator*)g:(XVimWindow*)window {
-	return [[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"] parent:self];
+- (XVimEvaluator*)g{
+	return [[[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"] withWindow:self.window withParent:self] autorelease];
 }
 
-- (XVimEvaluator*)i:(XVimWindow*)window {
-	XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-	XVimEvaluator *evaluator = [[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"] operatorAction:action withParent:self inclusive:NO];
+- (XVimEvaluator*)i{
+    // FIXME
+	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
+	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"]  withWindow:self.window withParent:self inclusive:NO] autorelease];
 	return evaluator;
 }
 
-- (XVimEvaluator*)J:(XVimWindow*)window {
-	[[window sourceView] join:[self numericArg]];
+- (XVimEvaluator*)J{
+	[[self sourceView] join:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)m:(XVimWindow*)window{
+- (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"]
-												  parent:self];
+	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window withParent:self] autorelease];
 }
 
-- (XVimEvaluator*)p:(XVimWindow*)window{
-    XVimSourceView* view = [window sourceView];
+- (XVimEvaluator*)p{
+    XVimSourceView* view = [self sourceView];
     XVimRegister* reg = [XVim instance].yankRegister;
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
-- (XVimEvaluator*)P:(XVimWindow*)window{
+- (XVimEvaluator*)P{
     // Looks P works as p in Visual Mode.. right?
-    return [self p:window];
+    return [self p];
 }
 
-- (XVimEvaluator*)s:(XVimWindow*)window {
+- (XVimEvaluator*)s{
 	// As far as I can tell this is equivalent to change
-	return [self c:window];
+	return [self c];
 }
 
 
-- (XVimEvaluator*)u:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)u{
+	XVimSourceView *view = [self sourceView];
     [view makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
-- (XVimEvaluator*)U:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)U{
+	XVimSourceView *view = [self sourceView];
     [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
-- (XVimEvaluator*)v:(XVimWindow*)window{
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)v{
+	XVimSourceView *view = [self sourceView];
     if( view.selectionMode == MODE_CHARACTER ){
-        return  [self ESC:window];
+        return  [self ESC];
     }
     [view changeSelectionMode:MODE_CHARACTER];
     return self;
 }
 
-- (XVimEvaluator*)V:(XVimWindow*)window{
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)V{
+	XVimSourceView *view = [self sourceView];
     if( view.selectionMode == MODE_LINE){
-        return  [self ESC:window];
+        return  [self ESC];
     }
     [view changeSelectionMode:MODE_LINE];
     return self;
 }
 
-- (XVimEvaluator*)C_v:(XVimWindow*)window{
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)C_v{
+	XVimSourceView *view = [self sourceView];
     if( view.selectionMode == MODE_BLOCK){
-        return  [self ESC:window];
+        return  [self ESC];
     }
     [view changeSelectionMode:MODE_BLOCK];
     return self;
 }
 
-- (XVimEvaluator*)x:(XVimWindow*)window{
-    return [self d:window];
+- (XVimEvaluator*)x{
+    return [self d];
 }
 
-- (XVimEvaluator*)X:(XVimWindow*)window{
-    return [self D:window];
+- (XVimEvaluator*)X{
+    return [self D];
 }
 
-- (XVimEvaluator*)y:(XVimWindow*)window{
-    [[window sourceView] yank:nil];
+- (XVimEvaluator*)y{
+    [[self sourceView] yank:nil];
     return nil;
 }
 
-- (XVimEvaluator*)DQUOTE:(XVimWindow*)window{
-    return [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] parent:self];
+- (XVimEvaluator*)DQUOTE{
+    return [[[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] withWindow:self.window withParent:self] autorelease];
 }
 
-- (XVimEvaluator*)EQUAL:(XVimWindow*)window{
-    [[window sourceView] filter:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+- (XVimEvaluator*)EQUAL{
+    [[self sourceView] filter:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
 
-- (XVimEvaluator*)ESC:(XVimWindow*)window{
-    [[window sourceView] changeSelectionMode:MODE_VISUAL_NONE];
+- (XVimEvaluator*)ESC{
+    [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
     return nil;
 }
 
-- (XVimEvaluator*)C_c:(XVimWindow*)window{
-  return [self ESC:window];
+- (XVimEvaluator*)C_c{
+    return [self ESC];
 }
 
-- (XVimEvaluator*)C_LSQUAREBRACKET:(XVimWindow*)window{
-  return [self ESC:window];
+- (XVimEvaluator*)C_LSQUAREBRACKET{
+    return [self ESC];
 }
 
-- (XVimEvaluator*)COLON:(XVimWindow*)window{
+- (XVimEvaluator*)COLON{
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[self contextCopy]
-																	 parent:self 
+                                                                 withWindow:self.window
+																	 withParent:self
                                                                 firstLetter:@":'<,'>" 
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command) 
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
-                               [excmd executeCommand:command inWindow:window];
+                               [excmd executeCommand:command inWindow:self.window];
                                
 							   //XVimSourceView *sourceView = [window sourceView];
-                               [[window sourceView] changeSelectionMode:MODE_VISUAL_NONE];
+                               [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
                                return nil;
                            }
                                                                  onKeyPress:nil];
@@ -288,19 +241,18 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return eval;
 }
 
-- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window{
-    [[window sourceView] shiftRight:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+- (XVimEvaluator*)GREATERTHAN{
+    [[self sourceView] shiftRight:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
 
-- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window{
-    [[window sourceView] shiftLeft:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+- (XVimEvaluator*)LESSTHAN{
+    [[self sourceView] shiftLeft:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
-- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter 
-{
+- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter {
     /*1
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																	 parent:self 
@@ -361,32 +313,32 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
                            }];
 	return eval;
      */
-    return [self ESC:window]; // Temprarily this feture is turned off
+    return [self ESC]; // Temprarily this feture is turned off
 }
 
-- (XVimEvaluator*)QUESTION:(XVimWindow*)window{
-	return [self executeSearch:window firstLetter:@"?"];
+- (XVimEvaluator*)QUESTION{
+	return [self executeSearch:self.window firstLetter:@"?"];
 }
 
-- (XVimEvaluator*)SLASH:(XVimWindow*)window{
-	return [self executeSearch:window firstLetter:@"/"];
+- (XVimEvaluator*)SLASH{
+	return [self executeSearch:self.window firstLetter:@"/"];
 }
 
-- (XVimEvaluator*)TILDE:(XVimWindow*)window {
-	XVimSourceView *view = [window sourceView];
+- (XVimEvaluator*)TILDE{
+	XVimSourceView *view = [self sourceView];
     [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type inWindow:(XVimWindow*)window {
+- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = to;
-    [[window sourceView] move:m];
+    [[self sourceView] move:m];
     return [self withNewContext];
 }
 
-- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow*)window{
-    [[window sourceView] move:motion];
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
+    [[self sourceView] move:motion];
     return self;
 }
 

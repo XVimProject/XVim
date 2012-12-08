@@ -15,20 +15,19 @@
 
 @implementation XVimYankEvaluator
 
-- (XVimEvaluator*)y:(XVimWindow*)window{
+- (XVimEvaluator*)y{
     // 'yy' should obey the repeat specifier 
     // e.g., '3yy' should yank/copy the current line and the two lines below it
     if ([self numericArg] < 1) 
         return nil;
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-    return [self motionFixed:m inWindow:window];
+    return [self motionFixed:m];
     
 }
 
-- (XVimEvaluator*)motionFixed:(XVimMotion *)motion inWindow:(XVimWindow *)window{
-    XVimSourceView* view = [window sourceView];
-    [view yank:motion];
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
+    [[self sourceView] yank:motion];
     return nil;
     
 }

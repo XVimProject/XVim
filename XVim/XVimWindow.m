@@ -20,14 +20,13 @@
 #import "IDEEditorArea+XVim.h"
 
 @interface XVimWindow() {
-	XVimEvaluator* _currentEvaluator;
+    NSMutableArray* _evaluatorStack;
 	XVimKeymapContext* _keymapContext;
 	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	BOOL _handlingMouseEvent;
 	NSString *_staticString;
 }
 - (id)initWithIDEEditorArea:(IDEEditorArea*)editorArea;
-- (void)setEvaluator:(XVimEvaluator*)evaluator;
 - (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 @end
 
@@ -45,13 +44,21 @@ static const char* KEY_WINDOW = "xvimwindow";
 	objc_setAssociatedObject(editorArea, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
 }
 
+- (void)_initEvaluatorStack{
+    // Initialize evlauator stack
+    [_evaluatorStack removeAllObjects];
+    XVimEvaluator* firstEvaluator = [[[XVimNormalEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self] autorelease];
+    [_evaluatorStack addObject:firstEvaluator];
+}
+
 - (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
     if (self = [super init]){
 		_staticString = @"";
-		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
         _localMarks = [[NSMutableDictionary alloc] init];
 		_keymapContext = [[XVimKeymapContext alloc] init];
         self.editorArea = editorArea;
+        _evaluatorStack = [[NSMutableArray alloc] init];
+        [self _initEvaluatorStack];
 	}
     return self;
 }
@@ -60,10 +67,14 @@ static const char* KEY_WINDOW = "xvimwindow";
     [_keymapContext release];
     [_localMarks release];
     [_staticString release];
-    [_currentEvaluator release];
     [_sourceView release];
     self.editorArea = nil;
+    [_evaluatorStack release];
     [super dealloc];
+}
+
+- (XVimEvaluator*)_currentEvaluator{
+    return [_evaluatorStack lastObject];
 }
 
 - (XVimCommandLine*)commandLine{
@@ -71,36 +82,9 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)willSetEvaluator:(XVimEvaluator*)evaluator {
-	if (evaluator != _currentEvaluator && _currentEvaluator){
-		[_currentEvaluator willEndHandlerInWindow:self];
-	}
-}
-
-- (void)setEvaluator:(XVimEvaluator*)evaluator {
-	if (!evaluator) {
-		evaluator = [[XVimNormalEvaluator alloc] init];
-        [[XVim instance] setYankRegisterByName:nil];
-	}
-
-	if (evaluator != _currentEvaluator) {
-		if (_currentEvaluator) {
-			[_currentEvaluator didEndHandlerInWindow:self];
-		}
-
-		[_keymapContext clear];
-
-		[self.commandLine setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
-		[self.commandLine setArgumentString:[evaluator argumentDisplayString]];
-		//[[self sourceView] updateInsertionPointStateAndRestartTimer];
-
-        [_currentEvaluator release];
-		_currentEvaluator = evaluator;
-		[evaluator becameHandlerInWindow:self];
-	}
-}
-
-- (XVimEvaluator*)currentEvaluator{
-    return _currentEvaluator;
+	//if (evaluator != _currentEvaluator && _currentEvaluator){
+//		[_currentEvaluator willEndHandlerInWindow:self];
+	//}
 }
 
 - (NSMutableDictionary *)getLocalMarks{
@@ -112,14 +96,12 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-    DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, _currentEvaluator,event.description);
+    DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, [self _currentEvaluator],event.description);
     NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
     XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
-    XVimKeymap* keymap = [_currentEvaluator selectKeymapWithProvider:[XVim instance]];
+    XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
     
-    NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions 
-                                                 withPrimary:primaryKeyStroke
-                                                 withContext:_keymapContext];
+    NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke withContext:_keymapContext];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (keystrokes) {
         for (XVimKeyStroke *keyStroke in keystrokes) {
@@ -135,12 +117,13 @@ static const char* KEY_WINDOW = "xvimwindow";
     
     NSString* argString = [_keymapContext toString];
     if ([argString length] == 0) {
-        argString = [_currentEvaluator argumentDisplayString];
+        argString = [[self _currentEvaluator] argumentDisplayString];
     }
     
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     
+    // For Debugging
     [[self sourceView] dumpState];
     return YES;
 }
@@ -154,33 +137,57 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self clearErrorMessage];
+	XVimEvaluator* currentEvaluator = [_evaluatorStack lastObject];
+	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
+    
+    // Record the event
     XVim *xvim = [XVim instance];
-	XVimEvaluator* currentEvaluator = _currentEvaluator;
-	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke inWindow:self];
-
-	[self willSetEvaluator:nextEvaluator];
-
 	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister fromEvaluator:currentEvaluator];
 	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister fromEvaluator:currentEvaluator];
-
-	[self setEvaluator:nextEvaluator];
+    
+    // Manipulate evaluator stack
+    if( nil == nextEvaluator ){
+        // current evaluator finished its task
+        if( [_evaluatorStack count] == 1 ){
+            // Current Evaluator is the root evaluator of the stack
+            // And it finished its task. Then we reset the stack.
+            [self _initEvaluatorStack];
+            // Reset other things too
+            [[XVim instance] setYankRegisterByName:nil];
+        }
+        else{
+            // Pass current evaluator to the evaluator below the current evaluator
+            [(XVimEvaluator*)[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2] onChildComplete:currentEvaluator];
+            [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
+        }
+    }else if( currentEvaluator != nextEvaluator ){
+        [_evaluatorStack addObject:nextEvaluator];
+        [currentEvaluator didEndHandler];
+        [(XVimEvaluator*)[_evaluatorStack lastObject] becameHandler];
+        
+		[_keymapContext clear];
+		[self.commandLine setModeString:[[nextEvaluator modeString] stringByAppendingString:_staticString]];
+		[self.commandLine setArgumentString:[nextEvaluator argumentDisplayString]];
+    }else{
+        // if current and next evaluator is the same
+        // do nothing.
+    }
 }
 
 - (void)handleTextInsertion:(NSString*)text {
 	[[self sourceView] insertText:text];
 }
 
-
 - (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range; {
-	XVimEvaluator *evaluator = [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:mode withRange:range];
+	XVimEvaluator *evaluator = [[[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self mode:mode withRange:range] autorelease];
 	[self willSetEvaluator:evaluator];
-	[self setEvaluator:evaluator];
+    [_evaluatorStack addObject:evaluator];
 }
 
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField {
 	[commandField setDelegate:nil];
 	[self willSetEvaluator:nil];
-	[self setEvaluator:nil];
+    [self _initEvaluatorStack];
 }
 
 - (void)recordIntoRegister:(XVimRegister*)xregister{
@@ -231,9 +238,13 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)endMouseEvent:(NSEvent*)event {
     TRACE_LOG(@"Event:%@", event.description);
 	_handlingMouseEvent = NO;
-	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
-	[self willSetEvaluator:next];
-	[self setEvaluator:next];
+	XVimEvaluator* next = [[self _currentEvaluator] handleMouseEvent:event];
+    if( nil != next ){
+        [self willSetEvaluator:next];
+        [_evaluatorStack addObject:next];
+    }else{
+        [self _initEvaluatorStack];
+    }
 }
 
 - (void)mouseDown:(NSEvent *)event{
@@ -276,23 +287,23 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (NSRange)restrictSelectedRange:(NSRange)range {
 	if (_handlingMouseEvent) {
-		range = [_currentEvaluator restrictSelectedRange:range inWindow:self];
+		range = [[self _currentEvaluator] restrictSelectedRange:range];
 	}
 	return range;
 }
 
 - (void)drawRect:(NSRect)rect {
-	//[_currentEvaluator drawRect:rect inWindow:self];
+	[[self _currentEvaluator] drawRect:rect];
 }
 
 - (BOOL)shouldDrawInsertionPoint {
-	return [_currentEvaluator shouldDrawInsertionPointInWindow:self];
+	return [[self _currentEvaluator] shouldDrawInsertionPoint];
 }
 
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
-	float heightRatio = [_currentEvaluator insertionPointHeightRatio];
-    float widthRatio = [_currentEvaluator insertionPointWidthRatio];
-    float alphaRatio = [_currentEvaluator insertionPointAlphaRatio];
+	float heightRatio = [[self _currentEvaluator] insertionPointHeightRatio];
+    float widthRatio = [[self _currentEvaluator] insertionPointWidthRatio];
+    float alphaRatio = [[self _currentEvaluator] insertionPointAlphaRatio];
     
 	XVimSourceView *sourceView = [self sourceView];
 	color = [color colorWithAlphaComponent:alphaRatio];

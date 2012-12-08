@@ -24,23 +24,21 @@
 @synthesize previous = _previous;
 @synthesize performedSearch = _performedSearch;
 
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider
-{
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window
-{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
 	XVimCharacterSearch *charSearcher = [[XVim instance] characterSearcher];
 	
 	unichar key = keyStroke.keyCode;
     NSString *searchChar = [NSString stringWithCharacters:&key length:1];
     [charSearcher setSearchCharacter:searchChar backward:!self.forward previous:self.previous];
 
-    XVimSourceView *view = [window sourceView];
+    XVimSourceView *view = self.sourceView;
     NSUInteger location = [view selectedRange].location;
     for (NSUInteger i = 0;;){
-        location = [charSearcher searchNextCharacterFrom:location inWindow:window];
+        location = [charSearcher searchNextCharacterFrom:location inWindow:self.window];
         if (location == NSNotFound || ++i >= [self numericArg]){
             break;
         }
@@ -63,7 +61,7 @@
             type = CHARACTERWISE_EXCLUSIVE;
         }
         self.performedSearch = YES;
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type inWindow:window]; 
+        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type];
     }
 
     return nil;

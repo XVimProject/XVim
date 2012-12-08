@@ -11,21 +11,18 @@
 
 @implementation XVimWindowEvaluator
 
-- (XVimEvaluator*)n:(id)arg
-{
+- (XVimEvaluator*)n:(id)arg {
     [[XVimWindowManager instance] addEditorWindow];
     return nil;
 }
 
-- (XVimEvaluator*)o:(id)arg
-{
+- (XVimEvaluator*)o:(id)arg {
 	[[XVimWindowManager instance] closeAllButActive];
     return nil;
 }
 
 - (XVimEvaluator*)s:(id)arg{
     [[XVimWindowManager instance] addEditorWindowHorizontal];
-    
     return nil;
 }
 
