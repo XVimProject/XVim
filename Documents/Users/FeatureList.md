@@ -84,6 +84,10 @@ Currently replacing first occurence of xxxx with yyyy each line is not available
 
 C-y, C-e
 
+## Print status commands
+
+C-g
+
 ## Text Object
 
 ib, iB, i(, i), i{, i}, i[, i], i>, i<, i", i', iw, iW

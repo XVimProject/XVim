@@ -245,6 +245,23 @@
     return nil;
 }
 
+- (XVimEvaluator*)C_g:(XVimWindow*)window{
+    // process
+    NSRange range = [[window sourceView] selectedRange];
+    NSUInteger numberOfLines = [[window sourceView] numberOfLines];
+    long long lineNumber = [[window sourceView] currentLineNumber];
+    NSUInteger columnNumber = [[window sourceView] columnNumber:range.location];
+    NSURL* documentURL = [[window sourceView] documentURL];
+	if( [documentURL isFileURL] ) {
+		NSString* filename = [documentURL path];
+		NSString* text = [NSString stringWithFormat:@"%@   line %lld of %ld --%d%%-- col %ld",
+                          filename, lineNumber, numberOfLines, (int)((float)lineNumber*100.0/(float)numberOfLines), columnNumber+1 ];
+        
+		[window statusMessage:text];
+	}
+    return nil;
+}
+
 - (XVimEvaluator*)g:(XVimWindow*)window{
     return [[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"]
 												  parent:self];

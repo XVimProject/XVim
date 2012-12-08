@@ -48,6 +48,7 @@
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
+- (void)statusMessage:(NSString*)message;
 - (void)clearErrorMessage;
 
 - (void)associateWith:(id)object;
