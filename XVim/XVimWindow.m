@@ -223,6 +223,8 @@
 
 - (void)endMouseEvent:(NSEvent*)event
 {
+    [self clearErrorMessage];
+
 	_handlingMouseEvent = NO;
 	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
 	[self willSetEvaluator:next];
@@ -255,17 +257,22 @@
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
 	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:message];
+    [commandLine errorMessage:message Timer:YES RedColorSetting:YES];
     if (ringBell) {
         [[XVim instance] ringBell];
     }
     return;
 }
 
+- (void)statusMessage:(NSString*)message {
+    XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:message Timer:NO RedColorSetting:NO];
+}
+
 - (void)clearErrorMessage
 {
 	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:@""];
+    [commandLine errorMessage:@"" Timer:NO RedColorSetting:YES];
 }
 
 // TODO:

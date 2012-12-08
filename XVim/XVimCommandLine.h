@@ -14,7 +14,7 @@
 - (id)init;
 - (void)setModeString:(NSString*)string;
 - (void)setArgumentString:(NSString*)string;
-- (void)errorMessage:(NSString*)string;
+- (void)errorMessage:(NSString*)string Timer:(BOOL)aTimer RedColorSetting:(BOOL)aRedColorSetting;
 - (void)didFrameChanged:(NSNotification*)notification;
 
 - (XVimCommandField*)commandField;
