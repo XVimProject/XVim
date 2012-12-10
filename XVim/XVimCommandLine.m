@@ -108,15 +108,27 @@
     [_argument setString:string];
 }
 
-- (void)errorMessage:(NSString*)string
+/**
+ * (BOOL)aRedColorSetting
+ *      YES: red color background
+ *      NO : white color background
+ */
+- (void)errorMessage:(NSString*)string Timer:(BOOL)aTimer RedColorSetting:(BOOL)aRedColorSetting
 {
+    if( aRedColorSetting ){
+        _error.backgroundColor = [NSColor redColor];
+    } else {
+        _error.backgroundColor = [NSColor whiteColor];
+    }
 	NSString* msg = string;
 	if( [msg length] != 0 ){
 		[_error setString:msg];
 		[_error setHidden:NO];
 		[_errorTimer invalidate];
-		_errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
-		[[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
+        if( aTimer ){
+            _errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
+            [[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
+        }
 	}else{
 		[_errorTimer invalidate];
 		[_error setHidden:YES];

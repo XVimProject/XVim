@@ -9,6 +9,7 @@
 #import "XVimSourceView+Xcode.h"
 #import "DVTSourceTextViewHook.h"
 #import "DVTKit.h"
+#import "IDEKit.h"
 
 @implementation XVimSourceView(Xcode)
 
@@ -83,4 +84,13 @@
 	[[self xview] updateInsertionPointStateAndRestartTimer:YES];
 }
 
+- (IDEEditor*)editor
+{
+    return (IDEEditor*)[[self xview] delegate];
+}
+
+- (NSURL*)documentURL
+{
+    return [(NSDocument*)[self editor].document fileURL];
+}
 @end
