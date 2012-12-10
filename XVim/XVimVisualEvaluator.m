@@ -87,7 +87,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"a"]
                                                                      withWindow:self.window
 																	 withParent:self
-                                                                       inclusive:YES] autorelease];
+                                                                       inner:NO] autorelease];
 	return evaluator;
 }
 
@@ -114,7 +114,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)i{
     // FIXME
 	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"]  withWindow:self.window withParent:self inclusive:NO] autorelease];
+	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"]  withWindow:self.window withParent:self inner:YES] autorelease];
 	return evaluator;
 }
 

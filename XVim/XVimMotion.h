@@ -44,10 +44,17 @@ typedef enum _MOTION{
     MOTION_NEXT_MATCHED_ITEM,       // %
     MOTION_LASTLINE,                // G
     TEXTOBJECT_WORD,
+    TEXTOBJECT_BIGWORD,
     TEXTOBJECT_SENTENCE,
-    TEXTOBJECT_PARENTHESES,         // () block
     TEXTOBJECT_PARAGRAPH,
+    TEXTOBJECT_SQUAREBRACKETS,      // [] block
+    TEXTOBJECT_PARENTHESES,         // () block
+    TEXTOBJECT_ANGLEBRACKETS,       // <> block
+    TEXTOBJECT_TAG,                 // <>...</> block
     TEXTOBJECT_BRACES,              // {} block
+    TEXTOBJECT_SQUOTE,
+    TEXTOBJECT_DQUOTE,
+    TEXTOBJECT_BACKQUOTE,
     MOTION_LINE_COLUMN,             // For custom (Line,Column) position
     MOTION_POSITION,                // For custom position
 }MOTION;

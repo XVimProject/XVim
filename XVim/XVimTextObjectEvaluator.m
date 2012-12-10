@@ -16,16 +16,17 @@
 #import "XVimMotionOption.h"
 
 @interface XVimTextObjectEvaluator() {
-	BOOL _inclusive;
 	XVimEvaluator *_parent;
 }
 @end
 
 @implementation XVimTextObjectEvaluator
+@synthesize inner = _inner;
+@synthesize textobject = _textobject;
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent inclusive:(BOOL)inclusive {
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent inner:(BOOL)inner{
 	if (self = [super initWithContext:context withWindow:window]) {
-		_inclusive = inclusive;
+        _inner = inner;
 		_parent = parent;
 	}
 	return self;
@@ -69,87 +70,73 @@
 	return [_parent withNewContext];
 }
 
-- (XVimEvaluator*)b:(XVimWindow*)window {
-	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '(', ')');
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)b{
+    self.textobject = TEXTOBJECT_PARENTHESES;
+    return nil;
 }
 
-- (XVimEvaluator*)B:(XVimWindow*)window {
-	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '{', '}');
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)B{
+    self.textobject = TEXTOBJECT_BRACES;
+    return nil;
 }
 
--(XVimEvaluator*)p:(XVimWindow*)window {
-    NSUInteger start = [window insertionPoint];
-    if(start != 0){
-        start = [window.sourceView paragraphsBackward:[window insertionPoint] count:1 option:MOPT_PARA_BOUND_BLANKLINE];
-    }
-    NSUInteger starts_end = [window.sourceView paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
-    NSUInteger end = [window.sourceView paragraphsForward:[window insertionPoint] count:[self numericArg] option:MOPT_PARA_BOUND_BLANKLINE];
-    
-    if(starts_end != end){
-        start = starts_end;
-    }
-    
-    NSRange r = NSMakeRange(start, end - start);
-	return [self executeActionForRange:r];
+-(XVimEvaluator*)p{
+    self.textobject = TEXTOBJECT_PARAGRAPH;
+    return nil;
 }
 
-- (XVimEvaluator*)w:(XVimWindow*)window {
-    MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
-    NSRange r = [window.sourceView currentWord:[window insertionPoint] count:[self numericArg] option:opt];
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)w{
+    self.textobject = TEXTOBJECT_WORD;
+    return nil;
 }
 
-- (XVimEvaluator*)W:(XVimWindow*)window {
-//    XVimMotion* m = XVIM_MAKE_MOTION(TEXTOBJECT_WORD, <#TYPE#>, <#OPTION#>, <#COUNT#>)
-    MOTION_OPTION opt = _inclusive ? INCLUSIVE : MOTION_OPTION_NONE;
-    NSRange r = [window.sourceView currentWord:[window insertionPoint] count:[self numericArg] option:opt|BIGWORD];
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)W{
+    self.textobject = TEXTOBJECT_BIGWORD;
+    return nil;
 }
 
-- (XVimEvaluator*)LSQUAREBRACKET:(XVimWindow*)window {
-	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '[', ']');
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)LSQUAREBRACKET{
+    self.textobject = TEXTOBJECT_SQUAREBRACKETS;
+    return nil;
 }
 
-- (XVimEvaluator*)RSQUAREBRACKET:(XVimWindow*)window {
-	return [self LSQUAREBRACKET:window];
+- (XVimEvaluator*)RSQUAREBRACKET{
+	return [self LSQUAREBRACKET];
 }
 
-- (XVimEvaluator*)LBRACE:(XVimWindow*)window {
-	return [self B:window];
+- (XVimEvaluator*)LBRACE{
+	return [self B];
 }
 
-- (XVimEvaluator*)RBRACE:(XVimWindow*)window {
-	return [self B:window];
+- (XVimEvaluator*)RBRACE{
+	return [self B];
 }
 
-- (XVimEvaluator*)LESSTHAN:(XVimWindow*)window {
-	NSRange r = xv_current_block([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '<', '>');
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)LESSTHAN{
+    self.textobject = TEXTOBJECT_ANGLEBRACKETS;
+    return nil;
 }
 
-- (XVimEvaluator*)GREATERTHAN:(XVimWindow*)window {
-	return [self LESSTHAN:window];
+- (XVimEvaluator*)GREATERTHAN{
+	return [self LESSTHAN];
 }
 
-- (XVimEvaluator*)LPARENTHESIS:(XVimWindow*)window {
-	return [self b:window];
+- (XVimEvaluator*)LPARENTHESIS{
+	return [self b];
 }
 
-- (XVimEvaluator*)RPARENTHESIS:(XVimWindow*)window {
-	return [self b:window];
+- (XVimEvaluator*)RPARENTHESIS{
+	return [self b];
 }
 
-- (XVimEvaluator*)SQUOTE:(XVimWindow*)window {
-	NSRange r = xv_current_quote([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '\'');
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)SQUOTE{
+    self.textobject = TEXTOBJECT_SQUOTE;
+    return nil;
 }
 
-- (XVimEvaluator*)DQUOTE:(XVimWindow*)window {
-	NSRange r = xv_current_quote([window.sourceView string], [window insertionPoint], [self numericArg], _inclusive, '"');
-	return [self executeActionForRange:r];
+- (XVimEvaluator*)DQUOTE{
+    self.textobject = TEXTOBJECT_DQUOTE;
+    return nil;
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister {

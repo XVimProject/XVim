@@ -12,6 +12,7 @@
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
+#import "XVimTextObjectEvaluator.h"
 #import "Logger.h"
 
 @interface XVimDeleteEvaluator() {
@@ -81,4 +82,12 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     return nil;
 }
 
+- (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{
+    if( [childEvaluator isKindOfClass:[XVimTextObjectEvaluator class]] ){
+        MOTION_OPTION opt = ((XVimTextObjectEvaluator*)childEvaluator).inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
+        XVimMotion* m = XVIM_MAKE_MOTION(((XVimTextObjectEvaluator*)childEvaluator).textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
+        [[self sourceView] delete:m];
+    }
+    return nil;
+}
 @end

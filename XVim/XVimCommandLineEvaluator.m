@@ -158,7 +158,7 @@
 - (XVimEvaluator*)ESC{
     XVimSourceView *sourceView = [self sourceView];
     [sourceView scrollTo:[self.window insertionPoint]];
-	return [_parent withNewContext];
+	return nil;
 }
 
 - (XVimEvaluator*)C_LSQUAREBRACKET{

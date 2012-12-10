@@ -146,31 +146,36 @@ static const char* KEY_WINDOW = "xvimwindow";
 	[self recordEvent:keyStroke intoRegister:xvim.repeatRegister fromEvaluator:currentEvaluator];
     
     // Manipulate evaluator stack
-    if( nil == nextEvaluator ){
-        // current evaluator finished its task
-        if( [_evaluatorStack count] == 1 ){
-            // Current Evaluator is the root evaluator of the stack
-            // And it finished its task. Then we reset the stack.
-            [self _initEvaluatorStack];
-            // Reset other things too
-            [[XVim instance] setYankRegisterByName:nil];
+    while(YES){
+        if( nil == nextEvaluator ){
+            // current evaluator finished its task
+            if( [_evaluatorStack count] == 1 ){
+                // Current Evaluator is the root evaluator of the stack
+                // And it finished its task. Then we reset the stack.
+                [self _initEvaluatorStack];
+                // Reset other things too
+                [[XVim instance] setYankRegisterByName:nil];
+                break;
+            }
+            else{
+                // Pass current evaluator to the evaluator below the current evaluator
+                nextEvaluator = [(XVimEvaluator*)[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2] onChildComplete:currentEvaluator];
+                [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
+                // Not break here. check the nextEvaluator repeatedly.
+            }
+        }else if( currentEvaluator != nextEvaluator ){
+            [_evaluatorStack addObject:nextEvaluator];
+            [currentEvaluator didEndHandler];
+            [(XVimEvaluator*)[_evaluatorStack lastObject] becameHandler];
+            
+            [_keymapContext clear];
+            [self.commandLine setModeString:[[nextEvaluator modeString] stringByAppendingString:_staticString]];
+            [self.commandLine setArgumentString:[nextEvaluator argumentDisplayString]];
+            break;
+        }else{
+            // if current and next evaluator is the same do nothing.
+            break;
         }
-        else{
-            // Pass current evaluator to the evaluator below the current evaluator
-            [(XVimEvaluator*)[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2] onChildComplete:currentEvaluator];
-            [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
-        }
-    }else if( currentEvaluator != nextEvaluator ){
-        [_evaluatorStack addObject:nextEvaluator];
-        [currentEvaluator didEndHandler];
-        [(XVimEvaluator*)[_evaluatorStack lastObject] becameHandler];
-        
-		[_keymapContext clear];
-		[self.commandLine setModeString:[[nextEvaluator modeString] stringByAppendingString:_staticString]];
-		[self.commandLine setArgumentString:[nextEvaluator argumentDisplayString]];
-    }else{
-        // if current and next evaluator is the same
-        // do nothing.
     }
 }
 

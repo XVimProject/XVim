@@ -17,7 +17,6 @@
 #import "XVimKeymapProvider.h"
 
 @interface XVimOperatorEvaluator() {
-	XVimOperatorAction *_operatorAction;
 	XVimEvaluator *_parent;
 }
 @end
@@ -60,13 +59,11 @@
 }
 
 - (XVimEvaluator*)a{
-	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] withWindow:self.window withParent:_parent inclusive:YES];
-	return eval;
+	return [[[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] withWindow:self.window withParent:_parent inner:NO] autorelease];
 }
 
 - (XVimEvaluator*)i{
-    XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] withWindow:self.window withParent:_parent inclusive:NO];
-	return eval;
+    return [[[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] withWindow:self.window withParent:_parent inner:YES] autorelease];
 }
 
 

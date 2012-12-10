@@ -37,7 +37,8 @@
 
 
 @interface XVimMotionEvaluator() {
-	BOOL _forceMotionType;
+    MOTION_TYPE _forcedMotionType;
+	BOOL _toggleInclusiveExclusive;
 }
 @end
 
@@ -46,7 +47,7 @@
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window{
     self = [super initWithContext:context withWindow:window];
     if (self) {
-        _forceMotionType = NO;
+        _forcedMotionType = DEFAULT_MOTION_TYPE;
     }
     return self;
 }
@@ -67,7 +68,7 @@
 
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
-    if( _forceMotionType ){
+    if( _forcedMotionType != CHARACTERWISE_EXCLUSIVE){
 		if ( type == LINEWISE) {
 			type = CHARACTERWISE_EXCLUSIVE;
 		} else if ( type == CHARACTERWISE_EXCLUSIVE ){
@@ -82,15 +83,25 @@
 }
 
 -(XVimEvaluator*)_motionFixed:(XVimMotion*)motion{
-    if( _forceMotionType ){
-		if ( motion.type == LINEWISE) {
-			motion.type = CHARACTERWISE_EXCLUSIVE;
-		} else if ( motion.type == CHARACTERWISE_EXCLUSIVE ){
-            motion.type = CHARACTERWISE_INCLUSIVE;
-        } else if(motion.type == CHARACTERWISE_INCLUSIVE) {
+    if( _forcedMotionType == CHARACTERWISE_EXCLUSIVE){ // CHARACTERWISE_EXCLUSIVE means 'v' is pressed and it means toggle inclusive/exclusive. So its not always "exclusive"
+        if( motion.type == LINEWISE ){
             motion.type = CHARACTERWISE_EXCLUSIVE;
+        }else{
+            if ( motion.type == CHARACTERWISE_EXCLUSIVE ){
+                motion.type = CHARACTERWISE_INCLUSIVE;
+            } else if(motion.type == CHARACTERWISE_INCLUSIVE) {
+                motion.type = CHARACTERWISE_EXCLUSIVE;
+            }
         }
-	}
+	}else if (_forcedMotionType == LINEWISE){
+        motion.type = LINEWISE;
+    }else if (_forcedMotionType == BLOCKWISE){
+        // TODO: Implemente BLOCKWISE operation
+        // Currently BLOCKWISE is not supporeted by operations implemented in XVimSourceView.m
+        motion.type = LINEWISE;
+    }else{
+        // _forceMotionType == DEFAULT_MOTION_TYPE
+    }
 	return [self motionFixed:motion];
 }
 
@@ -232,7 +243,21 @@
 }
 
 - (XVimEvaluator*)v{
-    _forceMotionType = !_forceMotionType;
+    _forcedMotionType = CHARACTERWISE_EXCLUSIVE; // This does not mean the motion will always be "exclusive". This is just for remembering that its type is "characterwise" forced.
+                                                 // Actual motion is decided by motions' default inclusive/exclusive attribute and _toggleInclusiveExclusive flag.
+    _toggleInclusiveExclusive = !_toggleInclusiveExclusive;
+    return self;
+}
+
+- (XVimEvaluator*)V{
+    _toggleInclusiveExclusive = NO;
+    _forcedMotionType = LINEWISE;
+    return self;
+}
+
+- (XVimEvaluator*)C_v{
+    _toggleInclusiveExclusive = NO;
+    _forcedMotionType = BLOCKWISE;
     return self;
 }
 

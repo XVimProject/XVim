@@ -1361,10 +1361,17 @@
             nextPos = [self firstOfLine:[self endOfFile]];
             break;
         case TEXTOBJECT_WORD:
+        case TEXTOBJECT_BIGWORD:
         case TEXTOBJECT_BRACES:
         case TEXTOBJECT_PARAGRAPH:
         case TEXTOBJECT_PARENTHESES:
         case TEXTOBJECT_SENTENCE:
+        case TEXTOBJECT_ANGLEBRACKETS:
+        case TEXTOBJECT_SQUOTE:
+        case TEXTOBJECT_DQUOTE:
+        case TEXTOBJECT_TAG:
+        case TEXTOBJECT_BACKQUOTE:
+        case TEXTOBJECT_SQUAREBRACKETS:
             break;
         case MOTION_LINE_COLUMN:
             nextPos = [self positionAtLineNumber:motion.line column:motion.column];

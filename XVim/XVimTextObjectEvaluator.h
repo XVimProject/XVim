@@ -7,12 +7,15 @@
 //
 
 #import "XVimEvaluator.h"
+#import "XVimMotion.h"
 
 @class XVimOperatorAction;
 
 @interface XVimTextObjectEvaluator : XVimEvaluator
+@property BOOL inner;
+@property MOTION textobject;
 - (id)initWithContext:(XVimEvaluatorContext*)context
            withWindow:(XVimWindow *)window
            withParent:(XVimEvaluator*)parent
-            inclusive:(BOOL)inclusive;
+            inner:(BOOL)inner;
 @end
