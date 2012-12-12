@@ -55,4 +55,5 @@
 // Sets the wrapline option
 - (void)setWrapsLines:(BOOL)wraps;
 
+- (NSURL*)documentURL;
 @end
