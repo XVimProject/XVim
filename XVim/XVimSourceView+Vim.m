@@ -74,7 +74,7 @@
 - (void)deleteTextIntoYankRegister:(XVimRegister*)xregister
 {
 	[self cutText];
-	[self adjustCursorPosition];
+	//[self adjustCursorPosition];
     [[XVim instance] onDeleteOrYank:xregister];
 }
 
