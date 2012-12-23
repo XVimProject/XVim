@@ -78,6 +78,12 @@
 		motionType = LINEWISE;
 	}
 	
+    // set the position before the jump
+    NSRange r = [[window sourceView] selectedRange];
+    NSValue *v =[NSValue valueWithRange:r];
+    [[window getLocalMarks] setValue:v forKey:@"`"];
+    [[window getLocalMarks] setValue:v forKey:@"'"];
+
     return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType inWindow:window];
 }
 
