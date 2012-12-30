@@ -38,7 +38,7 @@
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
-- (void)onDeleteOrYank:(XVimRegister*)yankRegister;
+- (void)onDeleteOrYank:(XVimRegister*)yankRegister text:(NSString*)text;
 - (NSString*)pasteText:(XVimRegister*)yankRegister;
 - (void)writeToLogfile:(NSString*)str;
     

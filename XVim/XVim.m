@@ -297,6 +297,7 @@ static XVim* s_instance = nil;
 }
 
 - (void)onDeleteOrYank:(XVimRegister*)yankRegister
+                  text:(NSString*)text
 {
     // Don't do anything if we are recording into a register (that isn't the repeat register)
     if (self.recordingRegister != nil){
@@ -307,8 +308,12 @@ static XVim* s_instance = nil;
     // the numbered registers.
     if (yankRegister != nil){
         [yankRegister clear];
-        [yankRegister appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
+        [yankRegister appendText:text];
     }else{
+        XVimRegister *reg = [self findRegister:@"DQUOTE"];
+        [reg clear];
+        [reg appendText:text];
+        
         // There are 10 numbered registers
         for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
             XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
@@ -321,9 +326,9 @@ static XVim* s_instance = nil;
             }
         }
         
-        XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
-        [reg clear];
-        [reg appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
+        XVimRegister *reg0 = [self.numberedRegisters objectAtIndex:0];
+        [reg0 clear];
+        [reg0 appendText:text];
     }
 }
 
@@ -333,8 +338,9 @@ static XVim* s_instance = nil;
 	{
 		return yankRegister.text;
 	}
-
-    return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    else {
+        return [[self findRegister:@"DQUOTE"] text];
+    }
 }
 
 @end

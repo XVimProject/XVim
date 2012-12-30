@@ -73,9 +73,10 @@
 
 - (void)deleteTextIntoYankRegister:(XVimRegister*)xregister
 {
-	[self cutText];
+    NSString* s = [[self string] substringWithRange:[self selectedRange]];
+	[self deleteText];
 	//[self adjustCursorPosition];
-    [[XVim instance] onDeleteOrYank:xregister];
+    [[XVim instance] onDeleteOrYank:xregister text:s];
 }
 
 - (void)sortLinesInRange:(NSRange)range withOptions:(XVimSortOptions)options
