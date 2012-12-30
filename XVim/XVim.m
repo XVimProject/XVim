@@ -306,14 +306,17 @@ static XVim* s_instance = nil;
 
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
-    if (yankRegister != nil){
+    if ([yankRegister.displayName isEqualToString:@"*"]){
+        [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
+    }
+    else if (yankRegister != nil){
+        if( yankRegister.isReadOnly )
+            return;
+        
         [yankRegister clear];
         [yankRegister appendText:text];
-    }else{
-        XVimRegister *reg = [self findRegister:@"DQUOTE"];
-        [reg clear];
-        [reg appendText:text];
-        
+    }
+    else {
         // There are 10 numbered registers
         for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
             XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
@@ -326,18 +329,32 @@ static XVim* s_instance = nil;
             }
         }
         
-        XVimRegister *reg0 = [self.numberedRegisters objectAtIndex:0];
-        [reg0 clear];
-        [reg0 appendText:text];
+        XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
+        [reg clear];
+        [reg appendText:text];
+        
+        if ( self.options.pasteboard ) {
+            [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
+        }
     }
+    
+    XVimRegister *defaultReg = [self findRegister:@"DQUOTE"];
+    [defaultReg clear];
+    [defaultReg appendText:text];
 }
 
 - (NSString*)pasteText:(XVimRegister*)yankRegister
 {
-	if (yankRegister)
+    if ([yankRegister.displayName isEqualToString:@"*"]) {
+        return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    }
+	else if (yankRegister)
 	{
 		return yankRegister.text;
 	}
+    else if (self.options.pasteboard) {
+        return [[NSPasteboard generalPasteboard] stringForType:NSStringPboardType];
+    }
     else {
         return [[self findRegister:@"DQUOTE"] text];
     }

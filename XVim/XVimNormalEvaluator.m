@@ -522,7 +522,7 @@
 	// Xcode crashes if we cut a zero length selection
 	if (replacementRange.length > 0)
 	{
-		[view cutText]; // Can't use del here since we may want to wind up at end of line
+		[view insertText:@"" replacementRange:replacementRange]; // Can't use del here since we may want to wind up at end of line
 	}
 	
     return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]

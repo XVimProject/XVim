@@ -74,7 +74,7 @@
 - (void)deleteTextIntoYankRegister:(XVimRegister*)xregister
 {
     NSString* s = [[self string] substringWithRange:[self selectedRange]];
-	[self deleteText];
+    [self insertText:@"" replacementRange:[self selectedRange]];
 	//[self adjustCursorPosition];
     [[XVim instance] onDeleteOrYank:xregister text:s];
 }
