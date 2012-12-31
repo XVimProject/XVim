@@ -143,6 +143,7 @@ The dot command ('.') is supported.
   [no]smartcase |
   guioptions | See below
   timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
+  [no]pasteboard | Whether yank/delete/pull uses the standard clipboard
 
 ## guioptions
 
