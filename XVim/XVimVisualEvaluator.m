@@ -301,12 +301,14 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     NSUInteger loc = [view selectedRange].location;
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
-        unichar uc = [text characterAtIndex:[text length] -1];
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-            if( [view isBlankLine:loc] && ![view isEOF:loc]){
-                [view setSelectedRange:NSMakeRange(loc+1,0)];
-            }else{
-                [view insertNewline];
+        if (_mode == MODE_CHARACTER) {
+            unichar uc = [text characterAtIndex:[text length] -1];
+            if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+                if( [view isBlankLine:loc] && ![view isEOF:loc]){
+                    [view setSelectedRange:NSMakeRange(loc+1,0)];
+                }else{
+                    [view insertNewline];
+                }
             }
         }
         
