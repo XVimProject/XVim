@@ -301,12 +301,14 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
     NSUInteger loc = [view selectedRange].location;
     NSString *text = [[XVim instance] pasteText:[self yankRegister]];
     if (text.length > 0){
-        unichar uc = [text characterAtIndex:[text length] -1];
-        if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
-            if( [view isBlankLine:loc] && ![view isEOF:loc]){
-                [view setSelectedRange:NSMakeRange(loc+1,0)];
-            }else{
-                [view insertNewline];
+        if (_mode == MODE_CHARACTER) {
+            unichar uc = [text characterAtIndex:[text length] -1];
+            if ([[NSCharacterSet newlineCharacterSet] characterIsMember:uc]) {
+                if( [view isBlankLine:loc] && ![view isEOF:loc]){
+                    [view setSelectedRange:NSMakeRange(loc+1,0)];
+                }else{
+                    [view insertNewline];
+                }
             }
         }
         
@@ -389,6 +391,15 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
 															   operatorAction:operatorAction 
 																   withParent:self];
     return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+}
+
+- (XVimEvaluator*)Y:(XVimWindow*)window{
+    [self updateSelectionInWindow:window];
+	XVimOperatorAction *operatorAction = [[XVimYankAction alloc] initWithYankRegister:[self yankRegister]];
+    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithContext:[self contextCopy]
+															   operatorAction:operatorAction 
+																   withParent:self];
+    return [evaluator motionFixedFrom:_selection_begin To:_selection_end Type:LINEWISE inWindow:window];
 }
 
 - (XVimEvaluator*)DQUOTE:(XVimWindow*)window{
