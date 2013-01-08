@@ -83,6 +83,19 @@
 	return eval;
 }
 
+- (XVimEvaluator*)b:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+}
+
+- (XVimEvaluator*)B:(XVimWindow*)window{
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:BIGWORD];
+    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+}
+
+
 - (XVimEvaluator*)i:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"]
 															operatorAction:_operatorAction 

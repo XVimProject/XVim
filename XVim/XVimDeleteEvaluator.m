@@ -36,6 +36,29 @@
 	return self;
 }
 
+- (XVimEvaluator*)b:(XVimWindow*)window{
+    if( _insertModeAtCompletion ){
+        // cb is special case of word motion
+        NSUInteger to = [[window sourceView] selectedRange].location;
+        NSUInteger from = [[window sourceView] wordsBackward:to count:[self numericArg] option:MOTION_OPTION_NONE];
+        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    }else{
+        return [super b:window];
+    }
+}
+
+- (XVimEvaluator*)B:(XVimWindow*)window{
+    if( _insertModeAtCompletion ){
+        // cB is special case of word motion
+        NSUInteger to = [[window sourceView] selectedRange].location;
+        NSUInteger from = [[window sourceView] wordsBackward:to count:[self numericArg] option:BIGWORD];
+        return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    }else{
+        return [super B:window];
+    }
+}
+
+
 - (XVimEvaluator*)c:(XVimWindow*)window
 {
     if( !_insertModeAtCompletion ){
