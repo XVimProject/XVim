@@ -18,6 +18,7 @@
 @property BOOL debug;
 @property (copy) NSString *guioptions;
 @property (copy) NSString *timeoutlen;
+@property int laststatus;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;
