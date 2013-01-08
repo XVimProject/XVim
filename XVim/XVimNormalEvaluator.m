@@ -529,6 +529,19 @@
 											oneCharMode:NO];
 }
 
+// "S" is Synonym for "cc"
+- (XVimEvaluator*)S:(XVimWindow*)window{
+	XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister]
+														 insertModeAtCompletion:TRUE];
+
+	if( [self numericArg] < 1 )
+		return nil;
+
+    XVimSourceView* view = [window sourceView];
+    NSUInteger end = [view nextLine:[view selectedRange].location column:0 count:[self numericArg]-1 option:MOTION_OPTION_NONE];
+    return [action motionFixedFrom:[view selectedRange].location To:end Type:LINEWISE inWindow:window];
+}
+
 - (XVimEvaluator*)u:(XVimWindow*)window{
     XVimSourceView* view = [window sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
