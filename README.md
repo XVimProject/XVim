@@ -25,8 +25,8 @@ From Source Code
 Download source code and build XVim.xcodeproj. 
 It automatically builds and installs the plugin into the correct directory.
 
-If you want to build with Xcode 4.2 for Snow Leopard, you will first need to change the build settings. Open the project editing page,
-and set "Mac OS X Deployment Target" to "10.6".
+If you want to build with Xcode 4.2 for Snow Leopard, you will first need to change the build settings.
+Open the project editing page, and set "Mac OS X Deployment Target" to "10.6".
 
 After a build, to use XVim, you should restart Xcode.
 
@@ -44,28 +44,28 @@ Support Xcode Versions
 =============
 We are developing XVim with Xcode 4.3 at the moment, So we recommend you use XVim with XCode 4.3. 
 Though, it should work on 4.2 too and we want to support that as much as possible.
-So if you have any problems with Xcode 4.2 feel free to create a new issue.
+So if you have any problems with Xcode 4.2, feel free to create a new issue.
 
 Bug reports
 =============
-Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs but it's really hard work.
-It helps greatly when we have your bug reports with following information:
+Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs, but it's really hard work.
+It helps greatly when we have your bug reports, with the following information:
  * Crash information ( Xcode shows threads stack trace when crashes. Copy them. )
  * The operations you did to cause the crash ( series of key strokes or mouse clicks )
  * The text you were manipulating
  * Xcode version ( 4.3 or 4.2 ... )
  * XVim version ( Version number of the revision you built or the date of the daylybuild package )
 
-There is also a logging feature in XVim. You can turn it on by the command ":set debug".
-After the command all the key input is logged in "$HOME/.xvimlog".
-To turn it off execute ":set nodebug". Write "set debug" in .xvimrc to turn it at start.
-This log file also really helpful to find out the cause of problems.
+There is also a logging feature in XVim. It can be turned on/off with `:set debug` & `:set nodebug`.
+By default, it is off; to default to on, just add `:set debug` to your `.xvimrc`.
+When logging is on, all key input is logged in `$HOME/.xvimlog`.
+This log file is also generally helpful for debugging.
 
 Contributions
 =============
 Any suggestions, bug reports or feature requests are welcome.
 Any pull requests are very much appreciated.
-If you are interested in contributing I can assign you as a collaborator of this repository.
+If you are interested in contributing, I can assign you as a collaborator of this repository.
 
 For Japanese Users/Developers (日本の開発者のみなさまへ）
 ==================================================
@@ -79,10 +79,12 @@ For Japanese Users/Developers (日本の開発者のみなさまへ）
 
 Donations
 ===========
-If you think the plugin is useful please donate.
-Since I do not intend make money from this project I decided to donate all donations I recieve to the people who are suffering from the damage of the 2011 Tohoku earthquake and tsunami in Japan.
+If you think the plugin is useful, please donate.
+Since I do not intend make money from this project, I am directing donations
+to the people suffering from the damage of the 2011 Tohoku earthquake and tsunami in Japan.
 
-To reduce the transfer fee, please donate directly through the Paypal donation site below.
+Please donate directly through the Paypal donation site below, as
+this will put more money to good use by reducing the transfer fee.
 
 https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
