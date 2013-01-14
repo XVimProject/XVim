@@ -29,6 +29,10 @@
     }
 	NSRange r = [[window sourceView] selectedRange];
 	NSValue *v =[NSValue valueWithRange:r];
+    if( c == '`' ){
+        // Both m' and m` use internally a ' mark like original vim.
+        keyStr = @"'";
+    }
 	[[window getLocalMarks] setValue:v forKey:keyStr];
     
     return [self defaultNextEvaluatorInWindow:window];
