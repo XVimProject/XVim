@@ -297,6 +297,7 @@ static XVim* s_instance = nil;
 }
 
 - (void)onDeleteOrYank:(XVimRegister*)yankRegister
+                  text:(NSString*)text
 {
     // Don't do anything if we are recording into a register (that isn't the repeat register)
     if (self.recordingRegister != nil){
@@ -305,10 +306,17 @@ static XVim* s_instance = nil;
 
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
-    if (yankRegister != nil){
+    if ([yankRegister.displayName isEqualToString:@"*"]){
+        [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
+    }
+    else if (yankRegister != nil){
+        if( yankRegister.isReadOnly )
+            return;
+        
         [yankRegister clear];
-        [yankRegister appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
-    }else{
+        [yankRegister appendText:text];
+    }
+    else {
         // There are 10 numbered registers
         for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
             XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
@@ -323,18 +331,33 @@ static XVim* s_instance = nil;
         
         XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
         [reg clear];
-        [reg appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
+        [reg appendText:text];
+        
+        if ( self.options.pasteboard ) {
+            [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
+        }
     }
+    
+    XVimRegister *defaultReg = [self findRegister:@"DQUOTE"];
+    [defaultReg clear];
+    [defaultReg appendText:text];
 }
 
 - (NSString*)pasteText:(XVimRegister*)yankRegister
 {
-	if (yankRegister)
+    if ([yankRegister.displayName isEqualToString:@"*"]) {
+        return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    }
+	else if (yankRegister)
 	{
 		return yankRegister.text;
 	}
-
-    return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    else if (self.options.pasteboard) {
+        return [[NSPasteboard generalPasteboard] stringForType:NSStringPboardType];
+    }
+    else {
+        return [[self findRegister:@"DQUOTE"] text];
+    }
 }
 
 @end

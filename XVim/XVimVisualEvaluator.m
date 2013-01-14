@@ -316,7 +316,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
             [view insertText:text];
         }
         
-        [[NSPasteboard generalPasteboard] setString:current forType:NSStringPboardType];
+        [[XVim instance] onDeleteOrYank:[self yankRegister] text:current];
     }
     return nil;
 }

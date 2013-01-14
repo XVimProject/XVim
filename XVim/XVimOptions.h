@@ -16,6 +16,7 @@
 @property BOOL gdefault;
 @property BOOL smartcase;
 @property BOOL debug;
+@property BOOL pasteboard;
 @property (copy) NSString *guioptions;
 @property (copy) NSString *timeoutlen;
 @property int laststatus;

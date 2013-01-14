@@ -21,6 +21,7 @@
 @synthesize incsearch = _incsearch;
 @synthesize gdefault = _gdefault;
 @synthesize smartcase = _smartcase;
+@synthesize pasteboard = _pasteboard;
 @synthesize guioptions = _guioptions;
 @synthesize debug = _debug;
 @synthesize timeoutlen = _timeoutlen;
@@ -37,6 +38,7 @@
          @"incsearch",@"is",
          @"gdefault",@"gd",
          @"smartcase",@"scs",
+         @"pasteboard",@"pb",
          @"timeoutlen",@"tm",
          @"laststatus",@"ls",
          nil];
@@ -48,6 +50,7 @@
         _incsearch = YES;
 		_gdefault = NO;
 		_smartcase = NO;
+		_pasteboard = NO;
 		_guioptions = @"rb";
         _timeoutlen = @"1000";
         _laststatus = 2;
