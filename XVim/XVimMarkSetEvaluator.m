@@ -24,11 +24,15 @@
         return [self defaultNextEvaluatorInWindow:window];
     }
     unichar c = [keyStr characterAtIndex:0];
-    if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z'))) ) {
+    if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z')) || c == '`' || c == '\'' ) ) {
         return [self defaultNextEvaluatorInWindow:window];
     }
 	NSRange r = [[window sourceView] selectedRange];
 	NSValue *v =[NSValue valueWithRange:r];
+    if( c == '`' ){
+        // Both m' and m` use internally a ' mark like original vim.
+        keyStr = @"'";
+    }
 	[[window getLocalMarks] setValue:v forKey:keyStr];
     
     return [self defaultNextEvaluatorInWindow:window];

@@ -42,8 +42,14 @@
 	if ([mark length] != 1) {
         return NSNotFound;
     }
+    NSString* internalMark;
+    if( [mark isEqualToString:@"`"] ){
+        internalMark = @"'";
+    } else {
+        internalMark = mark;
+    }
 
-	NSValue* v = [[window getLocalMarks] valueForKey:mark];
+	NSValue* v = [[window getLocalMarks] valueForKey:internalMark];
 	if (v == nil) {
 		[window errorMessage:@"Mark not set" ringBell:YES];
 		return NSNotFound;
@@ -78,6 +84,11 @@
 		motionType = LINEWISE;
 	}
 	
+    // set the position before the jump
+    NSRange r = [[window sourceView] selectedRange];
+    NSValue *v =[NSValue valueWithRange:r];
+    [[window getLocalMarks] setValue:v forKey:@"'"];
+
     return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType inWindow:window];
 }
 
