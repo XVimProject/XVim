@@ -55,7 +55,7 @@
 			// To notify contents of editor is changed
 			[editor addObserver:status forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
             
-            // For % reister
+            // For % register
             [editor addObserver:[XVim instance] forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
 		}
     }
