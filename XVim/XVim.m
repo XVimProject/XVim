@@ -61,6 +61,7 @@ static XVim* s_instance = nil;
 @synthesize characterSearcher = _characterSearcher;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
+@synthesize document = _document;
 
 +(void)receiveNotification:(NSNotification*)notification{
     if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
@@ -236,6 +237,8 @@ static XVim* s_instance = nil;
         }else{
             [[Logger defaultLogger] setLogFile:nil];
         }
+    } else if( [keyPath isEqualToString:@"document"] ){
+        self.document = [[[object document] fileURL] path];
     }
 }
     
@@ -306,6 +309,10 @@ static XVim* s_instance = nil;
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
     if (yankRegister != nil){
+        
+        if( yankRegister.isReadOnly )
+            return;
+        
         [yankRegister clear];
         [yankRegister appendText:[[NSPasteboard generalPasteboard]stringForType:NSStringPboardType]];
     }else{
