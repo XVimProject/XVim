@@ -669,7 +669,7 @@
 																								 completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
 	{
 		XVimRegister *xregister = [[XVim instance] findRegister:rname];
-        if (xregister.isReadOnly == NO)
+        if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] )
 		{
 			[context setYankRegister:xregister];
 			[context appendArgument:rname];

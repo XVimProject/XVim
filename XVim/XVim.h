@@ -31,6 +31,7 @@
 @property (weak) XVimRegister *repeatRegister;
 @property (weak) XVimRegister *recordingRegister;
 @property (weak) XVimRegister *lastPlaybackRegister;
+@property (strong) NSString* document;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;
