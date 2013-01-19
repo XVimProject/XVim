@@ -313,9 +313,6 @@ static XVim* s_instance = nil;
         [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
     }
     else if (yankRegister != nil){
-        if( yankRegister.isReadOnly )
-            return;
-        
         [yankRegister clear];
         [yankRegister appendText:text];
     }

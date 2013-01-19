@@ -33,13 +33,13 @@
 {
 	@synchronized(self)
 	{
-		if( ![self isReadOnly] ){
+		if( ![_displayName isEqualToString:@"%"] ) {
 			if( text != _text ){
 				[_text release];
 				_text = [text retain];
 			}
 		} else {
-			ERROR_LOG( "assert! readonly register" );
+			ERROR_LOG( "assert!" );
 		}
 	}
 }
@@ -158,9 +158,6 @@
 
 -(void) appendText:(NSString*)text{
     if (self.isPlayingBack){
-        return;
-    }
-    if (self.isReadOnly){
         return;
     }
 
