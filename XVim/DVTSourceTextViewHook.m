@@ -234,7 +234,7 @@
 						change:(NSDictionary *)change 
 					   context:(void *)context
 {	
-	if (keyPath == @"hasVerticalScroller")
+	if ([keyPath isEqualToString:@"hasVerticalScroller"])
 	{
 		NSScrollView *scrollView = object;
 		if ([scrollView hasVerticalScroller])
@@ -242,7 +242,7 @@
 			[scrollView setHasVerticalScroller:NO];
 		}
 	}
-	if (keyPath == @"hasHorizontalScroller")
+	if ([keyPath isEqualToString:@"hasHorizontalScroller"])
 	{
 		NSScrollView *scrollView = object;
 		if ([scrollView hasHorizontalScroller])
