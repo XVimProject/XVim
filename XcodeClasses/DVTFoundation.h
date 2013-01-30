@@ -524,10 +524,12 @@ typedef union {
 @end
 
 @protocol DVTAssertionHandling <NSObject>
+#if 0 /* XCODE46_PATCH */
 - (void)handleWarningInFunction:(id)arg1 fileName:(id)arg2 lineNumber:(long long)arg3 messageFormat:(id)arg4 arguments:(struct __va_list_tag [1])arg5;
 - (void)handleWarningInMethod:(SEL)arg1 object:(id)arg2 fileName:(id)arg3 lineNumber:(long long)arg4 messageFormat:(id)arg5 arguments:(struct __va_list_tag [1])arg6;
 - (void)handleFailureInFunction:(id)arg1 fileName:(id)arg2 lineNumber:(long long)arg3 messageFormat:(id)arg4 arguments:(struct __va_list_tag [1])arg5;
 - (void)handleFailureInMethod:(SEL)arg1 object:(id)arg2 fileName:(id)arg3 lineNumber:(long long)arg4 messageFormat:(id)arg5 arguments:(struct __va_list_tag [1])arg6;
+#endif
 @end
 
 @protocol DVTCancellationBlockCompletion <NSObject>
@@ -747,10 +749,12 @@ typedef union {
 + (id)currentHandlerForThread:(id)arg1;
 + (void)setCurrentHandler:(id)arg1;
 + (id)currentHandler;
+#if 0 /* XCODE46_PATCH */
 - (void)handleWarningInFunction:(id)arg1 fileName:(id)arg2 lineNumber:(long long)arg3 messageFormat:(id)arg4 arguments:(struct __va_list_tag [1])arg5;
 - (void)handleWarningInMethod:(SEL)arg1 object:(id)arg2 fileName:(id)arg3 lineNumber:(long long)arg4 messageFormat:(id)arg5 arguments:(struct __va_list_tag [1])arg6;
 - (void)handleFailureInFunction:(id)arg1 fileName:(id)arg2 lineNumber:(long long)arg3 messageFormat:(id)arg4 arguments:(struct __va_list_tag [1])arg5;
 - (void)handleFailureInMethod:(SEL)arg1 object:(id)arg2 fileName:(id)arg3 lineNumber:(long long)arg4 messageFormat:(id)arg5 arguments:(struct __va_list_tag [1])arg6;
+#endif
 
 @end
 
@@ -865,7 +869,9 @@ typedef union {
 }
 
 - (void)printf:(const char *)arg1;
+#if 0 /* XCODE46_PATCH */
 - (void)printf:(const char *)arg1 arguments:(struct __va_list_tag [1])arg2;
+#endif
 - (void)writePropertyList:(id)arg1;
 - (void)writeUnsignedAsciiInteger:(unsigned long long)arg1;
 - (void)writeString:(id)arg1;
@@ -3447,7 +3453,9 @@ typedef union {
 - (id)copyWithZone:(struct _NSZone *)arg1;
 - (void)setMacroNamesAndValuesFromDictionary:(id)arg1;
 - (void)setMacroNamesAndValues:(id)arg1;
+#if 0 /* XCODE46_PATCH */
 - (void)setMacroNamesAndValues:(id)arg1 arguments:(struct __va_list_tag [1])arg2;
+#endif
 - (void)enumerateMacroNamesAndValuesUsingBlock:(id)arg1;
 - (void)setValue:(id)arg1 forMacroName:(id)arg2 conditionSet:(id)arg3;
 - (id)valueForMacroName:(id)arg1 conditionSet:(id)arg2;
@@ -6144,13 +6152,17 @@ typedef union {
 + (id)dvt_errorWithDomain:(id)arg1 errorCode:(long long)arg2 message:(id)arg3 recoverySuggestion:(id)arg4;
 + (id)dvt_errorWithPOSIXErrorCode:(int)arg1;
 + (id)dvt_errorWithPOSIXErrorCode:(int)arg1 messageFormat:(id)arg2;
+#if 0 /* XCODE46_PATCH */
 + (id)dvt_errorWithPOSIXErrorCode:(int)arg1 messageFormat:(id)arg2 arguments:(struct __va_list_tag [1])arg3;
+#endif
 - (id)dvt_errorByInjectingUserInfoObject:(id)arg1 forKey:(id)arg2;
 @end
 
 @interface NSFileHandle (DVTNSFileHandleAdditions)
+#if 0 /* XCODE46_PATCH */
 - (BOOL)dvt_writeFormat:(id)arg1;
 - (BOOL)dvt_writeFormat:(id)arg1 arguments:(struct __va_list_tag [1])arg2;
+#endif
 - (BOOL)dvt_writeString:(id)arg1;
 - (BOOL)dvt_writeString:(id)arg1 error:(id *)arg2;
 - (BOOL)dvt_writeData:(id)arg1 error:(id *)arg2;
