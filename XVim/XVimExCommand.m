@@ -873,7 +873,9 @@
     }
     else if( [setCommand isEqualToString:@"nowrap"] ){
         [srcView setWrapsLines:NO];
-    }                
+    } else if( [setCommand isEqualToString:@"list!"] ){
+      [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
+    }
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
