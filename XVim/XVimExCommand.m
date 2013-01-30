@@ -892,20 +892,6 @@
     [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
-/*
-- (void)debugMenu:(NSMenu*)menu :(int)depth{
-    NSMutableString* tabs = [[[NSMutableString alloc] init] autorelease];
-    for( int i = 0 ; i < depth; i++ ){
-        [tabs appendString:@"\t"];
-    }
-    for(NSMenuItem* item in [menu itemArray] ){
-        if( ![item isSeparatorItem]  ){
-            TRACE_LOG(@"%@Title:%@    Action:%@", tabs, [item title], NSStringFromSelector([item action]));
-        }
-        [self debugMenu:[item submenu] :depth+1];
-    }
-}
- */
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
 }

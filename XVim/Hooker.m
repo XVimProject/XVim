@@ -34,6 +34,40 @@
     class_replaceMethod(cls, sel, method_getImplementation(newMethod), method_getTypeEncoding(origMethod));
     // origImpはnilが帰る可能性がある。（サブクラスがそのメソッドを持たない場合） origImp_stretをselOriginalで呼び出せるようにする
     //NSTextViewの実装をkeyDown_:で呼び出せるようにしておく（keyDownをフックしたときに、転送できるように）
-    class_addMethod(cls, selOriginal, origImp_stret, method_getTypeEncoding(origMethod));
+    if( nil != selOriginal ){
+        class_addMethod(cls, selOriginal, origImp_stret, method_getTypeEncoding(origMethod));
+    }
+}
+
++ (SEL) createPreserveSelectorName:(NSString*)origSelector{
+    NSRange r = [origSelector rangeOfString:@":"];
+    if( NSNotFound == r.location ){
+        // Just appeend "_" at the end.
+        return NSSelectorFromString([origSelector stringByAppendingString:@"_"]);
+    }else{
+        // Insert "_" before first "_"
+        NSMutableString *newSel = [NSMutableString stringWithString:[origSelector substringToIndex:r.location]];
+        [newSel appendString:@"_"];
+        [newSel appendString:[origSelector substringFromIndex:r.location]];
+        return NSSelectorFromString(newSel);
+    }
+}
+
++ (void) hookClass:(NSString*)cls method:(NSString*)mtd byClass:(NSString*)cls2 method:(NSString*)mtd2{
+    Class c1 = NSClassFromString(cls);
+    Class c2 = NSClassFromString(cls2);
+    Method m2 = class_getInstanceMethod(c2, NSSelectorFromString(mtd2));
+    
+    SEL preservedSelector = [Hooker createPreserveSelectorName:mtd];
+    
+    [Hooker hookMethod:NSSelectorFromString(mtd) ofClass:c1 withMethod:m2 keepingOriginalWith:preservedSelector];
+}
+
++ (void) unhookClass:(NSString*)cls method:(NSString*)mtd{
+    Class c1 = NSClassFromString(cls);
+    SEL preservedSelector = [Hooker createPreserveSelectorName:mtd];
+    Method m2 = class_getInstanceMethod(c1, preservedSelector);
+    
+    [Hooker hookMethod:NSSelectorFromString(mtd) ofClass:c1 withMethod:m2 keepingOriginalWith:nil];
 }
 @end
