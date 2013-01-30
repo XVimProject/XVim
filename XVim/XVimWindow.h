@@ -59,6 +59,7 @@
 - (void)stopRecordingRegister:(XVimRegister*)xregister;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
+- (void)statusMessage:(NSString*)message;
 - (void)clearErrorMessage;
 
 + (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea*)editorArea;

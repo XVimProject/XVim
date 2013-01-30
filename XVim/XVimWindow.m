@@ -242,6 +242,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)endMouseEvent:(NSEvent*)event {
     TRACE_LOG(@"Event:%@", event.description);
+    [self clearErrorMessage];
 	_handlingMouseEvent = NO;
 	XVimEvaluator* next = [[self _currentEvaluator] handleMouseEvent:event];
     if( nil != next ){
@@ -329,16 +330,22 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
 	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:message];
+    [commandLine errorMessage:message Timer:YES RedColorSetting:YES];
     if (ringBell) {
         [[XVim instance] ringBell];
     }
     return;
 }
 
-- (void)clearErrorMessage {
+- (void)statusMessage:(NSString*)message {
+    XVimCommandLine *commandLine = self.commandLine;
+    [commandLine errorMessage:message Timer:NO RedColorSetting:NO];
+}
+
+- (void)clearErrorMessage
+{
 	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:@""];
+    [commandLine errorMessage:@"" Timer:NO RedColorSetting:YES];
 }
 
 - (void)setForcusBackToSourceView{
