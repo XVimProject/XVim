@@ -340,6 +340,7 @@ static XVim* s_instance = nil;
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
     if ([yankRegister.displayName isEqualToString:@"*"]){
+        [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
         [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
     }
     else if (yankRegister != nil){
@@ -364,6 +365,7 @@ static XVim* s_instance = nil;
         [reg appendText:text];
         
         if ( self.options.pasteboard ) {
+            [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
             [[NSPasteboard generalPasteboard] setString:text forType:NSStringPboardType];
         }
     }
