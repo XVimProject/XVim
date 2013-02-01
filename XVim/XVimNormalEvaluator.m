@@ -135,8 +135,9 @@
     return nil;
 }
 
-- (XVimEvaluator*)C_g:(XVimWindow*)window{
+- (XVimEvaluator*)C_g{
     // process
+    XVimWindow* window = self.window;
     NSRange range = [[window sourceView] selectedRange];
     NSUInteger numberOfLines = [[window sourceView] numberOfLines];
     long long lineNumber = [[window sourceView] currentLineNumber];
