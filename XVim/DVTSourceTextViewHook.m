@@ -28,9 +28,6 @@
 {
     Class c = NSClassFromString(@"DVTSourceTextView");
     
-    // Hook setSelectedRange:affinity:stillSelecting:
-    [Hooker hookMethod:@selector(setSelectedRange:affinity:stillSelecting:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(setSelectedRange:affinity:stillSelecting:) ) keepingOriginalWith:@selector(setSelectedRange_:affinity:stillSelecting:)];
-    
     // Hook becomeFirstResponder  
     [Hooker hookMethod:@selector(becomeFirstResponder) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(becomeFirstResponder) ) keepingOriginalWith:@selector(becomeFirstResponder_)];
     
@@ -65,21 +62,6 @@
     [Hooker hookMethod:@selector(observeValueForKeyPath:ofObject:change:context:) 
 			   ofClass:c withMethod:class_getInstanceMethod([self class], @selector(observeValueForKeyPath:ofObject:change:context:) ) 
    keepingOriginalWith:@selector(observeValueForKeyPath_:ofObject:change:context:)];
-}
-
-- (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
-    @try{
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        if (window){
-            charRange = [window restrictSelectedRange:charRange];
-        }
-        [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    return;
 }
 
 -  (void)keyDown:(NSEvent *)theEvent{
@@ -218,6 +200,8 @@
 }
 
 - (BOOL)becomeFirstResponder{
+    // Since XVimWindow manages multiple DVTSourceTextView
+    // we have to switch current text view when the first responder changed.
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     XVimWindow* window = [base xvimWindow];
     BOOL b = [base becomeFirstResponder_];
