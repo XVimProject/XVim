@@ -777,6 +777,8 @@
     _cursorMode = CURSOR_MODE_INSERT;
     [self changeSelectionMode:MODE_VISUAL_NONE];
     [self _moveCursor:[self tailOfLine:_insertionPoint] preserveColumn:NO];
+    [self _syncState];
+    
 }
 
 - (void)insertBeforeFirstNonBlank{
@@ -1389,7 +1391,6 @@
 
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
     // This method only update the internal state(like _insertionPoint)
-    // syncState applies the variables to underlying _view at the end of this method.
     
     if( pos > [_view string].length){
         DEBUG_LOG(@"Position specified exceeds the length of the text");

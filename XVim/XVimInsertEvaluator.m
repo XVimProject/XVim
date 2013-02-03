@@ -184,8 +184,6 @@
 	NSRange r = [[self sourceView] selectedRange];
 	NSValue *v =[NSValue valueWithRange:r];
 	[[self.window getLocalMarks] setValue:v forKey:@"."];
-    
-	[[self sourceView] adjustCursorPosition];
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {
