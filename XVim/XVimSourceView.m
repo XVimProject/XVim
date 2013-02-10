@@ -74,7 +74,7 @@
 - (void)_deleteLine:(NSUInteger)lineNum;
 - (void)_setSelectedRange:(NSRange)range;
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
-- (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion;
+- (XVimRange)_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion;
 - (void)_syncStateFromView; // update our instance variables with _view's properties
 - (void)_syncState; // update _view's properties with our variables
 - (NSArray*)_selectedRanges;
@@ -213,18 +213,18 @@
 
 - (void)move:(XVimMotion*)motion{
     METHOD_TRACE_LOG();
-    NSUInteger next = [self _getPositionFrom:_insertionPoint Motion:motion];
-    if( next == NSNotFound ){
+    XVimRange r = [self _getMotionRange:_insertionPoint Motion:motion];
+    if( r.end == NSNotFound ){
         return;
     }
     switch( motion.motion ){
         case MOTION_LINE_BACKWARD:
         case MOTION_LINE_FORWARD:
             // TODO: Preserve column option can be included in motion object
-            [self _moveCursor:next preserveColumn:YES];
+            [self _moveCursor:r.end preserveColumn:YES];
             break;
         default:
-            [self _moveCursor:next preserveColumn:NO];
+            [self _moveCursor:r.end preserveColumn:NO];
             break;
     }
     
@@ -279,8 +279,8 @@
     motion.info->deleteLastLine = NO;
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
-        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-        if( to == NSNotFound ){
+        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( to.end == NSNotFound ){
             return;
         }
         // We have to treat some special cases
@@ -292,12 +292,12 @@
         if( motion.motion == MOTION_WORD_FORWARD ){
             if (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound) {
                 // Special cases for word move over a line break.
-                to = motion.info->lastEndOfLine;
+                to.end = motion.info->lastEndOfLine;
                 motion.type = CHARACTERWISE_INCLUSIVE;
             }
         }
-        r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
-        if( motion.type == LINEWISE && [self isLastLine:to]){
+        r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
+        if( motion.type == LINEWISE && [self isLastLine:to.end]){
             if( r.location != 0 ){
                 motion.info->deleteLastLine = YES;
                 r.location--;
@@ -357,13 +357,13 @@
     NSUInteger insertionPointAfterYank = _insertionPoint;
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
-        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-        if( NSNotFound == to ){
+        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( NSNotFound == to.end ){
             return;
         }
-        r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
-        BOOL eof = [self isEOF:to];
-        BOOL blank = [self isBlankLine:to];
+        r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
+        BOOL eof = [self isEOF:to.end];
+        BOOL blank = [self isBlankLine:to.end];
         if( motion.type == LINEWISE && blank && eof){
             if( r.location != 0 ){
                 r.location--;
@@ -471,23 +471,23 @@
     if( _selectionMode == MODE_VISUAL_NONE ){
         if( motion.motion == MOTION_NONE ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,LEFT_RIGHT_NOWRAP,motion.count);
-            NSUInteger end = [self _getPositionFrom:_insertionPoint Motion:m];
-            if( end == NSNotFound){
+            XVimRange r = [self _getMotionRange:_insertionPoint Motion:m];
+            if( r.end == NSNotFound){
                 return;
             }
             if( m.info->reachedEndOfLine ){
-                [self toggleCaseForRange:[self getOperationRangeFrom:_insertionPoint To:end Type:CHARACTERWISE_INCLUSIVE]];
+                [self toggleCaseForRange:[self getOperationRangeFrom:_insertionPoint To:r.end Type:CHARACTERWISE_INCLUSIVE]];
             }else{
-                [self toggleCaseForRange:[self getOperationRangeFrom:_insertionPoint To:end Type:CHARACTERWISE_EXCLUSIVE]];
+                [self toggleCaseForRange:[self getOperationRangeFrom:_insertionPoint To:r.end Type:CHARACTERWISE_EXCLUSIVE]];
             }
-            [self _moveCursor:end preserveColumn:NO];
+            [self _moveCursor:r.end preserveColumn:NO];
         }else{
             NSRange r;
-            NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-            if( to == NSNotFound){
+            XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+            if( to.end == NSNotFound){
                 return;
             }
-            r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
+            r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
             [self toggleCaseForRange:r];
             [self _moveCursor:r.location preserveColumn:NO];
         }
@@ -512,11 +512,11 @@
     NSString* s = [self string];
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
-        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-        if( to == NSNotFound ){
+        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( to.end == NSNotFound ){
             return;
         }
-        r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
+        r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
         [self insertText:[[s substringWithRange:r] lowercaseString] replacementRange:r];
         [self _moveCursor:r.location preserveColumn:NO];
     }else{
@@ -539,11 +539,11 @@
     NSString* s = [self string];
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
-        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-        if( to == NSNotFound ){
+        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( to.end == NSNotFound ){
             return;
         }
-        r = [self getOperationRangeFrom:_insertionPoint To:to Type:motion.type];
+        r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];  // TODO: use to.begin instead of insertionPoint
         [self insertText:[[s substringWithRange:r] uppercaseString] replacementRange:r];
         [self _moveCursor:r.location preserveColumn:NO];
     }else{
@@ -631,11 +631,11 @@
     NSUInteger insertionAfterFilter = _insertionPoint;
     NSRange filterRange;
     if( _selectionMode == MODE_VISUAL_NONE ){
-        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-        if( to == NSNotFound ){
+        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( to.end == NSNotFound ){
             return;
         }
-        filterRange = [self getOperationRangeFrom:_insertionPoint To:to Type:LINEWISE];
+        filterRange = [self getOperationRangeFrom:_insertionPoint To:to.end Type:LINEWISE];
     }else{
         insertionAfterFilter = [[[self _selectedRanges] lastObject] rangeValue].location;
         NSUInteger start = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
@@ -658,11 +658,11 @@
     NSUInteger count = 1;
     NSUInteger insertionAfterShift = _insertionPoint;
     if( _selectionMode == MODE_VISUAL_NONE ){
-        NSUInteger to = [self _getPositionFrom:_insertionPoint Motion:motion];
-        if( to == NSNotFound ){
+        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( to.end == NSNotFound ){
             return;
         }
-        NSRange r = [self getOperationRangeFrom:_insertionPoint To:to Type:LINEWISE];
+        NSRange r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:LINEWISE];
         insertionAfterShift = r.location;
         [self _setSelectedRange:r];
     }else{
@@ -1239,30 +1239,17 @@
 - (void)setSelectedRange:(NSRange)range {
     [self _setSelectedRange:range];
     [self _syncStateFromView];
-    /*
-    LOG_STATE();
-    @try{
-        _insertionPoint = range.location;
-        _selectionBegin = NSNotFound;;
-        if( 0 != range.length ){
-            _selectionBegin = _insertionPoint;
-        }
-        [self _syncState];
-    }@catch (NSException *exception) {
-        ERROR_LOG(@"main:Caught %@:%@", [exception name], [exception reason]);
-    }
-    LOG_STATE();
-     */
 }
 
 //////////////////////
 // Internal Methods //
 //////////////////////
 /**
- * Returns end position of the specified motion.
+ * Returns start and end position of the specified motion.
  * Note that this may return NSNotFound
  **/
-- (NSUInteger)_getPositionFrom:(NSUInteger)current Motion:(XVimMotion*)motion{
+- (XVimRange)_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion{
+    XVimRange range = XVimMakeRange(current, current );
     NSUInteger nextPos = current;
     NSUInteger tmpPos = NSNotFound;
     switch (motion.motion) {
@@ -1270,99 +1257,100 @@
             // Do nothing
             break;
         case MOTION_FORWARD:
-            nextPos = [self next:current count:motion.count option:motion.option info:motion.info];
+            range.end = [self next:current count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_BACKWARD:
-            nextPos = [self prev:_insertionPoint count:motion.count option:motion.option ];
+            range.end = [self prev:_insertionPoint count:motion.count option:motion.option ];
             break;
         case MOTION_WORD_FORWARD:
-            nextPos = [self wordsForward:current count:motion.count option:motion.option info:motion.info];
+            range.end = [self wordsForward:current count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_WORD_BACKWARD:
-            nextPos = [self wordsBackward:current count:motion.count option:motion.option];
+            range.end = [self wordsBackward:current count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_FORWARD:
-            nextPos = [self endOfWordsForward:current count:motion.count option:motion.option];
+            range.end = [self endOfWordsForward:current count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_BACKWARD:
-            nextPos = [self endOfWordsBackward:current count:motion.count option:motion.option];
+            range.end = [self endOfWordsBackward:current count:motion.count option:motion.option];
             break;
         case MOTION_LINE_FORWARD:
-            nextPos = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];
+            range.end = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];
             break;
         case MOTION_LINE_BACKWARD:
-            nextPos = [self prevLine:current column:_preservedColumn count:motion.count option:motion.option];
+            range.end = [self prevLine:current column:_preservedColumn count:motion.count option:motion.option];
             break;
         case MOTION_BEGINNING_OF_LINE:
-            nextPos = [self firstOfLine:current];
-            if( nextPos == NSNotFound){
-                nextPos = current;
+            range.end = [self firstOfLine:current];
+            if( range.end == NSNotFound){
+                range.end = current;
             }
             break;
         case MOTION_END_OF_LINE:
             tmpPos = [self nextLine:current column:0 count:motion.count-1 option:MOTION_OPTION_NONE];
-            nextPos = [self endOfLine:tmpPos];
-            if( nextPos == NSNotFound){
-                nextPos = tmpPos;
+            range.end = [self endOfLine:tmpPos];
+            if( range.end == NSNotFound){
+                range.end = tmpPos;
             }
             break;
         case MOTION_SENTENCE_FORWARD:
-            nextPos = [self sentencesForward:current count:motion.count option:motion.option];
+            range.end = [self sentencesForward:current count:motion.count option:motion.option];
             break;
         case MOTION_SENTENCE_BACKWARD:
-            nextPos = [self sentencesBackward:current count:motion.count option:motion.option];
+            range.end = [self sentencesBackward:current count:motion.count option:motion.option];
             break;
         case MOTION_PARAGRAPH_FORWARD:
-            nextPos = [self paragraphsForward:current count:motion.count option:motion.option];
+            range.end = [self paragraphsForward:current count:motion.count option:motion.option];
             if( nextPos != NSNotFound){
                 nextPos = current;
             }
             break;
         case MOTION_PARAGRAPH_BACKWARD:
-            nextPos = [self paragraphsBackward:current count:motion.count option:motion.option];
+            range.end = [self paragraphsBackward:current count:motion.count option:motion.option];
             if( nextPos != NSNotFound){
                 nextPos = current;
             }
             break;
         case MOTION_NEXT_FIRST_NONBLANK:
-            nextPos = [self nextLine:current column:0 count:motion.count option:motion.option];
+            range.end = [self nextLine:current column:0 count:motion.count option:motion.option];
             tmpPos = [self nextNonBlankInALine:nextPos];
             if( NSNotFound != tmpPos ){
-                nextPos = tmpPos;
+                range.end = tmpPos;
             }
             break;
         case MOTION_PREV_FIRST_NONBLANK:
-            nextPos = [self prevLine:current column:0 count:motion.count option:motion.option];
+            range.end = [self prevLine:current column:0 count:motion.count option:motion.option];
             tmpPos = [self nextNonBlankInALine:nextPos];
             if( NSNotFound != tmpPos ){
-                nextPos = tmpPos;
+                range.end = tmpPos;
             }
             break;
         case MOTION_FIRST_NONBLANK:
-            nextPos = [self headOfLineWithoutSpaces:current];
+            range.end = [self headOfLineWithoutSpaces:current];
             if( NSNotFound == nextPos ){
-                nextPos = current;
+                range.end = current;
             }
             break;
         case MOTION_LINENUMBER:
-            nextPos = [self positionAtLineNumber:motion.line column:0];
+            range.end = [self positionAtLineNumber:motion.line column:0];
             if (nextPos == NSNotFound) {
-                nextPos = [self firstOfLine:[self endOfFile]];
+                range.end = [self firstOfLine:[self endOfFile]];
             }
             break;
         case MOTION_PERCENT:
-            nextPos = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
-            if (nextPos == NSNotFound) {
-                nextPos = [self firstOfLine:[self endOfFile]];
+            range.end = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
+            if (range.end == NSNotFound) {
+                range.end = [self firstOfLine:[self endOfFile]];
             }
             break;
         case MOTION_NEXT_MATCHED_ITEM:
-            nextPos = [self positionOfMatchedPair:current];
+            range.end = [self positionOfMatchedPair:current];
             break;
         case MOTION_LASTLINE:
-            nextPos = [self firstOfLine:[self endOfFile]];
+            range.end = [self firstOfLine:[self endOfFile]];
             break;
         case TEXTOBJECT_WORD:
+            
         case TEXTOBJECT_BIGWORD:
         case TEXTOBJECT_BRACES:
         case TEXTOBJECT_PARAGRAPH:
@@ -1376,17 +1364,17 @@
         case TEXTOBJECT_SQUAREBRACKETS:
             break;
         case MOTION_LINE_COLUMN:
-            nextPos = [self positionAtLineNumber:motion.line column:motion.column];
-            if( NSNotFound == nextPos ){
-                nextPos = current;
+            range.end = [self positionAtLineNumber:motion.line column:motion.column];
+            if( NSNotFound == range.end ){
+                range.end = current;
             }
             break;
         case MOTION_POSITION:
-            nextPos = motion.position;
+            range.end = motion.position;
             break;
     }
-    TRACE_LOG(@"nextPos: %u", nextPos);
-    return nextPos;
+    TRACE_LOG(@"range begin:%u  end:%u", range.begin , range.end);
+    return range;
 }
 
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{

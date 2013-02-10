@@ -26,6 +26,17 @@
     (You can define a method which takes "index" to be used internally which sould be declared in .m file)
  **/
 
+typedef struct _XVimRange {
+    NSUInteger begin;
+    NSUInteger end;
+} XVimRange;
+
+NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
+    XVimRange r;
+    r.begin = begin;
+    r.end = end;
+    return r;
+}
 
 @interface XVimSourceView : NSObject <XVimTextViewProtocol>
 @property(readonly) NSString* string;

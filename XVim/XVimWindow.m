@@ -82,9 +82,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)willSetEvaluator:(XVimEvaluator*)evaluator {
-	//if (evaluator != _currentEvaluator && _currentEvaluator){
-//		[_currentEvaluator willEndHandlerInWindow:self];
-	//}
 }
 
 - (NSMutableDictionary *)getLocalMarks{
