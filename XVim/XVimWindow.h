@@ -19,7 +19,7 @@
 
 @property(retain) XVimSourceView* sourceView;
 @property(readonly) XVimEvaluator *currentEvaluator;
-@property(assign) XVimCommandLine *commandLine;
+@property(retain) XVimCommandLine *commandLine;
 
 
 - (NSUInteger)insertionPoint;

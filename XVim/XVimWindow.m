@@ -37,8 +37,9 @@
 - (id)init 
 {
     if (self = [super init]) {
-		_staticString = @"";
-		[self setEvaluator:[[XVimNormalEvaluator alloc] init]];
+		_staticString = [@"" retain];
+        _currentEvaluator = nil;
+		[self setEvaluator:[[[XVimNormalEvaluator alloc] init] autorelease]];
         _localMarks = [[NSMutableDictionary alloc] init];
 		_keymapContext = [[XVimKeymapContext alloc] init];
 	}
@@ -52,7 +53,7 @@
     [_staticString release];
     [_currentEvaluator release];
     [_sourceView release];
-    _commandLine = nil;
+    [_commandLine release];
     [super dealloc];
 }
 
@@ -66,30 +67,38 @@
 
 - (void)setEvaluator:(XVimEvaluator*)evaluator
 {
-	if (!evaluator) {
-		evaluator = [[XVimNormalEvaluator alloc] init];
-	}
+    @synchronized (self) {
+        if (!evaluator) {
+            evaluator = [[[XVimNormalEvaluator alloc] init] autorelease];
+        }
 
-	if (evaluator != _currentEvaluator)
-	{
-		if (_currentEvaluator) {
-			[_currentEvaluator didEndHandlerInWindow:self];
-		}
+        if (evaluator != _currentEvaluator)
+        {
+            if (_currentEvaluator) {
+                [_currentEvaluator didEndHandlerInWindow:self];
+            }
 
-		[_keymapContext clear];
+            [_keymapContext clear];
 
-		[self.commandLine setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
-		[self.commandLine setArgumentString:[evaluator argumentDisplayString]];
-		[[self sourceView] updateInsertionPointStateAndRestartTimer];
+            [self.commandLine setModeString:[[evaluator modeString] stringByAppendingString:_staticString]];
+            [self.commandLine setArgumentString:[evaluator argumentDisplayString]];
+            [[self sourceView] updateInsertionPointStateAndRestartTimer];
 
-        [_currentEvaluator release];
-		_currentEvaluator = evaluator;
-		[evaluator becameHandlerInWindow:self];
-	}
+            [_currentEvaluator release];
+            _currentEvaluator = [evaluator retain];
+            [evaluator becameHandlerInWindow:self];
+        }
+    }
 }
 
-- (XVimEvaluator*)currentEvaluator{
-    return _currentEvaluator;
+
+- (XVimEvaluator *)currentEvaluator
+{
+    XVimEvaluator *evaluator = nil;
+    @synchronized (self) {
+        evaluator = [_currentEvaluator retain];
+    }
+    return [evaluator autorelease];
 }
 
 - (NSMutableDictionary *)getLocalMarks{
@@ -102,9 +111,9 @@
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-	NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
+	NSMutableArray *keyStrokeOptions = [[[NSMutableArray alloc] init] autorelease];
 	XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
-	XVimKeymap* keymap = [_currentEvaluator selectKeymapWithProvider:[XVim instance]];
+	XVimKeymap* keymap = [[self currentEvaluator] selectKeymapWithProvider:[XVim instance]];
 	
 	NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions 
 												 withPrimary:primaryKeyStroke
@@ -127,7 +136,7 @@
 	NSString* argString = [_keymapContext toString];
 	if ([argString length] == 0)
 	{
-		argString = [_currentEvaluator argumentDisplayString];
+		argString = [[self currentEvaluator] argumentDisplayString];
 	}
 
 	[self.commandLine setArgumentString:argString];
@@ -145,9 +154,9 @@
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self clearErrorMessage];
     XVim *xvim = [XVim instance];
-	XVimEvaluator* currentEvaluator = _currentEvaluator;
+	XVimEvaluator* currentEvaluator = [self currentEvaluator];
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke inWindow:self];
-
+    
 	[self willSetEvaluator:nextEvaluator];
 
 	[self recordEvent:keyStroke intoRegister:xvim.recordingRegister fromEvaluator:currentEvaluator];
@@ -163,7 +172,8 @@
 
 - (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 {
-	XVimEvaluator *evaluator = [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] mode:mode withRange:range];
+    XVimEvaluatorContext *context = [[[XVimEvaluatorContext alloc] init] autorelease];
+	XVimEvaluator *evaluator = [[[XVimVisualEvaluator alloc] initWithContext:context mode:mode withRange:range] autorelease];
 	[self willSetEvaluator:evaluator];
 	[self setEvaluator:evaluator];
 }
@@ -226,7 +236,7 @@
     [self clearErrorMessage];
 
 	_handlingMouseEvent = NO;
-	XVimEvaluator* next = [_currentEvaluator handleMouseEvent:event inWindow:self];
+	XVimEvaluator* next = [[self currentEvaluator] handleMouseEvent:event inWindow:self];
 	[self willSetEvaluator:next];
 	[self setEvaluator:next];
 }
@@ -235,24 +245,24 @@
 {
 	if (_handlingMouseEvent)
 	{
-		range = [_currentEvaluator restrictSelectedRange:range inWindow:self];
+		range = [[self currentEvaluator] restrictSelectedRange:range inWindow:self];
 	}
 	return range;
 }
 
 - (void)drawRect:(NSRect)rect
 {
-	[_currentEvaluator drawRect:rect inWindow:self];
+    [[self currentEvaluator] drawRect:rect inWindow:self];
 }
 
 - (BOOL)shouldDrawInsertionPoint
 {
-	return [_currentEvaluator shouldDrawInsertionPointInWindow:self];
+	return [[self currentEvaluator] shouldDrawInsertionPointInWindow:self];
 }
 
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
 {
-	[_currentEvaluator drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
+	[[self currentEvaluator] drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
 }
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {

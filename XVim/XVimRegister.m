@@ -46,19 +46,28 @@
 
 -(NSMutableString*)text
 {
+    NSMutableString *text = nil;
 	@synchronized(self)
 	{
 		if( [_displayName isEqualToString:@"%"] ){
             // current file name register
-			return [NSMutableString stringWithString:[XVim instance].document];
+            NSString *document = [[XVim instance] document];
+            text = [NSMutableString stringWithString:document];
 		} else {
-			return [[_text retain] autorelease];
+            text = _text;
 		}
 	}
+    return text ? [[text retain] autorelease] : nil;
 }
 
 -(NSString*) description{
-    return [[NSString alloc] initWithFormat:@"\"%@: %@", self.displayName, self.text];
+    return [NSString stringWithFormat:@"\"%@: %@", self.displayName, self.text];
+}
+
++ (XVimRegister *)registerWithDisplayName:(NSString *)displayName
+{
+    XVimRegister *newRegister = [[XVimRegister alloc] initWithDisplayName:displayName];
+    return [newRegister autorelease];
 }
 
 -(id) initWithDisplayName:(NSString*)displayName
@@ -66,13 +75,20 @@
     self = [super init];
     if (self) {
         _keyEventsAndInsertedText = [[NSMutableArray alloc] init];
-        _text = [NSMutableString stringWithString:@""];
-        _displayName = [NSString stringWithString:displayName];
+        _text = [[@"" mutableCopy] retain];
+        _displayName = [displayName retain];
         _nonNumericKeyCount = 0;
         _isPlayingBack = NO;
 		_selectedRange.location = NSNotFound;
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [_text release];
+    [_displayName release];
+    [super dealloc];
 }
 
 -(BOOL) isAlpha{

@@ -8,12 +8,19 @@
 
 #import <Foundation/Foundation.h>
 
-@class XVimKeyStroke;
+@class XVimKeyStroke, XVimKeymapNode;
 
-@interface XVimKeymapContext : NSObject
+@interface XVimKeymapContext : NSObject {
+    NSMutableArray *_absorbedKeys;
+	XVimKeymapNode *_node;
+}
+
+@property (nonatomic, retain) NSMutableArray *absorbedKeys;
+@property (nonatomic, retain) XVimKeymapNode *node;
+
 - (void)clear;
 - (NSString*)toString;
-- (NSMutableArray *)absorbedKeys;
+
 @end
 
 @interface XVimKeymap : NSObject

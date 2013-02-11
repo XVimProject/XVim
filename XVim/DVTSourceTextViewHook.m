@@ -189,7 +189,7 @@
     BOOL b = [base becomeFirstResponder_];
     if (b) {
         if (!window.sourceView)
-            window.sourceView = [[XVimSourceView alloc] initWithView:base];
+            window.sourceView = [[[XVimSourceView alloc] initWithView:base] autorelease];
         window.commandLine = [base commandLine];
     }
     return b;

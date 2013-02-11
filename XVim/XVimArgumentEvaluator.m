@@ -15,9 +15,15 @@
 {
 	if (self = [super initWithContext:context])
 	{
-		_parent = parent;
+		_parent = [parent retain];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_parent release];
+    [super dealloc];
 }
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window

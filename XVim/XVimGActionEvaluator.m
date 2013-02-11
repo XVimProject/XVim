@@ -50,28 +50,31 @@
 		[view moveForward];
     } 
 	
-	return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+	XVimInsertEvaluator *evaluator = [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]]];
+    return [evaluator autorelease];
 }
 
 - (XVimEvaluator*)u:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimLowercaseAction alloc] init];
-	return [[XVimLowercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"u"]
-											operatorAction:operatorAction 
-												withParent:_parent];
+	XVimLowercaseEvaluator *evaluator = [[[XVimLowercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"u"]
+                                                                         operatorAction:operatorAction
+                                                                             withParent:_parent] autorelease];
+    return [evaluator autorelease];
 }
 
 - (XVimEvaluator*)U:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimUppercaseAction alloc] init];
-	return [[XVimUppercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"U"]
-											operatorAction:operatorAction 
-												withParent:_parent];
+	XVimUppercaseEvaluator *evaluator = [[[XVimUppercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"U"]
+                                                                         operatorAction:operatorAction
+                                                                             withParent:_parent] autorelease];
+    return [evaluator autorelease];
 }
 
 - (XVimEvaluator*)TILDE:(XVimWindow*)window {
 	XVimOperatorAction* operatorAction = [[XVimTildeAction alloc] init];
-	return [[XVimTildeEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"~"]
+	return [[[XVimTildeEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"~"]
 										operatorAction:operatorAction 
-											withParent:_parent];
+											withParent:_parent] autorelease];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

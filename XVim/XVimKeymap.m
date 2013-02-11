@@ -11,22 +11,25 @@
 
 @class XVimKeymapNode;
 
-@interface XVimKeymapContext() {
-@public
-	NSMutableArray *_absorbedKeys;
-	XVimKeymapNode *_node;
-}
-@end
-
 @implementation XVimKeymapContext
+@synthesize absorbedKeys = _absorbedKeys;
+@synthesize node = _node;
 
 - (id)init
 {
 	if (self = [super init])
 	{
 		_absorbedKeys = [[NSMutableArray alloc] init];
+        _node = nil;
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_absorbedKeys release];
+    [_node release];
+    [super dealloc];
 }
 
 - (void)clear
@@ -45,27 +48,34 @@
 	return ret;
 }
 
-- (NSMutableArray *)absorbedKeys {
-    return _absorbedKeys;
-}
-
 @end
 
 @interface XVimKeymapNode : NSObject {
-@public
 	NSMutableDictionary *_dict;
 	NSArray *_target;
 }
+
+@property (nonatomic, retain) NSMutableDictionary *dict;
+@property (nonatomic, retain) NSArray *target;
 @end
 
 @implementation XVimKeymapNode
+@synthesize dict = _dict;
+@synthesize target = _target;
 - (id)init
 {
 	if (self = [super init])
 	{
 		_dict = [[NSMutableDictionary alloc] init];
+        _target = nil;
 	}
 	return self;
+}
+- (void)dealloc
+{
+    [_dict release];
+    [_target release];
+    [super dealloc];
 }
 @end
 
@@ -84,20 +94,26 @@
 	return self;
 }
 
+- (void)dealloc
+{
+    [_node release];
+    [super dealloc];
+}
+
 - (void)mapKeyStroke:(NSArray*)keyStrokes to:(NSArray*)targetKeyStrokes
 {
 	XVimKeymapNode *node = _node;
 	for (XVimKeyStroke *keyStroke in keyStrokes)
 	{
-		XVimKeymapNode *nextNode = [node->_dict objectForKey:keyStroke];
+		XVimKeymapNode *nextNode = [node.dict objectForKey:keyStroke];
 		if (!nextNode)
 		{
-			nextNode = [[XVimKeymapNode alloc] init];
-			[node->_dict setObject:nextNode forKey:keyStroke];
+			nextNode = [[[XVimKeymapNode alloc] init] autorelease];
+			[node.dict setObject:nextNode forKey:keyStroke];
 		}
 		node = nextNode;
 	}
-	node->_target = targetKeyStrokes;
+	node.target = targetKeyStrokes;
 }
 
 - (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options 
@@ -105,29 +121,29 @@
 						   withContext:(XVimKeymapContext*)context
 {
 	NSArray *ret = nil;
-	XVimKeymapNode *node = context->_node;
+	XVimKeymapNode *node = context.node;
 	if (!node) { node = _node; }
 	
 	XVimKeymapNode *foundNode = nil;
 	
 	for (XVimKeyStroke* option in options)
 	{
-		foundNode = [node->_dict objectForKey:option];
+		foundNode = [node.dict objectForKey:option];
 		if (foundNode) { break; }
 	}
 	
 	if (foundNode) {
 		// Leaf node?
-		if ([foundNode->_dict count] == 0) {
-			ret = foundNode->_target;
+		if ([foundNode.dict count] == 0) {
+			ret = foundNode.target;
 			[context clear];
 		} else {
-			[context->_absorbedKeys addObject:primaryKeyStroke];
-			context->_node = foundNode;
+			[context.absorbedKeys addObject:primaryKeyStroke];
+			context.node = foundNode;
 		}
 		
 	} else {
-		NSMutableArray *objects = [NSMutableArray arrayWithArray:context->_absorbedKeys];
+		NSMutableArray *objects = [NSMutableArray arrayWithArray:context.absorbedKeys];
 		[objects addObject:primaryKeyStroke];
 		[context clear];
 		

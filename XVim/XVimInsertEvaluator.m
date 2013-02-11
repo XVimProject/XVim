@@ -46,16 +46,16 @@
 {
     self = [super initWithContext:context];
     if (self) {
-        _lastInsertedText = @"";
+        _lastInsertedText = [@"" retain];
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
         _insertedEventsAbort = NO;
-        _cancelKeys = [NSArray arrayWithObjects:
+        _cancelKeys = [[NSArray alloc] initWithObjects:
                        [NSValue valueWithPointer:@selector(ESC:)],
                        [NSValue valueWithPointer:@selector(C_LSQUAREBRACKET:)],
                        [NSValue valueWithPointer:@selector(C_c:)],
                        nil];
-        _movementKeys = [NSArray arrayWithObjects:
+        _movementKeys = [[NSArray alloc] initWithObjects:
                          [NSValue valueWithPointer:@selector(Up:)],
                          [NSValue valueWithPointer:@selector(Down:)],
                          [NSValue valueWithPointer:@selector(Left:)],
@@ -63,6 +63,14 @@
                          nil];
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [_lastInsertedText release];
+    [_cancelKeys release];
+    [_movementKeys release];
+    [super dealloc];
 }
 
 - (NSString*)modeString
@@ -78,9 +86,9 @@
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
 	NSRange range = [[window sourceView] selectedRange];
-	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+	return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
 																			  mode:MODE_CHARACTER
-                                                                         withRange:range];
+                                                                         withRange:range] autorelease];
 }
 
 // Move to insert mode, have it call insertion point on sourceView
@@ -306,6 +314,7 @@
 	XVimDeleteAction *action = [[XVimDeleteAction alloc] initWithYankRegister: nil
 														 insertModeAtCompletion:FALSE];
     [action motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    [action release];
     
     return self;
 }

@@ -13,6 +13,6 @@
 @interface XVimTextObjectEvaluator : XVimEvaluator
 - (id)initWithContext:(XVimEvaluatorContext*)context
 	   operatorAction:(XVimOperatorAction*)operatorAction 
-					withParent:(XVimEvaluator*)parent
-				   inclusive:(BOOL)inclusive;
+           withParent:(XVimEvaluator*)parent
+            inclusive:(BOOL)inclusive;
 @end
