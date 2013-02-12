@@ -17,6 +17,12 @@
 
 #define STATUS_LINE_HEIGHT 18 
 
+@interface XVimStatusLine ()
+
+- (void)_documentChangedNotification:(NSNotification *)notification;
+
+@end
+
 @implementation XVimStatusLine{
     DVTChooserView* _background;
     NSInsetTextView* _status;
@@ -33,6 +39,8 @@
         _status.backgroundColor = [NSColor clearColor];
         [_status setEditable:NO];
         
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:) name:XVimDocumentChangedNotification object:nil];
+        
         [self addSubview:_background];
         [self addSubview:_status];
     }
@@ -42,6 +50,8 @@
 
 - (void)dealloc
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:XVimDocumentChangedNotification object:nil];
+    
     [_background release];
     [_status release];
     [super dealloc];
@@ -88,12 +98,11 @@
      
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if( [keyPath isEqualToString:@"document"] ){
-        NSString *documentPath = [[[object document] fileURL] path];
-        if (documentPath != nil) {
-            [_status setString:documentPath];
-        }
+- (void)_documentChangedNotification:(NSNotification *)notification
+{
+    NSString *documentPath = [[notification userInfo] objectForKey:XVimDocumentPathKey];
+    if (documentPath != nil) {
+        [_status setString:documentPath];
     }
 }
 

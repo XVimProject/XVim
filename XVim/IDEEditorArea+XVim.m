@@ -43,6 +43,14 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     
 }
 
+- (void)teardownCommandLine
+{
+    NSView* layoutView = [self textViewArea];
+    DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
+    XVimCommandLine *cmd = [layoutView viewWithTag:XVimCommandLineTag];
+    [border removeObserver:cmd forKeyPath:@"hidden"];
+}
+
 - (XVimCommandLine*)commandLine{
     return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
 }

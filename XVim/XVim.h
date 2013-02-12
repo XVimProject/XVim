@@ -19,6 +19,9 @@
 @class XVimCommandLine;
 @class XVimCommandField;
 
+extern NSString * const XVimDocumentChangedNotification;
+extern NSString * const XVimDocumentPathKey;
+
 @interface XVim : NSObject<XVimKeymapProvider>
 
 + (XVim*)instance;

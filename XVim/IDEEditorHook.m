@@ -51,14 +51,12 @@
 			[[NSNotificationCenter defaultCenter] addObserver:status selector:@selector(didContainerFrameChanged:) name:NSViewFrameDidChangeNotification object:container];
 			[status layoutStatus:container];
 			[container performSelector:@selector(invalidateLayout)];
-			
-			// To notify contents of editor is changed
-			[editor addObserver:status forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
             
-            // For % register
+            // For % register and to notify contents of editor is changed
             [editor addObserver:[XVim instance] forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
 		}
     }
     //---- TO HERE ----
 }
+
 @end

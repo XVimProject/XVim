@@ -40,6 +40,9 @@
 #import "XVimCommandLine.h"
 #import "DVTSourceTextViewHook.h"
 
+NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
+NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
+
 @interface XVim() {
 	XVimHistoryHandler *_exCommandHistory;
 	XVimHistoryHandler *_searchHistory;
@@ -241,7 +244,6 @@
 			_keymaps[i] = [[XVimKeymap alloc] init];
 		}
 		[XVimKeyStroke initKeymaps];
-        
 	}
 	return self;
 }
@@ -268,7 +270,13 @@
             [[Logger defaultLogger] setLogFile:nil];
         }
     } else if( [keyPath isEqualToString:@"document"] ){
-        self.document = [[[object document] fileURL] path];
+        NSString *documentPath = [[[object document] fileURL] path];
+        self.document = documentPath;
+        
+        if (documentPath != nil) {
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:documentPath forKey:XVimDocumentPathKey];
+            [[NSNotificationCenter defaultCenter] postNotificationName:XVimDocumentChangedNotification object:nil userInfo:userInfo];
+        }
     }
 }
     

@@ -89,6 +89,11 @@
     [super dealloc];
 }
 
+- (NSInteger)tag
+{
+    return XVimCommandLineTag;
+}
+
 - (void)viewDidMoveToSuperview
 {
     [self layoutCmdline:[self superview]];

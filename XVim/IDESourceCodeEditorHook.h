@@ -14,4 +14,5 @@
 
 @interface IDESourceCodeEditor(Hook)
 - (id)initWithNibName_:nibName bundle:nibBundle document:nibDocument;
+- (void)primitiveInvalidate_;
 @end
