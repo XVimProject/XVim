@@ -50,7 +50,7 @@
 
 - (void)dealloc
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:XVimDocumentChangedNotification object:nil];
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [_background release];
     [_status release];
