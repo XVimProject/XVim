@@ -130,14 +130,17 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 {
     static XVim *__instance = nil;
     static dispatch_once_t __once;
-    dispatch_once(&__once, ^{
-        // Allocate singleton instance
-        __instance = [[XVim alloc] init];
-        [__instance.options addObserver:__instance forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
-        [__instance parseRcFile];
-        
-        TRACE_LOG(@"XVim loaded");
-    });
+    
+    if( nil == __instance ){
+        dispatch_once(&__once, ^{
+            // Allocate singleton instance
+            __instance = [[XVim alloc] init];
+            [__instance.options addObserver:__instance forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
+            [__instance parseRcFile];
+            
+            TRACE_LOG(@"XVim loaded");
+        });
+    }
 	return __instance;
 }
 
