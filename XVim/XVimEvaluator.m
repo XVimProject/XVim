@@ -34,9 +34,15 @@
 {
 	if (self = [super init])
 	{
-		_context = context;
+		_context = [context retain];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_context release];
+    [super dealloc];
 }
 
 - (void)becameHandlerInWindow:(XVimWindow*)window 
@@ -93,9 +99,9 @@
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event inWindow:(XVimWindow*)window
 {
 	NSRange range = [[window sourceView] selectedRange];
-	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-																											mode:MODE_CHARACTER 
-																									withRange:range];
+	return range.length == 0 ? [[XVimNormalEvaluator alloc] init] : [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease]
+                                                                                                             mode:MODE_CHARACTER
+                                                                                                        withRange:range] autorelease];
 }
 
 - (NSRange)restrictSelectedRange:(NSRange)range inWindow:(XVimWindow*)window
@@ -180,7 +186,7 @@
 // Returns the context
 - (XVimEvaluatorContext*)context
 {
-	return _context;
+	return [[_context retain] autorelease];
 }
 
 // Equivalent to [[self context] copy]
@@ -192,13 +198,19 @@
 // Clears the context and returns self, useful for escaping from operators
 - (XVimEvaluator*)withNewContext
 {
+    if (_context != nil) {
+        [_context release];
+    }
 	_context = [[XVimEvaluatorContext alloc] init];
 	return self;
 }
 
 - (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context
 {
-	_context = context;
+    if (_context != nil) {
+        [_context release];
+    }
+	_context = [context retain];
 	return self;
 }
 

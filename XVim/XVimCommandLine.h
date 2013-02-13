@@ -9,6 +9,8 @@
 #import <AppKit/AppKit.h>
 #import "XVimCommandField.h"
 
+static const NSInteger XVimCommandLineTag = 1337;
+
 @interface XVimCommandLine : NSView
 
 - (id)init;

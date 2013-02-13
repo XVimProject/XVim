@@ -43,14 +43,24 @@
 {
 	if (self = [super initWithContext:context])
 	{
-		_parent = parent;
-		_firstLetter = firstLetter;
-		_history = history;
+		_parent = [parent retain];
+		_firstLetter = [firstLetter retain];
+		_history = [history retain];
 		_onComplete = [completeHandler copy];
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_parent release];
+    [_firstLetter release];
+    [_history release];
+    [_onComplete release];
+    [_onKeyPress release];
+    [super dealloc];
 }
 
 - (void)takeFocusFromWindow:(XVimWindow*)window

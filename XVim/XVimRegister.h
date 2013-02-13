@@ -20,6 +20,8 @@ typedef enum {
 
 @interface XVimRegister : NSObject
 
++ (XVimRegister *)registerWithDisplayName:(NSString *)displayName;
+
 -(id) initWithDisplayName:(NSString*)displayName;
 
 -(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count;

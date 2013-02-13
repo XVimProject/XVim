@@ -425,6 +425,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 																	keyCode:unmodifiedKeyCode
 															  modifierFlags:modifierFlags];
 			[options addObject:keyStroke];
+            [keyStroke release];
 		}
 		
 		// Eg. "S-A"
@@ -433,6 +434,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 																	keyCode:modifiedKeyCode
 															  modifierFlags:modifierFlags];
 			[options addObject:keyStroke];
+            [keyStroke release];
 		}
 		
 		// Eg. "A"
@@ -454,7 +456,7 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 		primaryKeyStroke = keyStroke;
 	}
 	
-	return primaryKeyStroke;
+	return [primaryKeyStroke autorelease];
 }
 
 - (id)initWithKeyCode:(unichar)keyCode
@@ -656,11 +658,11 @@ static SEL getSelector(unichar charcode, NSUInteger modifierFlags)
 	number = number ? number : [s_stringToKeyCode objectForKey:keyString];
 	number = number ? number : [s_stringToKeyCode objectForKey:[keyString uppercaseString]];
 	
-	XVimKeyStroke *keyStroke = NULL;
+	XVimKeyStroke *keyStroke = nil;
 	if (number)
 	{
-		keyStroke = [[XVimKeyStroke alloc] initWithKeyCode:[number intValue]
-											 modifierFlags:modifierFlags];
+		keyStroke = [[[XVimKeyStroke alloc] initWithKeyCode:[number intValue]
+											 modifierFlags:modifierFlags] autorelease];
 	}
 	
 	*index = endi;

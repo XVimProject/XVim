@@ -28,7 +28,7 @@
 {
 	if (self = [super initWithContext:context
 					   operatorAction:operatorAction 
-								  withParent:parent
+                           withParent:parent
 				])
 	{
 		self->_insertModeAtCompletion = insertModeAtCompletion;
@@ -215,7 +215,10 @@
 		else {
 			[view setSelectedRangeWithBoundsCheck:from To:from];
 		}
-        return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]];
+        
+        XVimEvaluatorContext *context = [[[XVimEvaluatorContext alloc] init] autorelease];
+        XVimInsertEvaluator *evaluator = [[XVimInsertEvaluator alloc] initWithContext:context];
+        return [evaluator autorelease];
     }
     return nil;
 }

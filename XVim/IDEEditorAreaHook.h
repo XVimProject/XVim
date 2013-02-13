@@ -16,4 +16,5 @@
 
 @interface IDEEditorArea(Hook)
 - (void)viewDidInstall_;
+- (void)primitiveInvalidate_;
 @end

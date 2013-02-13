@@ -204,7 +204,7 @@
 																			  parent:self];
     eval.forward = YES;
     eval.previous = NO;
-    return eval;
+    return [eval autorelease];
 }
 
 - (XVimEvaluator*)F:(XVimWindow*)window{
@@ -212,7 +212,7 @@
 																			  parent:self];
     eval.forward = NO;
     eval.previous = NO;
-    return eval;
+    return [eval autorelease];
 }
 
 /*
@@ -224,8 +224,8 @@
 */
 
 - (XVimEvaluator*)g:(XVimWindow*)window{
-    return [[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"]
-																					 parent:self];
+    return [[[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"]
+																					 parent:self] autorelease];
 }
 
 - (XVimEvaluator*)G:(XVimWindow*)window{
@@ -316,7 +316,7 @@
 																												 parent:self];
     eval.forward = YES;
     eval.previous = YES;
-    return eval;
+    return [eval autorelease];
 }
 
 - (XVimEvaluator*)T:(XVimWindow*)window{
@@ -324,7 +324,7 @@
 																												 parent:self];
     eval.forward = NO;
     eval.previous = YES;
-    return eval;
+    return [eval autorelease];
 }
 
 - (XVimEvaluator*)v:(XVimWindow*)window{
@@ -347,8 +347,8 @@
 }
 
 - (XVimEvaluator*)z:(XVimWindow*)window{
-    return [[XVimZEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"z"]
-																			   parent:self];
+    return [[[XVimZEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"z"]
+																			   parent:self] autorelease];
 }
 
 - (XVimEvaluator*)NUM0:(XVimWindow*)window{
@@ -393,15 +393,15 @@
 //  the range of the document
 
 - (XVimEvaluator*)SQUOTE:(XVimWindow*)window{
-    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"]
+    return [[[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"]
 													 parent:self
-											   markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
+											   markOperator:MARKOPERATOR_MOVETOSTARTOFLINE] autorelease];
 }
 
 - (XVimEvaluator*)BACKQUOTE:(XVimWindow*)window{
-    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] 
+    return [[[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"]
 													 parent:self
-											   markOperator:MARKOPERATOR_MOVETO];
+											   markOperator:MARKOPERATOR_MOVETO] autorelease];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)

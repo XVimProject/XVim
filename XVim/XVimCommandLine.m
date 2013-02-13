@@ -85,7 +85,13 @@
     [_static release];
     [_error release];
     [_argument release];
+    [_errorTimer release];
     [super dealloc];
+}
+
+- (NSInteger)tag
+{
+    return XVimCommandLineTag;
 }
 
 - (void)viewDidMoveToSuperview
@@ -126,7 +132,11 @@
 		[_error setHidden:NO];
 		[_errorTimer invalidate];
         if( aTimer ){
-            _errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
+            if (_errorTimer != nil) {
+                [_errorTimer release];
+            }
+            
+            _errorTimer = [[NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO] retain];
             [[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
         }
 	}else{

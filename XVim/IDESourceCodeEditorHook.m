@@ -13,6 +13,7 @@
 #import "Logger.h"
 #import "XVimStatusLine.h"
 #import "XVimWindowManager.h"
+#import "XVim.h"
 
 @implementation IDESourceCodeEditorHook
 
