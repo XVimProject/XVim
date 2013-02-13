@@ -101,7 +101,7 @@ static Logger* s_defaultLogger = nil;
     
     // Write to file
     if( nil != _logFile) {
-        NSString* msg = [[NSString alloc] initWithFormat: fmt arguments: args2];
+        NSString* msg = [[[NSString alloc] initWithFormat:fmt arguments:args2] autorelease];
         [_logFile writeData:[msg dataUsingEncoding:NSUTF8StringEncoding]];
         [_logFile writeData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
     }

@@ -21,9 +21,10 @@
 {
 	XVimSourceView *view = [window sourceView];
 	NSRange r = [view getOperationRangeFrom:from To:to Type:type];
-	return [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+    XVimEvaluatorContext *context = [[[XVimEvaluatorContext alloc] init] autorelease];
+	return [[[XVimVisualEvaluator alloc] initWithContext:context
 												   mode:MODE_CHARACTER 
-											  withRange:r];
+											  withRange:r] autorelease];
 }
 
 @end

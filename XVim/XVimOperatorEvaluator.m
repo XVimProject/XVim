@@ -30,10 +30,17 @@
 {
 	if (self = [super initWithContext:context])
 	{
-		self->_operatorAction = action;
-		self->_parent = parent;
+		_operatorAction = [action retain];
+		_parent = [parent retain];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_operatorAction release];
+    [_parent release];
+    [super dealloc];
 }
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window
@@ -78,9 +85,9 @@
 - (XVimEvaluator*)a:(XVimWindow*)window {
 	XVimEvaluator* eval = [[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"]
 															operatorAction:_operatorAction 
-																	   withParent:_parent
-																		inclusive:YES];
-	return eval;
+                                                                withParent:_parent
+                                                                 inclusive:YES];
+	return [eval autorelease];
 }
 
 - (XVimEvaluator*)b:(XVimWindow*)window{
@@ -101,7 +108,7 @@
 															operatorAction:_operatorAction 
 																	   withParent:_parent
 																		inclusive:NO];
-	return eval;
+	return [eval autorelease];
 }
 
 - (XVimEvaluator*)w:(XVimWindow*)window{

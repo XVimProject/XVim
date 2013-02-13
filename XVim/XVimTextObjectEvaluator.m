@@ -25,16 +25,23 @@
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
 	   operatorAction:(XVimOperatorAction*)operatorAction 
-					withParent:(XVimEvaluator*)parent
-				   inclusive:(BOOL)inclusive
+           withParent:(XVimEvaluator*)parent
+            inclusive:(BOOL)inclusive
 {
 	if (self = [super initWithContext:context])
 	{
-		self->_operatorAction = operatorAction;
-		self->_inclusive = inclusive;
-		self->_parent = parent;
+		_operatorAction = [operatorAction retain];
+		_inclusive = inclusive;
+		_parent = [parent retain];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_operatorAction release];
+    [_parent release];
+    [super dealloc];
 }
 
 - (NSUInteger)insertionPointInWindow:(XVimWindow*)window

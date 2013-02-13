@@ -40,7 +40,7 @@
     NSString* text = [self string];
 	[self clampRangeToBuffer:&range];
 	
-	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
+	NSMutableString *substring = [[[text substringWithRange:range] mutableCopy] autorelease];
 	for (NSUInteger i = 0; i < range.length; ++i) {
 		NSRange currentRange = NSMakeRange(i, 1);
 		NSString *currentCase = [substring substringWithRange:currentRange];
@@ -927,7 +927,7 @@
         if( c == '.' || c == '!' || c == '?' ){
             // Check if this is end of a sentence.
             NSUInteger k = pos+1;
-            unichar c2;
+            unichar c2 = '\0';
             // Skip )]"'
             for( ; k < s.length ; k++ ){
                 c2 = [s characterAtIndex:k];
@@ -989,7 +989,7 @@
         if( c == '.' || c == '!' || c == '?' ){
             // Check if this is end of a sentence.
             NSUInteger k = pos+1;
-            unichar c2;
+            unichar c2 = '\0';
             // Skip )]"'
             for( ; k < lastSearchBase ; k++ ){
                 c2 = [s characterAtIndex:k];
@@ -1314,7 +1314,7 @@ static NSInteger seek_forwards(NSString*,NSInteger,NSCharacterSet*);
             wordSet = charSet;
         }
         else {
-            NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+            NSMutableCharacterSet *charSet = [[[NSCharacterSet alphanumericCharacterSet] mutableCopy] autorelease];
             [charSet addCharactersInString:@"_"];
             wordSet = charSet;
         }
