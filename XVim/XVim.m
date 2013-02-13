@@ -104,6 +104,12 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     item.title = @"XVim";
     [item setEnabled:YES];
     item.target = [XVim instance];
+    
+    //Caution: parseRcFile can potentially invoke +instance on XVim (e.g. if "set ..." is
+    //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
+    [item.target parseRcFile];
+    
+    
     item.action = @selector(toggleXVim:);
     item.state = NSOnState;
     NSMenuItem* editorManu = [menu itemWithTitle:@"Edit"];
@@ -131,16 +137,13 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     static XVim *__instance = nil;
     static dispatch_once_t __once;
     
-    if( nil == __instance ){
-        dispatch_once(&__once, ^{
-            // Allocate singleton instance
-            __instance = [[XVim alloc] init];
-            [__instance.options addObserver:__instance forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
-            [__instance parseRcFile];
-            
-            TRACE_LOG(@"XVim loaded");
-        });
-    }
+    dispatch_once(&__once, ^{
+        // Allocate singleton instance
+        __instance = [[XVim alloc] init];
+        [__instance.options addObserver:__instance forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
+        
+        TRACE_LOG(@"XVim loaded");
+    });
 	return __instance;
 }
 
