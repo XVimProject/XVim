@@ -29,11 +29,6 @@
 			   ofClass:delegate 
 			withMethod:class_getInstanceMethod([self class], @selector(initWithNibName:bundle:document:)) 
    keepingOriginalWith:@selector(initWithNibName_:bundle:document:)];
-    
-    [Hooker hookMethod:@selector(primitiveInvalidate)
-               ofClass:delegate
-            withMethod:class_getInstanceMethod([self class], @selector(primitiveInvalidate))
-   keepingOriginalWith:@selector(primitiveInvalidate_)];
 }
 
 - (NSArray*) textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
@@ -46,13 +41,6 @@
     [editor initWithNibName_:nibName bundle:nibBundle document:nibDocument];
 	[XVimWindowManager createWithEditor:editor];
     return (id)editor;
-}
-
-- (void)primitiveInvalidate
-{
-    IDESourceCodeEditor *editor = (IDESourceCodeEditor*)self;
-    [editor removeObserver:[XVim instance] forKeyPath:@"document"];
-    [editor primitiveInvalidate_];
 }
 
 @end

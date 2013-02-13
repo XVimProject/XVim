@@ -13,12 +13,16 @@
 #import "Logger.h"
 #import "XVim.h"
 #import "XVimStatusLine.h"
+#import <objc/runtime.h>
+
+#define DID_REGISTER_OBSERVER_KEY   "net.JugglerShu.IDEEditorHook._didRegisterObserver"
 
 @implementation IDEEditorHook
 +(void)hook{
     Class c = NSClassFromString(@"IDEEditor");
     
     [Hooker hookMethod:@selector(didSetupEditor) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(didSetupEditor) ) keepingOriginalWith:@selector(didSetupEditor_)];
+    [Hooker hookMethod:@selector(primitiveInvalidate) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(primitiveInvalidate)) keepingOriginalWith:@selector(primitiveInvalidate_)];
 }
 
 - (void)didSetupEditor{
@@ -54,9 +58,20 @@
             
             // For % register and to notify contents of editor is changed
             [editor addObserver:[XVim instance] forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
+            objc_setAssociatedObject(editor, DID_REGISTER_OBSERVER_KEY, [NSNumber numberWithBool:YES], OBJC_ASSOCIATION_RETAIN);
 		}
     }
     //---- TO HERE ----
+}
+
+- (void)primitiveInvalidate {
+    IDEEditor *editor = (IDEEditor *)self;
+    NSNumber *didRegisterObserver = objc_getAssociatedObject(editor, DID_REGISTER_OBSERVER_KEY);
+    if ([didRegisterObserver boolValue]) {
+        [editor removeObserver:[XVim instance] forKeyPath:@"document"];
+    }
+    
+    [editor primitiveInvalidate_];
 }
 
 @end

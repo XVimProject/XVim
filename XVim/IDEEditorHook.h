@@ -15,4 +15,5 @@
 
 @interface IDEEditor(Hook)
 - (void)didSetupEditor_;
+- (void)primitiveInvalidate_;
 @end
