@@ -26,8 +26,9 @@
     (You can define a method which takes "index" to be used internally which sould be declared in .m file)
  **/
 
+
 typedef struct _XVimRange {
-    NSUInteger begin;
+    NSUInteger begin; // begin may be greater than end
     NSUInteger end;
 } XVimRange;
 

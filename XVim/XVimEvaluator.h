@@ -55,10 +55,35 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window;
 
++ (XVimEvaluator*)invalidEvaluator;
+
 /**
- * @return Next evaluator. If its nil it means that this evaluator finished its task.
- *         If its not nil next key event will be handled by the evaluator and when it finished 
- *         "onChildComplete" will be called with the evaluator.
+ * About eval: method.
+ * This method handles key input.
+ * You usually do not need to override this method.
+ * Default implementation tries to find a method named same as key input and calls it
+ * and returns its return value directly.
+ * For example if 'a' is an input it tries to call a: method and the method must return XVimEvaluator* .
+ * The meaning of evaluator returned from each method is explained below.
+ * So what derived classes of XVimEvaluators should do is adding methods to handle key input.
+ * If it does not find any matched method to call it returns Invalud Evaluator explained below.
+ *
+ * The return value is one of followings
+ *  - Next Evaluator
+ *  - self
+ *  - nil
+ *  - Invalid Evaluator
+ *
+ * If this method returns any valid evaluator other than self it will be handled as a next
+ * evaluator and the next key input will be redirected to the returned evaluator.
+ * If this method returns self it means next evaluator is itself and next key input is still
+ * passed to this evaluator.
+ * If it returns nil it means this evaluator finished its task and the parent evaluator
+ * (which is the evaluator previously created this evaluator and returned it as a next evaluator)
+ * will be notified that its child evaluator finished its task via onChildComplete: method.
+ * If it returns invalid evaluator (which is [XVimEvaluator invalidEvaluator]) it means
+ * the key input to this evaluator is invalid and cancel all the input observed so far (which is almost
+ * same as inputing "ESC" )
  **/
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke;
 
@@ -68,7 +93,8 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
  *         onChildComplete: of parent evaluator will be called with this evaluator.
  **/
 - (XVimEvaluator*)onChildComplete:(XVimEvaluator*)childEvaluator;
-   
+
+
 - (void)becameHandler;
 - (void)didEndHandler;
 - (XVimEvaluator*)defaultNextEvaluator;
@@ -117,5 +143,6 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 - (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context;
 
 @end
+
 
 

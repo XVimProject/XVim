@@ -279,8 +279,8 @@
     motion.info->deleteLastLine = NO;
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
-        XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
-        if( to.end == NSNotFound ){
+        XVimRange motionRange = [self _getMotionRange:_insertionPoint Motion:motion];
+        if( motionRange.end == NSNotFound ){
             return;
         }
         // We have to treat some special cases
@@ -292,12 +292,12 @@
         if( motion.motion == MOTION_WORD_FORWARD ){
             if (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound) {
                 // Special cases for word move over a line break.
-                to.end = motion.info->lastEndOfLine;
+                motionRange.end = motion.info->lastEndOfLine;
                 motion.type = CHARACTERWISE_INCLUSIVE;
             }
         }
-        r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
-        if( motion.type == LINEWISE && [self isLastLine:to.end]){
+        r = [self getOperationRangeFrom:motionRange.begin To:motionRange.end Type:motion.type];
+        if( motion.type == LINEWISE && [self isLastLine:motionRange.end]){
             if( r.location != 0 ){
                 motion.info->deleteLastLine = YES;
                 r.location--;
@@ -1249,132 +1249,146 @@
  * Note that this may return NSNotFound
  **/
 - (XVimRange)_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion{
-    XVimRange range = XVimMakeRange(current, current );
-    NSUInteger nextPos = current;
+    NSRange range = NSMakeRange( NSNotFound , 0 );
+    NSUInteger begin = current;
+    NSUInteger end = NSNotFound;
     NSUInteger tmpPos = NSNotFound;
     switch (motion.motion) {
         case MOTION_NONE:
             // Do nothing
             break;
         case MOTION_FORWARD:
-            range.end = [self next:current count:motion.count option:motion.option info:motion.info];
+            end = [self next:begin count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_BACKWARD:
-            range.end = [self prev:_insertionPoint count:motion.count option:motion.option ];
+            end = [self prev:_insertionPoint count:motion.count option:motion.option ];
             break;
         case MOTION_WORD_FORWARD:
-            range.end = [self wordsForward:current count:motion.count option:motion.option info:motion.info];
+            end = [self wordsForward:begin count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_WORD_BACKWARD:
-            range.end = [self wordsBackward:current count:motion.count option:motion.option];
+            end = [self wordsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_FORWARD:
-            range.end = [self endOfWordsForward:current count:motion.count option:motion.option];
+            end = [self endOfWordsForward:begin count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_BACKWARD:
-            range.end = [self endOfWordsBackward:current count:motion.count option:motion.option];
+            end = [self endOfWordsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_LINE_FORWARD:
-            range.end = [self nextLine:current column:_preservedColumn count:motion.count option:motion.option];
+            end = [self nextLine:begin column:_preservedColumn count:motion.count option:motion.option];
             break;
         case MOTION_LINE_BACKWARD:
-            range.end = [self prevLine:current column:_preservedColumn count:motion.count option:motion.option];
+            end = [self prevLine:begin column:_preservedColumn count:motion.count option:motion.option];
             break;
         case MOTION_BEGINNING_OF_LINE:
-            range.end = [self firstOfLine:current];
-            if( range.end == NSNotFound){
-                range.end = current;
+            end = [self firstOfLine:begin];
+            if( end == NSNotFound){
+                end = current;
             }
             break;
         case MOTION_END_OF_LINE:
-            tmpPos = [self nextLine:current column:0 count:motion.count-1 option:MOTION_OPTION_NONE];
-            range.end = [self endOfLine:tmpPos];
-            if( range.end == NSNotFound){
-                range.end = tmpPos;
+            tmpPos = [self nextLine:begin column:0 count:motion.count-1 option:MOTION_OPTION_NONE];
+            end = [self endOfLine:tmpPos];
+            if( end == NSNotFound){
+                end = tmpPos;
             }
             break;
         case MOTION_SENTENCE_FORWARD:
-            range.end = [self sentencesForward:current count:motion.count option:motion.option];
+            end = [self sentencesForward:begin count:motion.count option:motion.option];
             break;
         case MOTION_SENTENCE_BACKWARD:
-            range.end = [self sentencesBackward:current count:motion.count option:motion.option];
+            end = [self sentencesBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_PARAGRAPH_FORWARD:
-            range.end = [self paragraphsForward:current count:motion.count option:motion.option];
-            if( nextPos != NSNotFound){
-                nextPos = current;
-            }
+            end = [self paragraphsForward:begin count:motion.count option:motion.option];
             break;
         case MOTION_PARAGRAPH_BACKWARD:
-            range.end = [self paragraphsBackward:current count:motion.count option:motion.option];
-            if( nextPos != NSNotFound){
-                nextPos = current;
-            }
+            end = [self paragraphsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_NEXT_FIRST_NONBLANK:
-            range.end = [self nextLine:current column:0 count:motion.count option:motion.option];
-            tmpPos = [self nextNonBlankInALine:nextPos];
+            end = [self nextLine:begin column:0 count:motion.count option:motion.option];
+            tmpPos = [self nextNonBlankInALine:end];
             if( NSNotFound != tmpPos ){
-                range.end = tmpPos;
+                end = tmpPos;
             }
             break;
         case MOTION_PREV_FIRST_NONBLANK:
-            range.end = [self prevLine:current column:0 count:motion.count option:motion.option];
-            tmpPos = [self nextNonBlankInALine:nextPos];
+            end = [self prevLine:begin column:0 count:motion.count option:motion.option];
+            tmpPos = [self nextNonBlankInALine:end];
             if( NSNotFound != tmpPos ){
-                range.end = tmpPos;
+                end = tmpPos;
             }
             break;
         case MOTION_FIRST_NONBLANK:
-            range.end = [self headOfLineWithoutSpaces:current];
-            if( NSNotFound == nextPos ){
-                range.end = current;
-            }
+            end = [self headOfLineWithoutSpaces:begin];
             break;
         case MOTION_LINENUMBER:
-            range.end = [self positionAtLineNumber:motion.line column:0];
-            if (nextPos == NSNotFound) {
-                range.end = [self firstOfLine:[self endOfFile]];
-            }
+            end = [self positionAtLineNumber:motion.line column:0];
             break;
         case MOTION_PERCENT:
-            range.end = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
-            if (range.end == NSNotFound) {
-                range.end = [self firstOfLine:[self endOfFile]];
-            }
+            end = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
             break;
         case MOTION_NEXT_MATCHED_ITEM:
-            range.end = [self positionOfMatchedPair:current];
+            end = [self positionOfMatchedPair:begin];
             break;
         case MOTION_LASTLINE:
-            range.end = [self firstOfLine:[self endOfFile]];
+            end = [self firstOfLine:[self endOfFile]];
             break;
         case TEXTOBJECT_WORD:
-            
-        case TEXTOBJECT_BIGWORD:
+            range = [self currentWord:begin count:motion.count  option:motion.option];
+            break;
         case TEXTOBJECT_BRACES:
+            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '{', '}');
+            break;
         case TEXTOBJECT_PARAGRAPH:
+            break;
         case TEXTOBJECT_PARENTHESES:
+            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+            break;
         case TEXTOBJECT_SENTENCE:
+            // Not supported
+            break;
         case TEXTOBJECT_ANGLEBRACKETS:
+            // Not supported
+            break;
         case TEXTOBJECT_SQUOTE:
+            range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\'');
+            break;
         case TEXTOBJECT_DQUOTE:
+            range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\"');
+            break;
         case TEXTOBJECT_TAG:
+            // Not supported
+            break;
         case TEXTOBJECT_BACKQUOTE:
+            range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '`');
+            break;
         case TEXTOBJECT_SQUAREBRACKETS:
+            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
             break;
         case MOTION_LINE_COLUMN:
-            range.end = [self positionAtLineNumber:motion.line column:motion.column];
-            if( NSNotFound == range.end ){
-                range.end = current;
+            end = [self positionAtLineNumber:motion.line column:motion.column];
+            if( NSNotFound == end ){
+                end = current;
             }
             break;
         case MOTION_POSITION:
-            range.end = motion.position;
+            end = motion.position;
             break;
     }
-    TRACE_LOG(@"range begin:%u  end:%u", range.begin , range.end);
-    return range;
+    
+    if( range.location != NSNotFound ){// This block is for TEXTOBJECT
+        begin = range.location;
+        if( range.length == 0 ){
+            end = NSNotFound;
+        }else{
+            end = range.location + range.length - 1;
+        }
+    }
+    XVimRange r = XVimMakeRange(begin, end);
+    TRACE_LOG(@"range location:%u  length:%u", r.begin, r.end);
+    return r;
 }
 
 - (void)_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{

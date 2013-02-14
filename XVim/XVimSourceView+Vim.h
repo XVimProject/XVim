@@ -312,7 +312,6 @@ NSInteger xv_0(NSString *string, NSInteger index);
 // Unlike vim, this function won't ignore indent before the current character
 // even if what is '{'
 NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what, char other);
-NSRange xv_current_word(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, BOOL fuzzy);
 NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what);
 
 // Find char in current line.

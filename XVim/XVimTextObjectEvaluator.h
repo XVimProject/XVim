@@ -14,6 +14,8 @@
 @interface XVimTextObjectEvaluator : XVimEvaluator
 @property BOOL inner;
 @property MOTION textobject;
+@property BOOL bigword;
+
 - (id)initWithContext:(XVimEvaluatorContext*)context
            withWindow:(XVimWindow *)window
            withParent:(XVimEvaluator*)parent

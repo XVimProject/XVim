@@ -157,9 +157,13 @@ static const char* KEY_WINDOW = "xvimwindow";
             else{
                 // Pass current evaluator to the evaluator below the current evaluator
                 nextEvaluator = [(XVimEvaluator*)[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2] onChildComplete:currentEvaluator];
+                [nextEvaluator becameHandler];
                 [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
                 // Not break here. check the nextEvaluator repeatedly.
             }
+        }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
+            [self _initEvaluatorStack];
+            break;
         }else if( currentEvaluator != nextEvaluator ){
             [_evaluatorStack addObject:nextEvaluator];
             [currentEvaluator didEndHandler];

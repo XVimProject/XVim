@@ -1,5 +1,3 @@
-//
-//  XVimTextObjectEvaluator.m
 //  XVim
 //
 //  Created by Tomas Lundell on 8/04/12.
@@ -23,11 +21,13 @@
 @implementation XVimTextObjectEvaluator
 @synthesize inner = _inner;
 @synthesize textobject = _textobject;
+@synthesize bigword = _bigword;
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent inner:(BOOL)inner{
 	if (self = [super initWithContext:context withWindow:window]) {
         _inner = inner;
 		_parent = parent;
+        _bigword = NO;
 	}
 	return self;
 }
@@ -91,7 +91,8 @@
 }
 
 - (XVimEvaluator*)W{
-    self.textobject = TEXTOBJECT_BIGWORD;
+    self.textobject = TEXTOBJECT_WORD;
+    self.bigword = YES;
     return nil;
 }
 

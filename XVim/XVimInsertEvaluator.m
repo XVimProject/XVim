@@ -70,10 +70,9 @@
 	return @"-- INSERT --";
 }
 
-- (void)becameHandlerInWindow:(XVimWindow*)window{
-	[super becameHandler];
+- (void)becameHandler{
     self.startRange = [[self sourceView] selectedRange];
-    [[window sourceView] insert];
+    [[self.window sourceView] insert];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{

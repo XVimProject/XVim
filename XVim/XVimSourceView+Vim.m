@@ -1511,7 +1511,7 @@ static NSInteger seek_forwards(NSString*,NSInteger,NSCharacterSet*);
         end = seek_forwards(string, end, searchSet);
         
         // For inclusive mode, try to eat some more
-        if ( opt & INCLUSIVE) {
+        if ( !(opt & TEXTOBJECT_INNER)) {
             NSInteger newEnd = end;
             if (end < maxIndex) {
                 if (initialCharIsWs) {

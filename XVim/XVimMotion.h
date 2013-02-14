@@ -44,7 +44,7 @@ typedef enum _MOTION{
     MOTION_NEXT_MATCHED_ITEM,       // %
     MOTION_LASTLINE,                // G
     TEXTOBJECT_WORD,
-    TEXTOBJECT_BIGWORD,
+    //TEXTOBJECT_BIGWORD,           // Use motion option
     TEXTOBJECT_SENTENCE,
     TEXTOBJECT_PARAGRAPH,
     TEXTOBJECT_SQUAREBRACKETS,      // [] block

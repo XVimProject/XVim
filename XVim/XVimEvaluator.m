@@ -17,6 +17,8 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 
+static XVimEvaluator* _invalidEvaluator = nil;
+
 @interface XVimEvaluator() {
 }
 @end
@@ -26,8 +28,20 @@
 @synthesize window = _window;
 
 - (id)init {
-	[NSException raise:@"Invalid init" format:@"Must call initWithContext"];
 	return nil;
+}
+
++ (XVimEvaluator*)invalidEvaluator{
+   	if(_invalidEvaluator){
+        return _invalidEvaluator;
+    }
+    
+	@synchronized([XVimEvaluator class]){
+		if(!_invalidEvaluator) {
+			_invalidEvaluator = [[XVimEvaluator alloc] init];
+		}
+	}
+    return _invalidEvaluator;
 }
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window{
@@ -72,6 +86,7 @@
 }
    
 - (void)becameHandler{
+    
 }
 
 - (void)didEndHandler{
@@ -82,7 +97,7 @@
 }
 
 - (XVimEvaluator*)defaultNextEvaluator{
-    return nil;
+    return [XVimEvaluator invalidEvaluator];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
