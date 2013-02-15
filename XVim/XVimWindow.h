@@ -14,6 +14,7 @@
 @class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
+@class IDEWorkspaceWindow;
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
@@ -56,5 +57,7 @@
 
 
 - (void)setForcusBackToSourceView;
+
+- (IDEWorkspaceWindow*)currentWorkspaceWindow;
 
 @end

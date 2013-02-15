@@ -34,8 +34,7 @@
 @synthesize sourceView = _sourceView;
 @synthesize commandLine = _commandLine;
 
-- (id)init 
-{
+- (id)init {
     if (self = [super init]) {
 		_staticString = [@"" retain];
         _currentEvaluator = nil;
@@ -46,8 +45,7 @@
 	return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_keymapContext release];
     [_localMarks release];
     [_staticString release];
@@ -57,16 +55,13 @@
     [super dealloc];
 }
 
-- (void)willSetEvaluator:(XVimEvaluator*)evaluator
-{
-	if (evaluator != _currentEvaluator && _currentEvaluator)
-	{
+- (void)willSetEvaluator:(XVimEvaluator*)evaluator {
+	if (evaluator != _currentEvaluator && _currentEvaluator) {
 		[_currentEvaluator willEndHandlerInWindow:self];
 	}
 }
 
-- (void)setEvaluator:(XVimEvaluator*)evaluator
-{
+- (void)setEvaluator:(XVimEvaluator*)evaluator {
     @synchronized (self) {
         if (!evaluator) {
             evaluator = [[[XVimNormalEvaluator alloc] init] autorelease];
@@ -92,8 +87,7 @@
 }
 
 
-- (XVimEvaluator *)currentEvaluator
-{
+- (XVimEvaluator *)currentEvaluator {
     XVimEvaluator *evaluator = nil;
     @synchronized (self) {
         evaluator = [_currentEvaluator retain];
@@ -105,8 +99,7 @@
     return _localMarks;
 }
 
-- (NSUInteger)insertionPoint
-{
+- (NSUInteger)insertionPoint {
 	return [[self currentEvaluator] insertionPointInWindow:self];
 }
 
@@ -119,10 +112,8 @@
 												 withPrimary:primaryKeyStroke
 												 withContext:_keymapContext];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    if (keystrokes)
-	{
-		for (XVimKeyStroke *keyStroke in keystrokes)
-		{
+    if (keystrokes) {
+		for (XVimKeyStroke *keyStroke in keystrokes) {
 			[self handleKeyStroke:keyStroke];
 		}
 	} else {
@@ -134,8 +125,7 @@
     }
 
 	NSString* argString = [_keymapContext toString];
-	if ([argString length] == 0)
-	{
+	if ([argString length] == 0) {
 		argString = [[self currentEvaluator] argumentDisplayString];
 	}
 
@@ -170,16 +160,14 @@
 }
 
 
-- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
-{
+- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range; {
     XVimEvaluatorContext *context = [[[XVimEvaluatorContext alloc] init] autorelease];
 	XVimEvaluator *evaluator = [[[XVimVisualEvaluator alloc] initWithContext:context mode:mode withRange:range] autorelease];
 	[self willSetEvaluator:evaluator];
 	[self setEvaluator:evaluator];
 }
 
-- (void)commandFieldLostFocus:(XVimCommandField*)commandField
-{
+- (void)commandFieldLostFocus:(XVimCommandField*)commandField {
 	[commandField setDelegate:nil];
 	[self willSetEvaluator:nil];
 	[self setEvaluator:nil];
@@ -208,8 +196,7 @@
     }
 }
 
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator
-{
+- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator {
     switch ([evaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
         case REGISTER_APPEND:
             [xregister appendKeyEvent:keyStroke];
@@ -226,13 +213,11 @@
     }
 }
 
-- (void)beginMouseEvent:(NSEvent*)event
-{
+- (void)beginMouseEvent:(NSEvent*)event {
 	_handlingMouseEvent = YES;
 }
 
-- (void)endMouseEvent:(NSEvent*)event
-{
+- (void)endMouseEvent:(NSEvent*)event {
     [self clearErrorMessage];
 
 	_handlingMouseEvent = NO;
@@ -241,8 +226,7 @@
 	[self setEvaluator:next];
 }
 
-- (NSRange)restrictSelectedRange:(NSRange)range
-{
+- (NSRange)restrictSelectedRange:(NSRange)range {
 	if (_handlingMouseEvent)
 	{
 		range = [[self currentEvaluator] restrictSelectedRange:range inWindow:self];
@@ -250,18 +234,15 @@
 	return range;
 }
 
-- (void)drawRect:(NSRect)rect
-{
+- (void)drawRect:(NSRect)rect {
     [[self currentEvaluator] drawRect:rect inWindow:self];
 }
 
-- (BOOL)shouldDrawInsertionPoint
-{
+- (BOOL)shouldDrawInsertionPoint {
 	return [[self currentEvaluator] shouldDrawInsertionPointInWindow:self];
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
-{
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
 	[[self currentEvaluator] drawInsertionPointInRect:rect color:color inWindow:self heightRatio:1];
 }
 
@@ -279,8 +260,7 @@
     [commandLine errorMessage:message Timer:NO RedColorSetting:NO];
 }
 
-- (void)clearErrorMessage
-{
+- (void)clearErrorMessage {
 	XVimCommandLine *commandLine = self.commandLine;
     [commandLine errorMessage:@"" Timer:NO RedColorSetting:YES];
 }
@@ -292,15 +272,18 @@
     [[[self.sourceView view] window] makeFirstResponder:[self.sourceView view]];
 }
 
+- (IDEWorkspaceWindow*)currentWorkspaceWindow{
+    IDEWorkspaceWindow* window = (IDEWorkspaceWindow*)[[self.sourceView view] window];
+    return window;
+}
+
 static char s_associate_key = 0;
 
-+ (XVimWindow*)associateOf:(id)object
-{
++ (XVimWindow*)associateOf:(id)object {
 	return (XVimWindow*)objc_getAssociatedObject(object, &s_associate_key);
 }
 
-- (void)associateWith:(id)object
-{
+- (void)associateWith:(id)object {
 	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
 }
 
