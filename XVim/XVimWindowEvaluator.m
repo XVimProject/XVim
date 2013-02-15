@@ -10,6 +10,7 @@
 #import "XVimWindowEvaluator.h"
 #import "XVimWindow.h"
 #import "IDEKit.h"
+#import "Utils.h"
 
 /**
  * XVim Window - View structure:
@@ -113,44 +114,128 @@
     return nil;
 }
 
-- (XVimEvaluator*)h:(XVimWindow*)window{
-    IDEViewController* current = [[self tabController:window] _currentFirstResponderArea];
-    IDEViewController* next;
-    while(true){
-        [[self tabController:window] moveKeyboardFocusToPreviousArea:self];
-        next = [[self tabController:window] _currentFirstResponderArea];
-        if( [[[next class] description] isEqualToString:@"IDEEditorContext" ]) {
-            break;
-        }
-        if( next == current ){ // When the fucus reaches one round we stop.
-            break;
+
+- (NSArray*)allEditorArea:(XVimWindow*)window{
+    IDEWorkspaceTabController* tabCtrl = [self tabController:window];
+    NSMutableArray* otherViews = [[[NSMutableArray alloc] init] autorelease];
+    for( IDEViewController* c in [tabCtrl _keyboardFocusAreas] ){
+        if( [[[c class] description] isEqualToString:@"IDEEditorContext"] ){
+            [otherViews addObject:c];
         }
     }
+    return otherViews;
+}
+
+/**
+ * For Ctrl-w + h,j,k,l calculations.
+ * The basic thing doing here is ...
+ *   Enumerate all the editors and
+ *   for each editors compare the position of the corner to current editors corner.
+ *    For example if its Ctrl-w + h, we compare "current editor's left edge" and "others right edge".
+ *    If we find the right edge on the left of current editors left edge we take it as a candidate to move forcus on.
+ *    But there may be more than 1 editor which is on the left of current editor we have to find 
+ *    the editor whose right edge is closest to the current editors right edge.
+ **/
+- (XVimEvaluator*)h:(XVimWindow*)window{
+    IDEWorkspaceTabController* tabCtrl = [self tabController:window];
+    IDEViewController* current = [tabCtrl _currentFirstResponderArea];
+    NSArray* allEditors = [self allEditorArea:window];
+    
+    CGPoint current_point = [[current view] frame].origin; // Left bottom point
+    current_point = [[current view] convertPoint:current_point toView:nil];
+    // To find a view left of this editor we walk around the view and find if there is a view whose right side is smaller than this left value.
+    CGPoint point;
+    CGFloat maximum_right = 0; // To keep nearest view
+    IDEEditorContext* targetEditor = nil;
+    for( IDEEditorContext* c in allEditors){
+        point = RightBottom([[c view] convertRect:[c.view frame]  toView:nil]);
+        if( point.x <= current_point.x ){
+            // This view is at least on the left of the current view.
+            if( maximum_right < point.x ){
+                targetEditor = c;
+                maximum_right = point.x;
+            }
+        }
+    }
+    [targetEditor takeFocus];
     return nil;
 }
 
+
 - (XVimEvaluator*)j:(XVimWindow*)window{
-    IDEViewController* current = [[self tabController:window] _currentFirstResponderArea];
-    IDEViewController* next;
-    while(true){
-        [[self tabController:window] moveKeyboardFocusToNextArea:self];
-        next = [[self tabController:window] _currentFirstResponderArea];
-        if( [[[next class] description] isEqualToString:@"IDEEditorContext" ]) {
-            break;
-        }
-        if( next == current ){ // When the fucus reaches one round we stop.
-            break;
+    IDEWorkspaceTabController* tabCtrl = [self tabController:window];
+    IDEViewController* current = [tabCtrl _currentFirstResponderArea];
+    NSArray* allEditors = [self allEditorArea:window];
+    
+    // Compare current view's bottom and other views' top positions.(Find the top is bigger the the bottom but nearest one)
+    // Remember that y gets bigger when gose to upper side.
+    CGPoint current_point = [current.view frame].origin; //Left bottom
+    current_point = [[current view] convertPoint:current_point toView:nil];
+    // To find a view left of this editor we walk around the view and find if there is a view whose right side is smaller than this left value.
+    CGPoint point;
+    CGFloat maximum_top = 0; // To keep nearest view
+    IDEEditorContext* targetEditor = nil;
+    for( IDEEditorContext* c in allEditors){
+        point = LeftTop([[c view] convertRect:[c.view frame] toView:nil]);
+        if( point.y <= current_point.y ){
+            if( maximum_top < point.y ){
+                targetEditor = c;
+                maximum_top = point.y;
+            }
         }
     }
+    [targetEditor takeFocus];
     return nil;
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
-    return [self h:window];
+    IDEWorkspaceTabController* tabCtrl = [self tabController:window];
+    IDEViewController* current = [tabCtrl _currentFirstResponderArea];
+    NSArray* allEditors = [self allEditorArea:window];
+    
+    // Compare current view's bottom and other views' top positions.(Find the top is bigger the the bottom but nearest one)
+    // Remember that y gets bigger when gose to upper side.
+    CGPoint current_point = LeftTop([current.view frame]);
+    current_point = [[current view] convertPoint:current_point toView:nil];
+    // To find a view left of this editor we walk around the view and find if there is a view whose right side is smaller than this left value.
+    CGPoint point;
+    CGFloat minimum_top = FLT_MAX; // To keep nearest view
+    IDEEditorContext* targetEditor = nil;
+    for( IDEEditorContext* c in allEditors){
+        point = [[c view] convertRect:[c.view frame] toView:nil].origin;
+        if( point.y >= current_point.y ){
+            if( minimum_top > point.y ){
+                targetEditor = c;
+                minimum_top = point.y;
+            }
+        }
+    }
+    [targetEditor takeFocus];
+    return nil;
 }
 
 - (XVimEvaluator*)l:(XVimWindow*)window{
-    return [self j:window];
+    IDEWorkspaceTabController* tabCtrl = [self tabController:window];
+    IDEViewController* current = [tabCtrl _currentFirstResponderArea];
+    NSArray* allEditors = [self allEditorArea:window];
+    
+    CGPoint current_point = RightBottom([[current view] frame]);
+    current_point = [[current view] convertPoint:current_point toView:nil];
+    // To find a view left of this editor we walk around the view and find if there is a view whose right side is smaller than this left value.
+    CGPoint point;
+    CGFloat minimum_left = FLT_MAX; // To keep nearest view
+    IDEEditorContext* targetEditor = nil;
+    for( IDEEditorContext* c in allEditors){
+        point = [[c view] convertRect:[c.view frame]  toView:nil].origin; // Left Bottom
+        if( point.x >= current_point.x ){
+            if( minimum_left > point.x ){
+                targetEditor = c;
+                minimum_left = point.x;
+            }
+        }
+    }
+    [targetEditor takeFocus];
+    return nil;
 }
 
 @end
