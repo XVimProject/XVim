@@ -32,6 +32,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
 	return self;
 }
 
+
 - (XVimEvaluator*)c{
     if( !_insertModeAtCompletion ){
         return nil;  // 'dc' does nothing
@@ -87,7 +88,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         MOTION_OPTION opt = ((XVimTextObjectEvaluator*)childEvaluator).inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
         opt |= ((XVimTextObjectEvaluator*)childEvaluator).bigword ? BIGWORD : MOTION_OPTION_NONE;
         XVimMotion* m = XVIM_MAKE_MOTION(((XVimTextObjectEvaluator*)childEvaluator).textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
-        [[self sourceView] delete:m];
+        return [self _motionFixed:m];
     }
     return nil;
 }

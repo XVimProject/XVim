@@ -21,6 +21,8 @@
 }
 @end
 
+// TODO: Maybe need to override b,B,w,W operation (See older implementation)
+
 @implementation XVimOperatorEvaluator
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent{

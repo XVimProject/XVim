@@ -22,5 +22,10 @@
 // Override this method to implement operations on motions.
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion;
 - (XVimEvaluator*)_motionFixed:(XVimMotion*)motion;
+
+
+// These are only for surpress warning
+- (XVimEvaluator*)b;
+- (XVimEvaluator*)B;
 @end
 

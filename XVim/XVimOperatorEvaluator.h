@@ -17,4 +17,10 @@
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window withParent:(XVimEvaluator*)parent;
+/*
+- (XVimEvaluator*)b;
+- (XVimEvaluator*)B;
+- (XVimEvaluator*)w;
+- (XVimEvaluator*)W;
+ */
 @end

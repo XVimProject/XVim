@@ -276,6 +276,13 @@
         return ;
     }
     
+    NSUInteger insertionPointAfterDelete = _insertionPoint;
+    BOOL keepInsertionPoint = NO;
+    if( _selectionMode != MODE_VISUAL_NONE ){
+        insertionPointAfterDelete = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
+        keepInsertionPoint = YES;
+    }
+    
     motion.info->deleteLastLine = NO;
     if( _selectionMode == MODE_VISUAL_NONE ){
         NSRange r;
@@ -317,8 +324,11 @@
         [_delegate textDeleted:_lastYankedText  withType:_lastYankedType inView:self];
     }
     
-    [self _moveCursor:_insertionPoint preserveColumn:NO];
+    
     [self _syncStateFromView];
+    if(keepInsertionPoint){
+        [self _moveCursor:insertionPointAfterDelete preserveColumn:NO];
+    }
     [self changeSelectionMode:MODE_VISUAL_NONE];
 }
 
@@ -329,10 +339,7 @@
         // So insertNewline as 'O' does before entering insert mode
         insertNewline = YES;
     }
-    NSUInteger insertionPointAfterDelete = _insertionPoint;
-    if( _selectionMode != MODE_VISUAL_NONE ){
-        insertionPointAfterDelete = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
-    }
+    
     // "cw" is like "ce" if the cursor is on a word ( in this case blank line is not treated as a word )
     if( motion.motion == MOTION_WORD_FORWARD && [self isNonBlank:_insertionPoint] ){
         motion.motion = MOTION_END_OF_WORD_FORWARD;
@@ -346,7 +353,6 @@
     else if( insertNewline ){
         [self insertNewlineAboveLine:[self lineNumber:_insertionPoint]];
     }else{
-        [self _moveCursor:insertionPointAfterDelete preserveColumn:NO];
     }
     [self changeSelectionMode:MODE_VISUAL_NONE];
     [self _syncState];
