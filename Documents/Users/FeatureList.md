@@ -69,8 +69,8 @@ Visual block mode is currently not supported.
 -----------|---------------------------
   C-w n    | Add new assisntant editor
   C-w q    | Delete one assistant editor
-  C-w s    | Place editors horizontally
-  C-w v    | Place editors vertically
+  C-w s    | Add new assistant editor horizontally
+  C-w v    | Add new assistant editor vertically
 C-w h,j,k,l| Move forcus between editors
 
 
