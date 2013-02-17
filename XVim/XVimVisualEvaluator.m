@@ -202,6 +202,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return [[[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] withWindow:self.window withParent:self] autorelease];
 }
 
+- (XVimEvaluator*)Y{
+    //TODO: support yunk linewise
+    [[self sourceView] yank:nil];
+    return nil;
+}
+
 - (XVimEvaluator*)EQUAL{
     [[self sourceView] filter:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
