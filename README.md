@@ -101,4 +101,7 @@ Contributors
 See contributors page in github repository.
 https://github.com/JugglerShu/XVim/contributors
 
+License
+============
+MIT License
 
