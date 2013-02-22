@@ -97,7 +97,7 @@
     }
    
     unichar charcode = [theEvent unmodifiedKeyCode];
-    [Logger logWithLevel:LogDebug format:@"Obj:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode];
+    DEBUG_LOG(@"Obj:%p keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
     
     if( [window handleKeyEvent:theEvent] ){
         return;
