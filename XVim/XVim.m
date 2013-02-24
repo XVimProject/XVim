@@ -343,7 +343,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     return;
 }
 
-- (void)onDeleteOrYank:(XVimRegister*)yankRegister
+- (void)onDeleteOrYank:(BOOL)deleteOrYank
+              Register:(XVimRegister*)yankRegister
                   text:(NSString*)text
 {
     // Don't do anything if we are recording into a register (that isn't the repeat register)
@@ -363,20 +364,24 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     }
     else {
         // There are 10 numbered registers
-        for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
-            XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
-            XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
-            
-            [next clear];
-            [next appendText:prev.text];
-            if( i == 0 ){
-                break;
+        if( deleteOrYank ){
+            // delete or change use "1 - "9
+            for (NSUInteger i = self.numberedRegisters.count - 2; i >= 1 ; --i){
+                XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
+                XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
+                
+                [next clear];
+                [next appendText:prev.text];
             }
+            XVimRegister *reg = [self.numberedRegisters objectAtIndex:1];
+            [reg clear];
+            [reg appendText:text];
+        } else {
+            // yank use "0
+            XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
+            [reg clear];
+            [reg appendText:text];
         }
-        
-        XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
-        [reg clear];
-        [reg appendText:text];
         
         if ( self.options.pasteboard ) {
             [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
