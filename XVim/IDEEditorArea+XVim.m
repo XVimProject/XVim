@@ -8,6 +8,7 @@
 
 #import <objc/runtime.h>
 #import "IDEEditorArea+XVim.h"
+#import "Logger.h"
 
 static const char* KEY_COMMAND_LINE = "commandLine";
 @implementation IDEEditorArea (XVim)
@@ -48,7 +49,12 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     NSView *layoutView = [self textViewArea];
     XVimCommandLine *cmd = [self commandLine];
     DVTBorderedView *border = [[layoutView subviews] objectAtIndex:0];
-    [border removeObserver:cmd forKeyPath:@"hidden"];
+    @try {
+        [border removeObserver:cmd forKeyPath:@"hidden"];
+    }
+    @catch (NSException *exception) {
+        DEBUG_LOG( @"%@", exception );
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:cmd];
 }
 
