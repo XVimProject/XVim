@@ -51,6 +51,7 @@
     if (self) {
         _forceMotionType = NO;
 		_column = NSNotFound;
+        _preserveColumn = NO;
     }
     return self;
 }
@@ -66,7 +67,6 @@
 	{
 		_column = [[window sourceView] columnNumber:[self insertionPointInWindow:window]]; // TODO: Keep column somewhere else
 	}
-	_preserveColumn = NO;
 }
 
 - (void)preserveColumn
@@ -262,7 +262,8 @@
 	[self preserveColumn];
 	
     NSUInteger to = [[window sourceView] nextLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self withNewContext];
 }
 
 - (XVimEvaluator*)k:(XVimWindow*)window{
@@ -271,7 +272,8 @@
 	[self preserveColumn];
 	
     NSUInteger to = [[window sourceView] prevLine:from column:column count:[self numericArg] option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+    return [self withNewContext];
 }
 
 - (XVimEvaluator*)l:(XVimWindow*)window{
