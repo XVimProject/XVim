@@ -8,6 +8,7 @@
 
 #import <objc/runtime.h>
 #import "IDEEditorArea+XVim.h"
+#import "Logger.h"
 
 static const char* KEY_COMMAND_LINE = "commandLine";
 @implementation IDEEditorArea (XVim)
@@ -16,6 +17,12 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     NSView* layoutView;
     object_getInstanceVariable(self, "_editorAreaAutoLayoutView", (void**)&layoutView); // The view contains editors and border view
     return layoutView;
+}
+
+- (DVTBorderedView*)debuggerBarBorderedView{
+    DVTBorderedView* border;
+    object_getInstanceVariable(self, "_debuggerBarBorderedView", (void**)&border); // The view contains editors and border view
+    return border;
 }
 
 - (void)setupCommandLine{
@@ -32,8 +39,7 @@ static const char* KEY_COMMAND_LINE = "commandLine";
                                                      name:NSViewFrameDidChangeNotification
                                                    object:layoutView];
         if ([[layoutView subviews] count] > 0) {
-            // This is a little hacky but first object in the subview is "border" view.
-            DVTBorderedView* border = [[layoutView subviews] objectAtIndex:0];
+            DVTBorderedView* border = [self debuggerBarBorderedView];
             // We need to know if border view is hidden or not to place editors and command line correctly.
             [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
             //NSView* view = [[layoutView subviews] objectAtIndex:0];
@@ -45,9 +51,8 @@ static const char* KEY_COMMAND_LINE = "commandLine";
 
 - (void)teardownCommandLine
 {
-    NSView *layoutView = [self textViewArea];
     XVimCommandLine *cmd = [self commandLine];
-    DVTBorderedView *border = [[layoutView subviews] objectAtIndex:0];
+    DVTBorderedView *border = [self debuggerBarBorderedView];
     [border removeObserver:cmd forKeyPath:@"hidden"];
     [[NSNotificationCenter defaultCenter] removeObserver:cmd];
 }
