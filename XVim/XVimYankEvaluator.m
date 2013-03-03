@@ -44,7 +44,7 @@
 {
     XVimSourceView* view = [window sourceView];
     [view selectOperationTargetFrom:from To:to Type:type];
-    [[XVim instance] onDeleteOrYank:_yankRegister text:[[view string] substringWithRange:[view selectedRange]]];
+    [[XVim instance] onDeleteOrYank:FALSE Register:_yankRegister text:[[view string] substringWithRange:[view selectedRange]]];
 
     [view setSelectedRange:NSMakeRange(from, 0)];
     return nil;

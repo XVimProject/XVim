@@ -76,7 +76,7 @@
     NSString* s = [[self string] substringWithRange:[self selectedRange]];
     [self insertText:@"" replacementRange:[self selectedRange]];
 	//[self adjustCursorPosition];
-    [[XVim instance] onDeleteOrYank:xregister text:s];
+    [[XVim instance] onDeleteOrYank:TRUE Register:xregister text:s];
 }
 
 - (void)sortLinesInRange:(NSRange)range withOptions:(XVimSortOptions)options
