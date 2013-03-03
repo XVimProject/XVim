@@ -733,12 +733,12 @@
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if (xregister.isRepeat){
-        if (xregister.nonNumericKeyCount == 1){
-            if([keyStroke classResponds:[XVimMotionEvaluator class]] || keyStroke.isNumeric){
-                return REGISTER_APPEND;
-            }
-        }
-
+        // DOT command register
+        /*
+         * XVimMotionEvaluator which deals with MOTION should not record
+         * commands for DOT command operation.
+         * XVimXXXEvaluator inherited from XVimMotionEvaluator should deal with it.
+         */
         return REGISTER_IGNORE;
     }
     
