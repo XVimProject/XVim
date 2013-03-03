@@ -20,6 +20,7 @@
 #import "XVimOptions.h"
 #import "IDEKit.h"
 #import "XVimDebug.h"
+#import "XVimRegister.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -908,7 +909,22 @@
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
 {
-    TRACE_LOG(@"registers: %@", [[XVim instance] registers])
+    //TRACE_LOG(@"registers: %@", [[XVim instance] registers])
+    NSDictionary* dic = [XVim instance].registers;
+    NSArray* aryKeys = [[dic allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    for( NSString* key in aryKeys ){
+        XVimRegister* reg = [dic valueForKey:key];
+        bool isUserRegister = false;
+        if( reg.displayName.length > 0 ){
+            unichar uc = [reg.displayName characterAtIndex:0];
+            if( uc >= 'a' && uc <='z' ){
+                isUserRegister = true;
+            }
+        }
+        if( !isUserRegister || reg.text.length > 0 ){
+            TRACE_LOG( @"\"%@   %@", reg.displayName, reg.text );
+        }
+    }
 }
 
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window

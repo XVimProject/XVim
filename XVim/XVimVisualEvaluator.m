@@ -316,7 +316,7 @@ static NSString* MODE_STRINGS[] = {@"-- VISUAL --", @"-- VISUAL LINE --", @"-- V
             [view insertText:text];
         }
         
-        [[XVim instance] onDeleteOrYank:[self yankRegister] text:current];
+        [[XVim instance] onDeleteOrYank:FALSE Register:[self yankRegister] text:current];
     }
     return nil;
 }

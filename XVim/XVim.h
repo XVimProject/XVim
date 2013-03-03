@@ -42,7 +42,7 @@ extern NSString * const XVimDocumentPathKey;
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
-- (void)onDeleteOrYank:(XVimRegister*)yankRegister text:(NSString*)text;
+- (void)onDeleteOrYank:(BOOL)deleteOrYank Register:(XVimRegister*)yankRegister text:(NSString*)text;
 - (NSString*)pasteText:(XVimRegister*)yankRegister;
 - (void)writeToLogfile:(NSString*)str;
     
