@@ -1111,6 +1111,9 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 // :., :~, :s and :gs are not supported yet
 -(void)_expandSpecialExTokens:(XVimExArg *)arg contextDict:(NSDictionary *)ctx
 {
+    if (!arg.arg || [arg.arg length]==0) {
+        return;
+    }
     NSError*error=nil;
     NSRegularExpression* regex = [ NSRegularExpression regularExpressionWithPattern:@"(%|#)(:p|:~|:h|:r|:t|:e|:\\.)*"
                                                                             options:0
