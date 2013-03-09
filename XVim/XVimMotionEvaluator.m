@@ -330,6 +330,23 @@
     return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
+// Underscore ( "_") moves the cursor to the start of the line (past leading whitespace)
+// Note: underscore without any numeric arguments behaves like caret but with a numeric argument greater than 1
+// it will moves to start of the numeric argument - 1 lines down.
+- (XVimEvaluator*)UNDERSCORE{
+    XVimSourceView* view = [self.window sourceView];
+    NSRange r = [view selectedRange];
+    NSUInteger repeat = [[self context] numericArg];
+    NSUInteger linesUpCursorloc = [view nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
+    NSUInteger head = [view headOfLineWithoutSpaces:linesUpCursorloc];
+    if( NSNotFound == head && linesUpCursorloc != NSNotFound){
+        head = linesUpCursorloc;
+    }else if(NSNotFound == head){
+        head = r.location;
+    }
+    return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE];
+}
+
 - (XVimEvaluator*)PERCENT:(XVimWindow*)window {
     if( self.numericMode ){
         return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_PERCENT, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
