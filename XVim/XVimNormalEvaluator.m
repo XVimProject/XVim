@@ -262,6 +262,12 @@
     return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window oneCharMode:NO];
 }
 
+// "S" is Synonym for "cc"
+- (XVimEvaluator*)S{
+    XVimDeleteEvaluator* d = [[[XVimDeleteEvaluator alloc] initWithContext:self.contextCopy withWindow:self.window withParent:self insertModeAtCompletion:YES] autorelease];
+    return [d performSelector:@selector(c)];
+}
+
 - (XVimEvaluator*)u{
     XVimSourceView* view = [self sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
