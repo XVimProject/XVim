@@ -144,8 +144,8 @@ The dot command ('.') is supported.
   guioptions | See below
   timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
-  [no]pasteboard | Whether yank/delete/pull uses the standard clipboard
->>>>>>> pasteboard
+  [no]pasteboard | pasteboard is not supported anymore. Use ":set clipboard=unnamed" instead.
+
 
 ## guioptions
 
