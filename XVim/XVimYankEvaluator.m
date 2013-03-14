@@ -29,7 +29,6 @@
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     [[self sourceView] yank:motion];
     return nil;
-    
 }
 @end
 

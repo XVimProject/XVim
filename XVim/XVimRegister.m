@@ -72,6 +72,10 @@
     return [self.displayName isEqualToString:@"repeat"];
 }
 
+-(BOOL) isClipboard{
+    return [self.displayName isEqualToString:@"*"];
+}
+
 -(BOOL) isReadOnly{
     BOOL readonly;
     NSCharacterSet *readonlyTokenCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@":.%#"];
@@ -103,6 +107,14 @@
 
 -(NSUInteger) nonNumericKeyCount{
     return _nonNumericKeyCount;
+}
+
+-(NSString*)string{
+    if( [self isClipboard] ){
+        return [[NSPasteboard generalPasteboard] stringForType:NSStringPboardType];
+    }else{
+        return _string;
+    }
 }
 
 -(void) clear{
@@ -138,8 +150,14 @@
         return;
     }
 
+    
     [(NSMutableString*)_string appendString:text];
     [self.keyEventsAndInsertedText addObject:text];
+    
+    if( [self isClipboard] ){
+        [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+        [[NSPasteboard generalPasteboard] setString:_string forType:NSStringPboardType];
+    }
 }
 
 -(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range {

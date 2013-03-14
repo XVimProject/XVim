@@ -270,6 +270,9 @@ static XVim* s_instance = nil;
 }
 
 - (XVimRegister*)findRegister:(NSString*)name{
+    if( [name isEqualToString:@"DQUOTE"] && [self.options.clipboard rangeOfString:@"unnamed"].location != NSNotFound ){
+       name = @"ASTERISK";
+    }
     return [self.registers valueForKey:name];
 }
 
@@ -382,15 +385,29 @@ static XVim* s_instance = nil;
         [reg appendText:deletedText];
         reg.type = type;
     }
+    
+    XVimRegister *defaultReg = [self findRegister:@"DQUOTE"];
+    [defaultReg clear];
+    [defaultReg appendText:deletedText];
 }
 
-
-- (NSString*)pasteText:(XVimRegister*)yankRegister {
-	if (yankRegister) {
+     /*
+- (NSString*)pasteText:(XVimRegister*)yankRegister
+{
+    if ([yankRegister.displayName isEqualToString:@"*"]) {
+        return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    }
+	else if (yankRegister)
+	{
 		return yankRegister.string;
 	}
-
-    return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
+    else if (self.options.pasteboard) {
+        return [[NSPasteboard generalPasteboard] stringForType:NSStringPboardType];
+    }
+    else {
+        return [[self findRegister:@"DQUOTE"] string];
+    }
 }
+     */
 
 @end
