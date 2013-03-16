@@ -24,44 +24,45 @@
 
 @implementation DVTSourceTextViewHook
 
++ (void)hook:(NSString*)method{
+    NSString* cls = @"DVTSourceTextView";
+    NSString* thisCls = NSStringFromClass([self class]);
+    [Hooker hookClass:cls method:method byClass:thisCls method:method];
+}
+
++ (void)unhook:(NSString*)method{
+    NSString* cls = @"DVTSourceTextView";
+    [Hooker unhookClass:cls method:method];
+}
+
 + (void)hook
 {
-    Class c = NSClassFromString(@"DVTSourceTextView");
-    
-    // Hook becomeFirstResponder  
-    [Hooker hookMethod:@selector(becomeFirstResponder) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(becomeFirstResponder) ) keepingOriginalWith:@selector(becomeFirstResponder_)];
-    
-    // Hook keyDown:
-    [Hooker hookMethod:@selector(keyDown:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(keyDown:) ) keepingOriginalWith:@selector(keyDown_:)];   
-    
-    // Hook mouseDown:
-    [Hooker hookMethod:@selector(mouseDown:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseDown:) ) keepingOriginalWith:@selector(mouseDown_:)];
-	
-    // Hook mouseUp:
-    [Hooker hookMethod:@selector(mouseUp:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseUp:) ) keepingOriginalWith:@selector(mouseDragged_:)];    
-	
-    // Hook mouseDragged:
-    [Hooker hookMethod:@selector(mouseDragged:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(mouseDragged:) ) keepingOriginalWith:@selector(mouseUp_:)];    
-	
-    // Hook drawRect:
-    [Hooker hookMethod:@selector(drawRect:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(drawRect:)) keepingOriginalWith:@selector(drawRect_:)];
-    
-    // Hook performKeyEquivalent:
-    [Hooker hookMethod:@selector(performKeyEquivalent:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(performKeyEquivalent:)) keepingOriginalWith:@selector(performKeyEquivalent_:)];
-    
-    // Hook shouldDrawInsertionPoint for Drawing Caret
-    [Hooker hookMethod:@selector(shouldDrawInsertionPoint) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(shouldDrawInsertionPoint)) keepingOriginalWith:@selector(shouldDrawInsertionPoint_)];
-    
-    // Hook drawInsertionPointInRect for Drawing Caret
-    [Hooker hookMethod:@selector(drawInsertionPointInRect:color:turnedOn:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(drawInsertionPointInRect:color:turnedOn:)) keepingOriginalWith:@selector(drawInsertionPointInRect_:color:turnedOn:)];
-    
-    // Hook _drawInsertionPointInRect for Drawing Caret       
-    [Hooker hookMethod:@selector(_drawInsertionPointInRect:color:) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(_drawInsertionPointInRect:color:)) keepingOriginalWith:@selector(_drawInsertionPointInRect_:color:)];
-	
-    [Hooker hookMethod:@selector(viewDidMoveToSuperview) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidMoveToSuperview) ) keepingOriginalWith:@selector(viewDidMoveToSuperview_)];
-    [Hooker hookMethod:@selector(observeValueForKeyPath:ofObject:change:context:) 
-			   ofClass:c withMethod:class_getInstanceMethod([self class], @selector(observeValueForKeyPath:ofObject:change:context:) ) 
-   keepingOriginalWith:@selector(observeValueForKeyPath_:ofObject:change:context:)];
+    [self hook:@"becomeFirstResponder"];
+    [self hook:@"keyDown:"];
+    [self hook:@"mouseDown:"];
+    [self hook:@"mouseDragged:"];
+    [self hook:@"drawRect:"];
+    [self hook:@"performKeyEquivalent:"];
+    [self hook:@"shouldDrawInsertionPoint"];
+    [self hook:@"drawInsertionPointInRect:color:turnedOn:"];
+    [self hook:@"_drawInsertionPointInRect:color:"];
+    [self hook:@"viewDidMoveToSuperview"];
+    [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
+}
+
++ (void)unhook
+{
+    [self unhook:@"becomeFirstResponder"];
+    [self unhook:@"keyDown:"];
+    [self unhook:@"mouseDown:"];
+    [self unhook:@"mouseDragged:"];
+    [self unhook:@"drawRect:"];
+    [self unhook:@"performKeyEquivalent:"];
+    [self unhook:@"shouldDrawInsertionPoint"];
+    [self unhook:@"drawInsertionPointInRect:color:turnedOn:"];
+    [self unhook:@"_drawInsertionPointInRect:color:"];
+    [self unhook:@"viewDidMoveToSuperview"];
+    [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
 
 -  (void)keyDown:(NSEvent *)theEvent{

@@ -14,6 +14,7 @@
 
 @interface DVTSourceTextViewHook : NSObject
 + (void)hook;
++ (void)unhook;
 @end
 
 @interface DVTSourceTextView(Hook)

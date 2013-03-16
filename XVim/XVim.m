@@ -34,6 +34,7 @@
 #import "XVimHistoryHandler.h"
 #import "XVimHookManager.h"
 #import "XVimCommandLine.h"
+#import "DVTSourceTextViewHook.h"
 
 static XVim* s_instance = nil;
 
@@ -67,6 +68,20 @@ static XVim* s_instance = nil;
     }
 }
 
+- (void)toggleXVim:(id)sender{
+    if( [sender state] == NSOnState ){
+        [DVTSourceTextViewHook unhook];
+        [sender setState:NSOffState];
+    }else{
+        [DVTSourceTextViewHook hook];
+        [sender setState:NSOnState];
+    }
+}
+
+- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
+    return YES;
+}
+
 + (void) load 
 { 
     NSBundle* app = [NSBundle mainBundle];
@@ -85,6 +100,21 @@ static XVim* s_instance = nil;
 	[s_instance parseRcFile];
     
     TRACE_LOG(@"XVim loaded");
+    
+    
+    // Add XVim menu item in "Edit"
+    // I have tried to add the item into "Editor" but did not work.
+    // It looks that the initialization of "Editor" menu is after loading XVim...
+    NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
+    NSMenuItem* item = [[[NSMenuItem alloc] init] autorelease];
+    item.title = @"XVim";
+    [item setEnabled:YES];
+    item.target = s_instance;
+    item.action = @selector(toggleXVim:);
+    item.state = NSOnState;
+    NSMenuItem* editorManu = [menu itemWithTitle:@"Edit"];
+    NSMenu* editorSubMenu = [editorManu submenu];
+    [editorSubMenu addItem:item];
     
     // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
     //[[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
