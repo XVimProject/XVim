@@ -32,6 +32,7 @@
     Class c = NSClassFromString(@"IDEEditorArea");
     
     [Hooker hookMethod:@selector(viewDidInstall) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidInstall) ) keepingOriginalWith:@selector(viewDidInstall_)];
+    [Hooker hookMethod:@selector(primitiveInvalidate) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(primitiveInvalidate)) keepingOriginalWith:@selector(primitiveInvalidate_)];
 }
 
 - (void)viewDidInstall{
@@ -41,6 +42,13 @@
     // Setup Command Line
     [XVimWindow createWindowForIDEEditorArea:base];
     [base setupCommandLine];
+}
+
+- (void)primitiveInvalidate
+{
+    IDEEditorArea* base = (IDEEditorArea*)self;
+    [base teardownCommandLine];
+    [base primitiveInvalidate_];
 }
 
 @end

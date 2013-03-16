@@ -92,10 +92,10 @@
 // it should go you into insert mode
 - (XVimEvaluator*)c{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:TRUE];
-    return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"c"]
+    return [[[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"c"]
                                              withWindow:self.window
 											 withParent:self
-								 insertModeAtCompletion:TRUE];
+								 insertModeAtCompletion:YES] autorelease];
 }
 
 // 'C' works similar to 'D' except that once it's done deleting
@@ -154,20 +154,20 @@
 }
 
 - (XVimEvaluator*)g{
-    return [[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window withParent:self];
+    return [[[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window withParent:self] autorelease];
 }
 
 - (XVimEvaluator*)i{
     // Go to insert 
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)I{
     [[self sourceView] insertBeforeFirstNonBlank];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
-// For 'J' (join line) bring the line up from below. all leading whitespac 
+// For 'J' (join line) bring the line up from below. all leading whitespac
 // of the line joined in should be stripped and then one space should be inserted 
 // between the joined lines
 - (XVimEvaluator*)J{
@@ -179,19 +179,19 @@
 
 - (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window withParent:self];
+	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window withParent:self] autorelease];
 }
 
 - (XVimEvaluator*)o{
     XVimSourceView* view = [self sourceView];
     [view insertNewlineBelow];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
     XVimSourceView* view = [self sourceView];
     [view insertNewlineAbove];
-    return [[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)C_o{
@@ -239,7 +239,7 @@
 - (XVimEvaluator*)r{
 	XVimEvaluatorContext *context = [XVimEvaluatorContext contextWithNumericArg:[self numericArg]];
 	[context setArgumentString:@"r"];
-    return [[XVimInsertEvaluator alloc] initWithContext:context withWindow:self.window oneCharMode:YES];
+    return [[[XVimInsertEvaluator alloc] initWithContext:context withWindow:self.window oneCharMode:YES] autorelease];
 }
 
 - (XVimEvaluator*)s{
@@ -258,8 +258,7 @@
 	if (replacementRange.length > 0){
 		[view deleteText];
 	}
-	
-    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window oneCharMode:NO];
+    return [[[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window oneCharMode:NO] autorelease];
 }
 
 // "S" is Synonym for "cc"
@@ -296,7 +295,7 @@
 }
 
 - (XVimEvaluator*)C_w{
-    return [[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] withWindow:self.window withParent:self];
+    return [[[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] withWindow:self.window withParent:self] autorelease];
 }
 
 - (XVimEvaluator*)x{
@@ -390,7 +389,6 @@ TODO: This block is from commit 42498.
 - (XVimEvaluator*)LESSTHAN{
     XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"<"] withWindow:self.window withParent:self unshift:YES] autorelease];
     return eval;
-    
 }
 
 - (XVimEvaluator*)HT{

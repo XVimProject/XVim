@@ -12,14 +12,21 @@
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent{
 	if (self = [super initWithContext:context withWindow:window]){
-		_parent = parent;
+		_parent = [parent retain];
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+    [_parent release];
+    [super dealloc];
 }
 
 - (void)drawRect:(NSRect)rect{
 	return [_parent drawRect:rect];
 }
+
 
 - (BOOL)shouldDrawInsertionPoint{
 	return [_parent shouldDrawInsertionPoint];

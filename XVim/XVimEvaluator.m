@@ -108,7 +108,7 @@ static XVimEvaluator* _invalidEvaluator = nil;
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	return [self sourceView].selectionMode == MODE_VISUAL_NONE ? [[[XVimNormalEvaluator alloc] init] autorelease] : [[[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
+	return [self sourceView].selectionMode == MODE_VISUAL_NONE ? [[[XVimNormalEvaluator alloc] init] autorelease] : [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease]
                                                                                                          withWindow:self.window
 																											mode:MODE_CHARACTER 
 																									withRange:NSMakeRange(0,0)] autorelease];
@@ -175,9 +175,9 @@ static XVimEvaluator* _invalidEvaluator = nil;
 	return [[self context] numericArg];
 }
 
-// Returns the context
-- (XVimEvaluatorContext*)context {
-	return _context;
+- (XVimEvaluatorContext*)context
+{
+	return [[_context retain] autorelease];
 }
 
 // Equivalent to [[self context] copy]
@@ -187,12 +187,13 @@ static XVimEvaluator* _invalidEvaluator = nil;
 
 // Clears the context and returns self, useful for escaping from operators
 - (XVimEvaluator*)withNewContext {
-	_context = [[XVimEvaluatorContext alloc] init];
+	self.context = [[[XVimEvaluatorContext alloc] init] autorelease];
 	return self;
 }
 
-- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context {
-	_context = context;
+- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context
+{
+	self.context = context;
 	return self;
 }
 

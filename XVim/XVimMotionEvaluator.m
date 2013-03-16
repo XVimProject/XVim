@@ -145,14 +145,14 @@
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"f"] withWindow:self.window withParent:self];
     eval.forward = YES;
     eval.previous = NO;
-    return eval;
+    return [eval autorelease];
 }
 
 - (XVimEvaluator*)F{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"F"] withWindow:self.window withParent:self];
     eval.forward = NO;
     eval.previous = NO;
-    return eval;
+    return [eval autorelease];
 }
 
 /*
@@ -164,7 +164,7 @@
  */
 
 - (XVimEvaluator*)g{
-    return [[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window withParent:self];
+    return [[[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window withParent:self] autorelease];
 }
 
 - (XVimEvaluator*)G{
@@ -232,14 +232,14 @@
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"t"] withWindow:self.window withParent:self];
     eval.forward = YES;
     eval.previous = YES;
-    return eval;
+    return [eval autorelease];
 }
 
 - (XVimEvaluator*)T{
     XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"T"] withWindow:self.window withParent:self];
     eval.forward = NO;
     eval.previous = YES;
-    return eval;
+    return [eval autorelease];
 }
 
 - (XVimEvaluator*)v{

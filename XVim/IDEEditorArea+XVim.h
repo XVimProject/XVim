@@ -19,4 +19,6 @@
 - (XVimCommandLine*)commandLine;
 - (NSView*)textViewArea;
 - (void)setupCommandLine;
+- (void)teardownCommandLine;
+- (XVimCommandLine*)commandLine;
 @end

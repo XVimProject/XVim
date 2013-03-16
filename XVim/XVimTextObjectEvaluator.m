@@ -26,14 +26,16 @@
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent inner:(BOOL)inner{
 	if (self = [super initWithContext:context withWindow:window]) {
         _inner = inner;
-		_parent = parent;
+		_parent = [parent retain];
         _bigword = NO;
 	}
 	return self;
 }
 
-- (void)drawRect:(NSRect)rect{
-	return [_parent drawRect:rect];
+- (void)dealloc
+{
+    [_parent release];
+    [super dealloc];
 }
 
 - (BOOL)shouldDrawInsertionPoint{

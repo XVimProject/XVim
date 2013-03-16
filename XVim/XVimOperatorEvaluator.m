@@ -27,13 +27,19 @@
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent{
 	if (self = [super initWithContext:context withWindow:window]){
-		_parent = parent;
+		_parent = [parent retain];
 	}
 	return self;
 }
 
 - (void)drawRect:(NSRect)rect{
 	return [_parent drawRect:rect];
+}
+
+- (void)dealloc
+{
+    [_parent release];
+    [super dealloc];
 }
 
 - (BOOL)shouldDrawInsertionPoint{
@@ -64,10 +70,11 @@
 	return [[[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] withWindow:self.window withParent:_parent inner:NO] autorelease];
 }
 
+// TODO: There used to be "b:" and "B:" methods here. Take a look how they have been.
+
 - (XVimEvaluator*)i{
     return [[[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] withWindow:self.window withParent:_parent inner:YES] autorelease];
 }
-
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
     if([keyStroke instanceResponds:self] || keyStroke.isNumeric){

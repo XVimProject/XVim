@@ -47,16 +47,16 @@
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode{
     self = [super initWithContext:context withWindow:window];
     if (self) {
-        _lastInsertedText = @"";
+        _lastInsertedText = [@"" retain];
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
         _insertedEventsAbort = NO;
-        _cancelKeys = [NSArray arrayWithObjects:
+        _cancelKeys = [[NSArray alloc] initWithObjects:
                        [NSValue valueWithPointer:@selector(ESC:)],
                        [NSValue valueWithPointer:@selector(C_LSQUAREBRACKET:)],
                        [NSValue valueWithPointer:@selector(C_c:)],
                        nil];
-        _movementKeys = [NSArray arrayWithObjects:
+        _movementKeys = [[NSArray alloc] initWithObjects:
                          [NSValue valueWithPointer:@selector(Up:)],
                          [NSValue valueWithPointer:@selector(Down:)],
                          [NSValue valueWithPointer:@selector(Left:)],
@@ -66,7 +66,16 @@
     return self;
 }
 
-- (NSString*)modeString{
+- (void)dealloc
+{
+    [_lastInsertedText release];
+    [_cancelKeys release];
+    [_movementKeys release];
+    [super dealloc];
+}
+
+- (NSString*)modeString
+{
 	return @"-- INSERT --";
 }
 
@@ -77,7 +86,7 @@
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
 	NSRange range = [[self sourceView] selectedRange];
-	return range.length == 0 ? self : [[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window mode:MODE_CHARACTER withRange:range];
+	return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window mode:MODE_CHARACTER withRange:range] autorelease];
 }
 
 - (float)insertionPointHeightRatio{
@@ -297,7 +306,6 @@
 														 insertModeAtCompletion:FALSE];
     [action motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
      */
-    
     return self;
 }
 

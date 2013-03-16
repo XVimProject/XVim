@@ -235,7 +235,6 @@ TODO: This block is from commit 42498.
     return nil;
 }
 
-
 - (XVimEvaluator*)ESC{
     [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
     return nil;

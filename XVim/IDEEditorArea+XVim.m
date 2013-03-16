@@ -18,9 +18,6 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     return [XVimWindow windowOfIDEEditorArea:self];
 }
 
-- (XVimCommandLine*)commandLine{
-    return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
-}
 
 - (NSView*)textViewArea{
     NSView* layoutView;
@@ -53,4 +50,16 @@ static const char* KEY_COMMAND_LINE = "commandLine";
     
 }
 
+- (void)teardownCommandLine
+{
+    NSView *layoutView = [self textViewArea];
+    XVimCommandLine *cmd = [self commandLine];
+    DVTBorderedView *border = [[layoutView subviews] objectAtIndex:0];
+    [border removeObserver:cmd forKeyPath:@"hidden"];
+    [[NSNotificationCenter defaultCenter] removeObserver:cmd];
+}
+
+- (XVimCommandLine*)commandLine{
+    return objc_getAssociatedObject(self, (void*)KEY_COMMAND_LINE);
+}
 @end

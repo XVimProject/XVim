@@ -42,10 +42,11 @@
 		  completion:(OnCompleteHandler)completeHandler
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler
 {
-	if (self = [super initWithContext:context withWindow:window]){
-		_parent = parent;
-		_firstLetter = firstLetter;
-		_history = history;
+    if (self = [super initWithContext:context withWindow:window])
+	{
+		_parent = [parent retain];
+		_firstLetter = [firstLetter retain];
+		_history = [history retain];
 		_onComplete = [completeHandler copy];
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
@@ -53,7 +54,18 @@
 	return self;
 }
 
-- (void)takeFocusFromWindow{
+- (void)dealloc
+{
+    [_parent release];
+    [_firstLetter release];
+    [_history release];
+    [_onComplete release];
+    [_onKeyPress release];
+    [super dealloc];
+}
+
+- (void)takeFocusFromWindow
+{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:self.window];
 	[[[[self.window sourceView] view] window] makeFirstResponder:commandField];

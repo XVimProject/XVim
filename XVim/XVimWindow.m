@@ -53,7 +53,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
     if (self = [super init]){
-		_staticString = @"";
+		_staticString = [@"" retain];
         _localMarks = [[NSMutableDictionary alloc] init];
 		_keymapContext = [[XVimKeymapContext alloc] init];
         self.editorArea = editorArea;
@@ -94,7 +94,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
     DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, [self _currentEvaluator],event.description);
-    NSMutableArray *keyStrokeOptions = [[NSMutableArray alloc] init];
+    NSMutableArray *keyStrokeOptions = [[[NSMutableArray alloc] init] autorelease];
     XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
     XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
     

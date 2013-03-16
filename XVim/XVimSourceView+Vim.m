@@ -1106,7 +1106,7 @@
         if( c == '.' || c == '!' || c == '?' ){
             // Check if this is end of a sentence.
             NSUInteger k = pos+1;
-            unichar c2;
+            unichar c2 = '\0';
             // Skip )]"'
             for( ; k < s.length ; k++ ){
                 c2 = [s characterAtIndex:k];
@@ -1168,7 +1168,7 @@
         if( c == '.' || c == '!' || c == '?' ){
             // Check if this is end of a sentence.
             NSUInteger k = pos+1;
-            unichar c2;
+            unichar c2 = '\0';
             // Skip )]"'
             for( ; k < lastSearchBase ; k++ ){
                 c2 = [s characterAtIndex:k];
@@ -1492,7 +1492,7 @@ static NSInteger seek_forwards(NSString*,NSInteger,NSCharacterSet*);
             wordSet = charSet;
         }
         else {
-            NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+            NSMutableCharacterSet *charSet = [[[NSCharacterSet alphanumericCharacterSet] mutableCopy] autorelease];
             [charSet addCharactersInString:@"_"];
             wordSet = charSet;
         }

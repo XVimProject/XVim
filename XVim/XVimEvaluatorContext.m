@@ -24,21 +24,29 @@
 		_numericArgTail = 1;
 		_numericArgHead = nil;
 		_yankRegister = nil;
-		_argumentString = @"";
+		_argumentString = [@"" retain];
 	}
 	return self;
 }
 
-+ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg {
+- (void)dealloc
+{
+    [_numericArgHead release];
+    [_argumentString release];
+    [super dealloc];
+}
+
++ (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg
+{
 	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
 	instance->_numericArgTail = numericArg;
-	return instance;
+	return [instance autorelease];
 }
 
 + (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument {
 	XVimEvaluatorContext *instance = [[XVimEvaluatorContext alloc] init];
 	instance->_argumentString = [argument copy];
-	return instance;
+	return [instance autorelease];
 }
 
 - (XVimRegister*)yankRegister {

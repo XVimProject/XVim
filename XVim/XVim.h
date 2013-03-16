@@ -20,10 +20,12 @@
 @class XVimCommandLine;
 @class XVimCommandField;
 
+extern NSString * const XVimDocumentChangedNotification;
+extern NSString * const XVimDocumentPathKey;
+
 @interface XVim : NSObject<XVimKeymapProvider, XVimTextViewDelegate>
 
 + (XVim*)instance;
-
 @property (strong) XVimOptions* options;
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimCharacterSearch* characterSearcher;
