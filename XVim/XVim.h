@@ -33,6 +33,7 @@
 @property (weak) XVimRegister *recordingRegister;
 @property (weak) XVimRegister *lastPlaybackRegister;
 @property (readonly) XVimRegister *yankRegister;
+@property (strong) NSString* document;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
 - (XVimRegister*)findRegister:(NSString*)name;

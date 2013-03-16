@@ -353,6 +353,30 @@ completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)
 - (XVimEvaluator*)DQUOTE{
     return  [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] withWindow:self.window withParent:self] autorelease];
 }
+/*
+TODO: This block is from commit 42498.
+      This is not merged. This is about percent register
+ 
+- (XVimEvaluator*)DQUOTE:(XVimWindow*)window
+{
+    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""]
+																									 parent:self
+																								 completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
+	{
+		XVimRegister *xregister = [[XVim instance] findRegister:rname];
+        if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] )
+		{
+			[context setYankRegister:xregister];
+			[context appendArgument:rname];
+            return [[XVimNormalEvaluator alloc] initWithContext:context];
+        }
+            
+		[[XVim instance] ringBell];
+		return nil;
+	}];
+	return eval;
+}
+*/ 
 
 - (XVimEvaluator*)EQUAL{
     return [[[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="] withWindow:self.window withParent:self] autorelease];

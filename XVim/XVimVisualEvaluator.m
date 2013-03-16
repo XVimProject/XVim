@@ -208,6 +208,28 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return nil;
 }
 
+/*
+TODO: This block is from commit 42498.
+      This is not merged. This is about percent register
+- (XVimEvaluator*)DQUOTE:(XVimWindow*)window{
+    XVimEvaluator* eval = [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""]
+																  parent:self
+															  completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)  
+						   {
+							   XVimRegister *xregister = [[XVim instance] findRegister:rname];
+							   if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] ){
+								   [context setYankRegister:xregister];
+								   [context appendArgument:rname];
+								   return [self withNewContext:context];
+							   }
+							   
+							   [[XVim instance] ringBell];
+							   return nil;
+						   }];
+	return eval;
+}
+*/
+
 - (XVimEvaluator*)EQUAL{
     [[self sourceView] filter:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;

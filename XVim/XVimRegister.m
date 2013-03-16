@@ -10,10 +10,13 @@
 #import "XVimEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimPlaybackHandler.h"
+#import "XVim.h"
+#import "Logger.h"
 
 @interface XVimRegister() {
 	NSRange _selectedRange;
 	VISUAL_MODE _visualMode;
+    NSMutableString* _text;
 }
 @property (readwrite) BOOL isPlayingBack;
 @property (strong) NSMutableArray *keyEventsAndInsertedText;
@@ -27,6 +30,34 @@
 @synthesize isPlayingBack = _isPlayingBack;
 @synthesize keyEventsAndInsertedText = _keyEventsAndInsertedText;
 @synthesize nonNumericKeyCount = _nonNumericKeyCount;
+
+-(void)setText:(NSMutableString*)text
+{
+	@synchronized(self)
+	{
+		if( ![self isReadOnly] ){
+			if( text != _text ){
+				[_text release];
+				_text = [text retain];
+			}
+		} else {
+			ERROR_LOG( "assert! readonly register" );
+		}
+	}
+}
+
+-(NSMutableString*)text
+{
+	@synchronized(self)
+	{
+		if( [_displayName isEqualToString:@"%"] ){
+            // current file name register
+			return [NSMutableString stringWithString:[XVim instance].document];
+		} else {
+			return [[_text retain] autorelease];
+		}
+	}
+}
 
 -(NSString*) description{
     return [[NSString alloc] initWithFormat:@"%@:%@", self.displayName, self.string];
@@ -147,6 +178,9 @@
 
 -(void) appendText:(NSString*)text{
     if (self.isPlayingBack){
+        return;
+    }
+    if (self.isReadOnly){
         return;
     }
 

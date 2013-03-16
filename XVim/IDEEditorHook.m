@@ -11,6 +11,7 @@
 #import "IDESourceEditor.h"
 #import "Hooker.h"
 #import "Logger.h"
+#import "XVim.h"
 #import "XVimStatusLine.h"
 
 @implementation IDEEditorHook
@@ -53,6 +54,9 @@
 			
 			// To notify contents of editor is changed
 			[editor addObserver:status forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
+            
+            // For % register
+            [editor addObserver:[XVim instance] forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
 		}
     }
     //---- TO HERE ----

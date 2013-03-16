@@ -58,6 +58,7 @@ static XVim* s_instance = nil;
 @synthesize characterSearcher = _characterSearcher;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
+@synthesize document = _document;
 
 // For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{
@@ -230,6 +231,8 @@ static XVim* s_instance = nil;
         }else{
             [[Logger defaultLogger] setLogFile:nil];
         }
+    } else if( [keyPath isEqualToString:@"document"] ){
+        self.document = [[[object document] fileURL] path];
     }
 }
     
