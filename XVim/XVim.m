@@ -443,23 +443,4 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [defaultReg appendText:deletedText];
 }
 
-     /*
-- (NSString*)pasteText:(XVimRegister*)yankRegister
-{
-    if ([yankRegister.displayName isEqualToString:@"*"]) {
-        return [[NSPasteboard generalPasteboard]stringForType:NSStringPboardType];
-    }
-	else if (yankRegister)
-	{
-		return yankRegister.string;
-	}
-    else if (self.options.pasteboard) {
-        return [[NSPasteboard generalPasteboard] stringForType:NSStringPboardType];
-    }
-    else {
-        return [[self findRegister:@"DQUOTE"] string];
-    }
-}
-     */
-
 @end
