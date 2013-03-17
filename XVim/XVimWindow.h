@@ -23,6 +23,7 @@
 @class XVimEvaluator;
 @class XVimRegister;
 @class IDEEditorArea;
+@class IDEWorkspaceWindow;
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
@@ -66,5 +67,7 @@
 + (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea;
 
 - (void)setForcusBackToSourceView;
+
+- (IDEWorkspaceWindow*)currentWorkspaceWindow;
 
 @end

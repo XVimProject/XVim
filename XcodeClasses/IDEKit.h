@@ -18472,8 +18472,8 @@ typedef struct {
 - (void)moveKeyboardFocusToPreviousArea:(id)arg1;
 - (void)moveKeyboardFocusToNextArea:(id)arg1;
 - (void)_moveKeyboardFocusToNextAreaForward:(BOOL)arg1;
-- (id)_keyboardFocusAreas;
-- (id)_currentFirstResponderArea;
+- (id)_keyboardFocusAreas;    // Returns NSArray ( its like array of IDENavigatorArea, IDEEditorContext, IDEDefaultDebugArea ) These are all IDEViewController derived classes.
+- (id)_currentFirstResponderArea; // Returns IDEEditorContext
 - (void)performCloseWorkspace:(id)arg1;
 - (void)_workspaceDocument:(id)arg1 shouldClose:(BOOL)arg2 contextInfo:(void *)arg3;
 - (void)setShowDisassemblyWhenDebugging:(id)arg1;

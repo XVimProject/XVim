@@ -343,8 +343,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     [commandLine errorMessage:message Timer:NO RedColorSetting:NO];
 }
 
-- (void)clearErrorMessage
-{
+- (void)clearErrorMessage {
 	XVimCommandLine *commandLine = self.commandLine;
     [commandLine errorMessage:@"" Timer:NO RedColorSetting:YES];
 }
@@ -353,6 +352,20 @@ static const char* KEY_WINDOW = "xvimwindow";
     [[[self.sourceView view] window] makeFirstResponder:[self.sourceView view]];
 }
 
+- (IDEWorkspaceWindow*)currentWorkspaceWindow{
+    IDEWorkspaceWindow* window = (IDEWorkspaceWindow*)[[self.sourceView view] window];
+    return window;
+}
+
+static char s_associate_key = 0;
+
++ (XVimWindow*)associateOf:(id)object {
+	return (XVimWindow*)objc_getAssociatedObject(object, &s_associate_key);
+}
+
+- (void)associateWith:(id)object {
+	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
+}
 
 @end
 
