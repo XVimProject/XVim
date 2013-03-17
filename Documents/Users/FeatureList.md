@@ -63,6 +63,17 @@ Ctrl-v is not supported now.
 
 Visual block mode is currently not supported.
 
+## Window manipulation
+
+ Input     | Operation
+-----------|---------------------------
+  C-w n    | Add new assisntant editor
+  C-w q    | Delete one assistant editor
+  C-w s    | Add new assistant editor horizontally
+  C-w v    | Add new assistant editor vertically
+C-w h,j,k,l| Move forcus between editors
+
+
 ## Search and Replace
 
 /, ?, #, \*, g*, g#, :s, n, N
