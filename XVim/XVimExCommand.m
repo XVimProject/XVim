@@ -20,6 +20,7 @@
 #import "XVimOptions.h"
 #import "XVimTester.h"
 #import "IDEKit.h"
+#import "XVimDebug.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -897,8 +898,15 @@
     [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
-- (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
+- (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    NSArray* params = [args.arg componentsSeparatedByString:@" "];
+    if( [params count] == 0 ){
+        return;
+    }
+    XVimDebug* debug = [[[XVimDebug alloc] init] autorelease];
+    if( [debug respondsToSelector:NSSelectorFromString([params objectAtIndex:0])] ){
+        [debug performSelector:NSSelectorFromString([params objectAtIndex:0])];
+    }
 }
 
 - (void)xvimtest:(XVimExArg*)args inWindow:(XVimWindow*)window{

@@ -18910,7 +18910,7 @@ typedef struct {
 @property(readonly, getter=isInMiniDebuggingMode) BOOL inMiniDebuggingMode; // @synthesize inMiniDebuggingMode=_inMiniDebuggingMode;
 @property(retain, nonatomic) DVTTabBarView *tabBarView; // @synthesize tabBarView=_tabBarView;
 @property(retain, nonatomic) DVTTabSwitcher *tabSwitcher; // @synthesize tabSwitcher;
-- (void)moveFocusToEditor:(id)arg1;
+- (void)moveFocusToEditor:(id)arg1; // This shows move forcus dialog
 - (void)dicardEditing;
 - (BOOL)commitEditingForAction:(int)arg1 errors:(id)arg2;
 - (void)_updateWindowTitle;
