@@ -9,6 +9,7 @@
 #import <objc/runtime.h>
 
 @interface Hooker : NSObject
+
 /**
  * Hook method specified by "cls" and "mtd" by "cls2"-"mtd2.
  * All the calls to the "cls"-"mtd" will be redirected to "cls2", "mtd2"
@@ -24,8 +25,17 @@
  *          - "setSelectedRange:affinity:stillSelecting:" would be "setSelectedRange_:affinity:stillSelecting:"
  **/
 + (void) hookClass:(NSString*)cls method:(NSString*)mtd byClass:(NSString*)cls2 method:(NSString*)mtd2;
+
+/**
+ * Unhook "cls"'s "mtd" method.
+ * This method must be hooked by hookClass:... method.
+ **/
 + (void) unhookClass:(NSString*)cls method:(NSString*)mtd;
 
+/**
+ * This is actual implemenatation of hookClass:... method.
+ * Do not use this unless you need hook with special names ( not obeying the rule above )
+ **/
 + (void) hookMethod:(SEL)sel ofClass:(Class)cls withMethod:(Method)newMethod keepingOriginalWith:(SEL)selOriginal;
 
 @end
