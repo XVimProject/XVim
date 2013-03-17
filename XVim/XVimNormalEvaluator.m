@@ -516,9 +516,19 @@ static NSArray *_invalidRepeatKeys;
     if (keySelector == [NSValue valueWithPointer:@selector(q:)]) {
         return REGISTER_IGNORE;
     } else if (xregister.isRepeat) {
+        // DOT command register
         if ([keyStroke classImplements:[XVimNormalEvaluator class]]) {
             if ([_invalidRepeatKeys containsObject:keySelector] == NO) {
-                return REGISTER_REPLACE;
+                [xregister clear];
+                if( [self numericArg] >= 2 ){
+                    NSString* str = [NSString stringWithFormat:@"%ld",[self numericArg]];
+                    for( NSUInteger i = 0; i < str.length; ++i ){
+                        NSString* s1 = [str substringWithRange:NSMakeRange(i, 1)];
+                        XVimKeyStroke* keyStroke = [XVimKeyStroke fromString:s1];
+                        [xregister appendKeyEvent:keyStroke];
+                    }
+                }
+                return REGISTER_APPEND;
             }
         }
     }

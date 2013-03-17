@@ -24,6 +24,7 @@
 @property (nonatomic, strong) NSString *lastInsertedText;
 @property (nonatomic, readonly, strong) NSArray *cancelKeys;
 @property (nonatomic, readonly, strong) NSArray *movementKeys;
+@property (nonatomic) BOOL enoughBufferForReplace;
 @end
 
 @implementation XVimInsertEvaluator{
@@ -37,7 +38,7 @@
 @synthesize movementKeys = _movementKeys;
 @synthesize lastInsertedText = _lastInsertedText;
 @synthesize movementKeyPressed = _movementKeyPressed;
-
+@synthesize enoughBufferForReplace = _enoughBufferForReplace;
 
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window{
@@ -51,6 +52,7 @@
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
         _insertedEventsAbort = NO;
+        _enoughBufferForReplace = YES;
         _cancelKeys = [[NSArray alloc] initWithObjects:
                        [NSValue valueWithPointer:@selector(ESC:)],
                        [NSValue valueWithPointer:@selector(C_LSQUAREBRACKET:)],
@@ -172,7 +174,7 @@
 - (void)willEndHandler{
 	XVimSourceView *sourceView = [self sourceView];
 	
-    if( !_insertedEventsAbort ){
+    if( !_insertedEventsAbort && !_oneCharMode ){
         NSString *text = [self getInsertedText];
         for( int i = 0 ; i < [self numericArg]-1; i++ ){
             [sourceView insertText:text];
@@ -181,7 +183,9 @@
     
     // Store off any needed text
     XVim *xvim = [XVim instance];
-    if (!self.movementKeyPressed){
+    if( _oneCharMode ){
+
+    }else if (!self.movementKeyPressed){
         [self recordTextIntoRegister:xvim.recordingRegister];
         [self recordTextIntoRegister:xvim.repeatRegister];
     }else if(self.lastInsertedText.length > 0){
@@ -215,17 +219,33 @@
     
     if (nextEvaluator != nil){
         NSEvent *event = [keyStroke toEvent];
-        if (_oneCharMode == TRUE) {
-            NSRange save = [[self sourceView] selectedRange];
-            for (NSUInteger i = 0; i < [self numericArg]; ++i) {
-                [[self sourceView] deleteForward];
-                [[self sourceView] passThroughKeyDown:event];
-                
-                save.location += 1;
+        if (_oneCharMode) {
+            // check buffer limit
+            XVimSourceView *view = [self sourceView];
+            NSUInteger loc = [view selectedRange].location;
+            if( [[view string] length] < loc + [self numericArg] ){
+                _enoughBufferForReplace = FALSE;
+            } else {
+                // r command effect is in one line.
+                for( NSUInteger i = loc; i <= loc + [self numericArg]-1; ++i ){
+                    unichar uc = [[view string] characterAtIndex:i];
+                    if( [[NSCharacterSet newlineCharacterSet] characterIsMember:uc] ){
+                        _enoughBufferForReplace = FALSE;
+                    }
+                }
+            }
+            if( _enoughBufferForReplace ){
+                NSRange save = [[self sourceView] selectedRange];
+                for (NSUInteger i = 0; i < [self numericArg]; ++i) {
+                    [[self sourceView] deleteForward];
+                    [[self sourceView] passThroughKeyDown:event];
+                    
+                    save.location += 1;
+                    [[self sourceView] setSelectedRange:save];
+                }
+                save.location -= 1;
                 [[self sourceView] setSelectedRange:save];
             }
-            save.location -= 1;
-            [[self sourceView] setSelectedRange:save];
             nextEvaluator = nil;
         } else if ([self windowShouldReceive:keySelector]) {
             [[self sourceView] passThroughKeyDown:event];
