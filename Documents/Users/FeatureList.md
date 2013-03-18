@@ -67,7 +67,7 @@ Visual block mode is currently not supported.
 
  Input     | Operation
 -----------|---------------------------
-  C-w n    | Add new assisntant editor
+  C-w n    | Add new assistant editor
   C-w q    | Delete one assistant editor
   C-w s    | Add new assistant editor horizontally
   C-w v    | Add new assistant editor vertically
