@@ -297,7 +297,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 
 - (void)writeToLogfile:(NSString*)str{
-    return;
     if( ![[self.options getOption:@"debug"] boolValue] ){
         return;
     }
