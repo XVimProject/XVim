@@ -563,7 +563,6 @@ static NSArray *_invalidRepeatKeys;
 
 
 - (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{
-    
    return nil;
 }
 

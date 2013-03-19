@@ -21,11 +21,11 @@
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     NSString* keyStr = [keyStroke toSelectorString];
 	if ([keyStr length] != 1) {
-        return [self defaultNextEvaluator];
+        return [XVimEvaluator invalidEvaluator];
     }
     unichar c = [keyStr characterAtIndex:0];
     if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z')) || c == '`' || c == '\'' ) ) {
-        return [self defaultNextEvaluator];
+        return [XVimEvaluator invalidEvaluator];
     }
 	NSRange r = [[self sourceView] selectedRange];
 	NSValue *v =[NSValue valueWithRange:r];
@@ -35,7 +35,7 @@
     }
 	[[self.window getLocalMarks] setValue:v forKey:keyStr];
     
-    return [self defaultNextEvaluator];
+    return nil;
 }
 
 @end

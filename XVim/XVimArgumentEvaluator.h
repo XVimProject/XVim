@@ -6,12 +6,10 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+@class XVimKeyStroke;
 #import "XVimEvaluator.h"
 
-// Helper class
-// Funnels certain evaluator calls to the parent
 @interface XVimArgumentEvaluator : XVimEvaluator {
 }
-
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window;
+@property(strong) XVimKeyStroke* keyStroke;
 @end

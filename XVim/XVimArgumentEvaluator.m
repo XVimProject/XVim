@@ -7,16 +7,19 @@
 //
 
 #import "XVimArgumentEvaluator.h"
+#import "XVimKeyStroke.h"
+#import "XVimWindow.h"
 
 @implementation XVimArgumentEvaluator
+@synthesize keyStroke = _keyStroke;
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window{
-	if (self = [super initWithContext:context withWindow:window]){
-	}
-	return self;
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
+    self.keyStroke = keyStroke;
+    return nil;
 }
 
 - (void)dealloc{
+    self.keyStroke = nil;
     [super dealloc];
 }
 
