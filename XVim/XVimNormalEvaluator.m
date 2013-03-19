@@ -41,8 +41,8 @@
 
 @implementation XVimNormalEvaluator
 
--(id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window playbackRegister:(XVimRegister*)xregister{
-	self = [super initWithContext:context withWindow:window];
+-(id)initWithContext:(XVimEvaluatorContext*)context playbackRegister:(XVimRegister*)xregister{
+	self = [super initWithContext:context withWindow:self.window];
     if (self) {
 		_playbackRegister = xregister;
     }
@@ -154,7 +154,7 @@
 }
 
 - (XVimEvaluator*)g{
-    return [[[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window withParent:self] autorelease];
+    return [[[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)i{
@@ -179,7 +179,7 @@
 
 - (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window withParent:self] autorelease];
+	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)o{
@@ -225,7 +225,20 @@
         return nil;
     }
     
-    return [[XVimRecordingRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"] withWindow:self.window withParent:self];
+    XVimEvaluator* e = [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"] withWindow:self.window];
+    self.onChildCompleteHandler = @selector(onComplete_q:);
+    return e;
+}
+
+- (XVimEvaluator*)onComplete_q:(XVimRegisterEvaluator*)childEvaluator{
+    NSAssert([childEvaluator isMemberOfClass:[XVimRegisterEvaluator class]], @"childEvaluato must be a XVimRegisterEvaluator");
+    XVimRegister *xregister = childEvaluator.reg;
+    if (xregister && xregister.isReadOnly == NO) {
+        [self.window recordIntoRegister:xregister];
+    } else {
+        [[XVim instance] ringBell];
+    }
+    return nil;
 }
 
 - (XVimEvaluator*)C_r{
@@ -295,7 +308,7 @@
 }
 
 - (XVimEvaluator*)C_w{
-    return [[[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] withWindow:self.window withParent:self] autorelease];
+    return [[[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)x{
@@ -328,29 +341,25 @@
 }
 
 - (XVimEvaluator*)AT{
-    XVimEvaluator *eval = [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"] withWindow:self.window withParent:self] autorelease];
-    // FIXME
-    /*
-completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context)
-                           {
-                               XVim *xvim = [XVim instance];
-                               XVimRegister *xregister = [rname isEqualToString:@"AT"] ? [xvim lastPlaybackRegister] : [xvim findRegister:rname];
-                               
-                               if (xregister && xregister.isReadOnly == NO) {
-                                   return [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy]
-                                                                      playbackRegister:xregister];
-                               } else {
-                                   [xvim ringBell];
-                                   return nil;
-                               }
-                           }];
-	
-     */
+    XVimEvaluator *eval = [[[XVimRecordingRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"] withWindow:self.window] autorelease];
+    self.onChildCompleteHandler = @selector(onComplete_AT:);
 	return eval;
 }
 
+- (XVimEvaluator*)onComplete_AT:(XVimRecordingRegisterEvaluator*)childEvaluator{
+    NSAssert([childEvaluator isMemberOfClass:[XVimRecordingRegisterEvaluator class]], @"childEvaluator must be a XVimRegisterEvaluator");
+    XVimRegister *xregister = childEvaluator.reg;
+    XVimEvaluator* ret = nil;
+    if (xregister && xregister.isReadOnly == NO) {
+        ret = [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy] playbackRegister:xregister];
+    } else {
+        ret = [XVimEvaluator invalidEvaluator];
+    }
+    return ret;
+}
+
 - (XVimEvaluator*)DQUOTE{
-    return  [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] withWindow:self.window withParent:self] autorelease];
+    return  [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] withWindow:self.window] autorelease];
 }
 /*
 TODO: This block is from commit 42498.
@@ -477,6 +486,23 @@ TODO: This block is from commit 42498.
 	return nil;
 }
 
+- (XVimEvaluator*)DEL{
+    [[self sourceView] moveBackward];
+	return nil;
+}
+
+- (XVimEvaluator*)ForwardDelete{
+	return [self x];
+}
+
+-(XVimEvaluator*)Pageup{
+    return [self C_b];
+}
+
+-(XVimEvaluator*)Pagedown{
+    return [self C_f];
+}
+
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     // in normal mode
     // move the a cursor to end of motion. We ignore the motion type.
@@ -535,20 +561,10 @@ static NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
-- (XVimEvaluator*)DEL{
-    [[self sourceView] moveBackward];
-	return nil;
+
+- (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{
+    
+   return nil;
 }
 
-- (XVimEvaluator*)ForwardDelete{
-	return [self x];
-}
-
--(XVimEvaluator*)Pageup{
-    return [self C_b];
-}
-
--(XVimEvaluator*)Pagedown{
-    return [self C_f];
-}
 @end

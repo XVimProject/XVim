@@ -19,17 +19,6 @@
 @end
 
 @implementation XVimRegisterEvaluator
-- (id)initWithContext:(XVimEvaluatorContext *)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent{
-    if (self = [super initWithContext:context withWindow:window withParent:parent]) {
-	}
-	return self;
-}
-
-
-- (void)registerFixed:(NSString*)rname{
-    [[XVim instance] setYankRegisterByName:rname];
-    [self.context appendArgument:rname];
-}
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:MODE_NONE];
@@ -42,8 +31,8 @@
         return [self performSelector:handler];
     }
 
-    [self registerFixed:[keyStroke toString]];
-    return [_parent withNewContext:self.context];
+    self.reg = [[XVim instance] findRegister:[keyStroke toString]];
+    return nil;
 }
 	
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
@@ -53,13 +42,8 @@
 @end
 
 @implementation XVimRecordingRegisterEvaluator
-- (void)registerFixed:(NSString*)rname{
-    XVimRegister *xregister = [[XVim instance] findRegister:rname];
-    if (xregister && xregister.isReadOnly == NO) {
-        [self.window recordIntoRegister:xregister];
-    } else {
-        [[XVim instance] ringBell];
-    }
+- (XVimEvaluator*)AT{
+    self.reg = [[XVim instance] lastPlaybackRegister];
+    return nil;
 }
-
 @end

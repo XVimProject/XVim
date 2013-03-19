@@ -52,6 +52,8 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 @interface XVimEvaluator : NSObject
 @property(strong) XVimEvaluatorContext* context;
 @property(strong) XVimWindow* window;
+@property(strong) XVimEvaluator* parent;
+@property SEL onChildCompleteHandler;
 
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window;
 

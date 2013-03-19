@@ -48,6 +48,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     // Initialize evlauator stack
     [_evaluatorStack removeAllObjects];
     XVimEvaluator* firstEvaluator = [[[XVimNormalEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self] autorelease];
+    [firstEvaluator becameHandler];
     [_evaluatorStack addObject:firstEvaluator];
 }
 
@@ -135,6 +136,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self clearErrorMessage];
 	XVimEvaluator* currentEvaluator = [_evaluatorStack lastObject];
+    currentEvaluator.window = self;
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
     
     // Record the event
@@ -156,12 +158,14 @@ static const char* KEY_WINDOW = "xvimwindow";
             }
             else{
                 // Pass current evaluator to the evaluator below the current evaluator
-                nextEvaluator = [(XVimEvaluator*)[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2] onChildComplete:currentEvaluator];
+                SEL onCompleteHandler = ((XVimEvaluator*)[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2]).onChildCompleteHandler;
+                nextEvaluator = [[_evaluatorStack objectAtIndex:[_evaluatorStack count]-2] performSelector:onCompleteHandler withObject:currentEvaluator];
                 [nextEvaluator becameHandler];
                 [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
                 // Not break here. check the nextEvaluator repeatedly.
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
+            [[XVim instance] ringBell];
             [self _initEvaluatorStack];
             break;
         }else if( currentEvaluator != nextEvaluator ){

@@ -26,10 +26,9 @@ static XVimEvaluator* _invalidEvaluator = nil;
 @implementation XVimEvaluator
 @synthesize context = _context;
 @synthesize window = _window;
+@synthesize parent = _parent;
+@synthesize onChildCompleteHandler = _onChildCompleteHandler;
 
-- (id)init {
-	return nil;
-}
 
 + (XVimEvaluator*)invalidEvaluator{
    	if(_invalidEvaluator){
@@ -44,19 +43,25 @@ static XVimEvaluator* _invalidEvaluator = nil;
     return _invalidEvaluator;
 }
 
+- (id)init {
+    self = [super init];
+	return self;
+}
+
 - (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window{
     NSAssert( nil != window, @"window must not be nil");
     if(self = [super init]){
         self.context = context;
         self.window = window;
+        self.onChildCompleteHandler = @selector(onChildComplete:);
     }
     return self;
 }
 
 - (void)dealloc{
-    [super dealloc];
     self.context = nil;
     self.window = nil;
+    [super dealloc];
 }
 
 - (XVimSourceView*)sourceView{
@@ -86,7 +91,6 @@ static XVimEvaluator* _invalidEvaluator = nil;
 }
    
 - (void)becameHandler{
-    
 }
 
 - (void)didEndHandler{
@@ -148,11 +152,14 @@ static XVimEvaluator* _invalidEvaluator = nil;
 	return other == self;
 }
 
-- (XVimEvaluator*)D_d:(XVimWindow*)window{
+- (XVimEvaluator*)D_d{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.
-    
     return nil;
+}
+
+- (XVimEvaluator*)ESC{
+    return [XVimEvaluator invalidEvaluator];
 }
 
 // Normally argumentString, but can be overridden
@@ -175,8 +182,7 @@ static XVimEvaluator* _invalidEvaluator = nil;
 	return [[self context] numericArg];
 }
 
-- (XVimEvaluatorContext*)context
-{
+- (XVimEvaluatorContext*)context{
 	return [[_context retain] autorelease];
 }
 
@@ -191,8 +197,7 @@ static XVimEvaluator* _invalidEvaluator = nil;
 	return self;
 }
 
-- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context
-{
+- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context{
 	self.context = context;
 	return self;
 }

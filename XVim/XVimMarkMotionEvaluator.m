@@ -21,8 +21,8 @@
 
 @implementation XVimMarkMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimMotionEvaluator*)parent markOperator:(XVimMarkOperator)markOperator {
-	if (self = [super initWithContext:context withWindow:window withParent:parent]) {
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window markOperator:(XVimMarkOperator)markOperator {
+	if (self = [super initWithContext:context withWindow:window]) {
 		_markOperator = markOperator;
 	}
 	return self;
@@ -68,7 +68,7 @@
 		return nil;
 	}
 	
-    NSUInteger from = [[self sourceView] selectedRange].location;
+    //NSUInteger from = [[self sourceView] selectedRange].location;
 	MOTION_TYPE motionType = CHARACTERWISE_EXCLUSIVE;
 	
 	if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
@@ -81,7 +81,9 @@
     NSValue *v =[NSValue valueWithRange:r];
     [[self.window getLocalMarks] setValue:v forKey:@"'"];
 
-    return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType];
+    //TODO: Support onChileComplele
+   // return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType];
+    return nil;
 }
 
 @end

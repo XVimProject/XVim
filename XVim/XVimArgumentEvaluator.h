@@ -11,9 +11,7 @@
 // Helper class
 // Funnels certain evaluator calls to the parent
 @interface XVimArgumentEvaluator : XVimEvaluator {
-@protected
-    XVimEvaluator* _parent;
 }
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent;
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window;
 @end

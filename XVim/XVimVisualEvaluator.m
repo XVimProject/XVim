@@ -108,7 +108,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)g{
-	return [[[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"] withWindow:self.window withParent:self] autorelease];
+	return [[[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)i{
@@ -125,7 +125,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window withParent:self] autorelease];
+	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)p{
@@ -199,7 +199,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)DQUOTE{
-    return [[[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] withWindow:self.window withParent:self] autorelease];
+    return [[[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] withWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)Y{

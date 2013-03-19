@@ -17,7 +17,6 @@ typedef enum {
 
 - (id)initWithContext:(XVimEvaluatorContext*)context
            withWindow:(XVimWindow *)window
-			   withParent:(XVimMotionEvaluator*)parent
 		 markOperator:(XVimMarkOperator)markOperator;
 
 + (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window;

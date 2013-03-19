@@ -10,14 +10,8 @@
 #import "XVimArgumentEvaluator.h"
 
 @interface XVimRegisterEvaluator : XVimArgumentEvaluator
-
-- (void)registerFixed:(NSString*)rname;
-
-- (id)initWithContext:(XVimEvaluatorContext *)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent;
-
+@property(strong) XVimRegister* reg;
 @end
 
 @interface XVimRecordingRegisterEvaluator : XVimRegisterEvaluator
-
 @end
-

@@ -14,27 +14,25 @@
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimMotionEvaluator*)parent {
-	if (self = [super initWithContext:context withWindow:window withParent:parent]) {
+- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window{
+	if (self = [super initWithContext:context withWindow:window]) {
 	}
 	return self;
 }
 
+/*
 - (XVimMotionEvaluator*)motionEvaluator {
 	return (XVimMotionEvaluator*)_parent;
 }
+*/
 
 -(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    if( nil != _parent ){
-        return [[self motionEvaluator] motionFixedFrom:from To:to Type:type];
-    }
+    // TODO: support onChileComplete
     return nil;
 }
 
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{
-    if( nil != _parent ){
-        return [[self motionEvaluator] commonMotion:motion Type:type];
-    }
+    // TODO: support onChileComplete
     return nil;
 }
 
