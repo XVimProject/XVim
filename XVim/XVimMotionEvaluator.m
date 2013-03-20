@@ -44,8 +44,8 @@
 
 @implementation XVimMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window{
-    self = [super initWithContext:context withWindow:window];
+- (id)initWithWindow:(XVimWindow *)window{
+    self = [super initWithWindow:window];
     if (self) {
         _forcedMotionType = DEFAULT_MOTION_TYPE;
     }
@@ -142,14 +142,16 @@
 }
 
 - (XVimEvaluator*)f{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"f"] withWindow:self.window];
+    [self.argumentString appendString:@"f"];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
     eval.forward = YES;
     eval.previous = NO;
     return [eval autorelease];
 }
 
 - (XVimEvaluator*)F{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"F"] withWindow:self.window];
+    [self.argumentString appendString:@"F"];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
     eval.forward = NO;
     eval.previous = NO;
     return [eval autorelease];
@@ -164,7 +166,8 @@
  */
 
 - (XVimEvaluator*)g{
-    return [[[XVimGMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"g"];
+    return [[[XVimGMotionEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)G{
@@ -229,14 +232,17 @@
  */
 
 - (XVimEvaluator*)t{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"t"] withWindow:self.window];
+    [self.argumentString appendString:@"t"];
+    
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
     eval.forward = YES;
     eval.previous = YES;
     return [eval autorelease];
 }
 
 - (XVimEvaluator*)T{
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"T"] withWindow:self.window];
+    [self.argumentString appendString:@"T"];
+    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
     eval.forward = NO;
     eval.previous = YES;
     return [eval autorelease];
@@ -270,7 +276,8 @@
 }
 
 - (XVimEvaluator*)z{
-    return [[XVimZEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"z"] withWindow:self.window];
+    [self.argumentString appendString:@"z"];
+    return [[XVimZEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)NUM0{
@@ -313,11 +320,13 @@
 //  the range of the document
 
 - (XVimEvaluator*)SQUOTE{
-    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"'"] withWindow:self.window markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
+    [self.argumentString appendString:@"'"];
+    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
 }
 
 - (XVimEvaluator*)BACKQUOTE{
-    return [[XVimMarkMotionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"`"] withWindow:self.window markOperator:MARKOPERATOR_MOVETO];
+    [self.argumentString appendString:@"`"];
+    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window markOperator:MARKOPERATOR_MOVETO];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
@@ -336,7 +345,7 @@
 - (XVimEvaluator*)UNDERSCORE{
     XVimSourceView* view = [self.window sourceView];
     NSRange r = [view selectedRange];
-    NSUInteger repeat = [[self context] numericArg];
+    NSUInteger repeat = self.numericArg;
     NSUInteger linesUpCursorloc = [view nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
     NSUInteger head = [view headOfLineWithoutSpaces:linesUpCursorloc];
     if( NSNotFound == head && linesUpCursorloc != NSNotFound){

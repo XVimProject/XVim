@@ -10,29 +10,22 @@
 #import "XVimKeyStroke.h"
 
 @implementation XVimNumericEvaluator
-
-- (BOOL)numericMode{
-	return [[self context] numericArgHead] != nil;
-}
+@synthesize numericMode = _numericMode;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     NSString* keyStr = [keyStroke toSelectorString];
-	XVimEvaluatorContext *context = [self context];
 	
     if (keyStroke.isNumeric) {
-		
-		NSNumber *numericArgHead = [context numericArgHead];
-		
-        if (numericArgHead) {
+        if (self.numericMode) {
             NSString* numStr = [keyStr substringFromIndex:3];
             NSUInteger n = (NSUInteger)[numStr integerValue]; 
-			NSUInteger newHead = [numericArgHead unsignedIntegerValue];
+			NSUInteger newHead = self.numericArg;
             // prevent integer overflow
             if(newHead <= floor((NSUIntegerMax - n) / 10)){
                 newHead*=10; 
                 newHead+=n;
-                [context setNumericArgHead:newHead];
-                [context appendArgument:numStr];
+                self.numericArg = n;
+                [self.argumentString appendString:numStr];
             }
             return self;
         }
@@ -43,8 +36,9 @@
             }else{
                 NSString* numStr = [keyStr substringFromIndex:3];
                 NSUInteger n = (NSUInteger)[numStr integerValue]; 
-				[context setNumericArgHead:n];
-				[context appendArgument:numStr];
+				self.numericArg = n;
+				[self.argumentString appendString:numStr];
+                self.numericMode = YES;
                 return self;
             }
         }

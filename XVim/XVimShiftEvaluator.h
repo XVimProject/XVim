@@ -12,5 +12,5 @@
 
 
 @interface XVimShiftEvaluator : XVimOperatorEvaluator
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window withParent:(XVimEvaluator*)parent unshift:(BOOL)unshift;
+- (id)initWithWindow:(XVimWindow*)window unshift:(BOOL)unshift;
 @end

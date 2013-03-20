@@ -15,8 +15,8 @@
 // They only rely on their interface to handle them.
 @interface XVimVisualEvaluator : XVimMotionEvaluator 
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode;
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode withRange:(NSRange)range; // Range is line numbers if mode == MODE_LINE
+- (id)initWithWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode;
+- (id)initWithWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode withRange:(NSRange)range; // Range is line numbers if mode == MODE_LINE
 
 
 @end

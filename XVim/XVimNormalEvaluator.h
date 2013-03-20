@@ -16,6 +16,6 @@
 // move the cusor to the position
 @interface XVimNormalEvaluator : XVimMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context playbackRegister:(XVimRegister*)xregister;
+- (id)initWithWindow:(XVimWindow*)window playbackRegister:(XVimRegister*)xregister;
 
 @end

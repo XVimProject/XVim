@@ -24,12 +24,12 @@
 @class XVimRegister;
 @class IDEEditorArea;
 @class IDEWorkspaceWindow;
+@class XVimEvaluatorContext;
 
 @interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
-@property(retain) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
-@property(retain) IDEEditorArea* editorArea;
-
+@property(strong) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
+@property(strong) IDEEditorArea* editorArea;
 
 - (NSUInteger)insertionPoint; // May be removed. This should be accessed via sourceView::insertionPoint
 - (XVimCommandLine*)commandLine;

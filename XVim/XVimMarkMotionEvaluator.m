@@ -21,8 +21,8 @@
 
 @implementation XVimMarkMotionEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window markOperator:(XVimMarkOperator)markOperator {
-	if (self = [super initWithContext:context withWindow:window]) {
+- (id)initWithWindow:(XVimWindow*)window markOperator:(XVimMarkOperator)markOperator {
+	if (self = [super initWithWindow:window]) {
 		_markOperator = markOperator;
 	}
 	return self;

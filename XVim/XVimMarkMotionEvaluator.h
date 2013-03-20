@@ -15,8 +15,7 @@ typedef enum {
 
 @interface XVimMarkMotionEvaluator : XVimMotionArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-           withWindow:(XVimWindow *)window
+- (id)initWithWindow:(XVimWindow *)window
 		 markOperator:(XVimMarkOperator)markOperator;
 
 + (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window;

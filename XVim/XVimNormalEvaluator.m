@@ -40,9 +40,12 @@
 @end
 
 @implementation XVimNormalEvaluator
-
--(id)initWithContext:(XVimEvaluatorContext*)context playbackRegister:(XVimRegister*)xregister{
-	self = [super initWithContext:context withWindow:self.window];
+-(id)initWithWindow:(XVimWindow *)window{
+    return [self initWithWindow:window playbackRegister:nil];
+}
+    
+-(id)initWithWindow:(XVimWindow*)window playbackRegister:(XVimRegister*)xregister{
+	self = [super initWithWindow:window];
     if (self) {
 		_playbackRegister = xregister;
     }
@@ -73,13 +76,13 @@
 
 - (XVimEvaluator*)a{
     [[self sourceView] append];
-	return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)A{
     XVimSourceView* view = [self sourceView];
     [view appendAtEndOfLine];
-    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -92,9 +95,8 @@
 // it should go you into insert mode
 - (XVimEvaluator*)c{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:TRUE];
-    return [[[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"c"]
-                                             withWindow:self.window
-											 withParent:self
+    [self.argumentString appendString:@"c"];
+    return [[[XVimDeleteEvaluator alloc] initWithWindow:self.window
 								 insertModeAtCompletion:YES] autorelease];
 }
 
@@ -103,7 +105,7 @@
 - (XVimEvaluator*)C{
     [self D];
     [[self sourceView] append];
-    return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window];
+    return [[XVimInsertEvaluator alloc] initWithWindow:self.window];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -114,7 +116,8 @@
 
 - (XVimEvaluator*)d{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:NO];
-    return [[XVimDeleteEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"d"] withWindow:self.window withParent:self insertModeAtCompletion:FALSE];
+    [self.argumentString appendString:@"d"];
+    return [[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:FALSE];
 }
 
 - (XVimEvaluator*)D{
@@ -154,17 +157,18 @@
 }
 
 - (XVimEvaluator*)g{
-    return [[[XVimGActionEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"g"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"g"];
+    return [[[XVimGActionEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)i{
     // Go to insert 
-    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)I{
     [[self sourceView] insertBeforeFirstNonBlank];
-    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 // For 'J' (join line) bring the line up from below. all leading whitespac
@@ -179,19 +183,20 @@
 
 - (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"m"];
+	return [[[XVimMarkSetEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)o{
     XVimSourceView* view = [self sourceView];
     [view insertNewlineBelow];
-    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
     XVimSourceView* view = [self sourceView];
     [view insertNewlineAbove];
-    return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)C_o{
@@ -206,14 +211,14 @@
 
 - (XVimEvaluator*)p{
     XVimSourceView* view = [self sourceView];
-    XVimRegister* reg = [XVim instance].yankRegister;
+    XVimRegister* reg = self.yankRegister;
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)P{
     XVimSourceView* view = [self sourceView];
-    XVimRegister* reg = [XVim instance].yankRegister;
+    XVimRegister* reg = self.yankRegister;
     [view put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     return nil;
 }
@@ -225,7 +230,8 @@
         return nil;
     }
     
-    XVimEvaluator* e = [[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"q"] withWindow:self.window];
+    [self.argumentString appendString:@"q"];
+    XVimEvaluator* e = [[XVimRegisterEvaluator alloc] initWithWindow:self.window];
     self.onChildCompleteHandler = @selector(onComplete_q:);
     return e;
 }
@@ -250,9 +256,8 @@
 }
 
 - (XVimEvaluator*)r{
-	XVimEvaluatorContext *context = [XVimEvaluatorContext contextWithNumericArg:[self numericArg]];
-	[context setArgumentString:@"r"];
-    return [[[XVimInsertEvaluator alloc] initWithContext:context withWindow:self.window oneCharMode:YES] autorelease];
+	[self.argumentString appendString:@"r"];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:YES] autorelease];
 }
 
 - (XVimEvaluator*)s{
@@ -271,12 +276,12 @@
 	if (replacementRange.length > 0){
 		[view deleteText];
 	}
-    return [[[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window oneCharMode:NO] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO] autorelease];
 }
 
 // "S" is Synonym for "cc"
 - (XVimEvaluator*)S{
-    XVimDeleteEvaluator* d = [[[XVimDeleteEvaluator alloc] initWithContext:self.contextCopy withWindow:self.window withParent:self insertModeAtCompletion:YES] autorelease];
+    XVimDeleteEvaluator* d = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
     return [d performSelector:@selector(c)];
 }
 
@@ -295,20 +300,21 @@
 }
 
 - (XVimEvaluator*)v{
-    return [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self.window mode:MODE_CHARACTER] autorelease];
+    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_CHARACTER] autorelease];
 }
 
 - (XVimEvaluator*)V{
-    return [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self.window mode:MODE_LINE] autorelease];
+    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_LINE] autorelease];
 }
 
 - (XVimEvaluator*)C_v{
     // Block selection
-    return [[[XVimVisualEvaluator alloc] initWithContext:[[[XVimEvaluatorContext alloc] init] autorelease] withWindow:self.window mode:MODE_BLOCK]  autorelease];
+    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_BLOCK]  autorelease];
 }
 
 - (XVimEvaluator*)C_w{
-    return [[[XVimWindowEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"^W"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"^W"];
+    return [[[XVimWindowEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)x{
@@ -327,12 +333,14 @@
 }
 
 - (XVimEvaluator*)Y{
-    XVimYankEvaluator* yank = [[[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"] withWindow:self.window withParent:self] autorelease];
+    [self.argumentString appendString:@"Y"];
+    XVimYankEvaluator* yank = [[[XVimYankEvaluator alloc] initWithWindow:self.window] autorelease];
     return [yank y];
 }
 
 - (XVimEvaluator*)y{
-    return [[[XVimYankEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"y"] withWindow:self.window withParent:self] autorelease];
+    [self.argumentString appendString:@"y"];
+    return [[[XVimYankEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)C_y{
@@ -341,7 +349,8 @@
 }
 
 - (XVimEvaluator*)AT{
-    XVimEvaluator *eval = [[[XVimRecordingRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"@"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"@"];
+    XVimEvaluator *eval = [[[XVimRecordingRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
     self.onChildCompleteHandler = @selector(onComplete_AT:);
 	return eval;
 }
@@ -351,7 +360,7 @@
     XVimRegister *xregister = childEvaluator.reg;
     XVimEvaluator* ret = nil;
     if (xregister && xregister.isReadOnly == NO) {
-        ret = [[XVimNormalEvaluator alloc] initWithContext:[self contextCopy] playbackRegister:xregister];
+        ret = [[XVimNormalEvaluator alloc] initWithWindow:self.window playbackRegister:xregister];
     } else {
         ret = [XVimEvaluator invalidEvaluator];
     }
@@ -359,44 +368,37 @@
 }
 
 - (XVimEvaluator*)DQUOTE{
-    return  [[[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"\""];
+    self.onChildCompleteHandler = @selector(onComplete_DQUOTE:);
+    return  [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
 }
-/*
-TODO: This block is from commit 42498.
-      This is not merged. This is about percent register
- 
-- (XVimEvaluator*)DQUOTE:(XVimWindow*)window
-{
-    XVimEvaluator *eval = [[XVimRegisterEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"\""]
-																									 parent:self
-																								 completion:^ XVimEvaluator* (NSString* rname, XVimEvaluatorContext *context) 
-	{
-		XVimRegister *xregister = [[XVim instance] findRegister:rname];
-        if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] )
-		{
-			[context setYankRegister:xregister];
-			[context appendArgument:rname];
-            return [[XVimNormalEvaluator alloc] initWithContext:context];
-        }
-            
-		[[XVim instance] ringBell];
-		return nil;
-	}];
-	return eval;
+
+- (XVimEvaluator*)onComplete_DQUOTE:(XVimRegisterEvaluator*)childEvaluator{
+    XVimRegister *xregister = childEvaluator.reg;
+    if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] ){
+        self.yankRegister = xregister;
+        [self.argumentString appendString:xregister.displayName];
+        self.onChildCompleteHandler = @selector(onChildComplete:);
+        return self;
+    }else{
+        return [XVimEvaluator invalidEvaluator];
+    }
 }
-*/ 
 
 - (XVimEvaluator*)EQUAL{
-    return [[[XVimEqualEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"="] withWindow:self.window withParent:self] autorelease];
+    [self.argumentString appendString:@"="];
+    return [[[XVimEqualEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)GREATERTHAN{
-    XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@">"] withWindow:self.window withParent:self unshift:NO] autorelease];
+    [self.argumentString appendString:@">"];
+    XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:NO] autorelease];
     return eval;
 }
 
 - (XVimEvaluator*)LESSTHAN{
-    XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"<"] withWindow:self.window withParent:self unshift:YES] autorelease];
+    [self.argumentString appendString:@"<"];
+    XVimShiftEvaluator* eval =  [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:YES] autorelease];
     return eval;
 }
 
@@ -406,10 +408,8 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)COLON{
-	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-                                                                 withWindow:self.window
-																	 withParent:self
-                                                                firstLetter:@":" 
+	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
+                                                                firstLetter:@":"
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command) 
                            {
@@ -423,9 +423,7 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter {
-	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init]
-                                                                 withWindow:self.window
-																	 withParent:self
+	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:firstLetter
                                                                     history:[[XVim instance] searchHistory]
                                                                  completion:^ XVimEvaluator* (NSString *command)

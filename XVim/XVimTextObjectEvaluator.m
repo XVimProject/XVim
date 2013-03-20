@@ -14,7 +14,6 @@
 #import "XVimMotionOption.h"
 
 @interface XVimTextObjectEvaluator() {
-	XVimEvaluator *_parent;
 }
 @end
 
@@ -23,23 +22,20 @@
 @synthesize textobject = _textobject;
 @synthesize bigword = _bigword;
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent inner:(BOOL)inner{
-	if (self = [super initWithContext:context withWindow:window]) {
+- (id)initWithWindow:window inner:(BOOL)inner{
+	if (self = [super initWithWindow:window]) {
         _inner = inner;
-		_parent = [parent retain];
         _bigword = NO;
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-    [_parent release];
+- (void)dealloc{
     [super dealloc];
 }
 
 - (BOOL)shouldDrawInsertionPoint{
-	return [_parent shouldDrawInsertionPoint];
+	return [self.parent shouldDrawInsertionPoint];
 }
 
 - (float)insertionPointHeightRatio{
@@ -47,15 +43,11 @@
 }
 
 - (NSString*)modeString {
-	return [_parent modeString];
+	return [self.parent modeString];
 }
 
 - (BOOL)isRelatedTo:(XVimEvaluator*)other {
-	return [super isRelatedTo:other] || other == _parent;
-}
-
-- (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
-    return [_parent withNewContext];
+	return [super isRelatedTo:other] || other == self.parent;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -69,7 +61,7 @@
         // TODO FIXME
 		//return [_operatorAction motionFixedFrom:r.location To:r.location+r.length Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
 	}
-	return [_parent withNewContext];
+    return nil;
 }
 
 - (XVimEvaluator*)b{

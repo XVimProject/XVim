@@ -210,7 +210,6 @@
         if (b) {
             DEBUG_LOG(@"DVTSourceTextView:%p became first responder", self);
             window.sourceView = [[[XVimSourceView alloc] initWithView:base] autorelease];
-            window.sourceView.delegate = [XVim instance];
         }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);

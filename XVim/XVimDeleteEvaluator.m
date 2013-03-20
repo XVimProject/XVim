@@ -22,11 +22,9 @@
 
 @implementation XVimDeleteEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-           withWindow:(XVimWindow *)window
-           withParent:(XVimEvaluator*)parent
+- (id)initWithWindow:(XVimWindow *)window
 insertModeAtCompletion:(BOOL)insertModeAtCompletion{
-	if (self = [super initWithContext:context withWindow:window withParent:parent]){
+	if (self = [super initWithWindow:window]){
 		self->_insertModeAtCompletion = insertModeAtCompletion;
 	}
 	return self;
@@ -76,7 +74,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
         [[self sourceView] change:motion];
-        return [[XVimInsertEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window];
+        return [[XVimInsertEvaluator alloc] initWithWindow:self.window];
     }else{
         [[self sourceView] delete:motion];
     }

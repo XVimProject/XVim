@@ -15,9 +15,7 @@ typedef void (^OnKeyPressHandler) (NSString* command);
 
 @interface XVimCommandLineEvaluator : XVimEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-           withWindow:(XVimWindow *)window
-           withParent:(XVimEvaluator*)parent
+- (id)initWithWindow:(XVimWindow *)window
 		 firstLetter:(NSString*)firstLetter
 			 history:(XVimHistoryHandler*)history
 		  completion:(OnCompleteHandler)completeHandler

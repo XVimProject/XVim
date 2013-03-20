@@ -12,8 +12,6 @@
 
 // Handles input after 'd' or 'c'
 @interface XVimDeleteEvaluator : XVimOperatorEvaluator
-- (id)    initWithContext:(XVimEvaluatorContext*)context
-               withWindow:(XVimWindow*)window
-               withParent:(XVimEvaluator*)parent
+- (id)initWithWindow:(XVimWindow*)window
    insertModeAtCompletion:(BOOL)insertModeAtCompletion;
 @end

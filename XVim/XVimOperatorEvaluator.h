@@ -16,7 +16,7 @@
 @class XVimOperatorAction;
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window withParent:(XVimEvaluator*)parent;
+- (id)initWithWindow:(XVimWindow *)window;
 /*
 - (XVimEvaluator*)b;
 - (XVimEvaluator*)B;

@@ -18,7 +18,6 @@
 #import "XVim.h"
 
 @interface XVimCommandLineEvaluator() {
-	XVimEvaluator *_parent;
 	XVimHistoryHandler *_history;
 	NSString *_currentCmd;
 	NSString *_firstLetter;
@@ -34,17 +33,13 @@
 
 @implementation XVimCommandLineEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context
-           withWindow:(XVimWindow *)window
-			   withParent:(XVimEvaluator*)parent
-		 firstLetter:(NSString*)firstLetter 
+- (id)initWithWindow:(XVimWindow *)window
+		 firstLetter:(NSString*)firstLetter
 			 history:(XVimHistoryHandler*)history
 		  completion:(OnCompleteHandler)completeHandler
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler
 {
-    if (self = [super initWithContext:context withWindow:window])
-	{
-		_parent = [parent retain];
+    if (self = [super initWithWindow:window]){
 		_firstLetter = [firstLetter retain];
 		_history = [history retain];
 		_onComplete = [completeHandler copy];
@@ -54,9 +49,7 @@
 	return self;
 }
 
-- (void)dealloc
-{
-    [_parent release];
+- (void)dealloc{
     [_firstLetter release];
     [_history release];
     [_onComplete release];
@@ -64,8 +57,7 @@
     [super dealloc];
 }
 
-- (void)takeFocusFromWindow
-{
+- (void)takeFocusFromWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:self.window];
 	[[[[self.window sourceView] view] window] makeFirstResponder:commandField];
@@ -132,7 +124,7 @@
 }
 
 - (void)drawRect:(NSRect)rect{
-	[_parent drawRect:rect];
+	[self.parent drawRect:rect];
 }
 
 - (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window{
@@ -144,11 +136,11 @@
 }
 
 - (NSString*)modeString{
-	return [_parent modeString];
+	return [self.parent modeString];
 }
 
 - (BOOL)isRelatedTo:(XVimEvaluator*)other{
-	return [super isRelatedTo:other] || other == _parent;
+	return [super isRelatedTo:other] || other == self.parent;
 }
 
 - (XVimEvaluator*)C_p{

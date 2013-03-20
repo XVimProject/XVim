@@ -23,7 +23,7 @@
 extern NSString * const XVimDocumentChangedNotification;
 extern NSString * const XVimDocumentPathKey;
 
-@interface XVim : NSObject<XVimKeymapProvider, XVimTextViewDelegate>
+@interface XVim : NSObject<XVimKeymapProvider>
 
 + (XVim*)instance;
 @property (strong) XVimOptions* options;
@@ -34,7 +34,7 @@ extern NSString * const XVimDocumentPathKey;
 @property (weak) XVimRegister *repeatRegister;
 @property (weak) XVimRegister *recordingRegister;
 @property (weak) XVimRegister *lastPlaybackRegister;
-@property (readonly) XVimRegister *yankRegister;
+@property (strong) NSArray *numberedRegisters;
 @property (strong) NSString* document;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
@@ -45,6 +45,5 @@ extern NSString * const XVimDocumentPathKey;
 - (void)ringBell;
 
 - (void)writeToLogfile:(NSString*)str;
-- (void)setYankRegisterByName:(NSString*)regName;
 
 @end

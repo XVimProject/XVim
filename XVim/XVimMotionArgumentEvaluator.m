@@ -14,8 +14,8 @@
 // e.g. 'f','F'
 @implementation XVimMotionArgumentEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window{
-	if (self = [super initWithContext:context withWindow:window]) {
+- (id)initWithWindow:(XVimWindow*)window{
+	if (self = [super initWithWindow:window]) {
 	}
 	return self;
 }

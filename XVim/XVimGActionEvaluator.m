@@ -48,19 +48,22 @@
 		[view moveForward];
     } 
 	
-	return [[[XVimInsertEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithNumericArg:[self numericArg]] withWindow:self.window] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)u{
-	return [[[XVimLowercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"u"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"u"];
+	return [[[XVimLowercaseEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)U{
-	return [[[XVimUppercaseEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"U"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"U"];
+	return [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)TILDE{
-	return [[[XVimTildeEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"~"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"~"];
+	return [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

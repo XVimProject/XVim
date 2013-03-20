@@ -17,7 +17,6 @@
 #import "XVimKeymapProvider.h"
 
 @interface XVimOperatorEvaluator() {
-	XVimEvaluator *_parent;
 }
 @end
 
@@ -25,25 +24,22 @@
 
 @implementation XVimOperatorEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:window withParent:(XVimEvaluator*)parent{
-	if (self = [super initWithContext:context withWindow:window]){
-		_parent = [parent retain];
+- (id)initWithWindow:window{
+	if (self = [super initWithWindow:window]){
 	}
 	return self;
 }
 
 - (void)drawRect:(NSRect)rect{
-	return [_parent drawRect:rect];
+	return [self.parent drawRect:rect];
 }
 
-- (void)dealloc
-{
-    [_parent release];
+- (void)dealloc {
     [super dealloc];
 }
 
 - (BOOL)shouldDrawInsertionPoint{
-	return [_parent shouldDrawInsertionPoint];
+	return [self.parent shouldDrawInsertionPoint];
 }
 
 - (float)insertionPointHeightRatio{
@@ -51,15 +47,11 @@
 }
 
 - (NSString*)modeString{
-	return [_parent modeString];
+	return [self.parent modeString];
 }
 
 - (BOOL)isRelatedTo:(XVimEvaluator*)other{
-	return [super isRelatedTo:other] || other == _parent;
-}
-
-- (XVimEvaluator*)defaultNextEvaluator{
-    return [_parent withNewContext];
+	return [super isRelatedTo:other] || other == self.parent;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
@@ -67,13 +59,15 @@
 }
 
 - (XVimEvaluator*)a{
-	return [[[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"a"] withWindow:self.window withParent:_parent inner:NO] autorelease];
+    [self.argumentString appendString:@"a"];
+	return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
 }
 
 // TODO: There used to be "b:" and "B:" methods here. Take a look how they have been.
 
 - (XVimEvaluator*)i{
-    return [[[XVimTextObjectEvaluator alloc] initWithContext:[[self contextCopy] appendArgument:@"i"] withWindow:self.window withParent:_parent inner:YES] autorelease];
+    [self.argumentString appendString:@"i"];
+    return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{

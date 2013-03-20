@@ -36,12 +36,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 @end
 @implementation XVimVisualEvaluator 
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode {
-    return [self initWithContext:context withWindow:window mode:mode withRange:NSMakeRange(NSNotFound,0)];
+- (id)initWithWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode {
+    return [self initWithWindow:window mode:mode withRange:NSMakeRange(NSNotFound,0)];
 }
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode withRange:(NSRange)range{
-	if (self = [self initWithContext:context withWindow:window]) {
+- (id)initWithWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode withRange:(NSRange)range{
+	if (self = [self initWithWindow:window]) {
         _mode = mode;
 		_operationRange = range;
 	}
@@ -84,17 +84,15 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)a{
     // FIXME
 	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"a"]
-                                                                     withWindow:self.window
-																	 withParent:self
-                                                                       inner:NO] autorelease];
+    [self.argumentString appendString:@"a"];
+	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
 	return evaluator;
 }
 
 - (XVimEvaluator*)c{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     [[self sourceView] change:m];
-    return [[[XVimInsertEvaluator alloc] initWithContext:[self contextCopy] withWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)d{
@@ -108,13 +106,15 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)g{
-	return [[[XVimGVisualEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"g"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"g"];
+	return [[[XVimGVisualEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)i{
     // FIXME
 	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"i"]  withWindow:self.window withParent:self inner:YES] autorelease];
+    [self.argumentString appendString:@"i"];
+	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
 	return evaluator;
 }
 
@@ -125,12 +125,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
-	return [[[XVimMarkSetEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"m"] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"m"];
+	return [[[XVimMarkSetEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)p{
     XVimSourceView* view = [self sourceView];
-    XVimRegister* reg = [XVim instance].yankRegister;
+    XVimRegister* reg = self.yankRegister;
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
@@ -199,7 +200,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)DQUOTE{
-    return [[[XVimRegisterEvaluator alloc] initWithContext:[XVimEvaluatorContext contextWithArgument:@"\""] withWindow:self.window] autorelease];
+    [self.argumentString appendString:@"\""];
+    return [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)Y{
@@ -249,10 +251,8 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)COLON{
-	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithContext:[self contextCopy]
-                                                                 withWindow:self.window
-																	 withParent:self
-                                                                firstLetter:@":'<,'>" 
+	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
+                                                                firstLetter:@":'<,'>"
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command) 
                            {
@@ -361,7 +361,7 @@ TODO: This block is from commit 42498.
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = to;
     [[self sourceView] move:m];
-    return [self withNewContext];
+    return self;
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{

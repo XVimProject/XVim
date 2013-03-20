@@ -46,7 +46,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     NSFileHandle* _logFile;
 }
 - (void)parseRcFile;
-@property (strong) NSArray *numberedRegisters;
 @end
 
 @implementation XVim
@@ -54,7 +53,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @synthesize repeatRegister = _repeatRegister;
 @synthesize recordingRegister = _recordingRegister;
 @synthesize lastPlaybackRegister = _lastPlaybackRegister;
-@synthesize yankRegister = _yankRegister;
 @synthesize numberedRegisters = _numberedRegisters;
 @synthesize searcher = _searcher;
 @synthesize characterSearcher = _characterSearcher;
@@ -239,7 +237,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         
         _recordingRegister = nil;
         _lastPlaybackRegister = nil;
-        _yankRegister = nil;
         _repeatRegister = [_registers valueForKey:@"repeat"];
         _logFile = nil;
         
@@ -258,7 +255,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	[_characterSearcher release];
     [_excmd release];
     [_logFile release];
-    [_yankRegister release];
     [_numberedRegisters release];
 	[super dealloc];
 }
@@ -340,106 +336,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         NSBeep();
     }
     return;
-}
-
-- (void)setYankRegisterByName:(NSString*)regName{
-    [_yankRegister release];
-    if(nil == regName){
-        _yankRegister = [[self findRegister:@"DQUOTE"] retain];
-    }else{
-        _yankRegister = [[self findRegister:regName] retain];
-    }
-    TRACE_LOG(@"_yankRegister : %@", _yankRegister.description);
-}
-
-- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view{
-    TRACE_LOG(@"yanked text: %@", yankedText);
-    
-    // Unnamed register
-    [[self findRegister:@"DQUOTE"] clear];
-    [[self findRegister:@"DQUOTE"] appendText:yankedText];
-    [self findRegister:@"DQUOTE"].type = type;
-    
-    
-    // Don't do anything if we are recording into the register (that isn't the repeat register)
-    if (self.recordingRegister == self.yankRegister){
-        return;
-    }
-
-    // If we are yanking into a specific register then we do not cycle through
-    // the numbered registers.
-    if (_yankRegister != nil){
-        [_yankRegister clear];
-        [_yankRegister appendText:yankedText];
-        _yankRegister.type = type;
-    }else{
-        // There are 10 numbered registers
-        // Cycle number registers
-        // TODO: better not copying the text to cycle
-        //       we can use some pointer to point the head of ring buffer for numbered registers
-        for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
-            XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
-            XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
-            [next clear];
-            [next appendText:prev.string];
-            next.type  = prev.type;
-            if( i == 0 ){
-                break;
-            }
-        }
-        
-        XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
-        [reg clear];
-        [reg appendText:yankedText];
-        reg.type = type;
-    }
-}
-
-- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view{
-    TRACE_LOG(@"deleted text: %@", deletedText);
-    
-    // Unnamed register
-    [[self findRegister:@"DQUOTE"] clear];
-    [[self findRegister:@"DQUOTE"] appendText:deletedText];
-    [self findRegister:@"DQUOTE"].type = type;
-    
-    
-    // Don't do anything if we are recording into the register (that isn't the repeat register)
-    if (self.recordingRegister == self.yankRegister){
-        return;
-    }
-
-    // If we are yanking into a specific register then we do not cycle through
-    // the numbered registers.
-    if (_yankRegister != nil){
-        [_yankRegister clear];
-        [_yankRegister appendText:deletedText];
-        _yankRegister.type = type;
-    }else{
-        // There are 10 numbered registers
-        // Cycle number registers
-        // TODO: better not copying the text to cycle
-        //       we can use some pointer to point the head of ring buffer for numbered registers
-        for (NSUInteger i = self.numberedRegisters.count - 2; ; --i){
-            XVimRegister *prev = [self.numberedRegisters objectAtIndex:i];
-            XVimRegister *next = [self.numberedRegisters objectAtIndex:i+1];
-            [next clear];
-            [next appendText:prev.string];
-            next.type  = prev.type;
-            if( i == 0 ){
-                break;
-            }
-        }
-        
-        XVimRegister *reg = [self.numberedRegisters objectAtIndex:0];
-        [reg clear];
-        [reg appendText:deletedText];
-        reg.type = type;
-    }
-    
-    XVimRegister *defaultReg = [self findRegister:@"DQUOTE"];
-    [defaultReg clear];
-    [defaultReg appendText:deletedText];
 }
 
 @end

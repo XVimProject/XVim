@@ -8,8 +8,9 @@
 
 #import "XVimOperatorEvaluator.h"
 #import "XVimOperatorAction.h"
+#import "XVimTextViewProtocol.h"
 
-@interface XVimYankEvaluator : XVimOperatorEvaluator
+@interface XVimYankEvaluator : XVimOperatorEvaluator <XVimTextViewDelegate>
 - (XVimEvaluator*)y;
 @end
 

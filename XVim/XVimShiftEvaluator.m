@@ -19,9 +19,9 @@
 
 @implementation XVimShiftEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window withParent:(XVimEvaluator*)parent unshift:(BOOL)unshift
+- (id)initWithWindow:(XVimWindow *)window unshift:(BOOL)unshift
 {
-	if (self = [super initWithContext:context withWindow:window withParent:parent]) {
+	if (self = [super initWithWindow:window]) {
 		_unshift = unshift;
 	}
 	return self;

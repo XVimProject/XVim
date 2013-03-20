@@ -38,6 +38,7 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 #import "XVimRegister.h"
 #import "XVimMode.h"
 #import "XVimEvaluatorContext.h"
+#import "XVimTextViewProtocol.h"
 
 @class XVimMotionEvaluator;
 @class XVimKeyStroke;
@@ -46,16 +47,17 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 @class DVTSourceTextView;
 @class XVimRegister;
 @class XVimSourceView;
-@class XVimEvaluatorContext;
 @protocol XVimKeymapProvider;
 
-@interface XVimEvaluator : NSObject
-@property(strong) XVimEvaluatorContext* context;
+@interface XVimEvaluator : NSObject <XVimTextViewDelegate>
 @property(strong) XVimWindow* window;
 @property(strong) XVimEvaluator* parent;
+@property NSUInteger numericArg;
+@property(strong) NSMutableString* argumentString;
+@property(strong) XVimRegister* yankRegister;
 @property SEL onChildCompleteHandler;
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window;
+- (id)initWithWindow:(XVimWindow*)window;
 
 + (XVimEvaluator*)invalidEvaluator;
 
@@ -116,6 +118,8 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 - (XVimSourceView*)sourceView;
 
+- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view;
+- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view;
 
 ////////////////////////////////////////////////
 // Context convenience functions
@@ -123,15 +127,13 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 // Normally argumentString, but can be overridden
 - (NSString*)argumentDisplayString;
 
-// Returns the current stack of arguments (eg. "a10d...")
-- (NSString*)argumentString;
-
 // Returns the context yank register if any
 - (XVimRegister*)yankRegister;
 
 // Returns the context numeric arguments multiplied together
 - (NSUInteger)numericArg;
 
+/*
 // Returns the context
 - (XVimEvaluatorContext*)context;
 
@@ -143,6 +145,7 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 // Returns self with the passed context
 - (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context;
+ */
 
 @end
 

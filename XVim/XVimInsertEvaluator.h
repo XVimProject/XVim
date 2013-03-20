@@ -10,6 +10,6 @@
 
 @interface XVimInsertEvaluator : XVimEvaluator
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window oneCharMode:(BOOL)oneCharMode;
+- (id)initWithWindow:(XVimWindow *)window oneCharMode:(BOOL)oneCharMode;
 
 @end

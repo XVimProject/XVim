@@ -10,20 +10,16 @@
 
 @class XVimRegister;
 
+/*
 @interface XVimEvaluatorContext : NSObject
+@property(strong) XVimRegister* yankRegister;
+@property NSUInteger numericArg;
+@property(strong) NSMutableString* argumentString;
 
 + (XVimEvaluatorContext*)contextWithNumericArg:(NSUInteger)numericArg;
 + (XVimEvaluatorContext*)contextWithArgument:(NSString*)argument;
-
-- (XVimRegister*)yankRegister;
-- (XVimRegister*)setYankRegister:(XVimRegister*)yankRegister;
 - (NSUInteger)numericArg;
-- (void)pushEmptyNumericArgHead;
-- (void)setNumericArgHead:(NSUInteger)numericArg;
-- (NSNumber*)numericArgHead;
-- (NSString*)argumentString;
-- (XVimEvaluatorContext*)setArgumentString:(NSString*)argument;
-- (XVimEvaluatorContext*)appendArgument:(NSString*)argument;
 - (XVimEvaluatorContext*)copy;
 
 @end
+*/

@@ -41,12 +41,12 @@
 @synthesize enoughBufferForReplace = _enoughBufferForReplace;
 
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow *)window{
-    return [self initWithContext:context withWindow:window oneCharMode:NO];
+- (id)initWithWindow:(XVimWindow *)window{
+    return [self initWithWindow:window oneCharMode:NO];
 }
 
-- (id)initWithContext:(XVimEvaluatorContext*)context withWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode{
-    self = [super initWithContext:context withWindow:window];
+- (id)initWithWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode{
+    self = [super initWithWindow:window];
     if (self) {
         _lastInsertedText = [@"" retain];
         _oneCharMode = oneCharMode;
@@ -88,7 +88,7 @@
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
 	NSRange range = [[self sourceView] selectedRange];
-	return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithContext:[[XVimEvaluatorContext alloc] init] withWindow:self.window mode:MODE_CHARACTER withRange:range] autorelease];
+	return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_CHARACTER withRange:range] autorelease];
 }
 
 - (float)insertionPointHeightRatio{
