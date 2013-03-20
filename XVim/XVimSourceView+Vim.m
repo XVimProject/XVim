@@ -747,7 +747,7 @@
 
 	// isFirstWordInALine
     // {CR}    -> {CR}    set
-    // {CR}    -> {word}  do nothig
+    // {CR}    -> {word}  do nothing
     // {CR}    -> {blank} do nothing
     // {word}  -> {CR}    set
     // {word}  -> {word}  do nothing
