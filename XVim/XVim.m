@@ -35,6 +35,7 @@
 #import "XVimHookManager.h"
 #import "XVimCommandLine.h"
 #import "DVTSourceTextViewHook.h"
+#import "XVimMarks.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -58,6 +59,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @synthesize characterSearcher = _characterSearcher;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
+@synthesize marks = _marks;
 @synthesize document = _document;
 
 // For reverse engineering purpose.
@@ -156,6 +158,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 		_searcher = [[XVimSearch alloc] init];
 		_characterSearcher = [[XVimCharacterSearch alloc] init];
 		_options = [[XVimOptions alloc] init];
+        _marks = [[XVimMarks alloc] init];
 		// From the vim documentation:
 		// There are nine types of registers:
 		// *registers* *E354*
@@ -256,6 +259,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [_excmd release];
     [_logFile release];
     [_numberedRegisters release];
+    [_marks release];
 	[super dealloc];
 }
 

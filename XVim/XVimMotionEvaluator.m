@@ -23,6 +23,8 @@
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 
 ////////////////////////////////
@@ -321,12 +323,59 @@
 
 - (XVimEvaluator*)SQUOTE{
     [self.argumentString appendString:@"'"];
-    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window markOperator:MARKOPERATOR_MOVETOSTARTOFLINE];
+    self.onChildCompleteHandler = @selector(onComplete_SQUOTE:);
+    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window];
+}
+
+- (XVimEvaluator*)onComplete_SQUOTE:(XVimArgumentEvaluator*)childEvaluator{
+    NSString* key = [childEvaluator.keyStroke toString];
+    NSUInteger cur_pos = self.sourceView.insertionPoint;
+    
+    XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
+	
+	MOTION_TYPE motionType = LINEWISE;
+    NSUInteger to = [[self sourceView] positionAtLineNumber:mark.line column:mark.column];
+    if( NSNotFound == to ){
+        return [XVimEvaluator invalidEvaluator];
+    }
+    to = [[self sourceView] firstNonBlankInALine:to]; // This never returns NSNotFound
+	
+    // set the position before the jump
+    XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
+    cur_mark.line = [self.sourceView lineNumber:cur_pos];
+    cur_mark.column = [self.sourceView columnNumber:cur_pos];
+    cur_mark.document = [self.sourceView documentURL].path;
+    [[XVim instance].marks setMark:cur_mark forName:@"'"];
+    
+    return [self _motionFixedFrom:cur_pos To:to Type:motionType];
 }
 
 - (XVimEvaluator*)BACKQUOTE{
     [self.argumentString appendString:@"`"];
-    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window markOperator:MARKOPERATOR_MOVETO];
+    self.onChildCompleteHandler = @selector(onComplete_BACKQUOTE:);
+    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window];
+}
+
+- (XVimEvaluator*)onComplete_BACKQUOTE:(XVimArgumentEvaluator*)childEvaluator{
+    NSString* key = [childEvaluator.keyStroke toString];
+    NSUInteger cur_pos = self.sourceView.insertionPoint;
+    
+    XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
+	
+	MOTION_TYPE motionType = CHARACTERWISE_EXCLUSIVE;
+    NSUInteger to = [[self sourceView] positionAtLineNumber:mark.line column:mark.column];
+    if( NSNotFound == to ){
+        return [XVimEvaluator invalidEvaluator];
+    }
+	
+    // set the position before the jump
+    XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
+    cur_mark.line = [self.sourceView lineNumber:cur_pos];
+    cur_mark.column = [self.sourceView columnNumber:cur_pos];
+    cur_mark.document = [self.sourceView documentURL].path;
+    [[XVim instance].marks setMark:cur_mark forName:@"'"];
+    
+    return [self _motionFixedFrom:cur_pos To:to Type:motionType];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)

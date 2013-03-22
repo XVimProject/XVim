@@ -8,6 +8,6 @@
 
 #import "XVimGMotionEvaluator.h"
 
-@interface XVimGActionEvaluator : XVimGMotionEvaluator
+@interface XVimGActionEvaluator : XVimEvaluator
 
 @end

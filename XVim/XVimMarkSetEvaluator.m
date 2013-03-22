@@ -11,6 +11,11 @@
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
+#import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
+#import "XVim.h"
 
 @implementation XVimMarkSetEvaluator
 
@@ -23,18 +28,13 @@
 	if ([keyStr length] != 1) {
         return [XVimEvaluator invalidEvaluator];
     }
-    unichar c = [keyStr characterAtIndex:0];
-    if (! (((c>='a' && c<='z')) || ((c>='A' && c<='Z')) || c == '`' || c == '\'' ) ) {
-        return [XVimEvaluator invalidEvaluator];
-    }
-	NSRange r = [[self sourceView] selectedRange];
-	NSValue *v =[NSValue valueWithRange:r];
-    if( c == '`' ){
-        // Both m' and m` use internally a ' mark like original vim.
-        keyStr = @"'";
-    }
-	[[self.window getLocalMarks] setValue:v forKey:keyStr];
     
+    XVimMark* mark = [[[XVimMark alloc] init] autorelease];
+	NSRange r = [self.sourceView selectedRange];
+    mark.line = [self.sourceView lineNumber:r.location];
+    mark.column = [self.sourceView columnNumber:r.location];
+    mark.document = [[self.sourceView documentURL] path];
+    [[XVim instance].marks setMark:mark forName:keyStr];
     return nil;
 }
 

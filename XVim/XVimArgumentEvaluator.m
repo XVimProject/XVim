@@ -15,6 +15,10 @@
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     self.keyStroke = keyStroke;
+    return [self onArgumentProvided:keyStroke];
+}
+
+- (XVimEvaluator*)onArgumentProvided:(XVimKeyStroke*)key{
     return nil;
 }
 

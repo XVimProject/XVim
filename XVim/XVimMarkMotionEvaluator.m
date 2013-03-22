@@ -12,18 +12,15 @@
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "XVim.h"
-
-@interface XVimMarkMotionEvaluator() {
-	XVimMarkOperator _markOperator;
-}
-@end
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 @implementation XVimMarkMotionEvaluator
 
-- (id)initWithWindow:(XVimWindow*)window markOperator:(XVimMarkOperator)markOperator {
+- (id)initWithWindow:(XVimWindow*)window{
 	if (self = [super initWithWindow:window]) {
-		_markOperator = markOperator;
 	}
 	return self;
 }
@@ -32,6 +29,7 @@
 	return [keymapProvider keymapForMode:MODE_NONE];
 }
 
+/*
 + (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window {
 	if ([mark length] != 1) {
         return NSNotFound;
@@ -60,30 +58,7 @@
     NSUInteger to = r.location;
 	return to;
 }
-
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-    NSString* keyStr = [keyStroke toString];
-	NSUInteger to = [[self class] markLocationForMark:keyStr inWindow:self.window];
-	if (to == NSNotFound) {
-		return nil;
-	}
-	
-    //NSUInteger from = [[self sourceView] selectedRange].location;
-	MOTION_TYPE motionType = CHARACTERWISE_EXCLUSIVE;
-	
-	if (_markOperator == MARKOPERATOR_MOVETOSTARTOFLINE) {
-		to = [[self sourceView] firstNonBlankInALine:to];
-		motionType = LINEWISE;
-	}
-	
-    // set the position before the jump
-    NSRange r = [[self.window sourceView] selectedRange];
-    NSValue *v =[NSValue valueWithRange:r];
-    [[self.window getLocalMarks] setValue:v forKey:@"'"];
-
-    //TODO: Support onChileComplele
-   // return [[self motionEvaluator] _motionFixedFrom:from To:to Type:motionType];
-    return nil;
-}
-
+*/
+ 
+ 
 @end

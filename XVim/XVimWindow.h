@@ -38,7 +38,6 @@
 - (void)beginMouseEvent:(NSEvent*)event;
 - (void)endMouseEvent:(NSEvent*)event;
 - (NSRange)restrictSelectedRange:(NSRange)range;
-- (NSMutableDictionary *)getLocalMarks;
 
 - (void)drawRect:(NSRect)rect;
 - (BOOL)shouldDrawInsertionPoint;

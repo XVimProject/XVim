@@ -19,6 +19,7 @@
 @class XVimHistoryHandler;
 @class XVimCommandLine;
 @class XVimCommandField;
+@class XVimMarks;
 
 extern NSString * const XVimDocumentChangedNotification;
 extern NSString * const XVimDocumentPathKey;
@@ -30,6 +31,7 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimCharacterSearch* characterSearcher;
 @property (strong) XVimExCommand* excmd;
+@property (readonly) XVimMarks* marks;
 @property (strong, readonly) NSDictionary* registers;
 @property (weak) XVimRegister *repeatRegister;
 @property (weak) XVimRegister *recordingRegister;

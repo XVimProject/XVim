@@ -20,12 +20,6 @@
 	return self;
 }
 
-/*
-- (XVimMotionEvaluator*)motionEvaluator {
-	return (XVimMotionEvaluator*)_parent;
-}
-*/
-
 -(XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     // TODO: support onChileComplete
     return nil;

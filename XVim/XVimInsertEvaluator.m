@@ -17,6 +17,8 @@
 #import "XVimKeymapProvider.h"
 #import "XVimVisualEvaluator.h"
 #import "XVimDeleteEvaluator.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -76,14 +78,13 @@
     [super dealloc];
 }
 
-- (NSString*)modeString
-{
+- (NSString*)modeString{
 	return @"-- INSERT --";
 }
 
 - (void)becameHandler{
     self.startRange = [[self sourceView] selectedRange];
-    [[self.window sourceView] insert];
+    [self.sourceView insert];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
@@ -171,7 +172,7 @@
     self.startRange = [[self sourceView] selectedRange];
 }
 
-- (void)willEndHandler{
+- (void)didEndHandler{
 	XVimSourceView *sourceView = [self sourceView];
 	
     if( !_insertedEventsAbort && !_oneCharMode ){
@@ -193,9 +194,9 @@
     }
     [sourceView hideCompletions];
 	
-	NSRange r = [[self sourceView] selectedRange];
-	NSValue *v =[NSValue valueWithRange:r];
-	[[self.window getLocalMarks] setValue:v forKey:@"."];
+    NSUInteger pos = self.sourceView.insertionPoint;
+    XVimMark* mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
+    [[XVim instance].marks setMark:mark forName:@"^"];
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {

@@ -16,6 +16,10 @@
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
+#import "XVim.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 @implementation XVimGActionEvaluator
 
@@ -37,17 +41,23 @@
 }
 
 - (XVimEvaluator*)i{
-	NSUInteger markLocation = [XVimMarkMotionEvaluator markLocationForMark:@"." inWindow:self.window];
-	if (markLocation == NSNotFound) { return nil; }
-	
-	XVimSourceView *view = self.sourceView;
-	
-	NSUInteger insertionPoint = markLocation;
-	[view setSelectedRangeWithBoundsCheck:insertionPoint To:insertionPoint];
-    if (!([view isEOF:insertionPoint] || [view isNewLine:insertionPoint])){
-		[view moveForward];
-    } 
-	
+    XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.sourceView.documentURL.path];
+	if ( mark.line != NSNotFound) {
+        NSUInteger newPos = [self.sourceView positionAtLineNumber:mark.line column:mark.column];
+        if( NSNotFound != newPos ){
+            XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
+            m.position = newPos;
+            
+            // set the position before the jump
+            XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
+            cur_mark.line = [self.sourceView insertionLine];
+            cur_mark.column = [self.sourceView insertionColumn];
+            cur_mark.document = [self.sourceView documentURL].path;
+            [[XVim instance].marks setMark:cur_mark forName:@"'"];
+            [self.sourceView move:m];
+            [self.sourceView append];
+        }
+    }
 	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 

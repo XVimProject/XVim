@@ -22,7 +22,6 @@
 @interface XVimWindow() {
     NSMutableArray* _evaluatorStack;
 	XVimKeymapContext* _keymapContext;
-	NSMutableDictionary* _localMarks; // key = single letter mark name. value = NSRange (wrapped in a NSValue) for mark location
 	BOOL _handlingMouseEvent;
 	NSString *_staticString;
 }
@@ -49,7 +48,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
     if (self = [super init]){
 		_staticString = [@"" retain];
-        _localMarks = [[NSMutableDictionary alloc] init];
 		_keymapContext = [[XVimKeymapContext alloc] init];
         self.editorArea = editorArea;
         _evaluatorStack = [[NSMutableArray alloc] init];
@@ -60,7 +58,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)dealloc{
     [_keymapContext release];
-    [_localMarks release];
     [_staticString release];
     [_sourceView release];
     self.editorArea = nil;
@@ -85,10 +82,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)willSetEvaluator:(XVimEvaluator*)evaluator {
-}
-
-- (NSMutableDictionary *)getLocalMarks{
-    return _localMarks;
 }
 
 - (NSUInteger)insertionPoint {
@@ -170,6 +163,7 @@ static const char* KEY_WINDOW = "xvimwindow";
                 // Pass current evaluator to the evaluator below the current evaluator
                 XVimEvaluator* completeEvaluator = [_evaluatorStack lastObject];
                 [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
+                [completeEvaluator didEndHandler];
                 currentEvaluator = [_evaluatorStack lastObject];
                 SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
@@ -194,8 +188,9 @@ static const char* KEY_WINDOW = "xvimwindow";
         }
     }
     
-    [self.commandLine setModeString:[[nextEvaluator modeString] stringByAppendingString:_staticString]];
-    [self.commandLine setArgumentString:[nextEvaluator argumentDisplayString]];
+    currentEvaluator = [_evaluatorStack lastObject];
+    [self.commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
+    [self.commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
 }
 
 - (void)handleTextInsertion:(NSString*)text {

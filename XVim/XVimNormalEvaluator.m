@@ -559,9 +559,4 @@ static NSArray *_invalidRepeatKeys;
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
-
-- (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{
-   return nil;
-}
-
 @end

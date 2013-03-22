@@ -6,18 +6,9 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "XVimMotionArgumentEvaluator.h"
+#import "XVimArgumentEvaluator.h"
+@class XVimMark;
 
-typedef enum {
-	MARKOPERATOR_MOVETO,
-	MARKOPERATOR_MOVETOSTARTOFLINE
-} XVimMarkOperator;
-
-@interface XVimMarkMotionEvaluator : XVimMotionArgumentEvaluator
-
-- (id)initWithWindow:(XVimWindow *)window
-		 markOperator:(XVimMarkOperator)markOperator;
-
-+ (NSUInteger)markLocationForMark:(NSString*)mark inWindow:(XVimWindow*)window;
-
+@interface XVimMarkMotionEvaluator : XVimArgumentEvaluator
+- (id)initWithWindow:(XVimWindow *)window;
 @end
