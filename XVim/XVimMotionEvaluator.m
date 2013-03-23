@@ -7,6 +7,7 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
+#import "IDEKit.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimSearchLineEvaluator.h"
 #import "XVimGMotionEvaluator.h"
@@ -316,6 +317,41 @@
     return nil;
 }
 
+// This is internal method used by SQUOTE, BACKQUOTE
+- (XVimEvaluator*)jumpToMark:(XVimMark*)mark firstOfLine:(BOOL)fol{
+    NSUInteger cur_pos = self.sourceView.insertionPoint;
+	MOTION_TYPE motionType = fol?LINEWISE:CHARACTERWISE_EXCLUSIVE;
+    
+    if( mark.line == NSNotFound ){
+        return [XVimEvaluator invalidEvaluator];
+    }
+    
+    if( ![mark.document isEqualToString:self.sourceView.documentURL.path]){
+        IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+        NSError* error;
+        NSURL* doc = [NSURL fileURLWithPath:mark.document];
+        [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
+    }
+    
+    NSUInteger to = [[self sourceView] positionAtLineNumber:mark.line column:mark.column];
+    if( NSNotFound == to ){
+        return [XVimEvaluator invalidEvaluator];
+    }
+    
+    if( fol ){
+        to = [[self sourceView] firstNonBlankInALine:to]; // This never returns NSNotFound
+    }
+	
+    // set the position before the jump
+    XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
+    cur_mark.line = [self.sourceView lineNumber:cur_pos];
+    cur_mark.column = [self.sourceView columnNumber:cur_pos];
+    cur_mark.document = [self.sourceView documentURL].path;
+    [[XVim instance].marks setMark:cur_mark forName:@"'"];
+    
+    return [self _motionFixedFrom:cur_pos To:to Type:motionType];
+}
+
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
 // e.g. 'a moves the cursor to the mark names "a"
 // It does nothing if the mark is not defined or if the mark is no longer within
@@ -329,25 +365,8 @@
 
 - (XVimEvaluator*)onComplete_SQUOTE:(XVimArgumentEvaluator*)childEvaluator{
     NSString* key = [childEvaluator.keyStroke toString];
-    NSUInteger cur_pos = self.sourceView.insertionPoint;
-    
     XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
-	
-	MOTION_TYPE motionType = LINEWISE;
-    NSUInteger to = [[self sourceView] positionAtLineNumber:mark.line column:mark.column];
-    if( NSNotFound == to ){
-        return [XVimEvaluator invalidEvaluator];
-    }
-    to = [[self sourceView] firstNonBlankInALine:to]; // This never returns NSNotFound
-	
-    // set the position before the jump
-    XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-    cur_mark.line = [self.sourceView lineNumber:cur_pos];
-    cur_mark.column = [self.sourceView columnNumber:cur_pos];
-    cur_mark.document = [self.sourceView documentURL].path;
-    [[XVim instance].marks setMark:cur_mark forName:@"'"];
-    
-    return [self _motionFixedFrom:cur_pos To:to Type:motionType];
+    return [self jumpToMark:mark firstOfLine:YES];
 }
 
 - (XVimEvaluator*)BACKQUOTE{
@@ -358,24 +377,8 @@
 
 - (XVimEvaluator*)onComplete_BACKQUOTE:(XVimArgumentEvaluator*)childEvaluator{
     NSString* key = [childEvaluator.keyStroke toString];
-    NSUInteger cur_pos = self.sourceView.insertionPoint;
-    
     XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
-	
-	MOTION_TYPE motionType = CHARACTERWISE_EXCLUSIVE;
-    NSUInteger to = [[self sourceView] positionAtLineNumber:mark.line column:mark.column];
-    if( NSNotFound == to ){
-        return [XVimEvaluator invalidEvaluator];
-    }
-	
-    // set the position before the jump
-    XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-    cur_mark.line = [self.sourceView lineNumber:cur_pos];
-    cur_mark.column = [self.sourceView columnNumber:cur_pos];
-    cur_mark.document = [self.sourceView documentURL].path;
-    [[XVim instance].marks setMark:cur_mark forName:@"'"];
-    
-    return [self _motionFixedFrom:cur_pos To:to Type:motionType];
+    return [self jumpToMark:mark firstOfLine:NO];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)
