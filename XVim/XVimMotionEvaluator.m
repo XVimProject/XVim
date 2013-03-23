@@ -12,7 +12,6 @@
 #import "XVimSearchLineEvaluator.h"
 #import "XVimGMotionEvaluator.h"
 #import "XVimZEvaluator.h"
-#import "XVimMarkMotionEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
@@ -360,7 +359,7 @@
 - (XVimEvaluator*)SQUOTE{
     [self.argumentString appendString:@"'"];
     self.onChildCompleteHandler = @selector(onComplete_SQUOTE:);
-    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)onComplete_SQUOTE:(XVimArgumentEvaluator*)childEvaluator{
@@ -372,7 +371,7 @@
 - (XVimEvaluator*)BACKQUOTE{
     [self.argumentString appendString:@"`"];
     self.onChildCompleteHandler = @selector(onComplete_BACKQUOTE:);
-    return [[XVimMarkMotionEvaluator alloc] initWithWindow:self.window];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)onComplete_BACKQUOTE:(XVimArgumentEvaluator*)childEvaluator{

@@ -11,7 +11,6 @@
 #import "XVimLowercaseEvaluator.h"
 #import "XVimUppercaseEvaluator.h"
 #import "XVimInsertEvaluator.h"
-#import "XVimMarkMotionEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
