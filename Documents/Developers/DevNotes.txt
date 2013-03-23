@@ -20,6 +20,18 @@ trailing whitespace" and first "u" command only undo the "trim..." action.
 I tried to group them up into one action to undo with one "u" commnad but could not.
 
 
+### How to control documents (Open, Close) ###
+You can use IDEDocumentController. Its like...
+   IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+   NSError* error;
+   NSURL* doc = [NSURL fileURLWithPath:@"/foo/bar/test.h"];
+   [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
+
+
+
+
+
+
 
 
 
