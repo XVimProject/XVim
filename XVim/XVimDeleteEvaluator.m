@@ -93,11 +93,11 @@
 
 
 - (XVimEvaluator*)w:(XVimWindow*)window{
-    if( _insertModeAtCompletion ){ 
-        // cw is special case of word motion
-        XVimWordInfo info;
-        NSUInteger from = [[window sourceView] selectedRange].location;
-        NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+    XVimWordInfo info;
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:MOTION_OPTION_NONE info:(XVimWordInfo*)&info];
+    if( _insertModeAtCompletion ){
+        // 'cw' is special case of word motion
         if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
             return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
         } else {
@@ -108,16 +108,22 @@
             }
         }
     }else{
-        return [super w:window];
+        // 'dw' is special case of word motion
+        if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
+            [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+        }else{
+            [self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+        }
+        return nil;
     }
 }
 
 - (XVimEvaluator*)W:(XVimWindow*)window{
-    if( _insertModeAtCompletion ){ 
-        // cw is special case of word motion
-        XVimWordInfo info;
-        NSUInteger from = [[window sourceView] selectedRange].location;
-        NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+    XVimWordInfo info;
+    NSUInteger from = [[window sourceView] selectedRange].location;
+    NSUInteger to = [[window sourceView] wordsForward:from count:[self numericArg] option:BIGWORD info:(XVimWordInfo*)&info];
+    if( _insertModeAtCompletion ){
+        // 'cW' is special case of WORD motion
         if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
             return [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
         } else {
@@ -128,7 +134,13 @@
             }
         }
     }else{
-        return [super W:window];
+        // 'dW' is special case of WORD motion
+        if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
+            [self _motionFixedFrom:from To:info.lastEndOfLine Type:CHARACTERWISE_INCLUSIVE inWindow:window];
+        } else {
+			[self _motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
+        }
+        return nil;
     }
 }
 

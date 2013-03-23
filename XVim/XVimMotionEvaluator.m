@@ -152,7 +152,6 @@
     NSUInteger realCount = [self numericArg];
 
     XVimWordInfo info;
-    info.findEndOfWord = TRUE;
     NSUInteger from = [[window sourceView] selectedRange].location;
     NSString *string = [[window sourceView] string];
     if (from + 1 < [string length] && from > 0){
@@ -167,7 +166,7 @@
             realCount += 1;
         }
     }
-    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:MOTION_OPTION_NONE info:&info];
+    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:(MOTION_OPTION_NONE|FIND_ENDOF_WORD) info:&info];
     if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
         to = info.lastEndOfLine;
     } else if (info.lastEndOfWord != NSNotFound) {
@@ -190,7 +189,7 @@
             realCount += 1;
         }
     }
-    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:BIGWORD info:&info];
+    NSUInteger to = [[window sourceView] wordsForward:from count:realCount option:(BIGWORD|FIND_ENDOF_WORD) info:&info];
     if (info.isFirstWordInALine && info.lastEndOfLine != NSNotFound) {
         to = info.lastEndOfLine;
     } else if (info.lastEndOfWord != NSNotFound) {
