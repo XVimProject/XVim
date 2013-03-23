@@ -838,65 +838,12 @@
     return;
 }
 
-///////////////////
-//   Commands    //
-///////////////////
+//////////////////////////////////////////////////////////
+//   Commands  !!Please keep them alphabetical order!!  //
+//////////////////////////////////////////////////////////
+
 - (void)commit:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(commitCommand:) to:nil from:self];
-}
-
-- (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-	XVimSearch *searcher = [[XVim instance] searcher];
-    [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
-}
-
-- (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    XVimSourceView* srcView = [window sourceView];
-	XVimOptions* options = [[XVim instance] options];
-    
-    if( [setCommand rangeOfString:@"="].location != NSNotFound ){
-        // "set XXX=YYY" form
-		NSUInteger idx = [setCommand rangeOfString:@"="].location;
-		NSString *name = [[setCommand substringToIndex:idx] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-		NSString *value = [[setCommand substringFromIndex:idx + 1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-		[options setOption:name value:value];
-        
-    }else if( [setCommand hasPrefix:@"no"] ){
-        // "set noXXX" form
-        NSString* prop = [setCommand substringFromIndex:2];
-        [options setOption:prop value:[NSNumber numberWithBool:NO]];
-    }else{
-        // "set XXX" form
-        [options setOption:setCommand value:[NSNumber numberWithBool:YES]];
-    }
-    
-    if( [setCommand isEqualToString:@"wrap"] ){
-        [srcView setWrapsLines:YES];
-    }
-    else if( [setCommand isEqualToString:@"nowrap"] ){
-        [srcView setWrapsLines:NO];
-    } else if( [setCommand isEqualToString:@"list!"] ){
-      [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
-    }
-}
-
-- (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
-{ // :w
-    [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
-}
-
-- (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window
-{ // :wq
-    [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
-    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
-}
-
-- (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window
-{ // :q
-    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -910,40 +857,29 @@
     }
 }
 
-- (void)xvimtest:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    XVimTester* tester = [[XVimTester alloc] initWithWindow:window];
-    [tester runTest];
+- (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :wq
+    [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
-- (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    //TRACE_LOG(@"registers: %@", [[XVim instance] registers])
-    NSDictionary* dic = [XVim instance].registers;
-    NSArray* aryKeys = [[dic allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    for( NSString* key in aryKeys ){
-        XVimRegister* reg = [dic valueForKey:key];
-        bool isUserRegister = false;
-        if( reg.displayName.length > 0 ){
-            unichar uc = [reg.displayName characterAtIndex:0];
-            if( uc >= 'a' && uc <='z' ){
-                isUserRegister = true;
-            }
-        }
-        if( !isUserRegister || reg.string.length > 0 ){
-            TRACE_LOG( @"\"%@   %@", reg.displayName, reg.string);
-        }
-    }
+- (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_INSERT withArgs:args inWindow:window];
 }
 
-- (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
+- (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
-- (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
+- (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_GLOBAL_MAP withArgs:args inWindow:window];
+	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
+	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
+}
+
+- (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	NSString *argString = args.arg;
 	NSScanner *scanner = [NSScanner scannerWithString:argString];
 	
@@ -981,64 +917,6 @@
 	}
 }
 
-- (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-	[self mapMode:MODE_GLOBAL_MAP withArgs:args inWindow:window];
-	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
-	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
-}
-
-- (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
-}
-
-- (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
-}
-
-- (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
-}
-
-- (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-	[self mapMode:MODE_INSERT withArgs:args inWindow:window];
-}
-
-- (void)run:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
-    NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
-    [[NSApplication sharedApplication] sendEvent:keyPress];
-}
-
-- (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    [NSApp sendAction:@selector(selectNextTab:) to:nil from:self];
-}
-
-- (void)tabprevious:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    [NSApp sendAction:@selector(selectPreviousTab:) to:nil from:self];
-}
-
-- (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
-}
-
-- (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
-}
-
-- (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
-}
-
 - (void)ncounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
     // To make forcus proper
     // We must make forcus back to editor first then invoke the command.
@@ -1048,24 +926,88 @@
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
+- (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
+}
+
+- (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
+}
+
+- (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
+}
+
 - (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(jumpToPreviousCounterpart:) to:nil from:self];
 }
 
-- (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window
-{
-    [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
+- (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
 }
 
-- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
-    [window setForcusBackToSourceView];
-    [NSApp sendAction:sel  to:nil from:self];
+- (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :q
+    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
-- (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window
-{
+- (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    //TRACE_LOG(@"registers: %@", [[XVim instance] registers])
+    NSDictionary* dic = [XVim instance].registers;
+    NSArray* aryKeys = [[dic allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    for( NSString* key in aryKeys ){
+        XVimRegister* reg = [dic valueForKey:key];
+        bool isUserRegister = false;
+        if( reg.displayName.length > 0 ){
+            unichar uc = [reg.displayName characterAtIndex:0];
+            if( uc >= 'a' && uc <='z' ){
+                isUserRegister = true;
+            }
+        }
+        if( !isUserRegister || reg.string.length > 0 ){
+            TRACE_LOG( @"\"%@   %@", reg.displayName, reg.string);
+        }
+    }
+}
+
+- (void)run:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
+    NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
+    [[NSApplication sharedApplication] sendEvent:keyPress];
+}
+
+- (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    XVimSourceView* srcView = [window sourceView];
+	XVimOptions* options = [[XVim instance] options];
+    
+    if( [setCommand rangeOfString:@"="].location != NSNotFound ){
+        // "set XXX=YYY" form
+		NSUInteger idx = [setCommand rangeOfString:@"="].location;
+		NSString *name = [[setCommand substringToIndex:idx] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		NSString *value = [[setCommand substringFromIndex:idx + 1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		[options setOption:name value:value];
+        
+    }else if( [setCommand hasPrefix:@"no"] ){
+        // "set noXXX" form
+        NSString* prop = [setCommand substringFromIndex:2];
+        [options setOption:prop value:[NSNumber numberWithBool:NO]];
+    }else{
+        // "set XXX" form
+        [options setOption:setCommand value:[NSNumber numberWithBool:YES]];
+    }
+    
+    if( [setCommand isEqualToString:@"wrap"] ){
+        [srcView setWrapsLines:YES];
+    }
+    else if( [setCommand isEqualToString:@"nowrap"] ){
+        [srcView setWrapsLines:NO];
+    } else if( [setCommand isEqualToString:@"list!"] ){
+      [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
+    }
+}
+
+- (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window{
     XVimSourceView *view = [window sourceView];
 	NSRange range = NSMakeRange([args lineBegin], [args lineEnd] - [args lineBegin] + 1);
     
@@ -1091,6 +1033,46 @@
     }
     
     [view sortLinesInRange:range withOptions:options];
+}
+
+- (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	XVimSearch *searcher = [[XVim instance] searcher];
+    [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
+}
+
+- (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(selectNextTab:) to:nil from:self];
+}
+
+- (void)tabprevious:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(selectPreviousTab:) to:nil from:self];
+}
+
+- (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
+}
+
+- (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
+}
+
+- (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w
+    [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+}
+
+- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
+    [window setForcusBackToSourceView];
+    [NSApp sendAction:sel  to:nil from:self];
+}
+
+- (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
+}
+
+- (void)xvimtest:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    XVimTester* tester = [[XVimTester alloc] initWithWindow:window];
+    [tester runTest];
 }
 
 @end
