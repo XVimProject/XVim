@@ -36,8 +36,11 @@
  **/
 
 
-
-
+/**
+ * TODO:
+ * We are not changing mark position when inserting newlines before the mark position.
+ * Vim manages its text by keeping each lines and when it insert new line the mark position also moves accordingly
+ **/
 
 
 @interface XVimMarks : NSObject
