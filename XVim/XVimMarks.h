@@ -35,6 +35,11 @@
  * This is because some marks shares one mark object in a dictionary (e.g. ` and ' marks)
  **/
 
+
+
+
+
+
 @interface XVimMarks : NSObject
 
 /**
@@ -54,11 +59,14 @@
 - (void)setMark:(XVimMark*)mark forName:(NSString*)name;
 
 /**
- * Returns XVimMarks object for a document.
+ * Returns list of XVimMarks object for a document.(Local Marks)
  * documentPath must be a full path since it identifies the XVimMarks object for the document by it.
  **/
 - (NSDictionary*)marksForDocument:(NSString*)documentPath;
 
+/**
+ * Returns list of XVimMarks object for file marks.
+ **/
 @property(readonly) NSDictionary* fileMarks;
 
 /**
@@ -71,5 +79,11 @@
  **/
 - (void)setLocalMark:(XVimMark*)mark forName:(NSString*)name;
 - (void)setFileMark:(XVimMark*)mark forName:(NSString*)name;
+
+/**
+ * Dump marks as a string
+ **/
+- (NSString*)dumpMarksForDocument:(NSString*)document;
+- (NSString*)dumpFileMarks;
 
 @end

@@ -22,6 +22,8 @@
 #import "IDEKit.h"
 #import "XVimDebug.h"
 #import "XVimRegister.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -915,6 +917,13 @@
 			[keymap mapKeyStroke:fromKeyStrokes to:toKeyStrokes];
 		}
 	}
+}
+
+- (void)marks:(XVimExArg*)args inWindow:(XVimWindow*)window{ // This is currently impelemented for debugging purpose
+    NSString* local = [[XVim instance].marks dumpMarksForDocument:window.sourceView.documentURL.path];
+    NSString* file = [[XVim instance].marks dumpFileMarks];
+    DEBUG_LOG(@"----LOCAL MARKS----\n%@", local);
+    DEBUG_LOG(@"----FILE MARKS----\n%@", file);
 }
 
 - (void)ncounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
