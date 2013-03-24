@@ -32,8 +32,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	NSRange _operationRange;
     VISUAL_MODE _mode;
 }
-- (XVimEvaluator*)ESC;
 @end
+
 @implementation XVimVisualEvaluator 
 
 - (id)initWithWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode {
@@ -96,6 +96,16 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
+- (XVimEvaluator*)C_b{
+    [[self sourceView] scrollPageBackward:[self numericArg]];
+    return self;
+}
+
+- (XVimEvaluator*)C_d{
+    [[self sourceView] scrollHalfPageForward:[self numericArg]];
+    return self;
+}
+
 - (XVimEvaluator*)d{
     [[self sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
     return nil;
@@ -104,6 +114,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)D{
     [[self sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
     return nil;
+}
+
+- (XVimEvaluator*)C_f{
+    [[self sourceView] scrollPageForward:[self numericArg]];
+    return self;
 }
 
 - (XVimEvaluator*)g{
@@ -158,6 +173,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	XVimSourceView *view = [self sourceView];
     [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
+}
+
+- (XVimEvaluator*)C_u{
+    [[self sourceView] scrollHalfPageForward:[self numericArg]];
+    return self;
 }
 
 - (XVimEvaluator*)v{
