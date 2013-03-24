@@ -38,16 +38,8 @@
     [super dealloc];
 }
 
-- (BOOL)shouldDrawInsertionPoint{
-	return [self.parent shouldDrawInsertionPoint];
-}
-
 - (float)insertionPointHeightRatio{
     return 0.5;
-}
-
-- (NSString*)modeString{
-	return [self.parent modeString];
 }
 
 - (BOOL)isRelatedTo:(XVimEvaluator*)other{

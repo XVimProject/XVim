@@ -1485,7 +1485,6 @@
         [self _moveCursor:r.location preserveColumn:NO];
         _selectionBegin = _insertionPoint;
     }else{
-        _selectionMode = MODE_CHARACTER;
         NSSelectionAffinity affinity = [_view selectionAffinity];
         _selectionBegin = r.location;
         if( affinity == NSSelectionAffinityDownstream ){

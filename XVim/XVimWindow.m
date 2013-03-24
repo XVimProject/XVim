@@ -69,8 +69,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     // Initialize evlauator stack
     [_evaluatorStack removeAllObjects];
     XVimEvaluator* firstEvaluator = [[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease];
-    [firstEvaluator becameHandler];
     [_evaluatorStack addObject:firstEvaluator];
+    [firstEvaluator becameHandler];
 }
 
 - (XVimEvaluator*)_currentEvaluator{
