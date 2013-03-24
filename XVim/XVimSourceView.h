@@ -55,6 +55,8 @@ NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
 // Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
 - (NSTextView*)view;
 
+- (void)syncStateFromView;
+
 // Selection ( DO NOT USE IN NEWLY CREATED CODE (except in XVimWindow class))
 - (NSRange)selectedRange;
 - (void)setSelectedRange:(NSRange)range;

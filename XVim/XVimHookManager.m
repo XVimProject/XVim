@@ -11,16 +11,16 @@
 #import "DVTSourceTextViewHook.h"
 #import "IDESourceCodeEditorHook.h"
 #import "IDEEditorHook.h"
+#import "IDEWorkspaceWindowHook.h"
 
 @implementation XVimHookManager
 
-+ (void)hookWhenPluginLoaded
-{
++ (void)hookWhenPluginLoaded{
     [IDEEditorAreaHook hook];
 }
 
-+ (void)hookWhenDidFinishLaunching
-{
++ (void)hookWhenDidFinishLaunching{
+    [IDEWorkspaceWindowHook hook];
 	[DVTSourceTextViewHook hook];
 	[IDESourceCodeEditorHook hook];
     [IDEEditorHook hook];

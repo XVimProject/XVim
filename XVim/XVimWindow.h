@@ -69,4 +69,18 @@
 
 - (IDEWorkspaceWindow*)currentWorkspaceWindow;
 
+/**
+ * Sync to update XVim internal state acording to Xcode state(mainly selected ranges).
+ * This method must be called after you call Xcode operation.
+ * It is usually Xcode operation like [NSApp sendAction] 
+ * When you call such method Xcode changes state of source view.
+ * This breaks integrity between infomation we keep internally and Xcode has internally.
+ *
+ * TODO:
+ * For future:
+ * We should not call Xcode functionarity directly without going through "XVimWindow" object.
+ * All the command must go through XVimWindow or XVimSourceView and there we can keep the integrity.
+ **/
+- (void)syncState;
+
 @end

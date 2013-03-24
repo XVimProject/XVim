@@ -138,6 +138,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke {
     [self dumpEvaluatorStack];
+    [self syncState];
     
     [self clearErrorMessage];
 	XVimEvaluator* currentEvaluator = [_evaluatorStack lastObject];
@@ -191,6 +192,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     currentEvaluator = [_evaluatorStack lastObject];
     [self.commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
     [self.commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
+    [self syncState];
 }
 
 - (void)handleTextInsertion:(NSString*)text {
@@ -368,6 +370,10 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (IDEWorkspaceWindow*)currentWorkspaceWindow{
     IDEWorkspaceWindow* window = (IDEWorkspaceWindow*)[[self.sourceView view] window];
     return window;
+}
+
+- (void)syncState{
+    [self.sourceView syncStateFromView];
 }
 
 static char s_associate_key = 0;

@@ -4,6 +4,7 @@
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "Utils.h"
+#import "NSObject+ExtraData.h"
 
 /*
  * XVimSourceView represent a text view used in XVim.
@@ -1246,12 +1247,23 @@
     return NSMakeRange(_insertionPoint, 0);
 }
 
+- (void)syncStateFromView{
+    NSNumber* n = [self.view dataForName:@"rangeChanged"];
+    if( n != nil && [n boolValue] ){
+        [self _syncStateFromView];
+        [self.view setBool:NO forName:@"rangeChanged"];
+    }
+    
+    n = [self.view dataForName:@"rangeChanged"];
+}
+
 // Obsolete
 // This is here because only compatibility reason
 - (void)setSelectedRange:(NSRange)range {
     [self _setSelectedRange:range];
     [self _syncStateFromView];
 }
+
 
 //////////////////////
 // Internal Methods //
@@ -1498,6 +1510,7 @@
     if( _cursorMode == CURSOR_MODE_COMMAND ){
         [self _adjustCursorPosition];
     }
+    [self dumpState];
     [_view setSelectedRanges:[self _selectedRanges]];
     [self scrollTo:_insertionPoint];
 }
