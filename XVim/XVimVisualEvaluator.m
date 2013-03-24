@@ -53,12 +53,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (void)becameHandler{
-	XVimSourceView* view = [self sourceView];
-    [view changeSelectionMode:_mode];
+    [super becameHandler];
+    [self.sourceView changeSelectionMode:_mode];
 }
     
 - (void)didEndHandler{
 	[super didEndHandler];
+    [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 	[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
 }
 

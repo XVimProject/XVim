@@ -58,6 +58,7 @@
         [_playbackRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
         _playbackRegister = nil;
     }
+    [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (NSString*)modeString {

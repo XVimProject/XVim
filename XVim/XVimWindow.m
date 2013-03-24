@@ -168,8 +168,6 @@ static const char* KEY_WINDOW = "xvimwindow";
                 currentEvaluator = [_evaluatorStack lastObject];
                 SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
-                [nextEvaluator becameHandler];
-                // Not break here. check the nextEvaluator repeatedly.
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
             [[XVim instance] ringBell];
@@ -179,9 +177,10 @@ static const char* KEY_WINDOW = "xvimwindow";
             [_evaluatorStack addObject:nextEvaluator];
             nextEvaluator.parent = currentEvaluator;
             [currentEvaluator didEndHandler];
-            [(XVimEvaluator*)[_evaluatorStack lastObject] becameHandler];
+            [nextEvaluator becameHandler];
             
             [_keymapContext clear];
+            // Not break here. check the nextEvaluator repeatedly.
             break;
         }else{
             // if current and next evaluator is the same do nothing.
