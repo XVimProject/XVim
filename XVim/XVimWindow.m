@@ -166,7 +166,8 @@ static const char* KEY_WINDOW = "xvimwindow";
                 [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
                 [completeEvaluator didEndHandler];
                 currentEvaluator = [_evaluatorStack lastObject];
-                SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
+                [currentEvaluator becameHandler];
+                 SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
