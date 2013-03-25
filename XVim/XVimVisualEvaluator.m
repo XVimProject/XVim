@@ -77,8 +77,17 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
+    /**
+     * The folloing code is to draw insertion point when its visual mode.
+     * Original NSTextView does not draw insertion point so we have to do it manually.
+     **/
+    [self.sourceView.view lockFocus];
+    [self drawRect:[self.sourceView boundingRectForGlyphIndex:self.sourceView.insertionPoint]];
+    [self.sourceView.view setNeedsDisplayInRect:[self.sourceView.view visibleRect] avoidAdditionalLayout:NO];
+    [self.sourceView.view unlockFocus];
+    
     return nextEvaluator;
 }
 
