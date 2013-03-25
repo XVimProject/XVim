@@ -88,7 +88,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b{
-    [[self sourceView] scrollHalfPageBackward:[self numericArg]];
+    [[self sourceView] scrollPageBackward:[self numericArg]];
     return nil;
 }
 

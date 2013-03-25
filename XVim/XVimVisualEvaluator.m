@@ -176,7 +176,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)C_u{
-    [[self sourceView] scrollHalfPageForward:[self numericArg]];
+    [[self sourceView] scrollHalfPageBackward:[self numericArg]];
     return self;
 }
 

@@ -1443,7 +1443,7 @@
 }
 
 - (void)pageBackward:(NSUInteger)index count:(NSUInteger)count { // C-b
-	[self scroll:1.0 count:count];
+	[self scroll:-1.0 count:count];
 }
 
 - (void)halfPageForward:(NSUInteger)index count:(NSUInteger)count { // C-d
