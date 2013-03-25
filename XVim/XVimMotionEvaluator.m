@@ -54,10 +54,6 @@
     return self;
 }
 
-- (void)becameHandlerInWindow{
-	[super becameHandler];
-}
-
 // This is helper method commonly used by many key event handlers.
 // You do not need to use this if this is not proper to express the motion.
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{

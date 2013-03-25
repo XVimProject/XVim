@@ -99,7 +99,22 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 - (XVimEvaluator*)onChildComplete:(XVimEvaluator*)childEvaluator;
 
 
+/**
+ * This is called when an evaluator became next handler.
+ * Next key input will be redirected to this evaluator.
+ * You can do some setup before handling next key input.
+ *
+ * YOU MUST CALL [super becameHandler] when you override this.
+ **/
 - (void)becameHandler;
+
+/**
+ * This is called when an evaluator has been finished its task and evicted from stack evaluatorhandler.
+ * This happens when you return next evaluator as "nil" or other evaluators.
+ * You can do some tearing down before handling next key input.
+ *
+ * YOU MUST CALL [super didEndHandler] when you override this.
+ **/
 - (void)didEndHandler;
 - (XVimEvaluator*)defaultNextEvaluator;
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event;

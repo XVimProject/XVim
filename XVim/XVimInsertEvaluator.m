@@ -83,6 +83,7 @@
 }
 
 - (void)becameHandler{
+    [super becameHandler];
     self.startRange = [[self sourceView] selectedRange];
     [self.sourceView insert];
 }
@@ -173,6 +174,7 @@
 }
 
 - (void)didEndHandler{
+    [super didEndHandler];
 	XVimSourceView *sourceView = [self sourceView];
 	
     if( !_insertedEventsAbort && !_oneCharMode ){

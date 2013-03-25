@@ -53,6 +53,7 @@
 }
 
 - (void)becameHandler{
+    [super becameHandler];
     if (_playbackRegister) {
 		[[XVim instance] setLastPlaybackRegister:_playbackRegister];
         [_playbackRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
