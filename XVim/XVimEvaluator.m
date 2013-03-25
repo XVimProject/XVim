@@ -177,7 +177,7 @@ static XVimEvaluator* _invalidEvaluator = nil;
     if( nil == self.parent ){
         return _argumentString;
     }else{
-        return [[self.parent argumentString] stringByAppendingString:_argumentString];
+        return [[self.parent argumentDisplayString] stringByAppendingString:_argumentString];
     }
 }
 
