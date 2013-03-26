@@ -37,7 +37,6 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 #import "XVimRegister.h"
 #import "XVimMode.h"
-#import "XVimEvaluatorContext.h"
 #import "XVimTextViewProtocol.h"
 
 @class XVimMotionEvaluator;
@@ -147,21 +146,6 @@ An evaluator which takes argument to determine the motion ( like 'f' ) use XVimM
 
 // Returns the context numeric arguments multiplied together
 - (NSUInteger)numericArg;
-
-/*
-// Returns the context
-- (XVimEvaluatorContext*)context;
-
-// Equivalent to [[self context] copy]
-- (XVimEvaluatorContext*)contextCopy;
-
-// Clears the context and returns self, useful for escaping from operators
-- (XVimEvaluator*)withNewContext;
-
-// Returns self with the passed context
-- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context;
- */
-
 @end
 
 

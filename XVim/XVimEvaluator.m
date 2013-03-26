@@ -311,30 +311,6 @@ static XVimEvaluator* _invalidEvaluator = nil;
     [defaultReg appendText:deletedText];
     return;
 }
-
-/*
-- (XVimEvaluatorContext*)context{
-	return [[_context retain] autorelease];
-}
- 
-
-// Equivalent to [[self context] copy]
-- (XVimEvaluatorContext*)contextCopy {
-	return [[self context] copy];
-}
-
-// Clears the context and returns self, useful for escaping from operators
-- (XVimEvaluator*)withNewContext {
-	self.context = [[[XVimEvaluatorContext alloc] init] autorelease];
-	return self;
-}
-
-- (XVimEvaluator*)withNewContext:(XVimEvaluatorContext*)context{
-	self.context = context;
-	return self;
-}
- */
-
 @end
 
 
