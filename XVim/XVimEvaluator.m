@@ -230,10 +230,10 @@ static XVimEvaluator* _invalidEvaluator = nil;
 
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
-    if (_yankRegister != nil){
-        [_yankRegister clear];
-        [_yankRegister appendText:yankedText];
-        _yankRegister.type = type;
+    if (self.yankRegister != nil){
+        [self.yankRegister clear];
+        [self.yankRegister appendText:yankedText];
+        self.yankRegister.type = type;
     }else{
         // There are 10 numbered registers
         // Cycle number registers
@@ -280,10 +280,10 @@ static XVimEvaluator* _invalidEvaluator = nil;
 
     // If we are yanking into a specific register then we do not cycle through
     // the numbered registers.
-    if (_yankRegister != nil){
-        [_yankRegister clear];
-        [_yankRegister appendText:deletedText];
-        _yankRegister.type = type;
+    if (self.yankRegister!= nil){
+        [self.yankRegister clear];
+        [self.yankRegister appendText:deletedText];
+        self.yankRegister.type = type;
     }else{
         // There are 10 numbered registers
         // Cycle number registers
