@@ -29,6 +29,7 @@
 static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
 
 @interface XVimVisualEvaluator(){
+    BOOL _waitForArgument;
 	NSRange _operationRange;
     VISUAL_MODE _mode;
 }
@@ -42,6 +43,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (id)initWithWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode withRange:(NSRange)range{
 	if (self = [self initWithWindow:window]) {
+        _waitForArgument = NO;
         _mode = mode;
 		_operationRange = range;
 	}
@@ -58,9 +60,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
     
 - (void)didEndHandler{
-	[super didEndHandler];
-    [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
-	[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
+    if( !_waitForArgument ){
+        [super didEndHandler];
+        [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
+        [[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
+    }
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -231,7 +235,20 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)DQUOTE{
     [self.argumentString appendString:@"\""];
-    return [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
+    self.onChildCompleteHandler = @selector(onComplete_DQUOTE:);
+    _waitForArgument = YES;
+    return  [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
+}
+
+- (XVimEvaluator*)onComplete_DQUOTE:(XVimRegisterEvaluator*)childEvaluator{
+    XVimRegister *xregister = childEvaluator.reg;
+    if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] ){
+        self.yankRegister = xregister;
+        [self.argumentString appendString:xregister.displayName];
+        self.onChildCompleteHandler = @selector(onChildComplete:);
+    }
+    _waitForArgument = YES;
+    return self;
 }
 
 - (XVimEvaluator*)Y{
