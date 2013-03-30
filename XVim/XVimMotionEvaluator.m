@@ -9,14 +9,12 @@
 
 #import "IDEKit.h"
 #import "XVimMotionEvaluator.h"
-#import "XVimSearchLineEvaluator.h"
 #import "XVimGMotionEvaluator.h"
 #import "XVimZEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
-#import "XVimCharacterSearch.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "XVimSourceView.h"
@@ -45,13 +43,20 @@
 @end
 
 @implementation XVimMotionEvaluator
+@synthesize motion = _motion;
 
 - (id)initWithWindow:(XVimWindow *)window{
     self = [super initWithWindow:window];
     if (self) {
         _forcedMotionType = DEFAULT_MOTION_TYPE;
+        _motion = [XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) retain];
     }
     return self;
+}
+
+- (void)dealloc{
+    [_motion release];
+    [super dealloc];
 }
 
 // This is helper method commonly used by many key event handlers.
@@ -139,20 +144,31 @@
     return [self _motionFixed:motion];
 }
 
+- (XVimEvaluator*)onComplete_fFtT:(XVimArgumentEvaluator*)childEvaluator{
+    if( childEvaluator.keyStroke.toString.length != 1 ){
+        return [XVimEvaluator invalidEvaluator];
+    }
+    
+    self.motion.count = self.numericArg;
+    self.motion.character = [childEvaluator.keyStroke.toString characterAtIndex:0];
+    [XVim instance].lastCharacterSearchMotion = self.motion;
+    return [self _motionFixed:self.motion];
+}
+                                   
 - (XVimEvaluator*)f{
     [self.argumentString appendString:@"f"];
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
-    eval.forward = YES;
-    eval.previous = NO;
-    return [eval autorelease];
+    self.onChildCompleteHandler = @selector(onComplete_fFtT:);
+    self.motion.motion = MOTION_NEXT_CHARACTER;
+    self.motion.type = CHARACTERWISE_INCLUSIVE;
+    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)F{
     [self.argumentString appendString:@"F"];
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
-    eval.forward = NO;
-    eval.previous = NO;
-    return [eval autorelease];
+    self.onChildCompleteHandler = @selector(onComplete_fFtT:);
+    self.motion.motion = MOTION_PREV_CHARACTER;
+    self.motion.type = CHARACTERWISE_EXCLUSIVE;
+    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 /*
@@ -231,19 +247,18 @@
 
 - (XVimEvaluator*)t{
     [self.argumentString appendString:@"t"];
-    
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
-    eval.forward = YES;
-    eval.previous = YES;
-    return [eval autorelease];
+    self.onChildCompleteHandler = @selector(onComplete_fFtT:);
+    self.motion.motion = MOTION_TILL_NEXT_CHARACTER;
+    self.motion.type = CHARACTERWISE_INCLUSIVE;
+    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)T{
     [self.argumentString appendString:@"T"];
-    XVimSearchLineEvaluator* eval = [[XVimSearchLineEvaluator alloc] initWithWindow:self.window];
-    eval.forward = NO;
-    eval.previous = YES;
-    return [eval autorelease];
+    self.onChildCompleteHandler = @selector(onComplete_fFtT:);
+    self.motion.motion = MOTION_TILL_PREV_CHARACTER;
+    self.motion.type = CHARACTERWISE_EXCLUSIVE;
+    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)v{
@@ -468,71 +483,42 @@
 }
 
 - (XVimEvaluator*)COMMA{
-	XVimCharacterSearch* charSearcher = [[XVim instance] characterSearcher];
-    XVimSourceView *view = [self.window sourceView];
-    NSUInteger location = [view selectedRange].location;
+    XVimMotion* m = [XVim instance].lastCharacterSearchMotion;
+    if( nil == m ){
+        return [XVimEvaluator invalidEvaluator];
+    }
     
-	for (NSUInteger i = 0;;) {
-        location = [charSearcher searchPrevCharacterFrom:location inWindow:self.window];
-        if (location == NSNotFound || ++i >= [self numericArg]){
+    MOTION new_motion = MOTION_PREV_CHARACTER;
+    switch( m.motion ){
+        case MOTION_NEXT_CHARACTER:
+            new_motion = MOTION_PREV_CHARACTER;
             break;
-        }
-        
-        if ([charSearcher shouldSearchPreviousCharacter]){
-            if ([charSearcher shouldSearchCharacterBackward]){
-                location +=1;
-            }else{
-                location -= 1;
-            }
-        }
+        case MOTION_PREV_CHARACTER:
+            new_motion = MOTION_NEXT_CHARACTER;
+            break;
+        case MOTION_TILL_NEXT_CHARACTER:
+            new_motion = MOTION_TILL_PREV_CHARACTER;
+            break;
+        case MOTION_TILL_PREV_CHARACTER:
+            new_motion = MOTION_TILL_NEXT_CHARACTER;
+            break;
+        default:
+            NSAssert(NO, @"Should not reach here");
+            break;
     }
-    
-    if (location == NSNotFound){
-        [[XVim instance]ringBell];
-    }else{
-        // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
-        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
-        if( ![charSearcher shouldSearchCharacterBackward]  ){
-            // If the last search was forward "comma" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
-            type = CHARACTERWISE_EXCLUSIVE;
-        }
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type];
-    }
-    
-    return nil;
+    XVimMotion* n = XVIM_MAKE_MOTION(new_motion, m.type, m.option, [self numericArg]);
+    n.character = m.character;
+    return [self _motionFixed:n];
 }
 
 - (XVimEvaluator*)SEMICOLON{
-	XVimCharacterSearch* charSearcher = [[XVim instance] characterSearcher];
-    XVimSourceView *view = [self sourceView];
-    NSUInteger location = [view selectedRange].location;
-    for (NSUInteger i = 0;;){
-        location = [charSearcher searchNextCharacterFrom:location inWindow:self.window];
-        if (location == NSNotFound || ++i >= [self numericArg]){
-            break;
-        }
-        
-        if ([charSearcher shouldSearchPreviousCharacter]){
-            if ([charSearcher shouldSearchCharacterBackward]){
-                location -= 1;
-            }else{
-                location +=1;
-            }
-        }
+    XVimMotion* m = [XVim instance].lastCharacterSearchMotion;
+    if( nil == m ){
+        return [XVimEvaluator invalidEvaluator];
     }
-    
-    if (location == NSNotFound){
-        [[XVim instance] ringBell];
-    }else{
-        MOTION_TYPE type=CHARACTERWISE_INCLUSIVE;
-        // If its 'F' or 'T' motion the motion type is CHARACTERWISE_EXCLUSIVE
-        if( [charSearcher shouldSearchCharacterBackward]  ){
-            // If the last search was backward "semicolon" is backward search and this is the case its CHARACTERWISE_EXCLUSIVE
-            type = CHARACTERWISE_EXCLUSIVE;
-        }
-        return [self _motionFixedFrom:[view selectedRange].location To:location Type:type];
-    }
-    return nil;
+    XVimMotion* n = XVIM_MAKE_MOTION(m.motion, m.type, m.option, [self numericArg]);
+    n.character = m.character;
+    return [self _motionFixed:n];
 }
 
 - (XVimEvaluator*)Up{

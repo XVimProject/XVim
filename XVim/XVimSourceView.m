@@ -1341,6 +1341,24 @@
         case MOTION_PARAGRAPH_BACKWARD:
             end = [self paragraphsBackward:begin count:motion.count option:motion.option];
             break;
+        case MOTION_NEXT_CHARACTER:
+            end = [self nextCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            break;
+        case MOTION_PREV_CHARACTER:
+            end = [self prevCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            break;
+        case MOTION_TILL_NEXT_CHARACTER:
+            end = [self nextCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            if(end != NSNotFound){
+                end--;
+            }
+            break;
+        case MOTION_TILL_PREV_CHARACTER:
+            end = [self prevCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            if(end != NSNotFound){
+                end++;
+            }
+            break;
         case MOTION_NEXT_FIRST_NONBLANK:
             end = [self nextLine:begin column:0 count:motion.count option:motion.option];
             tmpPos = [self nextNonBlankInALine:end];

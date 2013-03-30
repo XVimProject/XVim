@@ -120,7 +120,7 @@
  **/
 - (BOOL) isTOL:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [self isNewLine:index];
+    return [self isNewLine:index] || [self isEOF:index];
 }
 
 /**
@@ -461,12 +461,17 @@
  *    - Character just before EOF if its not newline 
  * Blankline does not have end of line.
  * Searching starts from position "index". So the "index" could be an end of line.
+ * If the index points newline character it returns the position previous of the index(if its not blank).
  **/
 - (NSUInteger)endOfLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     ASSERT_VALID_CURSOR_POS(index);
     if( [self isBlankLine:index] ){
         return NSNotFound;
+    }
+    if( [self isTOL:index] ){
+        // Its not blank but tail
+        return index-1;
     }
     NSUInteger nextNewLine = [self nextNewLine:index];
     if(NSNotFound == nextNewLine){
@@ -641,19 +646,6 @@
     }else{
         return --pos;
     }
-}
-
-/**
- * Returns index of the position where one of the the specified characters is found when searching from "pos"
- * to end of the line.
- * Returns NSNotFound if no character in the set is found.
- **/
-- (NSUInteger)nextCharacterInALine:(NSUInteger)pos inSet:(NSCharacterSet*)set{
-    NSUInteger end = [self endOfLine:pos];
-    if( NSNotFound == end ){
-        return NSNotFound;
-    }
-    return [[self string] rangeOfCharacterFromSet:set options:0 range:NSMakeRange(pos, end-pos+1)].location;
 }
 
 /**
@@ -1312,6 +1304,7 @@
     return paragraph_head;
 }
 
+
 - (NSUInteger)sectionsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
     return 0;
 }
@@ -1320,8 +1313,51 @@
     return 0;
 }
 
-- (NSUInteger)endOfFile
-{
+- (NSUInteger)nextCharacterInALine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [self isEOF:index] ){
+        return NSNotFound;
+    }
+    NSUInteger p = index+1;
+    NSUInteger end = [self endOfLine:p];
+    if( NSNotFound == end ){
+        return NSNotFound;
+    }
+    
+    for( ; p <= end; p++ ){
+        if( [[self string] characterAtIndex:p] == character ){
+            count--;
+            if( 0 == count ){
+                return p;
+            }
+        }
+    }
+    return NSNotFound;
+}
+
+- (NSUInteger)prevCharacterInALine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( 0 == index ){
+        return NSNotFound;
+    }
+    NSUInteger p = index-1;
+    NSUInteger head = [self headOfLine:p];
+    if( NSNotFound == head ){
+        return NSNotFound;
+    }
+    
+    for( ; p >= head ; p-- ){
+        if( [[self string] characterAtIndex:p] == character ){
+            count--;
+            if( 0 == count ){
+                return p;
+            }
+        }
+    }
+    return NSNotFound;
+}
+
+- (NSUInteger)endOfFile{
 	return self.string.length;
 }
 

@@ -39,6 +39,10 @@ typedef enum _MOTION{
     MOTION_NEXT_FIRST_NONBLANK,     // +
     MOTION_PREV_FIRST_NONBLANK,     // -
     MOTION_FIRST_NONBLANK,          // ^
+    MOTION_NEXT_CHARACTER,          // f
+    MOTION_PREV_CHARACTER,          // F
+    MOTION_TILL_NEXT_CHARACTER,     // t
+    MOTION_TILL_PREV_CHARACTER,     // T
     MOTION_LINENUMBER,              // [num]G
     MOTION_PERCENT,                 // [num]%
     MOTION_NEXT_MATCHED_ITEM,       // %

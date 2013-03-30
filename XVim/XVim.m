@@ -24,7 +24,6 @@
 #import "XVim.h"
 #import "Logger.h"
 #import "XVimSearch.h"
-#import "XVimCharacterSearch.h"
 #import "XVimExCommand.h"
 #import "XVimKeymap.h"
 #import "XVimMode.h"
@@ -36,6 +35,7 @@
 #import "XVimCommandLine.h"
 #import "DVTSourceTextViewHook.h"
 #import "XVimMarks.h"
+#import "xvimMotion.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -56,7 +56,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @synthesize lastPlaybackRegister = _lastPlaybackRegister;
 @synthesize numberedRegisters = _numberedRegisters;
 @synthesize searcher = _searcher;
-@synthesize characterSearcher = _characterSearcher;
+@synthesize lastCharacterSearchMotion = _lastCharacterSearchMotion;
 @synthesize excmd = _excmd;
 @synthesize options = _options;
 @synthesize marks = _marks;
@@ -83,8 +83,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     return YES;
 }
 
-+ (void) load 
-{ 
++ (void) load{
     NSBundle* app = [NSBundle mainBundle];
     NSString* identifier = [app bundleIdentifier];
     
@@ -131,8 +130,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
                                  object: nil];
 }
 
-+ (XVim*)instance
-{
++ (XVim*)instance{
     static XVim *__instance = nil;
     static dispatch_once_t __once;
     
@@ -156,7 +154,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 		_exCommandHistory = [[XVimHistoryHandler alloc] init];
 		_searchHistory = [[XVimHistoryHandler alloc] init];
 		_searcher = [[XVimSearch alloc] init];
-		_characterSearcher = [[XVimCharacterSearch alloc] init];
+        _lastCharacterSearchMotion = nil;
 		_options = [[XVimOptions alloc] init];
         _marks = [[XVimMarks alloc] init];
 		// From the vim documentation:
@@ -255,7 +253,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 -(void)dealloc{
     [_options release];
     [_searcher release];
-	[_characterSearcher release];
+    [_lastCharacterSearchMotion release];
     [_excmd release];
     [_logFile release];
     [_numberedRegisters release];

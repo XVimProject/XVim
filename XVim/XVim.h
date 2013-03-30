@@ -20,6 +20,7 @@
 @class XVimCommandLine;
 @class XVimCommandField;
 @class XVimMarks;
+@class XVimMotion;
 
 extern NSString * const XVimDocumentChangedNotification;
 extern NSString * const XVimDocumentPathKey;
@@ -29,7 +30,7 @@ extern NSString * const XVimDocumentPathKey;
 + (XVim*)instance;
 @property (strong) XVimOptions* options;
 @property (strong) XVimSearch* searcher;
-@property (strong) XVimCharacterSearch* characterSearcher;
+@property (strong) XVimMotion* lastCharacterSearchMotion;
 @property (strong) XVimExCommand* excmd;
 @property (readonly) XVimMarks* marks;
 @property (strong, readonly) NSDictionary* registers;

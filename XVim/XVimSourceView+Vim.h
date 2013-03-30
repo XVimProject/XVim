@@ -255,13 +255,6 @@ typedef enum {
 - (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound;
 
 /**
- * Returns index of the position where one of the the specified characters is found when searching from "pos"
- * to end of the line.
- * Returns NSNotFound if no character in the set is found.
- **/
-- (NSUInteger)nextCharacterInALine:(NSUInteger)pos inSet:(NSCharacterSet*)set;
-
-/**
  * This does all the work need to do with vim '%' motion.
  * Find match pair character in the line and find the corresponding pair.
  * Returns NSNotFound if not found.
@@ -290,6 +283,9 @@ typedef enum {
 - (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)nextCharacterInALine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt;
+- (NSUInteger)prevCharacterInALine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt;
+
 
 // Scrolls
 - (void)pageForward:(NSUInteger)index count:(NSUInteger)count;
