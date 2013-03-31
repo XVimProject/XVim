@@ -177,7 +177,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         }else if( currentEvaluator != nextEvaluator ){
             [_evaluatorStack addObject:nextEvaluator];
             nextEvaluator.parent = currentEvaluator;
-            [currentEvaluator didEndHandler];
+            //[currentEvaluator didEndHandler];
             [nextEvaluator becameHandler];
             
             [_keymapContext clear];
