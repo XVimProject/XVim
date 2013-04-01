@@ -567,9 +567,6 @@
                        CMD(@"Print", @"print:inWindow:"),
                        CMD(@"X", @"X:inWindow:"),
                        CMD(@"~", @"sub:inWindow:"),
-                       
-                       CMD(@"xvimtest", @"xvimtest:inWindow:"), // Run xvim test(for developing purpose)
-                       
 					   nil];
     }
     return self;
@@ -1077,11 +1074,6 @@
 
 - (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
-}
-
-- (void)xvimtest:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    XVimTester* tester = [[XVimTester alloc] initWithWindow:window];
-    [tester runTest];
 }
 
 @end

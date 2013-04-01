@@ -36,6 +36,7 @@
 #import "DVTSourceTextViewHook.h"
 #import "XVimMarks.h"
 #import "xvimMotion.h"
+#import "XVimTester.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -69,6 +70,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     }
 }
 
+- (void)runTest:(id)sender{
+    [[[[XVimTester alloc] init] autorelease] runTest];
+}
+
 - (void)toggleXVim:(id)sender{
     if( [sender state] == NSOnState ){
         [DVTSourceTextViewHook unhook];
@@ -77,10 +82,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         [DVTSourceTextViewHook hook];
         [sender setState:NSOnState];
     }
-}
-
-- (BOOL)validateMenuItem:(NSMenuItem *)menuItem{
-    return YES;
 }
 
 + (void) load{
@@ -94,25 +95,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
     
-    // Add XVim menu item in "Edit"
-    // I have tried to add the item into "Editor" but did not work.
-    // It looks that the initialization of "Editor" menu is after loading XVim...
-    NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
-    NSMenuItem* item = [[[NSMenuItem alloc] init] autorelease];
-    item.title = @"XVim";
-    [item setEnabled:YES];
-    item.target = [XVim instance];
-    
     //Caution: parseRcFile can potentially invoke +instance on XVim (e.g. if "set ..." is
     //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
-    [item.target parseRcFile];
+    [[XVim instance] parseRcFile];
     
-    
-    item.action = @selector(toggleXVim:);
-    item.state = NSOnState;
-    NSMenuItem* editorManu = [menu itemWithTitle:@"Edit"];
-    NSMenu* editorSubMenu = [editorManu submenu];
-    [editorSubMenu addItem:item];
     
     // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
     //[[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
@@ -124,10 +110,44 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [XVimHookManager hookWhenPluginLoaded];
 
     NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-    [notificationCenter addObserver: [XVimHookManager class]
-                                  selector: @selector( hookWhenDidFinishLaunching )
+   [notificationCenter addObserver: [self class]
+                                  selector: @selector( applicationDidFinishLaunching )
                                    name: NSApplicationDidFinishLaunchingNotification
-                                 object: nil];
+                                object: nil];
+}
+
++ (void)applicationDidFinishLaunching{
+    [XVimHookManager hookWhenDidFinishLaunching];
+    // Add XVim menu
+    // I have tried to add the item into "Editor" but did not work.
+    // It looks that the initialization of "Editor" menu is done later...
+    // It looks that the initialization of "Editor" menu is done later...
+    NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
+    NSMenuItem* item = [[[NSMenuItem alloc] init] autorelease];
+    NSMenu* m = [[[NSMenu alloc] initWithTitle:@"XVim"] autorelease];
+    [item setSubmenu:m];
+    NSMenuItem* item1 = [[[NSMenuItem alloc] init] autorelease];
+    item1.title = @"Enable";
+    [item1 setEnabled:YES];
+    [item1 setState:NSOnState];
+    item1.target = [XVim instance];
+    item1.action = @selector(toggleXVim:);
+    [m addItem:item1];
+    
+    if( [XVim instance].options.debug ){
+        NSMenuItem* item2 = [[[NSMenuItem alloc] init] autorelease];
+        item2.title = @"Run Test";
+        item2.target = [XVim instance];
+        item2.action = @selector(runTest:);
+        [item2 setEnabled:YES];
+        
+        [m addItem:item2];
+    }
+    
+    // Add XVim menu next to Editor menu
+    NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
+    [menu insertItem:item atIndex:editorIndex];
+    return;
 }
 
 + (XVim*)instance{

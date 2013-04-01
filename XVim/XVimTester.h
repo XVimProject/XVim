@@ -11,6 +11,5 @@
 
 @interface XVimTester : NSObject
 @property (strong)XVimWindow* window;
-- (id)initWithWindow:(XVimWindow*)window;
 - (void)runTest;
 @end
