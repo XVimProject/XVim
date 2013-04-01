@@ -158,7 +158,6 @@
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
-    METHOD_TRACE_LOG();
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
@@ -202,7 +201,6 @@
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
-    METHOD_TRACE_LOG();
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
@@ -216,7 +214,6 @@
 
 // Drawing Caret
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
-    METHOD_TRACE_LOG();
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
