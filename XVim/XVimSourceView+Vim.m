@@ -722,7 +722,11 @@
  * Returns position of the head of count words forward and an info structure that handles the end of word boundaries.
  * @param index
  * @param count
- * @param option MOTION_OPTION_NONE or BIGWORD
+ * @param option
+ *			MOTION_OPTION_NONE	for 'cw', 'dw', 'e'
+ *			BIGWORD				for 'cW', 'dW', 'E'
+ *			LEFT_RIGHT_NOWRAP	for serarch
+ *		    FIND_ENDOF_WORD		for 'e', 'E' (combination)
  * @param info This is used with special cases explaind above such as 'cw' or 'w' crossing over the newline.
  **/
 - (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimWordInfo*)info{
@@ -740,6 +744,18 @@
     
     NSString* str = [self string];
     unichar lastChar= [str characterAtIndex:index];
+
+	// isFirstWordInALine
+    // {CR}    -> {CR}    set
+    // {CR}    -> {word}  do nothing
+    // {CR}    -> {blank} do nothing
+    // {word}  -> {CR}    set
+    // {word}  -> {word}  do nothing
+    // {word}  -> {blank} unset
+    // {blank} -> {CR}    set
+    // {blank} -> {word}  do nothing
+    // {blank} -> {blank} do nothing
+
     BOOL inWord = isNonBlank(lastChar);
     BOOL newLineStarts = isNewLine(lastChar);
     BOOL foundNonBlanks = inWord;
@@ -762,20 +778,19 @@
             if(isNewLine(curChar)){
                 //two newlines in a row.
                 inWord = FALSE;
-                if(!info->findEndOfWord){
+                if(!(opt&FIND_ENDOF_WORD)){
                     --count;
                     info->lastEndOfWord = i-1; 
                     info->lastEndOfLine = i-1; 
                 }
+                info->isFirstWordInALine = TRUE;
             }else if(isNonBlank(curChar)){
                 inWord = TRUE;
                 --count;
                 newLineStarts = FALSE;
-                info->isFirstWordInALine = FALSE;
             }else {
                 inWord = FALSE; 
                 newLineStarts = FALSE;
-                info->isFirstWordInALine = FALSE;
             }
         }else if(inWord){
             if(isNewLine(curChar)){
@@ -785,6 +800,7 @@
                 foundNonBlanks = FALSE;
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
+                info->isFirstWordInALine = TRUE;
             }else if(isNonBlank(curChar)){
                 inWord = TRUE;
                 newLineStarts = FALSE;
@@ -798,6 +814,7 @@
                 inWord = FALSE;
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
+                info->isFirstWordInALine = FALSE;
             }
         }else { //on a blank character that is not a newline
             if(isNewLine(curChar)){
