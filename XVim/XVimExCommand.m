@@ -23,32 +23,31 @@
 #import "XVimRegister.h"
 
 @implementation XVimExArg
-@synthesize arg, cmd, forceit, lineBegin, lineEnd, addr_count;
+@synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
 @end
 
 @implementation XVimExCmdname
-@synthesize cmdName, methodName;
+@synthesize cmdName,methodName;
 
-- (id)initWithCmd:(NSString *)cmd method:(NSString *)method {
-    if (self = [super init]) {
+-(id)initWithCmd:(NSString*)cmd method:(NSString*)method{
+    if( self = [super init] ){
         cmdName = [cmd retain];
         methodName = [method retain];
     }
     return self;
 }
-
 @end
 
 
 @implementation XVimExCommand
-#define CMD(cmd, mtd) [[XVimExCmdname alloc] initWithCmd : cmd method : mtd]
-- (id)init {
-    if (self = [super init]) {
+#define CMD(cmd,mtd) [[XVimExCmdname alloc] initWithCmd:cmd method:mtd]
+-(id)init {
+    if( self = [super init] ){
         // This is the ex command list.
         // This is list from ex_cmds.h in Vim source code.
         // The method names correspond the Vim's function name.
         // You can change the method name as needed ( Since Vim's one is not always suitable )
-
+        
         _excommands = [[NSArray alloc] initWithObjects:
                        CMD(@"append", @"append:inWindow:"),
                        CMD(@"abbreviate", @"abbreviate:inWindow:"),
@@ -389,7 +388,7 @@
                        CMD(@"rewind", @"rewind:inWindow:"),
                        CMD(@"right", @"align:inWindow:"),
                        CMD(@"rightbelow", @"wrongmodifier:inWindow:"),
-                       CMD(@"run", @"run:inWindow:"), // This is XVim original command
+                       CMD(@"run",@"run:inWindow:"), // This is XVim original command
                        CMD(@"runtime", @"runtime:inWindow:"),
                        CMD(@"ruby", @"ruby:inWindow:"),
                        CMD(@"rubydo", @"rubydo:inWindow:"),
@@ -540,7 +539,7 @@
                        CMD(@"wqall", @"wqall:inWindow:"),
                        CMD(@"wsverb", @"wsverb:inWindow:"),
                        CMD(@"wviminfo", @"viminfo:inWindow:"),
-                       CMD(@"xccmd", @"xccmd:inWindow:"),
+                       CMD(@"xccmd" , @"xccmd:inWindow:"),
                        CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
                        CMD(@"xit", @"exit:inWindow:"),
                        CMD(@"xall", @"wqall:inWindow:"),
@@ -565,111 +564,118 @@
                        CMD(@"Print", @"print:inWindow:"),
                        CMD(@"X", @"X:inWindow:"),
                        CMD(@"~", @"sub:inWindow:"),
-
-                       nil];
+                       
+					   nil];
     }
     return self;
 }
 
-- (void)dealloc {
+- (void)dealloc{
     [_excommands release];
     [super dealloc];
 }
 
 // This method correnspons parsing part of get_address in ex_cmds.c
-- (NSUInteger)getAddress:(unichar *)parsing:(unichar **)cmdLeft inWindow:(XVimWindow *)window {
-    XVimSourceView *view = [window sourceView];
+- (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
+{
+    XVimSourceView* view = [window sourceView];
     //DVTFoldingTextStorage* storage = [view textStorage];
     //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
     NSUInteger begin = [view selectedRange].location;
-    NSUInteger end = [view selectedRange].location + [view selectedRange].length - 1;
-    unichar *tmp;
+    NSUInteger end = [view selectedRange].location + [view selectedRange].length-1;
+    unichar* tmp;
     NSUInteger count;
     unichar mark;
-
+    
     // Parse base addr (line number)
-    switch (*parsing) {
+    switch (*parsing)
+    {
         case '.':
             parsing++;
             addr = [view lineNumber:begin];
             break;
-        case '$':                           /* '$' - last line */
+        case '$':			    /* '$' - last line */
             parsing++;
             addr = [view numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
-            if ('<' == mark) {
+            if( '<' == mark ){
                 addr = [view lineNumber:begin];
-                parsing += 2;
-            } else if ('>' == mark) {
+                parsing+=2;
+            }else if( '>' == mark ){
                 addr = [view lineNumber:end];
-                parsing += 2;
-            } else {
+                parsing+=2;
+            }else{
                 // Other marks or invalid character. XVim does not support this.
             }
             break;
         case '/':
         case '?':
         case '\\':
-        // XVim does not support using search in range at the moment
-        // XVim does not support using search in range at the moment
+            // XVim does not support using search in range at the moment
+            // XVim does not support using search in range at the moment
         default:
             tmp = parsing;
             count = 0;
-            while (isDigit(*parsing) ) {
+            while( isDigit(*parsing) ){
                 parsing++;
                 count++;
             }
             addr = [[NSString stringWithCharacters:tmp length:count] unsignedIntValue];
-            if (0 == addr) {
+            if( 0 == addr ){
                 addr = NSNotFound;
             }
     }
-
+    
     // Parse additional modifier for addr ( ex. $-10 means 10 line above from end of file. Parse '-10' part here )
-    for (;; ) {
+    for (;;)
+    {
         // Skip whitespaces
-        while (isWhiteSpace(*parsing) )
+        while( isWhiteSpace(*parsing) ){
             parsing++;
-
+        }
+        
         unichar c = *parsing;
         unichar i;
         NSUInteger n;
         if (c != '-' && c != '+' && !isDigit(c)) // Handle '-' or '+' or degits only
             break;
-
-        if (addr == NSNotFound) {
+        
+        if (addr == NSNotFound){
             //addr = [view lineNumber:begin]; // This should be current cursor posotion
         }
-
+        
         // Determine if its + or -
-        if (isDigit(c)) {
-            i = '+';            /* "number" is same as "+number" */
-        } else {
+        if (isDigit(c)){
+            i = '+';		/* "number" is same as "+number" */
+        }else{
             i = c;
             parsing++;
         }
-
-        if (!isDigit(*parsing)) {       /* '+' is '+1', but '+0' is not '+1' */
+        
+        if (!isDigit(*parsing)){	/* '+' is '+1', but '+0' is not '+1' */
             n = 1;
-        } else {
+        }
+        else{
             tmp = parsing;
             count = 0;
-            while (isDigit(*parsing) ) {
+            while( isDigit(*parsing) ){
                 parsing++;
                 count++;
             }
             n = [[NSString stringWithCharacters:tmp length:count] unsignedIntValue];
         }
-
+        
         // Calc the address from base
-        if (i == '-') addr -= n;
-        else addr += n;
+        if (i == '-')
+            addr -= n;
+        else
+            addr += n;
     }
-
+    
     *cmdLeft = parsing;
     return addr;
 }
@@ -693,317 +699,339 @@
  * [addr] only supports digits or %,.,$,'<,'>, and +- modifiers
  * Multiple commands separated by '|' is not supported at the moment
  * Space is needed between [command] and [arguments]
- *
+ * 
  */
 
-- (XVimExArg *)parseCommand:(NSString *)cmd inWindow:(XVimWindow *)window {
-    XVimExArg *exarg = [[[XVimExArg alloc] init] autorelease];
+- (XVimExArg*)parseCommand:(NSString*)cmd inWindow:(XVimWindow*)window
+{
+    XVimExArg* exarg = [[[XVimExArg alloc] init] autorelease]; 
     NSUInteger len = [cmd length];
-
+    
     // Create unichar array to parse. Its easier
-    NSMutableData *dataCmd = [NSMutableData dataWithLength:(len + 1) * sizeof(unichar)];
-    unichar *pCmd = (unichar *)[dataCmd bytes];
-    [cmd getCharacters:pCmd range:NSMakeRange(0, len)];
+    NSMutableData* dataCmd = [NSMutableData dataWithLength:(len+1)*sizeof(unichar)];
+    unichar* pCmd = (unichar*)[dataCmd bytes];
+    [cmd getCharacters:pCmd range:NSMakeRange(0,len)];
     pCmd[len] = 0; // NULL terminate
-
-    unichar *parsing = pCmd;
-
+     
+    unichar* parsing = pCmd;
+    
     // 1. skip comment lines and leading space ( XVim does not handling commnet lines )
-    for (NSUInteger i = 0; i < len && (isWhiteSpace(*parsing) || *parsing == ':'); i++, parsing++) {
-    }
-
+    for( NSUInteger i = 0; i < len && ( isWhiteSpace(*parsing) || *parsing == ':' ); i++,parsing++ );
+    
     // 2. handle command modifiers
     // XVim does not support command mofifiers at the moment
-
+    
     // 3. parse range
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
-
-    XVimSourceView *view = [window sourceView];
-    for (;; ) {
-        NSUInteger addr = [self getAddress:parsing:&parsing inWindow:window];
-        if (NSNotFound == addr) {
-            if (*parsing == '%') { // XVim only supports %
+	
+    XVimSourceView* view = [window sourceView];
+    for(;;){
+        NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
+        if( NSNotFound == addr ){
+            if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
                 exarg.lineEnd = [view numberOfLines];
                 parsing++;
             }
-        } else {
+        }else{
             exarg.lineEnd = addr;
         }
-
-        if (exarg.lineBegin == NSNotFound) { // If its first range
+        
+        if( exarg.lineBegin == NSNotFound ){ // If its first range 
             exarg.lineBegin = exarg.lineEnd;
         }
-
-        if (*parsing != ',') {
+        
+        if( *parsing != ',' ){
             break;
         }
-
+        
         parsing++;
     }
-
-    if (exarg.lineBegin == NSNotFound) {
+    
+    if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
         exarg.lineBegin = [view lineNumber:[view selectedRange].location];
         exarg.lineEnd =  exarg.lineBegin;
     }
-
+    
     // 4. parse command
     // In window command and its argument must be separeted by space
-    unichar *tmp = parsing;
+    unichar* tmp = parsing;
     NSUInteger count = 0;
-    while (isAlpha(*parsing) || *parsing == '!') {
+    while( isAlpha(*parsing) || *parsing == '!' ){
         parsing++;
         count++;
     }
 
-    if (0 != count) {
+    if( 0 != count ){
         exarg.cmd = [NSString stringWithCharacters:tmp length:count];
-    } else {
+    }else{
         // no command
         exarg.cmd = nil;
     }
-
-    while (isWhiteSpace(*parsing)  )
+    
+    while( isWhiteSpace(*parsing)  ){
         parsing++;
-
+    }
+    
     // 5. parse arguments
     tmp = parsing;
     count = 0;
-    while (*parsing != 0) {
+    while( *parsing != 0 ){
         count++;
         parsing++;
     }
-    if (0 != count) {
+    if( 0 != count ){
         exarg.arg = [NSString stringWithCharacters:tmp length:count];
-    } else {
+    }else{
         // no command
         exarg.arg = nil;
     }
-
+    
     return exarg;
 }
 
 // This method corresponds to do_one_cmd in ex_docmd.c in Vim
-- (void)executeCommand:(NSString *)cmd inWindow:(XVimWindow *)window {
+- (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
+{
     // cmd INCLUDE ":" character
-
-    if ([cmd length] == 0) {
+    
+    if( [cmd length] == 0 ){
         ERROR_LOG(@"command string empty");
         return;
     }
-
+          
     // Actual parsing is done in following method.
-    XVimExArg *exarg = [self parseCommand:cmd inWindow:window];
-    if (exarg.cmd == nil) {
-        XVimSourceView *srcView = [window sourceView];
-
+    XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
+    if( exarg.cmd == nil ) {
+		XVimSourceView* srcView = [window sourceView];
+		
         // Jump to location
         NSUInteger pos = [srcView positionAtLineNumber:exarg.lineBegin column:0];
-        if (NSNotFound == pos) {
+        if( NSNotFound == pos ){
             pos = [srcView positionAtLineNumber:[srcView numberOfLines] column:0];
         }
         NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
-        if (NSNotFound == pos_wo_space) {
+        if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }
-        [srcView setSelectedRange:NSMakeRange(pos_wo_space, 0)];
+        [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
         [srcView scrollTo:[window insertionPoint]];
         return;
     }
-
+    
     // switch on command name
-    for (XVimExCmdname *cmdname in _excommands) {
-        if ([cmdname.cmdName hasPrefix:[exarg cmd]]) {
+    for( XVimExCmdname* cmdname in _excommands ){
+        if( [cmdname.cmdName hasPrefix:[exarg cmd]] ){
             SEL method = NSSelectorFromString(cmdname.methodName);
-            if ([self respondsToSelector:method]) {
+            if( [self respondsToSelector:method] ){
                 [self performSelector:method withObject:exarg withObject:window];
                 break;
             }
         }
     }
-
+    
     return;
 }
 
 ///////////////////
 //   Commands    //
 ///////////////////
-- (void)commit:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)commit:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(commitCommand:) to:nil from:self];
 }
 
-- (void)sub:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    XVimSearch *searcher = [[XVim instance] searcher];
+- (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	XVimSearch *searcher = [[XVim instance] searcher];
     [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
 }
 
-- (void)set:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    NSString *setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    XVimSourceView *srcView = [window sourceView];
-    XVimOptions *options = [[XVim instance] options];
-
-    if ([setCommand rangeOfString:@"="].location != NSNotFound) {
+- (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    XVimSourceView* srcView = [window sourceView];
+	XVimOptions* options = [[XVim instance] options];
+    
+    if( [setCommand rangeOfString:@"="].location != NSNotFound ){
         // "set XXX=YYY" form
-        NSUInteger idx = [setCommand rangeOfString:@"="].location;
-        NSString *name = [[setCommand substringToIndex:idx] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        NSString *value = [[setCommand substringFromIndex:idx + 1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-        [options setOption:name value:value];
-    } else if ([setCommand hasPrefix:@"no"]) {
+		NSUInteger idx = [setCommand rangeOfString:@"="].location;
+		NSString *name = [[setCommand substringToIndex:idx] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		NSString *value = [[setCommand substringFromIndex:idx + 1] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+		[options setOption:name value:value];
+        
+    }else if( [setCommand hasPrefix:@"no"] ){
         // "set noXXX" form
-        NSString *prop = [setCommand substringFromIndex:2];
+        NSString* prop = [setCommand substringFromIndex:2];
         [options setOption:prop value:[NSNumber numberWithBool:NO]];
-    } else {
+    }else{
         // "set XXX" form
         [options setOption:setCommand value:[NSNumber numberWithBool:YES]];
     }
-
-    if ([setCommand isEqualToString:@"wrap"]) {
+    
+    if( [setCommand isEqualToString:@"wrap"] ){
         [srcView setWrapsLines:YES];
-    } else if ([setCommand isEqualToString:@"nowrap"]) {
+    }
+    else if( [setCommand isEqualToString:@"nowrap"] ){
         [srcView setWrapsLines:NO];
-    } else if ([setCommand isEqualToString:@"list!"]) {
-        [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
+    } else if( [setCommand isEqualToString:@"list!"] ){
+      [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
     }
 }
 
-- (void)write:(XVimExArg *)args inWindow:(XVimWindow *)window { // :w
+- (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window
+{ // :w
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
 }
 
-- (void)exit:(XVimExArg *)args inWindow:(XVimWindow *)window { // :wq
+- (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window
+{ // :wq
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
     [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
-- (void)quit:(XVimExArg *)args inWindow:(XVimWindow *)window { // :q
+- (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window
+{ // :q
     [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
 }
 
-- (void)debug:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    NSArray *params = [args.arg componentsSeparatedByString:@" "];
-    if ([params count] == 0) {
+- (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    NSArray* params = [args.arg componentsSeparatedByString:@" "];
+    if( [params count] == 0 ){
         return;
     }
-    XVimDebug *debug = [[[XVimDebug alloc] init] autorelease];
-    if ([debug respondsToSelector:NSSelectorFromString([params objectAtIndex:0])]) {
+    XVimDebug* debug = [[[XVimDebug alloc] init] autorelease];
+    if( [debug respondsToSelector:NSSelectorFromString([params objectAtIndex:0])] ){
         [debug performSelector:NSSelectorFromString([params objectAtIndex:0])];
     }
 }
 
-- (void)reg:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     //TRACE_LOG(@"registers: %@", [[XVim instance] registers])
-    NSDictionary *dic = [XVim instance].registers;
-    NSArray *aryKeys = [[dic allKeys] sortedArrayUsingSelector:@selector(compare:)];
-    for (NSString *key in aryKeys) {
-        XVimRegister *reg = [dic valueForKey:key];
+    NSDictionary* dic = [XVim instance].registers;
+    NSArray* aryKeys = [[dic allKeys] sortedArrayUsingSelector:@selector(compare:)];
+    for( NSString* key in aryKeys ){
+        XVimRegister* reg = [dic valueForKey:key];
         bool isUserRegister = false;
-        if (reg.displayName.length > 0) {
+        if( reg.displayName.length > 0 ){
             unichar uc = [reg.displayName characterAtIndex:0];
-            if (uc >= 'a' && uc <= 'z') {
+            if( uc >= 'a' && uc <='z' ){
                 isUserRegister = true;
             }
         }
-        if (!isUserRegister || reg.text.length > 0) {
-            TRACE_LOG(@"\"%@   %@", reg.displayName, reg.text);
+        if( !isUserRegister || reg.text.length > 0 ){
+            TRACE_LOG( @"\"%@   %@", reg.displayName, reg.text );
         }
     }
 }
 
-- (void)make:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
-- (void)mapMode:(int)mode withArgs:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    NSString *argString = args.arg;
-    NSScanner *scanner = [NSScanner scannerWithString:argString];
-
-    NSMutableArray *subStrings = [[NSMutableArray alloc] init];
-    NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-    for (;; ) {
-        NSString *string;
-        [scanner scanCharactersFromSet:ws intoString:&string];
-
-        if (scanner.isAtEnd) {
-            break;
-        }
-        [scanner scanUpToCharactersFromSet:ws intoString:&string];
-
-        [subStrings addObject:string];
-    }
-
-    if (subStrings.count >= 2) {
-        NSString *fromString = [subStrings objectAtIndex:0];
-
-        [subStrings removeObjectAtIndex:0];
-        NSString *toString = [subStrings componentsJoinedByString:@" "];         // get all args seperate by space
-
-        NSMutableArray *fromKeyStrokes = [[NSMutableArray alloc] init];
-        [XVimKeyStroke fromString:fromString to:fromKeyStrokes];
-
-        NSMutableArray *toKeyStrokes = [[NSMutableArray alloc] init];
-        [XVimKeyStroke fromString:toString to:toKeyStrokes];
-
-        if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0) {
-            XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
-            [keymap mapKeyStroke:fromKeyStrokes to:toKeyStrokes];
-        }
-    }
+- (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	NSString *argString = args.arg;
+	NSScanner *scanner = [NSScanner scannerWithString:argString];
+	
+	NSMutableArray *subStrings = [[NSMutableArray alloc] init];
+	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+	for (;;)
+	{
+		NSString *string;
+		[scanner scanCharactersFromSet:ws intoString:&string];
+		
+		if (scanner.isAtEnd) { break; }
+		[scanner scanUpToCharactersFromSet:ws intoString:&string];
+		
+		[subStrings addObject:string];
+	}
+  
+	if (subStrings.count >= 2)
+	{
+		NSString *fromString = [subStrings objectAtIndex:0];
+    
+    [subStrings removeObjectAtIndex:0];
+		NSString *toString = [subStrings componentsJoinedByString:@" "]; // get all args seperate by space
+		
+		NSMutableArray *fromKeyStrokes = [[NSMutableArray alloc] init];
+		[XVimKeyStroke fromString:fromString to:fromKeyStrokes];
+		
+		NSMutableArray *toKeyStrokes = [[NSMutableArray alloc] init];
+		[XVimKeyStroke fromString:toString to:toKeyStrokes];
+		
+		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0)
+		{
+			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
+			[keymap mapKeyStroke:fromKeyStrokes to:toKeyStrokes];
+		}
+	}
 }
 
-- (void)map:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    [self mapMode:MODE_GLOBAL_MAP withArgs:args inWindow:window];
-    [self mapMode:MODE_NORMAL withArgs:args inWindow:window];
-    [self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
-    [self mapMode:MODE_VISUAL withArgs:args inWindow:window];
+- (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_GLOBAL_MAP withArgs:args inWindow:window];
+	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
+	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
 }
 
-- (void)nmap:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    [self mapMode:MODE_NORMAL withArgs:args inWindow:window];
+- (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
 }
 
-- (void)vmap:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    [self mapMode:MODE_VISUAL withArgs:args inWindow:window];
+- (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
 }
 
-- (void)omap:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    [self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
+- (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
 }
 
-- (void)imap:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    [self mapMode:MODE_INSERT withArgs:args inWindow:window];
+- (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+	[self mapMode:MODE_INSERT withArgs:args inWindow:window];
 }
 
-- (void)run:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)run:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"r" charactersIgnoringModifiers:@"r" isARepeat:NO keyCode:1];
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
-- (void)tabnext:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(selectNextTab:) to:nil from:self];
 }
 
-- (void)tabprevious:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)tabprevious:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(selectPreviousTab:) to:nil from:self];
 }
 
-- (void)tabclose:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
 }
 
-- (void)nissue:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
 }
 
-- (void)pissue:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
 }
 
-- (void)ncounterpart:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)ncounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
     // To make forcus proper
     // We must make forcus back to editor first then invoke the command.
     // This is because I do not know how to move focus on newly visible text editor by invoking this command.
@@ -1012,27 +1040,35 @@
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
-- (void)pcounterpart:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(jumpToPreviousCounterpart:) to:nil from:self];
 }
 
-- (void)xhelp:(XVimExArg *)args inWindow:(XVimWindow *)window {
+- (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
     [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
 }
 
-- (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    XVimSourceView *view = [window sourceView];
-    NSRange range = NSMakeRange([args lineBegin], [args lineEnd] - [args lineBegin] + 1);
+- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
+    [window setForcusBackToSourceView];
+    [NSApp sendAction:sel  to:nil from:self];
+}
 
+- (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    XVimSourceView *view = [window sourceView];
+	NSRange range = NSMakeRange([args lineBegin], [args lineEnd] - [args lineBegin] + 1);
+    
     NSString *cmdString = [[args cmd] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *argsString = [args arg];
     XVimSortOptions options = 0;
-
+    
     if ([cmdString characterAtIndex:[cmdString length] - 1] == '!') {
         options |= XVimSortOptionReversed;
     }
-
+    
     if (argsString) {
         #define STR_CONTAINS_ARG(str, arg) ([str rangeOfCharacterFromSet:[NSCharacterSet characterSetWithCharactersInString:arg]].location != NSNotFound)
         if (STR_CONTAINS_ARG(argsString, @"n")) {
@@ -1045,35 +1081,8 @@
             options |= XVimSortOptionRemoveDuplicateLines;
         }
     }
-
+    
     [view sortLinesInRange:range withOptions:options];
-}
-
-- (NSMenuItem *)findMenuItemIn:(NSMenu *)menu forAction:(NSString *)actionName {
-    if (nil == menu) {
-        menu = [NSApp mainMenu];
-    }
-    for (NSMenuItem *mi in [menu itemArray]) {
-        TRACE_LOG(@"%@", mi.title);
-        if ([mi action] == NSSelectorFromString(actionName) ) {
-            return mi;
-        }
-        if (nil != [mi submenu]) {
-            NSMenuItem *found = [self findMenuItemIn:[mi submenu] forAction:actionName];
-            if (nil != found) {
-                return found;
-            }
-        }
-    }
-    return nil;
-}
-
-- (void)xccmd:(XVimExArg *)args inWindow:(XVimWindow *)window {
-    [window setForcusBackToSourceView];
-    NSMenuItem *item = [self findMenuItemIn:nil forAction:[[args arg] stringByAppendingString:@":"]];
-    if (nil != item) {
-        [NSApp sendAction:item.action to:item.target from:self];
-    }
 }
 
 @end
