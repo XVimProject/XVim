@@ -1050,12 +1050,6 @@
     [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
 }
 
-- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    SEL sel = NSSelectorFromString([[args arg] stringByAppendingString:@":"]);
-    [window setForcusBackToSourceView];
-    [NSApp sendAction:sel  to:nil from:self];
-}
-
 - (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window
 {
     XVimSourceView *view = [window sourceView];
@@ -1083,6 +1077,33 @@
     }
     
     [view sortLinesInRange:range withOptions:options];
+}
+
+- (NSMenuItem*)findMenuItemIn:(NSMenu*)menu forAction:(NSString*)actionName{
+    if( nil == menu ){
+        menu = [NSApp mainMenu];
+    }
+    for(NSMenuItem* mi in [menu itemArray] ){
+        TRACE_LOG(@"%@", mi.title);
+        if( [mi action] == NSSelectorFromString(actionName) ){
+            return mi;
+        }
+        if( nil != [mi submenu] ){
+            NSMenuItem* found = [self findMenuItemIn:[mi submenu] forAction:actionName];
+            if( nil != found ){
+                return found;
+            }
+        }
+    }
+    return nil;
+}
+
+- (void)xccmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
+    NSMenuItem* item = [self findMenuItemIn:nil forAction:[[args arg] stringByAppendingString:@":"]];
+    if( nil != item ){
+        [NSApp sendAction:item.action to:item.target from:self];
+    }
 }
 
 @end
