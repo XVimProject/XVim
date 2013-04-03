@@ -10,6 +10,5 @@
 #import "XVimWindow.h"
 
 @interface XVimTester : NSObject
-@property (strong)XVimWindow* window;
 - (void)runTest;
 @end
