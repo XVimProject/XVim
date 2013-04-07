@@ -54,7 +54,10 @@
                           XVimMakeTestCase(text2, 24, 0, @"4fi", text2, 24, 0), // error case
                           
                           // g, G
-                         
+                          XVimMakeTestCase(text2, 44, 0, @"gg", text2,  8, 0),
+                          XVimMakeTestCase(text2,  4, 0,  @"G", text2, 40, 0),
+                          XVimMakeTestCase(text2, 44, 0, @"3G", text2, 32, 0),
+                           
                           
                           // h,j,k,l, <space>
                           XVimMakeTestCase(text1, 0, 0,   @"l", text1, 1, 0),
@@ -106,7 +109,7 @@
                           
                           // Searches (/,?,n,N,*,#)
                           
-                          // , ; (comma semicolon)
+                          // , ; (comma semicolon) for f F
                           XVimMakeTestCase(text2, 0, 0,  @"2fb;", text2, 6, 0),
                           XVimMakeTestCase(text2, 0, 0,  @"fb2;", text2, 6, 0),
                           XVimMakeTestCase(text2, 0, 0,  @"2fb,", text2, 4, 0),
@@ -117,6 +120,8 @@
                           XVimMakeTestCase(text2, 8, 0, @"2Fb,", text2, 6, 0),
                           XVimMakeTestCase(text2, 8, 0, @"3Fb2,", text2, 6, 0),
                            
+                          // , ; (comma semicolon) for t T
+                           
                           // Marks
                           XVimMakeTestCase(text2, 5,  0, @"majj3l`a", text2, 5, 0),
                           XVimMakeTestCase(text2, 5,  0, @"majj3l'a", text2, 0, 0),
@@ -125,7 +130,12 @@
                           
                           // Operations
                          
-                         
+                          // Recordings
+                           
+                          // Key remaping
+                          
+                          // Visual mode
+                           
                           // End of Test Cases
                           nil
                           ];
@@ -138,7 +148,7 @@
     
     // Alert Dialog to confirm current text will be deleted.
     NSAlert* alert = [[[NSAlert alloc] init] autorelease];
-    [alert setMessageText:@"This deletes text held in current source text view. Proceed?"];
+    [alert setMessageText:@"Make it sure that a source test view has a focus now.\r Running test deletes text in current source text view. Proceed?"];
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];
     NSInteger b = [alert runModal];
