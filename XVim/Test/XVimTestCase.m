@@ -102,8 +102,8 @@
         [[IDEApplication sharedApplication] sendEvent:event];
     }
     
-    BOOL b = [self assert];
+    self.success = [self assert];
     [self tearDown];
-    return b;
+    return self.success;
 }
 @end
