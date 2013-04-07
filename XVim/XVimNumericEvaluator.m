@@ -24,7 +24,7 @@
             if(newHead <= floor((NSUIntegerMax - n) / 10)){
                 newHead*=10; 
                 newHead+=n;
-                self.numericArg = n;
+                self.numericArg = newHead;
                 [self.argumentString appendString:numStr];
             }
             return self;
