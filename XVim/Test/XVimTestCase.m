@@ -91,9 +91,7 @@
     [XVimLastActiveSourceView() display];
 }
 
-- (BOOL)run{
-    [self setUp];
-    
+- (void)executeInput{
     NSInteger num = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowNumber];
     NSGraphicsContext* context = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] graphicsContext];
     for( NSUInteger i = 0 ; i < self.input.length; i++ ){
@@ -101,7 +99,11 @@
         NSEvent* event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0,0) modifierFlags:0 timestamp:0 windowNumber:num context:context characters:[NSString stringWithFormat:@"%C",c] charactersIgnoringModifiers:[NSString stringWithFormat:@"%C",c] isARepeat:NO keyCode:0];
         [[IDEApplication sharedApplication] sendEvent:event];
     }
-    
+}
+
+- (BOOL)run{
+    [self setUp];
+    [self executeInput];
     self.success = [self assert];
     [self tearDown];
     return self.success;
