@@ -60,7 +60,7 @@
                           XVimMakeTestCase(text1, 0, 0,   @"l", text1, 1, 0),
                           XVimMakeTestCase(text1, 0, 0, @"10l", text1, 2, 0),
                           XVimMakeTestCase(text1, 0, 0,   @"j", text1, 4, 0),
-                          XVimMakeTestCase(text1, 0, 0, @"10j", text1, 9, 0),
+                          XVimMakeTestCase(text1, 0, 0, @"10j", text1, 8, 0),
                           XVimMakeTestCase(text1, 4, 0,   @"k", text1, 0, 0),
                           XVimMakeTestCase(text1, 1, 0,   @"h", text1, 0, 0),
                           XVimMakeTestCase(text1, 0, 0,   @" ", text1, 1, 0),
@@ -82,10 +82,10 @@
                           // 0, $, ^
                           XVimMakeTestCase(text2, 10, 0,   @"0", text2,  0, 0),
                           XVimMakeTestCase(text2,  0, 0,   @"$", text2, 10, 0),
-                          XVimMakeTestCase(text2, 44, 0,   @"$", text2, 40, 0),
-                          XVimMakeTestCase(text2, 44, 0, @"10$", text2, 40, 0), // Number does not affect caret
-                          XVimMakeTestCase(text2, 36, 0,   @"$", text2, 44, 0),
-                          XVimMakeTestCase(text2, 36, 0,   @"_", text2, 44, 0),
+                          XVimMakeTestCase(text2, 44, 0,   @"^", text2, 40, 0),
+                          XVimMakeTestCase(text2, 44, 0, @"10^", text2, 40, 0), // Number does not affect caret
+                          XVimMakeTestCase(text2, 36, 0,   @"^", text2, 40, 0),
+                          XVimMakeTestCase(text2, 36, 0,   @"_", text2, 40, 0),
                           XVimMakeTestCase(text2, 32, 0,  @"2_", text2, 40, 0),
                           
                           // +, -, <CR>
@@ -93,8 +93,8 @@
                           XVimMakeTestCase(text2, 16, 0, @"2+", text2, 40, 0),
                           XVimMakeTestCase(text2, 40, 0,  @"-", text2, 24, 0),
                           XVimMakeTestCase(text2, 40, 0, @"2-", text2, 12, 0),
-                          XVimMakeTestCase(text2, 28, 0, @"\n", text2, 40, 0),
-                          XVimMakeTestCase(text2, 16, 0,@"2\n", text2, 40, 0),
+                          XVimMakeTestCase(text2, 28, 0, @"\r", text2, 40, 0),
+                          XVimMakeTestCase(text2, 16, 0,@"2\r", text2, 40, 0),
                           
                           // H,M,L
                          
