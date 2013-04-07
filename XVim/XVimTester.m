@@ -30,7 +30,7 @@
     // Test Cases
     /*
      You can use "\x1B" to ESC
-                 "\n"   to Enter
+                 "\r"   to Enter
     */
     self.testCases      = [NSArray arrayWithObjects:
                           // Motions
@@ -107,6 +107,16 @@
                           // Searches (/,?,n,N,*,#)
                           
                           // , ; (comma semicolon)
+                          XVimMakeTestCase(text2, 0, 0,  @"2fb;", text2, 6, 0),
+                          XVimMakeTestCase(text2, 0, 0,  @"fb2;", text2, 6, 0),
+                          XVimMakeTestCase(text2, 0, 0,  @"2fb,", text2, 4, 0),
+                          XVimMakeTestCase(text2, 0, 0, @"3fb2,", text2, 4, 0),
+                           
+                          XVimMakeTestCase(text2, 8, 0, @"2Fb;", text2, 4, 0),
+                          XVimMakeTestCase(text2, 8, 0, @"Fb2;", text2, 4, 0),
+                          XVimMakeTestCase(text2, 8, 0, @"2Fb,", text2, 6, 0),
+                          XVimMakeTestCase(text2, 8, 0, @"3Fb2,", text2, 6, 0),
+                           
                           // Marks
                           XVimMakeTestCase(text2, 5,  0, @"majj3l`a", text2, 5, 0),
                           XVimMakeTestCase(text2, 5,  0, @"majj3l'a", text2, 0, 0),
@@ -120,14 +130,6 @@
                           nil
                           ];
 }
-
-
-/*
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex{
-    
-}
-*/
-
 
 - (void)runTest{
     // Create Test Cases
