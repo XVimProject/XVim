@@ -10,6 +10,7 @@
 #import "IDEKit.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimGMotionEvaluator.h"
+#import "XVimArgumentEvaluator.h"
 #import "XVimZEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
@@ -181,8 +182,14 @@
 
 - (XVimEvaluator*)g{
     [self.argumentString appendString:@"g"];
+    self.onChildCompleteHandler = @selector(onComplete_g:);
     return [[[XVimGMotionEvaluator alloc] initWithWindow:self.window] autorelease];
 }
+
+- (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
+    return [self _motionFixed:childEvaluator.motion];
+}
+
 
 - (XVimEvaluator*)G{
     XVimMotion* m =XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, LEFT_RIGHT_NOWRAP, [self numericArg]);

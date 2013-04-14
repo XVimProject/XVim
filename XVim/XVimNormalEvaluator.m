@@ -159,7 +159,15 @@
 
 - (XVimEvaluator*)g{
     [self.argumentString appendString:@"g"];
+    self.onChildCompleteHandler = @selector(onComplete_g:);
     return [[[XVimGActionEvaluator alloc] initWithWindow:self.window] autorelease];
+}
+
+- (XVimEvaluator*)onComplete_g:(XVimGActionEvaluator*)childEvaluator{
+    if( childEvaluator.motion != nil ){
+        return [self _motionFixed:childEvaluator.motion];
+    }
+    return nil;
 }
 
 - (XVimEvaluator*)i{

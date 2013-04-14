@@ -20,15 +20,13 @@
 @implementation XVimGMotionEvaluator
 
 - (XVimEvaluator*)g{
-    //TODO: Must deal numeric arg as linenumber
-    XVimSourceView* view = [self.window sourceView];
-    NSUInteger location = [view nextLine:0 column:0 count:[self numericArg] - 1 option:MOTION_OPTION_NONE];
-    return [self _motionFixedFrom:[view selectedRange].location To:location Type:LINEWISE];
+    self.motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, MOTION_OPTION_NONE, 1);
+    self.motion.line = self.numericArg;
+    return nil;
 }
 
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
 	XVimSearch* searcher = [[XVim instance] searcher];
-	
 	NSUInteger cursorLocation = [self.window insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found = NSMakeRange(0, 0);
@@ -41,7 +39,8 @@
 		return nil;
 	}
     
-	return [self _motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE];
+    return nil;
+	//return [self _motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)ASTERISK:(XVimWindow*)window{

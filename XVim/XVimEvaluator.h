@@ -14,7 +14,6 @@ For example "motions" such as 'w','b' are handled by XVimMotionEvaluator and thi
 which needs to take a motions as operations. XVimDeleteEvaluator is one of the subclass of XVimMotionEvaluator ( its direct parent is XVimOperatorEvaluator ).
  
 XVimEvaluator - Evaluator base
-|- XVimMotionArgumentEvaluator 
 |- XVimNumericEvaluator - Handles numeric input
      |- XVimMotionEvaluator- Handles motions
           |- XVimNormalEvaluator - Handle normal mode. If XVimTextObject handled motion, this evaluator just move the cursor to the end point of the motion.
@@ -30,8 +29,6 @@ XVimMotionEvaluator
 |- XVimNormalEvaluator
 |- XVimVisualEvaluator
 ... And so on.
-
-An evaluator which takes argument to determine the motion ( like 'f' ) use XVimMotionArgumentEvaluator as its parent class.
 
 */
 

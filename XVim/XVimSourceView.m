@@ -226,6 +226,8 @@
     switch( motion.motion ){
         case MOTION_LINE_BACKWARD:
         case MOTION_LINE_FORWARD:
+        case MOTION_LASTLINE:
+        case MOTION_LINENUMBER:
             // TODO: Preserve column option can be included in motion object
             [self _moveCursor:r.end preserveColumn:YES];
             break;
@@ -1377,7 +1379,10 @@
             end = [self headOfLineWithoutSpaces:begin];
             break;
         case MOTION_LINENUMBER:
-            end = [self positionAtLineNumber:motion.line column:0];
+            end = [self positionAtLineNumber:motion.line column:_preservedColumn];
+            if( NSNotFound == end ){
+                end = [self positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
+            }
             break;
         case MOTION_PERCENT:
             end = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
@@ -1386,7 +1391,7 @@
             end = [self positionOfMatchedPair:begin];
             break;
         case MOTION_LASTLINE:
-            end = [self firstOfLine:[self endOfFile]];
+            end = [self positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
             break;
         case TEXTOBJECT_WORD:
             range = [self currentWord:begin count:motion.count  option:motion.option];

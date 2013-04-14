@@ -7,7 +7,7 @@
 //
 
 #import "XVimEvaluator.h"
-#import "XVimMotionArgumentEvaluator.h"
 
-@interface XVimGMotionEvaluator : XVimMotionArgumentEvaluator
+@interface XVimGMotionEvaluator : XVimEvaluator
+@property(strong) XVimMotion* motion;
 @end
