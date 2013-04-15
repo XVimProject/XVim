@@ -11,5 +11,4 @@
 
 // This evaluator is waiting for number input.
 @interface XVimNumericEvaluator : XVimEvaluator
-@property BOOL numericMode;
 @end

@@ -28,6 +28,7 @@ static XVimEvaluator* _invalidEvaluator = nil;
 @synthesize window = _window;
 @synthesize parent = _parent;
 @synthesize numericArg = _numericArg;
+@synthesize numericMode = _numericMode;
 @synthesize argumentString = _argumentString;
 @synthesize onChildCompleteHandler = _onChildCompleteHandler;
 
@@ -57,6 +58,7 @@ static XVimEvaluator* _invalidEvaluator = nil;
         self.parent = nil;
         self.argumentString = [[[NSMutableString alloc] init] autorelease];
         self.numericArg = 1;
+        self.numericMode = NO;
         self.yankRegister = nil;
         self.onChildCompleteHandler = @selector(onChildComplete:);
     }
@@ -206,6 +208,14 @@ static XVimEvaluator* _invalidEvaluator = nil;
         return _numericArg;
     }else{
         return [self.parent numericArg] * _numericArg;
+    }
+}
+
+- (BOOL)numericMode{
+    if( nil == self.parent ){
+        return _numericMode;
+    }else{
+        return [self.parent numericMode];
     }
 }
 

@@ -1004,10 +1004,18 @@
     
 }
 
-- (NSUInteger)scrollBottom:(NSNumber*)count { // zb / z-
+- (void)scrollBottom:(NSUInteger)lineNumber{ // zb / z-
+    if( lineNumber != 0 ){
+        NSUInteger pos = [self positionAtLineNumber:lineNumber];
+        if( NSNotFound == pos ){
+            pos = [self endOfFile];
+        }
+        [self _moveCursor:pos preserveColumn:NO];
+        [self _syncState];
+    }
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
-    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
     NSPoint bottom = NSMakePoint(0.0f, NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f);
     bottom.y -= NSHeight([[scrollView contentView] bounds]);
     if( bottom.y < 0.0 ){
@@ -1015,13 +1023,20 @@
     }
     [[scrollView contentView] scrollToPoint:bottom];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
-    return [self selectedRange].location;
 }
 
-- (NSUInteger)scrollCenter:(NSNumber*)count { // zz / z.
+- (void)scrollCenter:(NSUInteger)lineNumber{ // zz / z.
+    if( lineNumber != 0 ){
+        NSUInteger pos = [self positionAtLineNumber:lineNumber];
+        if( NSNotFound == pos ){
+            pos = [self endOfFile];
+        }
+        [self _moveCursor:pos preserveColumn:NO];
+        [self _syncState];
+    }
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
-    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
     NSPoint center = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
     center.y -= NSHeight([[scrollView contentView] bounds]) / 2.0f;
     if( center.y < 0.0 ){
@@ -1029,17 +1044,23 @@
     }
     [[scrollView contentView] scrollToPoint:center];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
-    return [self selectedRange].location;
 }
 
-- (NSUInteger)scrollTop:(NSNumber*)count { // zt / z<CR>
+- (void)scrollTop:(NSUInteger)lineNumber{ // zt / z<CR>
+    if( lineNumber != 0 ){
+        NSUInteger pos = [self positionAtLineNumber:lineNumber];
+        if( NSNotFound == pos ){
+            pos = [self endOfFile];
+        }
+        [self _moveCursor:pos preserveColumn:NO];
+        [self _syncState];
+    }
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
-    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
     NSPoint top = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
     [[scrollView contentView] scrollToPoint:top];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
-    return [self selectedRange].location;
 }
 
 - (void)scrollTo:(NSUInteger)location {

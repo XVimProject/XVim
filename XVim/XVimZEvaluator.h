@@ -9,6 +9,6 @@
 #import "XVimEvaluator.h"
 #import "XVimArgumentEvaluator.h"
 
-@interface XVimZEvaluator : XVimArgumentEvaluator
+@interface XVimZEvaluator : XVimEvaluator
 
 @end

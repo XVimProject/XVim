@@ -49,6 +49,7 @@ XVimMotionEvaluator
 @property(strong) XVimWindow* window;
 @property(strong) XVimEvaluator* parent;
 @property NSUInteger numericArg;
+@property BOOL numericMode;
 @property(strong) NSMutableString* argumentString;
 @property(strong) XVimRegister* yankRegister;
 @property SEL onChildCompleteHandler;
@@ -143,6 +144,8 @@ XVimMotionEvaluator
 
 // Returns the context numeric arguments multiplied together
 - (NSUInteger)numericArg;
+
+- (BOOL)numericMode;
 @end
 
 

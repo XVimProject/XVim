@@ -10,7 +10,6 @@
 #import "XVimKeyStroke.h"
 
 @implementation XVimNumericEvaluator
-@synthesize numericMode = _numericMode;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     NSString* keyStr = [keyStroke toSelectorString];

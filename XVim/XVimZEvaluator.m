@@ -13,38 +13,33 @@
 @implementation XVimZEvaluator
 
 - (XVimEvaluator*)b{
-    //TODO: Must deal numeric arg as linenumber
-    //return [self commonMotion:@selector(scrollBottom:) Type:CHARACTERWISE_EXCLUSIVE];
+    
+    [self.sourceView scrollBottom:[self numericMode] ? [self numericArg] : 0];
     return nil;
 }
 
 - (XVimEvaluator*)t{
-    //TODO: Must deal numeric arg as linenumber
-    //return [self commonMotion:@selector(scrollTop:) Type:CHARACTERWISE_EXCLUSIVE];
+    [self.sourceView scrollTop:[self numericMode] ? [self numericArg] : 0];
     return nil;
 }
 
 - (XVimEvaluator*)z{
-    //TODO: Must deal numeric arg as linenumber
-    //return [self commonMotion:@selector(scrollCenter:) Type:CHARACTERWISE_EXCLUSIVE];
+    [self.sourceView scrollCenter:[self numericMode] ? [self numericArg] : 0];
     return nil;
 }
 
 - (XVimEvaluator*)MINUS{
-    //TODO: Must deal numeric arg as linenumber
-    //return [self commonMotion:@selector(scrollBottom:) Type:CHARACTERWISE_EXCLUSIVE];
+    [self.sourceView scrollBottom:[self numericMode] ? [self numericArg] : 0];
     return nil;
 }
 
 - (XVimEvaluator*)DOT{
-    //TODO: Must deal numeric arg as linenumber
-    //return [self commonMotion:@selector(scrollCenter:) Type:CHARACTERWISE_EXCLUSIVE];
+    [self.sourceView scrollCenter:[self numericMode] ? [self numericArg] : 0];
     return nil;
 }
 
 - (XVimEvaluator*)CR{
-    //TODO: Must deal numeric arg as linenumber
-    //return [self commonMotion:@selector(scrollTop:) Type:CHARACTERWISE_EXCLUSIVE];
+    [self.sourceView scrollTop:[self numericMode] ? [self numericArg] : 0];
     return nil;
 }
 

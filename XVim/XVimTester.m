@@ -103,7 +103,8 @@
                           XVimMakeTestCase(text2, 16, 0,@"2\r", text2, 40, 0),
                           
                           // H,M,L
-                         
+                          //TODO: Implement test for H,M,L. These needs some special test check method since we have to calc the height of the view.
+                        
                           // Arrows( left,right,up,down )
                           
                           // Home, End, DEL
