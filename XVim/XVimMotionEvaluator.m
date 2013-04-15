@@ -206,7 +206,7 @@
 }
 
 - (XVimEvaluator*)H{
-    return [self commonMotion:@selector(cursorTop:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_HOME, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
 - (XVimEvaluator*)j{
@@ -222,11 +222,11 @@
 }
 
 - (XVimEvaluator*)L{
-    return [self commonMotion:@selector(cursorBottom:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_BOTTOM, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
 - (XVimEvaluator*)M{
-    return [self commonMotion:@selector(cursorCenter:) Type:CHARACTERWISE_EXCLUSIVE];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_MIDDLE, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
 - (XVimEvaluator*)n{

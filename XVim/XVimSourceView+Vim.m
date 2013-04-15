@@ -1361,6 +1361,97 @@
 	return self.string.length;
 }
 
+/**
+ * Return number of lines in current visible view.
+ * This means the capacity of the view to show lines and not actually showing now.
+ * For example the view is 100px height and 1 line is 10px then this returns 10
+ * even there are only 2 lines in current view.
+ *
+ * TODO: This assumes that all the lines in a view has same text height.
+ *       I thinks this is not bad assumption but there may be a situation the assumption does not work.
+ **/
+- (NSUInteger)numberOfLinesInView{
+    NSScrollView *scrollView = [self.view enclosingScrollView];
+    NSTextContainer *container = [self.view textContainer];
+    NSRect glyphRect = [[self.view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSAssert( glyphRect.size.height != 0 , @"Need to fix the code here if the height of current selected character can be 0 here" );
+    return [scrollView contentView].bounds.size.height / glyphRect.size.height;
+}
+
+/**
+ * Return line number from bottom line of the current visible view.
+ * "count" starts from 1.
+ * If the count is larger than the number of lines in a page it returns 
+ * line number of top line of the current visible view.
+ **/
+- (NSUInteger)lineNumberFromBottom:(NSUInteger)count { // L
+    NSAssert( 0 != count , @"count starts from 1" );
+    if( count > [self numberOfLinesInView] ){
+        count = [self numberOfLinesInView];
+    }
+    NSScrollView *scrollView = [self.view enclosingScrollView];
+    NSTextContainer *container = [self.view textContainer];
+    NSRect glyphRect = [[self.view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSPoint bottom = [[scrollView contentView] bounds].origin;
+    // This calculate the position of the bottom line and substruct height of "count" of lines to upwards
+    bottom.y += [[scrollView contentView] bounds].size.height - (NSHeight(glyphRect) / 2.0f) - (NSHeight(glyphRect) * (count-1));
+    return [self lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:bottom]];
+}
+
+/**
+ * Return line number of the middle line of the current visible view.
+ **/
+- (NSUInteger)lineNumberAtMiddle{
+    NSScrollView *scrollView = [self.view enclosingScrollView];
+    NSPoint center = [[scrollView contentView] bounds].origin;
+    center.y += [[scrollView contentView] bounds].size.height / 2;
+    return [self lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:center]];
+}
+
+/**
+ * Return line number from bottom line of the current visible view.
+ * "count" starts from 1.
+ * If the count is larger than the number of lines in a page it returns 
+ * line number of top line of the current visible view.
+ **/
+- (NSUInteger)lineNumberFromTop:(NSUInteger)count{
+    NSAssert( 0 != count , @"count starts from 1" );
+    if( count > [self numberOfLinesInView] ){
+        count = [self numberOfLinesInView];
+    }
+    NSScrollView *scrollView = [self.view enclosingScrollView];
+    NSTextContainer *container = [self.view textContainer];
+    NSRect glyphRect = [[self.view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSPoint top = [[scrollView contentView] bounds].origin;
+    // Add height of "count" of lines to downwards
+    top.y += (NSHeight(glyphRect) / 2.0f) + (NSHeight(glyphRect) * (count-1));
+    return [self lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:top]];
+}
+
+/*
+- (NSUInteger)cursorCenter:(NSNumber*)count { // M
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSPoint center = [[scrollView contentView] bounds].origin;
+    center.y += [[scrollView contentView] bounds].size.height / 2;
+    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:center], 0 };
+    
+    [self setSelectedRange:range];
+    return [self selectedRange].location;
+}
+
+- (NSUInteger)cursorTop:(NSNumber*)count { // H
+    NSScrollView *scrollView = [_view enclosingScrollView];
+    NSTextContainer *container = [_view textContainer];
+    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSPoint top = [[scrollView contentView] bounds].origin;
+    top.y += NSHeight(glyphRect) / 2.0f;
+    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
+   
+    [self setSelectedRange:range];
+    return [self selectedRange].location;
+}
+*/
+
 - (void)clampRangeToEndOfLine:(NSRange*)range {
     ASSERT_VALID_RANGE_WITH_EOF(range->location);
 	NSUInteger starti = range->location;

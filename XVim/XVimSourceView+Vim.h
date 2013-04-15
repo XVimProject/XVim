@@ -264,6 +264,11 @@ typedef enum {
 // Returns first position that is non-whitespace. If newline or eof encountered, returns index.
 - (NSUInteger)skipWhiteSpace:(NSUInteger)index;
 
+- (NSUInteger)numberOfLinesInView;
+- (NSUInteger)lineNumberFromBottom:(NSUInteger)count;
+- (NSUInteger)lineNumberAtMiddle;
+- (NSUInteger)lineNumberFromTop:(NSUInteger)count;
+    
 // Clamps range to end of line
 - (void)clampRangeToEndOfLine:(NSRange*)range;
 

@@ -1106,39 +1106,6 @@
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }
 
-- (NSUInteger)cursorBottom:(NSNumber*)count { // L
-    NSScrollView *scrollView = [_view enclosingScrollView];
-    NSTextContainer *container = [_view textContainer];
-    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint bottom = [[scrollView contentView] bounds].origin;
-    bottom.y += [[scrollView contentView] bounds].size.height - NSHeight(glyphRect) / 2.0f;
-    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:bottom], 0 };
-    
-    [self setSelectedRange:range];
-    return [self selectedRange].location;
-}
-
-- (NSUInteger)cursorCenter:(NSNumber*)count { // M
-    NSScrollView *scrollView = [_view enclosingScrollView];
-    NSPoint center = [[scrollView contentView] bounds].origin;
-    center.y += [[scrollView contentView] bounds].size.height / 2;
-    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:center], 0 };
-    
-    [self setSelectedRange:range];
-    return [self selectedRange].location;
-}
-
-- (NSUInteger)cursorTop:(NSNumber*)count { // H
-    NSScrollView *scrollView = [_view enclosingScrollView];
-    NSTextContainer *container = [_view textContainer];
-    NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint top = [[scrollView contentView] bounds].origin;
-    top.y += NSHeight(glyphRect) / 2.0f;
-    NSRange range = { [[scrollView documentView] characterIndexForInsertionAtPoint:top], 0 };
-   
-    [self setSelectedRange:range];
-    return [self selectedRange].location;
-}
 
 /**
  * Takes point in view and returns its index.
@@ -1392,6 +1359,15 @@
             break;
         case MOTION_LASTLINE:
             end = [self positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
+            break;
+        case MOTION_HOME:
+            end = [self firstNonBlankInALine:[self positionAtLineNumber:[self lineNumberFromTop:motion.count]]];
+            break;
+        case MOTION_MIDDLE:
+            end = [self firstNonBlankInALine:[self positionAtLineNumber:[self lineNumberAtMiddle]]];
+            break;
+        case MOTION_BOTTOM:
+            end = [self firstNonBlankInALine:[self positionAtLineNumber:[self lineNumberFromBottom:motion.count]]];
             break;
         case TEXTOBJECT_WORD:
             range = [self currentWord:begin count:motion.count  option:motion.option];

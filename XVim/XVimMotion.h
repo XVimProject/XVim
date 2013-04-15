@@ -47,6 +47,9 @@ typedef enum _MOTION{
     MOTION_PERCENT,                 // [num]%
     MOTION_NEXT_MATCHED_ITEM,       // %
     MOTION_LASTLINE,                // G
+    MOTION_HOME,                    // H
+    MOTION_MIDDLE,                  // M
+    MOTION_BOTTOM,                  // L
     TEXTOBJECT_WORD,
     //TEXTOBJECT_BIGWORD,           // Use motion option
     TEXTOBJECT_SENTENCE,
