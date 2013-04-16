@@ -297,7 +297,7 @@
 
 - (XVimEvaluator*)z{
     [self.argumentString appendString:@"z"];
-    return [[XVimZEvaluator alloc] initWithWindow:self.window];
+    return [[[XVimZEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)NUM0{
@@ -377,7 +377,7 @@
 - (XVimEvaluator*)SQUOTE{
     [self.argumentString appendString:@"'"];
     self.onChildCompleteHandler = @selector(onComplete_SQUOTE:);
-    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
+    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)onComplete_SQUOTE:(XVimArgumentEvaluator*)childEvaluator{
@@ -389,7 +389,7 @@
 - (XVimEvaluator*)BACKQUOTE{
     [self.argumentString appendString:@"`"];
     self.onChildCompleteHandler = @selector(onComplete_BACKQUOTE:);
-    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
+    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)onComplete_BACKQUOTE:(XVimArgumentEvaluator*)childEvaluator{

@@ -118,7 +118,7 @@
 - (XVimEvaluator*)d{
 	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:NO];
     [self.argumentString appendString:@"d"];
-    return [[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:FALSE];
+    return [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:FALSE] autorelease];
 }
 
 - (XVimEvaluator*)D{
@@ -240,7 +240,7 @@
     }
     
     [self.argumentString appendString:@"q"];
-    XVimEvaluator* e = [[XVimRegisterEvaluator alloc] initWithWindow:self.window];
+    XVimEvaluator* e = [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
     self.onChildCompleteHandler = @selector(onComplete_q:);
     return e;
 }
@@ -369,7 +369,7 @@
     XVimRegister *xregister = childEvaluator.reg;
     XVimEvaluator* ret = nil;
     if (xregister && xregister.isReadOnly == NO) {
-        ret = [[XVimNormalEvaluator alloc] initWithWindow:self.window playbackRegister:xregister];
+        ret = [[[XVimNormalEvaluator alloc] initWithWindow:self.window playbackRegister:xregister] autorelease];
     } else {
         ret = [XVimEvaluator invalidEvaluator];
     }
