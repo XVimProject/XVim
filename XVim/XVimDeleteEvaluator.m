@@ -74,7 +74,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
         [[self sourceView] change:motion];
-        return [[XVimInsertEvaluator alloc] initWithWindow:self.window];
+        return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
     }else{
         [[self sourceView] delete:motion];
     }
