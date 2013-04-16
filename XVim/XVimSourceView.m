@@ -1139,22 +1139,12 @@
     DVTFoldingTextStorage* storage = [(DVTSourceTextView*)_view textStorage];
     NSUInteger foldedIndex = [storage foldedLocationForRealLocation:glyphIndex];
     NSRect glyphRect;
-    glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 1)  inTextContainer:[_view textContainer]];
-    
-    // I do not remember why following code is needed...
-    // This is related to scrolling when there is a placeholder in a text.(There used to be a bug and corrupt text view)
-    // The foolowing code should be for fixing such bug but currently working without it.
-    // The reason I commented this out is when Visual Mode the cursor is not drawn because the folloing code
-    // returns glyphRect with its width 0.
-    // Maybe we still have something TODO: here
-    /*
-    NSUInteger len = [self realLength];
-    if( len >= glyphIndex ){ // TODO: This should be implemented in isEOF.
+    if( [self isEOF:glyphIndex] ){
+        // When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
         glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 0)  inTextContainer:[_view textContainer]];
     }else{
         glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 1)  inTextContainer:[_view textContainer]];
     }
-    */
     return glyphRect;
 }
 
