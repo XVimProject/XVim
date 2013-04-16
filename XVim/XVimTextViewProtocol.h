@@ -99,9 +99,9 @@ typedef enum {
 - (void)scrollHalfPageBackward:(NSUInteger)count;
 - (void)scrollLineForward:(NSUInteger)count;
 - (void)scrollLineBackward:(NSUInteger)count;
-- (void)scrollBottom:(NSUInteger)lineNumber;
-- (void)scrollTop:(NSUInteger)lineNumber;
-- (void)scrollCenter:(NSUInteger)lineNumber;
+- (void)scrollBottom:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb;
+- (void)scrollTop:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb;;
+- (void)scrollCenter:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb;;
 
 
 

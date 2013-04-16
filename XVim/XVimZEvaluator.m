@@ -13,33 +13,32 @@
 @implementation XVimZEvaluator
 
 - (XVimEvaluator*)b{
-    
-    [self.sourceView scrollBottom:[self numericMode] ? [self numericArg] : 0];
+    [self.sourceView scrollBottom:([self numericMode]?[self numericArg]:0) firstNonBlank:NO];
     return nil;
 }
 
 - (XVimEvaluator*)t{
-    [self.sourceView scrollTop:[self numericMode] ? [self numericArg] : 0];
+    [self.sourceView scrollTop:([self numericMode]?[self numericArg]:0) firstNonBlank:NO];
     return nil;
 }
 
 - (XVimEvaluator*)z{
-    [self.sourceView scrollCenter:[self numericMode] ? [self numericArg] : 0];
+    [self.sourceView scrollCenter:([self numericMode]?[self numericArg]:0) firstNonBlank:NO];
     return nil;
 }
 
 - (XVimEvaluator*)MINUS{
-    [self.sourceView scrollBottom:[self numericMode] ? [self numericArg] : 0];
+    [self.sourceView scrollBottom:([self numericMode]?[self numericArg]:0) firstNonBlank:YES];
     return nil;
 }
 
 - (XVimEvaluator*)DOT{
-    [self.sourceView scrollCenter:[self numericMode] ? [self numericArg] : 0];
+    [self.sourceView scrollCenter:([self numericMode]?[self numericArg]:0) firstNonBlank:YES];
     return nil;
 }
 
 - (XVimEvaluator*)CR{
-    [self.sourceView scrollTop:[self numericMode] ? [self numericArg] : 0];
+    [self.sourceView scrollTop:([self numericMode]?[self numericArg]:0) firstNonBlank:YES];
     return nil;
 }
 

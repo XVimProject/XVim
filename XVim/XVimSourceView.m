@@ -1004,7 +1004,8 @@
     
 }
 
-- (void)scrollBottom:(NSUInteger)lineNumber{ // zb / z-
+// This is used by scrollBottom,Top,Center as a common method
+- (void)_scrollCommon_moveCursorPos:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{
     if( lineNumber != 0 ){
         NSUInteger pos = [self positionAtLineNumber:lineNumber];
         if( NSNotFound == pos ){
@@ -1013,6 +1014,14 @@
         [self _moveCursor:pos preserveColumn:NO];
         [self _syncState];
     }
+    if( fnb ){
+        NSUInteger pos = [self firstNonBlankInALine:_insertionPoint];
+        [self _moveCursor:pos preserveColumn:NO];
+        [self _syncState];
+    }
+}
+- (void)scrollBottom:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{ // zb / z-
+    [self _scrollCommon_moveCursorPos:lineNumber firstNonBlank:fnb];
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
@@ -1025,15 +1034,8 @@
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }
 
-- (void)scrollCenter:(NSUInteger)lineNumber{ // zz / z.
-    if( lineNumber != 0 ){
-        NSUInteger pos = [self positionAtLineNumber:lineNumber];
-        if( NSNotFound == pos ){
-            pos = [self endOfFile];
-        }
-        [self _moveCursor:pos preserveColumn:NO];
-        [self _syncState];
-    }
+- (void)scrollCenter:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{ // zz / z.
+    [self _scrollCommon_moveCursorPos:lineNumber firstNonBlank:fnb];
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
@@ -1046,15 +1048,8 @@
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }
 
-- (void)scrollTop:(NSUInteger)lineNumber{ // zt / z<CR>
-    if( lineNumber != 0 ){
-        NSUInteger pos = [self positionAtLineNumber:lineNumber];
-        if( NSNotFound == pos ){
-            pos = [self endOfFile];
-        }
-        [self _moveCursor:pos preserveColumn:NO];
-        [self _syncState];
-    }
+- (void)scrollTop:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{ // zt / z<CR>
+    [self _scrollCommon_moveCursorPos:lineNumber firstNonBlank:fnb];
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
