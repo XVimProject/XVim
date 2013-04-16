@@ -19,6 +19,8 @@
 
 - (void)createTestCases{
     // Text Definitions
+    static NSString* text0 = @"aaa bbb ccc\n";
+    
     static NSString* text1 = @"aaa\n"   // 0  (index of each WORD)
                              @"bbb\n"   // 4
                              @"ccc";    // 8
@@ -27,6 +29,12 @@
                              @"ddd e-e fff\n"  // 12 16 20
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
+    
+    static NSString* a_result = @"aaa bbXXXb ccc\n";
+    static NSString* A_result = @"aaa bbb cccXXX\n";
+   
+    static NSString* cw_result1 = @"aaa baaa ccc\n";
+    static NSString* cw_result2 = @"aaa bbb caaa\n";
     // Test Cases
     /*
      You can use "\x1B" to ESC
@@ -132,7 +140,17 @@
                           
                           // Registers
                           
-                          // Operations
+                          // Edits
+                          // a, A
+                          XVimMakeTestCase(text0, 5,  0, @"aXXX\x1B", a_result, 8, 0), // aXXX<ESC>
+                          XVimMakeTestCase(text0, 5,  0, @"AXXX\x1B", A_result, 13, 0), // AXXX<ESC>
+                          
+                          // c, C
+                          XVimMakeTestCase(text0, 5,  0, @"cwaaa\x1B", cw_result1, 7, 0), // aXXX<ESC>
+                          XVimMakeTestCase(text0, 9,  0, @"cwaaa\x1B", cw_result2, 13, 0), // AXXX<ESC>
+                           
+                          
+                          // Scrolls
                          
                           // Recordings
                            
