@@ -200,6 +200,13 @@ static XVimEvaluator* _invalidEvaluator = nil;
     }
 }
 
+- (void)resetNumericArg{
+    _numericArg = 1;
+    if( self.parent != nil ){
+        [self.parent resetNumericArg];
+    }
+}
+
 // Returns the context numeric arguments multiplied together
 - (NSUInteger)numericArg {
     // FIXME: This may lead integer overflow.

@@ -142,6 +142,9 @@ XVimMotionEvaluator
 // Returns the context yank register if any
 - (XVimRegister*)yankRegister;
 
+// Reset all the numeric arg to 1 (includeing its parents recursively)
+- (void)resetNumericArg;
+
 // Returns the context numeric arguments multiplied together
 - (NSUInteger)numericArg;
 
