@@ -353,8 +353,8 @@
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
     }
-    [self delete:motion];
     _cursorMode = CURSOR_MODE_INSERT;
+    [self delete:motion];
     if( motion.info->deleteLastLine){
         [self insertNewlineBelowLine:[self lineNumber:_insertionPoint]];
     }

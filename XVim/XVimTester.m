@@ -147,7 +147,7 @@
                           
                           // c, C
                           XVimMakeTestCase(text0, 5,  0, @"cwaaa\x1B", cw_result1, 7, 0), // aXXX<ESC>
-                          XVimMakeTestCase(text0, 9,  0, @"cwaaa\x1B", cw_result2, 13, 0), // AXXX<ESC>
+                          XVimMakeTestCase(text0, 9,  0, @"cwaaa\x1B", cw_result2, 11, 0), // AXXX<ESC>
                            
                           
                           // Scrolls
