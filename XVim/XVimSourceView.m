@@ -774,6 +774,16 @@
     [self _syncStateFromView];
 }
 
+- (void)insertNewlineAboveAndInsert{
+    _cursorMode = CURSOR_MODE_INSERT;
+    [self insertNewlineAbove];
+}
+
+- (void)insertNewlineBelowAndInsert{
+    _cursorMode = CURSOR_MODE_INSERT;
+    [self insertNewlineBelow];
+}
+
 - (void)append{
     NSAssert(_cursorMode == CURSOR_MODE_COMMAND, @"_cursorMode shoud be CURSOR_MODE_COMMAND");
     _cursorMode = CURSOR_MODE_INSERT;

@@ -198,13 +198,13 @@
 
 - (XVimEvaluator*)o{
     XVimSourceView* view = [self sourceView];
-    [view insertNewlineBelow];
+    [view insertNewlineBelowAndInsert];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
     XVimSourceView* view = [self sourceView];
-    [view insertNewlineAbove];
+    [view insertNewlineAboveAndInsert];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 

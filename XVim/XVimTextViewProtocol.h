@@ -68,6 +68,8 @@ typedef enum {
 - (void)insertNewlineAboveLine:(NSUInteger)line;
 - (void)insertNewlineAbove;
 - (void)insertNewlineBelow;
+- (void)insertNewlineAboveAndInsert;
+- (void)insertNewlineBelowAndInsert;
 - (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
 
 // Insert or Command

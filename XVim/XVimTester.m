@@ -29,6 +29,7 @@
                              @"ddd e-e fff\n"  // 12 16 20
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
+   
     
     static NSString* a_result = @"aaa bbXXXb ccc\n";
     static NSString* A_result = @"aaa bbb cccXXX\n";
@@ -37,6 +38,13 @@
     static NSString* cw_result2 = @"aaa bbb caaa\n";
     static NSString* cw_result3 = @"aaa\nccc";
     static NSString* Cw_result1 = @"aaa baaaa\n";
+    
+    static NSString* oO_text = @"int abc(){\n"  // 0 4
+                               @"}\n";          // 11
+    
+    static NSString* oO_result = @"int abc(){\n" // This result may differ from editor setting. This is for 4 spaces for indent.
+                                 @"    \n"      // 11
+                                 @"}\n";
     
     // Test Cases
     /*
@@ -154,7 +162,10 @@
                           XVimMakeTestCase(text1, 1,  0, @"2cwaa\x1B", cw_result3,  2, 0),
                           XVimMakeTestCase(text0, 5,  0, @"Caaaa\x1B", Cw_result1,  8, 0),
                            
-                          
+                          // o, O
+                          XVimMakeTestCase(oO_text,  4, 0, @"o\x1B", oO_result, 14, 0),
+                          XVimMakeTestCase(oO_text, 11, 0, @"O\x1B", oO_result, 14, 0),
+                           
                           // Scrolls
                          
                           // Recordings
