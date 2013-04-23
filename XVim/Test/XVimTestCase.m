@@ -41,6 +41,7 @@
     test.input = in;
     test.expectedText = et;
     test.expectedRange = er;
+    test.message = @"";
     if( nil != desc ){
         test.description = desc;
     }else{
@@ -54,6 +55,7 @@
     self.initialText = nil;
     self.input = nil;
     self.expectedText = nil;
+    self.message = nil;
     [super dealloc];
 }
 
@@ -65,9 +67,7 @@
 
 - (BOOL)assert{
     if( ![self.expectedText isEqualToString:[XVimLastActiveSourceView() string]] ){
-        DEBUG_LOG(@"Test Failed : %@", self.description);
-        DEBUG_LOG(@"Result   Text : %@", [XVimLastActiveSourceView() string]);
-        DEBUG_LOG(@"Expected Text : %@", self.expectedText);
+        self.message = [NSString stringWithFormat:@"Result text is different from expected text.\n\nResult Text:\n%@\n\nExpected Text:\n%@\n", [XVimLastActiveSourceView() string], self.expectedText];
         return NO;
     }
     
@@ -75,9 +75,7 @@
     if( self.expectedRange.location != resultRange.location ||
         self.expectedRange.length   != resultRange.length
        ){
-        DEBUG_LOG(@"Test Failed : %@", self.description);
-        DEBUG_LOG(@"Result   Range : (%d,%d)", resultRange.location, resultRange.length );
-        DEBUG_LOG(@"Expected Range : (%d,%d)", self.expectedRange.location, self.expectedRange.length);
+        self.message = [NSString stringWithFormat:@"Result range(%lu,%lu) is different from expected range(%lu,%lu)", resultRange.location, resultRange.length, self.expectedRange.location, (unsigned long)self.expectedRange.length];
         return NO;
     }
     return YES;

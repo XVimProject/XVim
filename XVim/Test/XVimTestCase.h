@@ -30,7 +30,9 @@
 @property(strong) NSString* expectedText;
 @property         NSRange   expectedRange;
 @property(strong) NSString* description;
+@property(strong) NSString* message;
 @property         BOOL      success;
+
 
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
                             initialRange:(NSRange)ir

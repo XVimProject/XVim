@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "XVimWindow.h"
 
-@interface XVimTester : NSObject<NSTableViewDataSource>
+@interface XVimTester : NSObject<NSTableViewDataSource, NSTableViewDelegate>
 @property (strong) NSArray* testCases;
 - (void)runTest;
 @end
