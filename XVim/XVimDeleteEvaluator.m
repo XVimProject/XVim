@@ -59,16 +59,6 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     return [self _motionFixed:m];
 }
 
-- (XVimEvaluator*)j{
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]);
-    return [self _motionFixed:m];
-}
-
-- (XVimEvaluator*)k{
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]);
-    return [self _motionFixed:m];
-}
-
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for

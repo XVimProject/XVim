@@ -210,11 +210,11 @@
 }
 
 - (XVimEvaluator*)j{
-    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
 - (XVimEvaluator*)k{
-    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
 - (XVimEvaluator*)l{
