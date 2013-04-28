@@ -46,6 +46,9 @@
                                  @"    \n"      // 11
                                  @"}\n";
     
+    static NSString* tilde_result = @"AAa bbb ccc\n";
+    static NSString* g_tilde_w_result = @"AAA bbb ccc\n";
+    
     // Test Cases
     /*
      You can use "\x1B" to ESC
@@ -79,7 +82,7 @@
                           XVimMakeTestCase(text2,  4, 0,   @"G", text2, 40, 0),
                           XVimMakeTestCase(text2, 44, 0,  @"3G", text2, 32, 0),
                           XVimMakeTestCase(text2,  8, 0,  @"9G", text2, 44, 0),
-                           
+                          
                           
                           // h,j,k,l, <space>
                           XVimMakeTestCase(text1, 0, 0,   @"l", text1, 1, 0),
@@ -161,6 +164,14 @@
                           XVimMakeTestCase(text0, 9,  0, @"cwaaa\x1B", cw_result2, 11, 0),
                           XVimMakeTestCase(text1, 1,  0, @"2cwaa\x1B", cw_result3,  2, 0),
                           XVimMakeTestCase(text0, 5,  0, @"Caaaa\x1B", Cw_result1,  8, 0),
+                         
+                          // gu, gU
+                           
+                           
+                          // ~, g~
+                          XVimMakeTestCase(text0, 0,  0,     @"~~",     tilde_result,   2, 0),
+                          XVimMakeTestCase(text0, 0,  0, @"~~hh~~",            text0,   2, 0),
+                          XVimMakeTestCase(text0, 0,  0,    @"g~w", g_tilde_w_result,   0, 0),
                            
                           // o, O
                           XVimMakeTestCase(oO_text,  4, 0, @"o\x1B", oO_result, 14, 0),
