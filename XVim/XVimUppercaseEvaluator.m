@@ -21,7 +21,7 @@
     return [self _motionFixed:m];
 }
 
--(XVimEvaluator*)motionFixed:(XVimMotion*)motion inWindow:(XVimWindow*)window {
+-(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     [[self sourceView] makeUpperCase:motion];
     return nil;
 }

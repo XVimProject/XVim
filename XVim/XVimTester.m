@@ -19,7 +19,7 @@
 
 - (void)createTestCases{
     // Text Definitions
-    static NSString* text0 = @"aaa bbb ccc\n";
+    static NSString* text0 = @"aAa bbb ccc\n";
     
     static NSString* text1 = @"aaa\n"   // 0  (index of each WORD)
                              @"bbb\n"   // 4
@@ -31,13 +31,13 @@
                              @"    jjj kkk";   // 36 40 44
    
     
-    static NSString* a_result = @"aaa bbXXXb ccc\n";
-    static NSString* A_result = @"aaa bbb cccXXX\n";
+    static NSString* a_result = @"aAa bbXXXb ccc\n";
+    static NSString* A_result = @"aAa bbb cccXXX\n";
    
-    static NSString* cw_result1 = @"aaa baaa ccc\n";
-    static NSString* cw_result2 = @"aaa bbb caaa\n";
+    static NSString* cw_result1 = @"aAa baaa ccc\n";
+    static NSString* cw_result2 = @"aAa bbb caaa\n";
     static NSString* cw_result3 = @"aaa\nccc";
-    static NSString* Cw_result1 = @"aaa baaaa\n";
+    static NSString* Cw_result1 = @"aAa baaaa\n";
     
     static NSString* oO_text = @"int abc(){\n"  // 0 4
                                @"}\n";          // 11
@@ -46,8 +46,15 @@
                                  @"    \n"      // 11
                                  @"}\n";
     
-    static NSString* tilde_result = @"AAa bbb ccc\n";
-    static NSString* g_tilde_w_result = @"AAA bbb ccc\n";
+    
+    static NSString* guw_result = @"aaa bbb ccc\n";
+    static NSString* gUw_result = @"AAA bbb ccc\n";
+    static NSString* guu_result = @"aaa bbb ccc\n";
+    static NSString* gUU_result = @"AAA BBB CCC\n";
+    
+    static NSString* tilde_result = @"Aaa bbb ccc\n";
+    static NSString* g_tilde_w_result = @"AaA bbb ccc\n";
+    
     
     // Test Cases
     /*
@@ -166,6 +173,10 @@
                           XVimMakeTestCase(text0, 5,  0, @"Caaaa\x1B", Cw_result1,  8, 0),
                          
                           // gu, gU
+                          XVimMakeTestCase(text0, 0,  0, @"guw", guw_result, 0, 0),
+                          XVimMakeTestCase(text0, 0,  0, @"gUw", gUw_result, 0, 0),
+                          XVimMakeTestCase(text0, 4,  0, @"guu", guu_result, 0, 0),
+                          XVimMakeTestCase(text0, 4,  0, @"gUU", gUU_result, 0, 0),
                            
                            
                           // ~, g~
