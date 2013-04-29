@@ -125,6 +125,11 @@
     return nil;
 }
 
+- (XVimEvaluator*)BACKQUOTE{
+    self.textobject = TEXTOBJECT_BACKQUOTE;
+    return nil;
+}
+
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister {
     if (xregister.isRepeat && [keyStroke instanceResponds:self] ) {
 		return REGISTER_APPEND;

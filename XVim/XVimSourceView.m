@@ -1392,6 +1392,7 @@
             range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '{', '}');
             break;
         case TEXTOBJECT_PARAGRAPH:
+            // Not supported
             break;
         case TEXTOBJECT_PARENTHESES:
             range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
@@ -1400,7 +1401,7 @@
             // Not supported
             break;
         case TEXTOBJECT_ANGLEBRACKETS:
-            // Not supported
+            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '<', '>');
             break;
         case TEXTOBJECT_SQUOTE:
             range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\'');
@@ -1415,7 +1416,7 @@
             range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '`');
             break;
         case TEXTOBJECT_SQUAREBRACKETS:
-            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '[', ']');
             break;
         case MOTION_LINE_COLUMN:
             end = [self positionAtLineNumber:motion.line column:motion.column];

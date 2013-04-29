@@ -30,7 +30,6 @@
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
    
-    
     static NSString* a_result = @"aAa bbXXXb ccc\n";
     static NSString* A_result = @"aAa bbb cccXXX\n";
    
@@ -46,7 +45,6 @@
                                  @"    \n"      // 11
                                  @"}\n";
     
-    
     static NSString* guw_result = @"aaa bbb ccc\n";
     static NSString* gUw_result = @"AAA bbb ccc\n";
     static NSString* guu_result = @"aaa bbb ccc\n";
@@ -54,6 +52,32 @@
     
     static NSString* tilde_result = @"Aaa bbb ccc\n";
     static NSString* g_tilde_w_result = @"AaA bbb ccc\n";
+    
+    static NSString* text_object0 = @"aaa(aaa)aaa";
+    static NSString* text_object1 = @"bbb\"bbb\"bbb";
+    static NSString* text_object2 = @"ccc{ccc}ccc";
+    static NSString* text_object3 = @"ddd[ddd]ddd";
+    static NSString* text_object4 = @"eee'eee'eee";
+    static NSString* text_object5 = @"fff<fff>fff";
+    static NSString* text_object6 = @"ggg`ggg`ggg";
+    static NSString* text_object7 = @"hhh hhh hhh";
+    
+    static NSString* text_object_i_result0 = @"aaa()aaa";
+    static NSString* text_object_a_result0 = @"aaaaaa";
+    static NSString* text_object_i_result1 = @"bbb\"\"bbb";
+    static NSString* text_object_a_result1 = @"bbbbbb";
+    static NSString* text_object_i_result2 = @"ccc{}ccc";
+    static NSString* text_object_a_result2 = @"cccccc";
+    static NSString* text_object_i_result3 = @"ddd[]ddd";
+    static NSString* text_object_a_result3 = @"dddddd";
+    static NSString* text_object_i_result4 = @"eee''eee";
+    static NSString* text_object_a_result4 = @"eeeeee";
+    static NSString* text_object_i_result5 = @"fff<>fff";
+    static NSString* text_object_a_result5 = @"ffffff";
+    static NSString* text_object_i_result6 = @"ggg``ggg";
+    static NSString* text_object_a_result6 = @"gggggg";
+    static NSString* text_object_i_result7 = @"hhh  hhh";
+    static NSString* text_object_a_result7 = @"hhh hhh";
     
     
     // Test Cases
@@ -178,7 +202,6 @@
                           XVimMakeTestCase(text0, 4,  0, @"guu", guu_result, 0, 0),
                           XVimMakeTestCase(text0, 4,  0, @"gUU", gUU_result, 0, 0),
                            
-                           
                           // ~, g~
                           XVimMakeTestCase(text0, 0,  0,     @"~~",     tilde_result,   2, 0),
                           XVimMakeTestCase(text0, 0,  0, @"~~hh~~",            text0,   2, 0),
@@ -187,6 +210,52 @@
                           // o, O
                           XVimMakeTestCase(oO_text,  4, 0, @"o\x1B", oO_result, 14, 0),
                           XVimMakeTestCase(oO_text, 11, 0, @"O\x1B", oO_result, 14, 0),
+                           
+                          // Text Objects(TODO: with Numeric Arg)
+                           
+                          // (), b
+                          XVimMakeTestCase(text_object0, 5, 0, @"di(", text_object_i_result0 , 4, 0),
+                          XVimMakeTestCase(text_object0, 5, 0, @"di)", text_object_i_result0 , 4, 0),
+                          XVimMakeTestCase(text_object0, 5, 0, @"da(", text_object_a_result0 , 3, 0),
+                          XVimMakeTestCase(text_object0, 5, 0, @"da)", text_object_a_result0 , 3, 0),
+                          XVimMakeTestCase(text_object0, 5, 0, @"dib", text_object_i_result0 , 4, 0),
+                          XVimMakeTestCase(text_object0, 5, 0, @"dab", text_object_a_result0 , 3, 0),
+                           
+                          // "
+                          XVimMakeTestCase(text_object1, 5, 0, @"di\"", text_object_i_result1 , 4, 0),
+                          XVimMakeTestCase(text_object1, 5, 0, @"da\"", text_object_a_result1 , 3, 0),
+                           
+                          // {}, B
+                          XVimMakeTestCase(text_object2, 5, 0, @"di{", text_object_i_result2 , 4, 0),
+                          XVimMakeTestCase(text_object2, 5, 0, @"di}", text_object_i_result2 , 4, 0),
+                          XVimMakeTestCase(text_object2, 5, 0, @"da{", text_object_a_result2 , 3, 0),
+                          XVimMakeTestCase(text_object2, 5, 0, @"da}", text_object_a_result2 , 3, 0),
+                          XVimMakeTestCase(text_object2, 5, 0, @"diB", text_object_i_result2 , 4, 0),
+                          XVimMakeTestCase(text_object2, 5, 0, @"daB", text_object_a_result2 , 3, 0),
+                           
+                          // []
+                          XVimMakeTestCase(text_object3, 5, 0, @"di[", text_object_i_result3 , 4, 0),
+                          XVimMakeTestCase(text_object3, 5, 0, @"di]", text_object_i_result3 , 4, 0),
+                          XVimMakeTestCase(text_object3, 5, 0, @"da[", text_object_a_result3 , 3, 0),
+                          XVimMakeTestCase(text_object3, 5, 0, @"da]", text_object_a_result3 , 3, 0),
+                           
+                          // '
+                          XVimMakeTestCase(text_object4, 5, 0, @"di'", text_object_i_result4 , 4, 0),
+                          XVimMakeTestCase(text_object4, 5, 0, @"da'", text_object_a_result4 , 3, 0),
+                           
+                          // <>
+                          XVimMakeTestCase(text_object5, 5, 0, @"di<", text_object_i_result5 , 4, 0),
+                          XVimMakeTestCase(text_object5, 5, 0, @"di>", text_object_i_result5 , 4, 0),
+                          XVimMakeTestCase(text_object5, 5, 0, @"da<", text_object_a_result5 , 3, 0),
+                          XVimMakeTestCase(text_object5, 5, 0, @"da>", text_object_a_result5 , 3, 0),
+                           
+                          // `
+                          XVimMakeTestCase(text_object6, 5, 0, @"di`", text_object_i_result6 , 4, 0),
+                          XVimMakeTestCase(text_object6, 5, 0, @"da`", text_object_a_result6 , 3, 0),
+                           
+                          // w
+                          XVimMakeTestCase(text_object7, 5, 0, @"diw", text_object_i_result7 , 4, 0),
+                          XVimMakeTestCase(text_object7, 5, 0, @"daw", text_object_a_result7 , 4, 0),
                            
                           // Scrolls
                          
