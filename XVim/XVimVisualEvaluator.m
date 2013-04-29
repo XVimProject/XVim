@@ -16,7 +16,6 @@
 #import "XVimYankEvaluator.h"
 #import "XVimKeymapProvider.h"
 #import "XVimTextObjectEvaluator.h"
-#import "XVimSelectAction.h"
 #import "XVimGVisualEvaluator.h"
 #import "XVimRegisterEvaluator.h"
 #import "XVimCommandLineEvaluator.h"

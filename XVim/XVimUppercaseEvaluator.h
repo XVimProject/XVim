@@ -7,7 +7,6 @@
 //
 
 #import "XVimOperatorEvaluator.h"
-#import "XVimOperatorAction.h"
 
 @interface XVimUppercaseEvaluator : XVimOperatorEvaluator
 @end

@@ -8,7 +8,6 @@
 
 
 #import "XVimOperatorEvaluator.h"
-#import "XVimOperatorAction.h"
 
 // Handles input after 'd' or 'c'
 @interface XVimDeleteEvaluator : XVimOperatorEvaluator
