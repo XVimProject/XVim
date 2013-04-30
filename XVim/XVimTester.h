@@ -8,8 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import "XVimWindow.h"
+#import "XVimTestCase.h"
 
 @interface XVimTester : NSObject<NSTableViewDataSource, NSTableViewDelegate>
-@property (strong) NSArray* testCases;
+@property (strong) NSMutableArray* testCases;
 - (void)runTest;
 @end
