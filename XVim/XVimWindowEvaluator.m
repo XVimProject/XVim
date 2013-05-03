@@ -28,15 +28,15 @@
  *
  * The top level window is IDEWorkspaceWindow.
  * If you double click a file in navigator then you'll get another IDEWorkspaceWindow.
- * Actuall manipulations on the window is taken by IDEWorkspaceWindowController which you can get by IDEWorkspaceWindow's windowController method.
+ * Actual manipulations on the window are taken by IDEWorkspaceWindowController which you can get by IDEWorkspaceWindow's windowController method.
  * IDEWordspaceWindowController(IDEWSC) has multiple tabs and each tab is controlled by IDEWorkspaceTabController(IDEWTC).
- * IDEWTC manages all the view's in a tab. It means that it has navigation, editor, debug areas.
- * If you have multiple tabs it means you have multiple navigations or editors or debug areas since each tab has its own these areas.
+ * IDEWTC manages all the views in a tab. It means that it has navigation, editor, debug areas.
+ * If you have multiple tabs it means you have multiple navigations or editors or debug areas since each tab has its own areas.
  * Only one IDEWTC is active at once and you can get the active one through "activeWorkspaceTabContrller" method in IDEWSC.
  *
- * Most of the editor view manipulation can be done vie the IDEWTC.
- * You can get the all the areas in an IDEWTC by _keyboardFocusAreas method.
- * It returns array of IDEViewController derived classes such as IDENavigationArea, IDEEditorContext, IDEDefaultDebugArea.
+ * Most of the editor view manipulation can be done via the IDEWTC.
+ * You can get all the areas in an IDEWTC by _keyboardFocusAreas method.
+ * It returns an array of IDEViewController derived classes such as IDENavigationArea, IDEEditorContext, IDEDefaultDebugArea.
  **/
 
 @implementation XVimWindowEvaluator
@@ -128,13 +128,13 @@
 
 /**
  * For Ctrl-w + h,j,k,l calculations.
- * The basic thing doing here is ...
+ * The basic thing happening here is ...
  *   Enumerate all the editors and
- *   for each editors compare the position of the corner to current editors corner.
- *    For example if its Ctrl-w + h, we compare "current editor's left edge" and "others right edge".
- *    If we find the right edge on the left of current editors left edge we take it as a candidate to move forcus on.
- *    But there may be more than 1 editor which is on the left of current editor we have to find 
- *    the editor whose right edge is closest to the current editors right edge.
+ *   for each editor compare the position of the corner to the current editor's corner.
+ *    For example if it's Ctrl-w + h, we compare "current editor's left edge" and "other's right edge".
+ *    If we find the right edge on the left of current editor's left edge we take it as a candidate to move focus on.
+ *    But there may be more than 1 editor which is on the left of the current editor. We have to find 
+ *    the editor whose right edge is closest to the current editor's right edge.
  **/
 - (XVimEvaluator*)h:(XVimWindow*)window{
     IDEWorkspaceTabController* tabCtrl = [self tabController:window];
@@ -167,8 +167,8 @@
     IDEViewController* current = [tabCtrl _currentFirstResponderArea];
     NSArray* allEditors = [self allEditorArea:window];
     
-    // Compare current view's bottom and other views' top positions.(Find the top is bigger the the bottom but nearest one)
-    // Remember that y gets bigger when gose to upper side.
+    // Compare current view's bottom and other views' top positions.(Find the top that is bigger the the bottom but nearest one)
+    // Remember that y gets bigger when it goes to the upper side.
     CGPoint current_point = [current.view frame].origin; //Left bottom
     current_point = [[current view] convertPoint:current_point toView:nil];
     // To find a view left of this editor we walk around the view and find if there is a view whose right side is smaller than this left value.
@@ -194,7 +194,7 @@
     NSArray* allEditors = [self allEditorArea:window];
     
     // Compare current view's bottom and other views' top positions.(Find the top is bigger the the bottom but nearest one)
-    // Remember that y gets bigger when gose to upper side.
+    // Remember that y gets bigger when it goes to upper side.
     CGPoint current_point = LeftTop([current.view frame]);
     current_point = [[current view] convertPoint:current_point toView:nil];
     // To find a view left of this editor we walk around the view and find if there is a view whose right side is smaller than this left value.
