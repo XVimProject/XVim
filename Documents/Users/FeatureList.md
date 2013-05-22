@@ -71,7 +71,7 @@ Visual block mode is currently not supported.
   C-w q    | Delete one assistant editor
   C-w s    | Add new assistant editor horizontally
   C-w v    | Add new assistant editor vertically
-C-w h,j,k,l| Move forcus between editors
+C-w h,j,k,l| Move focus between editors
 
 
 ## Search and Replace
