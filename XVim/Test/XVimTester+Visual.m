@@ -10,6 +10,8 @@
 
 @implementation XVimTester (Visual)
 - (NSArray*)visual_testcases{
+    static NSString* text1 = @"a;a bbb ccc\n";  // 0  4  8
+    
     static NSString* text2 = @"a;a bbb ccc\n"  // 0  4  8
                              @"ddd e-e fff\n"  // 12 16 20
                              @"ggg hhh i_i\n"  // 24 28 32
@@ -27,10 +29,62 @@
                                     @" hhh i_i\n"
                                     @"    jjj kkk";
     
+    static NSString* vllccxxx_result= @"xxx bbb ccc\n";  // 0  4  8
+    
+    static NSString* vgU_result=  @"A;A BBB CCC\n"  // 0  4  8
+                                  @"DDD e-e fff\n"  // 12 16 20
+                                  @"ggg hhh i_i\n"  // 24 28 32
+                                  @"    jjj kkk";   // 36 40 44
+    
+    static NSString* VgU_result=  @"A;A BBB CCC\n"  // 0  4  8
+                                  @"DDD E-E FFF\n"  // 12 16 20
+                                  @"ggg hhh i_i\n"  // 24 28 32
+                                  @"    jjj kkk";   // 36 40 44
+    
+    static NSString* c_vgU_result=  @"A;A bbb ccc\n"  // 0  4  8
+                                    @"DDD e-e fff\n"  // 12 16 20
+                                    @"ggg hhh i_i\n"  // 24 28 32
+                                    @"    jjj kkk";   // 36 40 44
+    
+    /*
+    static NSString* J_result = @"a;a bbb ccc "
+                                @"ddd e-e fff "
+                                @"ggg hhh i_i "
+                                @"    jjj kkk"; //36
+     */
+    
+    static NSString* p_result = @"a;a bbb ccc\n" 
+                                @"a;a fff\n"
+                                @"ggg hhh i_i\n" 
+                                @"    jjj kkk";
+    
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text2, 0,  0, @"vljd", v_d_result, 0, 0),
             XVimMakeTestCase(text2, 0,  0, @"Vjd", V_d_result, 0, 0),
+            
+            // XVimMakeTestCase(text2, 0,  0, @"vjD", V_d_result, 0, 0), // not supported yet
+            
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljjd", C_v_d_result, 0, 0),
-    nil];
+            XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vlljgU", vgU_result , 0, 0), // vgU
+            XVimMakeTestCase(text2, 0,  0, @"vlljU",  vgU_result , 0, 0), // vU (same result with gU)
+            XVimMakeTestCase(text2, 0,  0, @"VlljgU", VgU_result, 0, 0),  // VgU
+            XVimMakeTestCase(text2, 0,  0, @"VlljU",  VgU_result, 0, 0),  // VU
+            XVimMakeTestCase(text2, 0,  0, @"<C-v>lljgU", c_vgU_result, 0, 0), // <C-v>gU
+            XVimMakeTestCase(text2, 0,  0, @"<C-v>lljU", c_vgU_result, 0, 0), // <C-v>U
+            
+            XVimMakeTestCase(text2, 0,  0, @"vlljgUvlljgu", text2, 0, 0), // make upper and reverse it to lower
+            XVimMakeTestCase(text2, 0,  0, @"vlljgUvllju", text2, 0, 0), // make upper and reverse it to lower
+            XVimMakeTestCase(text2, 0,  0, @"VlljgUVlljgu", text2, 0, 0),
+            XVimMakeTestCase(text2, 0,  0, @"VlljgUVllju", text2, 0, 0),
+            XVimMakeTestCase(text2, 0,  0, @"<C-v>lljgU<C-v>lljgu", text2, 0, 0),
+            XVimMakeTestCase(text2, 0,  0, @"<C-v>lljgU<C-v>llju", text2, 0, 0),
+            
+            // XVimMakeTestCase(text2, 0,  0, @"VjjjJ", J_result, 35, 0), // The correct result location is not supported now
+            
+            
+            XVimMakeTestCase(text2, 0,  0, @"vllyjv6lp", p_result, 12, 0), // yank and paste with visual
+            
+            nil];
 }
 @end

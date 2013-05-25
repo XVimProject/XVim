@@ -45,4 +45,10 @@
     
     return [super eval:keyStroke];
 }
+
+- (void)resetNumericArg{
+    [super resetNumericArg];
+    self.numericMode = NO;
+}
+
 @end

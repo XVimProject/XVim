@@ -412,6 +412,7 @@ TODO: This block is from commit 42498.
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     [[self sourceView] move:motion];
+    [self resetNumericArg];
     return self;
 }
 
