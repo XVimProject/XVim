@@ -899,14 +899,11 @@
 	{
 		NSString *fromString = [subStrings objectAtIndex:0];
     
-    [subStrings removeObjectAtIndex:0];
+        [subStrings removeObjectAtIndex:0];
 		NSString *toString = [subStrings componentsJoinedByString:@" "]; // get all args seperate by space
 		
-		NSMutableArray *fromKeyStrokes = [[NSMutableArray alloc] init];
-		[XVimKeyStroke fromString:fromString to:fromKeyStrokes];
-		
-		NSMutableArray *toKeyStrokes = [[NSMutableArray alloc] init];
-		[XVimKeyStroke fromString:toString to:toKeyStrokes];
+		NSArray *fromKeyStrokes = [XVimKeyStroke keyStrokesfromString:fromString];
+		NSArray *toKeyStrokes = [XVimKeyStroke keyStrokesfromString:toString];
 		
 		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0)
 		{

@@ -12,6 +12,7 @@
 #import "XVimUtil.h"
 #import "DVTSourceTextView+XVim.h"
 #import "XVimWindow.h"
+#import "XVimKeyStroke.h"
 
 @implementation XVimTestCase
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
@@ -92,9 +93,11 @@
 - (void)executeInput{
     NSInteger num = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowNumber];
     NSGraphicsContext* context = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] graphicsContext];
-    for( NSUInteger i = 0 ; i < self.input.length; i++ ){
-        unichar c = [self.input characterAtIndex:i];
-        NSEvent* event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0,0) modifierFlags:0 timestamp:0 windowNumber:num context:context characters:[NSString stringWithFormat:@"%C",c] charactersIgnoringModifiers:[NSString stringWithFormat:@"%C",c] isARepeat:NO keyCode:0];
+    NSArray* strokes = [XVimKeyStroke keyStrokesfromString:self.input];
+    for( XVimKeyStroke* stroke in strokes ){
+        NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
+        //event.context = context;
+        //NSEvent* event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0,0) modifierFlags:0 timestamp:0 windowNumber:num context:context characters:[NSString stringWithFormat:@"%C",c] charactersIgnoringModifiers:[NSString stringWithFormat:@"%C",c] isARepeat:NO keyCode:0];
         [[IDEApplication sharedApplication] sendEvent:event];
     }
 }

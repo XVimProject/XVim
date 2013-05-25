@@ -81,7 +81,7 @@
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
-	NSEvent *event = [keyStroke toEvent];
+	NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
 	[super keyDown:event];
 }
 

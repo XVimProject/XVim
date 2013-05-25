@@ -42,14 +42,14 @@
     
     return [NSArray arrayWithObjects:
            // a, A
-           XVimMakeTestCase(text0, 5,  0, @"aXXX\x1B", a_result, 8, 0), // aXXX<ESC>
-           XVimMakeTestCase(text0, 5,  0, @"AXXX\x1B", A_result, 13, 0), // AXXX<ESC>
+           XVimMakeTestCase(text0, 5,  0, @"aXXX<ESC>", a_result, 8, 0), // aXXX<ESC>
+           XVimMakeTestCase(text0, 5,  0, @"AXXX<ESC>", A_result, 13, 0), // AXXX<ESC>
            
            // c, C
-           XVimMakeTestCase(text0, 5,  0, @"cwaaa\x1B", cw_result1,  7, 0),
-           XVimMakeTestCase(text0, 9,  0, @"cwaaa\x1B", cw_result2, 11, 0),
-           XVimMakeTestCase(text1, 1,  0, @"2cwaa\x1B", cw_result3,  2, 0),
-           XVimMakeTestCase(text0, 5,  0, @"Caaaa\x1B", Cw_result1,  8, 0),
+           XVimMakeTestCase(text0, 5,  0, @"cwaaa<ESC>", cw_result1,  7, 0),
+           XVimMakeTestCase(text0, 9,  0, @"cwaaa<ESC>", cw_result2, 11, 0),
+           XVimMakeTestCase(text1, 1,  0, @"2cwaa<ESC>", cw_result3,  2, 0),
+           XVimMakeTestCase(text0, 5,  0, @"Caaaa<ESC>", Cw_result1,  8, 0),
            
            // gu, gU
            XVimMakeTestCase(text0, 0,  0, @"guw", guw_result, 0, 0),
@@ -63,8 +63,8 @@
            XVimMakeTestCase(text0, 0,  0,    @"g~w", g_tilde_w_result,   0, 0),
            
            // o, O
-           XVimMakeTestCase(oO_text,  4, 0, @"o\x1B", oO_result, 14, 0),
-           XVimMakeTestCase(oO_text, 11, 0, @"O\x1B", oO_result, 14, 0),
+           XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result, 14, 0),
+           XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result, 14, 0),
            
    nil];
     

@@ -221,7 +221,7 @@
     }
     
     if (nextEvaluator != nil){
-        NSEvent *event = [keyStroke toEvent];
+        NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
             // check buffer limit
             XVimSourceView *view = [self sourceView];

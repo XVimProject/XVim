@@ -48,7 +48,6 @@
             XVimMakeTestCase(text2, 44, 0,  @"3G", text2, 32, 0),
             XVimMakeTestCase(text2,  8, 0,  @"9G", text2, 44, 0),
             
-            
             // h,j,k,l, <space>
             XVimMakeTestCase(text1, 0, 0,   @"l", text1, 1, 0),
             XVimMakeTestCase(text1, 0, 0, @"10l", text1, 2, 0),
@@ -56,8 +55,8 @@
             XVimMakeTestCase(text1, 0, 0, @"10j", text1, 8, 0),
             XVimMakeTestCase(text1, 4, 0,   @"k", text1, 0, 0),
             XVimMakeTestCase(text1, 1, 0,   @"h", text1, 0, 0),
-            XVimMakeTestCase(text1, 0, 0,   @" ", text1, 1, 0),
-            XVimMakeTestCase(text1, 0, 0, @"10 ", text1, 2, 0),
+            XVimMakeTestCase(text1, 0, 0,   @"<Space>", text1, 1, 0),
+            XVimMakeTestCase(text1, 0, 0, @"10<Space>", text1, 2, 0),
             
             // t, T
             XVimMakeTestCase(text2,  0, 0,  @"tc", text2,  7, 0),
@@ -86,8 +85,8 @@
             XVimMakeTestCase(text2, 16, 0, @"2+", text2, 40, 0),
             XVimMakeTestCase(text2, 40, 0,  @"-", text2, 24, 0),
             XVimMakeTestCase(text2, 40, 0, @"2-", text2, 12, 0),
-            XVimMakeTestCase(text2, 28, 0, @"\r", text2, 40, 0),
-            XVimMakeTestCase(text2, 16, 0,@"2\r", text2, 40, 0),
+            XVimMakeTestCase(text2, 28, 0, @"<CR>", text2, 40, 0),
+            XVimMakeTestCase(text2, 16, 0,@"2<CR>", text2, 40, 0),
             
             // H,M,L
             //TODO: Implement test for H,M,L. These needs some special test check method since we have to calc the height of the view.

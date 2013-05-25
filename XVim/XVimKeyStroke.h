@@ -25,7 +25,7 @@
 + (XVimKeyStroke*)fromString:(NSString *)string;
 
 // Parses a string into an array of key strokes
-+ (void)fromString:(NSString *)string to:(NSMutableArray *)keystrokes;
++ (NSArray*)keyStrokesfromString:(NSString *)string;
 
 - (id)initWithKeyCode:(unichar)keyCode
 		modifierFlags:(NSUInteger)modifierFlags;
@@ -36,7 +36,7 @@
 		  modifierFlags:(NSUInteger)modifierFlags;
 
 // Generates an event from this key stroke
-- (NSEvent*)toEvent;
+- (NSEvent*)toEventwithWindowNumber:(NSInteger)num context:(NSGraphicsContext*)context;
 
 // Creates the selector string from this key stroke
 - (NSString*)toSelectorString;
