@@ -252,6 +252,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)Y{
     //TODO: support yunk linewise
+    [[self sourceView] changeSelectionMode:MODE_LINE];
     [[self sourceView] yank:nil];
     return nil;
 }

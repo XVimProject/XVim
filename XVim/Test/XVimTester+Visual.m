@@ -58,6 +58,11 @@
                                 @"ggg hhh i_i\n" 
                                 @"    jjj kkk";
     
+    static NSString* Y_result = @"a;a bbb ccc\n"
+                                @"a;a bbb ccc\n";
+    
+    static NSString* v_c_result = @"xxxbbb ccc\n";
+    
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text2, 0,  0, @"vljd", v_d_result, 0, 0),
             XVimMakeTestCase(text2, 0,  0, @"Vjd", V_d_result, 0, 0),
@@ -80,10 +85,23 @@
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljgU<C-v>lljgu", text2, 0, 0),
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljgU<C-v>llju", text2, 0, 0),
             
+            // Concanate
             // XVimMakeTestCase(text2, 0,  0, @"VjjjJ", J_result, 35, 0), // The correct result location is not supported now
             
             
+            // Yank , Put
             XVimMakeTestCase(text2, 0,  0, @"vllyjv6lp", p_result, 12, 0), // yank and paste with visual
+            XVimMakeTestCase(text2, 0,  0, @"vllyjv6lP", p_result, 12, 0), // yank and paste with visual
+            XVimMakeTestCase(text1, 0,  0, @"llvllYp", Y_result, 12, 0), // yank and paste with visual
+            
+            // Change
+            XVimMakeTestCase(text1, 0,  0, @"vlllcxxx<ESC>", v_c_result, 2, 0), // change in visual
+            
+            // Toggle between v,C-v,V
+            XVimMakeTestCase(text2, 0,  0, @"vllVjd", V_d_result, 0, 0), // change in visual
+            XVimMakeTestCase(text2, 0,  0, @"Vjlvd", v_d_result, 0, 0), // change in visual
+            XVimMakeTestCase(text2, 0,  0, @"vlljj<C-v>d", C_v_d_result, 0, 0), // change in visual
+            
             
             nil];
 }
