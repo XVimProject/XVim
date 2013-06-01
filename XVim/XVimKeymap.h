@@ -19,7 +19,7 @@
 @property (nonatomic, retain) XVimKeymapNode *node;
 
 - (void)clear;
-- (NSString*)toString;
+//- (NSString*)toString;
 
 @end
 

@@ -15,8 +15,7 @@
 @synthesize absorbedKeys = _absorbedKeys;
 @synthesize node = _node;
 
-- (id)init
-{
+- (id)init {
 	if (self = [super init])
 	{
 		_absorbedKeys = [[NSMutableArray alloc] init];
@@ -25,28 +24,26 @@
 	return self;
 }
 
-- (void)dealloc
-{
+- (void)dealloc {
     [_absorbedKeys release];
     [_node release];
     [super dealloc];
 }
 
-- (void)clear
-{
+- (void)clear {
 	[_absorbedKeys removeAllObjects];
 	_node = nil;
 }
 
-- (NSString*)toString
-{
+/*
+- (NSString*)toString {
 	NSString *ret = @"";
-	for (XVimKeyStroke *keyStroke in _absorbedKeys)
-	{
+	for (XVimKeyStroke *keyStroke in _absorbedKeys) {
 		ret = [ret stringByAppendingString:[keyStroke toString]];
 	}
 	return ret;
 }
+ */
 
 @end
 
@@ -103,8 +100,7 @@
 - (void)mapKeyStroke:(NSArray*)keyStrokes to:(NSArray*)targetKeyStrokes
 {
 	XVimKeymapNode *node = _node;
-	for (XVimKeyStroke *keyStroke in keyStrokes)
-	{
+	for (XVimKeyStroke *keyStroke in keyStrokes) {
 		XVimKeymapNode *nextNode = [node.dict objectForKey:keyStroke];
 		if (!nextNode)
 		{
@@ -116,18 +112,14 @@
 	node.target = targetKeyStrokes;
 }
 
-- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options 
-						   withPrimary:(XVimKeyStroke*)primaryKeyStroke
-						   withContext:(XVimKeymapContext*)context
-{
+- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options withPrimary:(XVimKeyStroke*)primaryKeyStroke withContext:(XVimKeymapContext*)context {
 	NSArray *ret = nil;
 	XVimKeymapNode *node = context.node;
 	if (!node) { node = _node; }
 	
 	XVimKeymapNode *foundNode = nil;
 	
-	for (XVimKeyStroke* option in options)
-	{
+	for (XVimKeyStroke* option in options) {
 		foundNode = [node.dict objectForKey:option];
 		if (foundNode) { break; }
 	}

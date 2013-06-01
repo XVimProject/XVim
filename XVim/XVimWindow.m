@@ -108,10 +108,13 @@ static const char* KEY_WINDOW = "xvimwindow";
         }
     }
     
-    NSString* argString = [_keymapContext toString];
-    if ([argString length] == 0) {
+    // FIXME:
+    // temporarily toString method is removed.
+    // Must be fixed. This makes argument string empty if there are absorbed keys in key mappings.
+    NSString* argString = @""; //[_keymapContext toString];
+    //if ([argString length] == 0) {
         argString = [[self _currentEvaluator] argumentDisplayString];
-    }
+    //}
     
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];

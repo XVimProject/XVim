@@ -10,8 +10,16 @@
 
 @interface XVimKeyStroke : NSObject<NSCopying>
 
+@property unichar character;
+@property unichar modifier;
+@property (nonatomic, readonly) BOOL isNumeric;
+
+- (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod;
+//- (NSData*)internalKeyCode;
+
+
 // Call on startup to initialise static data
-+ (void)initKeymaps;
+// + (void)initKeymaps;
 
 /**
  * Returns all possible mapping options from an event
@@ -30,11 +38,6 @@
 - (id)initWithKeyCode:(unichar)keyCode
 		modifierFlags:(NSUInteger)modifierFlags;
 
-// Constructs a key stroke from an event
-- (id)initWithEvent:(NSEvent*)event 
-				keyCode:(unichar)keyCode 
-		  modifierFlags:(NSUInteger)modifierFlags;
-
 // Generates an event from this key stroke
 - (NSEvent*)toEventwithWindowNumber:(NSInteger)num context:(NSGraphicsContext*)context;
 
@@ -42,7 +45,7 @@
 - (NSString*)toSelectorString;
 
 // Creates a human-readable string
-- (NSString*)toString;
+//- (NSString*)toString;
 
 // Returns the selector for this object
 - (SEL)selector;
@@ -59,7 +62,9 @@
 // Returns YES if the class implements this method and does so different to its superclass
 - (BOOL)classImplements:(Class)class;
 
+/*
 @property (nonatomic) unichar keyCode;
 @property (nonatomic) NSUInteger modifierFlags;
-@property (nonatomic, readonly) BOOL isNumeric;
+ */
+
 @end

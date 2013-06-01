@@ -146,12 +146,17 @@
 }
 
 - (XVimEvaluator*)onComplete_fFtT:(XVimArgumentEvaluator*)childEvaluator{
+    // FIXME:
+    // Do not use toString here.
+    // keyStroke must generate a internal code
+    /*
     if( childEvaluator.keyStroke.toString.length != 1 ){
         return [XVimEvaluator invalidEvaluator];
     }
+     */
     
     self.motion.count = self.numericArg;
-    self.motion.character = [childEvaluator.keyStroke.toString characterAtIndex:0];
+    self.motion.character = childEvaluator.keyStroke.character;
     [XVim instance].lastCharacterSearchMotion = self.motion;
     return [self _motionFixed:self.motion];
 }
@@ -381,7 +386,10 @@
 }
 
 - (XVimEvaluator*)onComplete_SQUOTE:(XVimArgumentEvaluator*)childEvaluator{
-    NSString* key = [childEvaluator.keyStroke toString];
+    // FIXME:
+    // This will work for Ctrl-c as register c but it should not
+    //NSString* key = [childEvaluator.keyStroke toString];
+    NSString* key = [NSString stringWithFormat:@"%c", childEvaluator.keyStroke.character];
     XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
     return [self jumpToMark:mark firstOfLine:YES];
 }
@@ -393,7 +401,10 @@
 }
 
 - (XVimEvaluator*)onComplete_BACKQUOTE:(XVimArgumentEvaluator*)childEvaluator{
-    NSString* key = [childEvaluator.keyStroke toString];
+    // FIXME:
+    // This will work for Ctrl-c as register c but it should not
+    // NSString* key = [childEvaluator.keyStroke toString];
+    NSString* key = [NSString stringWithFormat:@"%c", childEvaluator.keyStroke.character];
     XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
     return [self jumpToMark:mark firstOfLine:NO];
 }

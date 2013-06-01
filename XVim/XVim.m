@@ -264,7 +264,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 		for (int i = 0; i < MODE_COUNT; ++i) {
 			_keymaps[i] = [[XVimKeymap alloc] init];
 		}
-		[XVimKeyStroke initKeymaps];
 	}
 	return self;
 }

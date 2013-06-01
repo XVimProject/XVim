@@ -31,7 +31,12 @@
         return [self performSelector:handler];
     }
 
-    self.reg = [[XVim instance] findRegister:[keyStroke toString]];
+    if( keyStroke.modifier == 0 ){
+        unichar c = keyStroke.character;
+        self.reg = [[XVim instance] findRegister:[NSString stringWithCharacters:&c length:1]];
+    }else{
+        self.reg = nil;
+    }
     return nil;
 }
 	
