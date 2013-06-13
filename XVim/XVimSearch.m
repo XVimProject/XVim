@@ -384,9 +384,10 @@
     BOOL global = options.gdefault;
     BOOL confirmation = NO;
     if ([ex_command length] >= 3) {
+        unichar delimiter = [ex_command characterAtIndex:0];
         for(NSUInteger i=1;i<[ex_command length];++i) {
             unichar current = [ex_command characterAtIndex:i];
-            if (current == '/' && previous != '\\') {
+            if (current == delimiter && previous != '\\') {
                 component++;
             } else {
                 if (component == 0) {
