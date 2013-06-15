@@ -9,140 +9,204 @@
 #import "XVimKeymap.h"
 #import "XVimKeyStroke.h"
 
-@class XVimKeymapNode;
+
+//// Internal Class XVimKeymapNode ////
+/**
+ *  This class represents a node in key map trie.
+ **/
+@interface XVimKeymapNode : NSObject {
+}
+@property (nonatomic, retain) NSMutableDictionary *dict;
+@property                     BOOL remap;
+@property (nonatomic, retain) XVimString* target;
+
+- (BOOL)hasChild;
+@end
+
+@implementation XVimKeymapNode
+- (id)init{
+	if (self = [super init]){
+		self.dict = [[[NSMutableDictionary alloc] init] autorelease];
+        self.target = nil;
+	}
+	return self;
+}
+
+- (void)dealloc{
+    self.dict = nil;
+    self.target = nil;
+    [super dealloc];
+}
+
+- (BOOL)hasChild{
+    return 0 != self.dict.count;
+}
+
+@end
+//// XVimKeymapNode End ////
+
 
 @implementation XVimKeymapContext
-@synthesize absorbedKeys = _absorbedKeys;
-@synthesize node = _node;
-
 - (id)init {
-	if (self = [super init])
-	{
-		_absorbedKeys = [[NSMutableArray alloc] init];
-        _node = nil;
+	if (self = [super init]){
+		self.inputKeys = [[[NSMutableString alloc] init] autorelease];
+		self.lastMappedKeys = [[[NSMutableString alloc] init] autorelease];
+		self.lastMappedNode = nil;
+        self.node = nil;
 	}
 	return self;
 }
 
 - (void)dealloc {
-    [_absorbedKeys release];
-    [_node release];
+    self.inputKeys = nil;
+	self.lastMappedKeys = nil;
+    self.lastMappedNode = nil;
+    self.node = nil;
     [super dealloc];
 }
 
 - (void)clear {
-	[_absorbedKeys removeAllObjects];
-	_node = nil;
+	[self.inputKeys setString:@""];
+	[self.lastMappedKeys setString:@""];
+    self.lastMappedNode = nil;
+	self.node = nil;
 }
 
-/*
-- (NSString*)toString {
-	NSString *ret = @"";
-	for (XVimKeyStroke *keyStroke in _absorbedKeys) {
-		ret = [ret stringByAppendingString:[keyStroke toString]];
-	}
-	return ret;
+- (XVimString*)unmappedKeys{
+    NSAssert([self.lastMappedKeys length] == 0 ||  [self.inputKeys hasPrefix:self.lastMappedKeys], @"lastMappedKeys must be a prefix of inputKeys! Must be a programming error");
+    return [self.inputKeys substringWithRange:NSMakeRange(self.lastMappedKeys.length, self.inputKeys.length - self.lastMappedKeys.length)];
 }
- */
+
 
 @end
 
-@interface XVimKeymapNode : NSObject {
-	NSMutableDictionary *_dict;
-	NSArray *_target;
-}
 
-@property (nonatomic, retain) NSMutableDictionary *dict;
-@property (nonatomic, retain) NSArray *target;
-@end
 
-@implementation XVimKeymapNode
-@synthesize dict = _dict;
-@synthesize target = _target;
-- (id)init
-{
-	if (self = [super init])
-	{
-		_dict = [[NSMutableDictionary alloc] init];
-        _target = nil;
-	}
-	return self;
-}
-- (void)dealloc
-{
-    [_dict release];
-    [_target release];
-    [super dealloc];
-}
-@end
-
-@interface XVimKeymap() {
-	XVimKeymapNode* _node;
-}
+@interface XVimKeymap()
+@property(retain) XVimKeymapNode* root;
 @end
 
 @implementation XVimKeymap
-- (id)init
-{
+- (id)init{
 	self = [super init];
 	if (self) {
-		_node = [[XVimKeymapNode alloc] init];
+        self.root = [[[XVimKeymapNode alloc] init] autorelease];
 	}
 	return self;
 }
 
-- (void)dealloc
-{
-    [_node release];
+- (void)dealloc{
+    self.root = nil;
     [super dealloc];
 }
 
-- (void)mapKeyStroke:(NSArray*)keyStrokes to:(NSArray*)targetKeyStrokes
-{
-	XVimKeymapNode *node = _node;
-	for (XVimKeyStroke *keyStroke in keyStrokes) {
-		XVimKeymapNode *nextNode = [node.dict objectForKey:keyStroke];
-		if (!nextNode)
-		{
+- (void)map:(XVimString*)keyStrokes to:(XVimString*)targetKeyStrokes withRemap:(BOOL)remap{
+    // Create key map trie
+    XVimKeymapNode* current = self.root;
+    NSArray* strokes = [keyStrokes toKeyStrokes];
+    for( XVimKeyStroke* stroke in strokes ){
+		XVimKeymapNode *nextNode = [current.dict objectForKey:stroke];
+		if (!nextNode){
 			nextNode = [[[XVimKeymapNode alloc] init] autorelease];
-			[node.dict setObject:nextNode forKey:keyStroke];
+			[current.dict setObject:nextNode forKey:stroke];
 		}
-		node = nextNode;
-	}
-	node.target = targetKeyStrokes;
+		current = nextNode;
+    }
+	current.target = targetKeyStrokes;
 }
 
-- (NSArray*)lookupKeyStrokeFromOptions:(NSArray*)options withPrimary:(XVimKeyStroke*)primaryKeyStroke withContext:(XVimKeymapContext*)context {
-	NSArray *ret = nil;
-	XVimKeymapNode *node = context.node;
-	if (!node) { node = _node; }
-	
-	XVimKeymapNode *foundNode = nil;
-	
-	for (XVimKeyStroke* option in options) {
-		foundNode = [node.dict objectForKey:option];
-		if (foundNode) { break; }
-	}
-	
-	if (foundNode) {
-		// Leaf node?
-		if ([foundNode.dict count] == 0) {
-			ret = foundNode.target;
-			[context clear];
-		} else {
-			[context.absorbedKeys addObject:primaryKeyStroke];
-			context.node = foundNode;
-		}
-		
-	} else {
-		NSMutableArray *objects = [NSMutableArray arrayWithArray:context.absorbedKeys];
-		[objects addObject:primaryKeyStroke];
-		[context clear];
-		
-		ret = objects;
-	}
-	
-	return ret;
+- (void)unmapImpl:(NSMutableArray*)keystrokes atNode:(XVimKeymapNode*)node{
+    NSAssert( nil != keystrokes, @"must not be nil");
+    NSAssert( nil != node, @"must not be nil");
+    
+    XVimKeymapNode* nextNode = nil;
+    XVimKeyStroke* stroke = nil;
+    if( keystrokes.count != 0 ){
+        stroke = [keystrokes objectAtIndex:0];
+        nextNode = [node.dict objectForKey:stroke];
+        if( nextNode ){
+            // Go to most deep node recursively
+            [keystrokes removeObjectAtIndex:0];
+            [self unmapImpl:keystrokes atNode:nextNode];
+            if( nextNode.dict.count == 0 && nextNode.target == nil ){
+                // If the node does not have child and target we do not need to have it.
+                [node.dict removeObjectForKey:stroke];
+            }
+        }else{
+            // There is no node to follow ( maybe unmapping non-mapped key )
+            // Just do nothing
+        }
+    }else{
+        // This is the last node of the map( means most deep node of the keymap to unmap). Just delete target (this node is deleted on upper node processing if thid node does not have child any more)
+        node.target = nil;
+    }
 }
+
+- (void)unmap:(XVimString*)str{
+    NSAssert( nil != str, @"str must not be nil" );
+    if( str.length == 0 ){
+        return;
+    }
+    [self unmapImpl:[NSMutableArray arrayWithArray:[str toKeyStrokes]] atNode:self.root];
+}
+
+/**
+ *  This method map key input to the current key map.
+ *  If it maps to "remappable" keymap it calls recursively to fix the map.
+ **/
+- (XVimString*)mapKeys:(XVimString*)keys withContext:(XVimKeymapContext*)context forceFix:(BOOL)fix{
+    NSArray* strokes = [keys toKeyStrokes];
+    if( context.node == nil ){
+        context.node = self.root;
+    }
+	XVimKeymapNode *node = context.node;
+	XVimKeymapNode *nextNode = nil;
+    XVimString* unProcessedString = nil; // This will get un-nil when not all the strokes are processed in following loop
+	for ( NSUInteger i = 0 ; i < strokes.count; i++ ){
+        XVimKeyStroke* stroke = [strokes objectAtIndex:i];
+        // Walk through mapping node
+        nextNode = [node.dict objectForKey:stroke];
+		if (nil != nextNode){
+            // If there is a node to follow
+            [context.inputKeys appendString:[stroke xvimString]];
+            if( nextNode.target != nil ){
+                [context.lastMappedKeys setString:context.inputKeys];
+                context.lastMappedNode = nextNode;
+            }
+        }else{
+            // No node to follow
+            unProcessedString = [XVimKeyStroke keyStrokesToXVimString:[strokes subarrayWithRange:NSMakeRange(i, strokes.count-i)]];
+            break;
+        }
+        node = nextNode;
+	}
+    
+    // |    inputKeys                  |  unProcessedKeys  |
+    // |    lastMappedKeys  |
+    // will be converted to
+    // |    targetKeys |  unmappedKeys |  unProcessedKeys  |
+    
+    if( fix || !node.hasChild || unProcessedString != nil ){
+        // No more nodes to follow.
+        // Fix the keymapping
+        if( context.lastMappedNode != nil ){
+            XVimString* newStr = [NSString stringWithFormat:@"%@%@%@", context.lastMappedNode.target, context.unmappedKeys, unProcessedString];
+            if( context.lastMappedNode.remap ){
+                XVimKeymapContext* context = [[[XVimKeymapContext alloc] init] autorelease];
+                return [self mapKeys:newStr withContext:context forceFix:fix];
+            }else{
+                // No more mapping
+                return newStr;
+            }
+        }else{
+            // No map needed
+            return [XVimString stringWithFormat:@"%@%@", context.inputKeys, unProcessedString];
+        }
+    }
+    
+    // We still need to wait next key input
+    return nil;
+}
+
 
 @end

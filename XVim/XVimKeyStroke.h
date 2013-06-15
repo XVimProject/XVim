@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NSString XVimString;
+typedef NSMutableString XVimMutableString;
+
+@interface NSString(XVimKeyStroke)
+// Parses internal key code string and retturn key strokes array
+- (NSArray*)toKeyStrokes;
+@end
+
 @interface XVimKeyStroke : NSObject<NSCopying>
 
 @property unichar character;
@@ -15,7 +23,7 @@
 @property (nonatomic, readonly) BOOL isNumeric;
 
 - (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod;
-//- (NSData*)internalKeyCode;
+- (XVimString*)xvimString;
 
 
 // Call on startup to initialise static data
@@ -30,14 +38,17 @@
 + (XVimKeyStroke*)keyStrokeOptionsFromEvent:(NSEvent*)event into:(NSMutableArray*)options;
 
 // Parses a string into a key stroke
-+ (XVimKeyStroke*)fromString:(NSString *)string;
+// + (XVimKeyStroke*)fromNotation:(NSString *)notation;
 
++ (XVimString*)xvimStringFromKeyNotation:(NSString*)notation;
+    
 // Parses a string into an array of key strokes
-+ (NSArray*)keyStrokesfromString:(NSString *)string;
++ (NSArray*)keyStrokesfromNotation:(NSString *)notation;
 
-- (id)initWithKeyCode:(unichar)keyCode
-		modifierFlags:(NSUInteger)modifierFlags;
++ (XVimString*)keyStrokesToXVimString:(NSArray*)strokes;
 
++ (NSString*) eventToXVimString:(NSEvent*)event;
+    
 // Generates an event from this key stroke
 - (NSEvent*)toEventwithWindowNumber:(NSInteger)num context:(NSGraphicsContext*)context;
 

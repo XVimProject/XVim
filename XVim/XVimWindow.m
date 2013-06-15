@@ -88,16 +88,15 @@ static const char* KEY_WINDOW = "xvimwindow";
     return [self.sourceView insertionPoint];
 }
 
-- (BOOL)handleKeyEvent:(NSEvent*)event{
-    DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, [self _currentEvaluator],event.description);
-    NSMutableArray *keyStrokeOptions = [[[NSMutableArray alloc] init] autorelease];
-    XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
+- (BOOL)handleOneXVimString:(XVimString*)oneChar{
     XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
+    XVimString* mapped = [keymap mapKeys:oneChar withContext:_keymapContext forceFix:NO];
+    DEBUG_LOG(@"%@", mapped);
     
-    NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke withContext:_keymapContext];
+    //NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke withContext:_keymapContext];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
-    if (keystrokes) {
-        for (XVimKeyStroke *keyStroke in keystrokes) {
+    if (mapped) {
+        for (XVimKeyStroke *keyStroke in [mapped toKeyStrokes]) {
             [self handleKeyStroke:keyStroke];
         }
     } else {
@@ -124,10 +123,28 @@ static const char* KEY_WINDOW = "xvimwindow";
     return YES;
 }
 
-- (void)handleTimeout {
-    for (XVimKeyStroke *keyStroke in [_keymapContext absorbedKeys]) {
-        [self handleKeyStroke:keyStroke];
+- (BOOL)handleXVimString:(XVimString*)strokes{
+    BOOL last = NO;
+    for( XVimKeyStroke* stroke in [strokes toKeyStrokes] ){
+        DEBUG_LOG(@"XVimKeyStroke mod:%x char:%x", stroke.modifier , stroke.character);
+        last = [self handleOneXVimString:[stroke xvimString]];
     }
+    return last;
+}
+
+- (BOOL)handleKeyEvent:(NSEvent*)event{
+    DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, [self _currentEvaluator],event.description);
+    //NSMutableArray *keyStrokeOptions = [[[NSMutableArray alloc] init] autorelease];
+    //XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
+    XVimString* stroke = [XVimKeyStroke eventToXVimString:event];
+    DEBUG_LOG(@"XVimString for the Event: %@", stroke );
+    return [self handleXVimString:stroke];
+}
+
+- (void)handleTimeout {
+    XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
+    XVimString* mapped = [keymap mapKeys:@"" withContext:_keymapContext forceFix:YES];
+    [self handleXVimString:mapped];
     [_keymapContext clear];
 }
 

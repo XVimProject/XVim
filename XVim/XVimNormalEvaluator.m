@@ -556,9 +556,10 @@ static NSArray *_invalidRepeatKeys;
                 if( [self numericArg] >= 2 ){
                     NSString* str = [NSString stringWithFormat:@"%ld",[self numericArg]];
                     for( NSUInteger i = 0; i < str.length; ++i ){
-                        NSString* s1 = [str substringWithRange:NSMakeRange(i, 1)];
-                        XVimKeyStroke* keyStroke = [XVimKeyStroke fromString:s1];
-                        [xregister appendKeyEvent:keyStroke];
+                        // FIXME: This code is temprarily commented out to refactor
+                        //NSString* s1 = [str substringWithRange:NSMakeRange(i, 1)];
+                        // XVimKeyStroke* keyStroke = [XVimKeyStroke fromNotation:s1];
+                        //[xregister appendKeyEvent:keyStroke];
                     }
                 }
                 return REGISTER_APPEND;

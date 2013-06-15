@@ -825,6 +825,7 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins $(DEVELOPER_DIR)/Library/PrivateFrameworks $(inherited) $(DEVELOPER_DIR)/../Frameworks $(DEVELOPER_DIR)/../SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
@@ -845,6 +846,7 @@
 				INFOPLIST_FILE = XVim/Info.plist;
 				INSTALL_PATH = "";
 				PRODUCT_NAME = XVim;
+				SDKROOT = macosx;
 				USER_HEADER_SEARCH_PATHS = "$(DEVELOPER_DIR)/Library/Xcode/PrivatePlugins $(DEVELOPER_DIR)/Library/PrivateFrameworks $(inherited) $(DEVELOPER_DIR)/../Frameworks $(DEVELOPER_DIR)/../SharedFrameworks";
 				WRAPPER_EXTENSION = xcplugin;
 			};
