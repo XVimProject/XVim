@@ -8,18 +8,17 @@
 
 #import "XVimKeymap.h"
 #import "XVimKeyStroke.h"
+#import "Logger.h"
 
 
 //// Internal Class XVimKeymapNode ////
 /**
  *  This class represents a node in key map trie.
  **/
-@interface XVimKeymapNode : NSObject {
-}
+@interface XVimKeymapNode : NSObject
 @property (nonatomic, retain) NSMutableDictionary *dict;
 @property                     BOOL remap;
 @property (nonatomic, retain) XVimString* target;
-
 - (BOOL)hasChild;
 @end
 
@@ -77,7 +76,6 @@
     return [self.inputKeys substringWithRange:NSMakeRange(self.lastMappedKeys.length, self.inputKeys.length - self.lastMappedKeys.length)];
 }
 
-
 @end
 
 
@@ -100,6 +98,24 @@
     [super dealloc];
 }
 
+- (void)mapsInNode:(XVimKeymapNode*)node :(NSString*)mappingKey :(NSMutableDictionary*)dictionary{
+    if( node.target != nil ){
+        [dictionary setObject:node.target forKey:mappingKey];
+        DEBUG_LOG(@"MAP: %@  %@", mappingKey, node.target);
+    }
+    for(XVimKeyStroke* key in node.dict){
+        XVimKeymapNode* next = [node.dict objectForKey:key];
+        NSString* nextMap = [mappingKey stringByAppendingFormat:@"%C", key.character];
+        [self mapsInNode:next :nextMap :dictionary];
+    }
+}
+
+- (NSDictionary*)mapsInNode{
+    NSMutableDictionary* dict = [[[NSMutableDictionary alloc] init] autorelease];
+    [self mapsInNode:self.root :@"" :dict];
+    return dict;
+}
+
 - (void)map:(XVimString*)keyStrokes to:(XVimString*)targetKeyStrokes withRemap:(BOOL)remap{
     // Create key map trie
     XVimKeymapNode* current = self.root;
@@ -113,6 +129,9 @@
 		current = nextNode;
     }
 	current.target = targetKeyStrokes;
+    current.remap = remap;
+    
+    [self mapsInNode];
 }
 
 - (void)unmapImpl:(NSMutableArray*)keystrokes atNode:(XVimKeymapNode*)node{
@@ -159,12 +178,13 @@
     if( context.node == nil ){
         context.node = self.root;
     }
-	XVimKeymapNode *node = context.node;
-	XVimKeymapNode *nextNode = nil;
-    XVimString* unProcessedString = nil; // This will get un-nil when not all the strokes are processed in following loop
+    
+    // Walk through mapping node
+	XVimKeymapNode *node = context.node; // current node
+	XVimKeymapNode *nextNode = nil;      // next node to walk to
+    XVimString* unProcessedString = @""; // if a node does not have any path to walk rest of input keys are stored to this variable.
 	for ( NSUInteger i = 0 ; i < strokes.count; i++ ){
         XVimKeyStroke* stroke = [strokes objectAtIndex:i];
-        // Walk through mapping node
         nextNode = [node.dict objectForKey:stroke];
 		if (nil != nextNode){
             // If there is a node to follow
@@ -175,25 +195,38 @@
             }
         }else{
             // No node to follow
+            // Keep rest of input
             unProcessedString = [XVimKeyStroke keyStrokesToXVimString:[strokes subarrayWithRange:NSMakeRange(i, strokes.count-i)]];
             break;
         }
         node = nextNode;
 	}
     
+    // Update context in case the input are not fixed yet and use it later
+    context.node = node;
+    
     // |    inputKeys                  |  unProcessedKeys  |
     // |    lastMappedKeys  |
     // will be converted to
     // |    targetKeys |  unmappedKeys |  unProcessedKeys  |
     
-    if( fix || !node.hasChild || unProcessedString != nil ){
+    // If there is no node to follow (or force fix flag is on)
+    // we fix the input and return mapped keys
+    
+    static NSUInteger infinit_loop_guard = 1000; // TODO: This should be implemented as "maxmapdepth" value
+    
+    if( fix || !node.hasChild || unProcessedString.length != 0){
         // No more nodes to follow.
         // Fix the keymapping
         if( context.lastMappedNode != nil ){
             XVimString* newStr = [NSString stringWithFormat:@"%@%@%@", context.lastMappedNode.target, context.unmappedKeys, unProcessedString];
-            if( context.lastMappedNode.remap ){
+            if( context.lastMappedNode.remap && infinit_loop_guard != 0){
+                // Key remapping
                 XVimKeymapContext* context = [[[XVimKeymapContext alloc] init] autorelease];
-                return [self mapKeys:newStr withContext:context forceFix:fix];
+                infinit_loop_guard--;
+                NSString* map = [self mapKeys:newStr withContext:context forceFix:fix];
+                infinit_loop_guard++;
+                return map;
             }else{
                 // No more mapping
                 return newStr;
@@ -207,6 +240,4 @@
     // We still need to wait next key input
     return nil;
 }
-
-
 @end

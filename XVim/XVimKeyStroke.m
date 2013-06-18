@@ -511,10 +511,8 @@ static BOOL isModifier(unichar c){
         self.modifier = self.modifier & ~XVIM_MOD_SHIFT;
     }
     if( self.modifier != 0 ){
-        DEBUG_LOG(@"MOD:%x", XVIM_MAKE_MODIFIER(self.modifier));
         [str appendFormat:@"%C", XVIM_MAKE_MODIFIER(self.modifier)];
     }
-    DEBUG_LOG(@"CHAR:%x", self.character);
     [str appendFormat:@"%C", self.character];
     return str;
 }
@@ -525,8 +523,8 @@ static BOOL isModifier(unichar c){
 }
 
 - (NSUInteger)hash{
-    return 0;
-//	return self.modifierFlags + self.keyCode;
+    // FIXME: This is not valid
+	return self.modifier + self.character;
 }
 
 - (BOOL)isEqual:(id)object{
@@ -541,7 +539,7 @@ static BOOL isModifier(unichar c){
 }
 
 - (id)copyWithZone:(NSZone *)zone {
-    return [[XVimKeyStroke alloc] initWithCharacter:self.character modifier:self.modifier];
+    return [[XVimKeyStroke allocWithZone:zone] initWithCharacter:self.character modifier:self.modifier];
 }
 
 - (NSEvent*)toEventwithWindowNumber:(NSInteger)num context:(NSGraphicsContext*)context; {
@@ -561,29 +559,49 @@ static BOOL isModifier(unichar c){
                               keyCode:0];
 }
 
+
+- (NSString*)description{
+    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
+    if( 0 != self.modifier){
+        unichar m = XVIM_MAKE_MODIFIER(self.modifier);
+        [str appendFormat:@"0x%02x 0x%02x ", ((unsigned char*)(&m))[1], ((unsigned char*)(&m))[0]];
+    }
+    unichar c = self.character;
+    if( isPrintable(c)){
+        [str appendFormat:@"%C", c];
+    }else{
+        [str appendFormat:@"0x%02x 0x%02x", ((unsigned char*)(&c))[1], ((unsigned char*)(&c))[0]];
+    }
+    return str;
+}
+
 /*
-- (NSString*) toString{
+- (NSString*)notation{
 	unichar charcode = self.character;
 	NSUInteger modifierFlags = XVIMMOD2NSMOD(self.modifier);
 	
 	NSMutableString* keyStr = [[[NSMutableString alloc] init] autorelease];
-	if( modifierFlags & NSControlKeyMask ){
+	if( self.modifier & XVIM_MOD_CTRL){
 		[keyStr appendString:@"C-"];
 	}
-	if( modifierFlags & NSAlternateKeyMask ){
+	if( self.modifier & XVIM_MOD_ALT){
 		[keyStr appendString:@"M-"];
 	}
-	if( modifierFlags & NSCommandKeyMask ){
+	if( self.modifier & XVIM_MOD_CMD){
 		[keyStr appendString:@"D-"];
 	}
+	if( self.modifier & XVIM_MOD_FUNC){
+		[keyStr appendString:@"F-"];
+	}
 	
-	if (charcode <= 127)
-	{
-		NSString *keyname = [NSString stringWithCString:readable_keynames[charcode] encoding:NSASCIIStringEncoding];
+	if (isPrintable(charcode)) {
+        
 		if (keyname) { 
 			[keyStr appendString:keyname];
 		}
-	}
+	}else{
+        
+    }
 	
 	return keyStr;
 }

@@ -99,6 +99,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         for (XVimKeyStroke *keyStroke in [mapped toKeyStrokes]) {
             [self handleKeyStroke:keyStroke];
         }
+        [_keymapContext clear];
     } else {
         XVimOptions *options = [[XVim instance] options];
         NSTimeInterval delay = [options.timeoutlen integerValue] / 1000.0;
@@ -126,25 +127,22 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (BOOL)handleXVimString:(XVimString*)strokes{
     BOOL last = NO;
     for( XVimKeyStroke* stroke in [strokes toKeyStrokes] ){
-        DEBUG_LOG(@"XVimKeyStroke mod:%x char:%x", stroke.modifier , stroke.character);
         last = [self handleOneXVimString:[stroke xvimString]];
     }
     return last;
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-    DEBUG_LOG(@"XVimWindow:%p Evaluator:%p Event:%@", self, [self _currentEvaluator],event.description);
-    //NSMutableArray *keyStrokeOptions = [[[NSMutableArray alloc] init] autorelease];
-    //XVimKeyStroke* primaryKeyStroke = [XVimKeyStroke keyStrokeOptionsFromEvent:event into:keyStrokeOptions];
     XVimString* stroke = [XVimKeyStroke eventToXVimString:event];
-    DEBUG_LOG(@"XVimString for the Event: %@", stroke );
     return [self handleXVimString:stroke];
 }
 
 - (void)handleTimeout {
     XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
     XVimString* mapped = [keymap mapKeys:@"" withContext:_keymapContext forceFix:YES];
-    [self handleXVimString:mapped];
+    for (XVimKeyStroke *keyStroke in [mapped toKeyStrokes]) {
+        [self handleKeyStroke:keyStroke];
+    }
     [_keymapContext clear];
 }
 
@@ -199,8 +197,6 @@ static const char* KEY_WINDOW = "xvimwindow";
             nextEvaluator.parent = currentEvaluator;
             //[currentEvaluator didEndHandler];
             [nextEvaluator becameHandler];
-            
-            [_keymapContext clear];
             // Not break here. check the nextEvaluator repeatedly.
             break;
         }else{

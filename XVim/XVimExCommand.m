@@ -862,7 +862,11 @@
 }
 
 - (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_INSERT withArgs:args inWindow:window];
+	[self mapMode:MODE_INSERT withArgs:args remap:YES];
+}
+
+- (void)inoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_INSERT withArgs:args remap:NO];
 }
 
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -872,13 +876,20 @@
 }
 
 - (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_GLOBAL_MAP withArgs:args inWindow:window];
-	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
-	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
+	[self mapMode:MODE_GLOBAL_MAP withArgs:args remap:YES];
+	[self mapMode:MODE_NORMAL withArgs:args remap:YES];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
+	[self mapMode:MODE_VISUAL withArgs:args remap:YES];
 }
 
-- (void)mapMode:(int)mode withArgs:(XVimExArg*)args inWindow:(XVimWindow*)window{
+- (void)noremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_GLOBAL_MAP withArgs:args remap:NO];
+	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:NO];
+	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
+}
+
+- (void)mapMode:(XVIM_MODE)mode withArgs:(XVimExArg*)args remap:(BOOL)remap{
 	NSString *argString = args.arg;
 	NSScanner *scanner = [NSScanner scannerWithString:argString];
 	
@@ -909,7 +920,7 @@
 		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0)
 		{
 			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
-			[keymap map:[XVimKeyStroke keyStrokesToXVimString:fromKeyStrokes] to:[XVimKeyStroke keyStrokesToXVimString:toKeyStrokes] withRemap:YES];
+			[keymap map:[XVimKeyStroke keyStrokesToXVimString:fromKeyStrokes] to:[XVimKeyStroke keyStrokesToXVimString:toKeyStrokes] withRemap:remap];
 		}
 	}
 }
@@ -935,11 +946,19 @@
 }
 
 - (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_NORMAL withArgs:args inWindow:window];
+	[self mapMode:MODE_NORMAL withArgs:args remap:YES];
+}
+
+- (void)nnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
 }
 
 - (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args inWindow:window];
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
+}
+
+- (void)onoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:NO];
 }
 
 - (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1057,7 +1076,11 @@
 }
 
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_VISUAL withArgs:args inWindow:window];
+	[self mapMode:MODE_VISUAL withArgs:args remap:YES];
+}
+
+- (void)vnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w

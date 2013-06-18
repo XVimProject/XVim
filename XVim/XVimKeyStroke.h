@@ -73,9 +73,9 @@ typedef NSMutableString XVimMutableString;
 // Returns YES if the class implements this method and does so different to its superclass
 - (BOOL)classImplements:(Class)class;
 
-/*
-@property (nonatomic) unichar keyCode;
-@property (nonatomic) NSUInteger modifierFlags;
- */
+// Following methods are for to be a key in NSDictionary
+- (NSUInteger)hash;
+- (BOOL)isEqual:(id)object;
+- (id)copyWithZone:(NSZone *)zone;
 
 @end
