@@ -29,6 +29,7 @@
 		A22A00A01708914E0003046C /* XVimUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = A22A009F1708914D0003046C /* XVimUtil.m */; };
 		A22A00A31709CBE50003046C /* XVimTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = A22A00A21709CBE50003046C /* XVimTestCase.m */; };
 		A23771591611CD4300FE5F8B /* XVimMotion.m in Sources */ = {isa = PBXBuildFile; fileRef = A23771581611CD4200FE5F8B /* XVimMotion.m */; };
+		A23E43181770E19B0066BF30 /* XVimTester+map.m in Sources */ = {isa = PBXBuildFile; fileRef = A23E43171770E19B0066BF30 /* XVimTester+map.m */; };
 		A2420B3E14DDE59B008741DA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABE14D59F6600D817B0 /* AppKit.framework */; };
 		A245BFB2150123C700F048B1 /* XVim.xcplugin in CopyFiles */ = {isa = PBXBuildFile; fileRef = A234821814E7E26A003E0FF3 /* XVim.xcplugin */; };
 		A24782BF14D6F56E003B6433 /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B314D6F56E003B6433 /* Logger.m */; };
@@ -138,6 +139,7 @@
 		A234821814E7E26A003E0FF3 /* XVim.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XVim.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		A23771571611CD4200FE5F8B /* XVimMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMotion.h; path = XVim/XVimMotion.h; sourceTree = SOURCE_ROOT; };
 		A23771581611CD4200FE5F8B /* XVimMotion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotion.m; path = XVim/XVimMotion.m; sourceTree = SOURCE_ROOT; };
+		A23E43171770E19B0066BF30 /* XVimTester+map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+map.m"; path = "XVim/Test/XVimTester+map.m"; sourceTree = SOURCE_ROOT; };
 		A24782B014D6F56E003B6433 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = XVim/Info.plist; sourceTree = SOURCE_ROOT; };
 		A24782B214D6F56E003B6433 /* Logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Logger.h; path = XVim/Logger.h; sourceTree = SOURCE_ROOT; };
 		A24782B314D6F56E003B6433 /* Logger.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Logger.m; path = XVim/Logger.m; sourceTree = SOURCE_ROOT; };
@@ -351,6 +353,7 @@
 				A2575405172F65E6003D8A97 /* XVimTester+Operator.m */,
 				A2575408172F6698003D8A97 /* XVimTester+Mark.m */,
 				A257540B1732A58E003D8A97 /* XVimTester+Visual.m */,
+				A23E43171770E19B0066BF30 /* XVimTester+map.m */,
 			);
 			name = Testing;
 			sourceTree = "<group>";
@@ -741,6 +744,7 @@
 				A2575406172F65E6003D8A97 /* XVimTester+Operator.m in Sources */,
 				A2575409172F6698003D8A97 /* XVimTester+Mark.m in Sources */,
 				A257540C1732A58F003D8A97 /* XVimTester+Visual.m in Sources */,
+				A23E43181770E19B0066BF30 /* XVimTester+map.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

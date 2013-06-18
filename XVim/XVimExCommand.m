@@ -869,6 +869,14 @@
 	[self mapMode:MODE_INSERT withArgs:args remap:NO];
 }
 
+- (void)iunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self unmapMode:MODE_INSERT withArgs:args];
+}
+
+- (void)imapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self mapClearMode:MODE_INSERT];
+}
+
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSWindow *activeWindow = [[NSApplication sharedApplication] mainWindow];
     NSEvent *keyPress = [NSEvent keyEventWithType:NSKeyDown location:[NSEvent mouseLocation] modifierFlags:NSCommandKeyMask timestamp:[[NSDate date] timeIntervalSince1970] windowNumber:[activeWindow windowNumber] context:[NSGraphicsContext graphicsContextWithWindow:activeWindow] characters:@"b" charactersIgnoringModifiers:@"b" isARepeat:NO keyCode:1];
@@ -889,40 +897,81 @@
 	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
 }
 
+- (void)unmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self unmapMode:MODE_GLOBAL_MAP withArgs:args];
+	[self unmapMode:MODE_NORMAL withArgs:args];
+	[self unmapMode:MODE_OPERATOR_PENDING withArgs:args];
+	[self unmapMode:MODE_VISUAL withArgs:args];
+}
+
+- (void)mapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapClearMode:MODE_GLOBAL_MAP];
+	[self mapClearMode:MODE_NORMAL];
+	[self mapClearMode:MODE_OPERATOR_PENDING];
+	[self mapClearMode:MODE_VISUAL];
+}
+
 - (void)mapMode:(XVIM_MODE)mode withArgs:(XVimExArg*)args remap:(BOOL)remap{
 	NSString *argString = args.arg;
 	NSScanner *scanner = [NSScanner scannerWithString:argString];
 	
 	NSMutableArray *subStrings = [[NSMutableArray alloc] init];
 	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-	for (;;)
-	{
+	for (;;){
 		NSString *string;
 		[scanner scanCharactersFromSet:ws intoString:&string];
-		
-		if (scanner.isAtEnd) { break; }
+		if (scanner.isAtEnd) {
+            break;
+        }
 		[scanner scanUpToCharactersFromSet:ws intoString:&string];
-		
 		[subStrings addObject:string];
 	}
   
-	if (subStrings.count >= 2)
-	{
+	if (subStrings.count >= 2) {
 		NSString *fromString = [subStrings objectAtIndex:0];
-    
         [subStrings removeObjectAtIndex:0];
         // Todo: ":map a b  " must be mapped to "a" -> "b<space><space>"
 		NSString *toString = [subStrings componentsJoinedByString:@" "]; // get all args seperate by space
-		
 		NSArray *fromKeyStrokes = [XVimKeyStroke keyStrokesfromNotation:fromString];
 		NSArray *toKeyStrokes = [XVimKeyStroke keyStrokesfromNotation:toString];
 		
-		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0)
-		{
+		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0){
 			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
 			[keymap map:[XVimKeyStroke keyStrokesToXVimString:fromKeyStrokes] to:[XVimKeyStroke keyStrokesToXVimString:toKeyStrokes] withRemap:remap];
 		}
 	}
+}
+
+- (void)unmapMode:(XVIM_MODE)mode withArgs:(XVimExArg*)args{
+	NSString *argString = args.arg;
+	NSScanner *scanner = [NSScanner scannerWithString:argString];
+	
+	NSMutableArray *subStrings = [[NSMutableArray alloc] init];
+	NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+	for (;;){
+		NSString *string;
+		[scanner scanCharactersFromSet:ws intoString:&string];
+		if (scanner.isAtEnd) {
+            break;
+        }
+		[scanner scanUpToCharactersFromSet:ws intoString:&string];
+		[subStrings addObject:string];
+	}
+  
+	if (subStrings.count >= 1) {
+		NSString *fromString = [subStrings objectAtIndex:0];
+		NSArray *fromKeyStrokes = [XVimKeyStroke keyStrokesfromNotation:fromString];
+		if (fromKeyStrokes.count > 0){
+			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
+			[keymap unmap:[XVimKeyStroke keyStrokesToXVimString:fromKeyStrokes]];
+		}
+	}
+    
+}
+
+- (void)mapClearMode:(XVIM_MODE)mode{
+    XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
+    [keymap clear];
 }
 
 - (void)marks:(XVimExArg*)args inWindow:(XVimWindow*)window{ // This is currently impelemented for debugging purpose
@@ -953,12 +1002,28 @@
 	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
 }
 
+- (void)nunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self unmapMode:MODE_NORMAL withArgs:args];
+}
+
+- (void)nmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self mapClearMode:MODE_NORMAL];
+}
+
 - (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
 }
 
 - (void)onoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:NO];
+}
+
+- (void)ounmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self unmapMode:MODE_OPERATOR_PENDING withArgs:args];
+}
+
+- (void)omapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self mapClearMode:MODE_OPERATOR_PENDING];
 }
 
 - (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1081,6 +1146,14 @@
 
 - (void)vnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
+}
+
+- (void)vunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self unmapMode:MODE_VISUAL withArgs:args];
+}
+
+- (void)vmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self mapClearMode:MODE_VISUAL];
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w

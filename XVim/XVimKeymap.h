@@ -34,7 +34,7 @@
 @interface XVimKeymap : NSObject
 - (void)map:(XVimString*)keyStrokes to:(NSString*)targetKeyStrokes withRemap:(BOOL)remap;
 - (void)unmap:(XVimString*)keyStrokes;
-
+- (void)clear;
 
 /**
  * Update "context" according to the input "keys" by mapping to the keymap.

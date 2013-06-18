@@ -169,6 +169,10 @@
     [self unmapImpl:[NSMutableArray arrayWithArray:[str toKeyStrokes]] atNode:self.root];
 }
 
+- (void)clear{
+    [self.root.dict removeAllObjects];
+}
+
 /**
  *  This method map key input to the current key map.
  *  If it maps to "remappable" keymap it calls recursively to fix the map.
