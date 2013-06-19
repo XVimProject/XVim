@@ -132,6 +132,7 @@ static struct key_map key_maps[] = {
     {@"RS",  30, @"RS"},
     {@"US",  31, @"US"},
     {@"SPACE", 32, @"SPACE"},
+    {@" ", 32, @"SPACE"},
     {@"!", 33, @"EXCLAMATION"},
     {@"\"", 34, @"DQUOTE"},
     {@"#", 35, @"NUMBER"},
@@ -523,7 +524,6 @@ static BOOL isModifier(unichar c){
 }
 
 - (NSUInteger)hash{
-    // FIXME: This is not valid
 	return self.modifier + self.character;
 }
 
