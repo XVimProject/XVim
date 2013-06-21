@@ -12,9 +12,8 @@
 
 
 //// Internal Class XVimKeymapNode ////
-/**
- *  This class represents a node in key map trie.
- **/
+// This class represents a node in key map trie.
+
 @interface XVimKeymapNode : NSObject
 @property (nonatomic, retain) NSMutableDictionary *dict;
 @property                     BOOL remap;
@@ -101,7 +100,6 @@
 - (void)mapsInNode:(XVimKeymapNode*)node :(NSString*)mappingKey :(NSMutableDictionary*)dictionary{
     if( node.target != nil ){
         [dictionary setObject:node.target forKey:mappingKey];
-        DEBUG_LOG(@"MAP: %@  %@", mappingKey, node.target);
     }
     for(XVimKeyStroke* key in node.dict){
         XVimKeymapNode* next = [node.dict objectForKey:key];
@@ -119,7 +117,7 @@
 - (void)map:(XVimString*)keyStrokes to:(XVimString*)targetKeyStrokes withRemap:(BOOL)remap{
     // Create key map trie
     XVimKeymapNode* current = self.root;
-    NSArray* strokes = [keyStrokes toKeyStrokes];
+    NSArray* strokes = XVimKeyStrokesFromXVimString(keyStrokes);
     for( XVimKeyStroke* stroke in strokes ){
 		XVimKeymapNode *nextNode = [current.dict objectForKey:stroke];
 		if (!nextNode){
@@ -166,7 +164,7 @@
     if( str.length == 0 ){
         return;
     }
-    [self unmapImpl:[NSMutableArray arrayWithArray:[str toKeyStrokes]] atNode:self.root];
+    [self unmapImpl:[NSMutableArray arrayWithArray:XVimKeyStrokesFromXVimString(str)] atNode:self.root];
 }
 
 - (void)clear{
@@ -178,7 +176,7 @@
  *  If it maps to "remappable" keymap it calls recursively to fix the map.
  **/
 - (XVimString*)mapKeys:(XVimString*)keys withContext:(XVimKeymapContext*)context forceFix:(BOOL)fix{
-    NSArray* strokes = [keys toKeyStrokes];
+    NSArray* strokes = XVimKeyStrokesFromXVimString(keys);
     if( context.node == nil ){
         context.node = self.root;
     }
@@ -200,7 +198,7 @@
         }else{
             // No node to follow
             // Keep rest of input
-            unProcessedString = [XVimKeyStroke keyStrokesToXVimString:[strokes subarrayWithRange:NSMakeRange(i, strokes.count-i)]];
+            unProcessedString = XVimStringFromKeyStrokes([strokes subarrayWithRange:NSMakeRange(i, strokes.count-i)]);
             break;
         }
         node = nextNode;

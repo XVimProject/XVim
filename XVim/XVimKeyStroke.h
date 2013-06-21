@@ -8,47 +8,30 @@
 
 #import <Foundation/Foundation.h>
 
+@class XVimKeyStroke;
 typedef NSString XVimString;
 typedef NSMutableString XVimMutableString;
 
-@interface NSString(XVimKeyStroke)
-// Parses internal key code string and retturn key strokes array
-- (NSArray*)toKeyStrokes;
+// Helper Functions
+XVimString* XVimStringFromKeyNotation(NSString* notation);
+XVimString* XVimStringFromKeyStrokes(NSArray* strokes);
+NSArray* XVimKeyStrokesFromXVimString(XVimString* string);
+NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation);
+
+@interface NSEvent(XVimKeyStroke)
+- (XVimKeyStroke*)toXVimKeyStroke;
+- (XVimString*)toXVimString;
 @end
 
 @interface XVimKeyStroke : NSObject<NSCopying>
-
 @property unichar character;
-@property unichar modifier;
+@property unsigned char modifier;
 @property (nonatomic, readonly) BOOL isNumeric;
 
 - (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod;
+
 - (XVimString*)xvimString;
 
-
-// Call on startup to initialise static data
-// + (void)initKeymaps;
-
-/**
- * Returns all possible mapping options from an event
- * Eg. S-n would return S-n, S-N and N.
- * The primary key stroke is returned (in the above case, N is returned)
- * This is to be used in case a mapping is not found.
-**/
-+ (XVimKeyStroke*)keyStrokeOptionsFromEvent:(NSEvent*)event into:(NSMutableArray*)options;
-
-// Parses a string into a key stroke
-// + (XVimKeyStroke*)fromNotation:(NSString *)notation;
-
-+ (XVimString*)xvimStringFromKeyNotation:(NSString*)notation;
-    
-// Parses a string into an array of key strokes
-+ (NSArray*)keyStrokesfromNotation:(NSString *)notation;
-
-+ (XVimString*)keyStrokesToXVimString:(NSArray*)strokes;
-
-+ (NSString*) eventToXVimString:(NSEvent*)event;
-    
 // Generates an event from this key stroke
 - (NSEvent*)toEventwithWindowNumber:(NSInteger)num context:(NSGraphicsContext*)context;
 
@@ -56,7 +39,7 @@ typedef NSMutableString XVimMutableString;
 - (NSString*)toSelectorString;
 
 // Creates a human-readable string
-//- (NSString*)toString;
+// - (NSString*)notation;
 
 // Returns the selector for this object
 - (SEL)selector;

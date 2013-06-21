@@ -932,12 +932,10 @@
         [subStrings removeObjectAtIndex:0];
         // Todo: ":map a b  " must be mapped to "a" -> "b<space><space>"
 		NSString *toString = [subStrings componentsJoinedByString:@" "]; // get all args seperate by space
-		NSArray *fromKeyStrokes = [XVimKeyStroke keyStrokesfromNotation:fromString];
-		NSArray *toKeyStrokes = [XVimKeyStroke keyStrokesfromNotation:toString];
 		
-		if (fromKeyStrokes.count > 0 && toKeyStrokes.count > 0){
+		if (fromString.length > 0 && toString.length > 0){
 			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
-			[keymap map:[XVimKeyStroke keyStrokesToXVimString:fromKeyStrokes] to:[XVimKeyStroke keyStrokesToXVimString:toKeyStrokes] withRemap:remap];
+			[keymap map:XVimStringFromKeyNotation(fromString) to:XVimStringFromKeyNotation(toString) withRemap:remap];
 		}
 	}
 }
@@ -960,10 +958,9 @@
   
 	if (subStrings.count >= 1) {
 		NSString *fromString = [subStrings objectAtIndex:0];
-		NSArray *fromKeyStrokes = [XVimKeyStroke keyStrokesfromNotation:fromString];
-		if (fromKeyStrokes.count > 0){
+		if (fromString.length > 0 ){
 			XVimKeymap *keymap = [[XVim instance] keymapForMode:mode];
-			[keymap unmap:[XVimKeyStroke keyStrokesToXVimString:fromKeyStrokes]];
+			[keymap unmap:XVimStringFromKeyNotation(fromString)];
 		}
 	}
     

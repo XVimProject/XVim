@@ -96,7 +96,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     //NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke withContext:_keymapContext];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (mapped) {
-        for (XVimKeyStroke *keyStroke in [mapped toKeyStrokes]) {
+        for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped) ) {
             [self handleKeyStroke:keyStroke];
         }
         [_keymapContext clear];
@@ -126,21 +126,20 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (BOOL)handleXVimString:(XVimString*)strokes{
     BOOL last = NO;
-    for( XVimKeyStroke* stroke in [strokes toKeyStrokes] ){
+    for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(strokes) ){
         last = [self handleOneXVimString:[stroke xvimString]];
     }
     return last;
 }
 
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-    XVimString* stroke = [XVimKeyStroke eventToXVimString:event];
-    return [self handleXVimString:stroke];
+    return [self handleXVimString: [event toXVimString]];
 }
 
 - (void)handleTimeout {
     XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
     XVimString* mapped = [keymap mapKeys:@"" withContext:_keymapContext forceFix:YES];
-    for (XVimKeyStroke *keyStroke in [mapped toKeyStrokes]) {
+    for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped)) {
         [self handleKeyStroke:keyStroke];
     }
     [_keymapContext clear];

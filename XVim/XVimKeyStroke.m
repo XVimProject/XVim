@@ -8,20 +8,30 @@
 #import "NSEvent+VimHelper.h"
 #import "Logger.h"
 
+
+
 /*
- // Vim key handling (maybe correct) //
- // keymap.h file in Vim source helps understand this better //
+ XVimString and Key Notation
+ 
+ (keymap.h file in Vim source helps understand this better)
+ 
+ XVim uses internal string encoding as Vim does.
+ This encoding is not same as any usual character code because 
+ the encoding include special flags with characters like modifiers.
+ 
  In Vim they treat all the input as a character.
  This is how recordings or keymapping does work.
  Vim uses internal code(character) to express an input(usually a key stroke).
  For example if it is key stroke 'a' internal expression is just ascii 'a'.
- If the key is special like backspace internal expression is 0x80, 'k', 'b' (3byte).
+ If the key is special like 'backspace' internal expression is 0x80, 'k', 'b' (3byte).
  Vim uses 0x80 as a escape character and followng bytes defines the key.
  Special keys like F1-F10 or S-F1 are all mapped to a 0x80 prefixed value.
  
  Vim always does following convertings.
  [Phisical Key Input] -> [Vim intarnal code]
  [Key Notation in key map] -> [Vim internal code]
+
+ Key Notatation here is like <F1> or <BS>.
  
  And Vim interprets the [Vim intarnal code] as input and takes action.
  Printable codes are all stayed same.
@@ -52,34 +62,44 @@
  So the value 'Alt+a' will be 0x08 0xF8 0x61 0x00 in byte sequence(each unichar endian is little endian)
  This makes easy to handle key sequence as NSString.
  
- I call this internal expression "XVimString"
- */
-
-
-/* 
-Following bit mask for modifiers is from NSEvent.h
-We do not use this mask because modifier mask must be fits in 1 byte length.
+ Terminology:
+   XVimString - The internal key code explained above.
+   Notation - Key input represented by readable string like <C-n> or <BS>...
  
-enum {
-    NSAlphaShiftKeyMask         = 1 << 16,
-    NSShiftKeyMask              = 1 << 17,
-    NSControlKeyMask            = 1 << 18,
-    NSAlternateKeyMask          = 1 << 19,
-    NSCommandKeyMask            = 1 << 20,
-    NSNumericPadKeyMask         = 1 << 21,
-    NSHelpKeyMask               = 1 << 22,
-    NSFunctionKeyMask           = 1 << 23,
-    NSDeviceIndependentModifierFlagsMask    = 0xffff0000UL
-};
- */
+ XVimKeyStroke class:
+   This class represents a key input.
+   You always can convert XVimString <-> XVimKeyStroke(s).
+   Because XVimString is just a sequence of bytes(unichar) it is not usuful to handle in programming.
+   So when you handle XVimString you can convert it into XVimKeyStroke(s) and use its property to access
+   actuall character or modifier flag values.
+   XVimString can represents "Sequence" of key input but XVimKeyStroke represents only one key stroke.
+   So if XVimString has several key input it will be converted into array of XVimKeyStorke.
+ 
+   In other words you can serialize/deserialize XVimKeyStroke(s) with XVimString
+ 
+ Modifier Flags:
+   Following bit mask for modifiers is from NSEvent.h
+   We do not use this mask because modifier mask must be fits in 1 byte length.
+    enum {
+       NSAlphaShiftKeyMask         = 1 << 16,
+       NSShiftKeyMask              = 1 << 17,
+       NSControlKeyMask            = 1 << 18,
+       NSAlternateKeyMask          = 1 << 19,
+       NSCommandKeyMask            = 1 << 20,
+       NSNumericPadKeyMask         = 1 << 21,
+       NSHelpKeyMask               = 1 << 22,
+       NSFunctionKeyMask           = 1 << 23,
+       NSDeviceIndependentModifierFlagsMask    = 0xffff0000UL
+    };
+*/
 
 #define KS_MODIFIER         0xF8  // This value is not the same as Vim's one
-// These values are differed from Vim's definition in keymap.h
+// Following values are differed from Vim's definition in keymap.h
 #define XVIM_MOD_SHIFT      0x02  //  1 << 1
 #define XVIM_MOD_CTRL       0x04  //  1 << 2
 #define XVIM_MOD_ALT        0x08  //  1 << 3
 #define XVIM_MOD_CMD        0x10  //  1 << 4
-#define XVIM_MOD_FUNC       0x80  //  1 << 7
+#define XVIM_MOD_FUNC       0x80  //  1 << 7  // XVim Original
 
 #define XVIM_MODIFIER_MASK  0x9E  // Mask for used bits. (Change if you add some MOD_MASK_XXX)
 #define XVIM_MODIFIER_MIN   0xF802
@@ -257,6 +277,57 @@ static struct key_map key_maps[] = {
 static NSMutableDictionary *s_unicharToSelector = nil;
 static NSMutableDictionary *s_keyToUnichar = nil;
 
+static void initUnicharToSelector(){
+    if( nil == s_unicharToSelector ){
+        s_unicharToSelector = [[NSMutableDictionary alloc] init]; // Never release
+        for( unsigned int i = 0; i < sizeof(key_maps)/sizeof(struct key_map); i++ ){
+            [s_unicharToSelector setObject:key_maps[i].selector forKey:[NSNumber numberWithUnsignedInteger:key_maps[i].c]];
+        }
+    }
+}
+
+static void initKeyToUnichar(){
+    if( nil == s_keyToUnichar){
+        s_keyToUnichar = [[NSMutableDictionary alloc] init]; // Never release
+        for( unsigned int i = 0; i < sizeof(key_maps)/sizeof(struct key_map); i++ ){
+            [s_keyToUnichar setObject:[NSNumber numberWithUnsignedInteger:key_maps[i].c] forKey:key_maps[i].key];
+        }
+    }
+}
+
+static BOOL isValidKey(NSString* key){
+    if( nil == s_keyToUnichar ){
+        initKeyToUnichar();
+    }
+    // Notations like <CR>, <SPACE> are all case insensitive
+    if( [key length] > 1 ){
+        key = [key uppercaseString];
+    }
+    return nil != [s_keyToUnichar objectForKey:key];
+}
+
+static NSString* selectorFromUnichar(unichar c){
+    if( nil == s_unicharToSelector ){
+        initUnicharToSelector();
+    }
+    return [s_unicharToSelector objectForKey:[NSNumber numberWithUnsignedInteger:c]];
+}
+
+static unichar unicharFromKey(NSString* key){
+    if( nil == s_keyToUnichar ){
+        initKeyToUnichar();
+    }
+    
+    if( !isValidKey(key) ){
+        return (unichar)-1;
+    }else{
+        if( [key length] > 1){
+            key = [key uppercaseString];
+        }
+        return [[s_keyToUnichar objectForKey:key] unsignedIntegerValue];
+    }
+}
+
 static BOOL isPrintable(unichar c){
     // FIXME:
     // There may be better difinition of printable characters in unicode
@@ -270,153 +341,21 @@ static BOOL isModifier(unichar c){
     return ( XVIM_MODIFIER_MIN <= c && c <= XVIM_MODIFIER_MAX );
 }
 
-@implementation NSString(XVimKeyStroke)
-- (NSArray*)toKeyStrokes{
-    NSMutableArray* array = [[[NSMutableArray alloc] init] autorelease];
-    for( NSUInteger i = 0; i < self.length; i++ ){
-        unichar c1 = [self characterAtIndex:i];
-        unichar c2;
-        if( isModifier( c1 ) ){
-            i++;
-            c2 = [self characterAtIndex:i];
-        }else{
-            c2 = c1;
-            c1 = 0;
-        }
-        
-        XVimKeyStroke* stroke = [[[XVimKeyStroke alloc] initWithCharacter:c2 modifier:c1] autorelease];
-        [array addObject:stroke];
-    }
-    return array;
-}
-@end
-
-
-@implementation XVimKeyStroke
-
-+ (void)initUnicharToSelector{
-    if( nil == s_unicharToSelector ){
-        s_unicharToSelector = [[NSMutableDictionary alloc] init]; // Never release
-        for( unsigned int i = 0; i < sizeof(key_maps)/sizeof(struct key_map); i++ ){
-            [s_unicharToSelector setObject:key_maps[i].selector forKey:[NSNumber numberWithUnsignedInteger:key_maps[i].c]];
-        }
-    }
-}
-
-+ (void)initKeyToUnichar{
-    if( nil == s_keyToUnichar){
-        s_keyToUnichar = [[NSMutableDictionary alloc] init]; // Never release
-        for( unsigned int i = 0; i < sizeof(key_maps)/sizeof(struct key_map); i++ ){
-            [s_keyToUnichar setObject:[NSNumber numberWithUnsignedInteger:key_maps[i].c] forKey:key_maps[i].key];
-        }
-    }
-}
-
-+ (NSString*)selectorFromUnichar:(unichar)c{
-    if( nil == s_unicharToSelector ){
-        [self initUnicharToSelector];
-    }
-    return [s_unicharToSelector objectForKey:[NSNumber numberWithUnsignedInteger:c]];
-}
-
-+ (unichar)unicharFromKey:(NSString*)key{
-    if( nil == s_keyToUnichar ){
-        [self initKeyToUnichar];
-    }
-    
-    if( ![self isValidKey:key] ){
-        return (unichar)-1;
-    }else{
-        if( [key length] > 1){
-            key = [key uppercaseString];
-        }
-        return [[s_keyToUnichar objectForKey:key] unsignedIntegerValue];
-    }
-}
-
-- (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod{
-    if( self = [super init] ){
-        self.character = c;
-        self.modifier = mod;
-    }
-    return self;
-}
-
-+ (NSString*) eventToXVimString:(NSEvent*)event{
-    NSAssert( event.type == NSKeyDown , @"Event type must be NSKeyDown");
-    NSAssert( event.charactersIgnoringModifiers.length != 0, @"Event does not contain any character");
-    
-    unichar c = [[event charactersIgnoringModifiers] characterAtIndex:0];
-    unsigned char mod = NSMOD2XVIMMOD(event.modifierFlags);
-    return [[[[XVimKeyStroke alloc] initWithCharacter:c modifier:mod] autorelease] xvimString];
-    
-}
-
-+ (BOOL)isValidKey:(NSString*)key{
-    if( nil == s_keyToUnichar ){
-        [self initKeyToUnichar];
-    }
-    // Notations like <CR>, <SPACE> are all case insensitive
-    if( [key length] > 1 ){
-        key = [key uppercaseString];
-    }
-    return nil != [s_keyToUnichar objectForKey:key];
-}
-
-+ (XVimKeyStroke*)keyStrokeOptionsFromEvent:(NSEvent*)event into:(NSMutableArray*)options{
-	XVimKeyStroke *primaryKeyStroke = nil;
-	NSUInteger modifierFlags = NSMOD2XVIMMOD(event.modifierFlags);
-	
-    unichar unmodifiedKeyCode = [event unmodifiedKeyCode];
-    unichar modifiedKeyCode = [event modifiedKeyCode];
-
-    
-	if (modifierFlags & (XVIM_MOD_CTRL| XVIM_MOD_CMD)){
-		// Eg. "C-a"
-		XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithCharacter:unmodifiedKeyCode modifier:modifierFlags];
-		[options addObject:keyStroke];
-		primaryKeyStroke = keyStroke;
-	}
-	else if (modifierFlags & (XVIM_MOD_SHIFT| XVIM_MOD_ALT)) {
-        // When 'a'  unmodified and modified key code in NSEvent is 97(='a') and no modifier flag is on.
-        // When Shift-a which results in a letter 'A'  unmodified and modified key code are both 65(='A') and Shift modifier flag is on.
-		// Eg. "S-a"
-		{
-			XVimKeyStroke *keyStroke = [[[XVimKeyStroke alloc] initWithCharacter:unmodifiedKeyCode modifier:modifierFlags] autorelease];
-			[options addObject:keyStroke];
-		}
-		
-		// Eg. "S-A"
-		{
-			XVimKeyStroke *keyStroke = [[[XVimKeyStroke alloc] initWithCharacter:unmodifiedKeyCode modifier:modifierFlags] autorelease];
-			[options addObject:keyStroke];
-		}
-		
-		// Eg. "A"
-		{
-			XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithCharacter:modifiedKeyCode modifier:0];
-			[options addObject:keyStroke];
-			primaryKeyStroke = keyStroke;
-		}
-	}
-	else {
-		XVimKeyStroke *keyStroke = [[XVimKeyStroke alloc] initWithCharacter:modifiedKeyCode modifier:0];
-		[options addObject:keyStroke];
-		primaryKeyStroke = keyStroke;
-	}
-	
-	return [primaryKeyStroke autorelease];
-}
-
-+ (XVimString*)keyStrokesToXVimString:(NSArray*)strokes{
+static XVimString* MakeXVimString( unichar character, unsigned short modifier){
     NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
-    for( XVimKeyStroke* stroke in strokes ){
-        [str appendString:[stroke xvimString]];
+    // If the character is pritable we do not consider Shift modifier
+    // For example <S-!> and ! is same
+    if( isPrintable(character) ){
+        modifier = modifier & ~XVIM_MOD_SHIFT;
     }
+    if( modifier != 0 ){
+        [str appendFormat:@"%C", XVIM_MAKE_MODIFIER(modifier)];
+    }
+    [str appendFormat:@"%C", character];
     return str;
 }
 
-+ (XVimKeyStroke *)fromNotation:(NSString *)string from:(NSUInteger*)index{
+static XVimString* XVimStringFromKeyNotationImpl(NSString* string, NSUInteger* index){
 	NSUInteger starti = *index;
 	
 	NSUInteger modifierFlags = 0;
@@ -453,19 +392,19 @@ static BOOL isModifier(unichar c){
             }
         
             NSString* key = [string substringWithRange:NSMakeRange(p, keyEnd.location-p)];
-            if( [self isValidKey:key] ){
+            if( isValidKey(key) ){
                 if( 0 == modifierFlags ){
                     //If it does not have modifier flag the key must be multiple letters
                     if( [key length] > 1 ){
                         *index = keyEnd.location+1;
-                        unichar c = [self unicharFromKey:key];
-                        return [[[XVimKeyStroke alloc] initWithCharacter:c modifier:modifierFlags] autorelease];
+                        unichar c = unicharFromKey(key);
+                        return MakeXVimString( c, modifierFlags);
                     }
                 }else{
                     //This is modifier flag + valid key
                     *index = keyEnd.location+1;
-                    unichar c = [self unicharFromKey:key];
-                    return [[[XVimKeyStroke alloc] initWithCharacter:c modifier:modifierFlags] autorelease];
+                    unichar c = unicharFromKey(key);
+                    return MakeXVimString( c, modifierFlags);
                 }
             }
         }
@@ -475,47 +414,87 @@ static BOOL isModifier(unichar c){
     
     // Simple one letter key
     NSString* key = [string substringWithRange:NSMakeRange(starti, 1)];
-    unichar c = [self unicharFromKey:key];
+    unichar c = unicharFromKey(key);
     *index = starti+1;
-    return [[[XVimKeyStroke alloc] initWithCharacter:c modifier:modifierFlags] autorelease];
+    return MakeXVimString(c, modifierFlags);
 }
 
-+ (XVimKeyStroke*)fromXVimString:(NSString *)string {
-	NSUInteger index = 0;
-	XVimKeyStroke *keyStroke = [self fromNotation:string from:&index];
-	return keyStroke;
-}
-
-+ (XVimString*)xvimStringFromKeyNotation:(NSString*)notation{
-    NSArray* array = [XVimKeyStroke keyStrokesfromNotation:notation];
-    return [XVimKeyStroke keyStrokesToXVimString:array];
-}
-
-+ (NSArray*)keyStrokesfromNotation:(NSString *)notation{
+XVimString* XVimStringFromKeyNotation(NSString* notation){
 	NSUInteger index = 0;
 	NSUInteger len = notation.length;
-    NSMutableArray* array = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
 	while (index < len){
-		XVimKeyStroke* keyStroke = [self fromNotation:notation from:&index];
-		if (keyStroke == NULL) { break; }
-		[array addObject:keyStroke];
+        XVimString* oneKey = XVimStringFromKeyNotationImpl(notation, &index);
+		if( oneKey == nil ){
+            break;
+        }
+        [str appendString:oneKey];
 	}
+    return str;
+}
+
+XVimString* XVimStringFromKeyStrokes(NSArray* strokes){
+    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
+    for( XVimKeyStroke* stroke in strokes ){
+        [str appendString:[stroke xvimString]];
+    }
+    return str;
+}
+
+NSArray* XVimKeyStrokesFromXVimString(XVimString* string){
+    NSMutableArray* array = [[[NSMutableArray alloc] init] autorelease];
+    for( NSUInteger i = 0; i < string.length; i++ ){
+        unichar c1 = [string characterAtIndex:i];
+        unichar c2;
+        if( isModifier( c1 ) ){
+            i++;
+            c2 = [string characterAtIndex:i];
+        }else{
+            c2 = c1;
+            c1 = 0;
+        }
+        
+        XVimKeyStroke* stroke = [[[XVimKeyStroke alloc] initWithCharacter:c2 modifier:c1] autorelease];
+        [array addObject:stroke];
+    }
     return array;
 }
 
+NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation){
+    return XVimKeyStrokesFromXVimString(XVimStringFromKeyNotation(notation));
+}
+
+
+@implementation NSEvent(XVimKeyStroke)
+
+- (XVimKeyStroke*)toXVimKeyStroke{
+    unichar c = [[self charactersIgnoringModifiers] characterAtIndex:0];
+    unsigned char mod = NSMOD2XVIMMOD(self.modifierFlags);
+    return [[[XVimKeyStroke alloc] initWithCharacter:c modifier:mod] autorelease];
+}
+
+- (XVimString*)toXVimString{
+    NSAssert( self.type == NSKeyDown , @"Event type must be NSKeyDown");
+    NSAssert( self.charactersIgnoringModifiers.length != 0, @"Event does not contain any character");
+    unichar c = [[self charactersIgnoringModifiers] characterAtIndex:0];
+    unsigned char mod = NSMOD2XVIMMOD(self.modifierFlags);
+    return MakeXVimString(c, mod);
+}
+@end
+
+
+@implementation XVimKeyStroke
+
+- (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod{
+    if( self = [super init] ){
+        self.character = c;
+        self.modifier = mod;
+    }
+    return self;
+}
 
 - (XVimString*)xvimString{
-    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
-    // If the character is pritable we do not consider Shift modifier
-    // For example <S-!> and ! is same
-    if( isPrintable(self.character) ){
-        self.modifier = self.modifier & ~XVIM_MOD_SHIFT;
-    }
-    if( self.modifier != 0 ){
-        [str appendFormat:@"%C", XVIM_MAKE_MODIFIER(self.modifier)];
-    }
-    [str appendFormat:@"%C", self.character];
-    return str;
+    return MakeXVimString(self.character, self.modifier);
 }
 
 - (BOOL) isNumeric{
@@ -558,7 +537,6 @@ static BOOL isModifier(unichar c){
                             isARepeat:NO 
                               keyCode:0];
 }
-
 
 - (NSString*)description{
     NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
@@ -605,7 +583,7 @@ static BOOL isModifier(unichar c){
 	
 	return keyStr;
 }
- */
+*/
 
 - (NSString*) toSelectorString {
 	// S- Shift
@@ -630,7 +608,7 @@ static BOOL isModifier(unichar c){
         [keyStr appendString:@"F_"];
     }
 	
-	NSString *keyname = [XVimKeyStroke selectorFromUnichar:self.character];
+	NSString *keyname = selectorFromUnichar(self.character);
 	if (keyname) { 
 		[keyStr appendString:keyname];
 	}
@@ -662,6 +640,5 @@ static BOOL isModifier(unichar c){
 	IMP imp = [class instanceMethodForSelector:self.selector];
 	return imp && imp != [[class superclass] instanceMethodForSelector:self.selector];
 }
-
 
 @end

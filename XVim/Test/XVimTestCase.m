@@ -93,7 +93,7 @@
 - (void)executeInput{
     NSInteger num = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowNumber];
     NSGraphicsContext* context = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] graphicsContext];
-    NSArray* strokes = [XVimKeyStroke keyStrokesfromNotation:self.input];
+    NSArray* strokes = XVimKeyStrokesFromKeyNotation(self.input);
     for( XVimKeyStroke* stroke in strokes ){
         NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
         //event.context = context;
