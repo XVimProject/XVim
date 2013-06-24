@@ -40,6 +40,7 @@
     static NSString* tilde_result = @"Aaa bbb ccc\n";
     static NSString* g_tilde_w_result = @"AaA bbb ccc\n";
     
+    static NSString* C_o_result = @"abcdefbbb ccc\n";
     return [NSArray arrayWithObjects:
            // a, A
            XVimMakeTestCase(text0, 5,  0, @"aXXX<ESC>", a_result, 8, 0), // aXXX<ESC>
@@ -66,6 +67,9 @@
            XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result, 14, 0),
            XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result, 14, 0),
            
+           // Insert and Ctrl-o
+           XVimMakeTestCase(text0,  0, 0, @"iabc<C-o>dwdef<ESC>", C_o_result, 5, 0),
+            
    nil];
     
 }

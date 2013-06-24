@@ -19,6 +19,7 @@
 #import "XVimDeleteEvaluator.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
+#import "XVimNormalEvaluator.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -220,7 +221,7 @@
         self.startRange = [[self sourceView] selectedRange];
     }
     
-    if (nextEvaluator != nil){
+    if (nextEvaluator == self){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
             // check buffer limit
@@ -255,6 +256,16 @@
         }
     }
     return nextEvaluator;
+}
+
+- (XVimEvaluator*)C_o{
+    self.onChildCompleteHandler = @selector(onC_oComplete:);
+    return [[XVimNormalEvaluator alloc] initWithWindow:self.window];
+}
+
+- (XVimEvaluator*)onC_oComplete:(XVimEvaluator*)childEvaluator{
+    self.onChildCompleteHandler = nil;
+    return self;
 }
 
 - (XVimEvaluator*)ESC{
