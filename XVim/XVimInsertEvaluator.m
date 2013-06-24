@@ -260,7 +260,7 @@
 
 - (XVimEvaluator*)C_o{
     self.onChildCompleteHandler = @selector(onC_oComplete:);
-    return [[XVimNormalEvaluator alloc] initWithWindow:self.window];
+    return [[[XVimNormalEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)onC_oComplete:(XVimEvaluator*)childEvaluator{
