@@ -9,6 +9,7 @@ I'm currently working mainly on "refactoring" branch. Thoug the name is "refacto
 Unfortunately it is unstable and architecuture is still changing.
 I will not enhance current "master" branch any more. But I will only marge pull requests to master.
 
+Xcode 5 support : See https://github.com/JugglerShu/XVim/issues/402
 
 INSTALL
 =======
