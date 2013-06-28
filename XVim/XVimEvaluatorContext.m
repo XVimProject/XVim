@@ -97,7 +97,7 @@
 
 - (XVimEvaluatorContext*)appendArgument:(NSString*)argument
 {
-	_argumentString = [_argumentString stringByAppendingString:argument];
+	_argumentString = [[_argumentString copy] stringByAppendingString:argument];
 	return self;
 }
 
