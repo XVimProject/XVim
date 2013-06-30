@@ -477,9 +477,14 @@ static NSMutableDictionary *s_stringToKeyCode = NULL;
 {
 	if (self = [self initWithKeyCode:keyCode modifierFlags:modifierFlags])
 	{
-		self->_event = event;
+		self.event = event;
 	}
 	return self;
+}
+
+- (void)dealloc{
+    self.event = nil;
+    [super dealloc];
 }
 
 - (NSEvent*)toEvent
