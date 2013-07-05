@@ -16,7 +16,6 @@
                              @"bbb\n"   // 4
                              @"ccc";    // 8
     
-    
     static NSString* a_result = @"aAa bbXXXb ccc\n";
     static NSString* A_result = @"aAa bbb cccXXX\n";
    
@@ -41,6 +40,11 @@
     static NSString* g_tilde_w_result = @"AaA bbb ccc\n";
     
     static NSString* C_o_result = @"abcdefbbb ccc\n";
+    static NSString* C_w_result = @"aAa bbb \n";
+    static NSString* C_w_result2 = @"aAa bbb c\n";
+    //static NSString* C_w_resutl3= @"aaabbb\n"
+    //                              @"ccc";
+    
     return [NSArray arrayWithObjects:
            // a, A
            XVimMakeTestCase(text0, 5,  0, @"aXXX<ESC>", a_result, 8, 0), // aXXX<ESC>
@@ -69,7 +73,11 @@
            
            // Insert and Ctrl-o
            XVimMakeTestCase(text0,  0, 0, @"iabc<C-o>dwdef<ESC>", C_o_result, 5, 0),
-            
+           
+           // Insert and Ctrl-w
+           XVimMakeTestCase(text0, 11, 0, @"a<C-w><ESC>", C_w_result, 7, 0),
+           XVimMakeTestCase(text0, 11, 0, @"i<C-w><ESC>", C_w_result2, 7, 0),
+           // XVimMakeTestCase(text1, 4 , 0, @"i<C-w><ESC>", C_w_result3, 2, 0), // C-w should delete LF but not works currently
    nil];
     
 }

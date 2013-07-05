@@ -1485,12 +1485,14 @@
     if( [self isEOF:from] ){
         return NSMakeRange(from, 0); // from is EOF but the length is 0 means EOF will not be included in the returned range.
     }
-    if( [self isEOF:to] ){
+    
+    // EOF should not be included.
+    // If type is exclusive we do not subtract 1 because we do it later below
+    if( [self isEOF:to] && type != CHARACTERWISE_EXCLUSIVE){
         to--; // Note that we already know that "to" is not 0 so not chekcing if its 0.
     }
     
     // At this point "from" and "to" is not EOF
-    
     if( type == CHARACTERWISE_EXCLUSIVE ){
         // to will not be included.
         to--;
