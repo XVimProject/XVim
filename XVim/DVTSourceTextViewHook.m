@@ -45,7 +45,6 @@
     [self hook:@"mouseDown:"];
     [self hook:@"mouseDragged:"];
     [self hook:@"drawRect:"];
-    [self hook:@"performKeyEquivalent:"];
     [self hook:@"shouldDrawInsertionPoint"];
     [self hook:@"drawInsertionPointInRect:color:turnedOn:"];
     [self hook:@"_drawInsertionPointInRect:color:"];
@@ -60,7 +59,6 @@
     [self unhook:@"mouseDown:"];
     [self unhook:@"mouseDragged:"];
     [self unhook:@"drawRect:"];
-    [self unhook:@"performKeyEquivalent:"];
     [self unhook:@"shouldDrawInsertionPoint"];
     [self unhook:@"drawInsertionPointInRect:color:turnedOn:"];
     [self unhook:@"_drawInsertionPointInRect:color:"];
@@ -168,23 +166,6 @@
         [Logger logStackTrace:exception];
     }
     return;
-}
-
-- (BOOL) performKeyEquivalent:(NSEvent *)theEvent{
-    TRACE_LOG(@"Event:%@", theEvent.description);
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    @try{
-        METHOD_TRACE_LOG();
-        unichar charcode = [theEvent unmodifiedKeyCode];
-        TRACE_LOG(@"keyDown : keyCode:%d characters:%@ charsIgnoreMod:%@ ASCII:%d", [theEvent keyCode], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
-        if( [[base window] firstResponder] != base){
-            return NO;
-        }
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    return [base performKeyEquivalent_:theEvent];
 }
 
 - (BOOL)shouldDrawInsertionPoint{
