@@ -71,12 +71,14 @@
 - (void)pushEmptyNumericArgHead
 {
 	_numericArgTail = [self numericArg];
+    [_numericArgHead release];
 	_numericArgHead = nil;
 }
 
 - (void)setNumericArgHead:(NSUInteger)numericArg
 {
-	_numericArgHead = [NSNumber numberWithUnsignedInteger:numericArg];
+    [_numericArgHead release];
+	_numericArgHead = [[NSNumber numberWithUnsignedInteger:numericArg] retain];
 }
 
 - (NSNumber*)numericArgHead
@@ -91,13 +93,16 @@
 
 - (XVimEvaluatorContext*)setArgumentString:(NSString*)argument
 {
+    [_argumentString release];
 	_argumentString = [argument copy];
 	return self;
 }
 
 - (XVimEvaluatorContext*)appendArgument:(NSString*)argument
 {
-	_argumentString = [_argumentString stringByAppendingString:argument];
+    NSString* str = [_argumentString stringByAppendingString:argument];
+    [_argumentString release];
+    _argumentString = [str retain];
 	return self;
 }
 
