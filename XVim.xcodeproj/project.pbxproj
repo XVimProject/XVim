@@ -36,6 +36,7 @@
 		A24782C114D6F56E003B6433 /* XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B814D6F56E003B6433 /* XVim.m */; };
 		A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782BA14D6F56E003B6433 /* XVimCommandField.m */; };
 		A24782C614D6F6DC003B6433 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A24782C414D6F6DC003B6433 /* InfoPlist.strings */; };
+		A250950D1787B3340090F857 /* XVimTester+Register.m in Sources */ = {isa = PBXBuildFile; fileRef = A250950C1787B3340090F857 /* XVimTester+Register.m */; };
 		A2575400172F5F0E003D8A97 /* XVimTester+TextObject.m in Sources */ = {isa = PBXBuildFile; fileRef = A25753FF172F5F0E003D8A97 /* XVimTester+TextObject.m */; };
 		A2575403172F652B003D8A97 /* XVimTester+Motion.m in Sources */ = {isa = PBXBuildFile; fileRef = A2575402172F652B003D8A97 /* XVimTester+Motion.m */; };
 		A2575406172F65E6003D8A97 /* XVimTester+Operator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2575405172F65E6003D8A97 /* XVimTester+Operator.m */; };
@@ -155,6 +156,7 @@
 		A2508B531551D47C0083F9ED /* IDEFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEFoundation.h; path = XcodeClasses/IDEFoundation.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = "<none>"; };
 		A2508B541551D47C0083F9ED /* IDEKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEKit.h; path = XcodeClasses/IDEKit.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = "<none>"; };
 		A2508B551551D47C0083F9ED /* IDESourceEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDESourceEditor.h; path = XcodeClasses/IDESourceEditor.h; sourceTree = SOURCE_ROOT; };
+		A250950C1787B3340090F857 /* XVimTester+Register.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Register.m"; path = "XVim/Test/XVimTester+Register.m"; sourceTree = SOURCE_ROOT; };
 		A25753FF172F5F0E003D8A97 /* XVimTester+TextObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+TextObject.m"; path = "XVim/Test/XVimTester+TextObject.m"; sourceTree = SOURCE_ROOT; };
 		A2575402172F652B003D8A97 /* XVimTester+Motion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Motion.m"; path = "XVim/Test/XVimTester+Motion.m"; sourceTree = SOURCE_ROOT; };
 		A2575405172F65E6003D8A97 /* XVimTester+Operator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Operator.m"; path = "XVim/Test/XVimTester+Operator.m"; sourceTree = SOURCE_ROOT; };
@@ -357,6 +359,7 @@
 				A2575408172F6698003D8A97 /* XVimTester+Mark.m */,
 				A257540B1732A58E003D8A97 /* XVimTester+Visual.m */,
 				A23E43171770E19B0066BF30 /* XVimTester+map.m */,
+				A250950C1787B3340090F857 /* XVimTester+Register.m */,
 			);
 			name = Testing;
 			sourceTree = "<group>";
@@ -749,6 +752,7 @@
 				A2575409172F6698003D8A97 /* XVimTester+Mark.m in Sources */,
 				A257540C1732A58F003D8A97 /* XVimTester+Visual.m in Sources */,
 				A23E43181770E19B0066BF30 /* XVimTester+map.m in Sources */,
+				A250950D1787B3340090F857 /* XVimTester+Register.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

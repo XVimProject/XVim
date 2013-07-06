@@ -419,6 +419,9 @@
         for(NSUInteger i = 0; i < count ; i++ ){
             [_view insertText:text];
         }
+        if( text.length != 0 ){
+            insertionPointAfterPut += text.length*count - 1;
+        }
     }else if( type == TEXT_TYPE_LINES ){
         if( after ){
             [self insertNewlineBelow];
@@ -435,7 +438,8 @@
                 [_view insertText:t];
             } else{
                 [_view insertText:text];
-            } }
+            }
+        }
     }else if( type == TEXT_TYPE_BLOCK ){
         //Forward insertion point +1 if after flag if on
         if (![self isNewLine:_insertionPoint] && ![self isEOF:_insertionPoint] && after) {

@@ -90,8 +90,8 @@
             
             
             // Yank , Put
-            XVimMakeTestCase(text2, 0,  0, @"vllyjv6lp", p_result, 12, 0), // yank and paste with visual
-            XVimMakeTestCase(text2, 0,  0, @"vllyjv6lP", p_result, 12, 0), // yank and paste with visual
+            XVimMakeTestCase(text2, 0,  0, @"vllyjv6lp", p_result, 14, 0), // yank and paste with visual
+            XVimMakeTestCase(text2, 0,  0, @"vllyjv6lP", p_result, 14, 0), // yank and paste with visual
             XVimMakeTestCase(text1, 0,  0, @"llvllYp", Y_result, 12, 0), // yank and paste with visual
             
             // Change

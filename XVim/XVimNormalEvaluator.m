@@ -537,17 +537,17 @@ static NSArray *_invalidRepeatKeys;
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =
         [[NSArray alloc] initWithObjects:
-         [NSValue valueWithPointer:@selector(m:)],
-         [NSValue valueWithPointer:@selector(C_r:)],
-         [NSValue valueWithPointer:@selector(u:)],
-         [NSValue valueWithPointer:@selector(v:)],
-         [NSValue valueWithPointer:@selector(V:)],
-         [NSValue valueWithPointer:@selector(C_v:)],
-         [NSValue valueWithPointer:@selector(AT:)],
-         [NSValue valueWithPointer:@selector(COLON:)],
-         [NSValue valueWithPointer:@selector(DOT:)],
-         [NSValue valueWithPointer:@selector(QUESTION:)],
-         [NSValue valueWithPointer:@selector(SLASH:)],
+         [NSValue valueWithPointer:@selector(m)],
+         [NSValue valueWithPointer:@selector(C_r)],
+         [NSValue valueWithPointer:@selector(u)],
+         [NSValue valueWithPointer:@selector(v)],
+         [NSValue valueWithPointer:@selector(V)],
+         [NSValue valueWithPointer:@selector(C_v)],
+         [NSValue valueWithPointer:@selector(AT)],
+         [NSValue valueWithPointer:@selector(COLON)],
+         [NSValue valueWithPointer:@selector(DOT)],
+         [NSValue valueWithPointer:@selector(QUESTION)],
+         [NSValue valueWithPointer:@selector(SLASH)],
          nil];
     }
     NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
