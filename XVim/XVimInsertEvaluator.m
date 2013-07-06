@@ -342,14 +342,6 @@
 - (XVimEvaluator*)C_w{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     [[self sourceView] delete:m];
-    /*
-    NSUInteger from = [[window sourceView] selectedRange].location;
-    NSUInteger to = [[window sourceView] wordsBackward:from count:[self numericArg] option:MOTION_OPTION_NONE];
-    
-	XVimDeleteAction *action = [[XVimDeleteAction alloc] initWithYankRegister: nil
-														 insertModeAtCompletion:FALSE];
-    [action motionFixedFrom:from To:to Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-     */
     return self;
 }
 
