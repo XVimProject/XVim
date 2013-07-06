@@ -47,6 +47,4 @@ extern NSString * const XVimDocumentPathKey;
 - (XVimHistoryHandler*)searchHistory;
 - (void)ringBell;
 
-- (void)writeToLogfile:(NSString*)str;
-
 @end

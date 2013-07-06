@@ -159,7 +159,7 @@
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	[_history addEntry:command];
-    [[XVim instance] writeToLogfile:[@"ExCommand " stringByAppendingFormat:@"%@\n", command]];
+    DEBUG_LOG(@"ExCommand:%@", command);
 	return _onComplete(command);
 }
 

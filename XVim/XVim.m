@@ -313,26 +313,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	}
 }
 
-- (void)writeToLogfile:(NSString*)str{
-    if( ![[self.options getOption:@"debug"] boolValue] ){
-        return;
-    }
-    
-    if( nil == _logFile){
-        NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
-        NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
-        NSFileManager* fm = [NSFileManager defaultManager];
-        if( [fm fileExistsAtPath:logPath] ){
-            [fm removeItemAtPath:logPath error:nil];
-        }
-        [fm createFileAtPath:logPath contents:nil attributes:nil];
-        _logFile = [[NSFileHandle fileHandleForWritingAtPath:logPath] retain]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
-        [_logFile seekToEndOfFile];
-    }
-    
-    [_logFile writeData:[str dataUsingEncoding:NSUTF8StringEncoding]];
-}
-
 - (XVimKeymap*)keymapForMode:(int)mode {
 	return _keymaps[mode];
 }
