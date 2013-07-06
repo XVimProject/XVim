@@ -53,7 +53,7 @@
      (The range 0xF800-0xF8FF is private area in unicode and NSEvent does not use this range so far)
    - For special keys like F1, arrow keys XVim does not use the same code with Vim.
      Cocoa defines unichar value for them so we use it instead.
-     See http://cocoadev.com/wiki/KeyBindings or AppKit/NSEvent.h file
+     See  or AppKit/NSEvent.h file
  
  So normal keys like 'a' is just 0x0061 but 'Alt+a' will be 0xF808,0x0061 (4bytes) where 0xF808 represents Alt.
  
@@ -103,9 +103,9 @@
 
 #define XVIM_MODIFIER_MASK  0x9E  // Mask for used bits. (Change if you add some MOD_MASK_XXX)
 #define XVIM_MODIFIER_MIN   0xF802
-#define XVIM_MODIFIER_MAX   0xF880
+#define XVIM_MODIFIER_MAX   0xF89E
 
-#define NSMOD2XVIMMOD(x) ((unsigned int)x >> 16)
+#define NSMOD2XVIMMOD(x) (((unsigned int)x >> 16) & XVIM_MODIFIER_MASK)
 #define XVIMMOD2NSMOD(x) ((unsigned int)x << 16)
 #define XVIM_MAKE_MODIFIER(x) ((unsigned short)((KS_MODIFIER<<8) | x ))   // Crate 0xF8XX
 
@@ -251,10 +251,10 @@ static struct key_map key_maps[] = {
     {@"}",125, @"RBRACE"},
     {@"~",126, @"TILDE"},
     {@"DEL",127, @"DEL"},
-    {@"UP",63232, @"UP"},
-    {@"DOWN", 63233, @"DOWN"},
-    {@"LEFT", 63234, @"LEFT"},
-    {@"RIGHT", 63235, @"RIGHT"},
+    {@"UP",63232, @"Up"},
+    {@"DOWN", 63233, @"Down"},
+    {@"LEFT", 63234, @"Left"},
+    {@"RIGHT", 63235, @"Right"},
     {@"F1", 63236, @"F1"},
     {@"F2", 63237, @"F2"},
     {@"F3", 63238, @"F3"},
@@ -267,11 +267,11 @@ static struct key_map key_maps[] = {
     {@"F10", 63245, @"F10"},
     {@"F11", 63246, @"F11"},
     {@"F12", 63247, @"F12"},
-    {@"FORWARD_DELETE", 63272, @"FORWARD_DELETE"},
-    {@"HOME", 63273, @"HOME"},
-    {@"END", 63275, @"END"},
-    {@"PAGEUP", 63276, @"PAGEUP"},
-    {@"PAGEDOWN", 63277, @"PAGEDOWN"}
+    {@"FORWARD_DELETE", 63272, @"ForwardDelete"},
+    {@"HOME", 63273, @"Home"},
+    {@"END", 63275, @"End"},
+    {@"PAGEUP", 63276, @"Pageup"},
+    {@"PAGEDOWN", 63277, @"Pagedown"}
 };
 
 static NSMutableDictionary *s_unicharToSelector = nil;
@@ -328,7 +328,7 @@ static unichar unicharFromKey(NSString* key){
     }
 }
 
-static BOOL isPrintable(unichar c){
+BOOL isPrintable(unichar c){
     // FIXME:
     // There may be better difinition of printable characters in unicode
     if( c < 32 || c == 127 || ( 63232 <= c && c <= 63277 ) ){
@@ -469,16 +469,19 @@ NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation){
 
 - (XVimKeyStroke*)toXVimKeyStroke{
     unichar c = [[self charactersIgnoringModifiers] characterAtIndex:0];
-    unsigned char mod = NSMOD2XVIMMOD(self.modifierFlags);
-    return [[[XVimKeyStroke alloc] initWithCharacter:c modifier:mod] autorelease];
+    // We unset NSFunctionKeyMask bit for function keys (7F00 and above)
+    NSUInteger mod = self.modifierFlags;
+    if( c >= 0x7F00 ){
+        mod &= (NSUInteger)~NSFunctionKeyMask;
+    }
+    mod = NSMOD2XVIMMOD(mod);
+    return [[[XVimKeyStroke alloc] initWithCharacter:c modifier:(unsigned char)mod] autorelease];
 }
 
 - (XVimString*)toXVimString{
     NSAssert( self.type == NSKeyDown , @"Event type must be NSKeyDown");
     NSAssert( self.charactersIgnoringModifiers.length != 0, @"Event does not contain any character");
-    unichar c = [[self charactersIgnoringModifiers] characterAtIndex:0];
-    unsigned char mod = NSMOD2XVIMMOD(self.modifierFlags);
-    return MakeXVimString(c, mod);
+    return [[self toXVimKeyStroke] xvimString];
 }
 @end
 

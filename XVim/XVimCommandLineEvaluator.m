@@ -139,6 +139,10 @@
 	return [self.parent modeString];
 }
 
+- (XVIM_MODE)mode{
+	return MODE_CMDLINE;
+}
+
 - (BOOL)isRelatedTo:(XVimEvaluator*)other{
 	return [super isRelatedTo:other] || other == self.parent;
 }

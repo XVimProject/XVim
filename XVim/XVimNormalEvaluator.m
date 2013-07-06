@@ -61,8 +61,13 @@
     [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 }
 
+
 - (NSString*)modeString {
     return @"";
+}
+
+- (XVIM_MODE)mode{
+    return MODE_NORMAL;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {

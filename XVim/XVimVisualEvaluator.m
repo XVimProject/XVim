@@ -53,6 +53,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return MODE_STRINGS[_mode];
 }
 
+- (XVIM_MODE)mode{
+    return MODE_VISUAL;
+}
+
 - (void)becameHandler{
     [super becameHandler];
     [self.sourceView changeSelectionMode:_mode];

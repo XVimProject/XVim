@@ -18,6 +18,8 @@ XVimString* XVimStringFromKeyStrokes(NSArray* strokes);
 NSArray* XVimKeyStrokesFromXVimString(XVimString* string);
 NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation);
 
+BOOL isPrintable(unichar c);
+    
 @interface NSEvent(XVimKeyStroke)
 - (XVimKeyStroke*)toXVimKeyStroke;
 - (XVimString*)toXVimString;

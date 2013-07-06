@@ -82,6 +82,9 @@
 - (NSString*)modeString{
 	return @"-- INSERT --";
 }
+- (XVIM_MODE)mode{
+    return MODE_INSERT;
+}
 
 - (void)becameHandler{
     [super becameHandler];
@@ -221,7 +224,7 @@
         self.startRange = [[self sourceView] selectedRange];
     }
     
-    if (nextEvaluator == self){
+    if (nextEvaluator == self && nil == keySelector){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
             // check buffer limit
@@ -252,7 +255,14 @@
             }
             nextEvaluator = nil;
         } else if ([self windowShouldReceive:keySelector]) {
-            [[self sourceView] passThroughKeyDown:event];
+            // Here we pass the key input to original text view.
+            // The input coming to this method is already handled by "Input Method"
+            // and the input maight be non ascii like 'あ'
+            if( keyStroke.modifier == 0 && isPrintable(keyStroke.character)){
+                [self.sourceView.view insertText:keyStroke.xvimString];
+            }else{
+                [[[self sourceView] view] interpretKeyEvents:[NSArray arrayWithObject:event]];
+            }
         }
     }
     return nextEvaluator;

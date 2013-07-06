@@ -11,6 +11,7 @@
 #import "XVimTextViewProtocol.h"
 #import "XVimPlaybackHandler.h"
 #import "XVimTextViewProtocol.h"
+#import "XVimKeyStroke.h"
 
 /*
  * This class manages 1 window. (The term "window" here is different from NSWindow)
@@ -26,7 +27,7 @@
 @class IDEWorkspaceWindow;
 @class XVimEvaluatorContext;
 
-@interface XVimWindow : NSObject <NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
+@interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property(strong) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
 @property(strong) IDEEditorArea* editorArea;
@@ -35,6 +36,7 @@
 - (XVimCommandLine*)commandLine;
 
 - (BOOL)handleKeyEvent:(NSEvent*)event;
+- (BOOL)handleXVimString:(XVimString*)strokes;
 - (void)beginMouseEvent:(NSEvent*)event;
 - (void)endMouseEvent:(NSEvent*)event;
 - (NSRange)restrictSelectedRange:(NSRange)range;

@@ -160,6 +160,10 @@ static XVimEvaluator* _invalidEvaluator = nil;
 	return @"";
 }
 
+- (XVIM_MODE)mode{
+    return MODE_NORMAL;
+}
+
 - (BOOL)isRelatedTo:(XVimEvaluator*)other {
 	return other == self;
 }

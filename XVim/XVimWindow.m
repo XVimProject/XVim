@@ -25,6 +25,8 @@
 	BOOL _handlingMouseEvent;
 	NSString *_staticString;
 }
+@property(strong,nonatomic) NSTextInputContext* inputContext;
+@property(strong,nonatomic) XVimMutableString* tmpBuffer;
 - (id)initWithIDEEditorArea:(IDEEditorArea*)editorArea;
 - (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 - (void)_initEvaluatorStack;
@@ -51,6 +53,8 @@ static const char* KEY_WINDOW = "xvimwindow";
 		_keymapContext = [[XVimKeymapContext alloc] init];
         self.editorArea = editorArea;
         _evaluatorStack = [[NSMutableArray alloc] init];
+        self.inputContext = [[NSTextInputContext alloc] initWithClient:self];
+        self.tmpBuffer = [[XVimMutableString alloc] init];
         [self _initEvaluatorStack];
 	}
     return self;
@@ -61,6 +65,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     [_staticString release];
     [_sourceView release];
     self.editorArea = nil;
+    self.inputContext = nil;
+    self.tmpBuffer = nil;
     [_evaluatorStack release];
     [super dealloc];
 }
@@ -132,7 +138,47 @@ static const char* KEY_WINDOW = "xvimwindow";
     return last;
 }
 
+/**
+ * handleKeyEvent:
+ * This is the entry point of handling one key down event.
+ * In Cocoa a key event is handled in following order by default.
+ *  - keyDown: method in NSTextView (raw key event. Default impl calls interpertKeyEvents: method)
+ *  - interpertKey: method in NSTextView
+ *  - handleEvent: method in NSInputTextContext
+ *  - (Some processing by Input Method Service such as Japanese or Chinese input system)
+ *  - Callback methods(insertText: or doCommandBySelector:) in NSTextView are called from NSInpuTextContext
+ *  -
+ * See https://developer.apple.com/library/mac/#documentation/TextFonts/Conceptual/CocoaTextArchitecture/TextEditing/TextEditing.html#//apple_ref/doc/uid/TP40009459-CH3-SW2
+ *
+ *  So the point is that if we intercept keyDwon: method and do not pass it to "interpretKeyEvent" or subsequent methods
+ * we can not input Japanese or Chinese correctly.
+ *
+ *  So what we do here is that 
+ *    - Save original key input if it is INSERT or CMDLINE mode
+ *    - Call handleEvent in NSInputTextContext with the event
+ *      (The NSInputTextContext object is created with this XVimWindow object as its client)
+ *    - If insertText: or doCommandBySelector: is called it just passes saved key event(XVimString) to XVimInsertEvaluator or XVimCommandLineEvaluator.
+ *    - If they are not called it means that the key input is handled by the input method.
+ **/
 - (BOOL)handleKeyEvent:(NSEvent*)event{
+    if( [self _currentEvaluator].mode == MODE_INSERT || [self _currentEvaluator].mode == MODE_CMDLINE ){
+        // We must pass the event to the current input method
+        // If it is obserbed we do not do anything anymore and handle insertText: or doCommandBySelector:
+        
+        // Keep the key input temporary buffer
+        [self.tmpBuffer setString:[event toXVimString]];
+        
+        // The apple document says that we can not call 'activate' method directly
+        // but if we do not call this the input is not handled by the input context we own.
+        // So we call this every time key input comes.
+        [self.inputContext activate];
+        
+        // Pass it to the input context.
+        // This is necesarry for languages like Japanese or Chinese.
+        if( [self.inputContext handleEvent:event] ){
+            return YES;
+        }
+    }
     return [self handleXVimString: [event toXVimString]];
 }
 
@@ -401,5 +447,61 @@ static char s_associate_key = 0;
 	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
 }
 
+
+// NSTextInputClient Protocol
+- (void)insertText:(id)aString replacementRange:(NSRange)replacementRange{
+    [self.tmpBuffer setString:@""];
+    [self handleXVimString:aString];
+    //return [[self.sourceView view] insertText:aString replacementRange:replacementRange];
+}
+
+- (void)doCommandBySelector:(SEL)aSelector{
+    DEBUG_LOG(@"COMMAND:%@", NSStringFromSelector(aSelector));
+    [self handleXVimString:self.tmpBuffer];
+    [self.tmpBuffer setString:@""];
+    /*
+    NSString* selector = NSStringFromSelector(aSelector);
+    if( [selector isEqualToString:@"cancelOperation:"] ){
+        [self handleXVimString:XVimStringFromKeyNotation(@"<ESC>")];
+    }
+     */
+    //return [[self.sourceView view] doCommandBySelector:aSelector];
+}
+
+- (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange{
+    return [[self.sourceView view] setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+}
+
+- (void)unmarkText{
+    return [[self.sourceView view] unmarkText];
+}
+
+- (NSRange)selectedRange{
+    return [[self.sourceView view] selectedRange];
+}
+
+- (NSRange)markedRange{
+    return [[self.sourceView view] markedRange];
+}
+
+- (BOOL)hasMarkedText{
+    return [[self.sourceView view] hasMarkedText];
+}
+
+- (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
+    return [[self.sourceView view] attributedSubstringForProposedRange:aRange actualRange:actualRange];
+}
+
+- (NSArray*)validAttributesForMarkedText{
+    return [[self.sourceView view] validAttributesForMarkedText];
+}
+
+- (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
+    return [[self.sourceView view] firstRectForCharacterRange:aRange actualRange:actualRange];
+}
+
+- (NSUInteger)characterIndexForPoint:(NSPoint)aPoint{
+    return [[self.sourceView view] characterIndexForPoint:aPoint];
+}
 @end
 
