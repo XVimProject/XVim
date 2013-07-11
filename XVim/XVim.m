@@ -47,21 +47,11 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	XVimKeymap* _keymaps[MODE_COUNT];
     NSFileHandle* _logFile;
 }
+@property (strong,nonatomic) XVimRegisterManager* registerManager;
 - (void)parseRcFile;
 @end
 
 @implementation XVim
-@synthesize registers = _registers;
-@synthesize repeatRegister = _repeatRegister;
-@synthesize recordingRegister = _recordingRegister;
-@synthesize lastPlaybackRegister = _lastPlaybackRegister;
-@synthesize numberedRegisters = _numberedRegisters;
-@synthesize searcher = _searcher;
-@synthesize lastCharacterSearchMotion = _lastCharacterSearchMotion;
-@synthesize excmd = _excmd;
-@synthesize options = _options;
-@synthesize marks = _marks;
-@synthesize document = _document;
 
 // For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{
@@ -121,7 +111,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // Add XVim menu
     // I have tried to add the item into "Editor" but did not work.
     // It looks that the initialization of "Editor" menu is done later...
-    // It looks that the initialization of "Editor" menu is done later...
     NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
     NSMenuItem* item = [[[NSMenuItem alloc] init] autorelease];
     NSMenu* m = [[[NSMenu alloc] initWithTitle:@"XVim"] autorelease];
@@ -177,88 +166,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         _lastCharacterSearchMotion = nil;
 		_options = [[XVimOptions alloc] init];
         _marks = [[XVimMarks alloc] init];
-		// From the vim documentation:
-		// There are nine types of registers:
-		// *registers* *E354*
-		_registers =
-        [[NSDictionary alloc] initWithObjectsAndKeys:
-		 // 1. The unnamed register ""
-		 [XVimRegister registerWithDisplayName:@"\""] ,@"DQUOTE", 
-		 // 2. 10 numbered registers "0 to "9 
-		 [XVimRegister registerWithDisplayName:@"0"] ,@"NUM0", 
-		 [XVimRegister registerWithDisplayName:@"1"] ,@"NUM1", 
-		 [XVimRegister registerWithDisplayName:@"2"] ,@"NUM2", 
-		 [XVimRegister registerWithDisplayName:@"3"] ,@"NUM3", 
-		 [XVimRegister registerWithDisplayName:@"4"] ,@"NUM4", 
-		 [XVimRegister registerWithDisplayName:@"5"] ,@"NUM5", 
-		 [XVimRegister registerWithDisplayName:@"6"] ,@"NUM6", 
-		 [XVimRegister registerWithDisplayName:@"7"] ,@"NUM7", 
-		 [XVimRegister registerWithDisplayName:@"8"] ,@"NUM8", 
-		 [XVimRegister registerWithDisplayName:@"9"] ,@"NUM9", 
-		 // 3. The small delete register "-
-		 [XVimRegister registerWithDisplayName:@"-"] ,@"DASH", 
-		 // 4. 26 named registers "a to "z or "A to "Z
-		 [XVimRegister registerWithDisplayName:@"a"] ,@"a", 
-		 [XVimRegister registerWithDisplayName:@"b"] ,@"b", 
-		 [XVimRegister registerWithDisplayName:@"c"] ,@"c", 
-		 [XVimRegister registerWithDisplayName:@"d"] ,@"d", 
-		 [XVimRegister registerWithDisplayName:@"e"] ,@"e", 
-		 [XVimRegister registerWithDisplayName:@"f"] ,@"f", 
-		 [XVimRegister registerWithDisplayName:@"g"] ,@"g", 
-		 [XVimRegister registerWithDisplayName:@"h"] ,@"h", 
-		 [XVimRegister registerWithDisplayName:@"i"] ,@"i", 
-		 [XVimRegister registerWithDisplayName:@"j"] ,@"j", 
-		 [XVimRegister registerWithDisplayName:@"k"] ,@"k", 
-		 [XVimRegister registerWithDisplayName:@"l"] ,@"l", 
-		 [XVimRegister registerWithDisplayName:@"m"] ,@"m", 
-		 [XVimRegister registerWithDisplayName:@"n"] ,@"n", 
-		 [XVimRegister registerWithDisplayName:@"o"] ,@"o", 
-		 [XVimRegister registerWithDisplayName:@"p"] ,@"p", 
-		 [XVimRegister registerWithDisplayName:@"q"] ,@"q", 
-		 [XVimRegister registerWithDisplayName:@"r"] ,@"r", 
-		 [XVimRegister registerWithDisplayName:@"s"] ,@"s", 
-		 [XVimRegister registerWithDisplayName:@"t"] ,@"t", 
-		 [XVimRegister registerWithDisplayName:@"u"] ,@"u", 
-		 [XVimRegister registerWithDisplayName:@"v"] ,@"v", 
-		 [XVimRegister registerWithDisplayName:@"w"] ,@"w", 
-		 [XVimRegister registerWithDisplayName:@"x"] ,@"x", 
-		 [XVimRegister registerWithDisplayName:@"y"] ,@"y", 
-		 [XVimRegister registerWithDisplayName:@"z"] ,@"z", 
-		 // 5. four read-only registers ":, "., "% and "#
-		 [XVimRegister registerWithDisplayName:@":"] ,@"COLON", 
-		 [XVimRegister registerWithDisplayName:@"."] ,@"DOT", 
-		 [XVimRegister registerWithDisplayName:@"%"] ,@"PERCENT", 
-		 [XVimRegister registerWithDisplayName:@"#"] ,@"NUMBER", 
-		 // 6. the expression register "=
-		 [XVimRegister registerWithDisplayName:@"="] ,@"EQUAL", 
-		 // 7. The selection and drop registers "*, "+ and "~  
-		 [XVimRegister registerWithDisplayName:@"*"] ,@"ASTERISK", 
-		 [XVimRegister registerWithDisplayName:@"+"] ,@"PLUS", 
-		 [XVimRegister registerWithDisplayName:@"~"] ,@"TILDE", 
-		 // 8. The black hole register "_
-		 [XVimRegister registerWithDisplayName:@"_"] ,@"UNDERSCORE", 
-		 // 9. Last search pattern register "/
-		 [XVimRegister registerWithDisplayName:@"/"] ,@"SLASH", 
-		 // additional "hidden" register to store text for '.' command
-		 [XVimRegister registerWithDisplayName:@"repeat"] ,@"repeat",
-		 nil];
         
-        _numberedRegisters = [[NSArray alloc] initWithObjects:
-         [_registers valueForKey:@"NUM0"],
-         [_registers valueForKey:@"NUM1"],
-         [_registers valueForKey:@"NUM2"],
-         [_registers valueForKey:@"NUM3"],
-         [_registers valueForKey:@"NUM4"],
-         [_registers valueForKey:@"NUM5"],
-         [_registers valueForKey:@"NUM6"],
-         [_registers valueForKey:@"NUM7"],
-         [_registers valueForKey:@"NUM8"],
-         [_registers valueForKey:@"NUM9"],
-         nil];
-        
-        _recordingRegister = nil;
-        _lastPlaybackRegister = nil;
-        _repeatRegister = [_registers valueForKey:@"repeat"];
+        self.lastPlaybackRegister = nil;
+        self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
+        self.repeatRegister = [[[XVimRegister alloc] init] autorelease];
         _logFile = nil;
         
 		for (int i = 0; i < MODE_COUNT; ++i) {
@@ -270,12 +181,15 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 
 -(void)dealloc{
+    self.registerManager = nil;
+    self.repeatRegister = nil;
+    self.lastPlaybackRegister = nil;
+    
     [_options release];
     [_searcher release];
     [_lastCharacterSearchMotion release];
     [_excmd release];
     [_logFile release];
-    [_numberedRegisters release];
     [_marks release];
 	[super dealloc];
 }
@@ -315,13 +229,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 - (XVimKeymap*)keymapForMode:(int)mode {
 	return _keymaps[mode];
-}
-
-- (XVimRegister*)findRegister:(NSString*)name{
-    if( [name isEqualToString:@"DQUOTE"] && [self.options.clipboard rangeOfString:@"unnamed"].location != NSNotFound ){
-       name = @"ASTERISK";
-    }
-    return [self.registers valueForKey:name];
 }
 
 - (XVimHistoryHandler*)exCommandHistory {

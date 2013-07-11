@@ -88,4 +88,10 @@
     }
 }
 
+// Helper Methods
+
+- (BOOL)clipboardHasUnnamed{
+    return [self.clipboard rangeOfString:@"unnamed"].location != NSNotFound;
+}
+
 @end

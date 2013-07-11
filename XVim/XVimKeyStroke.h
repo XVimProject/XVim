@@ -41,7 +41,7 @@ BOOL isPrintable(unichar c);
 - (NSString*)toSelectorString;
 
 // Creates a human-readable string
-// - (NSString*)notation;
+- (NSString*)keyNotation;
 
 // Returns the selector for this object
 - (SEL)selector;

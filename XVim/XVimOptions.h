@@ -23,4 +23,8 @@
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;
+
+
+// Helper Methods
+- (BOOL)clipboardHasUnnamed;
 @end

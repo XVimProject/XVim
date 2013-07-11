@@ -74,8 +74,8 @@
  * and when XVim detect it XVim sync its insernal state with Xcode's one.
  **/
 - (void)setSelectedRange:(NSRange)charRange{
+    TRACE_LOG(@"%d %d", charRange.location, charRange.length);
     DVTSourceTextView *base = (DVTSourceTextView*)self;
-    DEBUG_LOG(@"%d %d", charRange.location, charRange.length);
     NSNumber* n = [self dataForName:@"isFromXVimSourceView"];
     if( nil == n || [n boolValue] == NO){
         [self setBool:YES forName:@"rangeChanged"];
@@ -85,9 +85,8 @@
 
 - (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
-    DEBUG_LOG(@"%d %d", charRange.location, charRange.length);
+    TRACE_LOG(@"%d %d", charRange.location, charRange.length);
     [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
- 
 }
 
 -  (void)keyDown:(NSEvent *)theEvent{
@@ -216,7 +215,7 @@
     BOOL b = [base becomeFirstResponder_];
     @try{
         if (b) {
-            DEBUG_LOG(@"DVTSourceTextView:%p became first responder", self);
+            TRACE_LOG(@"DVTSourceTextView:%p became first responder", self);
             window.sourceView = [[[XVimSourceView alloc] initWithView:base] autorelease];
             [window.sourceView dumpState];
         }

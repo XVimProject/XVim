@@ -411,15 +411,15 @@
     NSUInteger targetPos = _insertionPoint;
     if( type == TEXT_TYPE_CHARACTERS ){
         //Forward insertion point +1 if after flag if on
-        if (![self isNewLine:_insertionPoint] && after) {
-            targetPos++;
-        }
-        insertionPointAfterPut = targetPos;
-        [self _setSelectedRange:NSMakeRange(targetPos,0)];
-        for(NSUInteger i = 0; i < count ; i++ ){
-            [_view insertText:text];
-        }
-        if( text.length != 0 ){
+        if( 0 != text.length ){
+            if (![self isNewLine:_insertionPoint] && after) {
+                targetPos++;
+            }
+            insertionPointAfterPut = targetPos;
+            [self _setSelectedRange:NSMakeRange(targetPos,0)];
+            for(NSUInteger i = 0; i < count ; i++ ){
+                [_view insertText:text];
+            }
             insertionPointAfterPut += text.length*count - 1;
         }
     }else if( type == TEXT_TYPE_LINES ){

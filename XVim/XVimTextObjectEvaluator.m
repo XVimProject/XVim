@@ -131,11 +131,14 @@
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister {
+    /*
     if (xregister.isRepeat && [keyStroke instanceResponds:self] ) {
 		return REGISTER_APPEND;
 	}
     
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
+     */
+    return REGISTER_APPEND;
 }
 
 @end

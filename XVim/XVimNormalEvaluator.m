@@ -53,11 +53,13 @@
 
 - (void)becameHandler{
     [super becameHandler];
+    /*
     if (_playbackRegister) {
 		[[XVim instance] setLastPlaybackRegister:_playbackRegister];
         [_playbackRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
         _playbackRegister = nil;
     }
+     */
     [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 }
 
@@ -225,19 +227,20 @@
 
 - (XVimEvaluator*)p{
     XVimSourceView* view = [self sourceView];
-    XVimRegister* reg = self.yankRegister;
+    XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)P{
     XVimSourceView* view = [self sourceView];
-    XVimRegister* reg = self.yankRegister;
+    XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)q{
+    /*
     XVim *xvim = [XVim instance];
     if (xvim.recordingRegister != nil){
         [[self window] stopRecordingRegister:xvim.recordingRegister];
@@ -248,9 +251,13 @@
     XVimEvaluator* e = [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
     self.onChildCompleteHandler = @selector(onComplete_q:);
     return e;
+     */
+    return nil;
 }
 
 - (XVimEvaluator*)onComplete_q:(XVimRegisterEvaluator*)childEvaluator{
+    //FIXME: temoprary comment out
+    /*
     NSAssert([childEvaluator isMemberOfClass:[XVimRegisterEvaluator class]], @"childEvaluato must be a XVimRegisterEvaluator");
     XVimRegister *xregister = childEvaluator.reg;
     if (xregister && xregister.isReadOnly == NO) {
@@ -258,6 +265,7 @@
     } else {
         [[XVim instance] ringBell];
     }
+     */
     return nil;
 }
 
@@ -370,6 +378,8 @@
 }
 
 - (XVimEvaluator*)onComplete_AT:(XVimRecordingRegisterEvaluator*)childEvaluator{
+    //FIXME: temporary comment out
+    /*
     NSAssert([childEvaluator isMemberOfClass:[XVimRecordingRegisterEvaluator class]], @"childEvaluator must be a XVimRegisterEvaluator");
     XVimRegister *xregister = childEvaluator.reg;
     XVimEvaluator* ret = nil;
@@ -379,6 +389,8 @@
         ret = [XVimEvaluator invalidEvaluator];
     }
     return ret;
+     */
+    return nil;
 }
 
 - (XVimEvaluator*)DQUOTE{
@@ -388,12 +400,13 @@
 }
 
 - (XVimEvaluator*)onComplete_DQUOTE:(XVimRegisterEvaluator*)childEvaluator{
-    XVimRegister *xregister = childEvaluator.reg;
-    if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] ){
-        self.yankRegister = xregister;
-        [self.argumentString appendString:xregister.displayName];
+    XVimRegisterManager* m = [[XVim instance] registerManager];
+    if( [m isValidRegister:childEvaluator.reg] ){
+        self.yankRegister = childEvaluator.reg;
+        [self.argumentString appendString:childEvaluator.reg];
         self.onChildCompleteHandler = @selector(onChildComplete:);
         return self;
+        
     }else{
         return [XVimEvaluator invalidEvaluator];
     }
@@ -487,8 +500,15 @@
 }
 
 - (XVimEvaluator*)DOT{
-    XVimRegister *repeatRegister = [[XVim instance] findRegister:@"repeat"];
-    [repeatRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
+    /*
+    XVimRegister *repeatRegister = [[XVim instance] repeatRegister];
+    NSMutableArray* newEvaluatorStack = [[[NSMutableArray alloc] init] autorelease];
+    [newEvaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:self.window] autorelease]];
+    [self.window handleKeyEvent:
+    XVimNormalEvaluator* ret = [[[XVimNormalEvaluator alloc] initWithWindow:self.window playbackRegister:repeatRegister] autorelease];
+    //[repeatRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
+    return ret;
+     */
     return nil;
 }
 
@@ -532,8 +552,9 @@
 
 // There are fewer invalid keys than valid ones so make a list of invalid keys.
 // This can always be changed to a set of valid keys in the future if need be.
-static NSArray *_invalidRepeatKeys;
+//static NSArray *_invalidRepeatKeys;
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
+    /*
     if (_invalidRepeatKeys == nil){
         _invalidRepeatKeys =
         [[NSArray alloc] initWithObjects:
@@ -572,6 +593,8 @@ static NSArray *_invalidRepeatKeys;
         }
     }
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
+     */
+    return REGISTER_APPEND;
 }
 
 @end

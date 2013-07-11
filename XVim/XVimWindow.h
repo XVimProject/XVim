@@ -30,11 +30,11 @@
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
 
 @property(strong) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
-@property(strong) IDEEditorArea* editorArea;
 
 - (NSUInteger)insertionPoint; // May be removed. This should be accessed via sourceView::insertionPoint
 - (XVimCommandLine*)commandLine;
 
+- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)stack;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (BOOL)handleXVimString:(XVimString*)strokes;
 - (void)beginMouseEvent:(NSEvent*)event;
@@ -53,7 +53,6 @@
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
 
 // XVimPlaybackHandler
-- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke;
 - (void)handleTextInsertion:(NSString*)text;
 - (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 

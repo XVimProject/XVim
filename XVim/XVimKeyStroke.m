@@ -110,12 +110,15 @@
 #define XVIM_MAKE_MODIFIER(x) ((unsigned short)((KS_MODIFIER<<8) | x ))   // Crate 0xF8XX
 
 struct key_map{
-    NSString* key;
-    unichar c;
-    NSString* selector;
+    NSString* key; // Human readable key expression
+    unichar c;     // Char code
+    NSString* selector; // Selector to be called for evaluators
 };
 
 static struct key_map key_maps[] = {
+    // If multiple key expressions are mapped to one char code
+    // Put default key expression at the end of the same keys.
+    // The last one will be used when converting charcode -> key expression.
     {@"NUL", 0, @"NUL"},
     {@"SOH", 1, @"SOH"},
     {@"STX", 2, @"STX"},
@@ -126,13 +129,13 @@ static struct key_map key_maps[] = {
     {@"BEL", 7, @"BEL"},
     {@"BS",  8, @"BS" },
     {@"HT",  9, @"TAB"},
-    {@"TAB", 9, @"TAB"},
+    {@"TAB", 9, @"TAB"}, // Default notation
     {@"NL",  10, @"NL"},
     {@"VT",  11, @"VT"},
     {@"NP",  12, @"NP"},
-    {@"CR",  13, @"CR"},
     {@"RETURN", 13, @"CR"},
     {@"ENTER", 13, @"CR"},
+    {@"CR",  13, @"CR"}, // Default notation
     {@"SO",  14, @"SO"},
     {@"SI",  15, @"SI"},
     {@"DLE", 16, @"DLE"},
@@ -151,8 +154,8 @@ static struct key_map key_maps[] = {
     {@"GS",  29, @"GS"},
     {@"RS",  30, @"RS"},
     {@"US",  31, @"US"},
-    {@"SPACE", 32, @"SPACE"},
     {@" ", 32, @"SPACE"},
+    {@"SPACE", 32, @"SPACE"},
     {@"!", 33, @"EXCLAMATION"},
     {@"\"", 34, @"DQUOTE"},
     {@"#", 35, @"NUMBER"},
@@ -213,8 +216,8 @@ static struct key_map key_maps[] = {
     {@"Y", 89, @"Y"},
     {@"Z", 90, @"Z"},
     {@"[", 91, @"LSQUAREBRACKET"},
-    {@"\\",92, @"BACKSLASH"},
     {@"BSLASH", 92, @"BACKSLASH"},
+    {@"\\",92, @"BACKSLASH"}, // Default noattion
     {@"]",93, @"RSQUAREBRACKET"},
     {@"^",94, @"CARET"},
     {@"_",95, @"UNDERSCORE"},
@@ -246,8 +249,8 @@ static struct key_map key_maps[] = {
     {@"y",121, @"y"},
     {@"z",122, @"z"},
     {@"{",123, @"LBRACE"},
-    {@"|",124, @"BAR"},
     {@"BAR",124, @"BAR"},
+    {@"|",124, @"BAR"}, // Default notation
     {@"}",125, @"RBRACE"},
     {@"~",126, @"TILDE"},
     {@"DEL",127, @"DEL"},
@@ -276,6 +279,7 @@ static struct key_map key_maps[] = {
 
 static NSMutableDictionary *s_unicharToSelector = nil;
 static NSMutableDictionary *s_keyToUnichar = nil;
+static NSMutableDictionary *s_unicharToKey= nil;
 
 static void initUnicharToSelector(){
     if( nil == s_unicharToSelector ){
@@ -291,6 +295,15 @@ static void initKeyToUnichar(){
         s_keyToUnichar = [[NSMutableDictionary alloc] init]; // Never release
         for( unsigned int i = 0; i < sizeof(key_maps)/sizeof(struct key_map); i++ ){
             [s_keyToUnichar setObject:[NSNumber numberWithUnsignedInteger:key_maps[i].c] forKey:key_maps[i].key];
+        }
+    }
+}
+
+static void initUnicharToKey(){
+    if( nil == s_unicharToKey){
+        s_unicharToKey= [[NSMutableDictionary alloc] init]; // Never release
+        for( unsigned int i = 0; i < sizeof(key_maps)/sizeof(struct key_map); i++ ){
+            [s_unicharToKey setObject:key_maps[i].key forKey:[NSNumber numberWithUnsignedInteger:key_maps[i].c]];
         }
     }
 }
@@ -326,6 +339,13 @@ static unichar unicharFromKey(NSString* key){
         }
         return [[s_keyToUnichar objectForKey:key] unsignedIntegerValue];
     }
+}
+
+static NSString* keyFromUnichar(unichar c){
+    if( nil == s_unicharToKey){
+        initUnicharToKey();
+    }
+    return [s_unicharToKey objectForKey:[NSNumber numberWithUnsignedInteger:c]];
 }
 
 BOOL isPrintable(unichar c){
@@ -553,15 +573,17 @@ NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation){
     }else{
         [str appendFormat:@"0x%02x 0x%02x", ((unsigned char*)(&c))[1], ((unsigned char*)(&c))[0]];
     }
+    [str appendString:[self keyNotation]];
     return str;
 }
 
-/*
-- (NSString*)notation{
+- (NSString*)keyNotation{
 	unichar charcode = self.character;
-	NSUInteger modifierFlags = XVIMMOD2NSMOD(self.modifier);
 	
 	NSMutableString* keyStr = [[[NSMutableString alloc] init] autorelease];
+	if( self.modifier & XVIM_MOD_SHIFT){
+		[keyStr appendString:@"S-"];
+	}
 	if( self.modifier & XVIM_MOD_CTRL){
 		[keyStr appendString:@"C-"];
 	}
@@ -575,18 +597,19 @@ NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation){
 		[keyStr appendString:@"F-"];
 	}
 	
-	if (isPrintable(charcode)) {
-        
-		if (keyname) { 
-			[keyStr appendString:keyname];
-		}
-	}else{
-        
+    if( keyStr.length == 0 ){
+        if (isPrintable(charcode)) {
+            // Something like 'a' 'b'...
+            return [NSString stringWithFormat:@"%@%@", keyStr, keyFromUnichar(charcode)];
+        }else{
+            // Something like <CR>, <SPACE>...
+            return [NSString stringWithFormat:@"<%@%@>", keyStr, keyFromUnichar(charcode)];
+        }
+    }else{
+        // Something like <C-o>, <C-SPACE>...
+        return [NSString stringWithFormat:@"<%@%@>", keyStr, keyFromUnichar(charcode)];
     }
-	
-	return keyStr;
 }
-*/
 
 - (NSString*) toSelectorString {
 	// S- Shift

@@ -51,7 +51,7 @@ XVimMotionEvaluator
 @property NSUInteger numericArg;
 @property BOOL numericMode;
 @property(strong) NSMutableString* argumentString;
-@property(strong) XVimRegister* yankRegister;
+@property(strong) NSString* yankRegister;
 @property SEL onChildCompleteHandler;
 
 - (id)initWithWindow:(XVimWindow*)window;
@@ -115,7 +115,7 @@ XVimMotionEvaluator
 - (void)didEndHandler;
 - (XVimEvaluator*)defaultNextEvaluator;
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event;
-- (NSRange)restrictSelectedRange:(NSRange)range;
+//- (NSRange)restrictSelectedRange:(NSRange)range;
 - (void)drawRect:(NSRect)rect;
 - (BOOL)shouldDrawInsertionPoint;
 - (float)insertionPointHeightRatio;
@@ -139,9 +139,6 @@ XVimMotionEvaluator
 
 // Normally argumentString, but can be overridden
 - (NSString*)argumentDisplayString;
-
-// Returns the context yank register if any
-- (XVimRegister*)yankRegister;
 
 // Reset all the numeric arg to 1 (includeing its parents recursively)
 - (void)resetNumericArg;

@@ -33,15 +33,12 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong) XVimMotion* lastCharacterSearchMotion;
 @property (strong) XVimExCommand* excmd;
 @property (readonly) XVimMarks* marks;
-@property (strong, readonly) NSDictionary* registers;
+@property (readonly) XVimRegisterManager* registerManager;
 @property (weak) XVimRegister *repeatRegister;
-@property (weak) XVimRegister *recordingRegister;
-@property (weak) XVimRegister *lastPlaybackRegister;
-@property (strong) NSArray *numberedRegisters;
+@property (weak) NSString* lastPlaybackRegister;
 @property (strong) NSString* document;
 
 - (XVimKeymap*)keymapForMode:(int)mode;
-- (XVimRegister*)findRegister:(NSString*)name;
 - (void)parseRcFile;
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;

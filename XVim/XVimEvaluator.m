@@ -20,18 +20,7 @@
 
 static XVimEvaluator* _invalidEvaluator = nil;
 
-@interface XVimEvaluator() {
-}
-@end
-
 @implementation XVimEvaluator
-@synthesize window = _window;
-@synthesize parent = _parent;
-@synthesize numericArg = _numericArg;
-@synthesize numericMode = _numericMode;
-@synthesize argumentString = _argumentString;
-@synthesize onChildCompleteHandler = _onChildCompleteHandler;
-
 
 + (XVimEvaluator*)invalidEvaluator{
    	if(_invalidEvaluator){
@@ -116,9 +105,6 @@ static XVimEvaluator* _invalidEvaluator = nil;
 }
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-    if (xregister.isReadOnly){
-        return REGISTER_IGNORE;
-    }
     return REGISTER_APPEND;
 }
 
@@ -130,12 +116,14 @@ static XVimEvaluator* _invalidEvaluator = nil;
     }
 }
 
+/*
 - (NSRange)restrictSelectedRange:(NSRange)range{
 	if (range.length == 0 && ![[self sourceView] isValidCursorPosition:range.location]) {
 		--range.location;
 	}
 	return range;
 }
+ */
 
 - (void)drawRect:(NSRect)rect{
 }
@@ -188,16 +176,12 @@ static XVimEvaluator* _invalidEvaluator = nil;
 }
 
 // Returns the context yank register if any
-- (XVimRegister*)yankRegister {
+- (NSString*)yankRegister {
+    // Never use self.yankRegister here. It causes INFINITE LOOP
     if( nil != _yankRegister ){
         return [[_yankRegister retain] autorelease];
     }
     if( nil == self.parent ){
-        if( _yankRegister == nil ){
-            // Bottom most evaluator of a evaluator stack returns
-            // "DQUOTE" register as a default yank register
-            return [[[[XVim instance] findRegister:@"DQUOTE"] retain] autorelease];
-        }
         return _yankRegister;
     }else{
         return [self.parent yankRegister];
@@ -232,104 +216,13 @@ static XVimEvaluator* _invalidEvaluator = nil;
 
 - (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view{
     TRACE_LOG(@"yanked text: %@", yankedText);
-    
-    // TODO:
-    // This is temprary impl.
-    // Should avoid using XVim instance.
-    XVim* xvim = [XVim instance];
-    
-    // Unnamed register
-    [[xvim findRegister:@"DQUOTE"] clear];
-    [[xvim findRegister:@"DQUOTE"] appendText:yankedText];
-    [xvim findRegister:@"DQUOTE"].type = type;
-    
-    
-    // Don't do anything if we are recording into the register (that isn't the repeat register)
-    if (xvim.recordingRegister == self.yankRegister){
-        return;
-    }
-
-    // If we are yanking into a specific register then we do not cycle through
-    // the numbered registers.
-    if (self.yankRegister != nil){
-        [self.yankRegister clear];
-        [self.yankRegister appendText:yankedText];
-        self.yankRegister.type = type;
-    }else{
-        // There are 10 numbered registers
-        // Cycle number registers
-        // TODO: better not copying the text to cycle
-        //       we can use some pointer to point the head of ring buffer for numbered registers
-        for (NSUInteger i = xvim.numberedRegisters.count - 2; ; --i){
-            XVimRegister *prev = [xvim.numberedRegisters objectAtIndex:i];
-            XVimRegister *next = [xvim.numberedRegisters objectAtIndex:i+1];
-            [next clear];
-            [next appendText:prev.string];
-            next.type  = prev.type;
-            if( i == 0 ){
-                break;
-            }
-        }
-        
-        XVimRegister *reg = [xvim.numberedRegisters objectAtIndex:0];
-        [reg clear];
-        [reg appendText:yankedText];
-        reg.type = type;
-    }
-    
+    [[[XVim instance] registerManager] yank:yankedText withType:type onRegister:self.yankRegister];
     return;
 }
 
 - (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view{
     TRACE_LOG(@"deleted text: %@", deletedText);
-    
-    // TODO:
-    // This is temprary impl.
-    // Should avoid using XVim instance.
-    XVim* xvim = [XVim instance];
-    
-    // Unnamed register
-    [[xvim findRegister:@"DQUOTE"] clear];
-    [[xvim findRegister:@"DQUOTE"] appendText:deletedText];
-    [xvim findRegister:@"DQUOTE"].type = type;
-    
-    
-    // Don't do anything if we are recording into the register (that isn't the repeat register)
-    if (xvim.recordingRegister == self.yankRegister){
-        return;
-    }
-
-    // If we are yanking into a specific register then we do not cycle through
-    // the numbered registers.
-    if (self.yankRegister!= nil){
-        [self.yankRegister clear];
-        [self.yankRegister appendText:deletedText];
-        self.yankRegister.type = type;
-    }else{
-        // There are 10 numbered registers
-        // Cycle number registers
-        // TODO: better not copying the text to cycle
-        //       we can use some pointer to point the head of ring buffer for numbered registers
-        for (NSUInteger i = xvim.numberedRegisters.count - 2; ; --i){
-            XVimRegister *prev = [xvim.numberedRegisters objectAtIndex:i];
-            XVimRegister *next = [xvim.numberedRegisters objectAtIndex:i+1];
-            [next clear];
-            [next appendText:prev.string];
-            next.type  = prev.type;
-            if( i == 0 ){
-                break;
-            }
-        }
-        
-        XVimRegister *reg = [xvim.numberedRegisters objectAtIndex:0];
-        [reg clear];
-        [reg appendText:deletedText];
-        reg.type = type;
-    }
-    
-    XVimRegister *defaultReg = [xvim findRegister:@"DQUOTE"];
-    [defaultReg clear];
-    [defaultReg appendText:deletedText];
+    [[[XVim instance] registerManager] delete:deletedText withType:type onRegister:self.yankRegister];
     return;
 }
 @end

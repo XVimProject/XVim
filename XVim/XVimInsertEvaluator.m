@@ -154,12 +154,14 @@
     
 }
 
+/*
 - (void)recordTextIntoRegister:(XVimRegister*)xregister{
     NSString *text = [self getInsertedText];
     if (text.length > 0){
         [xregister appendText:text];
     }
 }
+ */
 
 - (void)onMovementKeyPressed{
     // TODO: we also have to handle when cursor is movieng by mouse clicking.
@@ -170,7 +172,7 @@
         
         // Store off any needed text
         self.lastInsertedText = [self getInsertedText];
-        [self recordTextIntoRegister:[XVim instance].recordingRegister];
+        //[self recordTextIntoRegister:[XVim instance].recordingRegister];
     }
     
     // Store off the new start range
@@ -189,14 +191,14 @@
     }
     
     // Store off any needed text
-    XVim *xvim = [XVim instance];
+    //XVim *xvim = [XVim instance];
     if( _oneCharMode ){
 
     }else if (!self.movementKeyPressed){
-        [self recordTextIntoRegister:xvim.recordingRegister];
-        [self recordTextIntoRegister:xvim.repeatRegister];
+        //[self recordTextIntoRegister:xvim.recordingRegister];
+        //[self recordTextIntoRegister:xvim.repeatRegister];
     }else if(self.lastInsertedText.length > 0){
-        [xvim.repeatRegister appendText:self.lastInsertedText];
+        //[xvim.repeatRegister appendText:self.lastInsertedText];
     }
     [sourceView hideCompletions];
 	
@@ -347,6 +349,7 @@
 
 - (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
     // Do not record key strokes for insert. Instead we will directly append the inserted text into the register.
+    /*
     NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
     if ([self.cancelKeys containsObject:keySelector]){
         return REGISTER_APPEND;
@@ -355,6 +358,7 @@
     }else if (xregister.isRepeat && _oneCharMode){
         return REGISTER_APPEND;
     }
+     */
     
     return REGISTER_IGNORE;
 }

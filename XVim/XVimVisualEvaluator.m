@@ -66,7 +66,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     if( !_waitForArgument ){
         [super didEndHandler];
         [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
-        [[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
+        // TODO:
+        //[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     }
 }
 
@@ -163,7 +164,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)p{
     XVimSourceView* view = [self sourceView];
-    XVimRegister* reg = self.yankRegister;
+    XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
@@ -244,13 +245,16 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)onComplete_DQUOTE:(XVimRegisterEvaluator*)childEvaluator{
-    XVimRegister *xregister = childEvaluator.reg;
-    if (xregister.isReadOnly == NO || [xregister.displayName isEqualToString:@"%"] ){
+    NSString *xregister = childEvaluator.reg;
+    if( [[[XVim instance] registerManager] isValidForYank:xregister] ){
         self.yankRegister = xregister;
-        [self.argumentString appendString:xregister.displayName];
+        [self.argumentString appendString:xregister];
         self.onChildCompleteHandler = @selector(onChildComplete:);
     }
-    _waitForArgument = YES;
+    else{
+        return [XVimEvaluator invalidEvaluator];
+    }
+    _waitForArgument = NO;
     return self;
 }
 
@@ -436,6 +440,7 @@ static NSArray *_invalidRepeatKeys;
          [NSValue valueWithPointer:@selector(SLASH:)],
          nil];
     }
+    /*
     NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
     if (xregister.isRepeat) {
         if ([keyStroke classImplements:[XVimVisualEvaluator class]]) {
@@ -444,6 +449,7 @@ static NSArray *_invalidRepeatKeys;
             }
         }
     }
+     */
     return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
