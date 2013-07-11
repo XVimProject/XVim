@@ -18,13 +18,17 @@
 	<string>1.01</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>DVTPlugInCompatibilityUUIDs</key>
+	<array>
+		<string>63FC1C47-140D-42B0-BB4D-A10B2D225574</string>
+	</array>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2012 JugglerShu.Net. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
 	<string>${PRODUCT_NAME}</string>
-	<key>XCGCReady</key>
-	<true/>
 	<key>XC4Compatible</key>
+	<true/>
+	<key>XCGCReady</key>
 	<true/>
 	<key>XCPluginHasUI</key>
 	<false/>
