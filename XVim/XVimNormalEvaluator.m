@@ -32,6 +32,7 @@
 #import "XVimExCommand.h"
 #import "XVimSearch.h"
 #import "XVimOptions.h"
+#import "XVimRecordingEvaluator.h"
 
 @interface XVimNormalEvaluator() {
 	__weak XVimRegister *_playbackRegister;
@@ -40,26 +41,15 @@
 
 @implementation XVimNormalEvaluator
 -(id)initWithWindow:(XVimWindow *)window{
-    return [self initWithWindow:window playbackRegister:nil];
-}
-    
--(id)initWithWindow:(XVimWindow*)window playbackRegister:(XVimRegister*)xregister{
 	self = [super initWithWindow:window];
     if (self) {
-		_playbackRegister = xregister;
+        self.isExecutingRegister = NO;
     }
     return self;
 }
-
+    
 - (void)becameHandler{
     [super becameHandler];
-    /*
-    if (_playbackRegister) {
-		[[XVim instance] setLastPlaybackRegister:_playbackRegister];
-        [_playbackRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
-        _playbackRegister = nil;
-    }
-     */
     [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 }
 
@@ -241,32 +231,25 @@
 }
 
 - (XVimEvaluator*)q{
-    /*
-    XVim *xvim = [XVim instance];
-    if (xvim.recordingRegister != nil){
-        [[self window] stopRecordingRegister:xvim.recordingRegister];
+    if( self.isExecutingRegister ){
         return nil;
     }
-    
     [self.argumentString appendString:@"q"];
     XVimEvaluator* e = [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
     self.onChildCompleteHandler = @selector(onComplete_q:);
     return e;
-     */
-    return nil;
 }
 
 - (XVimEvaluator*)onComplete_q:(XVimRegisterEvaluator*)childEvaluator{
-    //FIXME: temoprary comment out
-    /*
-    NSAssert([childEvaluator isMemberOfClass:[XVimRegisterEvaluator class]], @"childEvaluato must be a XVimRegisterEvaluator");
-    XVimRegister *xregister = childEvaluator.reg;
-    if (xregister && xregister.isReadOnly == NO) {
-        [self.window recordIntoRegister:xregister];
-    } else {
-        [[XVim instance] ringBell];
+    if( [[[XVim instance] registerManager] isValidForRecording:childEvaluator.reg] ){
+        self.onChildCompleteHandler = @selector(onComplete_Recording:);
+        return [[XVimRecordingEvaluator alloc] initWithWindow:self.window withRegister:childEvaluator.reg];
     }
-     */
+    [[XVim instance] ringBell];
+    return nil;
+}
+
+- (XVimEvaluator*)onComplete_Recording:childEvaluator{
     return nil;
 }
 
@@ -373,6 +356,9 @@
 }
 
 - (XVimEvaluator*)AT{
+    if( self.isExecutingRegister ){
+        return nil;
+    }
     [self.argumentString appendString:@"@"];
     XVimEvaluator *eval = [[[XVimRecordingRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
     self.onChildCompleteHandler = @selector(onComplete_AT:);
@@ -380,18 +366,20 @@
 }
 
 - (XVimEvaluator*)onComplete_AT:(XVimRecordingRegisterEvaluator*)childEvaluator{
-    //FIXME: temporary comment out
-    /*
-    NSAssert([childEvaluator isMemberOfClass:[XVimRecordingRegisterEvaluator class]], @"childEvaluator must be a XVimRegisterEvaluator");
-    XVimRegister *xregister = childEvaluator.reg;
-    XVimEvaluator* ret = nil;
-    if (xregister && xregister.isReadOnly == NO) {
-        ret = [[[XVimNormalEvaluator alloc] initWithWindow:self.window playbackRegister:xregister] autorelease];
-    } else {
-        ret = [XVimEvaluator invalidEvaluator];
+    NSMutableArray* stack = [NSMutableArray arrayWithObject:[[[XVimNormalEvaluator alloc] initWithWindow:self.window] autorelease]];
+    XVimRegister* reg = [[[XVim instance] registerManager] registerByName:childEvaluator.reg];
+    
+    for( NSUInteger repeat = 0 ; repeat < self.numericArg; repeat++ ){
+        for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(reg.string) ){
+            // FIXME:
+            // This assumes that first evaluator on the stack is allways XVimNormal Evaluator.
+            // This is true in current XVimWindow implementation but
+            // this easily leads bug when you changing XVimWindow implementation.
+            // We should consider some other way to keep executing state.
+            ((XVimNormalEvaluator*)[stack objectAtIndex:0]).isExecutingRegister = YES;
+            [self.window handleKeyStroke:stroke onStack:stack];
+        }
     }
-    return ret;
-     */
     return nil;
 }
 

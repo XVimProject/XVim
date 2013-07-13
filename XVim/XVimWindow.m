@@ -132,7 +132,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     XVimString* mapped = [keymap mapKeys:oneChar withContext:_keymapContext forceFix:NO];
     DEBUG_LOG(@"%@", mapped);
     
-    //NSArray *keystrokes = [keymap lookupKeyStrokeFromOptions:keyStrokeOptions withPrimary:primaryKeyStroke withContext:_keymapContext];
     [NSObject cancelPreviousPerformRequestsWithTarget:self];
     if (mapped) {
         for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped) ) {
@@ -180,23 +179,20 @@ static const char* KEY_WINDOW = "xvimwindow";
     [_keymapContext clear];
 }
 
-- (void)dumpEvaluatorStack{
+- (void)dumpEvaluatorStack:(NSMutableArray*)stack{
     XVimEvaluator* e;
-    for( NSUInteger i = 0 ; i < _evaluatorStack.count ; i ++ ){
-        e = [_evaluatorStack objectAtIndex:i];
+    for( NSUInteger i = 0 ; i < stack.count ; i ++ ){
+        e = [stack objectAtIndex:i];
         DEBUG_LOG(@"Evaluator%d:%@   argStr:%@   yankReg:%@", i, NSStringFromClass([e class]), e.argumentString, e.yankRegister);
     }
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)evaluatorStack{
-    [self dumpEvaluatorStack];
+    NSAssert(evaluatorStack.count != 0, @"Must have one evaluator at least" );
+    [self dumpEvaluatorStack:evaluatorStack];
     [self syncState];
     
     [self clearErrorMessage];
-    
-    if( evaluatorStack.count == 0 ){
-        [self _initEvaluatorStack:evaluatorStack];
-    }
     
     // Record the event
     XVim *xvim = [XVim instance];
@@ -207,23 +203,21 @@ static const char* KEY_WINDOW = "xvimwindow";
     currentEvaluator.window = self;
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
     
-    
     // Manipulate evaluator stack
     while(YES){
         if( nil == nextEvaluator ){
             // current evaluator finished its task
-            if( [evaluatorStack count] == 1 ){
+            XVimEvaluator* completeEvaluator = [evaluatorStack lastObject];
+            [evaluatorStack removeLastObject]; // remove current evaluator from the stack
+            [completeEvaluator didEndHandler];
+            if( [evaluatorStack count] == 0 ){
                 // Current Evaluator is the root evaluator of the stack
-                // And it finished its task. Then we reset the stack.
                 [xvim cancelRepeatCommand];
                 [self _initEvaluatorStack:evaluatorStack];
                 break;
             }
             else{
                 // Pass current evaluator to the evaluator below the current evaluator
-                XVimEvaluator* completeEvaluator = [evaluatorStack lastObject];
-                [evaluatorStack removeLastObject]; // remove current evaluator from the stack
-                [completeEvaluator didEndHandler];
                 currentEvaluator = [evaluatorStack lastObject];
                 [currentEvaluator becameHandler];
                  SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;

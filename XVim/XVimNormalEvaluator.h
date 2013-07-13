@@ -15,7 +15,5 @@
 // If XVimMotionEvaluator returns valid range object
 // move the cusor to the position
 @interface XVimNormalEvaluator : XVimMotionEvaluator
-
-- (id)initWithWindow:(XVimWindow*)window playbackRegister:(XVimRegister*)xregister;
-
+@property BOOL isExecutingRegister;
 @end

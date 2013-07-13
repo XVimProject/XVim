@@ -57,6 +57,7 @@
 		A2ABFE1315497A3C002220E8 /* XVimStatusLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ABFE1215497A3C002220E8 /* XVimStatusLine.m */; };
 		A2ADAB831545C18F0093A908 /* IDEEditorAreaHook.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADAB821545C18F0093A908 /* IDEEditorAreaHook.m */; };
 		A2AF5E18152EA92C00E13833 /* XVimSourceView.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AF5E17152EA92C00E13833 /* XVimSourceView.m */; };
+		A2AFD7341790F300009B442B /* XVimRecordingEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AFD7331790F2FF009B442B /* XVimRecordingEvaluator.m */; };
 		A2B4BABC14D59F6600D817B0 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
 		A2C1BB5316CEAC7F0066F420 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C1BB5216CEAC7F0066F420 /* Utils.m */; };
@@ -192,6 +193,8 @@
 		A2ADAB821545C18F0093A908 /* IDEEditorAreaHook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IDEEditorAreaHook.m; path = XVim/IDEEditorAreaHook.m; sourceTree = SOURCE_ROOT; };
 		A2AF5E16152EA92C00E13833 /* XVimSourceView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimSourceView.h; path = XVim/XVimSourceView.h; sourceTree = SOURCE_ROOT; };
 		A2AF5E17152EA92C00E13833 /* XVimSourceView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimSourceView.m; path = XVim/XVimSourceView.m; sourceTree = SOURCE_ROOT; };
+		A2AFD7321790F2FD009B442B /* XVimRecordingEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRecordingEvaluator.h; path = XVim/XVimRecordingEvaluator.h; sourceTree = SOURCE_ROOT; };
+		A2AFD7331790F2FF009B442B /* XVimRecordingEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRecordingEvaluator.m; path = XVim/XVimRecordingEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2B4BABB14D59F6600D817B0 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		A2B4BABE14D59F6600D817B0 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		A2B4BABF14D59F6600D817B0 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
@@ -476,6 +479,8 @@
 				C38A5B4C1527CEA400E1448D /* XVimNumericEvaluator.m */,
 				C3552D99153948D200D57577 /* XVimCommandLineEvaluator.h */,
 				C3552D9A153948D200D57577 /* XVimCommandLineEvaluator.m */,
+				A2AFD7321790F2FD009B442B /* XVimRecordingEvaluator.h */,
+				A2AFD7331790F2FF009B442B /* XVimRecordingEvaluator.m */,
 			);
 			name = "Event Handlers(Evaluators)";
 			sourceTree = "<group>";
@@ -753,6 +758,7 @@
 				A257540C1732A58F003D8A97 /* XVimTester+Visual.m in Sources */,
 				A23E43181770E19B0066BF30 /* XVimTester+map.m in Sources */,
 				A250950D1787B3340090F857 /* XVimTester+Register.m in Sources */,
+				A2AFD7341790F300009B442B /* XVimRecordingEvaluator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
