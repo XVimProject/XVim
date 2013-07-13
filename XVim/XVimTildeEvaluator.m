@@ -10,6 +10,7 @@
 #import "XVimWindow.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
+#import "XVim.h"
 
 @implementation XVimTildeEvaluator
 
@@ -23,6 +24,7 @@
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     [[self sourceView] swapCase:motion];
+    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 

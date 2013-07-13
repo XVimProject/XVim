@@ -193,14 +193,20 @@ static const char* KEY_WINDOW = "xvimwindow";
     [self syncState];
     
     [self clearErrorMessage];
+    
+    if( evaluatorStack.count == 0 ){
+        [self _initEvaluatorStack:evaluatorStack];
+    }
+    
+    // Record the event
+    XVim *xvim = [XVim instance];
+    [xvim appendRepeatKeyStroke:[keyStroke xvimString]];
+    
+    // Evaluate key stroke
 	XVimEvaluator* currentEvaluator = [evaluatorStack lastObject];
     currentEvaluator.window = self;
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
     
-    // Record the event
-    //XVim *xvim = [XVim instance];
-	//[self recordEvent:keyStroke intoRegister:xvim.recordingRegister fromEvaluator:currentEvaluator];
-	//[self recordEvent:keyStroke intoRegister:xvim.repeatRegister fromEvaluator:currentEvaluator];
     
     // Manipulate evaluator stack
     while(YES){
@@ -209,25 +215,27 @@ static const char* KEY_WINDOW = "xvimwindow";
             if( [evaluatorStack count] == 1 ){
                 // Current Evaluator is the root evaluator of the stack
                 // And it finished its task. Then we reset the stack.
+                [xvim cancelRepeatCommand];
                 [self _initEvaluatorStack:evaluatorStack];
                 break;
             }
             else{
                 // Pass current evaluator to the evaluator below the current evaluator
-                XVimEvaluator* completeEvaluator = [_evaluatorStack lastObject];
-                [_evaluatorStack removeLastObject]; // remove current evaluator from the stack
+                XVimEvaluator* completeEvaluator = [evaluatorStack lastObject];
+                [evaluatorStack removeLastObject]; // remove current evaluator from the stack
                 [completeEvaluator didEndHandler];
-                currentEvaluator = [_evaluatorStack lastObject];
+                currentEvaluator = [evaluatorStack lastObject];
                 [currentEvaluator becameHandler];
                  SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
+            [xvim cancelRepeatCommand];
             [[XVim instance] ringBell];
             [self _initEvaluatorStack:evaluatorStack];
             break;
         }else if( currentEvaluator != nextEvaluator ){
-            [_evaluatorStack addObject:nextEvaluator];
+            [evaluatorStack addObject:nextEvaluator];
             nextEvaluator.parent = currentEvaluator;
             //[currentEvaluator didEndHandler];
             [nextEvaluator becameHandler];
@@ -239,7 +247,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         }
     }
     
-    currentEvaluator = [_evaluatorStack lastObject];
+    currentEvaluator = [evaluatorStack lastObject];
     [self.commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
     [self.commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
     [self syncState];

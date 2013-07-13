@@ -521,8 +521,11 @@ NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation){
 }
 
 - (BOOL) isNumeric{
-    NSString *keyStr = [self toSelectorString];
-    return [keyStr hasPrefix:@"NUM"] && [keyStr length] == 4;
+    if( self.modifier == 0 && ( '0' <= self.character && self.character <= '9' ) ){
+        return YES;
+    }else{
+        return NO;
+    }
 }
 
 - (NSUInteger)hash{

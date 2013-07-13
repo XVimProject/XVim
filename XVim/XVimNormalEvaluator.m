@@ -132,6 +132,7 @@
     XVimSourceView* view = [self sourceView];
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
     [view delete:m];
+    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 
@@ -343,6 +344,7 @@
     XVimSourceView* view = [self sourceView];
     XVimMotion* m= XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
     [view delete:m];
+    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 
@@ -500,15 +502,33 @@
 }
 
 - (XVimEvaluator*)DOT{
-    /*
-    XVimRegister *repeatRegister = [[XVim instance] repeatRegister];
-    NSMutableArray* newEvaluatorStack = [[[NSMutableArray alloc] init] autorelease];
-    [newEvaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:self.window] autorelease]];
-    [self.window handleKeyEvent:
-    XVimNormalEvaluator* ret = [[[XVimNormalEvaluator alloc] initWithWindow:self.window playbackRegister:repeatRegister] autorelease];
-    //[repeatRegister playbackWithHandler:self.window withRepeatCount:[self numericArg]];
-    return ret;
-     */
+    [[XVim instance] startRepeat];
+    XVimString *repeatRegister = [[XVim instance] repeatRegister];
+    TRACE_LOG(@"Repeat:%@", repeatRegister);
+    
+    NSMutableArray* stack = [[[NSMutableArray alloc] init] autorelease];
+    
+    if( self.numericMode ){
+        // Input numeric args if dot command has numeric arg
+        XVimString* nums = [NSString stringWithFormat:@"%ld", (unsigned long)self.numericArg];
+        for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(nums) ){
+            [self.window handleKeyStroke:stroke onStack:stack];
+        }
+    }
+    
+    BOOL nonNumFound = NO;
+    for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(repeatRegister) ){
+        // TODO: This skips numeric args in repeat regisger if numericArg is specified.
+        //       But if numericArg is not begining of the input (such as d3w) this never skips it.
+        //       We have to also correctly handle "f3" not to skip the number.
+        if( !nonNumFound && self.numericMode && [stroke isNumeric]){
+            // Skip numeric arg
+            continue;
+        }
+        nonNumFound = YES;
+        [self.window handleKeyStroke:stroke onStack:stack];
+    }
+    [[XVim instance] endRepeat];
     return nil;
 }
 

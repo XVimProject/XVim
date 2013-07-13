@@ -10,6 +10,7 @@
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimWindow.h"
+#import "XVim.h"
 
 @implementation XVimLowercaseEvaluator
 
@@ -23,6 +24,7 @@
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     [[self sourceView] makeLowerCase:motion];
+    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 

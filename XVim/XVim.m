@@ -48,6 +48,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     NSFileHandle* _logFile;
 }
 @property (strong,nonatomic) XVimRegisterManager* registerManager;
+@property (strong,nonatomic) XVimMutableString* repeatRegister;
+@property (strong,nonatomic) XVimMutableString* tempRepeatRegister;
+@property (nonatomic) BOOL isRepeating;
 - (void)parseRcFile;
 @end
 
@@ -169,7 +172,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         
         self.lastPlaybackRegister = nil;
         self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
-        self.repeatRegister = [[[XVimRegister alloc] init] autorelease];
+        self.repeatRegister = [[[XVimMutableString alloc] init] autorelease];
+        self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
+        self.isRepeating = NO;
         _logFile = nil;
         
 		for (int i = 0; i < MODE_COUNT; ++i) {
@@ -184,6 +189,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     self.registerManager = nil;
     self.repeatRegister = nil;
     self.lastPlaybackRegister = nil;
+    self.repeatRegister = nil;
+    self.tempRepeatRegister = nil;
     
     [_options release];
     [_searcher release];
@@ -227,8 +234,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	}
 }
 
-- (XVimKeymap*)keymapForMode:(int)mode {
-	return _keymaps[mode];
+- (XVimKeymap*)keymapForMode:(XVIM_MODE)mode {
+	return _keymaps[(int)mode];
 }
 
 - (XVimHistoryHandler*)exCommandHistory {
@@ -237,6 +244,29 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 - (XVimHistoryHandler*)searchHistory {
 	return _searchHistory;
+}
+
+- (void)appendRepeatKeyStroke:(XVimString*)stroke{
+    [self.tempRepeatRegister appendString:stroke];
+}
+
+- (void)fixRepeatCommand{
+    if( !self.isRepeating ){
+        [self.repeatRegister setString:self.tempRepeatRegister];
+        [self.tempRepeatRegister setString:@""];
+    }
+}
+
+- (void)cancelRepeatCommand{
+    [self.tempRepeatRegister setString:@""];
+}
+
+- (void)startRepeat{
+    self.isRepeating = YES;
+}
+
+- (void)endRepeat{
+    self.isRepeating = NO;
 }
 
 - (void)ringBell {

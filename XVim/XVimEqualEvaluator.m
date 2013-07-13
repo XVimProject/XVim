@@ -26,6 +26,7 @@
 
 - (XVimEvaluator *)_motionFixed:(XVimMotion *)motion{
     [[self sourceView] filter:motion];
+    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 

@@ -191,7 +191,8 @@
     }
     
     // Store off any needed text
-    //XVim *xvim = [XVim instance];
+    XVim *xvim = [XVim instance];
+    [xvim fixRepeatCommand];
     if( _oneCharMode ){
 
     }else if (!self.movementKeyPressed){
@@ -291,26 +292,6 @@
 
 - (XVimEvaluator*)C_c{
     return [self ESC];
-}
-
-- (XVimEvaluator*)Up{
-    [self onMovementKeyPressed];
-    return self;
-}
-
-- (XVimEvaluator*)Down{
-    [self onMovementKeyPressed];
-    return self;
-}
-
-- (XVimEvaluator*)Left{
-    [self onMovementKeyPressed];
-    return self;
-}
-
-- (XVimEvaluator*)Right{
-    [self onMovementKeyPressed];
-    return self;
 }
 
 - (void)C_yC_eHelper:(BOOL)handlingC_y {

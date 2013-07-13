@@ -11,6 +11,7 @@
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
 #import "XVimWindow.h"
+#import "XVim.h"
 
 @interface XVimShiftEvaluator() {
 	BOOL _unshift;
@@ -19,18 +20,18 @@
 
 @implementation XVimShiftEvaluator
 
-- (id)initWithWindow:(XVimWindow *)window unshift:(BOOL)unshift
-{
+- (id)initWithWindow:(XVimWindow *)window unshift:(BOOL)unshift {
 	if (self = [super initWithWindow:window]) {
 		_unshift = unshift;
 	}
 	return self;
 }
 
-- (XVimEvaluator*)GREATERTHAN{
+- (XVimEvaluator*)GREATERTHAN {
     if( !_unshift ){
-        if ([self numericArg] < 1)
-        return nil;
+        if ([self numericArg] < 1){
+            return nil;
+        }
     
         XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
         return [self _motionFixed:m];
@@ -55,6 +56,7 @@
     }else{
         [[self sourceView] shiftRight:motion];
     }
+    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 @end

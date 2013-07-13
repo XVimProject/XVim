@@ -14,6 +14,7 @@
 #import "XVimSourceView+Xcode.h"
 #import "XVimTextObjectEvaluator.h"
 #import "Logger.h"
+#import "XVim.h"
 
 @interface XVimDeleteEvaluator() {
 	BOOL _insertModeAtCompletion;
@@ -65,8 +66,11 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         // example 'c3wWord<ESC>' results in Word not WordWordWord
         [[self sourceView] change:motion];
         [self resetNumericArg];
+        // Do not call [[XVim instance] fixRepeatCommand] here.
+        // It will be called after XVimInsertEvaluator finish handling key input.
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
     }else{
+        [[XVim instance] fixRepeatCommand];
         [[self sourceView] delete:motion];
     }
     return nil;

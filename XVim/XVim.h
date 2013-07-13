@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "XVimKeymapProvider.h"
 #import "XVimTextViewProtocol.h"
+#import "XVimMode.h"
 
 @class XVimKeymap;
 @class XVimOptions;
@@ -34,14 +35,47 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong) XVimExCommand* excmd;
 @property (readonly) XVimMarks* marks;
 @property (readonly) XVimRegisterManager* registerManager;
-@property (weak) XVimRegister *repeatRegister;
+@property (strong,readonly) XVimMutableString *repeatRegister;
 @property (weak) NSString* lastPlaybackRegister;
 @property (strong) NSString* document;
 
-- (XVimKeymap*)keymapForMode:(int)mode;
+- (XVimKeymap*)keymapForMode:(XVIM_MODE)mode;
 - (void)parseRcFile;
 - (XVimHistoryHandler*)exCommandHistory;
 - (XVimHistoryHandler*)searchHistory;
+
+/**
+ * Repeat(.) command related methods.
+ *
+ * How to use:
+ * Call appendRepeatKeyStroke to append repeat register.
+ * (This is not real register but just XVimString)
+ * When the command is fixed call fixRepeatCommand method.
+ * This set XVim's repeatRegister property (until then it never changes)
+ * If you want to cancel the input for the repeat call cancelRepeatCommand.
+ *
+ * This is because not all the key input should be recorded into
+ * repeat command register but only edit commands should be stored.
+ *
+ * Whenever key input occurs key hanlder(XVimWindow) calls
+ * appendRepeatKeyStroke method with the input.
+ * When the command is fixed in edit command related evaluators
+ * it calls fixRepeatCommand.
+ * If it is not called and when a command(series of key input) is 
+ * finished XVimWindow calls cancelRepeatCommand not to store the
+ * key input recorded in repeat regisger so far.
+ *
+ * When repeating you must call startRepeat first and 
+ * call endRepeat after you finish repeating.
+ * When in repeating the key input never recorded into 
+ * repeat regisgter
+ **/
+- (void)appendRepeatKeyStroke:(XVimString*)stroke;
+- (void)fixRepeatCommand;
+- (void)cancelRepeatCommand;
+- (void)startRepeat;
+- (void)endRepeat;
+
 - (void)ringBell;
 
 @end
