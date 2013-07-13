@@ -7,10 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DVTFoundation.h"
-#import "DVTKit.H"
-#import "IDEKit.h"
 
+@class IDEWorkspaceWindowController;
+@class IDEEditorArea;
+@class DVTSourceTextView;
 IDEWorkspaceWindowController* XVimLastActiveWindowController(void);
 IDEEditorArea* XVimLastActiveEditorArea(void);
 DVTSourceTextView* XVimLastActiveSourceView(void);

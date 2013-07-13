@@ -846,13 +846,15 @@
 }
 
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    NSArray* params = [args.arg componentsSeparatedByString:@" "];
+    NSMutableArray* params = [NSMutableArray arrayWithArray:[args.arg componentsSeparatedByString:@" "]];
     if( [params count] == 0 ){
         return;
     }
     XVimDebug* debug = [[[XVimDebug alloc] init] autorelease];
-    if( [debug respondsToSelector:NSSelectorFromString([params objectAtIndex:0])] ){
-        [debug performSelector:NSSelectorFromString([params objectAtIndex:0])];
+    NSString* selector = [NSString stringWithFormat:@"%@:",[params objectAtIndex:0]];
+    [params removeObjectAtIndex:0];
+    if( [debug respondsToSelector:NSSelectorFromString(selector)] ){
+        [debug performSelector:NSSelectorFromString(selector) withObject:params];
     }
 }
 
@@ -1038,7 +1040,9 @@
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [[[XVim instance] registerManager] enumerateRegisters:^(NSString* name, XVimRegister* reg){
-        TRACE_LOG(@"\"%@   %@", name, reg.string);
+        if( reg.string.length != 0 ){
+            [[XVim instance] writeToConsole:@"\"%@   %@", name, reg.string];
+        }
     }];
 }
 

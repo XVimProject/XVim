@@ -7,6 +7,9 @@
 //
 
 #import "XVimUtil.h"
+#import "DVTFoundation.h"
+#import "DVTKit.H"
+#import "IDEKit.h"
 
 IDEWorkspaceWindowController* XVimLastActiveWindowController(){
     return [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowController];

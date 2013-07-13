@@ -28,10 +28,29 @@ You can use IDEDocumentController. Its like...
    [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
 
 
+### Debugger area / Console Area ###
+To access console area (debugger area) you can use 
+    IDEDefaultDebugArea* debuggerArea = [(IDEDefaultDebugArea*)[XVimLastActiveEditorArea() activeDebuggerArea];
+IDEDefaultDebuggerArea is a NSViewContoroller and has "varibles view" and  "console view" as you can see in bottom of Xcode window.
 
+To access "condole view" you can use
+    IDEConsoleArea *console = [debuggerArea consoleArea];
+This is also NSViewController.
+If you want to access its view you have to get the view but it does provides public property to access it.
+So we have to specify the instance varible name to get the view as below.
+    IDEConsoleTextView* pView;
+    object_getInstanceVariable(console , "_consoleView" , (void**)&pView);
+Now "pView" is IDEConsoleTextView (subclass of NSView)
 
+To insert text into the console view you can do like
+    pView.logMode = 1;
+    [pView insertText:@"some text"]
+I do not know what is logMode but you have to specify it to insert text (otherwise you can not insert text).
 
-
-
-
+IDEConsoleArea has filterMode property. This property indicates the filter you can specify in console area.
+You can see "All Output","Deubbger Output","Target Output" pulldown selection button on top of the console area.
+The values corresponds like
+  0 - All Output
+  1 - Debugger Output
+  2 - Target Output
 

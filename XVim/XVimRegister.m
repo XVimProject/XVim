@@ -124,7 +124,7 @@
 
 @implementation XVimRegisterManager
 
-
+static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwxyz-*.:%/+~";
 #define XVimRegisterWithKeyName(name) [[[XVimRegister alloc] init] autorelease], name
 - (id)init{
     if( self = [super init] ){
@@ -169,18 +169,13 @@
          XVimRegisterWithKeyName(@"x"),
          XVimRegisterWithKeyName(@"y"),
          XVimRegisterWithKeyName(@"z"),
-         
          [[[XVimReadonlyRegister alloc] init] autorelease], @":",
          [[[XVimReadonlyRegister alloc] init] autorelease], @"." ,
          [[[XVimCurrentFileRegister alloc] init] autorelease], @"%" ,
          [[[XVimReadonlyRegister alloc] init] autorelease], @"#" ,
-         
-         XVimRegisterWithKeyName(@"="),
-         
          [[[XVimClipboardRegister alloc] init] autorelease], @"*",
          XVimRegisterWithKeyName(@"+"),
          XVimRegisterWithKeyName(@"~"),
-         
          [[[XVimBlackholeRegister alloc] init] autorelease], @"_",
          XVimRegisterWithKeyName(@"/"),
          nil] autorelease];
@@ -408,9 +403,10 @@
 }
 
 - (void)enumerateRegisters:(void (^)(NSString* name, XVimRegister* reg))block{
-    [self.registers enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL* stop){
-        block(key, obj);
-    }];
+    for( NSUInteger i = 0 ; i < s_enum_registers.length; i++ ){
+        NSString* key = [s_enum_registers substringWithRange:NSMakeRange(i,1)];
+        block(key , [self.registers objectForKey:key]);
+    }
 }
 
 @end

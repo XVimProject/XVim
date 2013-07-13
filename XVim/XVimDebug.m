@@ -12,7 +12,13 @@
 @implementation XVimDebug
 
 
-- (void)ViewTree{
+- (void)viewTree:(NSArray*)params{
     [Logger traceView:[[[NSApplication sharedApplication] mainWindow] contentView] depth:0];
+}
+
+- (void)trace:(NSArray*)params{
+    if( params.count != 0 ){
+        [Logger registerTracing:[params objectAtIndex:0]];
+    }
 }
 @end

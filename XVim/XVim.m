@@ -37,6 +37,9 @@
 #import "XVimMarks.h"
 #import "xvimMotion.h"
 #import "XVimTester.h"
+#import "XVimUtil.h"
+#import "IDEKit.h"
+#import "objc/runtime.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -68,12 +71,12 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 
 - (void)toggleXVim:(id)sender{
-    if( [sender state] == NSOnState ){
+    if( [(NSCell*)sender state] == NSOnState ){
         [DVTSourceTextViewHook unhook];
-        [sender setState:NSOffState];
+        [(NSCell*)sender setState:NSOffState];
     }else{
         [DVTSourceTextViewHook hook];
-        [sender setState:NSOnState];
+        [(NSCell*)sender setState:NSOnState];
     }
 }
 
@@ -181,6 +184,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 			_keymaps[i] = [[XVimKeymap alloc] init];
 		}
 	}
+    
 	return self;
 }
 
@@ -232,6 +236,26 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	{
 		[self.excmd executeCommand:[@":" stringByAppendingString:string] inWindow:nil];
 	}
+}
+
+- (void)writeToConsole:(NSString*)fmt, ...{
+    
+    [XVimLastActiveEditorArea() activateConsole:self];
+    IDEConsoleArea* console = [(IDEDefaultDebugArea*)[XVimLastActiveEditorArea() activeDebuggerArea] consoleArea];
+    
+    // IDEConsoleArea has IDEConsoleTextView as its view but we do not have public method to access it.
+    // It has the view as instance variable named "_consoleView"
+    // So use obj-c runtime method to get instance varialbe by its name.
+    IDEConsoleTextView* pView;
+    object_getInstanceVariable(console , "_consoleView" , (void**)&pView);
+    
+    va_list argumentList;
+    va_start(argumentList, fmt);
+    NSString* string = [[[NSString alloc] initWithFormat:fmt arguments:argumentList] autorelease];
+    pView.logMode = 1; // I do not know well about this value. But we have to set this to write text into the console.
+    [pView insertText:string];
+    [pView insertNewline:self];
+    va_end(argumentList);
 }
 
 - (XVimKeymap*)keymapForMode:(XVIM_MODE)mode {

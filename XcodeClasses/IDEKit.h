@@ -6143,7 +6143,7 @@ typedef struct {
 + (int)defaultEditorMode;
 + (BOOL)automaticallyNotifiesObserversOfLastActiveEditorContext;
 @property(nonatomic) int editorMode; // @synthesize editorMode=_editorMode;
-@property(readonly) IDEDebugArea *activeDebuggerArea; // @synthesize activeDebuggerArea=_activeDebuggerArea;
+@property(readonly) IDEDebugArea *activeDebuggerArea; // @synthesize activeDebuggerArea=_activeDebuggerArea; // This returns IDEDefaultDebugArea in Xcode 4.6
 @property(readonly) IDEDebugBar *activeDebuggerBar; // @synthesize activeDebuggerBar=_activeDebuggerBar;
 @property(retain, nonatomic) IDEEditorContext *lastActiveEditorContext; // @synthesize lastActiveEditorContext=_lastActiveEditorContext;
 @property(readonly) DVTReplacementView *debuggerAreaReplacementView; // @synthesize debuggerAreaReplacementView=_debuggerAreaReplacementView;
