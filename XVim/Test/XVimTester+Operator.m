@@ -16,6 +16,8 @@
                              @"bbb\n"   // 4
                              @"ccc";    // 8
     
+    static NSString* text2 = @"aAa bbb ccc";
+    
     static NSString* a_result = @"aAa bbXXXb ccc\n";
     static NSString* A_result = @"aAa bbb cccXXX\n";
    
@@ -23,6 +25,20 @@
     static NSString* cw_result2 = @"aAa bbb caaa\n";
     static NSString* cw_result3 = @"aaa\nccc";
     static NSString* Cw_result1 = @"aAa baaaa\n";
+    
+    static NSString* dw_result = @"bbb ccc\n";
+    static NSString* D_result = @"\n"
+                                @"bbb\n"
+                                @"ccc";
+    
+    static NSString* dw_result2 = @"\n"
+                                  @"bbb\n"
+                                  @"ccc";
+    static NSString* dw_result3 = @"aAa bbb ";
+    static NSString* dw_result4 = @"aAa bbb c";
+    
+    static NSString* yw_result1 = @"aAa aAa bbb ccc\n";
+    static NSString* yw_result2 = @"aAa bbb cccccc";
     
     static NSString* oO_text = @"int abc(){\n"  // 0 4
                                @"}\n";          // 11
@@ -56,6 +72,20 @@
            XVimMakeTestCase(text1, 1,  0, @"2cwaa<ESC>", cw_result3,  2, 0),
            XVimMakeTestCase(text0, 5,  0, @"Caaaa<ESC>", Cw_result1,  8, 0),
            
+           // d, D
+           XVimMakeTestCase(text0, 0, 0, @"dw", dw_result, 0, 0),
+           XVimMakeTestCase(text1, 0, 0, @"D", D_result, 0, 0),
+           // dw at the end of line should not delete newline
+           XVimMakeTestCase(text1, 0, 0, @"dw", dw_result2, 0, 0),
+           // dw at the end of file
+            XVimMakeTestCase(text2, 8, 0, @"dw", dw_result3, 7, 0),
+           // dvw at the end of file should not delete last character( a little strange behaviour in vim)
+           XVimMakeTestCase(text2, 8, 0, @"dvw", dw_result4, 8, 0),
+            
+           // y, Y
+           XVimMakeTestCase(text0, 0,  0, @"ywP", yw_result1,  3, 0),
+           XVimMakeTestCase(text2, 8,  0, @"ywP", yw_result2, 10, 0), // Yank to end of file
+            
            // gu, gU
            XVimMakeTestCase(text0, 0,  0, @"guw", guw_result, 0, 0),
            XVimMakeTestCase(text0, 0,  0, @"gUw", gUw_result, 0, 0),

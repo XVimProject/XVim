@@ -244,7 +244,8 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
     unichar first = [name characterAtIndex:0];
     if( ('a' <= first && first <= 'z') ||
         ('A' <= first && first <= 'Z') ||
-        ('0' <= first && first <= '9')    ){
+        ('0' <= first && first <= '9') ||
+         '"' == first                     ){
         return YES;
     }
     return NO;

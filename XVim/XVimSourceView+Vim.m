@@ -606,6 +606,7 @@
         // If the next position is the end of docuement and current position is not a newline
         // Never move a cursor to the end of document.
         if( [self isEOF:next] && !isNewLine([string characterAtIndex:pos]) ){
+            info->reachedEndOfLine = YES;
             break;
         }
         
@@ -871,6 +872,7 @@
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
             }
+            info->reachedEndOfLine = YES;
             return i-1;
         } 
         
@@ -913,7 +915,7 @@
         }else { //on a blank character that is not a newline
             if(isNewLine(curChar)){
                 //blank to newline boundary
-                info->lastEndOfLine = info->lastEndOfWord;
+                info->lastEndOfLine = i-1;
                 info->isFirstWordInALine = YES;
                 wordInLineFound = NO;
             }else if(isNonBlank(curChar)){

@@ -301,14 +301,25 @@
         // We have to treat some special cases
         // When a cursor get end of line with "l" motion, make the motion type to inclusive.
         // This make you to delete the last character. (if its exclusive last character never deleted with "dl")
-        if( motion.motion == MOTION_FORWARD && motion.info->reachedEndOfLine){
-            motion.type = CHARACTERWISE_INCLUSIVE;
+        if( motion.motion == MOTION_FORWARD && motion.info->reachedEndOfLine ){
+            if( motion.type == CHARACTERWISE_EXCLUSIVE ){
+                motion.type = CHARACTERWISE_INCLUSIVE;
+            }else if( motion.type == CHARACTERWISE_INCLUSIVE ){
+                motion.type = CHARACTERWISE_EXCLUSIVE;
+            }
         }
         if( motion.motion == MOTION_WORD_FORWARD ){
-            if (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound) {
+            if ( (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound )) {
                 // Special cases for word move over a line break.
                 motionRange.end = motion.info->lastEndOfLine;
                 motion.type = CHARACTERWISE_INCLUSIVE;
+            }
+            else if( motion.info->reachedEndOfLine ){
+                if( motion.type == CHARACTERWISE_EXCLUSIVE ){
+                    motion.type = CHARACTERWISE_INCLUSIVE;
+                }else if( motion.type == CHARACTERWISE_INCLUSIVE ){
+                    motion.type = CHARACTERWISE_EXCLUSIVE;
+                }
             }
         }
         r = [self getOperationRangeFrom:motionRange.begin To:motionRange.end Type:motion.type];
@@ -374,6 +385,24 @@
         XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
         if( NSNotFound == to.end ){
             return;
+        }
+        // We have to treat some special cases (same as delete)
+        if( motion.motion == MOTION_FORWARD && motion.info->reachedEndOfLine){
+            motion.type = CHARACTERWISE_INCLUSIVE;
+        }
+        if( motion.motion == MOTION_WORD_FORWARD ){
+            if ( (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound )) {
+                // Special cases for word move over a line break.
+                to.end = motion.info->lastEndOfLine;
+                motion.type = CHARACTERWISE_INCLUSIVE;
+            }
+            else if( motion.info->reachedEndOfLine ){
+                if( motion.type == CHARACTERWISE_EXCLUSIVE ){
+                    motion.type = CHARACTERWISE_INCLUSIVE;
+                }else if( motion.type == CHARACTERWISE_INCLUSIVE ){
+                    motion.type = CHARACTERWISE_EXCLUSIVE;
+                }
+            }
         }
         r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
         BOOL eof = [self isEOF:to.end];
