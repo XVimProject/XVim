@@ -30,6 +30,12 @@
                                         @"ggg hhh i_i\n"  // 24 28 32
                                         @"    jjj kkk";   // 36 40 44
     
+    
+    static NSString* dot_result1 = @"bb ccc\n"
+                                   @"ddd e-e fff\n"
+                                   @"ggg hhh i_i\n"
+                                   @"    jjj kkk";
+    
     return [NSArray arrayWithObjects:
             // Operation using registers
             XVimMakeTestCase(text, 0, 0, @"\"adw\"aP", text, 0, 0), // Cut and paste
@@ -47,10 +53,11 @@
             // Delete 2 lines but 2nd deletion is for blackhole
             XVimMakeTestCase(text, 0, 0, @"dd\"_dd\"_p\"1P", blackhole_result, 0, 0), // Yank stores "0 and delete does not affect it
             
-            // Recording
-            
             // Repeat(.)
-            
+            XVimMakeTestCase(@"aaa bbb ccc", 0, 0, @"iabc<ESC>b.", @"abcabcaaa bbb ccc", 2, 0),
+            XVimMakeTestCase(@"aaa bbb ccc", 0, 0, @"dw.", @"ccc", 0, 0),
+            // Numeric arg should be ignored when . with numeric arg
+            XVimMakeTestCase(text , 0, 0, @"2x3.", dot_result1, 0, 0),
             
             nil];
 }

@@ -188,7 +188,14 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)evaluatorStack{
-    NSAssert(evaluatorStack.count != 0, @"Must have one evaluator at least" );
+    
+    if( nil == evaluatorStack ){
+        // Use default evaluator stack
+        evaluatorStack = _evaluatorStack;
+    }
+    if( evaluatorStack.count == 0 ){
+        [self _initEvaluatorStack:evaluatorStack];
+    }
     [self dumpEvaluatorStack:evaluatorStack];
     [self syncState];
     
