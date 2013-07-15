@@ -7,6 +7,7 @@
 //
 
 
+#import "XVimEvaluator.h"
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVimMarkSetEvaluator.h"
@@ -40,10 +41,10 @@
 @end
 
 @implementation XVimNormalEvaluator
+
 -(id)initWithWindow:(XVimWindow *)window{
 	self = [super initWithWindow:window];
     if (self) {
-        self.isExecutingRegister = NO;
     }
     return self;
 }
@@ -52,7 +53,6 @@
     [super becameHandler];
     [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 }
-
 
 - (NSString*)modeString {
     return @"";
@@ -231,7 +231,7 @@
 }
 
 - (XVimEvaluator*)q{
-    if( self.isExecutingRegister ){
+    if( [XVim instance].isExecuting ){
         return nil;
     }
     [self.argumentString appendString:@"q"];
@@ -356,7 +356,7 @@
 }
 
 - (XVimEvaluator*)AT{
-    if( self.isExecutingRegister ){
+    if( [XVim instance].isExecuting ){
         return nil;
     }
     [self.argumentString appendString:@"@"];
@@ -366,21 +366,19 @@
 }
 
 - (XVimEvaluator*)onComplete_AT:(XVimRecordingRegisterEvaluator*)childEvaluator{
-    NSMutableArray* stack = [NSMutableArray arrayWithObject:[[[XVimNormalEvaluator alloc] initWithWindow:self.window] autorelease]];
+    self.onChildCompleteHandler = @selector(onChildComplete:);
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:childEvaluator.reg];
     
-    for( NSUInteger repeat = 0 ; repeat < self.numericArg; repeat++ ){
+    [XVim instance].isExecuting = YES;
+    NSUInteger count = self.numericArg;
+    [self resetNumericArg];
+    for( NSUInteger repeat = 0 ; repeat < count; repeat++ ){
         for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(reg.string) ){
-            // FIXME:
-            // This assumes that first evaluator on the stack is allways XVimNormal Evaluator.
-            // This is true in current XVimWindow implementation but
-            // this easily leads bug when you changing XVimWindow implementation.
-            // We should consider some other way to keep executing state.
-            ((XVimNormalEvaluator*)[stack objectAtIndex:0]).isExecutingRegister = YES;
-            [self.window handleKeyStroke:stroke onStack:stack];
+            [self.window handleKeyStroke:stroke onStack:nil];
         }
     }
-    return nil;
+    [XVim instance].isExecuting = NO;
+    return [XVimEvaluator noOperationEvaluator];
 }
 
 - (XVimEvaluator*)DQUOTE{

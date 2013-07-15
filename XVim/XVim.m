@@ -53,7 +53,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @property (strong,nonatomic) XVimRegisterManager* registerManager;
 @property (strong,nonatomic) XVimMutableString* repeatRegister;
 @property (strong,nonatomic) XVimMutableString* tempRepeatRegister;
-@property (nonatomic) BOOL isRepeating;
+@property (nonatomic) BOOL isRepeating; // For dot(.) command repeat
 - (void)parseRcFile;
 @end
 
@@ -178,6 +178,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         self.repeatRegister = [[[XVimMutableString alloc] init] autorelease];
         self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
         self.isRepeating = NO;
+        self.isExecuting = NO;
         _logFile = nil;
         
 		for (int i = 0; i < MODE_COUNT; ++i) {

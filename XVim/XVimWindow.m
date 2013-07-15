@@ -235,6 +235,10 @@ static const char* KEY_WINDOW = "xvimwindow";
             [[XVim instance] ringBell];
             [self _initEvaluatorStack:evaluatorStack];
             break;
+        }else if( nextEvaluator == [XVimEvaluator noOperationEvaluator] ){
+            // Do nothing
+            // This is only used by XVimNormalEvaluator AT handler.
+            break;
         }else if( currentEvaluator != nextEvaluator ){
             [evaluatorStack addObject:nextEvaluator];
             nextEvaluator.parent = currentEvaluator;

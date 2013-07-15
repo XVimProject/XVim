@@ -57,7 +57,8 @@ XVimMotionEvaluator
 - (id)initWithWindow:(XVimWindow*)window;
 
 + (XVimEvaluator*)invalidEvaluator;
-
++ (XVimEvaluator*)noOperationEvaluator;
+    
 /**
  * About eval: method.
  * This method handles key input.

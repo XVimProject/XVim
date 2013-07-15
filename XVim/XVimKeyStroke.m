@@ -484,6 +484,14 @@ NSArray* XVimKeyStrokesFromKeyNotation(NSString* notation){
     return XVimKeyStrokesFromXVimString(XVimStringFromKeyNotation(notation));
 }
 
+NSString* XVimKeyNotationFromXVimString(XVimString* string){
+    NSArray* array = XVimKeyStrokesFromXVimString(string);
+    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
+    for( XVimKeyStroke* stroke in array ){
+        [str appendString:[stroke keyNotation]];
+    }
+    return str;
+}
 
 @implementation NSEvent(XVimKeyStroke)
 

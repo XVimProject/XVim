@@ -24,6 +24,7 @@
 #import "XVimRegister.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
+#import "XVimKeyStroke.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -1041,7 +1042,7 @@
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [[[XVim instance] registerManager] enumerateRegisters:^(NSString* name, XVimRegister* reg){
         if( reg.string.length != 0 ){
-            [[XVim instance] writeToConsole:@"\"%@   %@", name, reg.string];
+            [[XVim instance] writeToConsole:@"\"%@   %@", name, XVimKeyNotationFromXVimString(reg.string) ];
         }
     }];
 }

@@ -15,5 +15,4 @@
 // If XVimMotionEvaluator returns valid range object
 // move the cusor to the position
 @interface XVimNormalEvaluator : XVimMotionEvaluator
-@property BOOL isExecutingRegister;
 @end

@@ -38,6 +38,7 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong,readonly) XVimMutableString *repeatRegister;
 @property (weak) NSString* lastPlaybackRegister;
 @property (strong) NSString* document;
+@property (nonatomic) BOOL isExecuting; // For @x command executing
 
 - (XVimKeymap*)keymapForMode:(XVIM_MODE)mode;
 - (void)parseRcFile;

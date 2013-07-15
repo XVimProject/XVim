@@ -19,6 +19,7 @@
 #import "XVim.h"
 
 static XVimEvaluator* _invalidEvaluator = nil;
+static XVimEvaluator* _noOperationEvaluator = nil;
 
 @implementation XVimEvaluator
 
@@ -33,6 +34,19 @@ static XVimEvaluator* _invalidEvaluator = nil;
 		}
 	}
     return _invalidEvaluator;
+}
+
++ (XVimEvaluator*)noOperationEvaluator{
+   	if(_noOperationEvaluator){
+        return _noOperationEvaluator;
+    }
+    
+	@synchronized([XVimEvaluator class]){
+		if(!_noOperationEvaluator) {
+			_noOperationEvaluator = [[XVimEvaluator alloc] init];
+		}
+	}
+    return _noOperationEvaluator;
 }
 
 - (id)init {
