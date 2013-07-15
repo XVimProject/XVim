@@ -6,7 +6,7 @@
 //
 //
 
-#import "XVimTester+Register.h"
+#import "XVimTester.h"
 
 @implementation XVimTester (Register)
 - (NSArray*)register_testcases{
