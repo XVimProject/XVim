@@ -51,7 +51,7 @@
     
 - (void)becameHandler{
     [super becameHandler];
-    [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
+    //[self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
 }
 
 - (NSString*)modeString {

@@ -1542,6 +1542,7 @@
 - (void)_syncStateFromView{
     // TODO: handle block selection (if selectedRanges have multiple ranges )
     NSRange r = [_view selectedRange];
+    DEBUG_LOG(@"Selected Range: Loc:%d Len:%d", r.location, r.length);
     if( r.length == 0 ){
         _selectionMode = MODE_VISUAL_NONE;
         [self _moveCursor:r.location preserveColumn:NO];
@@ -1567,6 +1568,7 @@
  * we use _view to express it visually.
  **/
 - (void)_syncState{
+    DEBUG_LOG(@"IP:%d", _insertionPoint);
     // Reset current selection
     if( _cursorMode == CURSOR_MODE_COMMAND ){
         [self _adjustCursorPosition];
