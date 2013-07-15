@@ -852,10 +852,10 @@
         return;
     }
     XVimDebug* debug = [[[XVimDebug alloc] init] autorelease];
-    NSString* selector = [NSString stringWithFormat:@"%@:",[params objectAtIndex:0]];
+    NSString* selector = [NSString stringWithFormat:@"%@:withWindow:",[params objectAtIndex:0]];
     [params removeObjectAtIndex:0];
     if( [debug respondsToSelector:NSSelectorFromString(selector)] ){
-        [debug performSelector:NSSelectorFromString(selector) withObject:params];
+        [debug performSelector:NSSelectorFromString(selector) withObject:params withObject:window];
     }
 }
 

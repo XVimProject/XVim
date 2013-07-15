@@ -88,8 +88,16 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     if( ![identifier isEqualToString:@"com.apple.dt.Xcode"] ){
         return;
     }
+    
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
+    
+    // This looks strange but this is what intended to.
+    // [XVim instance] part initialize all the internal objects which does not depends on each other
+    // (If some initialization of a object which is held by XVim class(such as XVimSearch) access
+    //  [XVim instance] inside it, it causes dead lock because of dispatch_once in [XVim instance] method.
+    // So after initializing all the independent object we do initialize dependent objects in init2
+    [[XVim instance] init2];
     
     //Caution: parseRcFile can potentially invoke +instance on XVim (e.g. if "set ..." is
     //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
@@ -152,8 +160,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     dispatch_once(&__once, ^{
         // Allocate singleton instance
         __instance = [[XVim alloc] init];
-        [__instance.options addObserver:__instance forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
-        
         TRACE_LOG(@"XVim loaded");
     });
 	return __instance;
@@ -165,44 +171,50 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 - (id)init {
 	if (self = [super init]) {
-		_excmd = [[XVimExCommand alloc] init];
-		_exCommandHistory = [[XVimHistoryHandler alloc] init];
-		_searchHistory = [[XVimHistoryHandler alloc] init];
-		_searcher = [[XVimSearch alloc] init];
-        _lastCharacterSearchMotion = nil;
-		_options = [[XVimOptions alloc] init];
-        _marks = [[XVimMarks alloc] init];
-        
-        self.lastPlaybackRegister = nil;
-        self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
-        self.repeatRegister = [[[XVimMutableString alloc] init] autorelease];
-        self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
-        self.isRepeating = NO;
-        self.isExecuting = NO;
-        _logFile = nil;
-        
-		for (int i = 0; i < MODE_COUNT; ++i) {
-			_keymaps[i] = [[XVimKeymap alloc] init];
-		}
+		self.options = [[[XVimOptions alloc] init] autorelease];
 	}
     
 	return self;
 }
 
+- (void)init2{
+    _searchHistory = [[XVimHistoryHandler alloc] init];
+    _searcher = [[XVimSearch alloc] init];
+    _lastCharacterSearchMotion = nil;
+    _marks = [[XVimMarks alloc] init];
+    
+    self.excmd = [[[XVimExCommand alloc] init] autorelease];
+    self.lastPlaybackRegister = nil;
+    self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
+    self.repeatRegister = [[[XVimMutableString alloc] init] autorelease];
+    self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
+    self.isRepeating = NO;
+    self.isExecuting = NO;
+    _logFile = nil;
+    _exCommandHistory = [[XVimHistoryHandler alloc] init];
+    
+    for (int i = 0; i < MODE_COUNT; ++i) {
+        _keymaps[i] = [[XVimKeymap alloc] init];
+    }
+    
+    [_options addObserver:self forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
+}
 
 -(void)dealloc{
+    self.excmd = nil;
     self.registerManager = nil;
     self.repeatRegister = nil;
     self.lastPlaybackRegister = nil;
     self.repeatRegister = nil;
     self.tempRepeatRegister = nil;
-    
     [_options release];
     [_searcher release];
     [_lastCharacterSearchMotion release];
     [_excmd release];
     [_logFile release];
     [_marks release];
+    self.options = nil;
+    
 	[super dealloc];
 }
 

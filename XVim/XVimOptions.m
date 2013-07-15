@@ -15,17 +15,6 @@
 @end
 
 @implementation XVimOptions
-@synthesize ignorecase = _ignorecase;
-@synthesize wrapscan = _wrapscan;
-@synthesize errorbells = _errorbells;
-@synthesize incsearch = _incsearch;
-@synthesize gdefault = _gdefault;
-@synthesize smartcase = _smartcase;
-@synthesize clipboard = _clipboard;
-@synthesize guioptions = _guioptions;
-@synthesize debug = _debug;
-@synthesize timeoutlen = _timeoutlen;
-@synthesize laststatus = _laststatus;
 
 - (id)init{
     if( self = [super init] ){
@@ -41,6 +30,7 @@
          @"clipboard",@"cb",
          @"timeoutlen",@"tm",
          @"laststatus",@"ls",
+         @"hlsearch",@"hls",
          nil];
         
         // Default values
@@ -54,6 +44,7 @@
 		_guioptions = @"rb";
         _timeoutlen = @"1000";
         _laststatus = 2;
+        _hlsearch = NO;
     }
     return self;
 }

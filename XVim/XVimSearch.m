@@ -14,6 +14,8 @@
 #import "XVim.h"
 #import "XVimOptions.h"
 #import "Logger.h"
+#import "XVimUtil.h"
+#import "IDEKit.h"
 
 @implementation XVimSearch
 @synthesize lastSearchCase = _lastSearchCase;
@@ -24,15 +26,65 @@
 @synthesize matchEnd = _matchEnd;
 @synthesize matchStart = _matchStart;
 
-- (id)init
-{
+- (id)init {
     if( self = [super init] ){
         _lastSearchDisplayString = @"";
         _lastReplacementString = @"";
         _lastSearchCase = XVimSearchCaseDefault;
         _lastSearchBackword = NO;
+        _lastSearchCmd = @"";
+        [[XVim instance].options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionNew context:nil];
     }
     return self;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
+    if( [keyPath isEqualToString:@"hlsearch"]) {
+        if( [XVim instance].options.hlsearch ){
+            [self highlightTextInView:XVimLastActiveSourceView()];
+        }else{
+            [self clearHighlightTextInView:XVimLastActiveSourceView()];
+        }
+    }
+    
+}
+
+- (void)clearHighlightTextInView:(NSTextView*)view{
+    NSString* string = view.string;
+    NSTextStorage* storage = [view textStorage];
+    [storage addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, string.length)];
+    [storage endEditing];
+    [view setNeedsDisplay:YES];
+    
+}
+
+- (void)highlightTextInView:(NSTextView*)view{
+    TRACE_LOG(@"%@", self.lastSearchCmd);
+    if( nil == view ){
+        return;
+    }
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
+	if ([self isCaseInsensitive]) {
+		r_opts |= NSRegularExpressionCaseInsensitive;
+	}
+
+    NSError *error = NULL;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchCmd options:r_opts error:&error];
+    NSString* string = view.string;
+    NSTextStorage* storage = [view textStorage];
+    // Find all the maches
+    NSArray*  matches = [regex matchesInString:string options:r_opts range:NSMakeRange(0, [string length]-1)];
+    // Add attributes to the each range
+    [storage beginEditing];
+    // Clear current highlight.
+    // I tried to use removeAttribute method to clear but did not work. So tried to addAttribute with clear color...
+    // Do not know if this is correct way
+    [storage addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, string.length)];
+    for( NSTextCheckingResult* result in matches ){
+        [storage addAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] range:result.range];
+    }
+    [storage endEditing];
+    [view setNeedsDisplay:YES];
 }
 
 - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window
@@ -81,7 +133,11 @@
     if( [searchCmd length] > 1 ){
         self.lastSearchCmd = [searchCmd substringFromIndex:1];
     }
-    return [self searchNextFrom:from inWindow:window];
+    NSRange r = [self searchNextFrom:from inWindow:window];
+    if( [XVim instance].options.hlsearch ){
+        [self highlightTextInView:window.sourceView.view];
+    }
+    return r;
 }
 
 - (BOOL)isCaseInsensitive

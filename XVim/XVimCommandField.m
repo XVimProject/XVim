@@ -73,10 +73,13 @@
 	[self setHidden:NO];
 }
 
-- (void)keyDown:(NSEvent*)event
-{
+- (void)keyDown:(NSEvent*)event {
 	// Redirect to window -> XVimCommandLineEvaluator -> Back to here via handleKeyStroke
 	// This is to get macro recording and key mapping support
+    // TODO:
+    // With this solution Input Method (Japanese or Chinese) does work but
+    // the list box for it drawn in text view not in command line field.
+    // Should be fixed.
 	[_delegate handleKeyEvent:event];
 }
 
