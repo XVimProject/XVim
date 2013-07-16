@@ -12,10 +12,11 @@ Xcode 5 will be supported (Currently we are working on Xcode5-DP3 to work with X
 INSTALL
 =======
 
-Download source code and build XVim.xcodeproj. 
-It automatically builds and installs the plugin into the correct directory.
-
-After a build, to use XVim, you should restart Xcode.
+ - Download source code and open XVim.xcodeproj with Xcode.
+ - Go to "Edit Scheme" and set "Build Configuration" as "Release"
+ - (You may need to set "Base SDK" value in Build Settings to "Latest OS X")
+ - Build it. It automatically installs the plugin into the correct directory.
+ - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
 
 Uninstall
 =============
