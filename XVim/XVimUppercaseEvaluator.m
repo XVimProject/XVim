@@ -24,7 +24,6 @@
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     [[self sourceView] makeUpperCase:motion];
-    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 

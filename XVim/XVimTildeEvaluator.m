@@ -24,7 +24,6 @@
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     [[self sourceView] swapCase:motion];
-    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 

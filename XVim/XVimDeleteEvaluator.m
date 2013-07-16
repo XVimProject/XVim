@@ -70,7 +70,6 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         // It will be called after XVimInsertEvaluator finish handling key input.
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
     }else{
-        [[XVim instance] fixRepeatCommand];
         [[self sourceView] delete:motion];
     }
     return nil;

@@ -34,6 +34,9 @@
 #import "XVimSearch.h"
 #import "XVimOptions.h"
 #import "XVimRecordingEvaluator.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
+#import "XVimMotion.h"
 
 @interface XVimNormalEvaluator() {
 	__weak XVimRegister *_playbackRegister;
@@ -92,18 +95,15 @@
 // 'c' works like 'd' except that once it's done deleting
 // it should go you into insert mode
 - (XVimEvaluator*)c{
-	//XVimOperatorAction *action = [[XVimDeleteAction alloc] initWithYankRegister:[self yankRegister] insertModeAtCompletion:TRUE];
     [self.argumentString appendString:@"c"];
-    return [[[XVimDeleteEvaluator alloc] initWithWindow:self.window
-								 insertModeAtCompletion:YES] autorelease];
+    return [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
 }
 
-// 'C' works similar to 'D' except that once it's done deleting
-// it should go into insert mode
 - (XVimEvaluator*)C{
-    [self D];
-    [[self sourceView] append];
-    return [[XVimInsertEvaluator alloc] initWithWindow:self.window];
+    // Same as c$
+    XVimDeleteEvaluator* d = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
+    d.parent = self;
+    return [d performSelector:@selector(DOLLAR)];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
@@ -119,11 +119,10 @@
 }
 
 - (XVimEvaluator*)D{
-    XVimSourceView* view = [self sourceView];
-    XVimMotion* m= XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
-    [view delete:m];
-    [[XVim instance] fixRepeatCommand];
-    return nil;
+    // Same as d$
+    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:NO] autorelease];
+    eval.parent = self;
+    return [eval performSelector:@selector(DOLLAR)];
 }
 
 - (XVimEvaluator*)C_e{
@@ -267,27 +266,16 @@
 }
 
 - (XVimEvaluator*)s{
-    XVimSourceView *view = [self sourceView];
-    NSRange r = [view selectedRange];
-	
-	// Set range to replace, ensuring we don't run over the end of the buffer
-	NSUInteger endi = r.location + [self numericArg];
-	NSUInteger maxi = [[view string] length];
-	endi = MIN(endi, maxi);
-	NSRange replacementRange = NSMakeRange(r.location, endi - r.location);
-	
-    [view setSelectedRange:replacementRange];
-	
-	//Xode crashes if we cut a zero length selection
-	if (replacementRange.length > 0){
-		[view deleteText];
-	}
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO] autorelease];
+    // Same as cl
+    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
+    eval.parent = self;
+    return [eval performSelector:@selector(l)];
 }
 
 // "S" is Synonym for "cc"
 - (XVimEvaluator*)S{
     XVimDeleteEvaluator* d = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
+    d.parent = self;
     return [d performSelector:@selector(c)];
 }
 
@@ -324,19 +312,17 @@
 }
 
 - (XVimEvaluator*)x{
-    XVimSourceView* view = [self sourceView];
-    XVimMotion* m= XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
-    [view delete:m];
-    [[XVim instance] fixRepeatCommand];
-    return nil;
+    // Same as dl
+    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:NO] autorelease];
+    eval.parent = self;
+    return [eval performSelector:@selector(l)];
 }
 
 // like 'x" but it goes backwards instead of forwards
 - (XVimEvaluator*)X{
-    XVimSourceView* view = [self sourceView];
-    XVimMotion* m= XVIM_MAKE_MOTION(MOTION_BACKWARD, CHARACTERWISE_EXCLUSIVE, LEFT_RIGHT_NOWRAP, [self numericArg]);
-    [view delete:m];
-    return nil;
+    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:NO] autorelease];
+    eval.parent = self;
+    return [eval performSelector:@selector(h)];
 }
 
 - (XVimEvaluator*)Y{

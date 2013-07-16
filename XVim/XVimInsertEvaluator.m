@@ -206,6 +206,8 @@
     NSUInteger pos = self.sourceView.insertionPoint;
     XVimMark* mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
     [[XVim instance].marks setMark:mark forName:@"^"];
+    mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
+    [[XVim instance].marks setMark:mark forName:@"."];
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {

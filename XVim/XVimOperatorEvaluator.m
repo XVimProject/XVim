@@ -6,14 +6,18 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
+#import "XVim.h"
 #import "XVimOperatorEvaluator.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
+#import "XVimSourceView+Xcode.h"
 #import "XVimTextObjectEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "Logger.h"
 #import "XVimKeymapProvider.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 @interface XVimOperatorEvaluator() {
 }
@@ -71,9 +75,18 @@
     return REGISTER_IGNORE;
 }
 
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    // TODO FIXME:
-	//return [self->_operatorAction motionFixedFrom:from To:to Type:type inWindow:window];
-    return nil;
+- (XVimEvaluator*)_motionFixed:(XVimMotion *)motion{
+    XVimEvaluator* evaluator = [super _motionFixed:motion];
+    // Fix repeat command for change here (except for Yank)
+    // Also need to set "." mark for last change.
+    // We do not fix the change here if next evaluator is not nil becaust it waits more input for fix the command.
+    // This happens for a command like "cw..."
+    if( nil == evaluator && ![NSStringFromClass([self class]) isEqualToString:@"XVimYankEvaluator"]){
+        XVimSourceView* view = self.window.sourceView;
+        [[XVim instance] fixRepeatCommand];
+        XVimMark* mark = XVimMakeMark([self.sourceView lineNumber:view.insertionPoint], [self.sourceView columnNumber:view.insertionPoint], view.documentURL.path);
+        [[XVim instance].marks setMark:mark forName:@"."];
+    }
+    return evaluator;
 }
 @end

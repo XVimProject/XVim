@@ -977,8 +977,8 @@
 - (void)marks:(XVimExArg*)args inWindow:(XVimWindow*)window{ // This is currently impelemented for debugging purpose
     NSString* local = [[XVim instance].marks dumpMarksForDocument:window.sourceView.documentURL.path];
     NSString* file = [[XVim instance].marks dumpFileMarks];
-    DEBUG_LOG(@"----LOCAL MARKS----\n%@", local);
-    DEBUG_LOG(@"----FILE MARKS----\n%@", file);
+    [[XVim instance] writeToConsole:@"----LOCAL MARKS----\n%@", local];
+    [[XVim instance] writeToConsole:@"----FILE MARKS----\n%@", file];
 }
 
 - (void)ncounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{

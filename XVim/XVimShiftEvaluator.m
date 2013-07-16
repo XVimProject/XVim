@@ -50,13 +50,12 @@
     return nil;
 }
 
-- (XVimEvaluator*)_motionFixed:(XVimMotion *)motion{
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     if( _unshift ){
         [[self sourceView] shiftLeft:motion];
     }else{
         [[self sourceView] shiftRight:motion];
     }
-    [[XVim instance] fixRepeatCommand];
     return nil;
 }
 @end

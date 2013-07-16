@@ -22,7 +22,7 @@
         return nil;
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
-    return [self motionFixed:m];
+    return [self _motionFixed:m];
     
 }
 

@@ -14,10 +14,12 @@ Comma and semicolon are supported. Toggle inclusive/exclusive by v is supported.
 
 ## Mark
 
-File-local marks are supported. Global marks are not yet supported.
+File-local and Global marks are supported.
 
-The '.' mark (last insertion point) is supported.
+The '^' mark (last insertion point) and '.' mark (last change point) are also supported.
 gi (insert mode at last insertion point) is supported.
+
+Known issue: When deleteing a line before a mark the mark position should go up along with the line marked but currently XVim does not follow the line. It stays at the absolution position as it was marked.
 
 ## Scroll
 
