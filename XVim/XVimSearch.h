@@ -28,7 +28,8 @@ typedef enum {
 @property BOOL matchStart;
 @property BOOL matchEnd;
 
-
+- (void)updateSearchStateInView:(NSTextView*)view;
+    
 - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window;
 - (NSRange)searchNextFrom:(NSUInteger)from inWindow:(XVimWindow*)window;
 - (NSRange)searchPrevFrom:(NSUInteger)from inWindow:(XVimWindow*)window;

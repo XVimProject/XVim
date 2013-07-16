@@ -59,7 +59,6 @@
 }
 
 - (void)highlightTextInView:(NSTextView*)view{
-    TRACE_LOG(@"%@", self.lastSearchCmd);
     if( nil == view ){
         return;
     }
@@ -85,6 +84,12 @@
     }
     [storage endEditing];
     [view setNeedsDisplay:YES];
+}
+
+- (void)updateSearchStateInView:(NSTextView*)view{
+    if( [XVim instance].options.hlsearch ){
+        [self highlightTextInView:view];
+    }
 }
 
 - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window

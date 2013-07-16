@@ -18,6 +18,7 @@
 #import "Logger.h"
 #import <objc/runtime.h>
 #import "IDEEditorArea+XVim.h"
+#import "XVimSearch.h"
 
 @interface XVimWindow() {
     NSMutableArray* _evaluatorStack;
@@ -157,6 +158,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     
+    [[XVim instance].searcher updateSearchStateInView:self.sourceView.view];
     // For Debugging
     [[self sourceView] dumpState];
     return YES;
