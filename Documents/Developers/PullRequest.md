@@ -1,34 +1,35 @@
-This file explains some rules I would like you to obey when you make pull request.
+# How to make a pull request
+
+This file explains some rules I would like you to obey when you make a pull request.
 This keeps the code clean and maintainable.
 
-# Basic steps to make pull request
-Here is overveiw of steps to meke pull request.
+## Basic steps to make a pull request
+Here is overveiw of steps to meke a pull request.
 
- - Fork XVim repository (And clone it to your local)
+ - Fork the XVim repository (And clone it to your local)
  - Checkout 'Develop' branch.  (You must not work on Master)
  - Create your feature branch  (Optional but recommended) 
  - Add/Fix features
- - Run/Write tests and confirm all the test are passed
+ - Run/Write tests and confirm all the tests are passed
  - Write FeatureList.md (if needed)
- - Make pull request to 'Develop' branch
+ - Make a pull request to 'Develop' branch
 
-First step is just general operation on git/github. So I do not explain it here.
+The first step is just a general operation on git/github. So I do not explain it here.
 I explain rest of the items in detail below.
 
 
-# Check out 'Develop' branch
+## Check out 'Develop' branch
 We have 'Develop' branch to work on daily development. So use it.
-'Deveop' is a kind of buffer to the 'Master' branch.
-When I feel everthing(including other pull requsts) is fine I merge 'Deveop' into 'Master'
+'Develop' branch is a kind of buffer to the 'Master' branch.
+When I feel everything(including other pull requsts) is fine I merge 'Develop' into 'Master'
 
 
-# Create your feature branch  (Optional but recommended) 
-This is for who want to add/fix more than one features.
-Think that you made a fix for feature A, and made pull request.
-I want to keep it to merge for a week but you started to add another fix for feature B on the same branch.
-When I want to merge fix for feature A I have to find which commit to merge
-(Insted of just clicking merge button in github)
-This is the reason why here is such recommendation.
+## Create your feature branch  (Optional but recommended) 
+Make a branch for your modification. This is for who want to add/fix more than one features.
+Think that you made a fix for feature A, and made a pull request.
+I may want to keep it from merging for a week but you started to add another fix for feature B on the same branch you made a pull request from.
+When I want to merge the fix for feature A I have to find which commit to merge
+This is the reason for the recommendation.
 
 
 # Add/Fix features
@@ -39,21 +40,20 @@ See Documents/Developers/DevGuide.md to how to modify/debug XVim.
 
 # Run/Write tests and confirm all the test are passed
 XVim has automatic testing feature. It ensures that your code modification did not break
-any other features. Unfortunately since its code structure is complex it is really likely
-happen that you braek other features.
-And you also must create a test for your modification to ensure it is not broke by further modification.
+any other features. Unfortunately since XVim codes are complex it is really likely to happen that you braek other features.
+And also you must create a test case for your modification to ensure it is not broken by further modification.
 
 
 ## Run test
 You should run test not only the end of your code modification but regulerly.
-You can select from the Xcode menu "XVim -> Run Test" (This shows up only when
-you write "set debug" in .xvimrc file).
+To run tests select "Run Test" from the Xcode menu "XVim -> Run Test" (This shows up only when
+you write "set debug" in .xvimrc file. You need to restart Xcode if you have not written it.).
 
-This runs the all the tests (Be careful that it deletes current text content may even save it. Make dummy file or project and run it on thet text. )
+This runs all the tests (Be careful that it deletes current text content and may even save it. Make a dummy project and run it on that text. )
 
 Then you see the result in a newly created window. 
-If you find some non pass test case in the list it means you broke something.
-See "Description" column which command did not work correctly. "Message" column may help you to find the reason why it is broken.  You may be need to see XVim/Test/XVimTester+xxx.h file to find out what is the actuall test case which was not passed. See "How to write test" section to know how to read test cases. 
+If you find some non pass test cases in the list it means you broke something.
+See "Description" column to know which command did not work correctly. "Message" column may help you to find the reason why it is broken.  You may be need to see XVim/Test/XVimTester+xxx.h file to find out what is the actual test case which was not passed. See "How to write test" section to know how to read test cases. 
 
 
 ## write test
@@ -120,10 +120,10 @@ The file is at Documents/Users/FeatureList.md
 
 
 # Make pull request to 'Develop' branch
-So you are now ready to make pull request. Confirm following againg please.
+So you are now ready to make a pull request. Confirm following again please.
  - You are working on 'Develop' or branch from 'Develop'
  - You made a test case for your modification
- - All the tests(not only users) are passed
+ - All the tests(not only yours) are passed
  - Modified FeatureList.md (if needed)
 
 After you push your modification to your github repository make a pull request from the branch you worked on to XVim 'Develop' branch.
