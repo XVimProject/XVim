@@ -194,7 +194,6 @@
     XVim *xvim = [XVim instance];
     [xvim fixRepeatCommand];
     if( _oneCharMode ){
-
     }else if (!self.movementKeyPressed){
         //[self recordTextIntoRegister:xvim.recordingRegister];
         //[self recordTextIntoRegister:xvim.repeatRegister];
@@ -203,11 +202,18 @@
     }
     [sourceView hideCompletions];
 	
+    // Position for "^" is before escaped from insert mode
     NSUInteger pos = self.sourceView.insertionPoint;
     XVimMark* mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
     [[XVim instance].marks setMark:mark forName:@"^"];
+    
+    [[self sourceView] escapeFromInsert];
+    
+    // Position for "." is after escaped from insert mode
+    pos = self.sourceView.insertionPoint;
     mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
     [[XVim instance].marks setMark:mark forName:@"."];
+    
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {
@@ -232,33 +238,11 @@
     if (nextEvaluator == self && nil == keySelector){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
-            // check buffer limit
-            XVimSourceView *view = [self sourceView];
-            NSUInteger loc = [view selectedRange].location;
-            if( [[view string] length] < loc + [self numericArg] ){
-                _enoughBufferForReplace = FALSE;
-            } else {
-                // r command effect is in one line.
-                for( NSUInteger i = loc; i <= loc + [self numericArg]-1; ++i ){
-                    unichar uc = [[view string] characterAtIndex:i];
-                    if( [[NSCharacterSet newlineCharacterSet] characterIsMember:uc] ){
-                        _enoughBufferForReplace = FALSE;
-                    }
-                }
+            if( ![self.sourceView replaceCharacters:keyStroke.character count:[self numericArg]] ){
+                nextEvaluator = [XVimEvaluator invalidEvaluator];
+            }else{
+                nextEvaluator = nil;
             }
-            if( _enoughBufferForReplace ){
-                NSRange save = [[self sourceView] selectedRange];
-                for (NSUInteger i = 0; i < [self numericArg]; ++i) {
-                    [[self sourceView] deleteForward];
-                    [[self sourceView] passThroughKeyDown:event];
-                    
-                    save.location += 1;
-                    [[self sourceView] setSelectedRange:save];
-                }
-                save.location -= 1;
-                [[self sourceView] setSelectedRange:save];
-            }
-            nextEvaluator = nil;
         } else if ([self windowShouldReceive:keySelector]) {
             // Here we pass the key input to original text view.
             // The input coming to this method is already handled by "Input Method"
@@ -284,7 +268,6 @@
 }
 
 - (XVimEvaluator*)ESC{
-    [[self sourceView] escapeFromInsert];
     return nil;
 }
 

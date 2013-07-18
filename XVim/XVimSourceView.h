@@ -52,6 +52,7 @@ NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
 
 - (id)initWithView:(NSTextView*)view;
 
+
 // Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
 - (NSTextView*)view;
 
@@ -68,6 +69,7 @@ NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
 - (void)moveToEndOfLine;
 
 
+
 // NSTextView functions (Do not use following methods)
 - (void)copyText;
 - (void)deleteText;
@@ -77,12 +79,12 @@ NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
 - (void)moveUp;
 - (void)moveDown;
 - (void)moveForwardAndModifySelection;
-
 - (void)moveBackwardAndModifySelection;
 - (void)deleteForward;
 - (void)insertText:(NSString*)text;
 - (void)insertText:(NSString*)text replacementRange:(NSRange)range;
 - (void)insertNewline;
+
 
 - (NSColor *)insertionPointColor;
 

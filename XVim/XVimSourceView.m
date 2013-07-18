@@ -209,12 +209,14 @@
 ////////// Top level operation interface/////////
 
 - (void)escapeFromInsert{
-    [self _syncStateFromView];
-    _cursorMode = CURSOR_MODE_COMMAND;
-    if(![self isFirstOfLine:_insertionPoint]){
-        [self _moveCursor:_insertionPoint-1 preserveColumn:NO];
+    if( _cursorMode == CURSOR_MODE_INSERT ){
+        [self _syncStateFromView];
+        _cursorMode = CURSOR_MODE_COMMAND;
+        if(![self isFirstOfLine:_insertionPoint]){
+            [self _moveCursor:_insertionPoint-1 preserveColumn:NO];
+        }
+        [self _syncState];
     }
-    [self _syncState];
 }
 
 - (void)move:(XVimMotion*)motion{
@@ -609,6 +611,24 @@
     
 }
 
+- (BOOL)replaceCharacters:(unichar)c count:(NSUInteger)count{
+    NSUInteger end = [self endOfLine:_insertionPoint];
+    // Note : endOfLine may return one less than _insertionPoint if _insertionPoint is on newline
+    if( NSNotFound == end ){
+        return NO;
+    }
+    NSUInteger num = end - _insertionPoint + 1;
+    if( num < count ){
+        return NO;
+    }
+    
+    for( NSUInteger pos = _insertionPoint; pos < _insertionPoint+count; pos++){
+        [self insertText:[NSString stringWithFormat:@"%c",c] replacementRange:NSMakeRange(pos, 1)];
+    }
+    [self _syncStateFromView];
+    return YES;
+}
+
 - (void)joinAtLineNumber:(NSUInteger)line{
     BOOL needSpace = NO;
     NSUInteger headOfLine = [self positionAtLineNumber:line];
@@ -844,6 +864,16 @@
 - (void)insertBeforeFirstNonBlank{
     _insertionPoint = [self firstNonBlankInALine:_insertionPoint];
     [self insert];
+}
+
+- (void)overwriteCharacter:(unichar)c{
+    if( _insertionPoint >= [self endOfFile] ){
+        // Should not happen.
+        return;
+    }
+    [[self view] insertText:[NSString stringWithFormat:@"%c",c] replacementRange:NSMakeRange(_insertionPoint,1)];
+    [self _syncStateFromView];
+    return;
 }
 
 - (void)passThroughKeyDown:(NSEvent*)event{

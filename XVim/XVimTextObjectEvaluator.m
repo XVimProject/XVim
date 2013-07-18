@@ -45,16 +45,6 @@
 	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
 }
 
-- (XVimEvaluator*)executeActionForRange:(NSRange)r{
-	if (r.location != NSNotFound) {
-		[[self sourceView] clampRangeToBuffer:&r];
-        return nil;
-        // TODO FIXME
-		//return [_operatorAction motionFixedFrom:r.location To:r.location+r.length Type:CHARACTERWISE_EXCLUSIVE inWindow:window];
-	}
-    return nil;
-}
-
 - (XVimEvaluator*)b{
     self.textobject = TEXTOBJECT_PARENTHESES;
     return nil;

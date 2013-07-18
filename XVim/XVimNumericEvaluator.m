@@ -14,6 +14,7 @@
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     NSString* keyStr = [keyStroke toSelectorString];
 	
+    
     if (keyStroke.isNumeric) {
         if (self.numericMode) {
             NSString* numStr = [keyStr substringFromIndex:3];

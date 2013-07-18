@@ -71,6 +71,7 @@ typedef enum {
 - (void)insertNewlineAboveAndInsert;
 - (void)insertNewlineBelowAndInsert;
 - (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
+- (BOOL)replaceCharacters:(unichar)c count:(NSUInteger)count;
 
 // Insert or Command
 - (void)escapeFromInsert;
@@ -93,6 +94,8 @@ typedef enum {
 - (void)moveSentencesBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsForward:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
+
+- (void)overwriteCharacter:(unichar)c;
 
 // Scrolls
 - (void)scrollPageForward:(NSUInteger)count;

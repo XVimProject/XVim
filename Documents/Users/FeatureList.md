@@ -35,7 +35,7 @@ a, A, i, I, o, O
 
 ## Yank, put and change
 
-d, dd, D, y, yy, Y, c, cc, C, r, s, x, X
+d, dd, D, y, yy, Y, c, cc, C, r, s, S, x, X
 
 ## Line join
 
