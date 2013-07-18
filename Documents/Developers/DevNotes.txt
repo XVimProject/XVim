@@ -54,3 +54,28 @@ The values corresponds like
   1 - Debugger Output
   2 - Target Output
 
+
+
+### DVTSourceTextview / DVTFoldingTextStorage / DVTTextStorage
+DVTSourceText view is a subclass of NSTextView.
+NSTextView has NSTextStorage to hold its content and DVTFoldingTextStorage is the claas corresponds it in Xcode.
+
+DVTFoldingTextStorage is handling string in a DVTSourceTextView with folding state.
+For example, we often have a placeholder in the text view (the highlighted words when you type some method)
+Internally it is just a text like "< # placholder #>" and it is showl as just "placeholder" with blue highlighted.
+(I put space between < and # above because Xcode automatically holds it if it is not there)
+In this case ,DVTFoldingTextStorage will give a string "placeholder" to its text view.
+And DVTFoldingTextStorage has a property "realTextStorage"(DVTTextStorage) which holds internal text notation including < # part.
+So the length of the text is different between internal text notation and text acutually shown in the view.
+We have to handle these correctly when we calc the position in a text. We usually can use just a
+DVTFoldingTextStorage's methods but sometimes we need to know acutal length in internal text.
+
+
+
+### Exception occurs when you edit DVTFoldingTextStorage when the view is showing complition list
+When I tried to implement "hlsearch" I had to update text view (text storage) whenever they type (insert/delete) text because they puroduce
+some text which match/unmatch the currently search string.
+Highlighting a text is done via editing text storage object in a text view (DVTFoldingTextStorage in this case).
+So I update the storage whenever the type. But it causes exceptions in DVTFoldinTextStorage.
+If I tried to edit the storage while the view is showing autocompletion it causes exception and break the completion feature.
+Currently I use NSTextViewDidChangeNotification to know when to update highlight state.

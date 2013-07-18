@@ -34,6 +34,7 @@
         _lastSearchBackword = NO;
         _lastSearchCmd = @"";
         [[XVim instance].options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionNew context:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewDidChangeText:) name:NSTextDidChangeNotification object:nil];
     }
     return self;
 }
@@ -47,6 +48,12 @@
         }
     }
     
+}
+
+- (void)viewDidChangeText:(NSNotification*)notification{
+    if( [NSStringFromClass([notification.object class]) isEqualToString:@"DVTSourceTextView"] ){
+        [self updateSearchStateInView:notification.object];
+    }
 }
 
 - (void)clearHighlightTextInView:(NSTextView*)view{

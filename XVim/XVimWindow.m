@@ -57,6 +57,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         self.inputContext = [[NSTextInputContext alloc] initWithClient:self];
         self.tmpBuffer = [[XVimMutableString alloc] init];
         [self _initEvaluatorStack:_evaluatorStack];
+        
 	}
     return self;
 }
@@ -158,7 +159,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     
-    [[XVim instance].searcher updateSearchStateInView:self.sourceView.view];
     // For Debugging
     [[self sourceView] dumpState];
     return YES;
