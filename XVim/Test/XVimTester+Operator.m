@@ -108,6 +108,29 @@
                                  @"bbb\n"
                                  @"ccc";
     
+    static NSString* x_result1 = @"aa bbb ccc\n";
+    static NSString* x_result2 = @"abbb ccc\n";
+    static NSString* x_result3 = @"a\n"
+                                 @"bbb\n"
+                                 @"ccc";
+    static NSString* x_result4 = @"a\n"
+                                 @"b\n"
+                                 @"c";
+    static NSString* x_result5 = @"aa\n"
+                                 @"bbb\n"
+                                 @"ccc";
+    
+    static NSString* X_result1 = @"Aa bbb ccc\n";
+    static NSString* X_result2 = @"abbb ccc\n";
+    static NSString* X_result3 = @"aaa\n"
+                                 @"bb\n"
+                                 @"ccc";
+    static NSString* X_result4 = @"aa\n"
+                                 @"bb\n"
+                                 @"ccc";
+    static NSString* X_result5 = @"aa\n"
+                                 @"bbb\n"
+                                 @"ccc";
     
     static NSString* yw_result1 = @"aAa aAa bbb ccc\n";
     static NSString* yw_result2 = @"aAa bbb cccccc";
@@ -246,14 +269,19 @@
             XVimMakeTestCase(text1, 1,  0, @"Saaa<ESC>jj`^" , cc_result4,  2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"Saaa<ESC>jj`." , cc_result4,  2, 0), // . Mark
             
-            // x, X
-            /*
-            XVimMakeTestCase(text0, 0, 0, @"dw", dw_result, 0, 0),
-            XVimMakeTestCase(text0, 5,  0, @"2Caaaa<ESC>", Cw_result1,  8, 0),    // Numeric arg
-            XVimMakeTestCase(text0, 5,  0, @"Caaaa<ESC>jj..", Cw_result1,  8, 0), // Repeat
-            XVimMakeTestCase(text0, 5,  0, @"2Caaaa<ESC>", Cw_result1,  8, 0),    // ^ Mark
-            XVimMakeTestCase(text0, 5,  0, @"2Caaaa<ESC>", Cw_result1,  8, 0),    // . Mark
-             */
+            // x
+            XVimMakeTestCase(text0, 1, 0, @"x"      , x_result1, 1, 0),
+            XVimMakeTestCase(text0, 1, 0, @"3x"     , x_result2, 1, 0), // Numeric arg
+            XVimMakeTestCase(text1, 1, 0, @"5x"     , x_result3, 0, 0), // Numeric arg (Not exceed end of line)
+            XVimMakeTestCase(text1, 1, 0, @"2xj.j." , x_result4, 4, 0), // Repeat
+            XVimMakeTestCase(text1, 1, 0, @"xjj`."  , x_result5, 1, 0), // . Mark
+            
+            // X
+            XVimMakeTestCase(text0, 1, 0, @"X"     , X_result1, 0, 0),
+            XVimMakeTestCase(text0, 4, 0, @"3X"    , X_result2, 1, 0), // Numeric arg
+            XVimMakeTestCase(text1, 5, 0, @"5X"    , X_result3, 4, 0), // Numeric arg (Not exceed head of line)
+            XVimMakeTestCase(text1, 2, 0, @"Xj.j." , X_result4, 6, 0), // Repeat
+            XVimMakeTestCase(text1, 1, 0, @"Xjj`." , X_result5, 0, 0), // . Mark
             
             // gu, gU
             XVimMakeTestCase(text0, 0,  0, @"guw", guw_result, 0, 0),
