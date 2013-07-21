@@ -25,10 +25,6 @@
 	OnKeyPressHandler _onKeyPress;
 	NSUInteger _historyNo;
 }
-
-- (XVimEvaluator*) Up;
-- (XVimEvaluator*) Down;
-
 @end
 
 @implementation XVimCommandLineEvaluator
@@ -95,10 +91,6 @@
     }
             
 	return next;
-}
-
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-	return [super shouldRecordEvent:keyStroke inRegister:xregister];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{

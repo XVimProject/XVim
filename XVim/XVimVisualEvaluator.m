@@ -425,32 +425,4 @@ TODO: This block is from commit 42498.
     return self;
 }
 
-static NSArray *_invalidRepeatKeys;
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-    if (_invalidRepeatKeys == nil){
-        _invalidRepeatKeys =
-        [[NSArray alloc] initWithObjects:
-         [NSValue valueWithPointer:@selector(m:)],
-         [NSValue valueWithPointer:@selector(C_r:)],
-         [NSValue valueWithPointer:@selector(v:)],
-         [NSValue valueWithPointer:@selector(V:)],
-         [NSValue valueWithPointer:@selector(C_v:)],
-         [NSValue valueWithPointer:@selector(COLON:)],
-         [NSValue valueWithPointer:@selector(QUESTION:)],
-         [NSValue valueWithPointer:@selector(SLASH:)],
-         nil];
-    }
-    /*
-    NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
-    if (xregister.isRepeat) {
-        if ([keyStroke classImplements:[XVimVisualEvaluator class]]) {
-            if ([_invalidRepeatKeys containsObject:keySelector] == NO) {
-                return REGISTER_REPLACE;
-            }
-        }
-    }
-     */
-    return [super shouldRecordEvent:keyStroke inRegister:xregister];
-}
-
 @end

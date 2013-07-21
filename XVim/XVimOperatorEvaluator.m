@@ -65,16 +65,6 @@
     return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
-    if([keyStroke instanceResponds:self] || keyStroke.isNumeric){
-        TRACE_LOG(@"REGISTER_APPEND");
-        return REGISTER_APPEND;
-    }
-    
-    TRACE_LOG(@"REGISTER_IGNORE");
-    return REGISTER_IGNORE;
-}
-
 - (XVimEvaluator*)_motionFixed:(XVimMotion *)motion{
     XVimEvaluator* evaluator = [super _motionFixed:motion];
     // Fix repeat command for change here (except for Yank)

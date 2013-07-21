@@ -127,7 +127,6 @@ XVimMotionEvaluator
 - (XVIM_MODE)mode;
 - (BOOL)isRelatedTo:(XVimEvaluator*)other;
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister;
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
 
 - (XVimSourceView*)sourceView;

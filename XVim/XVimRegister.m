@@ -23,14 +23,14 @@
 
 - (id)init{
     if(self = [super init]){
-        self.string = [[[XVimMutableString alloc] init] autorelease];
-        self.type = TEXT_TYPE_CHARACTERS;
+        _string = [[XVimMutableString alloc] init];
+        _type = TEXT_TYPE_CHARACTERS;
     }
     return self;
 }
 
 - (void)dealloc{
-    self.string = nil;
+    [_string release];
     [super dealloc];
 }
 
@@ -62,12 +62,14 @@
 - (XVimString*)string{
     return [[XVim instance] document];
 }
+
 @end
 
 @implementation XVimReadonlyRegister
 @end
 
 @implementation XVimClipboardRegister
+
 -(void) appendXVimString:(XVimString*)string{
     NSAssert( false, @"Clipboard register should never be called as appending string");
     return;
@@ -125,11 +127,12 @@
 @implementation XVimRegisterManager
 
 static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwxyz-*.:%/+~";
+
 #define XVimRegisterWithKeyName(name) [[[XVimRegister alloc] init] autorelease], name
 - (id)init{
     if( self = [super init] ){
-		self.registers =
-        [[[NSMutableDictionary alloc] initWithObjectsAndKeys:
+		_registers =
+        [[NSMutableDictionary alloc] initWithObjectsAndKeys:
          XVimRegisterWithKeyName(@"\""), // Unnamed register works as if pointer to other register
          XVimRegisterWithKeyName(@"0"),
          XVimRegisterWithKeyName(@"1"),
@@ -169,27 +172,27 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
          XVimRegisterWithKeyName(@"x"),
          XVimRegisterWithKeyName(@"y"),
          XVimRegisterWithKeyName(@"z"),
-         [[[XVimReadonlyRegister alloc] init] autorelease], @":",
-         [[[XVimReadonlyRegister alloc] init] autorelease], @"." ,
-         [[[XVimCurrentFileRegister alloc] init] autorelease], @"%" ,
-         [[[XVimReadonlyRegister alloc] init] autorelease], @"#" ,
-         [[[XVimClipboardRegister alloc] init] autorelease], @"*",
+         [[[XVimReadonlyRegister alloc] init] autorelease],    @":",
+         [[[XVimReadonlyRegister alloc] init] autorelease],    @".",
+         [[[XVimCurrentFileRegister alloc] init] autorelease], @"%",
+         [[[XVimReadonlyRegister alloc] init] autorelease],    @"#",
+         [[[XVimClipboardRegister alloc] init] autorelease],   @"*",
          XVimRegisterWithKeyName(@"+"),
          XVimRegisterWithKeyName(@"~"),
-         [[[XVimBlackholeRegister alloc] init] autorelease], @"_",
+         [[[XVimBlackholeRegister alloc] init] autorelease],   @"_",
          XVimRegisterWithKeyName(@"/"),
-         nil] autorelease];
+          nil];
         
-        self.recordingRegister = [[[XVimRegister alloc] init] autorelease];
-        self.recordingRegisterName = nil;
+        _recordingRegister = [[XVimRegister alloc] init];
+        _recordingRegisterName = nil;
     }
     return self;
 }
 
 - (void)dealloc{
-    self.registers = nil;
-    self.recordingRegister = nil;
-    self.recordingRegisterName = nil;
+    _recordingRegisterName = nil;
+    _recordingRegister = nil;
+    _registers = nil;
     [super dealloc];
 }
 
@@ -209,16 +212,6 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
     }
 }
 
-- (XVimRegister*)registerByName:(NSString*)name{
-    NSAssert( name == nil || name.length == 1, @"name must not nil and one character string");
-    if( nil == name ){
-        name = @"\"";
-    }
-    // Always lowercase
-    name = [name lowercaseString];
-    return [self.registers objectForKey:name];
-}
-
 // Private
 - (BOOL)isApendingRegister:(NSString*)name{
     NSAssert( name != nil && name.length == 1, @"name must not nil and one character string");
@@ -228,6 +221,31 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
     }else{
         return NO;
     }
+}
+
+// Private
+- (void)setXVimString:(XVimString*)string withType:(TEXT_TYPE)type forReg:(NSString*)reg{
+    NSAssert( reg != nil && reg.length == 1, @"name must not nil and one character string");
+    XVimRegister* r = [self registerByName:reg];
+    [r setXVimString:string];
+    r.type = type;
+}
+
+// Private
+- (void)appendXVimString:(XVimString*)string forReg:(NSString*)reg{
+    NSAssert( reg != nil && reg.length == 1, @"name must not nil and one character string");
+    XVimRegister* r = [self registerByName:reg];
+    [r appendXVimString:string];
+}
+
+- (XVimRegister*)registerByName:(NSString*)name{
+    NSAssert( name == nil || name.length == 1, @"name must not nil and one character string");
+    if( nil == name ){
+        name = @"\"";
+    }
+    // Always lowercase
+    name = [name lowercaseString];
+    return [self.registers objectForKey:name];
 }
 
 - (BOOL)isValidForYank:(NSString*)name{
@@ -263,21 +281,6 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
         return YES;
     }
     return NO;
-}
-
-// Private
-- (void)setXVimString:(XVimString*)string withType:(TEXT_TYPE)type forReg:(NSString*)reg{
-    NSAssert( reg != nil && reg.length == 1, @"name must not nil and one character string");
-    XVimRegister* r = [self registerByName:reg];
-    [r setXVimString:string];
-    r.type = type;
-}
-
-// Private
-- (void)appendXVimString:(XVimString*)string forReg:(NSString*)reg{
-    NSAssert( reg != nil && reg.length == 1, @"name must not nil and one character string");
-    XVimRegister* r = [self registerByName:reg];
-    [r appendXVimString:string];
 }
 
 - (XVimString*)xvimStringForRegister:(NSString*)name{
@@ -369,6 +372,10 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
     
 }
 
+- (void)registerExecuted:(NSString *)name{
+    self.lastExecutedRegister = name;
+}
+
 - (BOOL)isRecording{
     return self.recordingRegisterName != nil;
 }
@@ -411,178 +418,3 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
 }
 
 @end
-
-
-/*
-@implementation XVimRegister
-
--(id) initWithDisplayName:(NSString*)displayName {
-    self = [super init];
-    if (self) {
-        _string = [[XVimMutableString alloc] init];
-        _type = TEXT_TYPE_CHARACTERS;
-        _displayName = [displayName retain];
-    }
-    return self;
-}
-
--(void) dealloc{
-    self.string = nil;
-    self.displayName = nil;
-    [super dealloc];
-}
-
-- (void)appendXVimString:(XVimString*)string{
-	@synchronized(self)
-	{
-		if( ![_displayName isEqualToString:@"%"] ) {
-            [self.string appendString:string];
-		} else {
-			ERROR_LOG( "assert!" );
-		}
-	}
-}
-
--(NSString*)string{
-	@synchronized(self)
-	{
-		if( [_displayName isEqualToString:@"%"] ){
-            // current file name register
-		} else {
-            text = _text;
-		}
-	}
-    return text ? [[text retain] autorelease] : nil;
-}
-
--(NSString*) description{
-    return [NSString stringWithFormat:@"\"%@: %@", self.displayName, self.text];
-}
-
-+ (XVimRegister *)registerWithDisplayName:(NSString *)displayName
-{
-    XVimRegister *newRegister = [[XVimRegister alloc] initWithDisplayName:displayName];
-    return [newRegister autorelease];
-}
-
-
--(BOOL) isAlpha{
-    if (self.displayName.length != 1){
-        return NO;
-    }
-    unichar charcode = [self.displayName characterAtIndex:0];
-    return (65 <= charcode && charcode <= 90) || (97 <= charcode && charcode <= 122);
-}
-
--(BOOL) isNumeric{
-    if (self.displayName.length != 1){
-        return NO;
-    }
-    unichar charcode = [self.displayName characterAtIndex:0];
-    return (48 <= charcode && charcode <= 57);
-}
-
--(BOOL) isRepeat{
-    return [self.displayName isEqualToString:@"repeat"];
-}
-
--(BOOL) isClipboard{
-    return [self.displayName isEqualToString:@"*"];
-}
-
--(BOOL) isReadOnly{
-    BOOL readonly;
-    NSCharacterSet *readonlyTokenCharacterSet = [NSCharacterSet characterSetWithCharactersInString:@":.%#"];
-    if ([_displayName length] == 1) {
-        unichar character = [_displayName characterAtIndex:0];
-        readonly = [readonlyTokenCharacterSet characterIsMember:character];
-    } else {
-        readonly = NO;
-    }
-    
-    return readonly || self.isRepeat;
-}
-
--(BOOL) isEqual:(id)object{
-    return [object isKindOfClass:[self class]] && [self hash] == [object hash];
-}
-
--(NSUInteger) hash{
-    return [self.displayName hash];
-}
-
--(NSUInteger) keyCount{
-    return self.keyEventsAndInsertedText.count;
-}
-
--(NSString*)string{
-    if( [self isClipboard] ){
-        return [[NSPasteboard generalPasteboard] stringForType:NSStringPboardType];
-    }else{
-        return _string;
-    }
-}
-
--(void) clear{
-    _selectedRange.location = NSNotFound;
-    [(NSMutableString*)_string setString:@""];
-    [self.keyEventsAndInsertedText removeAllObjects];
-}
-
--(void) appendKeyStroke:(XVimKeyStroke*)keyStroke{
-    NSString *key = [keyStroke toSelectorString];
-    if (key.length > 1){
-        [(NSMutableString*)_string appendString:[NSString stringWithFormat:@"<%@>", key]];
-    }else{
-        [(NSMutableString*)_string appendString:key];
-    }
-    if (!keyStroke.isNumeric){
-        ++_nonNumericKeyCount;
-    }
-    [self.keyEventsAndInsertedText addObject:keyStroke];
-}
-
--(void) appendText:(NSString*)text{
-    if (self.isPlayingBack){
-        return;
-    }
-
-    
-    [(NSMutableString*)_string appendString:text];
-    [self.keyEventsAndInsertedText addObject:text];
-    
-    if( [self isClipboard] ){
-        [[NSPasteboard generalPasteboard] declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
-        [[NSPasteboard generalPasteboard] setString:_string forType:NSStringPboardType];
-    }
-}
-
--(void) setVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range {
-	if (self.isPlayingBack){
-		return;
-	}
-	_selectedRange = range;
-	_visualMode = mode;
-}
-
--(void) playbackWithHandler:(id<XVimPlaybackHandler>)handler withRepeatCount:(NSUInteger)count{
-    self.isPlayingBack = YES;
-	
-	if (_selectedRange.location != NSNotFound){
-		[handler handleVisualMode:_visualMode withRange:_selectedRange];
-	}
-	
-    for (NSUInteger i = 0; i < count; ++i) {
-        [self.keyEventsAndInsertedText enumerateObjectsUsingBlock:^(id eventOrText, NSUInteger index, BOOL *stop){        
-            if ([eventOrText isKindOfClass:[XVimKeyStroke class]]){
-				[handler handleKeyStroke:(XVimKeyStroke*)eventOrText];
-            }else if([eventOrText isKindOfClass:[NSString class]]){
-                [handler handleTextInsertion:(NSString*)eventOrText];
-            }
-        }];
-    }
-    self.isPlayingBack = NO;
-}
- 
-@end
-*/

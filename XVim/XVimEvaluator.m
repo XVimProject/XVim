@@ -118,10 +118,6 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     return [XVimEvaluator invalidEvaluator];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-    return REGISTER_APPEND;
-}
-
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
 	if( [self sourceView].selectionMode == MODE_VISUAL_NONE){
         return [[[XVimNormalEvaluator alloc] init] autorelease];

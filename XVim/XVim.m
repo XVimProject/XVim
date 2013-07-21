@@ -66,19 +66,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     }
 }
 
-- (void)runTest:(id)sender{
-    [[[[XVimTester alloc] init] autorelease] runTest];
-}
-
-- (void)toggleXVim:(id)sender{
-    if( [(NSCell*)sender state] == NSOnState ){
-        [DVTSourceTextViewHook unhook];
-        [(NSCell*)sender setState:NSOffState];
-    }else{
-        [DVTSourceTextViewHook hook];
-        [(NSCell*)sender setState:NSOnState];
-    }
-}
 
 + (void) load{
     NSBundle* app = [NSBundle mainBundle];
@@ -311,6 +298,20 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         NSBeep();
     }
     return;
+}
+
+- (void)runTest:(id)sender{
+    [[[[XVimTester alloc] init] autorelease] runTest];
+}
+
+- (void)toggleXVim:(id)sender{
+    if( [(NSCell*)sender state] == NSOnState ){
+        [DVTSourceTextViewHook unhook];
+        [(NSCell*)sender setState:NSOffState];
+    }else{
+        [DVTSourceTextViewHook hook];
+        [(NSCell*)sender setState:NSOnState];
+    }
 }
 
 @end

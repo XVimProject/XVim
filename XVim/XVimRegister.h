@@ -16,13 +16,6 @@ typedef enum{
     TEXT_TYPE_LINES
 }TEXT_TYPE;
 
-typedef enum {
-    REGISTER_IGNORE,
-    REGISTER_APPEND,
-    REGISTER_REPLACE
-} XVimRegisterOperation;
-
-
 @interface XVimRegister : NSObject
 -(void) appendXVimString:(XVimString*)string;
 -(void) setXVimString:(XVimString*)string;
@@ -34,6 +27,7 @@ typedef enum {
 // Never implement direct access to XVimRegister object.
 // XVimRegisterManager must handle all the requests.
 @interface XVimRegisterManager : NSObject
+@property (strong) NSString* lastExecutedRegister;
 /**
  * Returns XVimRegister object for the registry "name".
  * The register may be invalid after a few key input because
@@ -56,6 +50,7 @@ typedef enum {
 - (void)delete:(XVimString*)string withType:(TEXT_TYPE)type onRegister:(NSString*)name;
 - (void)textInserted:(XVimString*)string withType:(TEXT_TYPE)type;
 - (void)commandExecuted:(XVimString*)string withType:(TEXT_TYPE)type;
+- (void)registerExecuted:(NSString*)name;
 
 /**
  * Start recording into a register specified by 'name'.

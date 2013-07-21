@@ -563,19 +563,4 @@
     return [self DOLLAR];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
-    /*
-    if (xregister.isRepeat){
-        // DOT command register
-         * XVimMotionEvaluator which deals with MOTION should not record
-         * commands for DOT command operation.
-         * XVimXXXEvaluator inherited from XVimMotionEvaluator should deal with it.
-        return REGISTER_IGNORE;
-    }
-    
-    return [super shouldRecordEvent:keyStroke inRegister:xregister];
-     */
-    return REGISTER_APPEND;
-}
-
 @end

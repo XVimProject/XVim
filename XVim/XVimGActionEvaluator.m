@@ -75,12 +75,4 @@
 	return [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
-    if ([keyStroke classImplements:[XVimGActionEvaluator class]]){
-        return REGISTER_APPEND;
-    }
-    
-    return [super shouldRecordEvent:keyStroke inRegister:xregister];
-}
-
 @end

@@ -30,7 +30,6 @@
 @property(strong,nonatomic) NSTextInputContext* inputContext;
 @property(strong,nonatomic) XVimMutableString* tmpBuffer;
 - (id)initWithIDEEditorArea:(IDEEditorArea*)editorArea;
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator;
 - (void)_initEvaluatorStack:(NSMutableArray*)stack;
 @end
 
@@ -272,52 +271,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField {
 	[commandField setDelegate:nil];
     [self _initEvaluatorStack:_evaluatorStack];
-}
-
-- (void)recordIntoRegister:(XVimRegister*)xregister{
-/*
- XVim *xvim = [XVim instance];
-    if (xvim.recordingRegister == nil){
-        xvim.recordingRegister = xregister;
-        _staticString = @"recording";
-        // when you record into a register you clear out any previous recording
-        // unless it was capitalized
-        [xvim.recordingRegister clear];
-    }else{        
-        [xvim ringBell];
-    }
- */
-}
-
-- (void)stopRecordingRegister:(XVimRegister*)xregister{
-/*
- XVim *xvim = [XVim instance];
-    if (xvim.recordingRegister == nil){
-        [xvim ringBell];
-    }else{
-        xvim.recordingRegister = nil;
-		_staticString = @"";
-    }
- */
-}
-
-- (void)recordEvent:(XVimKeyStroke*)keyStroke intoRegister:(XVimRegister*)xregister fromEvaluator:(XVimEvaluator*)evaluator {
-    /*
-    switch ([evaluator shouldRecordEvent:keyStroke inRegister:xregister]) {
-        case REGISTER_APPEND:
-            [xregister appendKeyEvent:keyStroke];
-            break;
-            
-        case REGISTER_REPLACE:
-            [xregister clear];
-            [xregister appendKeyEvent:keyStroke];
-            break;
-            
-        case REGISTER_IGNORE:
-        default:
-            break;
-    }
-     */
 }
 
 - (void)beginMouseEvent:(NSEvent*)event {

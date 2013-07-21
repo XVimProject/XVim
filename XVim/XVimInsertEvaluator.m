@@ -313,20 +313,4 @@
     return self;
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-    // Do not record key strokes for insert. Instead we will directly append the inserted text into the register.
-    /*
-    NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
-    if ([self.cancelKeys containsObject:keySelector]){
-        return REGISTER_APPEND;
-    }else if (xregister.isReadOnly == NO && ([self.movementKeys containsObject:keySelector] || _oneCharMode)){
-        return REGISTER_APPEND;
-    }else if (xregister.isRepeat && _oneCharMode){
-        return REGISTER_APPEND;
-    }
-     */
-    
-    return REGISTER_IGNORE;
-}
-
 @end

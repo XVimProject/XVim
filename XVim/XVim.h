@@ -35,15 +35,15 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong) XVimExCommand* excmd;
 @property (readonly) XVimMarks* marks;
 @property (readonly) XVimRegisterManager* registerManager;
-@property (strong,readonly) XVimMutableString *repeatRegister;
-@property (weak) NSString* lastPlaybackRegister;
-@property (strong) NSString* document;
+@property (readonly) XVimHistoryHandler* exCommandHistory;
+@property (readonly) XVimHistoryHandler* searchHistory;
+@property (readonly) XVimMutableString *repeatRegister;
+@property (copy) NSString* lastPlaybackRegister;
+@property (copy) NSString* document;
 @property (nonatomic) BOOL isExecuting; // For @x command executing
 
+// XVimKeymapProvider protocol
 - (XVimKeymap*)keymapForMode:(XVIM_MODE)mode;
-- (void)parseRcFile;
-- (XVimHistoryHandler*)exCommandHistory;
-- (XVimHistoryHandler*)searchHistory;
 
 /**
  * Repeat(.) command related methods.

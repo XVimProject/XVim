@@ -59,6 +59,9 @@
             // Numeric arg should be ignored when . with numeric arg
             XVimMakeTestCase(text , 0, 0, @"2x3.", dot_result1, 0, 0),
             
+            // Repeat by @@
+            XVimMakeTestCase(@"aaa bbb ccc", 0, 0, @"qallq@a2@@", @"aaa bbb ccc", 8, 0),
+            
             nil];
 }
 

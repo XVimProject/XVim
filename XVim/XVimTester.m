@@ -95,17 +95,20 @@
     
     // Alert Dialog to confirm current text will be deleted.
     NSAlert* alert = [[[NSAlert alloc] init] autorelease];
-    [alert setMessageText:@"Make it sure that a source test view has a focus now.\r Running test deletes text in current source text view. Proceed?"];
+    [alert setMessageText:@"Running test deletes text in current source text view. Proceed?"];
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];
     NSInteger b = [alert runModal];
     
+    if( b != NSAlertFirstButtonReturn ){
+        return;
+    }
+    
+    // Move forcus to source view
+    [[XVimLastActiveWindowController() window] makeFirstResponder:XVimLastActiveSourceView()];
     // Run test for all the cases
-    if( b == NSAlertFirstButtonReturn ){
-        // test each
-        for( NSUInteger i = 0; i < testArray.count; i++ ){
-            [(XVimTestCase*)[testArray objectAtIndex:i] run];
-        }
+    for( NSUInteger i = 0; i < testArray.count; i++ ){
+        [(XVimTestCase*)[testArray objectAtIndex:i] run];
     }
     
     // Setup Talbe view to show result

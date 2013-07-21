@@ -56,8 +56,6 @@
 - (void)handleTextInsertion:(NSString*)text;
 - (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
 
-- (void)recordIntoRegister:(XVimRegister*)xregister;
-- (void)stopRecordingRegister:(XVimRegister*)xregister;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;

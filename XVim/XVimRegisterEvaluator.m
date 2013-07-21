@@ -39,16 +39,12 @@
     }
     return nil;
 }
-	
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-    return REGISTER_IGNORE;
-}
 
 @end
 
 @implementation XVimRecordingRegisterEvaluator
 - (XVimEvaluator*)AT{
-    self.reg = [[XVim instance] lastPlaybackRegister];
+    self.reg = [[[XVim instance] registerManager] lastExecutedRegister];
     return nil;
 }
 @end

@@ -51,12 +51,4 @@
 	return [self searchCurrentWord:YES];
 }
 
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*) keyStroke inRegister:(XVimRegister*)xregister{
-    if ([keyStroke classResponds:[XVimGMotionEvaluator class]]){
-        return REGISTER_APPEND;
-    }
-    
-    return [super shouldRecordEvent:keyStroke inRegister:xregister];
-}
-
 @end

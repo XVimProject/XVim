@@ -363,6 +363,7 @@
             [self.window handleKeyStroke:stroke onStack:nil];
         }
     }
+    [[XVim instance].registerManager registerExecuted:childEvaluator.reg];
     [XVim instance].isExecuting = NO;
     return [XVimEvaluator noOperationEvaluator];
 }
@@ -540,53 +541,6 @@
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     [[self sourceView] move:motion];
     return nil;
-}
-
-// There are fewer invalid keys than valid ones so make a list of invalid keys.
-// This can always be changed to a set of valid keys in the future if need be.
-//static NSArray *_invalidRepeatKeys;
-- (XVimRegisterOperation)shouldRecordEvent:(XVimKeyStroke*)keyStroke inRegister:(XVimRegister*)xregister{
-    /*
-    if (_invalidRepeatKeys == nil){
-        _invalidRepeatKeys =
-        [[NSArray alloc] initWithObjects:
-         [NSValue valueWithPointer:@selector(m)],
-         [NSValue valueWithPointer:@selector(C_r)],
-         [NSValue valueWithPointer:@selector(u)],
-         [NSValue valueWithPointer:@selector(v)],
-         [NSValue valueWithPointer:@selector(V)],
-         [NSValue valueWithPointer:@selector(C_v)],
-         [NSValue valueWithPointer:@selector(AT)],
-         [NSValue valueWithPointer:@selector(COLON)],
-         [NSValue valueWithPointer:@selector(DOT)],
-         [NSValue valueWithPointer:@selector(QUESTION)],
-         [NSValue valueWithPointer:@selector(SLASH)],
-         nil];
-    }
-    NSValue *keySelector = [NSValue valueWithPointer:[keyStroke selectorForInstance:self]];
-    if (keySelector == [NSValue valueWithPointer:@selector(q:)]) {
-        return REGISTER_IGNORE;
-    } else if (xregister.isRepeat) {
-        // DOT command register
-        if ([keyStroke classImplements:[XVimNormalEvaluator class]]) {
-            if ([_invalidRepeatKeys containsObject:keySelector] == NO) {
-                [xregister clear];
-                if( [self numericArg] >= 2 ){
-                    NSString* str = [NSString stringWithFormat:@"%ld",[self numericArg]];
-                    for( NSUInteger i = 0; i < str.length; ++i ){
-                        // FIXME: This code is temprarily commented out to refactor
-                        //NSString* s1 = [str substringWithRange:NSMakeRange(i, 1)];
-                        // XVimKeyStroke* keyStroke = [XVimKeyStroke fromNotation:s1];
-                        //[xregister appendKeyEvent:keyStroke];
-                    }
-                }
-                return REGISTER_APPEND;
-            }
-        }
-    }
-    return [super shouldRecordEvent:keyStroke inRegister:xregister];
-     */
-    return REGISTER_APPEND;
 }
 
 @end
