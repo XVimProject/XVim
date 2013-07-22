@@ -26,6 +26,7 @@
 #import "XVimMarks.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
+#import "XVimUtil.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -545,6 +546,7 @@
                        CMD(@"wsverb", @"wsverb:inWindow:"),
                        CMD(@"wviminfo", @"viminfo:inWindow:"),
                        CMD(@"xccmd" , @"xccmd:inWindow:"),
+                       CMD(@"xctabctrl", @"xctabctrl:inWindow:"),
                        CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
                        CMD(@"xit", @"exit:inWindow:"),
                        CMD(@"xall", @"wqall:inWindow:"),
@@ -1227,6 +1229,13 @@
     NSMenuItem* item = [self findMenuItemIn:nil forAction:[[args arg] stringByAppendingString:@":"]];
     if( nil != item ){
         [NSApp sendAction:item.action to:item.target from:self];
+    }
+}
+
+- (void)xctabctrl:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    IDEWorkspaceTabController* ctrl = XVimLastActiveWorkspaceTabController();
+    if( [ctrl respondsToSelector:NSSelectorFromString(args.arg)] ){
+        [ctrl performSelector:NSSelectorFromString(args.arg) withObject:self];
     }
 }
 

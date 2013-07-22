@@ -201,3 +201,22 @@ Example:
 # Known problems
  See XVim issue page.
 
+
+## Experimental
+
+### :xctabctrl (Ex command)
+:xctabctrl command takes one argument and send message to the current tab workspace window.
+A tab workspace window handles a lot of usuful actions provided by Xcode.
+For example following command shows/hides a utility area (right side of a window)
+
+      :xctabctrl showUtilitiesArea:
+      :xctabctrl hideUtilitiesArea:
+
+The arguments :xctabctrl accepts are method names in IDEWorkspaceTabController class.
+See IDEKit.h file in XVim source code and find the class.
+It has a lot of  actions (selectors) which takes one argument. These are the methods
+we can call directly through the ex command.
+Some does work well but some does not. Try using it to find out if it works as you like.
+If you once find some usuful feature in it you can map it to key input via :map command.
+
+(Note that the argument for :xctabctrl always ends with ":" as shown above)

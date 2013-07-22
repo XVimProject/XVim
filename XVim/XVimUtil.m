@@ -11,8 +11,13 @@
 #import "DVTKit.H"
 #import "IDEKit.h"
 
+
 IDEWorkspaceWindowController* XVimLastActiveWindowController(){
     return [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowController];
+}
+
+IDEWorkspaceTabController* XVimLastActiveWorkspaceTabController(){
+    return [XVimLastActiveWindowController() activeWorkspaceTabController];
 }
 
 IDEEditorArea* XVimLastActiveEditorArea(){

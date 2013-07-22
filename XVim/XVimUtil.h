@@ -9,9 +9,11 @@
 #import <Foundation/Foundation.h>
 
 @class IDEWorkspaceWindowController;
+@class IDEWorkspaceTabController;
 @class IDEEditorArea;
 @class DVTSourceTextView;
 IDEWorkspaceWindowController* XVimLastActiveWindowController(void);
+IDEWorkspaceTabController* XVimLastActiveWorkspaceTabController(void);
 IDEEditorArea* XVimLastActiveEditorArea(void);
 DVTSourceTextView* XVimLastActiveSourceView(void);
 
