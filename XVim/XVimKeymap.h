@@ -59,4 +59,7 @@
  * This may return the same keys as input when there is no mapping or 'fix' is set.
  **/
 - (XVimString*)mapKeys:(XVimString*)keys withContext:(XVimKeymapContext*)context forceFix:(BOOL)fix;
+
+- (void)enumerateKeymaps:(void (^)(NSString* mapFrom, NSString* mapTo))block;
+
 @end

@@ -25,6 +25,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimKeyStroke.h"
+#import "XVimKeymap.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -886,7 +887,23 @@
     [[NSApplication sharedApplication] sendEvent:keyPress];
 }
 
+// Private
+- (void)writeMapsToConsoleWithFirstLetter:(NSString*)f forMapMode:(XVIM_MODE)mode{
+    // Show map list in console
+    XVimKeymap* map =  [[XVim instance] keymapForMode:mode];
+    [map enumerateKeymaps:^(NSString *mapFrom, NSString *mapTo){
+        [[XVim instance] writeToConsole:[NSString stringWithFormat:@"%@ %-10s %s",f, [mapFrom UTF8String], [mapTo UTF8String]] ];
+    }];
+}
+
 - (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"n" forMapMode:MODE_NORMAL];
+        [self writeMapsToConsoleWithFirstLetter:@"o" forMapMode:MODE_OPERATOR_PENDING];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        return;
+    }
 	[self mapMode:MODE_GLOBAL_MAP withArgs:args remap:YES];
 	[self mapMode:MODE_NORMAL withArgs:args remap:YES];
 	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
@@ -894,6 +911,13 @@
 }
 
 - (void)noremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"n" forMapMode:MODE_NORMAL];
+        [self writeMapsToConsoleWithFirstLetter:@"o" forMapMode:MODE_OPERATOR_PENDING];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        return;
+    }
 	[self mapMode:MODE_GLOBAL_MAP withArgs:args remap:NO];
 	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
 	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:NO];
@@ -995,10 +1019,20 @@
 }
 
 - (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_NORMAL];
+        return;
+    }
 	[self mapMode:MODE_NORMAL withArgs:args remap:YES];
 }
 
 - (void)nnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_NORMAL];
+        return;
+    }
 	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
 }
 
@@ -1011,6 +1045,11 @@
 }
 
 - (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_OPERATOR_PENDING];
+        return;
+    }
 	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
 }
 
@@ -1019,6 +1058,11 @@
 }
 
 - (void)ounmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_OPERATOR_PENDING];
+        return;
+    }
     [self unmapMode:MODE_OPERATOR_PENDING withArgs:args];
 }
 
@@ -1130,10 +1174,20 @@
 }
 
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        return;
+    }
 	[self mapMode:MODE_VISUAL withArgs:args remap:YES];
 }
 
 - (void)vnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if( args.arg.length == 0 ){
+        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        return;
+    }
 	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
 }
 

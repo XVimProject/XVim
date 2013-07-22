@@ -242,4 +242,20 @@
     // We still need to wait next key input
     return nil;
 }
+
+- (void)enumerateKeymapsImpl:(XVimKeymapNode*)node forKeys:(XVimString*)keys withBlock:(void (^)(NSString *, NSString *))block{
+    if( node.target != nil ){
+        NSString* toKey   = [XVimString stringWithFormat:@"%@%@" , node.remap?@"":@"* ", XVimKeyNotationFromXVimString(node.target)];
+         block( keys,  toKey);
+    }
+    
+    [node.dict enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop){
+        XVimKeyStroke* stroke = key;
+        [self enumerateKeymapsImpl:obj forKeys:[XVimString stringWithFormat:@"%@%@", keys, [stroke keyNotation]] withBlock:block];
+    }];
+}
+- (void)enumerateKeymaps:(void (^)(NSString* mapFrom, NSString* mapTo))block{
+    [self enumerateKeymapsImpl:self.root forKeys:@"" withBlock:block];
+}
+
 @end

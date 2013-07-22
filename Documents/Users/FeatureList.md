@@ -45,7 +45,6 @@ J
 
 Normal mode: >, >>, <, <<
 
-Visual mode: >, <
 
 ## Case change operations
 
@@ -58,12 +57,13 @@ Visual mode: u, U, ~, gu, gU
 u, C-r
 
 ## Visual
-v, V
+v, V, Ctrl-v
 
-Ctrl-v is not supported now.
 (v, V in visual mode to toggle or escape from visual mode is supported)
 
-Visual block mode is currently not supported.
+Inserting with visual block is not supported currently (Ctrl-v + Shift-I does not work.)
+
+## Operation in Visual
 
 ## Window manipulation
 

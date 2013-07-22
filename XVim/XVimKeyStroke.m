@@ -154,8 +154,8 @@ static struct key_map key_maps[] = {
     {@"GS",  29, @"GS"},
     {@"RS",  30, @"RS"},
     {@"US",  31, @"US"},
-    {@" ", 32, @"SPACE"},
     {@"SPACE", 32, @"SPACE"},
+    {@" ", 32, @"SPACE"}, // Default notation
     {@"!", 33, @"EXCLAMATION"},
     {@"\"", 34, @"DQUOTE"},
     {@"#", 35, @"NUMBER"},
@@ -183,8 +183,8 @@ static struct key_map key_maps[] = {
     {@"9", 57, @"NUM9"},
     {@":", 58, @"COLON"},
     {@";", 59, @"SEMICOLON"},
-    {@"<", 60, @"LESSTAHN"},
     {@"lt",60, @"LESSTHAN"},
+    {@"<", 60, @"LESSTHAN"}, // Default notation
     {@"=", 61, @"EQUAL"},
     {@">", 62, @"GREATERTHAN"},
     {@"?", 63, @"QUESTION"},

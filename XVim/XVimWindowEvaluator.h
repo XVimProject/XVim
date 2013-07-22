@@ -8,6 +8,6 @@
 
 #import "XVimArgumentEvaluator.h"
 
-@interface XVimWindowEvaluator : XVimArgumentEvaluator
+@interface XVimWindowEvaluator : XVimEvaluator
 
 @end
