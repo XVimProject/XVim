@@ -132,8 +132,12 @@
                                  @"bbb\n"
                                  @"ccc";
     
-    static NSString* yw_result1 = @"aAa aAa bbb ccc\n";
-    static NSString* yw_result2 = @"aAa bbb cccccc";
+    static NSString* y_result1 = @"aAa aAa bbb ccc\n";
+    static NSString* y_result2 = @"aAa bbb cccccc";
+    static NSString* y_result3 = @"aaa\n"
+                                 @"aaa\n"
+                                 @"bbb\n"
+                                 @"ccc";
     
     static NSString* oO_text = @"int abc(){\n"  // 0 4
     @"}\n";          // 11
@@ -197,6 +201,13 @@
             XVimMakeTestCase(text1, 1,  0, @"ccaaa<ESC>jj`^" , cc_result4,  2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"ccaaa<ESC>jj`." , cc_result4,  2, 0), // . Mark
             
+            // c_ does the same as cc
+            XVimMakeTestCase(text0, 5,  0, @"c_aaa<ESC>"     , cc_result1,  2, 0),
+            XVimMakeTestCase(text1, 1,  0, @"2c_aaa<ESC>"    , cc_result2,  2, 0), // Numeric arg
+            XVimMakeTestCase(text0, 5,  0, @"c_aaa<ESC>.."   , cc_result3,  2, 0), // Repeat
+            XVimMakeTestCase(text1, 1,  0, @"c_aaa<ESC>jj`^" , cc_result4,  2, 0), // ^ Mark
+            XVimMakeTestCase(text1, 1,  0, @"c_aaa<ESC>jj`." , cc_result4,  2, 0), // . Mark
+            
             // d
             XVimMakeTestCase(text1, 1, 0, @"dw"    , d_result1, 0, 0),
             XVimMakeTestCase(text1, 1, 0, @"2dw"   , d_result2, 0, 0),    // Numeric arg
@@ -240,12 +251,25 @@
             XVimMakeTestCase(text1, 1, 0, @"dd.."  , dd_result3, 0, 0), // Repeat
             XVimMakeTestCase(text1, 1, 0, @"ddjj`.", dd_result4, 0, 0), // . Mark
             
+            // d_ does the same as dd
+            XVimMakeTestCase(text1, 1, 0, @"d_"    , dd_result1, 0, 0),
+            XVimMakeTestCase(text1, 1, 0, @"2d_"   , dd_result2, 0, 0), // Numeric arg
+            XVimMakeTestCase(text1, 1, 0, @"d_.."  , dd_result3, 0, 0), // Repeat
+            XVimMakeTestCase(text1, 1, 0, @"d_jj`.", dd_result4, 0, 0), // . Mark
+            
             // y, Y
-            XVimMakeTestCase(text0, 0,  0, @"ywP", yw_result1,  3, 0),
-            XVimMakeTestCase(text2, 8,  0, @"ywP", yw_result2, 10, 0), // Yank to end of file
+            XVimMakeTestCase(text0, 0,  0, @"ywP", y_result1,  3, 0),
+            XVimMakeTestCase(text2, 8,  0, @"ywP", y_result2, 10, 0), // Yank to end of file
             
             // yy
-            XVimMakeTestCase(text0, 0,  0, @"ywP", yw_result1,  3, 0),
+            XVimMakeTestCase(text1, 1,  0, @"yyp", y_result3,  4, 0),
+            // y_ does the same as yy
+            XVimMakeTestCase(text1, 1,  0, @"y_p", y_result3,  4, 0),
+            
+            // p, P
+            // TODO: Currently the insertion position after put(P) is not correct.(Must pass followings)
+            //XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
+            //XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
             
             // r
             XVimMakeTestCase(text0, 5,  0, @"rX",     r_result1, 5, 0),

@@ -26,6 +26,10 @@
     
 }
 
+- (XVimEvaluator*)UNDERSCORE{
+    return [self y];
+}
+
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     [[self sourceView] yank:motion];
     return nil;

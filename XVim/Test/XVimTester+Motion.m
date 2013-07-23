@@ -88,6 +88,8 @@
             XVimMakeTestCase(text2, 28, 0, @"<CR>", text2, 40, 0),
             XVimMakeTestCase(text2, 16, 0,@"2<CR>", text2, 40, 0),
             
+            // Motion with k,l should remember column position
+            
             // H,M,L
             //TODO: Implement test for H,M,L. These needs some special test check method since we have to calc the height of the view.
             

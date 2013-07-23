@@ -60,6 +60,14 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     return [self _motionFixed:m];
 }
 
+- (XVimEvaluator*)UNDERSCORE{
+    if(!_insertModeAtCompletion){
+        return [self d];
+    }else{
+        return [self c];
+    }
+}
+    
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
