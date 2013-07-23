@@ -417,6 +417,7 @@
         }
         [self _yankRanges:[NSArray arrayWithObject:[NSValue valueWithRange:r]] withType:motion.type];
     }else{
+        insertionPointAfterYank = _insertionPoint < _selectionBegin ? _insertionPoint : _selectionBegin;
         [self _yankRanges:[self _selectedRanges] withType:motion.type];
     }
     
@@ -1577,18 +1578,7 @@
         _selectionMode = MODE_VISUAL_NONE;
         [self _moveCursor:r.location preserveColumn:NO];
         _selectionBegin = _insertionPoint;
-    }else{
-        NSSelectionAffinity affinity = [_view selectionAffinity];
-        _selectionBegin = r.location;
-        if( affinity == NSSelectionAffinityDownstream ){
-            [self _moveCursor:r.location + r.length - 1 preserveColumn:NO];
-        }else{
-            [self _moveCursor:r.location preserveColumn:NO];
-        }
     }
-    
-    // Apply it back to _view
-    [self _syncState];
 }
 
 /**
