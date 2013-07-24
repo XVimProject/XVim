@@ -99,7 +99,7 @@
             return;
         }
         
-        unichar charcode = [theEvent unmodifiedKeyCode];
+        unichar charcode __unused = [theEvent unmodifiedKeyCode];
         DEBUG_LOG(@"Obj:%p keyDown : keyCode:%d firstCharacter:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [[theEvent characters] characterAtIndex:0], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
         
         if( [window handleKeyEvent:theEvent] ){

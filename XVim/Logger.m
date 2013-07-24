@@ -180,7 +180,7 @@ static Logger* s_defaultLogger = nil;
     Method* m = class_copyMethodList(c, &num);    
     TRACE_LOG(@"METHOD LIST : %@", class);
     for( unsigned int i = 0 ; i < num ; i++ ){
-        SEL selector = method_getName(m[i]);
+        SEL selector __unused = method_getName(m[i]);
         TRACE_LOG(@"%@", NSStringFromSelector(selector) );
     }
 }
@@ -229,8 +229,8 @@ static Logger* s_defaultLogger = nil;
 
 + (void) traceViewInfoImpl:(NSView*)obj subView:(BOOL)sub prefix:(NSString*)pre{
     NSString* className = NSStringFromClass([obj class]);
-    NSRect f = obj.frame;
-    NSRect b = obj.bounds;
+    NSRect f __unused = obj.frame;
+    NSRect b __unused = obj.bounds;
     TRACE_LOG(@"%@ViewInfo : Class:%@ frame:%f,%f,%f,%f bounds:%f,%f,%f,%f", pre, className, f.origin.x, f.origin.y, f.size.width, f.size.height, b.origin.x, b.origin.y, b.size.width, b.size.height);
 
     if( sub ){
