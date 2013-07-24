@@ -404,6 +404,11 @@
     return eval;
 }
 
+- (XVimEvaluator*)C_RSQUAREBRACKET{
+    [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
+    return nil;
+}
+
 - (XVimEvaluator*)HT{
     [[self sourceView] selectNextPlaceholder];
     return nil;
