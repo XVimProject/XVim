@@ -7,6 +7,7 @@
 //
 
 #import "XVimOptions.h"
+#import "DVTFoundation.h"
 
 @interface XVimOptions() {
 @private
@@ -31,6 +32,7 @@
          @"timeoutlen",@"tm",
          @"laststatus",@"ls",
          @"hlsearch",@"hls",
+         @"number", @"nu",
          nil];
         
         // Default values
@@ -45,6 +47,7 @@
         _timeoutlen = @"1000";
         _laststatus = 2;
         _hlsearch = NO;
+        _number = NO;
     }
     return self;
 }
@@ -77,6 +80,29 @@
     if( [self respondsToSelector:NSSelectorFromString(propName)] ){
         [self setValue:value forKey:propName];
     }
+}
+
+
+- (void)setNumber:(BOOL)n{
+    _number = n;
+    [[DVTTextPreferences preferences] setShowLineNumbers:_number];
+    
+    
+    // The following code is just to remember what I have tried and not worked to change preferences
+    /*
+    // This is tu get preference window controller (
+    IDEPreferencesController* ctrl = [IDEPreferencesController defaultPreferencesController];
+    TRACE_LOG(@"%@", [ctrl toolbarAllowedItemIdentifiers:nil]);
+    
+    // Directly manipulate user defaults does not work (It can change the value but not applied to currently existing views)
+    NSUserDefaults* defaults = [NSUserDefaults standardUserDefaults];
+    [defaults setBool:n forKey:@"DVTTextShowLineNumbers"];
+    [defaults synchronize];
+    [[NSApplication sharedApplication] setWindowsNeedUpdate:YES];
+    [[NSApplication sharedApplication] updateWindows];
+    [[IDEApplicationController sharedAppController] _currentPreferenceSetChanged];
+    */
+    
 }
 
 // Helper Methods

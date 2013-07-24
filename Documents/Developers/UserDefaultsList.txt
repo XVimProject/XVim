@@ -1,0 +1,473 @@
+This is the list of NSUserDefaults dictionary keys.
+(To get current configuration you can use this but you can not use this to set configurations because it does not applied to currently existing views correctly.)
+(See DevNotes.txt)
+
+
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/0BABBDAF-7AFD-4328-AF51-BC1C2904612A
+Key:IBGuidesAreEnabled 
+Key:NSNavPanelFileListModeForSaveMode2 
+Key:NSAMPMDesignation 
+Key:NSScrollerButtonDelay 
+Key:IDETextIndexMaxConcurrentOperations 
+Key:com.apple.updatesettings_did_disable_ftp 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/5AB3BE6F-2513-4D95-B212-FCAE160EE775 
+Key:NSSystemFontSize 
+Key:IDETextIndexDisable 
+Key:DVTTextIndentUsingTabs 
+Key:Xcode3ProjectTemplateChooserAssistantSelectedTemplateCategory 
+Key:DVTAppDirectoryIsExtraPlugInPath 
+Key:NSTableView Columns InspectedCustomAttributes 
+Key:NSDragCancelLimit 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace-WithoutBreakpoints/DB75863D-97EA-4110-A0EF-2E6106E8B1FD 
+Key:NSMonthNameArray 
+Key:EnableClangCppIndexing 
+Key:DVTTextBeepOnNonMatchingBrace 
+Key:IDECreateGroupsForFolders 
+Key:DVTTextShowCompletionsOnEsc 
+Key:NSLaterTimeDesignations 
+Key:NSFontSize 
+Key:NSScrollerButtonPeriod 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/18974DDA-B4F7-46BB-AF72-D5E1FDDC95C0 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/6EA27C7F-1A70-4CF8-B326-BBBAAE62947A 
+Key:DVTDefaultLogLevel 
+Key:IDEIndexClangSaveAllReferences 
+Key:IDEIconCreatorCacheIcons 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/74621296-FA91-40CB-86CA-AB93F2F84640 
+Key:DVTFontAndColorCurrentTheme 
+Key:IBHideUncommonClasses 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/C5C7FC19-423F-469E-AC3C-62E3DDC97000 
+Key:com.apple.trackpad.momentumScroll 
+Key:IDEActivityLogShowsAllBuildSteps 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/D95D357B-5531-44BC-B629-0DB665349B43 
+Key:IDEAlwaysShowAllPackagesToInstall 
+Key:DVTTextIndentSoloBraces 
+Key:Xcode3ProjectEditorSourceListVisible 
+Key:NSPreferredWebServices 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/FCD98C00-61DF-4EF1-A98B-A30796B84DB3 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/E6A3B3CC-4C34-4CDA-B3C2-0B0329072CBB 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/86318CBF-AFC7-43D4-BAAA-8BE5EC77BEB4 
+Key:NSNegativeCurrencyFormatString 
+Key:com.apple.trackpad.fourFingerPinchSwipeGesture 
+Key:AssistantEditorsLayout 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace-WithoutBreakpoints/C4A25BCB-99B7-42BB-87F5-3EA75F26C212 
+Key:com.apple.trackpad.twoFingerFromRightEdgeSwipeGesture 
+Key:DTAssetLibraryGroupOutlineViewUIState - com.apple.InterfaceBuilder.AssetCategories.Objects:IBCocoaTouchFramework 
+Key:IDEUserWantsToEnableDeveloperMode 
+Key:NSWindow Frame IDEOrganizerWindow 
+Key:IDEIndexImporterAlwaysLogDeferredChanges 
+Key:IDEIndexingQPPurgeTimeout 
+Key:NSInterfaceStyle 
+Key:IDEIndexSchedulerLowPriority 
+Key:IDELastGMLicenseAgreedTo 
+Key:MultipleSessionEnabled 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/C9E38FC1-355B-4100-927E-DF15CE677518 
+Key:NavPanelFileListModeForSaveMode 
+Key:IDEActivityLogShowsAnalyzerResults 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/9199B6CF-D833-404C-A568-B71E3CDCF99E 
+Key:DVTTextMatchIndentWithLineAbove 
+Key:IDEIndexDeferredJobEnable 
+Key:com.apple.TimeZonePref.Last_Selected_City 
+Key:NSColorPickerSlidersDefaults 
+Key:AppleMiniaturizeOnDoubleClick 
+Key:NSShortMonthNameArray 
+Key:NSNavPanelFileListModeForOpenMode2 
+Key:DVTPlugInManagerUseCache 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/7FE3275F-AED8-4645-8841-D6ADB9AF9600 
+Key:com.apple.DictionaryServices 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/2BE415A2-394E-430D-BF65-A80567E26240 
+Key:AppleScrollAnimationEnabled 
+Key:DTAssetLibraryGroupOutlineViewUIState - com.apple.InterfaceBuilder.AssetCategories.Classes:IBCocoaTouchFramework 
+Key:NSNavLastRootDirectory 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/D480CFA9-E4B6-40F4-9122-B11903B61BB2 
+Key:NSScrollerHasSeparateArrows 
+Key:IDESuppressStopExecutionWarning 
+Key:DVTShowMessageBubbleAnnotations 
+Key:DVTFontAndColorExcludedThemes 
+Key:IDESourceControlPreferencesVersion 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/CDD4654B-BB36-45AE-92A0-D110C7B70F97 
+Key:Xcode3ProjectTemplateChooserAssistantSelectedTemplateSection 
+Key:IDEKeyBindingCurrentPreferenceSet 
+Key:DVTLibraryUIState.Xcode.IDETemplateLibrary.Library.Files 
+Key:IDEFileTemplateChooserAssistantSelectedTemplateCategory 
+Key:kDSAUpdateIDToDownloadPathKey 
+Key:NSNextNextDayDesignations 
+Key:IBViewSizeInspectorPreferredRectType 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/CBCC008A-9184-4BDA-B51E-3C27B1B86D61 
+Key:NSEarlierTimeDesignations 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/B7EC028D-4015-4C93-8C0E-959184E5754F 
+Key:IDEXcodeVersionForAgreedToGMLicense 
+Key:NSDateFormatString 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/E982F759-5E2F-47A7-BFCA-889A38DBE98E 
+Key:NSShortDateFormatString 
+Key:NSColorPanelMode 
+Key:NSLocaleCode 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/98AC1E47-03BC-4AE6-9C0D-AE1712A6D8F7 
+Key:IDEIndexingQPCacheSize 
+Key:NSLanguageName 
+Key:com.apple.trackpad.version 
+Key:IDEIndexDeferredJobGap 
+Key:DVTOnlyExtraPlugInPaths 
+Key:DVTDeveloperAccountManagerAppleIDs 
+Key:NSMenuScrollingOffset 
+Key:com.apple.CommonPanels.CalibrateDisplay.identifier-5B81C5C1 
+Key:com.apple.ColorSync.Devices 
+Key:IDEDisableGitSupportForNewProjects 
+Key:DVTSkipAllowedVersionsCheck 
+Key:IDEIndexSchedulerCheckBattery 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/F3FFD441-C40A-41A7-A731-45E4F04462D8 
+Key:DSAPreferenceRefreshInterval 
+Key:com.apple.preferences.timezone.selected_city 
+Key:Google_O3D_User 
+Key:DVTTextCompletionRecentCompletions 
+Key:IDEIndexClangShowSpellingErrors 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/AF297D56-14F2-4A9D-9CD9-24D31005EA7F 
+Key:DVTPlugInConsistencyCheck 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace 
+Key:com.apple.CommonPanels.CalibrateDisplay.seed 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace-WithoutBreakpoints/5B0CADCA-3BCB-49BA-8949-9C9FDE53208D 
+Key:IDEIndexDBPageSize 
+Key:IBAnnotationQueuingDelayDefaultsKey 
+Key:DSMSubscriptionManagerManualCheckNowDate 
+Key:NSDocumentRevisionsDebugMode 
+Key:AppleMetricUnits 
+Key:IDEHasConvertedXcode3BuildPrefs 
+Key:IDEHexEditorByteGrouping 
+Key:DVTTextUsesSyntaxAwareIndenting 
+Key:AppleAntiAliasingThreshold 
+Key:NSEnableAutoCollapseOutlineDuringDragsDefault 
+Key:Xcode3TargetTemplateChooserAssistantSelectedTemplateCategory 
+Key:IDEBuildingContinueBuildingAfterErrors 
+Key:NSSplitView Subview Frames IDEReviewFilesSplitViewPosition 
+Key:IDESourceControlProjects 
+Key:IDEReviewFilesSelectedChoiceWithoutWorkspace 
+Key:DVTTextAutoSuggestCompletionsDelay 
+Key:PBXBuildDebugLevel 
+Key:NSInputServerLaunchTimeout 
+Key:NSFixedPitchFontSize 
+Key:NSExplicitCharacterEncodingTakesPrecedence 
+Key:IDESourceControlSuppressRevertSelectedDifference 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/CD9E73A1-2006-432D-9203-0A3762A221F4 
+Key:IDEActivityLogShowAllResultsDefaultKey 
+Key:NSWindow Frame IDEEditContextSheet 
+Key:IDESuppressStopTestWarning 
+Key:OSASmartInsertDeleteEnabled 
+Key:IDESourceTreeDisplayNames 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/5BF0B2C3-D16F-49E1-AFC4-6C51DBFF33A6 
+Key:NSUIHeartBeatCycle 
+Key:DVTTextAutoHighlightTokens 
+Key:IBStructureAreaLastKnownOutlineViewModeWidth 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/C5DF6B67-5B3F-4948-A136-93F586606649 
+Key:Xcode3BuildSettingsEditorDisplayMode 
+Key:DVTTextIndentTabWidth 
+Key:DVTTextTabKeyIndentBehavior 
+Key:IDEAlwaysShowLicense 
+Key:IDESingleFileProcessingDefaultSchemeCommand 
+Key:DVTTextPageGuideLocation 
+Key:IDEIndexClangQueriesOnly 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/DCBA4C04-2180-43E4-B26C-393C63859B13 
+Key:IBEnablePropertyLocking 
+Key:NSNavRecentPlaces 
+Key:NSLanguageCode 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/A2DE1838-A992-4C4B-85A3-6172F50B57E0 
+Key:NSShortWeekDayNameArray 
+Key:IDEIndexSchedulerQueueWidth 
+Key:IBStringsTableIgnoreCase 
+Key:IDEIndexDatabaseMaxQueryConnections 
+Key:DVTPresentationAnnotationAlphaAdjustment 
+Key:IDEIndexIncludeAutoImportCodeCompletionResults 
+Key:NSWindow Frame IDEOpenQuickly 
+Key:IDEVariablesViewQuickLookEnabled 
+Key:IBGlobalLastEditorTargetRuntime 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/480695F5-33E2-4A81-92CD-55EB2884797B 
+Key:NSPriorDayDesignations 
+Key:com.apple.AppleModemSettingTool.LastCountryCode 
+Key:NSNavPanelSidebarKeyForOpen 
+Key:IDEiPhoneOrganizerCurrentSimulator 
+Key:DVTDownloadableAutomaticUpdate 
+Key:IDEShouldRunUpgradeCheck 
+Key:IDEDocCollapsedSearchResultsGroups 
+Key:IBDefaultLanguageForRuntime-IBCocoaTouchFramework 
+Key:IDETemplateCompletionDefaultPath 
+Key:IDETimestampOfMobileDeviceDevelopmentPackage 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/E5614855-3384-4674-9B0A-CEB3C446CBE2 
+Key:IDEEnableImplicitBuildDependencies 
+Key:com.apple.trackpad.fourFingerVertSwipeGesture 
+Key:IDEActivityLogShowsWarnings 
+Key:NSNextDayDesignations 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/FD8EFAD6-C0C8-4193-84CE-21D0B555F478 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/A1C04E63-EA8F-4A48-9C94-B0CE8A736091 
+Key:WebIconDatabaseDirectoryDefaultsKey 
+Key:VariablesViewShowsType 
+Key:IBDesktopImageCacheVersionKey 
+Key:NSScrollAnimationEnabled 
+Key:IBViewSizeInspectorPreferredFrameType 
+Key:IDEPollIntervalForAlertAllApp 
+Key:DVTTextShowPageGuide 
+Key:IDETemplateOptions 
+Key:IDELastXcodeFinderStopLocation 
+Key:NSButtonPeriod 
+Key:NSDateTimeOrdering 
+Key:NSDecimalSeparator 
+Key:IDEiPhoneOrganizerCurrentIdentifier 
+Key:NSWindow Frame IDEReviewFilesWindow 
+Key:DBGMemoryBrowserLineNumberFormat 
+Key:DVTTextAutoInsertOpenBracket 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/FBF2B9E7-DFF9-4886-ADA0-D9E54124D834 
+Key:AppleLanguages 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/EDBF3192-F3C6-4A3C-B346-831D83BD673F 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/88DD1A87-8E26-478E-BE06-AE0F3DA072FA 
+Key:IBAppliesAutoResizingRulesWhileResizing 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/A6B929B8-B0BC-4699-847A-F64E33DA669A 
+Key:UsePerConfigurationBuildLocations 
+Key:NSScrollerKnobCount 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/1535F6E8-610D-4434-96E5-BA6B700873B5 
+Key:NSTimeFormatString 
+Key:IDELastBetaLicenseAgreedTo 
+Key:IDEIndexingQPMinCacheSize 
+Key:IDERunActionSelectedTab 
+Key:com.apple.trackpad.rotateGesture 
+Key:BuildSystemCacheMinimumRemovalAgeInHours 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/8AFC2850-7F47-49C9-BF22-4B882A89A4C5 
+Key:kXCDocCheckAndInstallUpdatesAutomatically 
+Key:NSRequireAutoCollapseOutlineAfterDropsDefault 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/F19AD2F8-EFB7-48FC-A290-2B78AF945756 
+Key:AppleGCIdleTimeInterval 
+Key:IDEIndexClangUseBackgroundPriority 
+Key:NavPanelFileListModeForOpenMode 
+Key:IDEIndexClangUseIndexerCallbacks 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/D989AB0D-5606-496E-A48A-F0709E896FAE 
+Key:com.apple.springing.enabled 
+Key:NSQuotedKeystrokeBinding 
+Key:DVTShowNonBreakingSpace 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/DC28C363-008F-41D6-8CA1-CD89A7A6A103 
+Key:NSMenuFlashCount 
+Key:NSNavPanelFileLastListModeForOpenModeKey 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/702A567B-7FA0-47D0-B260-DDF429FF93BB 
+Key:NSWindow Frame NSColorPanel 
+Key:IDELastLocationOfXcodeWhenItemsWereRegisteredWithLaunchServices 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/727FAC61-E4F9-4C0A-90DA-5CD029312522 
+Key:ViEmuSettings 
+Key:NSSystemFont 
+Key:IDEIndexActiveSchemeOnly 
+Key:IBPreferencesMigrated 
+Key:IDESkipDownloadableInstallationDuringFLE 
+Key:IDERecentEditorDocuments 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/7C5C6A46-54A2-47AD-AC6E-A68A1600FF60 
+Key:IDEKeyBindingExcludedPreferenceSet 
+Key:com.apple.trackpad.enableSecondaryClick 
+Key:DVTTextAutoSuggestCompletionsStyle 
+Key:Xcode3BuildSettingsEditorMode 
+Key:IDELastLocationOfXcodeWhenItemsWereRegisteredWithLaunchSerives 
+Key:DVTSelectToInsideMatchingBraces 
+Key:DVTTextWrappedLinesIndentWidth 
+Key:com.apple.mouse.tapBehavior 
+Key:DVTTextSyntaxColoringSizeLimit 
+Key:DVTTextEditorTrimTrailingWhitespace 
+Key:DVTSelectToMatchingBrace 
+Key:DVTSelectToInsideMatchingQuotes 
+Key:DVTTextShowFoldingSidebar 
+Key:NSWindowResizeTime 
+Key:DVTTextCentersOnScroll 
+Key:NSFixedPitchFont 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/687A9A30-EF07-43CE-A1C1-EDC03625365D 
+Key:com.apple.trackpad.threeFingerTapGesture 
+Key:NSEnableAutoExpandOutlineDuringDragsDefault 
+Key:XCShowWelcomeWindow 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/EE503534-1D86-4F66-86FA-16FED80B1537 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/488318D0-2048-4199-87E7-5AD3922984AC 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/237B01EF-ADCA-4E0A-8001-4838426A6C71 
+Key:NSWindow Frame IDEManageContextSheet 
+Key:NSYearMonthWeekDesignations 
+Key:NSNavPanelExpandedSizeForOpenMode 
+Key:ConsoleAutoCompletionDelay 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/5B0CADCA-3BCB-49BA-8949-9C9FDE53208D 
+Key:NSSplitView Subview Frames IDESourceControlCommitWindowSplitViewPosition 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/32852849-DE52-4B1E-836B-B1F4E173C115 
+Key:NSTimeDateFormatString 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/6EAD9740-D160-4DA2-81ED-7301CA1249C1 
+Key:IDETimestampOfMobileDeviceFrameworkPackage 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/1D531ADD-3DBB-4355-984C-4C2BBFF441D3 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/759D3CF4-8820-4644-B811-9C043F0F4F35 
+Key:NSMargins 
+Key:VariablesViewViewMode 
+Key:AlwaysShowTabBar 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/CB734E71-353F-4C3C-B0CC-F678E4DE464D 
+Key:DTAssetLibraryGroupOutlineViewUIState - com.apple.InterfaceBuilder.AssetCategories.Media:IBCocoaTouchFramework 
+Key:com.apple.trackpad.pinchGesture 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/59794B81-D58B-4E86-B64F-E27A0D74414B 
+Key:NSNavPanelSidebarKeyForSave 
+Key:IDEXcodeVersionForAgreedToBetaLicense 
+Key:IDEDocViewerLastViewedURLKey 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/FD086EFE-0EC9-4311-83CA-D46811259370 
+Key:IDEIndexSchedulerRandomize 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/A1F518CB-8035-4398-BFF1-7AA91FD47070 
+Key:IDEActivityLogShowsErrors 
+Key:com.apple.springing.delay 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/F287B7D3-5F36-472B-BA3C-7757C51B0606 
+Key:NSScrollerButtonAcceleration 
+Key:NSDraggingAutoscrollDelay 
+Key:IBUIViewSizeInspectorPreferredRectOrigin 
+Key:IDEPrefersTabsToWindows 
+Key:NSDragAutoscrollAreaWidth 
+Key:IBViewSizeInspectorRectPinning-Flipped 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/EE475302-A601-4A26-A633-0B95C999FCAA 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/19F25E45-06AF-4099-B03E-933691F50940 
+Key:DVTTextShowInvisibleCharacters 
+Key:DVTTextShowMatchingBrace 
+Key:NSThisDayDesignations 
+Key:DVTConvertExistingFilesLineEndings 
+Key:NSUseSavedScreen 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/8F7A2E46-86BB-4B90-AE0B-365CFD040014 
+Key:EnableRecursiveSearchPaths 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/2A3A4C1C-CF12-47F0-AD89-B0EB14056BF9 
+Key:IDEReviewFilesSelectedChoiceWithWorkspace 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/1FCD2497-A764-4E1F-B096-7F3AD097A479 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/6EF37217-F926-4C4B-8A9A-94F407EFCE32 
+Key:IBThresholdForNotificationOnSave 
+Key:DVTTextIndentSlashSlashComments 
+Key:DVTDisclosureViewDisclosedStates 
+Key:DVTTextAnnotationDisplayPolicy 
+Key:com.apple.trackpad.threeFingerHorizSwipeGesture 
+Key:NSInternationalCurrencyString 
+Key:DVTTextAutoInsertCloseBrace 
+Key:IDEInspectorAreaUserPreferredCategories 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/19A2DE5C-FEC9-49DB-8930-38467DB7203F 
+Key:DVTShowControlCharacters 
+Key:IDESourceControlRepositoryDefaultsKey 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/59BEDAD5-15E0-4614-ADE6-58A2A7594EEE 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/F46E3583-338A-4787-8578-9506B5BC19A3 
+Key:_IDEClangDiagnosticQueuingDelay 
+Key:IDEIndexClangGetCompletionStrings 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/F4FCFE61-EC34-4C32-8F7C-86FEF9FC5043 
+Key:NSTableView Sort Ordering InspectedCustomAttributes 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/AD715506-669E-495E-AB3A-2F96562F9A34 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/6C70C879-E0E4-4CC1-9CC2-6C2AF9975480 
+Key:com.apple.trackpad.twoFingerDoubleTapGesture 
+Key:Xcode.AlertEvents.4_1 
+Key:DVTLibraryUIState.Xcode.DVTKit.CocoaIntegration.ObjectsLibrary 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/39E055A4-D4B9-48DC-BD92-676CD69F3A37 
+Key:NSNavPanelFileLastListModeForSaveModeKey 
+Key:DVTRecentColors 
+Key:CurrentAlertPreferencesSelection 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/75ECDEB5-C3AF-4036-B5B2-88351B69331F 
+Key:NSDecimalDigits 
+Key:IBDefaultLanguageForRuntime-IBCocoaFramework 
+Key:Xcode3ProjectTemplateChooserAssistantSelectedTemplateName 
+Key:NSMenuScrollingSpeed 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/492E712B-27CD-4E9F-B940-C172815E56A7 
+Key:DVTTextCompletionsIncludeParameters 
+Key:IBViewSizeInspectorRectPinning 
+Key:NSButtonDelay 
+Key:NSLanguages 
+Key:DVTTextCodeFocusFollowsSelection 
+Key:IDEOpenQuicklyRecentInputStrings 
+Key:IBStringsTableExcludeEmptyStrings 
+Key:NSFont 
+Key:AppleID 
+Key:IDEEnableLiveIssues 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/06298158-802F-4FD4-A8A9-F0AFE21BFD9A 
+Key:IDELibraryAreaUserPreferredCategories 
+Key:IDEHaveRemovediTunesSoftwareServiceCache 
+Key:NSResetIncrementalSearchOnFailure 
+Key:EnablePredictiveCompilation 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/FD759A92-0416-451F-9F9A-794B71A75886 
+Key:DVTLibraryUIState.Xcode.DVTKit.CocoaTouchIntegration.StoryboardObjectsLibrary 
+Key:DVTTextEnableTypeOverCompletions 
+Key:IDELastVersionOfXcodeThatRegisteredLaunchServicesItems 
+Key:IBStoryboardOutlineViewHidden 
+Key:IBDocumentOutlineViewExpanded 
+Key:NSPreferredSpellServerLanguage 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/40CDB6A4-FBE3-426B-8F6C-2329F05BC4A9 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/0850CF10-D8DB-49CF-BB04-15ED817427B4 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/A9901447-48DF-4DC8-9B89-4F4271C9F563 
+Key:Xcode3TargetTemplateChooserAssistantSelectedTemplateName 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/FCD21272-482B-4DFE-BE0D-2EC4C04B133D 
+Key:com.apple.keyboard.fnState 
+Key:DVTTextCodeFocusOnHover 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/E0CD0244-AD32-4B86-A364-08D1C6B929AB 
+Key:DVTTextDefaultTextEncoding 
+Key:IDEBuildLocationStyle 
+Key:NSFormalName 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/4F71290E-BD30-469F-BC60-A2BBDAC7168B 
+Key:IDEFileTemplateChooserAssistantSelectedTemplateName 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/9959CEED-A548-4033-AA0A-2B60380F5F08 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/9014390A-79AC-4531-A980-A693BA5A7590 
+Key:BuildSystemCacheSizeInMegabytes 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/F1B8A0B0-60CF-44CF-AEA4-5647C146B4BA 
+Key:DVTTextEditorWrapsLines 
+Key:Xcode3TargetTemplateChooserAssistantSelectedTemplateSection 
+Key:AppleCollationOrder 
+Key:NSEnableConcurrentViewDrawing 
+Key:IDEIndexFollowsActiveScheme 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/8579FB84-6394-4C97-9D0C-1741EC615D59 
+Key:DVTTextAlignConsecutiveSlashSlashComments 
+Key:NSWindow Frame IDEPreferencesPanel 
+Key:NSBoldSystemFont 
+Key:com.apple.trackpad.threeFingerVertSwipeGesture 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/DB75863D-97EA-4110-A0EF-2E6106E8B1FD 
+Key:NSCurrencySymbol 
+Key:NSNavPanelExpandedSizeForSaveMode 
+Key:com.apple.trackpad.threeFingerDragGesture 
+Key:IDEAlwaysShowAllXcodesToRemove 
+Key:Country 
+Key:com.apple.trackpad.fiveFingerPinchSwipeGesture 
+Key:AppleShowAllExtensions 
+Key:DVTTextDefaultLineEndings 
+Key:IDEIndexClangRecordMethodOverrides 
+Key:DVTFilePathWatchWholeVolumes 
+Key:AppleMeasurementUnits 
+Key:NSNavPanelExpandedStateForSaveMode 
+Key:DVTTextEditorTrimWhitespaceOnlyLines 
+Key:NSQuitAlwaysKeepsWindows 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/C252C6AA-5DB9-4A74-A050-BB319FD585B6 
+Key:OpenQuicklyRecentInputStrings 
+Key:DVTMessageTracer.enabled 
+Key:DVTScrollToEndOfMatchingBrace 
+Key:NSHourNameDesignations 
+Key:DVTTextShowLineNumbers 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/66E47F85-D4D9-41E4-A3ED-6FB8EF011E8E 
+Key:IDEIndexClangIncludeComments 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/C371C5FC-BB44-4C9B-8B51-0416E1F8CBB9 
+Key:IDESuppressStopBuildWarning 
+Key:DVTTextAutoHighlightTokensDelay 
+Key:DVTTextIndentWidth 
+Key:com.apple.trackpad.fourFingerHorizSwipeGesture 
+Key:IDEIndexImporterUseSpliceTable 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/B64B5469-2C81-4CCE-9998-CD6F86D0FD0F 
+Key:UseSpecificationCache 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/2DFC35FB-5359-48E3-AA99-EBD03931B292 
+Key:IDEFileTemplateChooserAssistantSelectedTemplateSection 
+Key:com.apple.trackpad.scrollBehavior 
+Key:NSScrollerKnobDelay 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/0C29B840-CBFA-4EA1-9EBE-C722F6977B24 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/CCBB42B7-7A02-4B96-8569-631BCFE51C0A 
+Key:AppleKeyboardUIMode 
+Key:NSSmartCMYKColorConversion 
+Key:DSAPreferenceSubscriptions 
+Key:NSThousandsSeparator 
+Key:NSParentContext 
+Key:DVTTextSoloBraceIndentWidth 
+Key:AppleLocale 
+Key:NSWeekDayNameArray 
+Key:IDEDefaultPrimaryEditorFrameSizeForPaths 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/4769A3DD-F16B-45E2-8C67-3FA43C6538D2 
+Key:NSShortTimeDateFormatString 
+Key:DVTTextAutoSuggestCompletions 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/2301FA7D-8C96-4F36-B29E-774DF552169F 
+Key:NSPreferredSpellServerVendors 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/8817DCFB-21AF-4760-9AC6-71933E5423C9 
+Key:NSTableView Hidden Columns InspectedCustomAttributes 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/C1D8DE17-2E2F-4911-B179-3C73018AC4D5 
+Key:DVTLibraryUIState.Xcode.DVTKit.CocoaTouchIntegration.ObjectsLibrary 
+Key:NSPositiveCurrencyFormatString 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/943AD41C-2D9C-48A6-B8A4-724C5D53C6AE 
+Key:IBConnectionPanelFrameViewDefaultMaxContentHeight 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/9F7611AF-E886-494A-8EC8-DA31887897F7 
+Key:IBPreserveBundleContentsDuringSaves 
+Key:VariablesViewShowsFormattedSummary 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace/716C7AEB-F567-4675-A217-85E0EEBC0CD4 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.Workspace-WithoutBreakpoints/419D3582-EEE9-499C-85FA-C866D51E6E92 
+Key:NSToolbar Configuration Xcode.IDEKit.ToolbarDefinition.SimpleFilesFocused/ED8190D7-31AE-436A-A94D-CAF9CC3BF1FE 
+Key:DVTTextAutoIndentCharacters 
+Key:IDEDoMobileDeviceLoadedCheck 
+Key:NSUseCocoaInputServers

@@ -76,6 +76,21 @@ DVTFoldingTextStorage's methods but sometimes we need to know acutal length in i
 When I tried to implement "hlsearch" I had to update text view (text storage) whenever they type (insert/delete) text because they puroduce
 some text which match/unmatch the currently search string.
 Highlighting a text is done via editing text storage object in a text view (DVTFoldingTextStorage in this case).
-So I update the storage whenever the type. But it causes exceptions in DVTFoldinTextStorage.
+So I update the storage whenever they type something. But it causes exceptions in DVTFoldinTextStorage.
 If I tried to edit the storage while the view is showing autocompletion it causes exception and break the completion feature.
 Currently I use NSTextViewDidChangeNotification to know when to update highlight state.
+
+
+### Preferences
+Colors or some features on Xcode is configured via "Preferences" menu.
+Preferences are mainly managed by NSUserDefaults.
+But if you change NSUserDefaults directly it is not applied to Xcode views.
+(I think the views are listening "Preference" controller and not the NSUserDefaults itself)
+
+What I found so far is that for text preferences you can use DVTTextPreferences class. (It took 5 hours to find this...)
+It has a class method which returns global singleton DVTTextPreferences object. When you set its property
+it is properly affected to views.
+It is like...
+
+      [DVTTextPreferences preferences].showLineNumbers = YES;
+      

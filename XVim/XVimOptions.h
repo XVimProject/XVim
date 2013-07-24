@@ -17,6 +17,7 @@
 @property BOOL smartcase;
 @property BOOL debug;
 @property BOOL hlsearch;
+@property BOOL number;
 @property (copy) NSString *clipboard;
 @property (copy) NSString *guioptions;
 @property (copy) NSString *timeoutlen;
