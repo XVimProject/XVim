@@ -35,7 +35,7 @@ a, A, i, I, o, O
 
 ## Yank, put and change
 
-d, dd, D, y, yy, Y, c, cc, C, r, s, S, x, X
+d, dd(d_), D, y, yy(y_), Y, c, cc(c_), C, r, s, S, x, X
 
 ## Line join
 
@@ -44,7 +44,6 @@ J
 ## Shift block
 
 Normal mode: >, >>, <, <<
-
 
 ## Case change operations
 
