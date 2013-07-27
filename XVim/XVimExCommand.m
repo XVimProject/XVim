@@ -868,19 +868,19 @@
 }
 
 - (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_INSERT withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_INSERT withArgs:args remap:YES];
 }
 
 - (void)inoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_INSERT withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_INSERT withArgs:args remap:NO];
 }
 
 - (void)iunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self unmapMode:MODE_INSERT withArgs:args];
+    [self unmapMode:XVIM_MODE_INSERT withArgs:args];
 }
 
 - (void)imapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self mapClearMode:MODE_INSERT];
+    [self mapClearMode:XVIM_MODE_INSERT];
 }
 
 - (void)make:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -900,44 +900,38 @@
 
 - (void)map:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"n" forMapMode:MODE_NORMAL];
-        [self writeMapsToConsoleWithFirstLetter:@"o" forMapMode:MODE_OPERATOR_PENDING];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        [self writeMapsToConsoleWithFirstLetter:@"n" forMapMode:XVIM_MODE_NORMAL];
+        [self writeMapsToConsoleWithFirstLetter:@"o" forMapMode:XVIM_MODE_OPERATOR_PENDING];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_VISUAL];
         return;
     }
-	[self mapMode:MODE_GLOBAL_MAP withArgs:args remap:YES];
-	[self mapMode:MODE_NORMAL withArgs:args remap:YES];
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
-	[self mapMode:MODE_VISUAL withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_NORMAL withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_VISUAL withArgs:args remap:YES];
 }
 
 - (void)noremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"n" forMapMode:MODE_NORMAL];
-        [self writeMapsToConsoleWithFirstLetter:@"o" forMapMode:MODE_OPERATOR_PENDING];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        [self writeMapsToConsoleWithFirstLetter:@"n" forMapMode:XVIM_MODE_NORMAL];
+        [self writeMapsToConsoleWithFirstLetter:@"o" forMapMode:XVIM_MODE_OPERATOR_PENDING];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_VISUAL];
         return;
     }
-	[self mapMode:MODE_GLOBAL_MAP withArgs:args remap:NO];
-	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:NO];
-	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_NORMAL withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_VISUAL withArgs:args remap:NO];
 }
 
 - (void)unmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self unmapMode:MODE_GLOBAL_MAP withArgs:args];
-	[self unmapMode:MODE_NORMAL withArgs:args];
-	[self unmapMode:MODE_OPERATOR_PENDING withArgs:args];
-	[self unmapMode:MODE_VISUAL withArgs:args];
+	[self unmapMode:XVIM_MODE_NORMAL withArgs:args];
+	[self unmapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args];
+	[self unmapMode:XVIM_MODE_VISUAL withArgs:args];
 }
 
 - (void)mapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapClearMode:MODE_GLOBAL_MAP];
-	[self mapClearMode:MODE_NORMAL];
-	[self mapClearMode:MODE_OPERATOR_PENDING];
-	[self mapClearMode:MODE_VISUAL];
+	[self mapClearMode:XVIM_MODE_NORMAL];
+	[self mapClearMode:XVIM_MODE_OPERATOR_PENDING];
+	[self mapClearMode:XVIM_MODE_VISUAL];
 }
 
 - (void)mapMode:(XVIM_MODE)mode withArgs:(XVimExArg*)args remap:(BOOL)remap{
@@ -1022,54 +1016,50 @@
 
 - (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_NORMAL];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_NORMAL];
         return;
     }
-	[self mapMode:MODE_NORMAL withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_NORMAL withArgs:args remap:YES];
 }
 
 - (void)nnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_NORMAL];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_NORMAL];
         return;
     }
-	[self mapMode:MODE_NORMAL withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_NORMAL withArgs:args remap:NO];
 }
 
 - (void)nunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self unmapMode:MODE_NORMAL withArgs:args];
+    [self unmapMode:XVIM_MODE_NORMAL withArgs:args];
 }
 
 - (void)nmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self mapClearMode:MODE_NORMAL];
+    [self mapClearMode:XVIM_MODE_NORMAL];
 }
 
 - (void)omap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_OPERATOR_PENDING];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_OPERATOR_PENDING];
         return;
     }
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:YES];
 }
 
 - (void)onoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-	[self mapMode:MODE_OPERATOR_PENDING withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:NO];
 }
 
 - (void)ounmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_OPERATOR_PENDING];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_OPERATOR_PENDING];
         return;
     }
-    [self unmapMode:MODE_OPERATOR_PENDING withArgs:args];
+    [self unmapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args];
 }
 
 - (void)omapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self mapClearMode:MODE_OPERATOR_PENDING];
+    [self mapClearMode:XVIM_MODE_OPERATOR_PENDING];
 }
 
 - (void)pcounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1177,28 +1167,26 @@
 
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_VISUAL];
         return;
     }
-	[self mapMode:MODE_VISUAL withArgs:args remap:YES];
+	[self mapMode:XVIM_MODE_VISUAL withArgs:args remap:YES];
 }
 
 - (void)vnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
-        [self writeMapsToConsoleWithFirstLetter:@"" forMapMode:MODE_GLOBAL_MAP];
-        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:MODE_VISUAL];
+        [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_VISUAL];
         return;
     }
-	[self mapMode:MODE_VISUAL withArgs:args remap:NO];
+	[self mapMode:XVIM_MODE_VISUAL withArgs:args remap:NO];
 }
 
 - (void)vunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self unmapMode:MODE_VISUAL withArgs:args];
+    [self unmapMode:XVIM_MODE_VISUAL withArgs:args];
 }
 
 - (void)vmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [self mapClearMode:MODE_VISUAL];
+    [self mapClearMode:XVIM_MODE_VISUAL];
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w

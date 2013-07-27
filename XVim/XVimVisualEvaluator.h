@@ -7,7 +7,6 @@
 //
 
 #import "XVimMotionEvaluator.h"
-#import "XVimVisualMode.h"
 
 // TODO:
 // insertionPoint in Visual mode is different from NSTextView's point obtained from selectedRange.
@@ -15,8 +14,8 @@
 // They only rely on their interface to handle them.
 @interface XVimVisualEvaluator : XVimMotionEvaluator 
 
-- (id)initWithWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode;
-- (id)initWithWindow:(XVimWindow*)window mode:(VISUAL_MODE)mode withRange:(NSRange)range; // Range is line numbers if mode == MODE_LINE
-
+- (id)initWithWindow:(XVimWindow*)window mode:(XVIM_VISUAL_MODE)mode;
+- (id)initWithLastVisualStateWithWindow:(XVimWindow *)window;
+    
 
 @end

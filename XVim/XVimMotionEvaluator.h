@@ -16,8 +16,6 @@
 @interface XVimMotionEvaluator : XVimNumericEvaluator
 @property (strong) XVimMotion* motion;
 
--(XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
 
 /**

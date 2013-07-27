@@ -83,7 +83,7 @@
 	return @"-- INSERT --";
 }
 - (XVIM_MODE)mode{
-    return MODE_INSERT;
+    return XVIM_MODE_INSERT;
 }
 
 - (void)becameHandler{
@@ -93,8 +93,9 @@
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	NSRange range = [[self sourceView] selectedRange];
-	return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_CHARACTER withRange:range] autorelease];
+	// NSRange range = [[self sourceView] selectedRange];
+	//return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER withRange:range] autorelease];
+    return self;
 }
 
 - (float)insertionPointHeightRatio{
@@ -123,7 +124,7 @@
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
-	return [keymapProvider keymapForMode:MODE_INSERT];
+	return [keymapProvider keymapForMode:XVIM_MODE_INSERT];
 }
 
 - (NSString*)getInsertedText{
@@ -192,7 +193,8 @@
     
     // Store off any needed text
     XVim *xvim = [XVim instance];
-    [xvim fixRepeatCommand];
+    xvim.lastVisualMode = self.sourceView.selectionMode;
+    [xvim fixOperationCommands];
     if( _oneCharMode ){
     }else if (!self.movementKeyPressed){
         //[self recordTextIntoRegister:xvim.recordingRegister];

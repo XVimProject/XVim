@@ -14,6 +14,10 @@
 
 @implementation XVimTildeEvaluator
 
+- (XVimEvaluator*)fixWithNoMotion:(NSUInteger)count{
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, count)];
+}
+
 - (XVimEvaluator*)TILDE{
     if ([self numericArg] < 1) 
         return nil;

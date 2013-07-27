@@ -70,6 +70,7 @@
     return [self _motionFixed:m];
 }
 
+/*
 - (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
     if( _forcedMotionType != CHARACTERWISE_EXCLUSIVE){
@@ -85,6 +86,7 @@
 	XVimEvaluator *ret = [self motionFixedFrom:from To:to Type:type];
 	return ret;
 }
+ */
 
 -(XVimEvaluator*)_motionFixed:(XVimMotion*)motion{
     if( _forcedMotionType == CHARACTERWISE_EXCLUSIVE){ // CHARACTERWISE_EXCLUSIVE means 'v' is pressed and it means toggle inclusive/exclusive. So its not always "exclusive"
@@ -371,7 +373,9 @@
     cur_mark.document = [self.sourceView documentURL].path;
     [[XVim instance].marks setMark:cur_mark forName:@"'"];
     
-    return [self _motionFixedFrom:cur_pos To:to Type:motionType];
+    XVimMotion* m =XVIM_MAKE_MOTION(MOTION_POSITION, motionType, MOTION_OPTION_NONE, self.numericArg);
+    m.position = to;
+    return [self _motionFixed:m];
 }
 
 // SQUOTE ( "'{mark-name-letter}" ) moves the cursor to the mark named {mark-name-letter}
@@ -423,6 +427,7 @@
 // Note: underscore without any numeric arguments behaves like caret but with a numeric argument greater than 1
 // it will moves to start of the numeric argument - 1 lines down.
 - (XVimEvaluator*)UNDERSCORE{
+    // TODO add this motion interface to XVimSourceView
     XVimSourceView* view = [self.window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger repeat = self.numericArg;
@@ -433,7 +438,9 @@
     }else if(NSNotFound == head){
         head = r.location;
     }
-    return [self _motionFixedFrom:r.location To:head Type:CHARACTERWISE_EXCLUSIVE];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
+    m.position = head;
+    return [self _motionFixed:m];
 }
 
 - (XVimEvaluator*)PERCENT:(XVimWindow*)window {

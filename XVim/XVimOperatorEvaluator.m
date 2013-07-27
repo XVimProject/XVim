@@ -50,7 +50,7 @@
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
-	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
+	return [keymapProvider keymapForMode:XVIM_MODE_OPERATOR_PENDING];
 }
 
 - (XVimEvaluator*)a{
@@ -66,16 +66,19 @@
 }
 
 - (XVimEvaluator*)_motionFixed:(XVimMotion *)motion{
+    // We have to save current selection range before fix the command to pass them to fixOperationCommandInMode...
     XVimEvaluator* evaluator = [super _motionFixed:motion];
     // Fix repeat command for change here (except for Yank)
     // Also need to set "." mark for last change.
     // We do not fix the change here if next evaluator is not nil becaust it waits more input for fix the command.
     // This happens for a command like "cw..."
-    if( nil == evaluator && ![NSStringFromClass([self class]) isEqualToString:@"XVimYankEvaluator"]){
+    if( nil == evaluator ){
         XVimSourceView* view = self.window.sourceView;
-        [[XVim instance] fixRepeatCommand];
-        XVimMark* mark = XVimMakeMark([self.sourceView lineNumber:view.insertionPoint], [self.sourceView columnNumber:view.insertionPoint], view.documentURL.path);
-        [[XVim instance].marks setMark:mark forName:@"."];
+        if( ![NSStringFromClass([self class]) isEqualToString:@"XVimYankEvaluator"]){
+            [[XVim instance] fixOperationCommands];
+            XVimMark* mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);
+            [[XVim instance].marks setMark:mark forName:@"."];
+        }
     }
     return evaluator;
 }

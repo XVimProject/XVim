@@ -40,7 +40,6 @@
 	}
     
     return nil;
-	//return [self _motionFixedFrom:cursorLocation To:found.location Type:CHARACTERWISE_EXCLUSIVE];
 }
 
 - (XVimEvaluator*)ASTERISK:(XVimWindow*)window{

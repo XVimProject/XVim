@@ -42,7 +42,7 @@
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
-	return [keymapProvider keymapForMode:MODE_OPERATOR_PENDING];
+	return [keymapProvider keymapForMode:XVIM_MODE_OPERATOR_PENDING];
 }
 
 - (XVimEvaluator*)b{

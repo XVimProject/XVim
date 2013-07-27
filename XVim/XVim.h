@@ -7,9 +7,10 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimDefs.h"
 #import "XVimKeymapProvider.h"
 #import "XVimTextViewProtocol.h"
-#import "XVimMode.h"
+#import "XVimKeyStroke.h"
 
 @class XVimKeymap;
 @class XVimOptions;
@@ -22,6 +23,8 @@
 @class XVimCommandField;
 @class XVimMarks;
 @class XVimMotion;
+@class XVimRegisterManager;
+
 
 extern NSString * const XVimDocumentChangedNotification;
 extern NSString * const XVimDocumentPathKey;
@@ -37,7 +40,11 @@ extern NSString * const XVimDocumentPathKey;
 @property (readonly) XVimRegisterManager* registerManager;
 @property (readonly) XVimHistoryHandler* exCommandHistory;
 @property (readonly) XVimHistoryHandler* searchHistory;
-@property (readonly) XVimMutableString *repeatRegister;
+@property (readonly) XVimMutableString *lastOperationCommands;
+@property  XVIM_VISUAL_MODE lastVisualMode;
+@property  XVimPosition lastVisualPosition;
+@property  XVimPosition lastVisualSelectionBegin;
+
 @property (copy) NSString* lastPlaybackRegister;
 @property (copy) NSString* document;
 @property (nonatomic) BOOL isExecuting; // For @x command executing
@@ -49,19 +56,19 @@ extern NSString * const XVimDocumentPathKey;
  * Repeat(.) command related methods.
  *
  * How to use:
- * Call appendRepeatKeyStroke to append repeat register.
- * (This is not real register but just XVimString)
- * When the command is fixed call fixRepeatCommand method.
- * This set XVim's repeatRegister property (until then it never changes)
- * If you want to cancel the input for the repeat call cancelRepeatCommand.
+ * Call appendOperationKeyStroke to append operation commands.
+ * Until you call fixOperationCommand it is saved int temporary buffer.
+ * When the command is fixed call fixOperationCommand method.
+ * This saves the commands to lastOperationCommands property.
+ * If you want to cancel the command call cancelOperationCommands.
  *
  * This is because not all the key input should be recorded into
  * repeat command register but only edit commands should be stored.
  *
  * Whenever key input occurs key hanlder(XVimWindow) calls
- * appendRepeatKeyStroke method with the input.
- * When the command is fixed in edit command related evaluators
- * it calls fixRepeatCommand.
+ * appendOperationKeyStroke method with the input.
+ * When the command is fixed with edit command related evaluators
+ * it calls fixOperationCommand.
  * If it is not called and when a command(series of key input) is 
  * finished XVimWindow calls cancelRepeatCommand not to store the
  * key input recorded in repeat regisger so far.
@@ -71,9 +78,9 @@ extern NSString * const XVimDocumentPathKey;
  * When in repeating the key input never recorded into 
  * repeat regisgter
  **/
-- (void)appendRepeatKeyStroke:(XVimString*)stroke;
-- (void)fixRepeatCommand;
-- (void)cancelRepeatCommand;
+- (void)appendOperationKeyStroke:(XVimString*)stroke;
+- (void)fixOperationCommands;
+- (void)cancelOperationCommands;
 - (void)startRepeat;
 - (void)endRepeat;
 

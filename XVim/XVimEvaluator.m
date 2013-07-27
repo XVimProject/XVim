@@ -111,7 +111,7 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
-	return [keymapProvider keymapForMode:MODE_GLOBAL_MAP];
+	return [keymapProvider keymapForMode:XVIM_MODE_NORMAL];
 }
 
 - (XVimEvaluator*)defaultNextEvaluator{
@@ -119,10 +119,11 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	if( [self sourceView].selectionMode == MODE_VISUAL_NONE){
+	if( [self sourceView].selectionMode == XVIM_VISUAL_NONE){
         return [[[XVimNormalEvaluator alloc] init] autorelease];
     }else{
-        return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_CHARACTER withRange:NSMakeRange(0,0)] autorelease];
+        //return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER withRange:NSMakeRange(0,0)] autorelease];
+        return [[[XVimNormalEvaluator alloc] init] autorelease];
     }
 }
 
@@ -159,7 +160,7 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
 
 - (XVIM_MODE)mode{
-    return MODE_NORMAL;
+    return XVIM_MODE_NORMAL;
 }
 
 - (BOOL)isRelatedTo:(XVimEvaluator*)other {

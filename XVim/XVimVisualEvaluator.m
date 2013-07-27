@@ -30,49 +30,61 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 @interface XVimVisualEvaluator(){
     BOOL _waitForArgument;
 	NSRange _operationRange;
-    VISUAL_MODE _mode;
+    XVIM_VISUAL_MODE _visual_mode;
 }
+@property XVimPosition initialFromPos;
+@property XVimPosition initialToPos;
 @end
 
 @implementation XVimVisualEvaluator 
-
-- (id)initWithWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode {
-    return [self initWithWindow:window mode:mode withRange:NSMakeRange(NSNotFound,0)];
+- (id)initWithLastVisualStateWithWindow:(XVimWindow *)window{
+    if( self = [self initWithWindow:window mode:[XVim instance].lastVisualMode] ){
+        self.initialFromPos = [XVim instance].lastVisualSelectionBegin;
+        self.initialToPos = [XVim instance].lastVisualPosition;
+    }
+    return self;
 }
-
-- (id)initWithWindow:(XVimWindow *)window mode:(VISUAL_MODE)mode withRange:(NSRange)range{
+    
+- (id)initWithWindow:(XVimWindow *)window mode:(XVIM_VISUAL_MODE)mode {
 	if (self = [self initWithWindow:window]) {
         _waitForArgument = NO;
-        _mode = mode;
-		_operationRange = range;
+        _visual_mode = mode;
+        self.initialFromPos = XVimMakePosition(NSNotFound, NSNotFound);;
+        self.initialToPos = XVimMakePosition(NSNotFound, NSNotFound);;
 	}
-	return self;
+    return self;
 }
 
 - (NSString*)modeString {
-	return MODE_STRINGS[_mode];
+	return MODE_STRINGS[_visual_mode];
 }
 
 - (XVIM_MODE)mode{
-    return MODE_VISUAL;
+    return XVIM_MODE_VISUAL;
 }
 
 - (void)becameHandler{
     [super becameHandler];
-    [self.sourceView changeSelectionMode:_mode];
+    if( self.initialToPos.line != NSNotFound ){
+        [self.sourceView moveToPosition:self.initialFromPos];
+        [self.sourceView changeSelectionMode:_visual_mode];
+        [self.sourceView moveToPosition:self.initialToPos];
+    }else{
+        [self.sourceView changeSelectionMode:_visual_mode];
+    }
 }
-    
+
 - (void)didEndHandler{
     if( !_waitForArgument ){
         [super didEndHandler];
-        [self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
+        [self.sourceView changeSelectionMode:XVIM_VISUAL_NONE];
         // TODO:
         //[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     }
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
-	return [keymapProvider keymapForMode:MODE_VISUAL];
+	return [keymapProvider keymapForMode:XVIM_MODE_VISUAL];
 }
 
 - (void)drawRect:(NSRect)rect{
@@ -86,6 +98,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
+    [XVim instance].lastVisualMode = self.sourceView.selectionMode;
+    [XVim instance].lastVisualPosition = self.sourceView.insertionPosition;
+    [XVim instance].lastVisualSelectionBegin = self.sourceView.selectionBeginPosition;
+    
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
     /**
      * The folloing code is to draw insertion point when its visual mode.
@@ -199,28 +215,28 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)v{
 	XVimSourceView *view = [self sourceView];
-    if( view.selectionMode == MODE_CHARACTER ){
+    if( view.selectionMode == XVIM_VISUAL_CHARACTER ){
         return  [self ESC];
     }
-    [view changeSelectionMode:MODE_CHARACTER];
+    [view changeSelectionMode:XVIM_VISUAL_CHARACTER];
     return self;
 }
 
 - (XVimEvaluator*)V{
 	XVimSourceView *view = [self sourceView];
-    if( view.selectionMode == MODE_LINE){
+    if( view.selectionMode == XVIM_VISUAL_LINE){
         return  [self ESC];
     }
-    [view changeSelectionMode:MODE_LINE];
+    [view changeSelectionMode:XVIM_VISUAL_LINE];
     return self;
 }
 
 - (XVimEvaluator*)C_v{
 	XVimSourceView *view = [self sourceView];
-    if( view.selectionMode == MODE_BLOCK){
+    if( view.selectionMode == XVIM_VISUAL_BLOCK){
         return  [self ESC];
     }
-    [view changeSelectionMode:MODE_BLOCK];
+    [view changeSelectionMode:XVIM_VISUAL_BLOCK];
     return self;
 }
 
@@ -260,7 +276,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)Y{
     //TODO: support yunk linewise
-    [[self sourceView] changeSelectionMode:MODE_LINE];
+    [[self sourceView] changeSelectionMode:XVIM_VISUAL_LINE];
     [[self sourceView] yank:nil];
     return nil;
 }
@@ -293,7 +309,7 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)ESC{
-    [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
+    [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
     return nil;
 }
 
@@ -315,7 +331,7 @@ TODO: This block is from commit 42498.
                                [excmd executeCommand:command inWindow:self.window];
                                
 							   //XVimSourceView *sourceView = [window sourceView];
-                               [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
+                               [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
                                return nil;
                            }
                                                                  onKeyPress:nil];

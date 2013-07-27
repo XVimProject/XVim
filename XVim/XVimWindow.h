@@ -6,10 +6,7 @@
 //
 
 #import <Cocoa/Cocoa.h>
-#import "XVimMode.h"
 #import "XVimCommandLine.h"
-#import "XVimTextViewProtocol.h"
-#import "XVimPlaybackHandler.h"
 #import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
 
@@ -27,7 +24,7 @@
 @class IDEWorkspaceWindow;
 @class XVimEvaluatorContext;
 
-@interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate, XVimPlaybackHandler>
+@interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate>
 
 @property(strong) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
 
@@ -51,11 +48,6 @@
 
 // XVimCommandFieldDelegate
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField;
-
-// XVimPlaybackHandler
-- (void)handleTextInsertion:(NSString*)text;
-- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range;
-
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;

@@ -94,7 +94,7 @@
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
-	return [keymapProvider keymapForMode:MODE_NONE];
+	return [keymapProvider keymapForMode:XVIM_MODE_CMDLINE];
 }
 
 - (void)becameHandler{
@@ -132,7 +132,7 @@
 }
 
 - (XVIM_MODE)mode{
-	return MODE_CMDLINE;
+	return XVIM_MODE_CMDLINE;
 }
 
 - (BOOL)isRelatedTo:(XVimEvaluator*)other{

@@ -1,12 +1,13 @@
 //
 //  XVimTextView.h
 //  XVim
+
 //
 //  Created by Suzuki Shuichiro on 9/19/12.
 //
 //
 
-#import "XVimVisualMode.h"
+#import "XVim.h"
 #import "XVimMotion.h"
 #import "XVimRegister.h"
 #import <Foundation/Foundation.h>
@@ -23,7 +24,7 @@
 @end
 
 typedef enum {
-    CURSOR_MODE_INSERT,
+    CURSOR_XVIM_MODE_INSERT,
     CURSOR_MODE_COMMAND
 }CURSOR_MODE;
 
@@ -37,7 +38,9 @@ typedef enum {
 @property(readonly) NSUInteger insertionPreservedColumn;
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger selectionBegin;
-@property(readonly) VISUAL_MODE selectionMode;
+@property(readonly) XVIM_VISUAL_MODE selectionMode;
+@property(readonly) NSUInteger selectedLines;  // Number of lines selected (0 if not in selection mode)
+@property(readonly) NSUInteger selectedColumns; // Number of columns selected (0 if not in selection mode)
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
 
@@ -46,7 +49,7 @@ typedef enum {
 
 
 // Selection Mode
-- (void)changeSelectionMode:(VISUAL_MODE)mode;
+- (void)changeSelectionMode:(XVIM_VISUAL_MODE)mode;
 
 
 
@@ -96,6 +99,9 @@ typedef enum {
 - (void)moveParagraphsBackward:(NSUInteger)count option:(MOTION_OPTION)opt;
 
 - (void)overwriteCharacter:(unichar)c;
+
+
+- (void)moveToPosition:(XVimPosition)pos;
 
 // Scrolls
 - (void)scrollPageForward:(NSUInteger)count;

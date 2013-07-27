@@ -9,4 +9,5 @@
 #import "XVimOperatorEvaluator.h"
 
 @interface XVimTildeEvaluator : XVimOperatorEvaluator
+- (XVimEvaluator*)fixWithNoMotion:(NSUInteger)count;
 @end

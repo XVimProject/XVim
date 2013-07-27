@@ -19,6 +19,7 @@
 #import "XVim.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
+#import "XVimVisualEvaluator.h"
 
 @implementation XVimGActionEvaluator
 
@@ -68,6 +69,11 @@
 - (XVimEvaluator*)U{
     [self.argumentString appendString:@"U"];
 	return [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+}
+
+- (XVimEvaluator*)v{
+    // Select previous visual selection
+    return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
 }
 
 - (XVimEvaluator*)TILDE{

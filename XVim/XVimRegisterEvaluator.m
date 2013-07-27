@@ -21,7 +21,7 @@
 @implementation XVimRegisterEvaluator
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
-	return [keymapProvider keymapForMode:MODE_NONE];
+	return [keymapProvider keymapForMode:XVIM_MODE_NONE];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{

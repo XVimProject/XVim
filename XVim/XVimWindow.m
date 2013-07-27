@@ -107,7 +107,7 @@ static const char* KEY_WINDOW = "xvimwindow";
  *    - If they are not called it means that the key input is handled by the input method.
  **/
 - (BOOL)handleKeyEvent:(NSEvent*)event{
-    if( [self _currentEvaluator].mode == MODE_INSERT || [self _currentEvaluator].mode == MODE_CMDLINE ){
+    if( [self _currentEvaluator].mode == XVIM_MODE_INSERT || [self _currentEvaluator].mode == XVIM_MODE_CMDLINE ){
         // We must pass the event to the current input method
         // If it is obserbed we do not do anything anymore and handle insertText: or doCommandBySelector:
         
@@ -204,7 +204,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     
     // Record the event
     XVim *xvim = [XVim instance];
-    [xvim appendRepeatKeyStroke:[keyStroke xvimString]];
+    [xvim appendOperationKeyStroke:[keyStroke xvimString]];
     
     // Evaluate key stroke
 	XVimEvaluator* currentEvaluator = [evaluatorStack lastObject];
@@ -220,7 +220,7 @@ static const char* KEY_WINDOW = "xvimwindow";
             [completeEvaluator didEndHandler];
             if( [evaluatorStack count] == 0 ){
                 // Current Evaluator is the root evaluator of the stack
-                [xvim cancelRepeatCommand];
+                [xvim cancelOperationCommands];
                 [self _initEvaluatorStack:evaluatorStack];
                 break;
             }
@@ -232,7 +232,7 @@ static const char* KEY_WINDOW = "xvimwindow";
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
-            [xvim cancelRepeatCommand];
+            [xvim cancelOperationCommands];
             [[XVim instance] ringBell];
             [self _initEvaluatorStack:evaluatorStack];
             break;
@@ -263,11 +263,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 	[[self sourceView] insertText:text];
 }
 
-- (void)handleVisualMode:(VISUAL_MODE)mode withRange:(NSRange)range; {
-	XVimEvaluator *evaluator = [[[XVimVisualEvaluator alloc] initWithWindow:self mode:mode withRange:range] autorelease];
-    [_evaluatorStack addObject:evaluator];
-}
-
 - (void)commandFieldLostFocus:(XVimCommandField*)commandField {
 	[commandField setDelegate:nil];
     [self _initEvaluatorStack:_evaluatorStack];
@@ -295,7 +290,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
-    [[self sourceView] changeSelectionMode:MODE_VISUAL_NONE];
+    [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = index;
     [[self sourceView] move:m];
@@ -317,8 +312,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
     
-    if(self.sourceView.selectionMode == MODE_VISUAL_NONE){
-        [self.sourceView changeSelectionMode:MODE_CHARACTER];
+    if(self.sourceView.selectionMode == XVIM_VISUAL_NONE){
+        [self.sourceView changeSelectionMode:XVIM_VISUAL_CHARACTER];
     }
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);

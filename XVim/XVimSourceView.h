@@ -27,27 +27,18 @@
  **/
 
 
-typedef struct _XVimRange {
-    NSUInteger begin; // begin may be greater than end
-    NSUInteger end;
-} XVimRange;
-
-NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
-    XVimRange r;
-    r.begin = begin;
-    r.end = end;
-    return r;
-}
 
 @interface XVimSourceView : NSObject <XVimTextViewProtocol>
 @property(readonly) NSString* string;
 @property(readonly) NSUInteger insertionPoint;
+@property(readonly) XVimPosition insertionPosition;
 @property(readonly) NSUInteger insertionColumn;
 @property(readonly) NSUInteger insertionPreservedColumn;
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger selectionBegin;
+@property(readonly) XVimPosition selectionBeginPosition;
 @property(readonly) NSUInteger preservedColumn;
-@property(readonly) VISUAL_MODE selectionMode;
+@property(readonly) XVIM_VISUAL_MODE selectionMode;
 @property(readonly) CURSOR_MODE cursorMode;
 
 - (id)initWithView:(NSTextView*)view;
@@ -55,6 +46,7 @@ NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
 
 // Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
 - (NSTextView*)view;
+- (NSArray*)selectedRanges;
 
 - (void)syncStateFromView;
 

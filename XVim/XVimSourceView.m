@@ -97,7 +97,7 @@
 		_view = (NSTextView*)view;
         _insertionPoint = [_view selectedRange].location + [_view selectedRange].length;
         _preservedColumn = [self columnNumber:_insertionPoint];
-        _selectionMode = MODE_VISUAL_NONE;
+        _selectionMode = XVIM_VISUAL_NONE;
         _selectionBegin = NSNotFound;
         _cursorMode = CURSOR_MODE_COMMAND;
         _lastYankedText = [[NSMutableString alloc] init];
@@ -134,9 +134,55 @@
     return [self _selectedRanges];
 }
 
-////////////////
-// Scrolling  //
-////////////////
+- (NSUInteger)selectedLines{
+    if( XVIM_VISUAL_NONE == _selectionMode ){
+        return 0;
+    }
+    
+    NSUInteger min = MIN(_insertionPoint,_selectionBegin);
+    NSUInteger max = MAX(_insertionPoint,_selectionBegin);
+    NSUInteger lineMin = [self lineNumber:min];
+    NSUInteger lineMax = [self lineNumber:max];
+    
+    return lineMax - lineMin + 1;
+}
+
+- (NSUInteger)selectedColumns{
+    if( XVIM_VISUAL_NONE == _selectionMode ){
+        return 0;
+    }
+    
+    NSUInteger min = MIN(_insertionPoint,_selectionBegin);
+    NSUInteger max = MAX(_insertionPoint,_selectionBegin);
+    NSUInteger lineMin = [self lineNumber:min];
+    NSUInteger lineMax = [self lineNumber:max];
+    NSUInteger columnMin = MIN( [self columnNumber:min], [self columnNumber:max]);
+    NSUInteger columnMax = MAX( [self columnNumber:min], [self columnNumber:max]);
+    
+    if( XVIM_VISUAL_CHARACTER == _selectionMode ){
+        if( lineMin == lineMax ){
+            return max - min + 1;
+        }else{ // If it is multipe lines return number of columns selected in the last line.
+            return [self columnNumber:max] + 1; // Columns number starts from 0
+        }
+    }else if( XVIM_VISUAL_LINE == _selectionMode ){
+        return NSUIntegerMax;
+    }else if( XVIM_VISUAL_BLOCK == _selectionMode ){
+        return columnMax - columnMin + 1;
+    }else{
+        NSAssert(FALSE, @"Should not be reached here");
+        return 0;
+    }
+    
+}
+
+- (XVimPosition)insertionPosition{
+    return XVimMakePosition(self.insertionLine, self.insertionColumn);
+}
+
+- (XVimPosition)selectionBeginPosition{
+    return XVimMakePosition([self lineNumber:_selectionBegin], [self columnNumber:_selectionBegin]);
+}
 
 - (NSUInteger)insertionColumn{
     return [self columnNumber:_insertionPoint];
@@ -150,10 +196,10 @@
     NSUInteger selectionStart, selectionEnd = NSNotFound;
     NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
     // And then select new selection area
-    if (_selectionMode == MODE_VISUAL_NONE) { // its not in selecting mode
+    if (_selectionMode == XVIM_VISUAL_NONE) { // its not in selecting mode
         [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(_insertionPoint,0)]];
     }
-    else if( _selectionMode == MODE_CHARACTER){
+    else if( _selectionMode == XVIM_VISUAL_CHARACTER){
         selectionStart = MIN(_insertionPoint,_selectionBegin);
         selectionEnd = MAX(_insertionPoint,_selectionBegin);
         if( [self isEOF:selectionStart] ){
@@ -165,7 +211,7 @@
         }else{
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
         }
-    }else if(_selectionMode == MODE_LINE ){
+    }else if(_selectionMode == XVIM_VISUAL_LINE ){
         NSUInteger min = MIN(_insertionPoint,_selectionBegin);
         NSUInteger max = MAX(_insertionPoint,_selectionBegin);
         selectionStart = [self firstOfLine:min];
@@ -179,7 +225,7 @@
         }else{
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
         }
-    }else if( _selectionMode == MODE_BLOCK){
+    }else if( _selectionMode == XVIM_VISUAL_BLOCK){
         // Define the block as a rect by line and column number
         NSUInteger top    = MIN( [self lineNumber:_insertionPoint], [self lineNumber:_selectionBegin] );
         NSUInteger bottom = MAX( [self lineNumber:_insertionPoint], [self lineNumber:_selectionBegin] );
@@ -209,7 +255,7 @@
 ////////// Top level operation interface/////////
 
 - (void)escapeFromInsert{
-    if( _cursorMode == CURSOR_MODE_INSERT ){
+    if( _cursorMode == CURSOR_XVIM_MODE_INSERT ){
         [self _syncStateFromView];
         _cursorMode = CURSOR_MODE_COMMAND;
         if(![self isFirstOfLine:_insertionPoint]){
@@ -217,6 +263,11 @@
         }
         [self _syncState];
     }
+}
+
+- (void)moveToPosition:(XVimPosition)pos{
+    [self _moveCursor:[self positionAtLineNumber:pos.line column:pos.column] preserveColumn:NO];
+    [self _syncState];
 }
 
 - (void)move:(XVimMotion*)motion{
@@ -242,17 +293,17 @@
 }
 
 - (void)_yankRanges:(NSArray*)ranges withType:(MOTION_TYPE)type{
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         if( type == CHARACTERWISE_EXCLUSIVE || type == CHARACTERWISE_INCLUSIVE ){
             _lastYankedType = TEXT_TYPE_CHARACTERS;
         }else if( type == LINEWISE ){
             _lastYankedType = TEXT_TYPE_LINES;
         }
-    }else if( _selectionMode == MODE_CHARACTER){
+    }else if( _selectionMode == XVIM_VISUAL_CHARACTER){
         _lastYankedType = TEXT_TYPE_CHARACTERS;
-    }else if( _selectionMode == MODE_LINE ){
+    }else if( _selectionMode == XVIM_VISUAL_LINE ){
         _lastYankedType = TEXT_TYPE_LINES;
-    }else if( _selectionMode == MODE_BLOCK ){
+    }else if( _selectionMode == XVIM_VISUAL_BLOCK ){
         _lastYankedType = TEXT_TYPE_BLOCK;
     }
     TRACE_LOG(@"YANKED TYPE:%d", _lastYankedType);
@@ -281,20 +332,20 @@
 }
 
 - (void)delete:(XVimMotion*)motion{
-    NSAssert( !(_selectionMode == MODE_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
+    NSAssert( !(_selectionMode == XVIM_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
     if( _insertionPoint == 0 && [[self string] length] == 0 ){
         return ;
     }
     
     NSUInteger insertionPointAfterDelete = _insertionPoint;
     BOOL keepInsertionPoint = NO;
-    if( _selectionMode != MODE_VISUAL_NONE ){
+    if( _selectionMode != XVIM_VISUAL_NONE ){
         insertionPointAfterDelete = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
         keepInsertionPoint = YES;
     }
     
     motion.info->deleteLastLine = NO;
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
         XVimRange motionRange = [self _getMotionRange:_insertionPoint Motion:motion];
         if( motionRange.end == NSNotFound ){
@@ -350,12 +401,12 @@
     if(keepInsertionPoint){
         [self _moveCursor:insertionPointAfterDelete preserveColumn:NO];
     }
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (void)change:(XVimMotion*)motion{
     BOOL insertNewline = NO;
-    if( motion.type == LINEWISE || _selectionMode == MODE_LINE){
+    if( motion.type == LINEWISE || _selectionMode == XVIM_VISUAL_LINE){
         // 'cc' deletes the lines but need to keep the last newline.
         // So insertNewline as 'O' does before entering insert mode
         insertNewline = YES;
@@ -366,7 +417,7 @@
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
     }
-    _cursorMode = CURSOR_MODE_INSERT;
+    _cursorMode = CURSOR_XVIM_MODE_INSERT;
     [self delete:motion];
     if( motion.info->deleteLastLine){
         [self insertNewlineBelowLine:[self lineNumber:_insertionPoint]];
@@ -375,14 +426,14 @@
         [self insertNewlineAboveLine:[self lineNumber:_insertionPoint]];
     }else{
     }
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
     [self _syncState];
 }
 
 - (void)yank:(XVimMotion*)motion{
-    NSAssert( !(_selectionMode == MODE_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
+    NSAssert( !(_selectionMode == XVIM_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
     NSUInteger insertionPointAfterYank = _insertionPoint;
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
         XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
         if( NSNotFound == to.end ){
@@ -427,12 +478,12 @@
     
     [self _moveCursor:insertionPointAfterYank preserveColumn:NO];
     [self _syncStateFromView];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (void)put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count{
     TRACE_LOG(@"text:%@  type:%d   afterCursor:%d   count:%d", text, type, after, count);
-    if( _selectionMode != MODE_VISUAL_NONE ){
+    if( _selectionMode != XVIM_VISUAL_NONE ){
         // FIXME: Make them not to change text from register...
         text = [NSString stringWithString:text]; // copy string because the text may be changed with folloing delete if it is from the same register...
         [self delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1)];
@@ -513,7 +564,7 @@
     
     [self _moveCursor:insertionPointAfterPut preserveColumn:NO];
     [self _syncState];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (void)swapCase:(XVimMotion*)motion{
@@ -521,7 +572,7 @@
         return ;
     }
     
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         if( motion.motion == MOTION_NONE ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,LEFT_RIGHT_NOWRAP,motion.count);
             XVimRange r = [self _getMotionRange:_insertionPoint Motion:m];
@@ -553,7 +604,7 @@
     }
 
     [self _syncState];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
     
 }
 
@@ -563,7 +614,7 @@
     }
     
     NSString* s = [self string];
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
         XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
         if( to.end == NSNotFound ){
@@ -581,7 +632,7 @@
     }
 
     [self _syncState];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (void)makeUpperCase:(XVimMotion*)motion{
@@ -590,7 +641,7 @@
     }
     
     NSString* s = [self string];
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
         XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
         if( to.end == NSNotFound ){
@@ -608,7 +659,7 @@
     }
 
     [self _syncState];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
     
 }
 
@@ -676,7 +727,7 @@
 
 - (void)join:(NSUInteger)count{
     NSUInteger start = [[[self _selectedRanges] objectAtIndex:0] rangeValue].location;
-    if( _selectionMode != MODE_VISUAL_NONE ){
+    if( _selectionMode != XVIM_VISUAL_NONE ){
         // If in selection mode ignore count
         NSRange lastSelection = [[[self _selectedRanges] lastObject] rangeValue];
         NSUInteger end = lastSelection.location + lastSelection.length - 1;
@@ -690,7 +741,7 @@
     }
     
     [self _syncStateFromView];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
     return;
 }
 
@@ -701,7 +752,7 @@
     
     NSUInteger insertionAfterFilter = _insertionPoint;
     NSRange filterRange;
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
         if( to.end == NSNotFound ){
             return;
@@ -718,7 +769,7 @@
 	[self indentCharacterRange: filterRange];
     [self _syncStateFromView];
     [self _moveCursor:insertionAfterFilter preserveColumn:NO];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (void)shift:(XVimMotion*)motion right:(BOOL)right{
@@ -728,7 +779,7 @@
     
     NSUInteger count = 1;
     NSUInteger insertionAfterShift = _insertionPoint;
-    if( _selectionMode == MODE_VISUAL_NONE ){
+    if( _selectionMode == XVIM_VISUAL_NONE ){
         XVimRange to = [self _getMotionRange:_insertionPoint Motion:motion];
         if( to.end == NSNotFound ){
             return;
@@ -754,7 +805,7 @@
     }
 	NSUInteger cursorLocation = [self firstNonBlankInALine:insertionAfterShift];
     [self _moveCursor:cursorLocation preserveColumn:NO];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
     [self _syncState];
     
     
@@ -831,18 +882,18 @@
 }
 
 - (void)insertNewlineAboveAndInsert{
-    _cursorMode = CURSOR_MODE_INSERT;
+    _cursorMode = CURSOR_XVIM_MODE_INSERT;
     [self insertNewlineAbove];
 }
 
 - (void)insertNewlineBelowAndInsert{
-    _cursorMode = CURSOR_MODE_INSERT;
+    _cursorMode = CURSOR_XVIM_MODE_INSERT;
     [self insertNewlineBelow];
 }
 
 - (void)append{
     NSAssert(_cursorMode == CURSOR_MODE_COMMAND, @"_cursorMode shoud be CURSOR_MODE_COMMAND");
-    _cursorMode = CURSOR_MODE_INSERT;
+    _cursorMode = CURSOR_XVIM_MODE_INSERT;
     if( ![self isEOF:_insertionPoint] && ![self isNewLine:_insertionPoint]){
         _insertionPoint++;
     }
@@ -850,13 +901,13 @@
 }
 
 - (void)insert{
-    _cursorMode = CURSOR_MODE_INSERT;
+    _cursorMode = CURSOR_XVIM_MODE_INSERT;
     [self _syncState];
 }
 
 - (void)appendAtEndOfLine{
-    _cursorMode = CURSOR_MODE_INSERT;
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    _cursorMode = CURSOR_XVIM_MODE_INSERT;
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
     [self _moveCursor:[self tailOfLine:_insertionPoint] preserveColumn:NO];
     [self _syncState];
     
@@ -999,10 +1050,10 @@
 // Selection (Visual Mode)  //
 //////////////////////////////
 
-- (void)changeSelectionMode:(VISUAL_MODE)mode{
-    if( _selectionMode == MODE_VISUAL_NONE && mode != MODE_VISUAL_NONE ){
+- (void)changeSelectionMode:(XVIM_VISUAL_MODE)mode{
+    if( _selectionMode == XVIM_VISUAL_NONE && mode != XVIM_VISUAL_NONE ){
         _selectionBegin = _insertionPoint;
-    }else if( _selectionMode != MODE_VISUAL_NONE && mode == MODE_VISUAL_NONE){
+    }else if( _selectionMode != XVIM_VISUAL_NONE && mode == XVIM_VISUAL_NONE){
         _selectionBegin = NSNotFound;
     }
     _selectionMode = mode;
@@ -1287,13 +1338,13 @@
 - (void)undo {
 	[[_view undoManager] undo];
     [self _syncStateFromView];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (void)redo {
 	[[_view undoManager] redo];
     [self _syncStateFromView];
-    [self changeSelectionMode:MODE_VISUAL_NONE];
+    [self changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (NSColor*)insertionPointColor {
@@ -1516,7 +1567,7 @@
         pos = [_view string].length;
     }
     
-    if( _cursorMode == CURSOR_MODE_COMMAND && !(_selectionMode == MODE_BLOCK)){
+    if( _cursorMode == CURSOR_MODE_COMMAND && !(_selectionMode == XVIM_VISUAL_BLOCK)){
         _insertionPoint = [self convertToValidCursorPositionForNormalMode:pos];
     }else{
         _insertionPoint = pos;
@@ -1575,7 +1626,7 @@
     NSRange r = [_view selectedRange];
     DEBUG_LOG(@"Selected Range: Loc:%d Len:%d", r.location, r.length);
     if( r.length == 0 ){
-        _selectionMode = MODE_VISUAL_NONE;
+        _selectionMode = XVIM_VISUAL_NONE;
         [self _moveCursor:r.location preserveColumn:NO];
         _selectionBegin = _insertionPoint;
     }

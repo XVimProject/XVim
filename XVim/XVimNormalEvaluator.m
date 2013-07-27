@@ -37,6 +37,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
+#import "XVimTildeEvaluator.h"
 
 @interface XVimNormalEvaluator() {
 	__weak XVimRegister *_playbackRegister;
@@ -54,7 +55,7 @@
     
 - (void)becameHandler{
     [super becameHandler];
-    //[self.sourceView changeSelectionMode:MODE_VISUAL_NONE];
+    //[self.sourceView changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (NSString*)modeString {
@@ -62,11 +63,11 @@
 }
 
 - (XVIM_MODE)mode{
-    return MODE_NORMAL;
+    return XVIM_MODE_NORMAL;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
-	return [keymapProvider keymapForMode:MODE_NORMAL];
+	return [keymapProvider keymapForMode:XVIM_MODE_NORMAL];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -294,16 +295,16 @@
 }
 
 - (XVimEvaluator*)v{
-    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_CHARACTER] autorelease];
+    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER] autorelease];
 }
 
 - (XVimEvaluator*)V{
-    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_LINE] autorelease];
+    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_LINE] autorelease];
 }
 
 - (XVimEvaluator*)C_v{
     // Block selection
-    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:MODE_BLOCK]  autorelease];
+    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_BLOCK]  autorelease];
 }
 
 - (XVimEvaluator*)C_w{
@@ -481,7 +482,7 @@
 
 - (XVimEvaluator*)DOT{
     [[XVim instance] startRepeat];
-    XVimString *repeatRegister = [[XVim instance] repeatRegister];
+    XVimString *repeatRegister = [[XVim instance] lastOperationCommands];
     TRACE_LOG(@"Repeat:%@", repeatRegister);
     
     NSMutableArray* stack = [[[NSMutableArray alloc] init] autorelease];
@@ -498,7 +499,7 @@
     for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(repeatRegister) ){
         // TODO: This skips numeric args in repeat regisger if numericArg is specified.
         //       But if numericArg is not begining of the input (such as d3w) this never skips it.
-        //       We have to also correctly handle "f3" not to skip the number.
+        //       We have to also correctly handle "df3" not to skip the number.
         if( !nonNumFound && self.numericMode && [stroke isNumeric]){
             // Skip numeric arg
             continue;
@@ -511,9 +512,10 @@
 }
 
 - (XVimEvaluator*)TILDE{
-    XVimSourceView* view = [self sourceView];
-    [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
-	return nil;
+    [self.argumentString appendString:@"~"];
+    XVimTildeEvaluator* swap = [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
+    // TODO: support tildeop option
+    return [swap fixWithNoMotion:self.numericArg];
 }
 
 - (XVimEvaluator*)DEL{
@@ -531,16 +533,6 @@
 
 -(XVimEvaluator*)Pagedown{
     return [self C_f];
-}
-
-- (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    // in normal mode
-    // move the a cursor to end of motion. We ignore the motion type.
-    XVimSourceView* view = [self sourceView];
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    m.position = to;
-    [view move:m];
-    return nil;
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{

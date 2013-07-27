@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XVimVisualMode.h"
 #import "XVimKeyStroke.h"
 
 typedef enum{

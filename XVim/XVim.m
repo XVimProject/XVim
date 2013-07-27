@@ -26,7 +26,6 @@
 #import "XVimSearch.h"
 #import "XVimExCommand.h"
 #import "XVimKeymap.h"
-#import "XVimMode.h"
 #import "XVimRegister.h"
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
@@ -47,11 +46,11 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @interface XVim() {
 	XVimHistoryHandler *_exCommandHistory;
 	XVimHistoryHandler *_searchHistory;
-	XVimKeymap* _keymaps[MODE_COUNT];
+	XVimKeymap* _keymaps[XVIM_MODE_COUNT];
     NSFileHandle* _logFile;
 }
 @property (strong,nonatomic) XVimRegisterManager* registerManager;
-@property (strong,nonatomic) XVimMutableString* repeatRegister;
+@property (strong,nonatomic) XVimMutableString* lastOperationCommands;
 @property (strong,nonatomic) XVimMutableString* tempRepeatRegister;
 @property (nonatomic) BOOL isRepeating; // For dot(.) command repeat
 - (void)parseRcFile;
@@ -173,14 +172,16 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     self.excmd = [[[XVimExCommand alloc] init] autorelease];
     self.lastPlaybackRegister = nil;
     self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
-    self.repeatRegister = [[[XVimMutableString alloc] init] autorelease];
+    self.lastOperationCommands = [[[XVimMutableString alloc] init] autorelease];
+    self.lastVisualPosition = XVimMakePosition(NSNotFound, NSNotFound);
+    self.lastVisualSelectionBegin = XVimMakePosition(NSNotFound, NSNotFound);
     self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
     self.isRepeating = NO;
     self.isExecuting = NO;
     _logFile = nil;
     _exCommandHistory = [[XVimHistoryHandler alloc] init];
     
-    for (int i = 0; i < MODE_COUNT; ++i) {
+    for (int i = 0; i < XVIM_MODE_COUNT; ++i) {
         _keymaps[i] = [[XVimKeymap alloc] init];
     }
     
@@ -190,9 +191,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 -(void)dealloc{
     self.excmd = nil;
     self.registerManager = nil;
-    self.repeatRegister = nil;
+    self.lastOperationCommands = nil;
     self.lastPlaybackRegister = nil;
-    self.repeatRegister = nil;
+    self.lastOperationCommands = nil;
     self.tempRepeatRegister = nil;
     [_options release];
     [_searcher release];
@@ -270,18 +271,18 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	return _searchHistory;
 }
 
-- (void)appendRepeatKeyStroke:(XVimString*)stroke{
+- (void)appendOperationKeyStroke:(XVimString*)stroke{
     [self.tempRepeatRegister appendString:stroke];
 }
 
-- (void)fixRepeatCommand{
+- (void)fixOperationCommands{
     if( !self.isRepeating ){
-        [self.repeatRegister setString:self.tempRepeatRegister];
+        [self.lastOperationCommands setString:self.tempRepeatRegister];
         [self.tempRepeatRegister setString:@""];
     }
 }
 
-- (void)cancelRepeatCommand{
+- (void)cancelOperationCommands{
     [self.tempRepeatRegister setString:@""];
 }
 

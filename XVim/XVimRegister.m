@@ -10,7 +10,6 @@
 #import "XVimOptions.h"
 #import "XVimEvaluator.h"
 #import "XVimKeyStroke.h"
-#import "XVimPlaybackHandler.h"
 #import "XVim.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"

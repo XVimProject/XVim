@@ -33,7 +33,6 @@ XVimMotionEvaluator
 */
 
 #import "XVimRegister.h"
-#import "XVimMode.h"
 #import "XVimTextViewProtocol.h"
 
 @class XVimMotionEvaluator;
