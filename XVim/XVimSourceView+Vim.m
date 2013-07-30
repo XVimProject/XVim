@@ -8,6 +8,7 @@
 
 #import "Logger.h"
 #import "XVimSourceView+Vim.h"
+#import "NSTextStorage+VimOperation.h"
 #import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
 #import "XVim.h"
@@ -18,31 +19,13 @@
 /////////////////////////
 // support methods     //
 /////////////////////////
-#ifdef DEBUG
-// Most of the support methods take index as current interest position and index can be at EOF
-// The following macros asserts the range of index.
-// WITH_EOF permits the index at EOF position.
-// WITHOUT_EOF doesn't permit the index at EOF position.
-#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string.   TextLength:%lu   SpecifiedIndex:%lu", [[self string] length], x)
-#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string - 1 TextLength:%lu   SpecifiedIndex:%lu", [[self string] length], x)
-
-// Some methods assume that "index" is at valid cursor position in Normal mode.
-// See isValidCursorPosition's description the condition of the valid cursor position.
-#define ASSERT_VALID_CURSOR_POS(x) NSAssert( [self isValidCursorPosition:x], @"index can not be invalid cursor position" )
-#else
-#define ASSERT_VALID_RANGE_WITH_EOF(x)
-#define ASSERT_VALID_RANGE_WITHOUT_EOF(x)
-#define ASSERT_VALID_CURSOR_POS(x)
-#endif
-
-#define charat(x) [[self string] characterAtIndex:(x)]
 
 @implementation XVimSourceView(Vim)
 
 - (void)sortLinesInRange:(NSRange)range withOptions:(XVimSortOptions)options
 {
-    NSUInteger beginPos = [self positionAtLineNumber:range.location];
-    NSUInteger endPos = [self positionAtLineNumber:range.location + range.length];
+    NSUInteger beginPos = [self.view.textStorage positionAtLineNumber:range.location];
+    NSUInteger endPos = [self.view.textStorage positionAtLineNumber:range.location + range.length];
     NSRange characterRange = NSMakeRange(beginPos, endPos - beginPos);
     [self clampRangeToBuffer:&characterRange];
     NSString *str = [[self string] substringWithRange:characterRange];
@@ -84,167 +67,6 @@
     [self insertText:sortedLinesString replacementRange:characterRange];
 }
 
-/**
- * Determine if the position specified with "index" is EOF.
- **/
-- (BOOL) isEOF:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [[self string] length] == index;
-}
-
-/**
- * Determine if the document is empty ( size = 0 )
- **/
-- (BOOL) isEmptyDocument{
-    return [[self string] length] == 0;
-}
-
-/**
- * Determine if the posiion is last character of the document
- **/
-- (BOOL) isLastCharacter:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [[self string] length]-1 == index;
-}
-
-/**
- * Determine if the position specified with "index" is EOL.
- **/
-- (BOOL) isEOL:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [self isEOF:index] == NO && [self isNewLine:index] == NO && [self isNewLine:index+1];
-}
-
-/**
- * Determine if the position specified with "index" is EOL.
- **/
-- (BOOL) isTOL:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [self isNewLine:index] || [self isEOF:index];
-}
-
-/**
- * Determine if the position specified with "index" is newline.
- **/
-- (BOOL) isNewLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( index == [[self string] length] ){
-        return NO; // EOF is not a newline
-    }
-    return isNewLine([[self string] characterAtIndex:index]);
-}
-
-/**
- * Determine if the position specified with "index" is white space.
- **/
-- (BOOL) isWhiteSpace:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( index == [[self string] length] ){
-        return NO; // EOF is not whitespace
-    }
-    
-    return isWhiteSpace([[self string] characterAtIndex:index]);
-}
-
-// Determine if the position is on the last line in the document
-- (BOOL) isLastLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [self lineNumber:index] == [self numberOfLines];
-}
-
-- (BOOL) isFirstOfLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( 0 == index ){
-        return YES;
-    }
-    
-    if( [self isNewLine:index-1] ){
-        return YES;
-    }
-    
-    return NO;
-}
-
-// Determine if the position is non blank character
-// EOF is treated as a blank character
-- (BOOL) isNonBlank:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [self isEOF:index]){
-        return YES;
-    }
-    return isNonBlank([[self string] characterAtIndex:index]);
-}
-
-/**
- * Determine if the position specified with "index" is blankline.
- * Blankline is one of them
- *   - Newline after Newline. Ex. Second '\n' in "abc\n\nabc" is a blankline. First one is not.  
- *   - Newline at begining of the document.
- *   - EOF after Newline. Ex. The index 4 of "abc\n" is blankline. Note that index 4 is exceed the string length. But the cursor can be there.
- *   - EOF of 0 sized document.
- **/
-- (BOOL) isBlankLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( index == [[self string] length] || isNewLine([[self string] characterAtIndex:index])){
-        if( 0 == index || isNewLine([[self string] characterAtIndex:index-1]) ){
-            return YES;
-        }
-    }
-    return NO;
-}
-
-/**
- * Determine if the position specified with "index" is an empty line.
- * Empty line is one of them
- *   - Blankline
- *   - Only whitespace followed by Newline.
- **/
-- (BOOL) isEmptyLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if ([self isBlankLine:index]) {
-        return YES;
-    }
-    NSUInteger head = [self headOfLine:index];
-    if (head == NSNotFound || [self nextNonBlankInALine:head] == NSNotFound){
-        return YES;
-    }
-    return NO;
-}
-
-
-/**
- * Determine if the position specified with "index" is valid cursor position in normal mode.
- * Valid position is followings
- *   - Non newline characters.
- *   - Blankline( including EOF after newline )
- **/
-- (BOOL) isValidCursorPosition:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [self isBlankLine:index] ){
-        return YES;
-    }
-    // "index" in not a blankline.
-    // Then the EOF is not a valid cursor position.
-    if( [self isEOF:index] ){
-        return NO;
-    }
-    
-    // index is never the position of EOF. We can call isNewLine with index.
-    if( ![self isNewLine:index]){
-        return YES;
-    }
-    
-    return NO;
-}
-
-- (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    // If the current cursor position is not valid for normal mode move it.
-    if( ![self isValidCursorPosition:index] ){
-        return index-1;
-    }
-    return index;
-}
 
 /**
  * Adjust cursor position if the position is not valid as normal mode cursor position
@@ -253,7 +75,7 @@
 - (void)adjustCursorPosition{
     METHOD_TRACE_LOG();
     // If the current cursor position is not valid for normal mode move it.
-    if( ![self isValidCursorPosition:[self selectedRange].location] ){
+    if( ![self.view.textStorage isValidCursorPosition:[self selectedRange].location] ){
         NSRange currentRange = [self selectedRange];
         [self selectPreviousPlaceholder];
         NSRange prevPlaceHolder = [self selectedRange];
@@ -267,74 +89,6 @@
     return;
 }
 
-/**
- * Returns next non-blank character position after the position "index" in a current line.
- * If no non-blank character is found or the line is a blank line this returns NSNotFound.
- * NOTE: This searches non blank characters from "index" and NOT "index+1"
- *       If the character at "index" is non blank this returns "index" itself
- **/ 
-- (NSUInteger)nextNonBlankInALine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    while (index < [[self string] length]) {
-        if( [self isNewLine:index] ){
-            return NSNotFound; // Characters left in a line is whitespaces
-        }
-        if ( !isWhiteSpace([[self string] characterAtIndex:index])){
-            break;
-        }
-        index++;
-    }
-    
-    if( [self isEOF:index]){
-        return NSNotFound;
-    }
-    return index;
-}
-
-/**
- * Returns position of the first newline character when searching forwards from "index+1"
- * Searching starts from position "index"+1. The position index is not included to search newline.
- * Returns NSNotFound if no newline character is found.
- **/
-- (NSUInteger)nextNewLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    NSUInteger length = [[self string] length];
-    if( length == 0 ){
-        return NSNotFound; // Nothing to search
-    }
-    
-    if( index >= length - 1 ){
-        return NSNotFound;
-    }
-    
-    for( NSUInteger i = index+1; i < length ; i++ ){
-        if( [self isNewLine:i] ){
-            return i;
-        }
-    }
-    return NSNotFound;
-}
-
-/**
- * Returns position of the first newline character when searching backwards from "index-1"
- * Searching starts from position "index"-1. The position index is not included to search newline.
- * Returns NSNotFound if no newline characer is found.
- **/
-- (NSUInteger)prevNewLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( 0 == index ){ //Nothing to search
-        return NSNotFound;
-    }
-    for(NSUInteger i = index-1; ; i-- ){
-        if( [self isNewLine:i] ){
-            return i;
-        }
-        if( 0 == i ){
-            break;
-        }
-    }
-    return NSNotFound;
-}
 
 /**
  *Find and return an NSArray* with the placeholders in a current line.
@@ -343,7 +97,7 @@
  */
 -(NSArray*)placeholdersInLine:(NSUInteger)position{
     NSMutableArray* placeholders = [[NSMutableArray alloc] initWithCapacity:2];
-    NSUInteger p = [self headOfLine:position];
+    NSUInteger p = [self.view.textStorage firstOfLine:position];
     
     for(NSUInteger curPos = p; curPos < [[self string] length]; curPos++){
         NSRange retval = [(DVTCompletingTextView*)[self view] rangeOfPlaceholderFromCharacterIndex:curPos forward:YES wrap:NO limit:50];
@@ -351,7 +105,7 @@
             curPos = retval.location + retval.length;
             [placeholders addObject:[NSValue valueWithRange:retval]];
         }
-        if ([self isEOL:curPos] || [self isEOF:curPos]) {
+        if ([self.view.textStorage isLOL:curPos] || [self.view.textStorage isEOF:curPos]) {
             return [placeholders autorelease];
         }
     }
@@ -359,148 +113,6 @@
     return [placeholders autorelease];
 }
 
-/**
- * Returns position of the head of line specified by index.
- * Head of line is one of them which is found first when searching backwords from "index".
- *    - Character just after newline
- *    - Character at the head of document
- * If the size of document is 0 it does not have any head of line.
- * Blankline does NOT have headOfLine. So EOF is NEVER head of line.
- * Searching starts from position "index". So the "index" could be a head of line and may be returned.
-**/
-- (NSUInteger)headOfLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [[self string] length] == 0 ){
-        return NSNotFound;
-    }
-    if( [self isBlankLine:index] ){
-        return NSNotFound;
-    }
-    NSUInteger prevNewline = [self prevNewLine:index];
-    if( NSNotFound == prevNewline ){
-        return 0; // head of line is character at head of document since its not empty document.
-    }
-    
-    return prevNewline+1; // Then this is the head of line
-}
-
-/**
- * Returns position of first character of the line specified by index.
- * Note that first character in the line is different from head of line.
- * First character may be newline when its blankline.
- * First character may be EOF if the EOF is blankline
- * In short words, its just after a newline or begining of document.
- * This never returns NSNotFound
- **/
-- (NSUInteger)firstOfLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    while (index > 0)
-    {
-        if (isNewLine([[self string] characterAtIndex:index-1])) { break; }
-        --index;
-    }
-    return index;
-}
-/**
- * Returns position of the first non-whitespace character past the head of line of the
- * current line specified by index.
- * If there is no head of line it returns NSNotFound
- **/
-- (NSUInteger)headOfLineWithoutSpaces:(NSUInteger)index {
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    NSUInteger head = [self headOfLine:index];
-    if( NSNotFound == head ){
-        return NSNotFound;  
-    }
-    NSUInteger head_wo_space = [self nextNonBlankInALine:head];
-    return head_wo_space;
-}
-
-/**
- * Returns position of the first non-blank character at the line specified by index
- * If its blank line it retuns position of newline character
- * If its a line with only white spaces it returns end of line.
- * This NEVER returns NSNotFound.
- **/
-- (NSUInteger)firstNonBlankInALine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [self isBlankLine:index] ){
-        return index;
-    }
-    NSUInteger head = [self headOfLine:index];
-    NSUInteger end = [self endOfLine:head];
-    NSUInteger head_wo_space = [self headOfLineWithoutSpaces:head];
-    if( NSNotFound == head_wo_space ){
-        return end;
-    }else{
-        return head_wo_space;
-    }
-}
-
-/**
- * Returns position of the tail of current line. 
- * Tail of line is one of followings
- *    - Newline character at the end of a line.
- *    - EOF of the last line of the document.
- * Blankline also has tail of line.
- **/
-- (NSUInteger)tailOfLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    for( NSUInteger i = index; i < [[self string] length]; i++ ){
-        if( [self isNewLine:i] ){
-            return i;
-        }
-    }
-    return [[self string] length]; //EOF
-}
-
-/**
- * Returns position of the end of line when the cursor is at "index"
- * End of line is one of following which is found first when searching forwords from "index".
- *    - Character just before newline if its not newline
- *    - Character just before EOF if its not newline 
- * Blankline does not have end of line.
- * Searching starts from position "index". So the "index" could be an end of line.
- * If the index points newline character it returns the position previous of the index(if its not blank).
- **/
-- (NSUInteger)endOfLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    ASSERT_VALID_CURSOR_POS(index);
-    if( [self isBlankLine:index] ){
-        return NSNotFound;
-    }
-    if( [self isTOL:index] ){
-        // Its not blank but tail
-        return index-1;
-    }
-    NSUInteger nextNewLine = [self nextNewLine:index];
-    if(NSNotFound == nextNewLine){
-        return [[self string] length]-1;//just before EOF
-    }
-    return nextNewLine-1;
-}
-
-// Returns first position that is non-whitespace. If newline or eof encountered, returns index.
-- (NSUInteger)skipWhiteSpace:(NSUInteger)index
-{
-	NSUInteger length = [[self string] length];
-	for (NSUInteger i = index; i < length; ++i)
-	{
-		if ([self isNewLine:i]) { break; }
-		if (![self isWhiteSpace:i]) { return i; }
-	}
-	return index;
-}
-
-- (NSUInteger)lineNumber:(NSUInteger)index{
-    NSUInteger newLines=1;
-    for( NSUInteger pos = 0 ; pos < index && pos < [[self string] length]; pos++ ){
-        if( [self isNewLine:pos] ){
-            newLines++;
-        }
-    }
-    return newLines;
-}
 
 ////////////////
 // Selection  //
@@ -543,7 +155,6 @@
 // Motions //
 /////////////
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    ASSERT_VALID_CURSOR_POS(index);
     if( 0 == index){
         return 0;
     }
@@ -555,13 +166,13 @@
         //Try move to prev position and check if its valid position.
         NSUInteger prev = pos-1; //This is the position where we are trying to move to.
         // If the position is new line and its not wrapable we stop moving
-        if( opt == LEFT_RIGHT_NOWRAP && isNewLine([[self string] characterAtIndex:prev]) ){
+        if( opt == LEFT_RIGHT_NOWRAP && isNewline([[self string] characterAtIndex:prev]) ){
             break; // not update the position
         }
         
         // If its wrapable, skip newline except its blankline
-        if (isNewLine([string characterAtIndex:prev])) {
-            if(![self isBlankLine:prev]) {
+        if (isNewline([string characterAtIndex:prev])) {
+            if(![self.view.textStorage isBlankline:prev]) {
                 // skip the newline letter at the end of line
                 prev--;
             }
@@ -597,7 +208,7 @@
     NSString* string = [self string];
     NSUInteger pos = index;
     // If the currenct cursor position is on a newline (blank line) and not wrappable never move the cursor
-    if( opt == LEFT_RIGHT_NOWRAP && [self isBlankLine:pos]){
+    if( opt == LEFT_RIGHT_NOWRAP && [self.view.textStorage isBlankline:pos]){
         return pos;
     }
     
@@ -605,19 +216,19 @@
         NSUInteger next = pos + 1;
         // If the next position is the end of docuement and current position is not a newline
         // Never move a cursor to the end of document.
-        if( [self isEOF:next] && !isNewLine([string characterAtIndex:pos]) ){
+        if( [self.view.textStorage isEOF:next] && !isNewline([string characterAtIndex:pos]) ){
             info->reachedEndOfLine = YES;
             break;
         }
         
-        if( opt == LEFT_RIGHT_NOWRAP && isNewLine([[self string] characterAtIndex:next]) ){
+        if( opt == LEFT_RIGHT_NOWRAP && isNewline([[self string] characterAtIndex:next]) ){
             info->reachedEndOfLine = YES;
             break;
         }
         
         // If the next position is newline and not a blankline skip it
-        if (isNewLine([string characterAtIndex:next])) {
-            if(![self isBlankLine:next]) {
+        if (isNewline([string characterAtIndex:next])) {
+            if(![self.view.textStorage isBlankline:next]) {
                 // skip the newline letter at the end of line
                 next++;
             }
@@ -627,27 +238,6 @@
     return pos;
 }
 
-// Note: This method may return position on the newline character.
-//       For example, blankline have only newlin character and it is column number at "0"
-- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound{
-    NSUInteger end = [self tailOfLine:pos];
-
-	// Primitive search until the column number matches
-    // If tab is included in the line the values "columnNumber" returns does not continuous.
-    // So "¥t¥t¥tabc" may rerturn 0,4,8,9,10,11 as a column numbers for each index.
-	while (pos <= end) {
-		if ([self columnNumber:pos] == column) { return pos; }
-        if ([self columnNumber:pos] > column){ pos--; return pos; }
-		++pos;
-	}
-    
-    // No matching column is found
-    if( notfound ){
-        return NSNotFound;
-    }else{
-        return --pos;
-    }
-}
 
 /**
  * This does all the work need to do with vim '%' motion.
@@ -663,7 +253,7 @@
     if (pos >= s.length-1) {
         return NSNotFound;
     }
-    NSUInteger eol = [view endOfLine:pos];
+    NSUInteger eol = [view.view.textStorage endOfLine:pos];
     if (eol == NSNotFound){
         at.length = 1;
     }else{
@@ -763,19 +353,19 @@
     
     NSUInteger pos = index;
     for(NSUInteger i = 0; i < count; i++ ){
-        pos = [self prevNewLine:pos];
+        pos = [self.view.textStorage prevNewline:pos];
         if( NSNotFound == pos ){
             pos = 0;
             break;
         }
     }
 
-    NSUInteger head = [self headOfLine:pos];
+    NSUInteger head = [self.view.textStorage firstOfLine:pos];
     if( NSNotFound == head ){
         return pos;
     }
 	
-	return [self nextPositionFrom:head matchingColumn:column returnNotFound:NO];
+	return [self.view.textStorage nextPositionFrom:head matchingColumn:column returnNotFound:NO];
 }
 
 /**
@@ -789,14 +379,14 @@
     }
     
     // Search and count newlines.
-    if( [self isBlankLine:index] ){
+    if( [self.view.textStorage isBlankline:index] ){
         count--; // Current position must be counted as newline in this case
     }
 
     // Move position along with newlines
     NSUInteger pos = index;
     for(NSUInteger i = 0; i < count; i++ ){
-        NSUInteger next = [self nextNewLine:pos];
+        NSUInteger next = [self.view.textStorage nextNewline:pos];
         if( NSNotFound == next){
             break;
         }
@@ -805,12 +395,12 @@
     
     // If "pos" is not on a newline here it means no newline is found and "pos == index".
     
-    if( [self isNewLine:pos] ){
+    if( [self.view.textStorage isNewline:pos] ){
         // This is the case any newline was found.
         // pos is on a newline. The next line is the target line.
         // There is at least 1 more range available.
         pos++;
-		return [self nextPositionFrom:pos matchingColumn:column returnNotFound:NO];
+		return [self.view.textStorage nextPositionFrom:pos matchingColumn:column returnNotFound:NO];
     }
     return pos; 
 }
@@ -848,11 +438,11 @@
     NSAssert(nil != info, @"Specify info");
     
     NSUInteger pos = index;
-    info->isFirstWordInALine = NO;
+    info->isFirstWordInLine = NO;
     info->lastEndOfLine = NSNotFound;
     info->lastEndOfWord = NSNotFound;
     
-    if( [self isEOF:index] ){
+    if( [self.view.textStorage isEOF:index] ){
         return index;
     }
     
@@ -864,11 +454,11 @@
         // Remember blankline is a word
         unichar curChar; 
         
-        if( ![self isEOF:i] ){
+        if( ![self.view.textStorage isEOF:i] ){
             curChar = [str characterAtIndex:i];
         }else {
             //EOF found so return this position.
-            if( isNonBlank(lastChar)){
+            if( isNonblank(lastChar)){
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
             }
@@ -877,35 +467,35 @@
         } 
         
         //Check relation between last and current character to determine the word boundary
-        if(isNewLine(lastChar)){
-            if(isNewLine(curChar)){
+        if(isNewline(lastChar)){
+            if(isNewline(curChar)){
                 //two newlines in a row (means blank line)
                 //blank line is a word so count it.
                 --count;
                 info->lastEndOfWord = i-1;
                 info->lastEndOfLine = i-1;
-                info->isFirstWordInALine = YES;
+                info->isFirstWordInLine = YES;
                 wordInLineFound = YES;
-            }else if(isNonBlank(curChar)){
+            }else if(isNonblank(curChar)){
                 // A word found
                 --count;
-                info->isFirstWordInALine = YES;
+                info->isFirstWordInLine = YES;
                 wordInLineFound = YES;
             }else {
                 // Nothing
             }
-        }else if(isNonBlank(lastChar)){
-            if(isNewLine(curChar)){
+        }else if(isNonblank(lastChar)){
+            if(isNewline(curChar)){
                 //from word to newline
                 info->lastEndOfLine = i-1;
                 info->lastEndOfWord = i-1;
                 wordInLineFound = NO;
-            }else if(isNonBlank(curChar)){
+            }else if(isNonblank(curChar)){
                 if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
                     --count;
                     info->lastEndOfLine = i-1;
                     info->lastEndOfWord = i-1;
-                    info->isFirstWordInALine = NO;
+                    info->isFirstWordInLine = NO;
                     wordInLineFound = YES;
                 }
             }else{
@@ -913,19 +503,19 @@
                 info->lastEndOfWord = i-1;
             }
         }else { //on a blank character that is not a newline
-            if(isNewLine(curChar)){
+            if(isNewline(curChar)){
                 //blank to newline boundary
                 info->lastEndOfLine = i-1;
-                info->isFirstWordInALine = YES;
+                info->isFirstWordInLine = YES;
                 wordInLineFound = NO;
-            }else if(isNonBlank(curChar)){
+            }else if(isNonblank(curChar)){
                 // blank to non-blank. A word found.
                 --count;
                 if( !wordInLineFound){
-                    info->isFirstWordInALine = YES;
+                    info->isFirstWordInLine = YES;
                     wordInLineFound = YES;
                 }else{
-                    info->isFirstWordInALine = NO;
+                    info->isFirstWordInLine = NO;
                 }
             }else{
                 //Two blanks in a row...
@@ -934,7 +524,7 @@
         }
         
         lastChar = curChar;
-        if( isNewLine(curChar) && opt == LEFT_RIGHT_NOWRAP ){
+        if( isNewline(curChar) && opt == LEFT_RIGHT_NOWRAP ){
             pos = i-1;
             break;
         }
@@ -994,10 +584,10 @@
         //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
         //    - newline and newline(blankline) 
         else if(
-           ((isWhiteSpace(curChar) || isNewLine(curChar)) && isNonBlank(lastChar))   ||
-           ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhiteSpace(lastChar) && !isNewLine(lastChar))   ||
-           ( opt != BIGWORD && !isKeyword(curChar) && !isWhiteSpace(curChar) && !isNewLine(lastChar) && isKeyword(lastChar) )  ||
-           ( isNewLine(curChar) && [self isBlankLine:i+1] ) 
+           ((isWhitespace(curChar) || isNewline(curChar)) && isNonblank(lastChar))   ||
+           ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhitespace(lastChar) && !isNewline(lastChar))   ||
+           ( opt != BIGWORD && !isKeyword(curChar) && !isWhitespace(curChar) && !isNewline(lastChar) && isKeyword(lastChar) )  ||
+           ( isNewline(curChar) && [self.view.textStorage isBlankline:i+1] )
            ){
             count--; 
         }
@@ -1007,7 +597,7 @@
             pos = 0;
             break;
         }
-        if( 0 == count || (isNewLine(curChar) && opt == LEFT_RIGHT_NOWRAP) ){
+        if( 0 == count || (isNewline(curChar) && opt == LEFT_RIGHT_NOWRAP) ){
             pos = i+1;
             break;
         }
@@ -1025,13 +615,13 @@
 - (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert( 0 != count , @"count must be greater than 0");
-    if( [self isEOF:index] || [self isLastCharacter:index]){
+    if( [self.view.textStorage isEOF:index] || [self.view.textStorage isLastCharacter:index]){
         return index;
     }
     
     NSUInteger p = index+1; // We start searching end of word from next character
     NSString *string = [self string];
-    while( ![self isLastCharacter:p] ){
+    while( ![self.view.textStorage isLastCharacter:p] ){
         unichar curChar = [string characterAtIndex:p];
         unichar nextChar = [string characterAtIndex:p+1];
         // Find the border of words.
@@ -1039,16 +629,16 @@
         // Thats why we are not seeing blank line as a border of a word here (commented out the condition currently)
         // We may add some option to specify if we count a blank line as a word here.
         if( opt == BIGWORD ){
-            if( /*[self isBlankLine:p]                               || */// blank line
-               (isNonBlank(curChar) && !isNonBlank(nextChar))             // non blank to blank
+            if( /*[self.view.textStorage isBlankline:p]                               || */// blank line
+               (isNonblank(curChar) && !isNonblank(nextChar))             // non blank to blank
                ){
                 count--;
             }
         }else{
-            if( /*[self isBlankLine:p]                               || */// blank line
-               (isNonBlank(curChar) && !isNonBlank(nextChar))       ||   // non blank to blank
+            if( /*[self.view.textStorage isBlankline:p]                               || */// blank line
+               (isNonblank(curChar) && !isNonblank(nextChar))       ||   // non blank to blank
                (isKeyword(curChar) && !isKeyword(nextChar))         ||   // keyword to non keyword
-               (isNonBlank(curChar) && !isKeyword(curChar) && isKeyword(nextChar))              // non keyword-non blank to keyword
+               (isNonblank(curChar) && !isKeyword(curChar) && isKeyword(nextChar))              // non keyword-non blank to keyword
                ){
                 count--;
             }
@@ -1109,12 +699,12 @@
                 }
             }
             // after )]"' must be space to be end of a sentence.
-            if( k < s.length && !isNonBlank(c2) ){ // !isNonBlank == isBlank
+            if( k < s.length && !isNonblank(c2) ){ // !isNonblank == isBlank
                 // This is a end of sentence.
                 // Now search for next non blank character to find head of sentence
                 for( k++ ; k < s.length ; k++ ){
                     c2 = [s characterAtIndex:k];
-                    if(isNonBlank(c2)){
+                    if(isNonblank(c2)){
                         // Found a head of sentence.
                         sentence_found++;
                         if( count == sentence_found ){
@@ -1129,8 +719,8 @@
     
     if( sentence_head == NSNotFound && pos == s.length ){
         if( (sentence_found+1) == count ){
-            sentence_head = [self endOfFile];
-            while( ![self isValidCursorPosition:sentence_head] ){
+            sentence_head = [self.view.textStorage endOfFile];
+            while( ![self.view.textStorage isValidCursorPosition:sentence_head] ){
                 sentence_head--;
             }
         }
@@ -1171,12 +761,12 @@
                 }
             }
             // after )]"' must be space to be end of a sentence.
-            if( k < lastSearchBase && !isNonBlank(c2) ){ // !isNonBlank == isBlank
+            if( k < lastSearchBase && !isNonblank(c2) ){ // !isNonblank == isBlank
                 // This is a end of sentence.
                 // Now search for next non blank character
                 for( k++ ; k < lastSearchBase ; k++ ){
                     c2 = [s characterAtIndex:k];
-                    if(isNonBlank(c2)){
+                    if(isNonblank(c2)){
                         // Found a head of sentence.
                         sentence_found++;
                         if( count == sentence_found ){
@@ -1225,8 +815,8 @@
     for( ; pos < s.length && NSNotFound == paragraph_head ; pos++,prevpos++ ){
         unichar c = [s characterAtIndex:pos];
         unichar prevc = [s characterAtIndex:prevpos];
-        if(isNewLine(prevc) && !isNewLine(c)){
-            if([self nextNonBlankInALine:pos] == NSNotFound && opt == MOPT_PARA_BOUND_BLANKLINE){
+        if(isNewline(prevc) && !isNewline(c)){
+            if([self.view.textStorage nextNonblankInLine:pos] == NSNotFound && opt == MOPT_PARA_BOUND_BLANKLINE){
                 paragraph_found++;
                 if(count == paragraph_found){
                     paragraph_head = pos;
@@ -1234,7 +824,7 @@
                 }
             }
         }
-        if( (isNewLine(c) && isNewLine(prevc)) ){
+        if( (isNewline(c) && isNewline(prevc)) ){
             if( newlines_skipped ){
                 paragraph_found++;
                 if( count  == paragraph_found ){
@@ -1254,8 +844,8 @@
     
     if( NSNotFound == paragraph_head   ){
         // end of document
-        paragraph_head = [self endOfFile];
-        while( ![self isValidCursorPosition:paragraph_head] ){
+        paragraph_head = [self.view.textStorage endOfFile];
+        while( ![self.view.textStorage isValidCursorPosition:paragraph_head] ){
             paragraph_head--;
         }
     }
@@ -1280,7 +870,7 @@
     for( ; pos > 0 && NSNotFound == paragraph_head ; pos--,prevpos-- ){
         unichar c = [s characterAtIndex:pos];
         unichar prevc = [s characterAtIndex:prevpos];
-        if(isNewLine(c) && isNewLine(prevc)){
+        if(isNewline(c) && isNewline(prevc)){
             if( newlines_skipped ){
                 paragraph_found++;
                 if( count == paragraph_found ){
@@ -1315,13 +905,13 @@
     return 0;
 }
 
-- (NSUInteger)nextCharacterInALine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
+- (NSUInteger)nextCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [self isEOF:index] ){
+    if( [self.view.textStorage isEOF:index] ){
         return NSNotFound;
     }
     NSUInteger p = index+1;
-    NSUInteger end = [self endOfLine:p];
+    NSUInteger end = [self.view.textStorage endOfLine:p];
     if( NSNotFound == end ){
         return NSNotFound;
     }
@@ -1337,13 +927,13 @@
     return NSNotFound;
 }
 
-- (NSUInteger)prevCharacterInALine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
+- (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( 0 == index ){
         return NSNotFound;
     }
     NSUInteger p = index-1;
-    NSUInteger head = [self headOfLine:p];
+    NSUInteger head = [self.view.textStorage firstOfLine:p];
     if( NSNotFound == head ){
         return NSNotFound;
     }
@@ -1359,9 +949,6 @@
     return NSNotFound;
 }
 
-- (NSUInteger)endOfFile{
-	return self.string.length;
-}
 
 /**
  * Return number of lines in current visible view.
@@ -1397,7 +984,7 @@
     NSPoint bottom = [[scrollView contentView] bounds].origin;
     // This calculate the position of the bottom line and substruct height of "count" of lines to upwards
     bottom.y += [[scrollView contentView] bounds].size.height - (NSHeight(glyphRect) / 2.0f) - (NSHeight(glyphRect) * (count-1));
-    return [self lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:bottom]];
+    return [self.view.textStorage lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:bottom]];
 }
 
 /**
@@ -1407,7 +994,7 @@
     NSScrollView *scrollView = [self.view enclosingScrollView];
     NSPoint center = [[scrollView contentView] bounds].origin;
     center.y += [[scrollView contentView] bounds].size.height / 2;
-    return [self lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:center]];
+    return [self.view.textStorage lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:center]];
 }
 
 /**
@@ -1457,7 +1044,7 @@
 - (void)clampRangeToEndOfLine:(NSRange*)range {
     ASSERT_VALID_RANGE_WITH_EOF(range->location);
 	NSUInteger starti = range->location;
-	NSUInteger taili = [self tailOfLine:starti];
+	NSUInteger taili = [self.view.textStorage endOfLine:starti];
     NSUInteger length = range->length;
     // We do not need to check if "taili > range->location"(Integer Undeflow) since taili is result of tailofLine based on the location 
     length = MIN(range->length, taili - range->location);
@@ -1466,7 +1053,7 @@
 
 - (void)clampRangeToBuffer:(NSRange*)range {
     ASSERT_VALID_RANGE_WITH_EOF(range->location);
-	NSUInteger taili = [self endOfFile];
+	NSUInteger taili = [self.view.textStorage endOfFile];
 	NSUInteger length = range->length;
     // We do not need to check if "taili > range->location"(Integer Undeflow) since taili(endOfFile) is equal or greater the location (which is checked by assersion)
     length = MIN(range->length, taili - range->location);    
@@ -1484,13 +1071,13 @@
         to = tmp;
     }
     // EOF can not be included in operation range.
-    if( [self isEOF:from] ){
+    if( [self.view.textStorage isEOF:from] ){
         return NSMakeRange(from, 0); // from is EOF but the length is 0 means EOF will not be included in the returned range.
     }
     
     // EOF should not be included.
     // If type is exclusive we do not subtract 1 because we do it later below
-    if( [self isEOF:to] && type != CHARACTERWISE_EXCLUSIVE){
+    if( [self.view.textStorage isEOF:to] && type != CHARACTERWISE_EXCLUSIVE){
         to--; // Note that we already know that "to" is not 0 so not chekcing if its 0.
     }
     
@@ -1501,11 +1088,11 @@
     }else if( type == CHARACTERWISE_INCLUSIVE ){
         // Nothing special
     }else if( type == LINEWISE ){
-        to = [self tailOfLine:to];
-        if( [self isEOF:to] ){
+        to = [self.view.textStorage endOfLine:to];
+        if( [self.view.textStorage isEOF:to] ){
             to--;
         }
-        NSUInteger head = [self headOfLine:from];
+        NSUInteger head = [self.view.textStorage firstOfLine:from];
         if( NSNotFound != head ){
             from = head;
         }
@@ -1519,51 +1106,6 @@
     [self setSelectedRangeWithBoundsCheck:opRange.location To:opRange.location + opRange.length];
 }
 
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num{
-    NSAssert(0 != num, @"line number starts from 1");
-    
-    // Primitive search to find line number
-    // TODO: we may need to keep track line number and position by hooking insertText: method.
-    NSUInteger pos = 0;
-    num--; // line number starts from 1
-	
-	NSUInteger length = [[self string] length];
-    while( pos < length && num != 0){
-        if( [self isNewLine:pos] ){
-            num--;
-        }
-        pos++; // may be EOF if EOF is blank line
-    }
-    
-    if( num != 0 ){
-        // Couldn't find the line
-        return NSNotFound;
-    }
-	
-	return pos;
-}
-
-/**
- * Returns position of specifiled line number and column.
- * If the specified line exceeds the number of lines in current document it returns NSNotFound.
- * If the specified column exeeds the column number in the line it returns position of tail of the line(newline or eof)
- **/
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column{
-	NSUInteger idx = [self positionAtLineNumber:num];
-	if (idx == NSNotFound) { return NSNotFound; }
-	return [self nextPositionFrom:idx matchingColumn:column returnNotFound:NO];
-}
-
-- (NSUInteger)maxColumnAtLineNumber:(NSUInteger)num{
-    // Column starts from 0
-    NSUInteger firstIdx = [self positionAtLineNumber:num];
-    if( NSNotFound == firstIdx ){
-        //There no such line in the text.
-        return NSNotFound;
-    }
-    NSUInteger eol = [self tailOfLine:firstIdx];
-    return eol-firstIdx;
-}
 
 ////////////////
 // Scrolling  //
@@ -1608,7 +1150,7 @@ static NSInteger seek_forwards(NSString*,NSInteger,NSCharacterSet*);
     // repeatCount loop starts here
     while (count--) {
         // Skip past newline
-        while (index < maxIndex && isNewLine([string characterAtIndex:index])) {
+        while (index < maxIndex && isNewline([string characterAtIndex:index])) {
             ++index;
         }
         
@@ -1662,7 +1204,7 @@ static NSInteger seek_forwards(NSString*,NSInteger,NSCharacterSet*);
                     newBegin = seek_backwards(string, begin, wsSet);
                     
                     // Never remove a line's leading whitespace
-                    if (newBegin == 0 || isNewLine([string characterAtIndex:newBegin - 1])) {
+                    if (newBegin == 0 || isNewline([string characterAtIndex:newBegin - 1])) {
                         newBegin = begin;
                     }
                 }
@@ -1738,7 +1280,7 @@ NSInteger xv_caret(NSString *string, NSInteger index)
     
     while (seekingIndex > 0) {
         unichar ch = [string characterAtIndex:seekingIndex-1];
-        if (isNewLine(ch)) {
+        if (isNewline(ch)) {
             break;
         } else if (ch != '\t' && ch != ' ') {
             resultIndex = seekingIndex - 1;
@@ -1750,7 +1292,7 @@ NSInteger xv_caret(NSString *string, NSInteger index)
         NSInteger maxIndex = [string length] - 1;
         while (resultIndex < maxIndex) {
             unichar ch = [string characterAtIndex:resultIndex];
-            if (isNewLine(ch) || isWhiteSpace(ch) == NO) {
+            if (isNewline(ch) || isWhitespace(ch) == NO) {
                 break;
             }
             ++resultIndex;
@@ -1764,7 +1306,7 @@ NSInteger xv_0(NSString *string, NSInteger index)
 {    
     while (index > 0)
     {
-        if (isNewLine([string characterAtIndex:index-1])) { break; }
+        if (isNewline([string characterAtIndex:index-1])) { break; }
         --index;
     }
     return index;
@@ -1837,7 +1379,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
             if (pos == 0) { break; } // At start of file
             --pos;
             
-            if (isNewLine(characterAtIndex(h, pos)))
+            if (isNewline(characterAtIndex(h, pos)))
             {
                 // At prev line.
                 do_quotes = -1;
@@ -1845,7 +1387,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
         } else {  // Forward search
             if (pos == maxIndex) { break; } // At end of file
             
-            if (isNewLine(characterAtIndex(h, pos))) {
+            if (isNewline(characterAtIndex(h, pos))) {
                 do_quotes = -1;
             }
             
@@ -1868,11 +1410,11 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
             at_start = do_quotes;
             
             NSInteger ptr = pos;
-            while (ptr > 0 && !isNewLine([string characterAtIndex:ptr-1])) { --ptr; }
+            while (ptr > 0 && !isNewline([string characterAtIndex:ptr-1])) { --ptr; }
             NSInteger sta = ptr;
             
             while (ptr < maxIndex && 
-                   !isNewLine(characterAtIndex(h, ptr)))
+                   !isNewline(characterAtIndex(h, ptr)))
             {
                 if (ptr == pos + backwards) { at_start = (do_quotes & 1); }
                 
@@ -1886,7 +1428,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
                 
                 if (characterAtIndex(h, ptr) == '\\' && 
                     ptr + 1 < maxIndex && 
-                    !isNewLine(characterAtIndex(h, ptr+1))) 
+                    !isNewline(characterAtIndex(h, ptr+1))) 
                 { ++ptr; }
                 ++ptr;
             }
@@ -1943,7 +1485,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
                     while (col > 0) {
                         --col;
                         c2 = characterAtIndex(h, col);
-                        if (isNewLine(c2) || c2 != '\\') {
+                        if (isNewline(c2) || c2 != '\\') {
                             break;
                         }
                         ++qcnt;
@@ -1964,7 +1506,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
                         int col = 0;
                         while (p1 > 0 && col < 3) {
                             --p1;
-                            if (isNewLine(characterAtIndex(h, p1))) {
+                            if (isNewline(characterAtIndex(h, p1))) {
                                 break;
                             }
                             ++col;
@@ -1986,11 +1528,11 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
                         }
                     } else {
                         // Forward search
-                        if (pos < maxIndex && !isNewLine(characterAtIndex(h, pos + 1)))
+                        if (pos < maxIndex && !isNewline(characterAtIndex(h, pos + 1)))
                         {
                             if (characterAtIndex(h, pos + 1) == '\\' &&
                                 (pos < maxIndex - 2) &&
-                                !isNewLine(characterAtIndex(h, pos + 2)) &&
+                                !isNewline(characterAtIndex(h, pos + 2)) &&
                                 characterAtIndex(h, pos + 3) == '\'') 
                             {
                                 pos += 3;
@@ -2021,7 +1563,7 @@ int findmatchlimit(NSString* string, NSInteger pos, unichar initc, BOOL cpo_matc
                         while (col > 0) {
                             --col;
                             c2 = characterAtIndex(h, col);
-                            if (isNewLine(c2) || c2 != '\\') {
+                            if (isNewline(c2) || c2 != '\\') {
                                 break;
                             }
                             ++bslcnt;
@@ -2172,7 +1714,7 @@ NSInteger find_next_quote(NSString* string, NSInteger start, NSInteger max, unic
     while (start < max)
     {
         unichar ch = [string characterAtIndex:start];
-		if (isNewLine(ch)) { break; }
+		if (isNewline(ch)) { break; }
 		
 		if (!ignoreNextChar || ignoreEscape)
 		{
@@ -2199,7 +1741,7 @@ NSInteger find_prev_quote(NSString* string, NSInteger start, unichar quote, BOOL
     while (start >= 0)
     {
 		unichar ch = [string characterAtIndex:start];	
-        if (isNewLine(ch)) { break; }
+        if (isNewline(ch)) { break; }
 		
 		if (ch == '\\' && !ignoreEscape)
 		{
@@ -2301,7 +1843,7 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
                 result = idx; // Found
                 break;
             }
-        } else if (isNewLine(ch))
+        } else if (isNewline(ch))
         {
             break; // Only search in current line.
         }

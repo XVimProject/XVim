@@ -81,7 +81,7 @@ typedef enum {
 - (void)append;
 - (void)insert;
 - (void)appendAtEndOfLine;
-- (void)insertBeforeFirstNonBlank;
+- (void)insertBeforeFirstNonblank;
 
 // for keydown in insertion
 - (void)passThroughKeyDown:(NSEvent*)event;
@@ -110,9 +110,9 @@ typedef enum {
 - (void)scrollHalfPageBackward:(NSUInteger)count;
 - (void)scrollLineForward:(NSUInteger)count;
 - (void)scrollLineBackward:(NSUInteger)count;
-- (void)scrollBottom:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb;
-- (void)scrollTop:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb;;
-- (void)scrollCenter:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb;;
+- (void)scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;;
+- (void)scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;;
 
 
 

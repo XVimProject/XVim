@@ -18,6 +18,7 @@
 #import "XVimSearch.h"
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
+#import "NSTextStorage+VimOperation.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
@@ -342,6 +343,7 @@
 }
 
 // This is internal method used by SQUOTE, BACKQUOTE
+// TODO: rename firstOfLine -> firstNonblankOfLine
 - (XVimEvaluator*)jumpToMark:(XVimMark*)mark firstOfLine:(BOOL)fol{
     NSUInteger cur_pos = self.sourceView.insertionPoint;
 	MOTION_TYPE motionType = fol?LINEWISE:CHARACTERWISE_EXCLUSIVE;
@@ -357,13 +359,13 @@
         [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
     }
     
-    NSUInteger to = [[self sourceView] positionAtLineNumber:mark.line column:mark.column];
+    NSUInteger to = [self.sourceView.view.textStorage positionAtLineNumber:mark.line column:mark.column];
     if( NSNotFound == to ){
         return [XVimEvaluator invalidEvaluator];
     }
     
     if( fol ){
-        to = [[self sourceView] firstNonBlankInALine:to]; // This never returns NSNotFound
+        to = [self.sourceView.view.textStorage firstNonblankInLine:to]; // This never returns NSNotFound
     }
 	
     // set the position before the jump
@@ -420,7 +422,7 @@
 }
 
 - (XVimEvaluator*)DOLLAR{
-    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_END_OF_LINE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
 // Underscore ( "_") moves the cursor to the start of the line (past leading whitespace)
@@ -432,7 +434,7 @@
     NSRange r = [view selectedRange];
     NSUInteger repeat = self.numericArg;
     NSUInteger linesUpCursorloc = [view nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
-    NSUInteger head = [view headOfLineWithoutSpaces:linesUpCursorloc];
+    NSUInteger head = [view.view.textStorage firstOfLineWithoutSpaces:linesUpCursorloc];
     if( NSNotFound == head && linesUpCursorloc != NSNotFound){
         head = linesUpCursorloc;
     }else if(NSNotFound == head){

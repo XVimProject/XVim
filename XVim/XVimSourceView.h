@@ -43,6 +43,7 @@
 
 - (id)initWithView:(NSTextView*)view;
 
+- (NSUInteger)lineNumber:(NSUInteger)index;
 
 // Returns the attached view (DO NOT USE IT IN NEWLY CREATED CODE)
 - (NSTextView*)view;

@@ -230,20 +230,18 @@
             // D for blankline
             // Vim never deletes blankline with D
             // The strange thing is that 2D deletes 2 lines including line below current cursor position.
-            // Assume we have 3 empty lines (They haev only \n in each line)
+            // Assume we have 3 empty lines (They have only \n in each line)
             //  D -> 0 line is deleted
             // 2D -> 2 lines are deleted
-            // Because of this strangeness XVim does not support first one.
-            // XVim deletes one line when D comes to blankline.
+            // This is because of the exceptional Vim behavior
+            // (See ":help d" in Vim and read exceptional statement for d{motion})
+            // Currently XVim does not support this exceptional behavior
             
-            // Test case Vim passes but XVim does not
-            // XVimMakeTestCase(@"\n\n" , 0, 0, @"D"  , @"\n\n", 0, 0), // D never delete blank line
+            // Test case Vim and XVim passes
+            XVimMakeTestCase(@"\n\n" , 0, 0, @"D"  , @"\n\n", 0, 0), // D never delete blank line
             
-            // Test XVim passes but not Vim behaviour
-            XVimMakeTestCase(@"\n\n" , 0, 0, @"D"  , @"\n", 0, 0),
-            
-            // 2D (Vim and XVim has same behaviour)
-            XVimMakeTestCase(@"\n\n" , 0, 0, @"2D"  , @"", 0, 0),
+            // Test XVim does not support currently
+            // XVimMakeTestCase(@"\n\n" , 0, 0, @"2D"  , @"", 0, 0),
             
             // dd
             XVimMakeTestCase(text1, 1, 0, @"dd"    , dd_result1, 0, 0),

@@ -25,7 +25,7 @@
         
         _info = malloc(sizeof(XVimMotionInfo));
         _info->reachedEndOfLine = NO;
-        _info->isFirstWordInALine = NO;
+        _info->isFirstWordInLine = NO;
         _info->lastEndOfLine = NSNotFound;
         _info->lastEndOfWord = NSNotFound;
     }

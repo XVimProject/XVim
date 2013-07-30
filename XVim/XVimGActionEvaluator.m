@@ -20,6 +20,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimVisualEvaluator.h"
+#import "NSTextStorage+VimOperation.h"
 
 @implementation XVimGActionEvaluator
 
@@ -43,7 +44,7 @@
 - (XVimEvaluator*)i{
     XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.sourceView.documentURL.path];
 	if ( mark.line != NSNotFound) {
-        NSUInteger newPos = [self.sourceView positionAtLineNumber:mark.line column:mark.column];
+        NSUInteger newPos = [self.sourceView.view.textStorage positionAtLineNumber:mark.line column:mark.column];
         if( NSNotFound != newPos ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
             m.position = newPos;

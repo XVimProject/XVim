@@ -11,8 +11,8 @@
 // support functions   //
 /////////////////////////
 BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
-BOOL isWhiteSpace(unichar ch) { return ch == ' ' || ch == '\t'; }
-BOOL isNewLine(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
+BOOL isWhitespace(unichar ch) { return ch == ' ' || ch == '\t'; }
+BOOL isNewline(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
 BOOL isNonAscii(unichar ch) { return ch > 128; } // is this not ch >= 128 ? (JugglerShu)
 BOOL isAlpha(unichar ch) { 
     return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_';
@@ -23,8 +23,8 @@ BOOL isDelimeter(unichar ch) {
     (ch >= '[' && ch <= '`' && ch != '_') ||
     (ch >= '{' && ch <= '~');
 }
-BOOL isNonBlank(unichar ch) {
-    return (!isWhiteSpace(ch)) && (!isNewLine(ch));
+BOOL isNonblank(unichar ch) {
+    return (!isWhitespace(ch)) && (!isNewline(ch));
 }
 BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined for 1 byte char
     return isDigit(ch) || isAlpha(ch)  || ch >= 192;
@@ -43,19 +43,19 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return isDelimeter([self characterAtIndex:index]);
 }
 
-- (BOOL) isWhiteSpace:(NSUInteger)index{
-    return isWhiteSpace([self characterAtIndex:index]);
+- (BOOL) isWhitespace:(NSUInteger)index{
+    return isWhitespace([self characterAtIndex:index]);
 }
 
 - (BOOL) isNonAscii:(NSUInteger)index{
     return isNonAscii([self characterAtIndex:index]);
 }
 
-- (BOOL) isNewLine:(NSUInteger)index{
-    return isNewLine([self characterAtIndex:index]); }
+- (BOOL) isNewline:(NSUInteger)index{
+    return isNewline([self characterAtIndex:index]); }
 
-- (BOOL) isNonBlank:(NSUInteger)index{
-    return isNonBlank([self characterAtIndex:index]);
+- (BOOL) isNonblank:(NSUInteger)index{
+    return isNonblank([self characterAtIndex:index]);
 }
 
 - (BOOL) isKeyword:(NSUInteger)index{

@@ -1,3 +1,4 @@
+#import "NSTextStorage+VimOperation.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
 #import "DVTSourceTextViewHook.h"
@@ -192,6 +193,10 @@
     return [self lineNumber:_insertionPoint];
 }
 
+- (NSUInteger)lineNumber:(NSUInteger)index{
+    return [self.view.textStorage lineNumber:index];
+}
+
 - (NSArray*)_selectedRanges{
     NSUInteger selectionStart, selectionEnd = NSNotFound;
     NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
@@ -202,10 +207,10 @@
     else if( _selectionMode == XVIM_VISUAL_CHARACTER){
         selectionStart = MIN(_insertionPoint,_selectionBegin);
         selectionEnd = MAX(_insertionPoint,_selectionBegin);
-        if( [self isEOF:selectionStart] ){
+        if( [self.view.textStorage isEOF:selectionStart] ){
             // EOF can not be selected
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]];
-        }else if( [self isEOF:selectionEnd] ){
+        }else if( [self.view.textStorage isEOF:selectionEnd] ){
             selectionEnd--;
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
         }else{
@@ -214,12 +219,12 @@
     }else if(_selectionMode == XVIM_VISUAL_LINE ){
         NSUInteger min = MIN(_insertionPoint,_selectionBegin);
         NSUInteger max = MAX(_insertionPoint,_selectionBegin);
-        selectionStart = [self firstOfLine:min];
-        selectionEnd   = [self tailOfLine:max];
-        if( [self isEOF:selectionStart] ){
+        selectionStart = [self.view.textStorage beginningOfLine:min];
+        selectionEnd   = [self.view.textStorage endOfLine:max];
+        if( [self.view.textStorage isEOF:selectionStart] ){
             // EOF can not be selected
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]];
-        }else if( [self isEOF:selectionEnd] ){
+        }else if( [self.view.textStorage isEOF:selectionEnd] ){
             selectionEnd--;
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
         }else{
@@ -232,12 +237,12 @@
         NSUInteger left   = MIN( [self columnNumber:_insertionPoint], [self columnNumber:_selectionBegin] );
         NSUInteger right  = MAX( [self columnNumber:_insertionPoint], [self columnNumber:_selectionBegin] );
         for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
-            selectionStart = [self positionAtLineNumber:top+i column:left];
-            selectionEnd = [self positionAtLineNumber:top+i column:right];
-            if( [self isEOF:selectionStart] || [self isTOL:selectionStart]){
+            selectionStart = [self.view.textStorage positionAtLineNumber:top+i column:left];
+            selectionEnd = [self.view.textStorage positionAtLineNumber:top+i column:right];
+            if( [self.view.textStorage isEOF:selectionStart] || [self.view.textStorage isEOL:selectionStart]){
                 // EOF or EOL can not be selected
                 [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]]; // 0 means No selection. This information is important and used in operators like 'delete'
-            }else if( [self isEOF:selectionEnd] || [self isTOL:selectionEnd]){
+            }else if( [self.view.textStorage isEOF:selectionEnd] || [self.view.textStorage isEOL:selectionEnd]){
                 selectionEnd--;
                 [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
             }else{
@@ -258,7 +263,7 @@
     if( _cursorMode == CURSOR_XVIM_MODE_INSERT ){
         [self _syncStateFromView];
         _cursorMode = CURSOR_MODE_COMMAND;
-        if(![self isFirstOfLine:_insertionPoint]){
+        if(![self.view.textStorage isBOL:_insertionPoint]){
             [self _moveCursor:_insertionPoint-1 preserveColumn:NO];
         }
         [self _syncState];
@@ -266,7 +271,7 @@
 }
 
 - (void)moveToPosition:(XVimPosition)pos{
-    [self _moveCursor:[self positionAtLineNumber:pos.line column:pos.column] preserveColumn:NO];
+    [self _moveCursor:[self.view.textStorage positionAtLineNumber:pos.line column:pos.column] preserveColumn:NO];
     [self _syncState];
 }
 
@@ -323,7 +328,7 @@
     // where we treat EOF as a newline when yank
     if( _lastYankedType == TEXT_TYPE_LINES){
         NSString* lastLine = [tmp lastObject];
-        if( !isNewLine([lastLine characterAtIndex:[lastLine length]-1]) ){
+        if( !isNewline([lastLine characterAtIndex:[lastLine length]-1]) ){
             [tmp addObject:@""]; // add empty dummy line
         }
     }
@@ -362,7 +367,7 @@
             }
         }
         if( motion.motion == MOTION_WORD_FORWARD ){
-            if ( (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound )) {
+            if ( (motion.info->isFirstWordInLine && motion.info->lastEndOfLine != NSNotFound )) {
                 // Special cases for word move over a line break.
                 motionRange.end = motion.info->lastEndOfLine;
                 motion.type = CHARACTERWISE_INCLUSIVE;
@@ -376,7 +381,7 @@
             }
         }
         r = [self getOperationRangeFrom:motionRange.begin To:motionRange.end Type:motion.type];
-        if( motion.type == LINEWISE && [self isLastLine:motionRange.end]){
+        if( motion.type == LINEWISE && [self.view.textStorage isLastLine:motionRange.end]){
             if( r.location != 0 ){
                 motion.info->deleteLastLine = YES;
                 r.location--;
@@ -413,7 +418,7 @@
     }
     
     // "cw" is like "ce" if the cursor is on a word ( in this case blank line is not treated as a word )
-    if( motion.motion == MOTION_WORD_FORWARD && [self isNonBlank:_insertionPoint] ){
+    if( motion.motion == MOTION_WORD_FORWARD && [self.view.textStorage isNonblank:_insertionPoint] ){
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
     }
@@ -444,7 +449,7 @@
             motion.type = CHARACTERWISE_INCLUSIVE;
         }
         if( motion.motion == MOTION_WORD_FORWARD ){
-            if ( (motion.info->isFirstWordInALine && motion.info->lastEndOfLine != NSNotFound )) {
+            if ( (motion.info->isFirstWordInLine && motion.info->lastEndOfLine != NSNotFound )) {
                 // Special cases for word move over a line break.
                 to.end = motion.info->lastEndOfLine;
                 motion.type = CHARACTERWISE_INCLUSIVE;
@@ -458,8 +463,8 @@
             }
         }
         r = [self getOperationRangeFrom:_insertionPoint To:to.end Type:motion.type];
-        BOOL eof = [self isEOF:to.end];
-        BOOL blank = [self isBlankLine:to.end];
+        BOOL eof = [self.view.textStorage isEOF:to.end];
+        BOOL blank = [self.view.textStorage isBlankline:to.end];
         if( motion.type == LINEWISE && blank && eof){
             if( r.location != 0 ){
                 r.location--;
@@ -495,7 +500,7 @@
     if( type == TEXT_TYPE_CHARACTERS ){
         //Forward insertion point +1 if after flag if on
         if( 0 != text.length ){
-            if (![self isNewLine:_insertionPoint] && after) {
+            if (![self.view.textStorage isNewline:_insertionPoint] && after) {
                 targetPos++;
             }
             insertionPointAfterPut = targetPos;
@@ -510,7 +515,7 @@
             [self insertNewlineBelow];
             targetPos = _insertionPoint;
         }else{
-            targetPos= [self firstOfLine:_insertionPoint];
+            targetPos= [self.view.textStorage beginningOfLine:_insertionPoint];
         }
         insertionPointAfterPut = _insertionPoint;
         [self _setSelectedRange:NSMakeRange(targetPos,0)];
@@ -525,7 +530,7 @@
         }
     }else if( type == TEXT_TYPE_BLOCK ){
         //Forward insertion point +1 if after flag if on
-        if (![self isNewLine:_insertionPoint] && ![self isEOF:_insertionPoint] && after) {
+        if (![self.view.textStorage isNewline:_insertionPoint] && ![self.view.textStorage isEOF:_insertionPoint] && after) {
             _insertionPoint++;
         }
         insertionPointAfterPut = _insertionPoint;
@@ -536,21 +541,21 @@
         for( NSUInteger i = 0 ; i < lines.count ; i++){
             NSString* line = [lines objectAtIndex:i];
             NSUInteger targetLine = startLine + i;
-            NSUInteger head = [self positionAtLineNumber:targetLine];
+            NSUInteger head = [self.view.textStorage positionAtLineNumber:targetLine];
             if( NSNotFound == head ){
                 NSAssert( targetLine != 0, @"This should not be happen");
                 [self insertNewlineBelowLine:targetLine-1];
-                head = [self positionAtLineNumber:targetLine];
+                head = [self.view.textStorage positionAtLineNumber:targetLine];
             }
             NSAssert( NSNotFound != head , @"Head of the target line must be found at this point");
             
             // Find next insertion point
-            NSUInteger max = [self maxColumnAtLineNumber:[self lineNumber:head]];
+            NSUInteger max = [self.view.textStorage maxColumnAtLineNumber:[self lineNumber:head]];
             NSAssert( max != NSNotFound , @"Should not be NSNotFound");
             if( column > max ){
                 // If the line does not have enough column pad it with spaces
                 NSUInteger spaces = column - max;
-                NSUInteger end = [self tailOfLine:head];
+                NSUInteger end = [self.view.textStorage endOfLine:head];
                 for( NSUInteger i = 0 ; i < spaces; i++){
                     [_view insertText:@" " replacementRange:NSMakeRange(end,0)];
                 }
@@ -664,7 +669,7 @@
 }
 
 - (BOOL)replaceCharacters:(unichar)c count:(NSUInteger)count{
-    NSUInteger end = [self endOfLine:_insertionPoint];
+    NSUInteger end = [self.view.textStorage endOfLine:_insertionPoint];
     // Note : endOfLine may return one less than _insertionPoint if _insertionPoint is on newline
     if( NSNotFound == end ){
         return NO;
@@ -683,36 +688,36 @@
 
 - (void)joinAtLineNumber:(NSUInteger)line{
     BOOL needSpace = NO;
-    NSUInteger headOfLine = [self positionAtLineNumber:line];
+    NSUInteger headOfLine = [self.view.textStorage positionAtLineNumber:line];
     if( headOfLine == NSNotFound){
         return;
     }
 
-    NSUInteger tail = [self tailOfLine:headOfLine];
-    if( [self isEOF:tail] ){
+    NSUInteger tail = [self.view.textStorage endOfLine:headOfLine];
+    if( [self.view.textStorage isEOF:tail] ){
         // This is the last line and nothing to join
         return;
     }
     
     // Check if we need to insert space between lines.
-    NSUInteger endOfLine = [self endOfLine:headOfLine];
+    NSUInteger endOfLine = [self.view.textStorage endOfLine:headOfLine];
     if( endOfLine != NSNotFound ){
         // This is not blank line so we check if the last character is space or not .
-        if( ![self isWhiteSpace:endOfLine] ){
+        if( ![self.view.textStorage isWhitespace:endOfLine] ){
             needSpace = YES;
         }
     }
 
     // Search in next line for the position to join(skip white spaces in next line)
     NSUInteger posToJoin = [self nextLine:headOfLine column:0 count:1 option:MOTION_OPTION_NONE];
-    NSUInteger tmp = [self nextNonBlankInALine:posToJoin];
+    NSUInteger tmp = [self.view.textStorage nextNonblankInLine:posToJoin];
     if( NSNotFound == tmp ){
         // Only white spaces are found in the next line
-        posToJoin = [self tailOfLine:posToJoin];
+        posToJoin = [self.view.textStorage endOfLine:posToJoin];
     }else{
         posToJoin = tmp;
     }
-    if( ![self isEOF:posToJoin] && [self.string characterAtIndex:posToJoin] == ')' ){
+    if( ![self.view.textStorage isEOF:posToJoin] && [self.string characterAtIndex:posToJoin] == ')' ){
         needSpace = NO;
     }
     
@@ -803,7 +808,7 @@
             [(DVTSourceTextView*)_view shiftLeft:self];
         }
     }
-	NSUInteger cursorLocation = [self firstNonBlankInALine:insertionAfterShift];
+	NSUInteger cursorLocation = [self.view.textStorage firstNonblankInLine:insertionAfterShift];
     [self _moveCursor:cursorLocation preserveColumn:NO];
     [self changeSelectionMode:XVIM_VISUAL_NONE];
     [self _syncState];
@@ -820,7 +825,7 @@
 }
 
 - (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column{
-    NSUInteger pos = [self positionAtLineNumber:line column:column];
+    NSUInteger pos = [self.view.textStorage positionAtLineNumber:line column:column];
     if( pos == NSNotFound ){
         return;
     }
@@ -829,11 +834,11 @@
 
 - (void)insertNewlineBelowLine:(NSUInteger)line{
     NSAssert( line != 0, @"line number starts from 1");
-    NSUInteger pos = [self positionAtLineNumber:line];
+    NSUInteger pos = [self.view.textStorage positionAtLineNumber:line];
     if( NSNotFound == pos ){
         return;
     }
-    pos = [self tailOfLine:pos];
+    pos = [self.view.textStorage endOfLine:pos];
     [_view insertText:@"\n" replacementRange:NSMakeRange(pos ,0)];
     [self _moveCursor:pos+1 preserveColumn:NO];
     [self _syncState];
@@ -842,7 +847,7 @@
 - (void)insertNewlineBelow{
     NSUInteger l = _insertionPoint;
     // TODO: Use _insertionPoint to move cursor
-    NSUInteger tail = [self tailOfLine:l];
+    NSUInteger tail = [self.view.textStorage endOfLine:l];
     [[self view] setSelectedRange:NSMakeRange(tail,0)];
     [[self view] insertNewline:self];
     [self _syncStateFromView];
@@ -850,7 +855,7 @@
 
 - (void)insertNewlineAboveLine:(NSUInteger)line{
     NSAssert( line != 0, @"line number starts from 1");
-    NSUInteger pos = [self positionAtLineNumber:line];
+    NSUInteger pos = [self.view.textStorage positionAtLineNumber:line];
     if( NSNotFound == pos ){
         return;
     }
@@ -863,7 +868,7 @@
 
 - (void)insertNewlineAbove{
     NSUInteger l = _insertionPoint;
-    NSUInteger head = [self headOfLine:l];
+    NSUInteger head = [self.view.textStorage firstOfLine:l];
     if( NSNotFound == head ){
         head = l;
     }
@@ -894,7 +899,7 @@
 - (void)append{
     NSAssert(_cursorMode == CURSOR_MODE_COMMAND, @"_cursorMode shoud be CURSOR_MODE_COMMAND");
     _cursorMode = CURSOR_XVIM_MODE_INSERT;
-    if( ![self isEOF:_insertionPoint] && ![self isNewLine:_insertionPoint]){
+    if( ![self.view.textStorage isEOF:_insertionPoint] && ![self.view.textStorage isNewline:_insertionPoint]){
         _insertionPoint++;
     }
     [self insert];
@@ -908,18 +913,18 @@
 - (void)appendAtEndOfLine{
     _cursorMode = CURSOR_XVIM_MODE_INSERT;
     [self changeSelectionMode:XVIM_VISUAL_NONE];
-    [self _moveCursor:[self tailOfLine:_insertionPoint] preserveColumn:NO];
+    [self _moveCursor:[self.view.textStorage endOfLine:_insertionPoint] preserveColumn:NO];
     [self _syncState];
     
 }
 
-- (void)insertBeforeFirstNonBlank{
-    _insertionPoint = [self firstNonBlankInALine:_insertionPoint];
+- (void)insertBeforeFirstNonblank{
+    _insertionPoint = [self.view.textStorage firstNonblankInLine:_insertionPoint];
     [self insert];
 }
 
 - (void)overwriteCharacter:(unichar)c{
-    if( _insertionPoint >= [self endOfFile] ){
+    if( _insertionPoint >= [self.view.textStorage endOfFile] ){
         // Should not happen.
         return;
     }
@@ -1125,30 +1130,30 @@
     [[scrollView contentView] scrollToPoint:scrollPoint];
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 	
-    cursorIndexAfterScroll = [self firstNonBlankInALine:cursorIndexAfterScroll];
+    cursorIndexAfterScroll = [self.view.textStorage firstNonblankInLine:cursorIndexAfterScroll];
     [self _moveCursor:cursorIndexAfterScroll preserveColumn:NO];
     [self _syncState];
     
 }
 
 // This is used by scrollBottom,Top,Center as a common method
-- (void)_scrollCommon_moveCursorPos:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{
+- (void)_scrollCommon_moveCursorPos:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{
     if( lineNumber != 0 ){
-        NSUInteger pos = [self positionAtLineNumber:lineNumber];
+        NSUInteger pos = [self.view.textStorage positionAtLineNumber:lineNumber];
         if( NSNotFound == pos ){
-            pos = [self endOfFile];
+            pos = [self.view.textStorage endOfFile];
         }
         [self _moveCursor:pos preserveColumn:NO];
         [self _syncState];
     }
     if( fnb ){
-        NSUInteger pos = [self firstNonBlankInALine:_insertionPoint];
+        NSUInteger pos = [self.view.textStorage firstNonblankInLine:_insertionPoint];
         [self _moveCursor:pos preserveColumn:NO];
         [self _syncState];
     }
 }
-- (void)scrollBottom:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{ // zb / z-
-    [self _scrollCommon_moveCursorPos:lineNumber firstNonBlank:fnb];
+- (void)scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{ // zb / z-
+    [self _scrollCommon_moveCursorPos:lineNumber firstNonblank:fnb];
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
@@ -1161,8 +1166,8 @@
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }
 
-- (void)scrollCenter:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{ // zz / z.
-    [self _scrollCommon_moveCursorPos:lineNumber firstNonBlank:fnb];
+- (void)scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{ // zz / z.
+    [self _scrollCommon_moveCursorPos:lineNumber firstNonblank:fnb];
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
@@ -1175,8 +1180,8 @@
     [scrollView reflectScrolledClipView:[scrollView contentView]];
 }
 
-- (void)scrollTop:(NSUInteger)lineNumber firstNonBlank:(BOOL)fnb{ // zt / z<CR>
-    [self _scrollCommon_moveCursorPos:lineNumber firstNonBlank:fnb];
+- (void)scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{ // zt / z<CR>
+    [self _scrollCommon_moveCursorPos:lineNumber firstNonblank:fnb];
     NSScrollView *scrollView = [_view enclosingScrollView];
     NSTextContainer *container = [_view textContainer];
     NSRect glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(_insertionPoint,0) inTextContainer:container];
@@ -1191,13 +1196,13 @@
     //         What I changed was the way calc "glyphRec". Not its using [self boundingRectForGlyphIndex] which coniders
     //         text folding when calc the rect.
     /*
-	BOOL isBlankLine =
-		(location == [[self string] length] || isNewLine([[self string] characterAtIndex:location])) &&
-		(location == 0 || isNewLine([[self string] characterAtIndex:location-1]));
+	BOOL isBlankline =
+		(location == [[self string] length] || isNewline([[self string] characterAtIndex:location])) &&
+		(location == 0 || isNewline([[self string] characterAtIndex:location-1]));
 
     NSRange characterRange;
     characterRange.location = location;
-    characterRange.length = isBlankLine ? 0 : 1;
+    characterRange.length = isBlankline ? 0 : 1;
     
     // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll
     // to the appropriate glyph due to non contiguous layout
@@ -1266,7 +1271,7 @@
     DVTFoldingTextStorage* storage = [(DVTSourceTextView*)_view textStorage];
     NSUInteger foldedIndex = [storage foldedLocationForRealLocation:glyphIndex];
     NSRect glyphRect;
-    if( [self isEOF:glyphIndex] ){
+    if( [self.view.textStorage isEOF:glyphIndex] ){
         // When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
         glyphRect = [[_view layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 0)  inTextContainer:[_view textContainer]];
     }else{
@@ -1419,14 +1424,14 @@
             end = [self prevLine:begin column:_preservedColumn count:motion.count option:motion.option];
             break;
         case MOTION_BEGINNING_OF_LINE:
-            end = [self firstOfLine:begin];
+            end = [self.view.textStorage beginningOfLine:begin];
             if( end == NSNotFound){
                 end = current;
             }
             break;
         case MOTION_END_OF_LINE:
             tmpPos = [self nextLine:begin column:0 count:motion.count-1 option:MOTION_OPTION_NONE];
-            end = [self endOfLine:tmpPos];
+            end = [self.view.textStorage endOfLine:tmpPos];
             if( end == NSNotFound){
                 end = tmpPos;
             }
@@ -1444,63 +1449,63 @@
             end = [self paragraphsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_NEXT_CHARACTER:
-            end = [self nextCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
             break;
         case MOTION_PREV_CHARACTER:
-            end = [self prevCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
             break;
         case MOTION_TILL_NEXT_CHARACTER:
-            end = [self nextCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
             if(end != NSNotFound){
                 end--;
             }
             break;
         case MOTION_TILL_PREV_CHARACTER:
-            end = [self prevCharacterInALine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
             if(end != NSNotFound){
                 end++;
             }
             break;
         case MOTION_NEXT_FIRST_NONBLANK:
             end = [self nextLine:begin column:0 count:motion.count option:motion.option];
-            tmpPos = [self nextNonBlankInALine:end];
+            tmpPos = [self.view.textStorage nextNonblankInLine:end];
             if( NSNotFound != tmpPos ){
                 end = tmpPos;
             }
             break;
         case MOTION_PREV_FIRST_NONBLANK:
             end = [self prevLine:begin column:0 count:motion.count option:motion.option];
-            tmpPos = [self nextNonBlankInALine:end];
+            tmpPos = [self.view.textStorage nextNonblankInLine:end];
             if( NSNotFound != tmpPos ){
                 end = tmpPos;
             }
             break;
         case MOTION_FIRST_NONBLANK:
-            end = [self headOfLineWithoutSpaces:begin];
+            end = [self.view.textStorage firstOfLineWithoutSpaces:begin];
             break;
         case MOTION_LINENUMBER:
-            end = [self positionAtLineNumber:motion.line column:_preservedColumn];
+            end = [self.view.textStorage positionAtLineNumber:motion.line column:_preservedColumn];
             if( NSNotFound == end ){
-                end = [self positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
+                end = [self.view.textStorage positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
             }
             break;
         case MOTION_PERCENT:
-            end = [self positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
+            end = [self.view.textStorage positionAtLineNumber:1 + ([self numberOfLines]-1) * motion.count/100];
             break;
         case MOTION_NEXT_MATCHED_ITEM:
             end = [self positionOfMatchedPair:begin];
             break;
         case MOTION_LASTLINE:
-            end = [self positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
+            end = [self.view.textStorage positionAtLineNumber:[self numberOfLines] column:_preservedColumn];
             break;
         case MOTION_HOME:
-            end = [self firstNonBlankInALine:[self positionAtLineNumber:[self lineNumberFromTop:motion.count]]];
+            end = [self.view.textStorage firstNonblankInLine:[self.view.textStorage positionAtLineNumber:[self lineNumberFromTop:motion.count]]];
             break;
         case MOTION_MIDDLE:
-            end = [self firstNonBlankInALine:[self positionAtLineNumber:[self lineNumberAtMiddle]]];
+            end = [self.view.textStorage firstNonblankInLine:[self.view.textStorage positionAtLineNumber:[self lineNumberAtMiddle]]];
             break;
         case MOTION_BOTTOM:
-            end = [self firstNonBlankInALine:[self positionAtLineNumber:[self lineNumberFromBottom:motion.count]]];
+            end = [self.view.textStorage firstNonblankInLine:[self.view.textStorage positionAtLineNumber:[self lineNumberFromBottom:motion.count]]];
             break;
         case TEXTOBJECT_WORD:
             range = [self currentWord:begin count:motion.count  option:motion.option];
@@ -1536,7 +1541,7 @@
             range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '[', ']');
             break;
         case MOTION_LINE_COLUMN:
-            end = [self positionAtLineNumber:motion.line column:motion.column];
+            end = [self.view.textStorage positionAtLineNumber:motion.line column:motion.column];
             if( NSNotFound == end ){
                 end = current;
             }
@@ -1568,7 +1573,7 @@
     }
     
     if( _cursorMode == CURSOR_MODE_COMMAND && !(_selectionMode == XVIM_VISUAL_BLOCK)){
-        _insertionPoint = [self convertToValidCursorPositionForNormalMode:pos];
+        _insertionPoint = [self.view.textStorage convertToValidCursorPositionForNormalMode:pos];
     }else{
         _insertionPoint = pos;
     }
@@ -1581,12 +1586,12 @@
 }
 
 - (void)_deleteLine:(NSUInteger)lineNum{
-    NSUInteger pos = [self positionAtLineNumber:lineNum];
+    NSUInteger pos = [self.view.textStorage positionAtLineNumber:lineNum];
     if( NSNotFound == pos ){
         return;
     }
     
-    if( [self isLastLine:pos] ){
+    if( [self.view.textStorage isLastLine:pos] ){
         // To delete last line we need to delete newline char before this line
         NSUInteger start = pos;
         if( pos != 0 ){
@@ -1594,7 +1599,7 @@
         }
         
         // Delete upto end of line of the last line.
-        NSUInteger end = [self endOfLine:pos];
+        NSUInteger end = [self.view.textStorage endOfLine:pos];
         if( NSNotFound == end ){
             // The last line is blank-EOF line
             [_view insertText:@"" replacementRange:NSMakeRange(start, end-start+1)];
@@ -1602,14 +1607,14 @@
             [_view insertText:@"" replacementRange:NSMakeRange(start, end-start)];
         }
     }else{
-        NSUInteger end = [self tailOfLine:pos];
+        NSUInteger end = [self.view.textStorage endOfLine:pos];
         NSAssert( end != NSNotFound, @"Only when it is last line it return NSNotFound");
         [_view insertText:@"" replacementRange:NSMakeRange(pos, end-pos+1)]; //delete including newline
     }
 }
 
 - (void)_adjustCursorPosition{
-    if( ![self isValidCursorPosition:_insertionPoint] ){
+    if( ![self.view.textStorage isValidCursorPosition:_insertionPoint] ){
         NSRange placeholder = [(DVTSourceTextView*)_view rangeOfPlaceholderFromCharacterIndex:_insertionPoint forward:NO wrap:NO limit:0];
         if( placeholder.location != NSNotFound && _insertionPoint == (placeholder.location + placeholder.length)){
             //The condition here means that just before current insertion point is a placeholder.
@@ -1657,7 +1662,7 @@
 //   - setSelectedRange:NSMakeRange( indexOfEOF, 0 )   is allowed
 //   - setSelectedRange:NSMakeRange( indexOfEOF, 1 )   is not allowed
 - (void)_setSelectedRange:(NSRange)range{
-    if( [self isEOF:range.location] ){
+    if( [self.view.textStorage isEOF:range.location] ){
         [_view setSelectedRange:NSMakeRange(range.location,0)];
         return;
     }
@@ -1665,7 +1670,7 @@
         // No need to check bounds
     }else{
         NSUInteger lastIndex = range.location + range.length - 1;
-        if( [self isEOF:lastIndex] ){
+        if( [self.view.textStorage isEOF:lastIndex] ){
             range.length--;
         }else{
             // No need to change the selection area

@@ -174,7 +174,7 @@
 }
 
 - (XVimEvaluator*)I{
-    [[self sourceView] insertBeforeFirstNonBlank];
+    [[self sourceView] insertBeforeFirstNonblank];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 

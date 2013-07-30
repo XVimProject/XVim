@@ -12,7 +12,7 @@
 
 typedef struct {
     BOOL reachedEndOfLine;
-    BOOL isFirstWordInALine;
+    BOOL isFirstWordInLine;
     BOOL deleteLastLine;
     NSUInteger lastEndOfLine;
     NSUInteger lastEndOfWord;

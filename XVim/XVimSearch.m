@@ -7,6 +7,7 @@
 //
 
 #import "XVimSearch.h"
+#import "NSTextStorage+VimOperation.h"
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "NSString+VimHelper.h"
@@ -334,12 +335,12 @@
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
     NSUInteger searchStart = NSNotFound;
-    NSUInteger firstNonBlank = NSNotFound;
+    NSUInteger firstNonblank = NSNotFound;
 	
-	for (NSUInteger i = begin.location; ![view isEOF:i]; ++i)
+	for (NSUInteger i = begin.location; ![view.view.textStorage isEOF:i]; ++i)
 	{
         unichar curChar = [string characterAtIndex:i];
-        if (isNewLine(curChar)){
+        if (isNewline(curChar)){
             break;
         }
 
@@ -348,15 +349,15 @@
             break;
         }
 
-        if (isNonBlank(curChar) && firstNonBlank == NSNotFound){
-            firstNonBlank = i;
+        if (isNonblank(curChar) && firstNonblank == NSNotFound){
+            firstNonblank = i;
         }
 
         ++i;
     }
 
     if (searchStart == NSNotFound){
-        searchStart = firstNonBlank;
+        searchStart = firstNonblank;
     }
 
     if (searchStart == NSNotFound){
@@ -369,7 +370,7 @@
         unichar curChar = [string characterAtIndex:wordStart];
         unichar lastChar = [string characterAtIndex:wordStart-1];
         if ((isKeyword(curChar) && isKeyword(lastChar)) ||
-            (!isKeyword(curChar) && isNonBlank(curChar) && !isKeyword(lastChar) && isNonBlank(lastChar))){
+            (!isKeyword(curChar) && isNonblank(curChar) && !isKeyword(lastChar) && isNonblank(lastChar))){
             wordStart = [view wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
         }
     }
@@ -481,13 +482,13 @@
     self.lastReplacementString = replacement;
     
     // Find the position to start searching
-    NSUInteger replace_start_location = [[window sourceView] positionAtLineNumber:from column:0];
+    NSUInteger replace_start_location = [window.sourceView.view.textStorage positionAtLineNumber:from column:0];
     if( NSNotFound == replace_start_location){
         return;
     }
     
     // Find the position to end the searching
-    NSUInteger endOfReplacement = [[window sourceView] positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
+    NSUInteger endOfReplacement = [window.sourceView.view.textStorage positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
     if( NSNotFound == endOfReplacement ){
         endOfReplacement = [[[window sourceView] string] length];
     }

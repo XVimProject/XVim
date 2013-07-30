@@ -13,6 +13,7 @@
 #import "XVimSourceView.h"
 #import "XVimSourceView+Vim.h"
 #import "XVimSourceView+Xcode.h"
+#import "NSTextStorage+VimOperation.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
@@ -603,7 +604,7 @@
             break;
         case '$':			    /* '$' - last line */
             parsing++;
-            addr = [view numberOfLines];
+            addr = [view.view.textStorage numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
@@ -640,7 +641,7 @@
     for (;;)
     {
         // Skip whitespaces
-        while( isWhiteSpace(*parsing) ){
+        while( isWhitespace(*parsing) ){
             parsing++;
         }
         
@@ -722,7 +723,7 @@
     unichar* parsing = pCmd;
     
     // 1. skip comment lines and leading space ( XVim does not handling commnet lines )
-    for( NSUInteger i = 0; i < len && ( isWhiteSpace(*parsing) || *parsing == ':' ); i++,parsing++ );
+    for( NSUInteger i = 0; i < len && ( isWhitespace(*parsing) || *parsing == ':' ); i++,parsing++ );
     
     // 2. handle command modifiers
     // XVim does not support command mofifiers at the moment
@@ -737,7 +738,7 @@
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [view numberOfLines];
+                exarg.lineEnd = [view.view.textStorage numberOfLines];
                 parsing++;
             }
         }else{
@@ -777,7 +778,7 @@
         exarg.cmd = nil;
     }
     
-    while( isWhiteSpace(*parsing)  ){
+    while( isWhitespace(*parsing)  ){
         parsing++;
     }
     
@@ -812,13 +813,14 @@
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
 		XVimSourceView* srcView = [window sourceView];
+        NSTextStorage* storage = [srcView.view textStorage];
 		
         // Jump to location
-        NSUInteger pos = [srcView positionAtLineNumber:exarg.lineBegin column:0];
+        NSUInteger pos = [storage positionAtLineNumber:exarg.lineBegin column:0];
         if( NSNotFound == pos ){
-            pos = [srcView positionAtLineNumber:[srcView numberOfLines] column:0];
+            pos = [srcView.view.textStorage positionAtLineNumber:[srcView.view.textStorage numberOfLines] column:0];
         }
-        NSUInteger pos_wo_space = [srcView nextNonBlankInALine:pos];
+        NSUInteger pos_wo_space = [srcView.view.textStorage nextNonblankInLine:pos];
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }
