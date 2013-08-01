@@ -253,6 +253,7 @@
                 [self.sourceView.view insertText:keyStroke.xvimString];
             }else{
                 [[[self sourceView] view] interpretKeyEvents:[NSArray arrayWithObject:event]];
+                [[self sourceView] syncStateFromView];
             }
         }
     }
