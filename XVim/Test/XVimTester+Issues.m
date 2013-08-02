@@ -25,15 +25,14 @@
 - (NSArray*)issues_testcases{
     
     static NSString* text0 = @"aaa bbb ccc\n";
-    /*
     static NSString* text1 = @"a;a bbb ccc\n"  // 0  4  8
                              @"ddd e-e fff\n"  // 12 16 20
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
-     */
     
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
+            XVimMakeTestCase(text1, 24, 0, @":inoremap <lt>C-e> <lt>C-o>$<CR>i<Right><Right><Up><Up><C-e><ESC>", text1 , 10, 0),  // Issue #416
             nil];
     
 }

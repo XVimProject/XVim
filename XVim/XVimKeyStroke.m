@@ -183,7 +183,7 @@ static struct key_map key_maps[] = {
     {@"9", 57, @"NUM9"},
     {@":", 58, @"COLON"},
     {@";", 59, @"SEMICOLON"},
-    {@"lt",60, @"LESSTHAN"},
+    {@"LT",60, @"LESSTHAN"},
     {@"<", 60, @"LESSTHAN"}, // Default notation
     {@"=", 61, @"EQUAL"},
     {@">", 62, @"GREATERTHAN"},

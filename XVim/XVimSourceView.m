@@ -1367,10 +1367,16 @@
 
 - (void)syncStateFromView{
     NSNumber* n = [self.view dataForName:@"rangeChanged"];
-    if( n != nil && [n boolValue] ){
+
+// Without if condition here it used to cause
+// corruption of insertion point integrity between ours and NSTextView's.
+// (See commit 65241b)
+// But this prohibit sync state from NSTextView when it is insertion evaluator (Issue #416)
+// Unexpectedly currently
+//   if( n != nil && [n boolValue] ){
         [self _syncStateFromView];
         [self.view setBool:NO forName:@"rangeChanged"];
-    }
+//   }
     
     n = [self.view dataForName:@"rangeChanged"];
 }
