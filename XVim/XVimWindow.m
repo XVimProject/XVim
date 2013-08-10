@@ -338,7 +338,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 	return [[self _currentEvaluator] shouldDrawInsertionPoint];
 }
 
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
+- (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
 	float heightRatio = [[self _currentEvaluator] insertionPointHeightRatio];
     float widthRatio = [[self _currentEvaluator] insertionPointWidthRatio];
     float alphaRatio = [[self _currentEvaluator] insertionPointAlphaRatio];
@@ -358,6 +358,8 @@ static const char* KEY_WINDOW = "xvimwindow";
     rect.size.width *= widthRatio;
 	
 	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+    
+    return rect;
 }
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {

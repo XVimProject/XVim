@@ -94,3 +94,135 @@ It is like...
 
       [DVTTextPreferences preferences].showLineNumbers = YES;
       
+      
+### Thick insertion point(caret) drawing in NSTextView
+In NSTextView you can find a method "drawInsertionPointInRect:color:turnedOn:" which obviously draws insertion point.
+So it looks that overriding (or hooking) the method and just changing the "rect" is enough to achieve our goal.
+Unforunately it does not work correctly.
+
+I here explain how the insertion point on a NSTextView is drawn.
+
+The method is fired by timer which is set by NSTextView internally. On each time it toggles "turnedOn:" argument
+so if the flag is ON you must draw insertion point and clear the insertion point when the flag is OFF.
+This makes a caret blinking.
+
+It is easy to draw insertion point but clearing insertion point is not so simple.
+Assume that you have a caret at the left side of a character and the caret and the caracter is overlapping.
+(Usual caret is only 1 or 2 pixel so it is not big problem but we will draw thick caret as Vim does)
+When clearing a caret you have to redraw the character under the caret. To do so what you have to do is 
+   - Clear the area (rect) of the caret with background color
+   - Draw the (part of)character which resides in the rect
+
+Redrawing a specific area is a job done by drawRect: method (See Cocoa document). So acutual thing you should do in the
+drawInsertionInRect:... method is
+   - Draw caret if the flag is ON
+   - Call setNeedsDisplayInRect for the caret area if the flag is OFF. (This will lead drawRect being called)
+
+This is perhaps what default implementation of the NSTextView is doing
+
+so the pseudo code for the method is as following.
+
+ - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
+    if( flag ){
+        // Draw caret
+        // NSTextView has a internal method to draw a caret
+        [self _drawInsertionPointInRect:rect color:color];
+    }else{
+        // Clear caret
+        // To clear firs they clear the rect which is previously drawn by _drawInsertionPointInRect:color: above
+        // It is saved in internal varibale "_insertionPointRect"
+        // So first clear the region of _insertionPointRect and then call following
+        [self setNeedsDisplayInRect:_insertionPointRect];
+    }
+ }
+
+ ( This code is from my analysis of the behaviour. No guarantee. )
+ 
+ What this means is that NSTextView uses _drawInsertionPointInRect to draw the caret when the flag is ON.
+ If the flag is OFF it calls setDisplayInRect: to redraw the previously drawn caret.
+ The important thing is that NSTextView keeps its insertion point rect as internal variable named "_insertionPointRect"
+
+ And one more thing we have to know about drawing insertion point.
+ _drawInsertionPointInRect:color: method is also called from setSelectedRange method.
+ When you move a cursor, It immideately change the position of the caret. To achive this,
+ _drawInsertionPointInRect:color: is called.
+ 
+ So everything in mind insertion point drawing methods should be like folloiwng.
+
+ - (void)_drawInsertionPointInRect:(NSRange*)rect color:(NSColor*)color{
+     // Some code...
+
+     [color setFill];
+     NSFillRect(rect);
+    // Keep rect to clear this region later (when drawInsertionPointInRect is called with the flag OFF)
+     _insertionPointRect = rect;
+
+     // Some code...
+ }
+
+ - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
+    if( flag ){
+        // Draw caret
+        [self _drawInsertionPointInRect:rect color:color];
+    }else{
+        // Clear caret
+        // To clear firs they clear the rect which is previously drawn by _drawInsertionPointInRect:color: above
+        // It is saved in internal varibale "_insertionPointRect"
+        // So first clear the region of _insertionPointRect and then call following
+        [self setNeedsDisplayInRect:_insertionPointRect];
+    }
+ }
+ 
+ - (void)setSelectedRange:(NSRange)range{
+    // Some code...
+    
+    // Clear current caret useing _insertionPointRect
+
+    // Calculate new caret rect from the range argument
+    // And then
+    [self _drawInsertionPointInRect:rect color:_insertionPointColor];
+
+    // acutal setSelectedRagen is just a stub for setSelectedRange:affinity:stillSelecting:
+ }
+ 
+ - (void)insertionTimerExpired{
+    // Calculate the caret rect from current selected range
+    // And then
+    _insertionPointOn = !_insertionPointOn; // Inverse the internal flag for insertoin point drawing.
+    [self drawInsertionPointInRect:rect color:_insertionPointColor turnedOn:_insertionPointOn];
+ }
+
+
+ Now let us think how to make thick insertion point. Following actually works as we expect.
+  - Hook drawInseritonPointInRect:colro:flag
+  - Resize the rect argument to fit into the caracter at insertion point. (make it thick)
+  - Call original darwInsertionPointInRect...
+
+ But we have a problems.
+ _drawInsertionPointRect uses NSRectFill to draw insertion point which completely override the color of the text with the caret color.
+ There is no transparency.
+
+ The next thing we can think of is hooking _drawInsertionPointInRect:... method. 
+ And draw insertion point without calling original _drawInsertionPointInRect:..
+ It should be like this.
+
+ - (void)_drawInsertionPointRect:(NSRect)rect color:(NSColor*)color{
+    // Change rect to be fit to the character at the inseriton point. 
+    // And then
+    
+    [color set];
+	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+
+    // And do not call original _drawInsertionPointRect:...
+ }
+
+ This solves the problem. But we have another problem then.
+ NSTextView keeps insertion point rect to clear the caret. If we do not call the original one NSTextView never has a chance 
+ to keep the rect which results in that NSTextView never clears the caret. It means caret never blinks or
+ drawn carets are stays on all the caracters it pass.
+
+ So what we have to do is update _insertionPointRect varibles in NSTextView when we override _drawInsertionPointRect:... method.
+ 
+ This is what XVim is currently doing. (See acutual implementation in XVimSourceTextViewHook.m)
+
+

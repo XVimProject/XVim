@@ -24,6 +24,10 @@
 #import "DVTSourceTextView+XVim.h"
 #import "NSEvent+VimHelper.h"
 #import "NSObject+ExtraData.h"
+#import "XVim.h"
+#import "XVimSearch.h"
+#import <objc/runtime.h>
+#import <string.h>
 
 @implementation DVTSourceTextViewHook
 
@@ -39,14 +43,13 @@
 }
 
 + (void)hook{
-    [self hook:@"setSelectedRange:"];
+    [self unhook:@"setSelectedRange:"];
     [self hook:@"becomeFirstResponder"];
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
     [self hook:@"mouseDragged:"];
     [self hook:@"drawRect:"];
     [self hook:@"shouldDrawInsertionPoint"];
-    [self hook:@"drawInsertionPointInRect:color:turnedOn:"];
     [self hook:@"_drawInsertionPointInRect:color:"];
     [self hook:@"viewDidMoveToSuperview"];
     [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
@@ -60,7 +63,6 @@
     [self unhook:@"mouseDragged:"];
     [self unhook:@"drawRect:"];
     [self unhook:@"shouldDrawInsertionPoint"];
-    [self unhook:@"drawInsertionPointInRect:color:turnedOn:"];
     [self unhook:@"_drawInsertionPointInRect:color:"];
     [self unhook:@"viewDidMoveToSuperview"];
     [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
@@ -183,24 +185,26 @@
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        [window drawInsertionPointInRect:aRect color:aColor];
-        [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-}
-
-// Drawing Caret
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
-    @try{
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        if (flag) {
-            [window drawInsertionPointInRect:rect color:color];
-        }
-        [base setNeedsDisplayInRect:[base visibleRect] avoidAdditionalLayout:NO];
+         XVimWindow* window = [base xvimWindow];
+        
+        // We do not call original _darawInsertionPointRect here
+        // Because it uses NSRectFill to draw the caret which overrides the character entirely.
+        // We want some tranceparency for the caret.
+        
+        // [base _drawInsertionPointInRect_:glyphRect color:aColor];
+        
+        // Call our drawing method
+        NSRect rect = [window drawInsertionPointInRect:aRect color:aColor];
+        
+        // Change NSTextView internal variable named "_insertionPointRect"
+        // NSTextView has a instance of NSTextViewIvars class.
+        // NSTextViewIvars class has various varibles to keep private variables for NSTextView
+        // _insertionPointRect in the class is used when clearing the caret we draw.
+        // We are not writing any code to clear caret but NSTextView does it automatically if we set
+        // this internal varible properly.
+        id nsTextViewIvars;
+        object_getInstanceVariable(base, "_ivars", (void**)&nsTextViewIvars);
+        [nsTextViewIvars setValue:[NSValue valueWithRect:rect] forKey:@"_insertionPointRect"];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -235,6 +239,7 @@
         XVimOptions *options = [[XVim instance] options];
         NSString *guioptions = options.guioptions;
         NSScrollView * scrollView = [base enclosingScrollView];
+        [scrollView setPostsBoundsChangedNotifications:YES];
         if ([guioptions rangeOfString:@"r"].location == NSNotFound) {
             [scrollView addObserver:self
                          forKeyPath:@"hasVerticalScroller"

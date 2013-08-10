@@ -66,6 +66,22 @@
     
 }
 
+// Thanks to  http://lists.apple.com/archives/cocoa-dev/2005/Jun/msg01909.html
+- (NSRange)visibleRange:(NSTextView *)tv{
+    NSScrollView *sv = [tv enclosingScrollView];
+    if(!sv) return NSMakeRange(0,0);
+    NSLayoutManager *lm = [tv layoutManager];
+    NSRect visRect = [tv visibleRect];
+    
+    NSPoint tco = [tv textContainerOrigin];
+    visRect.origin.x -= tco.x;
+    visRect.origin.y -= tco.y;
+    
+    NSRange glyphRange = [lm glyphRangeForBoundingRect:visRect inTextContainer:[tv textContainer]];
+    NSRange charRange = [lm characterRangeForGlyphRange:glyphRange actualGlyphRange:nil];
+    return charRange;
+}
+
 - (void)highlightTextInView:(NSTextView*)view{
     if( nil == view ){
         return;
@@ -80,18 +96,22 @@
     NSString* string = view.string;
     NSTextStorage* storage = [view textStorage];
     // Find all the maches
-    NSArray*  matches = [regex matchesInString:string options:r_opts range:NSMakeRange(0, [string length]-1)];
+    NSArray*  matches = [regex matchesInString:string options:r_opts range:NSMakeRange(0, string.length)];
     // Add attributes to the each range
-    [storage beginEditing];
+    
+    
+    // There is 2 ways to add attributes
+    // One is to add attributes to NSAttributedString(NSTextStorage)
+    // One is to add attributes to NSLayoutManager by addTempraryAttributes
+    // Later is faster so I use it here.
+    
     // Clear current highlight.
-    // I tried to use removeAttribute method to clear but did not work. So tried to addAttribute with clear color...
-    // Do not know if this is correct way
-    [storage addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, string.length)];
+    [view.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:NSMakeRange(0, storage.length)];
+    // Add yellow highlight
     for( NSTextCheckingResult* result in matches ){
-        [storage addAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] range:result.range];
+        [view.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
     }
-    [storage endEditing];
-    [view setNeedsDisplay:YES];
+    [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];
 }
 
 - (void)updateSearchStateInView:(NSTextView*)view{

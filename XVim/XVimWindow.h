@@ -40,7 +40,7 @@
 
 - (void)drawRect:(NSRect)rect;
 - (BOOL)shouldDrawInsertionPoint;
-- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
+- (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
 - (void)mouseDown:(NSEvent*)event;
 - (void)mouseUp:(NSEvent*)event;
