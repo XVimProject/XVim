@@ -8,6 +8,9 @@
 
 #import <Foundation/Foundation.h>
 
+#define XVimAddPoint(a,b) NSMakePoint(a.x+b.x,a.y+b.y)  // Is there such macro in Cocoa?
+#define XVimSubPoint(a,b) NSMakePoint(a.x-b.x,a.y-b.y)  // Is there such macro in Cocoa?
+
 NS_INLINE NSPoint AddPoint(NSPoint a, NSPoint b){
     return NSMakePoint(a.x+b.x, a.y+b.y);
 }

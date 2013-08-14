@@ -8,8 +8,6 @@
 
 #import "XVimEvaluator.h"
 #import "XVimMotionEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
 #import "XVimWindow.h"
@@ -17,6 +15,7 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVim.h"
+#import "NSTextView+VimOperation.h"
 
 static XVimEvaluator* _invalidEvaluator = nil;
 static XVimEvaluator* _noOperationEvaluator = nil;
@@ -76,7 +75,7 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     [super dealloc];
 }
 
-- (XVimSourceView*)sourceView{
+- (NSTextView*)sourceView{
     return self.window.sourceView;
 }
 
@@ -103,11 +102,11 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
    
 - (void)becameHandler{
-    self.sourceView.delegate = self;
+    self.sourceView.yankDelegate = self;
 }
 
 - (void)didEndHandler{
-    self.sourceView.delegate = nil;
+    self.sourceView.yankDelegate = nil;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -119,7 +118,7 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	if( [self sourceView].selectionMode == XVIM_VISUAL_NONE){
+	if( self.sourceView.selectionMode == XVIM_VISUAL_NONE){
         return [[[XVimNormalEvaluator alloc] init] autorelease];
     }else{
         //return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER withRange:NSMakeRange(0,0)] autorelease];

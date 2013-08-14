@@ -8,9 +8,6 @@
 
 #import "XVim.h"
 #import "XVimOperatorEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "XVimTextObjectEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
@@ -18,6 +15,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
+#import "NSTextView+VimOperation.h"
 
 @interface XVimOperatorEvaluator() {
 }
@@ -73,7 +71,7 @@
     // We do not fix the change here if next evaluator is not nil becaust it waits more input for fix the command.
     // This happens for a command like "cw..."
     if( nil == evaluator ){
-        XVimSourceView* view = self.window.sourceView;
+        NSTextView* view = self.window.sourceView;
         if( ![NSStringFromClass([self class]) isEqualToString:@"XVimYankEvaluator"]){
             [[XVim instance] fixOperationCommands];
             XVimMark* mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);

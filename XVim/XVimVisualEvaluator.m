@@ -5,9 +5,6 @@
 
 #import "XVimInsertEvaluator.h"
 #import "XVimVisualEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "Logger.h"
@@ -88,7 +85,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (void)drawRect:(NSRect)rect{
-    XVimSourceView* sourceView = [self sourceView];
+    NSTextView* sourceView = [self sourceView];
 	
 	NSUInteger glyphIndex = [self.window insertionPoint];
 	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
@@ -107,10 +104,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
      * The folloing code is to draw insertion point when its visual mode.
      * Original NSTextView does not draw insertion point so we have to do it manually.
      **/
-    [self.sourceView.view lockFocus];
+    [self.sourceView lockFocus];
     [self drawRect:[self.sourceView boundingRectForGlyphIndex:self.sourceView.insertionPoint]];
-    [self.sourceView.view setNeedsDisplayInRect:[self.sourceView.view visibleRect] avoidAdditionalLayout:NO];
-    [self.sourceView.view unlockFocus];
+    [self.sourceView setNeedsDisplayInRect:[self.sourceView visibleRect] avoidAdditionalLayout:NO];
+    [self.sourceView unlockFocus];
     
     return nextEvaluator;
 }
@@ -140,12 +137,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)d{
-    [[self sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
+    [[self sourceView] del:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
 
 - (XVimEvaluator*)D{
-    [[self sourceView] delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
+    [[self sourceView] del:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
 
@@ -179,7 +176,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)p{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
@@ -197,13 +194,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)u{
-	XVimSourceView *view = [self sourceView];
+	NSTextView *view = [self sourceView];
     [view makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
 - (XVimEvaluator*)U{
-	XVimSourceView *view = [self sourceView];
+	NSTextView *view = [self sourceView];
     [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
@@ -214,7 +211,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)v{
-	XVimSourceView *view = [self sourceView];
+	NSTextView *view = [self sourceView];
     if( view.selectionMode == XVIM_VISUAL_CHARACTER ){
         return  [self ESC];
     }
@@ -223,7 +220,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)V{
-	XVimSourceView *view = [self sourceView];
+	NSTextView *view = [self sourceView];
     if( view.selectionMode == XVIM_VISUAL_LINE){
         return  [self ESC];
     }
@@ -232,7 +229,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)C_v{
-	XVimSourceView *view = [self sourceView];
+	NSTextView *view = [self sourceView];
     if( view.selectionMode == XVIM_VISUAL_BLOCK){
         return  [self ESC];
     }
@@ -330,7 +327,7 @@ TODO: This block is from commit 42498.
                                XVimExCommand *excmd = [[XVim instance] excmd];
                                [excmd executeCommand:command inWindow:self.window];
                                
-							   //XVimSourceView *sourceView = [window sourceView];
+							   //NSTextView *sourceView = [window sourceView];
                                [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
                                return nil;
                            }
@@ -359,7 +356,7 @@ TODO: This block is from commit 42498.
 																completion:^ XVimEvaluator* (NSString *command)
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
-							   XVimSourceView *sourceView = [window sourceView];
+							   NSTextView *sourceView = [window sourceView];
 							   NSRange found = [searcher executeSearch:command 
 															   display:[command substringFromIndex:1]
 																  from:[window insertionPoint] 
@@ -385,7 +382,7 @@ TODO: This block is from commit 42498.
                                XVimOptions *options = [[XVim instance] options];
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
-                                   XVimSourceView *sourceView = [window sourceView];
+                                   NSTextView *sourceView = [window sourceView];
                                    NSRange found = [searcher executeSearch:command 
 																   display:[command substringFromIndex:1]
 																	  from:[window insertionPoint] 
@@ -423,7 +420,7 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)TILDE{
-	XVimSourceView *view = [self sourceView];
+	NSTextView *view = [self sourceView];
     [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }

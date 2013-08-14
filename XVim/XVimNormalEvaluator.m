@@ -20,9 +20,6 @@
 #import "XVimWindowEvaluator.h"
 #import "XVimGActionEvaluator.h"
 #import "XVimMarkSetEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
@@ -38,6 +35,7 @@
 #import "XVimMarks.h"
 #import "XVimMotion.h"
 #import "XVimTildeEvaluator.h"
+#import "NSTextView+VimOperation.h"
 
 @interface XVimNormalEvaluator() {
 	__weak XVimRegister *_playbackRegister;
@@ -82,7 +80,7 @@
 }
 
 - (XVimEvaluator*)A{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     [view appendAtEndOfLine];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
@@ -141,9 +139,9 @@
     // process
     XVimWindow* window = self.window;
     NSRange range = [[window sourceView] selectedRange];
-    NSUInteger numberOfLines = [[window sourceView] numberOfLines];
-    long long lineNumber = [[window sourceView] currentLineNumber];
-    NSUInteger columnNumber = [[window sourceView] columnNumber:range.location];
+    NSUInteger numberOfLines = [window.sourceView.textStorage numberOfLines];
+    long long lineNumber = [window.sourceView currentLineNumber];
+    NSUInteger columnNumber = [window.sourceView.textStorage columnNumber:range.location];
     NSURL* documentURL = [[window sourceView] documentURL];
 	if( [documentURL isFileURL] ) {
 		NSString* filename = [documentURL path];
@@ -195,13 +193,13 @@
 }
 
 - (XVimEvaluator*)o{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     [view insertNewlineBelowAndInsert];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     [view insertNewlineAboveAndInsert];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
@@ -217,14 +215,14 @@
 }
 
 - (XVimEvaluator*)p{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)P{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     return nil;
@@ -254,9 +252,9 @@
 }
 
 - (XVimEvaluator*)C_r{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-		[view redo];
+		[view.undoManager redo];
     }
     return nil;
 }
@@ -281,9 +279,9 @@
 }
 
 - (XVimEvaluator*)u{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [view undo];
+        [view.undoManager undo];
     }
     return nil;
 }
@@ -437,7 +435,7 @@
                                                                  completion:^ XVimEvaluator* (NSString *command)
 						   {
 							   XVimSearch *searcher = [[XVim instance] searcher];
-							   XVimSourceView *sourceView = [self sourceView];
+							   NSTextView *sourceView = [self sourceView];
 							   NSRange found = [searcher executeSearch:command 
 															   display:[command substringFromIndex:1] 
 																  from:[self.window insertionPoint]
@@ -457,7 +455,7 @@
                                XVimOptions *options = [[XVim instance] options];
                                if (options.incsearch){
                                    XVimSearch *searcher = [[XVim instance] searcher];
-                                   XVimSourceView *sourceView = [self sourceView];
+                                   NSTextView *sourceView = [self sourceView];
                                    NSRange found = [searcher executeSearch:command 
 																   display:[command substringFromIndex:1]
 																	  from:[self.window insertionPoint]
@@ -516,11 +514,6 @@
     XVimTildeEvaluator* swap = [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
     // TODO: support tildeop option
     return [swap fixWithNoMotion:self.numericArg];
-}
-
-- (XVimEvaluator*)DEL{
-    [[self sourceView] moveBackward];
-	return nil;
 }
 
 - (XVimEvaluator*)ForwardDelete{

@@ -34,7 +34,7 @@ typedef struct _XVimRange {
 } XVimRange;
 
 typedef struct _XVimPosition{
-    NSUInteger line; // begin may be greater than end
+    NSUInteger line;
     NSUInteger column;
 } XVimPosition;
 

@@ -1,5 +1,5 @@
 //
-//  XVimBuffer.m
+//  XVimWindow.m
 //  XVim
 //
 //  Created by Tomas Lundell on 9/04/12.
@@ -11,14 +11,12 @@
 #import "XVimVisualEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "XVimOptions.h"
 #import "Logger.h"
 #import <objc/runtime.h>
 #import "IDEEditorArea+XVim.h"
 #import "XVimSearch.h"
+#import "NSTextView+VimOperation.h"
 
 @interface XVimWindow() {
     NSMutableArray* _evaluatorStack;
@@ -158,8 +156,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     [self.commandLine setArgumentString:argString];
     [self.commandLine setNeedsDisplay:YES];
     
-    // For Debugging
-    [[self sourceView] dumpState];
     return YES;
 }
 
@@ -288,7 +284,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)mouseDown:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
-    NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
+    NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
     [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
@@ -309,7 +305,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)mouseDragged:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
-    NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
+    NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
     NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
     
     if(self.sourceView.selectionMode == XVIM_VISUAL_NONE){
@@ -343,7 +339,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     float widthRatio = [[self _currentEvaluator] insertionPointWidthRatio];
     float alphaRatio = [[self _currentEvaluator] insertionPointAlphaRatio];
     
-	XVimSourceView *sourceView = [self sourceView];
+	NSTextView *sourceView = [self sourceView];
 	color = [color colorWithAlphaComponent:alphaRatio];
     NSUInteger glyphIndex = [sourceView insertionPoint];
 	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
@@ -382,11 +378,11 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (void)setForcusBackToSourceView{
-    [[[self.sourceView view] window] makeFirstResponder:[self.sourceView view]];
+    [[self.sourceView  window] makeFirstResponder:self.sourceView];
 }
 
 - (IDEWorkspaceWindow*)currentWorkspaceWindow{
-    IDEWorkspaceWindow* window = (IDEWorkspaceWindow*)[[self.sourceView view] window];
+    IDEWorkspaceWindow* window = (IDEWorkspaceWindow*)[self.sourceView window];
     return window;
 }
 
@@ -434,39 +430,39 @@ static char s_associate_key = 0;
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange{
-    return [[self.sourceView view] setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+    return [self.sourceView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
 }
 
 - (void)unmarkText{
-    return [[self.sourceView view] unmarkText];
+    return [self.sourceView unmarkText];
 }
 
 - (NSRange)selectedRange{
-    return [[self.sourceView view] selectedRange];
+    return [self.sourceView selectedRange];
 }
 
 - (NSRange)markedRange{
-    return [[self.sourceView view] markedRange];
+    return [self.sourceView markedRange];
 }
 
 - (BOOL)hasMarkedText{
-    return [[self.sourceView view] hasMarkedText];
+    return [self.sourceView hasMarkedText];
 }
 
 - (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
-    return [[self.sourceView view] attributedSubstringForProposedRange:aRange actualRange:actualRange];
+    return [self.sourceView attributedSubstringForProposedRange:aRange actualRange:actualRange];
 }
 
 - (NSArray*)validAttributesForMarkedText{
-    return [[self.sourceView view] validAttributesForMarkedText];
+    return [self.sourceView validAttributesForMarkedText];
 }
 
 - (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
-    return [[self.sourceView view] firstRectForCharacterRange:aRange actualRange:actualRange];
+    return [self.sourceView firstRectForCharacterRange:aRange actualRange:actualRange];
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)aPoint{
-    return [[self.sourceView view] characterIndexForPoint:aPoint];
+    return [self.sourceView characterIndexForPoint:aPoint];
 }
 @end
 

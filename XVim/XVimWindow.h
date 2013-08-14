@@ -26,7 +26,7 @@
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate>
 
-@property(strong) XVimSourceView<XVimTextViewProtocol>* sourceView; // This represents currently focused sourceView
+@property(strong) NSTextView* sourceView; // This represents currently focused sourceView
 
 - (NSUInteger)insertionPoint; // May be removed. This should be accessed via sourceView::insertionPoint
 - (XVimCommandLine*)commandLine;

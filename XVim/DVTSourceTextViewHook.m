@@ -13,9 +13,7 @@
 #import "XVimWindow.h"
 #import "Hooker.h"
 #import "Logger.h"
-#import "XVimSourceView.h"
 #import "DVTKit.h"
-#import "XVimSourceView.h"
 #import "XVimStatusLine.h"
 #import "XVim.h"
 #import "XVimOptions.h"
@@ -43,7 +41,7 @@
 }
 
 + (void)hook{
-    [self unhook:@"setSelectedRange:"];
+    [self hook:@"setSelectedRange:"];
     [self hook:@"becomeFirstResponder"];
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
@@ -220,8 +218,7 @@
     @try{
         if (b) {
             TRACE_LOG(@"DVTSourceTextView:%p became first responder", self);
-            window.sourceView = [[[XVimSourceView alloc] initWithView:base] autorelease];
-            [window.sourceView dumpState];
+            window.sourceView = (NSTextView*)base;
         }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);

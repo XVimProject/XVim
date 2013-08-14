@@ -9,9 +9,7 @@
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimWindow.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
+#import "NSTextView+VimOperation.h"
 #import "XVimTextObjectEvaluator.h"
 #import "Logger.h"
 #import "XVim.h"
@@ -78,7 +76,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         // It will be called after XVimInsertEvaluator finish handling key input.
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
     }else{
-        [[self sourceView] delete:motion];
+        [[self sourceView] del:motion];
     }
     return nil;
 }

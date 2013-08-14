@@ -24,7 +24,7 @@
 @end
 
 typedef enum {
-    CURSOR_XVIM_MODE_INSERT,
+    CURSOR_MODE_INSERT,
     CURSOR_MODE_COMMAND
 }CURSOR_MODE;
 
@@ -35,7 +35,6 @@ typedef enum {
 @protocol XVimTextViewProtocol <NSObject>
 @property(readonly) NSUInteger insertionPoint;
 @property(readonly) NSUInteger insertionColumn;
-@property(readonly) NSUInteger insertionPreservedColumn;
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger selectionBegin;
 @property(readonly) XVIM_VISUAL_MODE selectionMode;

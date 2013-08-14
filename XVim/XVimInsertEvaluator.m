@@ -7,9 +7,6 @@
 //
 
 #import "XVimInsertEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "Logger.h"
@@ -20,6 +17,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimNormalEvaluator.h"
+#import "NSTextView+VimOperation.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -128,7 +126,7 @@
 }
 
 - (NSString*)getInsertedText{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
     NSUInteger startLoc = self.startRange.location;
     NSUInteger endLoc = [view selectedRange].location;
     NSRange textRange = NSMakeRange(NSNotFound, 0);
@@ -182,7 +180,7 @@
 
 - (void)didEndHandler{
     [super didEndHandler];
-	XVimSourceView *sourceView = [self sourceView];
+	NSTextView *sourceView = [self sourceView];
 	
     if( !_insertedEventsAbort && !_oneCharMode ){
         NSString *text = [self getInsertedText];
@@ -206,14 +204,14 @@
 	
     // Position for "^" is before escaped from insert mode
     NSUInteger pos = self.sourceView.insertionPoint;
-    XVimMark* mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
+    XVimMark* mark = XVimMakeMark([self.sourceView.textStorage lineNumber:pos], [self.sourceView.textStorage columnNumber:pos], self.sourceView.documentURL.path);
     [[XVim instance].marks setMark:mark forName:@"^"];
     
     [[self sourceView] escapeFromInsert];
     
     // Position for "." is after escaped from insert mode
     pos = self.sourceView.insertionPoint;
-    mark = XVimMakeMark([self.sourceView lineNumber:pos], [self.sourceView columnNumber:pos], self.sourceView.documentURL.path);
+    mark = XVimMakeMark([self.sourceView.textStorage lineNumber:pos], [self.sourceView.textStorage columnNumber:pos], self.sourceView.documentURL.path);
     [[XVim instance].marks setMark:mark forName:@"."];
     
 }
@@ -250,10 +248,10 @@
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
             if( keyStroke.modifier == 0 && isPrintable(keyStroke.character)){
-                [self.sourceView.view insertText:keyStroke.xvimString];
+                [self.sourceView insertText:keyStroke.xvimString];
             }else{
-                [[[self sourceView] view] interpretKeyEvents:[NSArray arrayWithObject:event]];
-                [[self sourceView] syncStateFromView];
+                [self.sourceView interpretKeyEvents:[NSArray arrayWithObject:event]];
+                [self.sourceView syncStateFromView];
             }
         }
     }
@@ -283,15 +281,15 @@
 }
 
 - (void)C_yC_eHelper:(BOOL)handlingC_y {
-    NSUInteger currentCursorIndex = [[self sourceView] selectedRange].location;
-    NSUInteger currentColumnIndex = [[self sourceView] columnNumber:currentCursorIndex];
+    NSUInteger currentCursorIndex = [self.sourceView selectedRange].location;
+    NSUInteger currentColumnIndex = [self.sourceView.textStorage columnNumber:currentCursorIndex];
     NSUInteger newCharIndex;
     if (handlingC_y) {
-        newCharIndex = [[self  sourceView] prevLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
+        newCharIndex = [self.sourceView.textStorage prevLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
     } else {
-        newCharIndex = [[self sourceView] nextLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
+        newCharIndex = [self.sourceView.textStorage nextLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
     }
-    NSUInteger newColumnIndex = [[self sourceView] columnNumber:newCharIndex];
+    NSUInteger newColumnIndex = [self.sourceView.textStorage columnNumber:newCharIndex];
     NSLog(@"Old column: %ld\tNew column: %ld", currentColumnIndex, newColumnIndex);
     if (currentColumnIndex == newColumnIndex) {
         unichar u = [[[self sourceView] string] characterAtIndex:newCharIndex];
@@ -312,7 +310,7 @@
 
 - (XVimEvaluator*)C_w{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [[self sourceView] delete:m];
+    [[self sourceView] del:m];
     return self;
 }
 

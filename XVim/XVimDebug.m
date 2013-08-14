@@ -8,7 +8,6 @@
 
 #import "XVimDebug.h"
 #import "XVimWindow.h"
-#import "XVimSourceView.h"
 #import "Logger.h"
 
 // You can invoke methods in this class by
@@ -28,14 +27,14 @@
 }
 
 - (void)highlight:(NSArray*)params withWindow:(XVimWindow*)window{
-    NSTextView* view = [[window sourceView] view];
+    NSTextView* view = window.sourceView;
     [[view textStorage] beginEditing];
     [[view textStorage] addAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] range:NSMakeRange(0,5)];
     [[view textStorage] endEditing];
 }
 
 - (void)highlightclear:(NSArray*)params withWindow:(XVimWindow*)window{
-    NSTextView* view = [[window sourceView] view];
+    NSTextView* view = window.sourceView;
     [[view textStorage] beginEditing];
     [[view textStorage] addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, view.string.length)];
     [[view textStorage] endEditing];

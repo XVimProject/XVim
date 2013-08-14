@@ -7,8 +7,6 @@
 //
 
 #import "XVimLowercaseEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 

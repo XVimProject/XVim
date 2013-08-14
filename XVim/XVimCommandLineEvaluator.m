@@ -8,8 +8,7 @@
 
 #import "Logger.h"
 #import "XVimCommandLineEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
+#import "NSTextView+VimOperation.h"
 #import "XVimKeymapProvider.h"
 #import "XVimWindow.h"
 #import "XVimCommandField.h"
@@ -56,7 +55,7 @@
 - (void)takeFocusFromWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:self.window];
-	[[[[self.window sourceView] view] window] makeFirstResponder:commandField];
+	[[[self.window sourceView] window] makeFirstResponder:commandField];
 }
 
 - (void)relinquishFocusToWindow{
@@ -156,7 +155,7 @@
 }
 
 - (XVimEvaluator*)ESC{
-    XVimSourceView *sourceView = [self sourceView];
+    NSTextView *sourceView = [self sourceView];
     [sourceView scrollTo:[self.window insertionPoint]];
 	return nil;
 }

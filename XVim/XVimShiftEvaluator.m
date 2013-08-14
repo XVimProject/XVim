@@ -7,9 +7,7 @@
 //
 
 #import "XVimShiftEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
+#import "NSTextView+VimOperation.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 

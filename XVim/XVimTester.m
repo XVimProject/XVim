@@ -67,21 +67,29 @@
 
 @implementation XVimTester
 
+
 - (id)init{
+    return [self initWithTestCategory:nil];
+}
+
+- (id)initWithTestCategory:(NSString*)category{
     if( self = [super init] ){
+    if( nil == category ){
+        category = @"";
+    }
         self.testCases = [[NSMutableArray alloc] init];
         unsigned int count = 0;
         Method* m = 0;
         m = class_copyMethodList([XVimTester class],  &count);
         for( unsigned int i = 0 ; i < count; i++ ){
             SEL sel = method_getName(m[i]);
-            TRACE_LOG(@"%@", NSStringFromSelector(sel) );
-            if( [NSStringFromSelector(sel) hasSuffix:@"_testcases"] ){
+            if( [NSStringFromSelector(sel) rangeOfString:[category stringByAppendingString:@"_testcases"]].location != NSNotFound ){
                 [self.testCases addObjectsFromArray:[self performSelector:sel]];
             }
         }
     }
     return self;
+    
 }
 
 - (void)dealloc{

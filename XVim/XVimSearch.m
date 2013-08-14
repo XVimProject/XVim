@@ -7,9 +7,7 @@
 //
 
 #import "XVimSearch.h"
-#import "NSTextStorage+VimOperation.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
+#import "NSTextView+VimOperation.h"
 #import "NSString+VimHelper.h"
 #import "XVimWindow.h"
 #import "XVim.h"
@@ -168,7 +166,7 @@
     }
     NSRange r = [self searchNextFrom:from inWindow:window];
     if( [XVim instance].options.hlsearch ){
-        [self highlightTextInView:window.sourceView.view];
+        [self highlightTextInView:window.sourceView];
     }
     return r;
 }
@@ -200,7 +198,7 @@
 #ifdef __MAC_10_7
     XVimOptions *options = [[XVim instance] options];
     
-    XVimSourceView* srcView = [window sourceView];
+    NSTextView* srcView = [window sourceView];
     NSUInteger search_base = from;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
@@ -268,7 +266,7 @@
     NSRange found = {NSNotFound, 0};
 #ifdef __MAC_10_7    
 	XVimOptions *options = [[XVim instance] options];
-    XVimSourceView* srcView = [window sourceView];
+    NSTextView* srcView = [window sourceView];
     NSUInteger search_base = from;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
@@ -350,14 +348,14 @@
 {
     NSRange found = {NSNotFound,0};
 #ifdef __MAC_10_7
-    XVimSourceView *view = [window sourceView];
+    NSTextView *view = [window sourceView];
 
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
     NSUInteger searchStart = NSNotFound;
     NSUInteger firstNonblank = NSNotFound;
 	
-	for (NSUInteger i = begin.location; ![view.view.textStorage isEOF:i]; ++i)
+	for (NSUInteger i = begin.location; ![view.textStorage isEOF:i]; ++i)
 	{
         unichar curChar = [string characterAtIndex:i];
         if (isNewline(curChar)){
@@ -391,11 +389,11 @@
         unichar lastChar = [string characterAtIndex:wordStart-1];
         if ((isKeyword(curChar) && isKeyword(lastChar)) ||
             (!isKeyword(curChar) && isNonblank(curChar) && !isKeyword(lastChar) && isNonblank(lastChar))){
-            wordStart = [view wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
+            wordStart = [view.textStorage wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
         }
     }
 
-    NSUInteger wordEnd = [view wordsForward:wordStart count:1 option:LEFT_RIGHT_NOWRAP info:&info];
+    NSUInteger wordEnd = [view.textStorage wordsForward:wordStart count:1 option:LEFT_RIGHT_NOWRAP info:&info];
     if (info.lastEndOfWord != NSNotFound){
         wordEnd = info.lastEndOfWord;
     }
@@ -430,7 +428,7 @@
     
 #ifdef __MAC_10_7    
     
-    XVimSourceView* srcView = [window sourceView];
+    NSTextView* srcView = [window sourceView];
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
@@ -502,13 +500,13 @@
     self.lastReplacementString = replacement;
     
     // Find the position to start searching
-    NSUInteger replace_start_location = [window.sourceView.view.textStorage positionAtLineNumber:from column:0];
+    NSUInteger replace_start_location = [window.sourceView.textStorage positionAtLineNumber:from column:0];
     if( NSNotFound == replace_start_location){
         return;
     }
     
     // Find the position to end the searching
-    NSUInteger endOfReplacement = [window.sourceView.view.textStorage positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
+    NSUInteger endOfReplacement = [window.sourceView.textStorage positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
     if( NSNotFound == endOfReplacement ){
         endOfReplacement = [[[window sourceView] string] length];
     }
@@ -537,7 +535,7 @@
 	
 	// Move cursor and show the found string
     if(valid) {
-		XVimSourceView* srcView = [window sourceView];
+		NSTextView* srcView = [window sourceView];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
 		[srcView scrollTo:[window insertionPoint]];
         [srcView showFindIndicatorForRange:found];

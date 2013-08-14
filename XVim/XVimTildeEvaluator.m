@@ -8,8 +8,7 @@
 
 #import "XVimTildeEvaluator.h"
 #import "XVimWindow.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
+#import "NSTextView+VimOperation.h"
 #import "XVim.h"
 
 @implementation XVimTildeEvaluator

@@ -27,13 +27,13 @@
  **/
 
 
+/*
 
 @interface XVimSourceView : NSObject <XVimTextViewProtocol>
 @property(readonly) NSString* string;
 @property(readonly) NSUInteger insertionPoint;
 @property(readonly) XVimPosition insertionPosition;
 @property(readonly) NSUInteger insertionColumn;
-@property(readonly) NSUInteger insertionPreservedColumn;
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger selectionBegin;
 @property(readonly) XVimPosition selectionBeginPosition;
@@ -96,3 +96,4 @@
 - (void)dumpState;
 @end
 
+ */

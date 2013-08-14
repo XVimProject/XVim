@@ -30,4 +30,5 @@
 - (void)_drawInsertionPointInRect_:(NSRect)aRect color:(NSColor*)aColor;
 - (BOOL)becomeFirstResponder_;
 - (void)viewDidMoveToSuperview_;
-@end
+- (void)delete_:(id)sender;
+@end 

@@ -19,9 +19,6 @@
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "NSTextStorage+VimOperation.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "NSString+VimHelper.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
@@ -64,7 +61,7 @@
 // This is helper method commonly used by many key event handlers.
 // You do not need to use this if this is not proper to express the motion.
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{
-    XVimSourceView* view = [self sourceView];
+    NSTextView* view = [self sourceView];
 	NSUInteger motionTo = (NSUInteger)[view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, type, MOTION_OPTION_NONE, [self numericArg]);
     m.position = motionTo;
@@ -104,7 +101,7 @@
         motion.type = LINEWISE;
     }else if (_forcedMotionType == BLOCKWISE){
         // TODO: Implemente BLOCKWISE operation
-        // Currently BLOCKWISE is not supporeted by operations implemented in XVimSourceView.m
+        // Currently BLOCKWISE is not supporeted by operations implemented in NSTextView.m
         motion.type = LINEWISE;
     }else{
         // _forceMotionType == DEFAULT_MOTION_TYPE
@@ -359,19 +356,19 @@
         [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
     }
     
-    NSUInteger to = [self.sourceView.view.textStorage positionAtLineNumber:mark.line column:mark.column];
+    NSUInteger to = [self.sourceView.textStorage positionAtLineNumber:mark.line column:mark.column];
     if( NSNotFound == to ){
         return [XVimEvaluator invalidEvaluator];
     }
     
     if( fol ){
-        to = [self.sourceView.view.textStorage firstNonblankInLine:to]; // This never returns NSNotFound
+        to = [self.sourceView.textStorage firstNonblankInLine:to]; // This never returns NSNotFound
     }
 	
     // set the position before the jump
     XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-    cur_mark.line = [self.sourceView lineNumber:cur_pos];
-    cur_mark.column = [self.sourceView columnNumber:cur_pos];
+    cur_mark.line = [self.sourceView.textStorage lineNumber:cur_pos];
+    cur_mark.column = [self.sourceView.textStorage columnNumber:cur_pos];
     cur_mark.document = [self.sourceView documentURL].path;
     [[XVim instance].marks setMark:cur_mark forName:@"'"];
     
@@ -429,12 +426,12 @@
 // Note: underscore without any numeric arguments behaves like caret but with a numeric argument greater than 1
 // it will moves to start of the numeric argument - 1 lines down.
 - (XVimEvaluator*)UNDERSCORE{
-    // TODO add this motion interface to XVimSourceView
-    XVimSourceView* view = [self.window sourceView];
+    // TODO add this motion interface to NSTextView
+    NSTextView* view = [self.window sourceView];
     NSRange r = [view selectedRange];
     NSUInteger repeat = self.numericArg;
-    NSUInteger linesUpCursorloc = [view nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
-    NSUInteger head = [view.view.textStorage firstOfLineWithoutSpaces:linesUpCursorloc];
+    NSUInteger linesUpCursorloc = [view.textStorage nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
+    NSUInteger head = [view.textStorage firstOfLineWithoutSpaces:linesUpCursorloc];
     if( NSNotFound == head && linesUpCursorloc != NSNotFound){
         head = linesUpCursorloc;
     }else if(NSNotFound == head){

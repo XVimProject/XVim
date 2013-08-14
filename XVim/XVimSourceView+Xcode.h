@@ -20,6 +20,7 @@
 
  **/
 
+/*
 @interface XVimSourceView(Xcode)
 
 // Indentation
@@ -56,4 +57,6 @@
 - (void)setWrapsLines:(BOOL)wraps;
 
 - (NSURL*)documentURL;
+ 
 @end
+ */

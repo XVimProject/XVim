@@ -7,9 +7,16 @@
 //
 
 
+#import "XVimMotion.h"
 #import "XVimDefs.h"
 #import <Cocoa/Cocoa.h>
 
+typedef enum {
+    XVimSortOptionReversed              = 1,
+    XVimSortOptionRemoveDuplicateLines  = 1 << 1,
+    XVimSortOptionNumericSort           = 1 << 2,
+    XVimSortOptionIgnoreCase            = 1 << 3
+} XVimSortOptions;
 
 /**
  VimOperation category on NSTextStorage
@@ -283,6 +290,100 @@
  **/
 - (NSUInteger)columnNumber:(NSUInteger)index;
 
+/**
+ * Return characgter range for line range.
+ * NOTE: Linenumber starts from 0 not 1 for this method.
+ * TODO: Xcode uses linenuber starts from 0 and XVim uses 1
+ *       We should adapt Xcode's way.
+ **/
+- (NSRange)characterRangeForLineRange:(NSRange)arg1;
+
+
+#pragma mark Vim operation related methods
+
+- (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info;
+
+/**
+ * Returns the position when a cursor goes to upper line.
+ * @param index the position of the cursor
+ * @param column the desired position of the column in previous line
+ * @param count number of repeat
+ * @param opt currntly nothing is supported
+ * @return The position to move to. If the current index is on the first line it returns 0
+ *
+ * "column" may be greater then number of characters in the current line.
+ * Assume that you have following text.
+ *     abcd
+ *     ef
+ *     12345678
+ * When a cursor at character "4" goes up cursor will go at "f".
+ * When a cursor goes up agein it should got at d. (This is default Vim motion)
+ * To keep the column position you have to specifi the "column" argument.
+ *
+ **/
+- (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
+
+/**
+ * See prevLine's description for meaning of arguments
+ **/
+- (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;
+
+/**
+ * Returns position of the head of count words forward and an info structure that handles the end of word boundaries.
+ * @param index
+ * @param count
+ * @param option MOTION_OPTION_NONE or BIGWORD
+ * @param info This is used with special cases explaind above such as 'cw' or 'w' crossing over the newline.
+ **/
+- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info;
+
+
+- (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt; //e,E
+- (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt; //ge,gE
+- (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (NSUInteger)nextCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt;
+- (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt;
+
+
+- (void)toggleCaseForRange:(NSRange)range;
+    
+/**
+ * This does all the work need to do with vim '%' motion.
+ * Find match pair character in the line and find the corresponding pair.
+ * Returns NSNotFound if not found.
+ **/
+- (NSUInteger)positionOfMatchedPair:(NSUInteger)pos;
+
+#pragma mark Text Object
+// TODO: Following code should be rewritten
+- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+// The following code is from xVim by WarWithinMe.
+// These will be integreted into NSTextView category.
+
+// =======================
+// Return the location of the start of indentation on current line. '^'
+NSInteger xv_caret(NSString *string, NSInteger index);
+// Return the beginning of line location. '0'
+NSInteger xv_0(NSString *string, NSInteger index);
+
+// Unlike vim, this function won't ignore indent before the current character
+// even if what is '{'
+NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what, char other);
+NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what);
+
+// Find char in current line.
+// Return the current index if nothing found.
+// If inclusive is YES :
+//   'fx' returns the index after 'x'
+//   'Fx' returns the index before 'x'
+NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char command, unichar what, BOOL inclusive);
+
+
 
 #pragma mark Conversions
 /**
@@ -306,64 +407,4 @@
  **/
 - (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index;
     
-
-#pragma mark Operations on string
-/**
- * Delete one character at the position specified by "pos"
- * If pos does not exist it does nothing.
- **/
-- (void)delete:(XVimPosition)pos;
-
-/**
- * Delete a line specified by lineNumber.
- * If the line is ended by EOF it deletes preceeding newline character too.
- * For example when we have a text below
- *      1:  This is sample text lineNumber1
- *      2:  This is 2nd line
- *      3:  The last line does not have newline at the end[EOF]
- * and "deleteLine:3" will delete the newline at end of the line number 2.
- *
- * If the specified lineNumber exceeds the maximam line number it does nothing.
- **/
-- (void)deleteLine:(NSUInteger)lineNumber;
-
-/**
- * Delete range of lines specified by arguments.
- * "line1" can be greater than "line2"
- * If the range exceeds the maximam line number it deletes up to the end of file.
- **/
-- (void)deleteLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2;
-
-/**
- * Delete characters until next newline character from specified position.
- * This does not delete newline character a the end of line.
- * If the specified position is newline character or EOF it does nothing.
- * If the specified position does not exist it does nothing.
- **/
-- (void)deleteRestOfLine:(XVimPosition)pos;
-
-/**
- * Delete characters in a block specified by pos1 and pos2.
- * "pos1" and "pos2" specify the points on diagonal of the block.
- * "pos1" and "pos2" can be any position in a text.
- * If the block exceeds the line/column of the text it deletes the characters
- * in the block.
- * This never deletes newline characters.
- **/
-- (void)deleteBlockFrom:(XVimPosition)pos1 to:(XVimPosition)pos2;
-
-/**
- * Join the line specified and the line bewlow it.
- * This does not do additional process like inserting spaces between them 
- * or deleting leading spaces in the second line.
- * Use vimJoinAtLine: to do Vim's join.
- * This method can be used for 'gJ' command
- **/
-- (void)joinAtLine:(NSUInteger)lineNumber;
-
-/**
- * Does Vim's join on the specified line.
- * See ":help J" in Vim how it works.
- **/
-- (void)vimJoinAtLine:(NSUInteger)lineNumber;
 @end

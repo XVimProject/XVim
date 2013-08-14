@@ -7,9 +7,7 @@
 //
 
 #import "XVimEqualEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
+#import "NSTextView+VimOperation.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimWindow.h"
 #import "Logger.h"

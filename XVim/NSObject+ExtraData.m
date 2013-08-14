@@ -19,7 +19,12 @@ static const NSString* EXTRA_DATA_KEY = @"EXTRADATAKEY";
         return nil;
     }
     
-    return [dic objectForKey:name];
+    id ret = [dic objectForKey:name];
+    if( [NSNull null] == ret ){
+        return nil;
+    }else{
+        return ret;
+    }
 }
 
 - (void)setData:(id)data forName:(NSString*)name{
@@ -29,6 +34,9 @@ static const NSString* EXTRA_DATA_KEY = @"EXTRADATAKEY";
         objc_setAssociatedObject(self, EXTRA_DATA_KEY, dic, OBJC_ASSOCIATION_RETAIN);
     }
     
+    if( nil == data){
+        data = [NSNull null];
+    }
     [dic setObject:data forKey:name];
 }
 
@@ -37,4 +45,13 @@ static const NSString* EXTRA_DATA_KEY = @"EXTRADATAKEY";
     [self setData:n forName:name];
 }
 
+- (void)setUnsignedInteger:(NSUInteger)b forName:(NSString *)name{
+    NSNumber* n = [NSNumber numberWithUnsignedInteger:b];
+    [self setData:n forName:name];
+}
+
+- (void)setInteger:(NSInteger)b forName:(NSString *)name{
+    NSNumber* n = [NSNumber numberWithInteger:b];
+    [self setData:n forName:name];
+}
 @end

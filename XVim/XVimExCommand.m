@@ -10,10 +10,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
-#import "NSTextStorage+VimOperation.h"
+#import "NSTextView+VimOperation.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
@@ -28,6 +25,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimKeymap.h"
 #import "XVimUtil.h"
+#import "XVimTester.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -491,6 +489,7 @@
                        CMD(@"tcldo", @"tcldo:inWindow:"),
                        CMD(@"tclfile", @"tclfile:inWindow:"),
                        CMD(@"tearoff", @"tearoff:inWindow:"),
+                       CMD(@"test", @"test:inWindow:"), // XVim test case runner
                        CMD(@"tfirst", @"tag:inWindow:"),
                        CMD(@"throw", @"throw:inWindow:"),
                        CMD(@"tjump", @"tag:inWindow:"),
@@ -585,12 +584,12 @@
 // This method correnspons parsing part of get_address in ex_cmds.c
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
 {
-    XVimSourceView* view = [window sourceView];
+    NSTextView* view = [window sourceView];
     //DVTFoldingTextStorage* storage = [view textStorage];
     //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
-    NSUInteger begin = [view selectedRange].location;
-    NSUInteger end = [view selectedRange].location + [view selectedRange].length-1;
+    NSUInteger begin = view.selectionBegin;
+    NSUInteger end = view.insertionPoint;
     unichar* tmp;
     NSUInteger count;
     unichar mark;
@@ -600,20 +599,20 @@
     {
         case '.':
             parsing++;
-            addr = [view lineNumber:begin];
+            addr = [view.textStorage lineNumber:begin];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
-            addr = [view.view.textStorage numberOfLines];
+            addr = [view.textStorage numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
             if( '<' == mark ){
-                addr = [view lineNumber:begin];
+                addr = [view.textStorage lineNumber:begin];
                 parsing+=2;
             }else if( '>' == mark ){
-                addr = [view lineNumber:end];
+                addr = [view.textStorage lineNumber:end];
                 parsing+=2;
             }else{
                 // Other marks or invalid character. XVim does not support this.
@@ -732,13 +731,13 @@
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
 	
-    XVimSourceView* view = [window sourceView];
+    NSTextView* view = [window sourceView];
     for(;;){
         NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [view.view.textStorage numberOfLines];
+                exarg.lineEnd = [view.textStorage numberOfLines];
                 parsing++;
             }
         }else{
@@ -758,7 +757,7 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        exarg.lineBegin = [view lineNumber:[view selectedRange].location];
+        exarg.lineBegin = [view.textStorage lineNumber:view.insertionPoint];
         exarg.lineEnd =  exarg.lineBegin;
     }
     
@@ -812,15 +811,15 @@
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
-		XVimSourceView* srcView = [window sourceView];
-        NSTextStorage* storage = [srcView.view textStorage];
+		NSTextView* srcView = [window sourceView];
+        NSTextStorage* storage = srcView.textStorage;
 		
         // Jump to location
         NSUInteger pos = [storage positionAtLineNumber:exarg.lineBegin column:0];
         if( NSNotFound == pos ){
-            pos = [srcView.view.textStorage positionAtLineNumber:[srcView.view.textStorage numberOfLines] column:0];
+            pos = [srcView.textStorage positionAtLineNumber:[srcView.textStorage numberOfLines] column:0];
         }
-        NSUInteger pos_wo_space = [srcView.view.textStorage nextNonblankInLine:pos];
+        NSUInteger pos_wo_space = [srcView.textStorage nextNonblankInLine:pos];
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }
@@ -1093,7 +1092,7 @@
 
 - (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    XVimSourceView* srcView = [window sourceView];
+    NSTextView* srcView = [window sourceView];
 	XVimOptions* options = [[XVim instance] options];
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
@@ -1123,8 +1122,7 @@
 }
 
 - (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window{
-    XVimSourceView *view = [window sourceView];
-	NSRange range = NSMakeRange([args lineBegin], [args lineEnd] - [args lineBegin] + 1);
+    NSTextView *view = [window sourceView];
     
     NSString *cmdString = [[args cmd] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *argsString = [args arg];
@@ -1147,7 +1145,7 @@
         }
     }
     
-    [view sortLinesInRange:range withOptions:options];
+    [view sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
 }
 
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1165,6 +1163,10 @@
 
 - (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
+}
+
+- (void)test:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [[[[XVimTester alloc] initWithTestCategory:args.arg] autorelease] runTest];
 }
 
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{

@@ -13,6 +13,7 @@
 #import "DVTSourceTextView+XVim.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
+#import "NSTextView+VimOperation.h"
 
 @implementation XVimTestCase
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it

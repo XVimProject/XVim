@@ -10,12 +10,10 @@
 #import "XVimKeymapProvider.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
-#import "XVimSourceView+Xcode.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVim.h"
+#import "NSTextView+VimOperation.h"
 
 @implementation XVimMarkSetEvaluator
 
@@ -31,8 +29,8 @@
     
     XVimMark* mark = [[[XVimMark alloc] init] autorelease];
 	NSRange r = [self.sourceView selectedRange];
-    mark.line = [self.sourceView lineNumber:r.location];
-    mark.column = [self.sourceView columnNumber:r.location];
+    mark.line = [self.sourceView.textStorage lineNumber:r.location];
+    mark.column = [self.sourceView.textStorage columnNumber:r.location];
     mark.document = [[self.sourceView documentURL] path];
     [[XVim instance].marks setMark:mark forName:keyStr];
     return nil;

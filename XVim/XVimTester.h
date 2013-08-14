@@ -12,5 +12,6 @@
 
 @interface XVimTester : NSObject<NSTableViewDataSource, NSTableViewDelegate>
 @property (strong) NSMutableArray* testCases;
+- (id)initWithTestCategory:(NSString*)category;
 - (void)runTest;
 @end

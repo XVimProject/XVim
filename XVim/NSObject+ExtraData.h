@@ -14,4 +14,6 @@
 
 // Utilities
 - (void)setBool:(BOOL)b forName:(NSString*)name;
+- (void)setUnsignedInteger:(NSUInteger)b forName:(NSString*)name;
+- (void)setInteger:(NSInteger)b forName:(NSString *)name;
 @end
