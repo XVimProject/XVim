@@ -238,9 +238,13 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
 }
 
 - (XVimRegister*)registerByName:(NSString*)name{
-    NSAssert( name == nil || name.length == 1, @"name must not nil and one character string");
+    NSAssert( name == nil || name.length == 1, @"name must be nil or one character string");
     if( nil == name ){
-        name = @"\"";
+        if( [[XVim instance].options clipboardHasUnnamed] ){
+            name = @"*";
+        }else{
+            name = @"\"";
+        }
     }
     // Always lowercase
     name = [name lowercaseString];
