@@ -26,8 +26,9 @@
 }
 
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
+    //TODO: Must be moved to XVimSearch.m
 	XVimSearch* searcher = [[XVim instance] searcher];
-	NSUInteger cursorLocation = [self.window insertionPoint];
+	NSUInteger cursorLocation = [self.window.sourceView insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found = NSMakeRange(0, 0);
     for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){

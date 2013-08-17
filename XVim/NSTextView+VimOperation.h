@@ -31,16 +31,26 @@
 // ability to edit its string and do not need to consider any view related thing.
 // deleteLine: method in NSTextView+VimOperation would use deleteLine: method in NSTextStorage+VimOperation
 // and complete its task.
+//
+// Public or Private
+// A method declared here is a public method to XVimEvaluators.
+// As explained above these methods are interface to achieve Vim operation to a NSTextView.
+// If you need some helper method used internally, declare it in VimOperationPrivate category in .m file
+//
+//
+// Naming conventoin
+//
+// All the method in this caregory must have a prefix "xvim_"
+// This is to avoid a conflict with method names in NSTextView.
 
-
-#import "Utils.h"
 #import "XVimTextViewProtocol.h"
 #import "NSTextStorage+VimOperation.h"
 #import <Cocoa/Cocoa.h>
 
 @interface NSTextView (VimOperation)
-
+// TODO: Method names in category should have prefix like xvim_
 #pragma mark Properties
+// Make sure that these property names are not conflicting to the properties in NSTextView
 @property(readonly) NSUInteger insertionPoint;
 @property(readonly) XVimPosition insertionPosition;
 @property(readonly) NSUInteger insertionColumn;
@@ -54,45 +64,45 @@
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSURL* documentURL;
 @property(strong) id yankDelegate;
+@property(readonly) long long currentLineNumber;
 
 #pragma mark Status
-- (NSUInteger)numberOfLinesInVisibleRect;
-- (long long)currentLineNumber;
+- (NSUInteger)xvim_numberOfLinesInVisibleRect;
 
 #pragma mark Changing state
-- (void)changeSelectionMode:(XVIM_VISUAL_MODE)mode;
-- (void)escapeFromInsert;
-- (void)setWrapsLines:(BOOL)wraps;
+- (void)xvim_changeSelectionMode:(XVIM_VISUAL_MODE)mode;
+- (void)xvim_escapeFromInsert;
+- (void)xvim_setWrapsLines:(BOOL)wraps;
 
 #pragma mark Operations (Has effect to internal state)
-- (void)adjustCursorPosition;
-- (void)moveToPosition:(XVimPosition)pos;
-- (void)move:(XVimMotion*)motion;
-- (void)del:(XVimMotion*)motion;
-- (void)change:(XVimMotion*)motion;
-- (void)yank:(XVimMotion*)motion;
-- (void)put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
-- (void)swapCase:(XVimMotion*)motion;
-- (void)makeLowerCase:(XVimMotion*)motion;
-- (void)makeUpperCase:(XVimMotion*)motion;
-- (BOOL)replaceCharacters:(unichar)c count:(NSUInteger)count;
-- (void)joinAtLineNumber:(NSUInteger)line;
-- (void)join:(NSUInteger)count;
-- (void)filter:(XVimMotion*)motion;
-- (void)shiftRight:(XVimMotion*)motion;
-- (void)shiftLeft:(XVimMotion*)motion;
-- (void)insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
-- (void)insertNewlineBelowLine:(NSUInteger)line;
-- (void)insertNewlineBelow;
-- (void)insertNewlineAboveLine:(NSUInteger)line;
-- (void)insertNewlineAbove;
-- (void)insertNewlineAboveAndInsert;
-- (void)insertNewlineBelowAndInsert;
-- (void)append;
-- (void)insert;
-- (void)appendAtEndOfLine;
-- (void)insertBeforeFirstNonblank;
-- (void)overwriteCharacter:(unichar)c;
+- (void)xvim_adjustCursorPosition;
+- (void)xvim_moveToPosition:(XVimPosition)pos;
+- (void)xvim_move:(XVimMotion*)motion;
+- (void)xvim_delete:(XVimMotion*)motion;
+- (void)xvim_change:(XVimMotion*)motion;
+- (void)xvim_yank:(XVimMotion*)motion;
+- (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
+- (void)xvim_swapCase:(XVimMotion*)motion;
+- (void)xvim_makeLowerCase:(XVimMotion*)motion;
+- (void)xvim_makeUpperCase:(XVimMotion*)motion;
+- (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count;
+- (void)xvim_joinAtLineNumber:(NSUInteger)line;
+- (void)xvim_join:(NSUInteger)count;
+- (void)xvim_filter:(XVimMotion*)motion;
+- (void)xvim_shiftRight:(XVimMotion*)motion;
+- (void)xvim_shiftLeft:(XVimMotion*)motion;
+- (void)xvim_insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
+- (void)xvim_insertNewlineBelowLine:(NSUInteger)line;
+- (void)xvim_insertNewlineBelow;
+- (void)xvim_insertNewlineAboveLine:(NSUInteger)line;
+- (void)xvim_insertNewlineAbove;
+- (void)xvim_insertNewlineAboveAndInsert;
+- (void)xvim_insertNewlineBelowAndInsert;
+- (void)xvim_append;
+- (void)xvim_insert;
+- (void)xvim_appendAtEndOfLine;
+- (void)xvim_insertBeforeFirstNonblank;
+- (void)xvim_overwriteCharacter:(unichar)c;
 
 /**
  * Sort specified lines.
@@ -104,29 +114,29 @@
  * it sorts lines up to end of the text.
  * If the range is out of range of current text it does nothing.
  **/
-- (void)sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options;
-- (void)selectNextPlaceholder;
-- (void)selectPreviousPlaceholder;
-- (void)hideCompletions;
+- (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options;
+- (void)xvim_selectNextPlaceholder;
+- (void)xvim_selectPreviousPlaceholder;
+- (void)xvim_hideCompletions;
 
 #pragma mark Scroll
-- (NSUInteger)lineUp:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)lineDown:(NSUInteger)index count:(NSUInteger)count;
-- (void)scroll:(CGFloat)ratio count:(NSUInteger)count;
-- (void)scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (void)scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (void)scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (void)scrollTo:(NSUInteger)location;
-- (void)pageForward:(NSUInteger)index count:(NSUInteger)count;
-- (void)pageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (void)halfPageForward:(NSUInteger)index count:(NSUInteger)count;
-- (void)halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (void)scrollPageForward:(NSUInteger)count;
-- (void)scrollPageBackward:(NSUInteger)count;
-- (void)scrollHalfPageForward:(NSUInteger)count;
-- (void)scrollHalfPageBackward:(NSUInteger)count;
-- (void)scrollLineForward:(NSUInteger)count;
-- (void)scrollLineBackward:(NSUInteger)count;
+- (NSUInteger)xvim_lineUp:(NSUInteger)index count:(NSUInteger)count;
+- (NSUInteger)xvim_lineDown:(NSUInteger)index count:(NSUInteger)count;
+- (void)xvim_scroll:(CGFloat)ratio count:(NSUInteger)count;
+- (void)xvim_scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)xvim_scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)xvim_scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)xvim_scrollTo:(NSUInteger)location;
+- (void)xvim_pageForward:(NSUInteger)index count:(NSUInteger)count;
+- (void)xvim_pageBackward:(NSUInteger)index count:(NSUInteger)count;
+- (void)xvim_halfPageForward:(NSUInteger)index count:(NSUInteger)count;
+- (void)xvim_halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
+- (void)xvim_scrollPageForward:(NSUInteger)count;
+- (void)xvim_scrollPageBackward:(NSUInteger)count;
+- (void)xvim_scrollHalfPageForward:(NSUInteger)count;
+- (void)xvim_scrollHalfPageBackward:(NSUInteger)count;
+- (void)xvim_scrollLineForward:(NSUInteger)count;
+- (void)xvim_scrollLineBackward:(NSUInteger)count;
     
 #pragma mark Searching positions
 // TODO: Thses method should be internal. Create abstracted interface to achieve the operation uses these methods.
@@ -136,8 +146,8 @@
  * When some characters are folded( like placeholders) the pure index for a specifix point is
  * less than real index in the string.
  **/
-- (NSUInteger)glyphIndexForPoint:(NSPoint)point;
-- (NSRect)boundingRectForGlyphIndex:(NSUInteger)glyphIndex;
+- (NSUInteger)xvim_glyphIndexForPoint:(NSPoint)point;
+- (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex;
 
 /**
  * Return number of lines in current visible view.
@@ -148,12 +158,12 @@
  * TODO: This assumes that all the lines in a view has same text height.
  *       I thinks this is not bad assumption but there may be a situation the assumption does not work.
  **/
-- (NSUInteger)numberOfLinesInVisibleRect;
+- (NSUInteger)xvim_numberOfLinesInVisibleRect;
 
+- (void)xvim_syncStateFromView; // update our instance variables with self's properties
 
 #pragma mark Helper methods
 
-- (void)syncStateFromView;
 
 
 
@@ -178,7 +188,7 @@
  * Delete one character at the position specified by "pos"
  * If pos does not exist it does nothing.
  **/
-- (void)deleteCharacter:(XVimPosition)pos;
+- (void)xvim_deleteCharacter:(XVimPosition)pos;
 
 /**
  * Delete a line specified by lineNumber.
@@ -191,14 +201,14 @@
  *
  * If the specified lineNumber exceeds the maximam line number it does nothing.
  **/
-- (void)deleteLine:(NSUInteger)lineNumber;
+- (void)xvim_deleteLine:(NSUInteger)lineNumber;
 
 /**
  * Delete range of lines specified by arguments.
  * "line1" can be greater than "line2"
  * If the range exceeds the maximam line number it deletes up to the end of file.
  **/
-- (void)deleteLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2;
+- (void)xvim_deleteLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2;
 
 /**
  * Delete characters until next newline character from specified position.
@@ -206,7 +216,7 @@
  * If the specified position is newline character or EOF it does nothing.
  * If the specified position does not exist it does nothing.
  **/
-- (void)deleteRestOfLine:(XVimPosition)pos;
+- (void)xvim_deleteRestOfLine:(XVimPosition)pos;
 
 /**
  * Delete characters in a block specified by pos1 and pos2.
@@ -216,7 +226,7 @@
  * in the block.
  * This never deletes newline characters.
  **/
-- (void)deleteBlockFrom:(XVimPosition)pos1 to:(XVimPosition)pos2;
+- (void)xvim_deleteBlockFrom:(XVimPosition)pos1 to:(XVimPosition)pos2;
 
 /**
  * Join the line specified and the line bewlow it.
@@ -225,13 +235,13 @@
  * Use vimJoinAtLine: to do Vim's join.
  * This method can be used for 'gJ' command
  **/
-- (void)joinAtLine:(NSUInteger)lineNumber;
+- (void)xvim_joinAtLine:(NSUInteger)lineNumber;
 
 /**
  * Does Vim's join on the specified line.
  * See ":help J" in Vim how it works.
  **/
-- (void)vimJoinAtLine:(NSUInteger)lineNumber;
+- (void)xvim_vimJoinAtLine:(NSUInteger)lineNumber;
 
 
 

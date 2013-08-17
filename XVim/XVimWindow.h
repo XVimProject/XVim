@@ -1,5 +1,5 @@
 //
-//  XVimBuffer.h
+//  XVimWindow.h
 //  XVim
 //
 //  Created by Tomas Lundell on 9/04/12.
@@ -28,7 +28,6 @@
 
 @property(strong) NSTextView* sourceView; // This represents currently focused sourceView
 
-- (NSUInteger)insertionPoint; // May be removed. This should be accessed via sourceView::insertionPoint
 - (XVimCommandLine*)commandLine;
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)stack;
@@ -36,8 +35,6 @@
 - (BOOL)handleXVimString:(XVimString*)strokes;
 - (void)beginMouseEvent:(NSEvent*)event;
 - (void)endMouseEvent:(NSEvent*)event;
-- (NSRange)restrictSelectedRange:(NSRange)range;
-
 - (void)drawRect:(NSRect)rect;
 - (BOOL)shouldDrawInsertionPoint;
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
@@ -60,18 +57,5 @@
 
 - (IDEWorkspaceWindow*)currentWorkspaceWindow;
 
-/**
- * Sync to update XVim internal state acording to Xcode state(mainly selected ranges).
- * This method must be called after you call Xcode operation.
- * It is usually Xcode operation like [NSApp sendAction] 
- * When you call such method Xcode changes state of source view.
- * This breaks integrity between infomation we keep internally and Xcode has internally.
- *
- * TODO:
- * For future:
- * We should not call Xcode functionarity directly without going through "XVimWindow" object.
- * All the command must go through XVimWindow or XVimSourceView and there we can keep the integrity.
- **/
-- (void)syncState;
 
 @end

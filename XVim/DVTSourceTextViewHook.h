@@ -18,8 +18,7 @@
 @end
 
 @interface DVTSourceTextView(Hook)
-- (void)setSelectedRange_:(NSRange)charRange;
-- (void)setSelectedRange_:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag;
+- (void)setSelectedRanges_:(NSArray*)array affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag;
 - (void)keyDown_:(NSEvent *)theEvent;
 - (void)mouseDown_:(NSEvent *)theEvent;
 - (void)mouseUp_:(NSEvent *)theEvent;
@@ -30,5 +29,4 @@
 - (void)_drawInsertionPointInRect_:(NSRect)aRect color:(NSColor*)aColor;
 - (BOOL)becomeFirstResponder_;
 - (void)viewDidMoveToSuperview_;
-- (void)delete_:(id)sender;
-@end 
+@end

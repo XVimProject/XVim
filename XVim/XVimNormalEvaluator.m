@@ -75,19 +75,19 @@
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a{
-    [[self sourceView] append];
+    [[self sourceView] xvim_append];
 	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)A{
     NSTextView* view = [self sourceView];
-    [view appendAtEndOfLine];
+    [view xvim_appendAtEndOfLine];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b{
-    [[self sourceView] scrollPageBackward:[self numericArg]];
+    [[self sourceView] xvim_scrollPageBackward:[self numericArg]];
     return nil;
 }
 
@@ -107,7 +107,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d{
-    [[self sourceView] scrollHalfPageForward:[self numericArg]];
+    [[self sourceView] xvim_scrollHalfPageForward:[self numericArg]];
     return nil;
 }
 
@@ -125,13 +125,13 @@
 }
 
 - (XVimEvaluator*)C_e{
-    [[self sourceView] scrollLineForward:[self numericArg]];
+    [[self sourceView] xvim_scrollLineForward:[self numericArg]];
     return nil;
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f{
-    [[self sourceView] scrollPageForward:[self numericArg]];
+    [[self sourceView] xvim_scrollPageForward:[self numericArg]];
     return nil;
 }
 
@@ -172,7 +172,7 @@
 }
 
 - (XVimEvaluator*)I{
-    [[self sourceView] insertBeforeFirstNonblank];
+    [[self sourceView] xvim_insertBeforeFirstNonblank];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
@@ -180,7 +180,7 @@
 // of the line joined in should be stripped and then one space should be inserted 
 // between the joined lines
 - (XVimEvaluator*)J{
-    [[self sourceView] join:[self numericArg]];
+    [[self sourceView] xvim_join:[self numericArg]];
     return nil;
 }
 
@@ -194,13 +194,13 @@
 
 - (XVimEvaluator*)o{
     NSTextView* view = [self sourceView];
-    [view insertNewlineBelowAndInsert];
+    [view xvim_insertNewlineBelowAndInsert];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
     NSTextView* view = [self sourceView];
-    [view insertNewlineAboveAndInsert];
+    [view xvim_insertNewlineAboveAndInsert];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
@@ -217,14 +217,14 @@
 - (XVimEvaluator*)p{
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
 - (XVimEvaluator*)P{
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
+    [view xvim_put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     return nil;
 }
 
@@ -288,7 +288,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u{
-    [[self sourceView] scrollHalfPageBackward:[self numericArg]];
+    [[self sourceView] xvim_scrollHalfPageBackward:[self numericArg]];
     return nil;
 }
 
@@ -336,7 +336,7 @@
 }
 
 - (XVimEvaluator*)C_y{
-    [[self sourceView] scrollLineBackward:[self numericArg]];
+    [[self sourceView] xvim_scrollLineBackward:[self numericArg]];
     return nil;
 }
 
@@ -409,7 +409,7 @@
 }
 
 - (XVimEvaluator*)HT{
-    [[self sourceView] selectNextPlaceholder];
+    [[self sourceView] xvim_selectNextPlaceholder];
     return nil;
 }
 
@@ -438,12 +438,12 @@
 							   NSTextView *sourceView = [self sourceView];
 							   NSRange found = [searcher executeSearch:command 
 															   display:[command substringFromIndex:1] 
-																  from:[self.window insertionPoint]
+																  from:[self.window.sourceView insertionPoint]
 															  inWindow:window];
 							   //Move cursor and show the found string
 							   if (found.location != NSNotFound) {
 								   [sourceView setSelectedRange:NSMakeRange(found.location, 0)];
-								   [sourceView scrollTo:[self.window insertionPoint]];
+								   [sourceView xvim_scrollTo:[self.window.sourceView insertionPoint]];
 								   [sourceView showFindIndicatorForRange:found];
 							   } else {
 								   [self.window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
@@ -458,11 +458,11 @@
                                    NSTextView *sourceView = [self sourceView];
                                    NSRange found = [searcher executeSearch:command 
 																   display:[command substringFromIndex:1]
-																	  from:[self.window insertionPoint]
+																	  from:[self.window.sourceView insertionPoint]
 																  inWindow:window];
                                    //Move cursor and show the found string
                                    if (found.location != NSNotFound) {
-                                       [sourceView scrollTo:found.location];
+                                       [sourceView xvim_scrollTo:found.location];
                                        [sourceView showFindIndicatorForRange:found];
                                    }
                                }
@@ -529,7 +529,7 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
-    [[self sourceView] move:motion];
+    [[self sourceView] xvim_move:motion];
     return nil;
 }
 

@@ -63,18 +63,18 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (void)becameHandler{
     [super becameHandler];
     if( self.initialToPos.line != NSNotFound ){
-        [self.sourceView moveToPosition:self.initialFromPos];
-        [self.sourceView changeSelectionMode:_visual_mode];
-        [self.sourceView moveToPosition:self.initialToPos];
+        [self.sourceView xvim_moveToPosition:self.initialFromPos];
+        [self.sourceView xvim_changeSelectionMode:_visual_mode];
+        [self.sourceView xvim_moveToPosition:self.initialToPos];
     }else{
-        [self.sourceView changeSelectionMode:_visual_mode];
+        [self.sourceView xvim_changeSelectionMode:_visual_mode];
     }
 }
 
 - (void)didEndHandler{
     if( !_waitForArgument ){
         [super didEndHandler];
-        [self.sourceView changeSelectionMode:XVIM_VISUAL_NONE];
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
         // TODO:
         //[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     }
@@ -87,8 +87,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (void)drawRect:(NSRect)rect{
     NSTextView* sourceView = [self sourceView];
 	
-	NSUInteger glyphIndex = [self.window insertionPoint];
-	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
+	NSUInteger glyphIndex = [sourceView insertionPoint];
+	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
 	
 	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
 	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
@@ -105,7 +105,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
      * Original NSTextView does not draw insertion point so we have to do it manually.
      **/
     [self.sourceView lockFocus];
-    [self drawRect:[self.sourceView boundingRectForGlyphIndex:self.sourceView.insertionPoint]];
+    [self drawRect:[self.sourceView xvim_boundingRectForGlyphIndex:self.sourceView.insertionPoint]];
     [self.sourceView setNeedsDisplayInRect:[self.sourceView visibleRect] avoidAdditionalLayout:NO];
     [self.sourceView unlockFocus];
     
@@ -122,32 +122,32 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)c{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [[self sourceView] change:m];
+    [[self sourceView] xvim_change:m];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)C_b{
-    [[self sourceView] scrollPageBackward:[self numericArg]];
+    [[self sourceView] xvim_scrollPageBackward:[self numericArg]];
     return self;
 }
 
 - (XVimEvaluator*)C_d{
-    [[self sourceView] scrollHalfPageForward:[self numericArg]];
+    [[self sourceView] xvim_scrollHalfPageForward:[self numericArg]];
     return self;
 }
 
 - (XVimEvaluator*)d{
-    [[self sourceView] del:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
+    [[self sourceView] xvim_delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
 
 - (XVimEvaluator*)D{
-    [[self sourceView] del:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
+    [[self sourceView] xvim_delete:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
     return nil;
 }
 
 - (XVimEvaluator*)C_f{
-    [[self sourceView] scrollPageForward:[self numericArg]];
+    [[self sourceView] xvim_scrollPageForward:[self numericArg]];
     return self;
 }
 
@@ -165,7 +165,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)J{
-	[[self sourceView] join:[self numericArg]];
+	[[self sourceView] xvim_join:[self numericArg]];
     return nil;
 }
 
@@ -178,7 +178,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)p{
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
@@ -195,18 +195,18 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)u{
 	NSTextView *view = [self sourceView];
-    [view makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    [view xvim_makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
 - (XVimEvaluator*)U{
 	NSTextView *view = [self sourceView];
-    [view makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    [view xvim_makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
 - (XVimEvaluator*)C_u{
-    [[self sourceView] scrollHalfPageBackward:[self numericArg]];
+    [[self sourceView] xvim_scrollHalfPageBackward:[self numericArg]];
     return self;
 }
 
@@ -215,7 +215,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     if( view.selectionMode == XVIM_VISUAL_CHARACTER ){
         return  [self ESC];
     }
-    [view changeSelectionMode:XVIM_VISUAL_CHARACTER];
+    [view xvim_changeSelectionMode:XVIM_VISUAL_CHARACTER];
     return self;
 }
 
@@ -224,7 +224,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     if( view.selectionMode == XVIM_VISUAL_LINE){
         return  [self ESC];
     }
-    [view changeSelectionMode:XVIM_VISUAL_LINE];
+    [view xvim_changeSelectionMode:XVIM_VISUAL_LINE];
     return self;
 }
 
@@ -233,7 +233,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     if( view.selectionMode == XVIM_VISUAL_BLOCK){
         return  [self ESC];
     }
-    [view changeSelectionMode:XVIM_VISUAL_BLOCK];
+    [view xvim_changeSelectionMode:XVIM_VISUAL_BLOCK];
     return self;
 }
 
@@ -246,7 +246,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)y{
-    [[self sourceView] yank:nil];
+    [[self sourceView] xvim_yank:nil];
     return nil;
 }
 
@@ -273,8 +273,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)Y{
     //TODO: support yunk linewise
-    [[self sourceView] changeSelectionMode:XVIM_VISUAL_LINE];
-    [[self sourceView] yank:nil];
+    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    [[self sourceView] xvim_yank:nil];
     return nil;
 }
 
@@ -301,12 +301,12 @@ TODO: This block is from commit 42498.
 */
 
 - (XVimEvaluator*)EQUAL{
-    [[self sourceView] filter:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    [[self sourceView] xvim_filter:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
 - (XVimEvaluator*)ESC{
-    [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
+    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     return nil;
 }
 
@@ -328,7 +328,7 @@ TODO: This block is from commit 42498.
                                [excmd executeCommand:command inWindow:self.window];
                                
 							   //NSTextView *sourceView = [window sourceView];
-                               [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
+                               [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
                                return nil;
                            }
                                                                  onKeyPress:nil];
@@ -337,13 +337,13 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)GREATERTHAN{
-    [[self sourceView] shiftRight:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    [[self sourceView] xvim_shiftRight:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
 
 - (XVimEvaluator*)LESSTHAN{
-    [[self sourceView] shiftLeft:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    [[self sourceView] xvim_shiftLeft:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
     return nil;
 }
 
@@ -421,19 +421,19 @@ TODO: This block is from commit 42498.
 
 - (XVimEvaluator*)TILDE{
 	NSTextView *view = [self sourceView];
-    [view swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
+    [view xvim_swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 	return nil;
 }
 
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = to;
-    [[self sourceView] move:m];
+    [[self sourceView] xvim_move:m];
     return self;
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
-    [[self sourceView] move:motion];
+    [[self sourceView] xvim_move:motion];
     [self resetNumericArg];
     return self;
 }

@@ -25,9 +25,6 @@
 #define FATAL_LOG(fmt,...)
 #endif
 
-
-#define METHOD_TRACE_LOG() TRACE_LOG(@"ENTER")
-
 #define REGISTER_CLASS_FOR_METHOD_TRACING(cls) [Logger registerTracing:cls]
 typedef enum LogLevel_t{
     LogTrace,

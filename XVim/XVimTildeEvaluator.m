@@ -26,7 +26,7 @@
 }
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
-    [[self sourceView] swapCase:motion];
+    [[self sourceView] xvim_swapCase:motion];
     return nil;
 }
 

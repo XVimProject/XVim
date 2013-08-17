@@ -26,6 +26,7 @@
 #import "XVimSearch.h"
 #import <objc/runtime.h>
 #import <string.h>
+#import "NSTextView+VimOperation.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -41,7 +42,7 @@
 }
 
 + (void)hook{
-    [self hook:@"setSelectedRange:"];
+    [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
     [self hook:@"becomeFirstResponder"];
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
@@ -54,7 +55,7 @@
 }
 
 + (void)unhook{
-    [self unhook:@"setSelectedRange:"];
+    [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
     [self unhook:@"becomeFirstResponder"];
     [self unhook:@"keyDown:"];
     [self unhook:@"mouseDown:"];
@@ -66,28 +67,16 @@
     [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
 
-/**
- * DVTSourceTextView's setSelectedRange is called from both Xcode and XVim.
- * Since XVim manages its insertion point(and selected range) if Xcode calls setSelectedRange directly
- * XVim does not have chance to keep integrity between our insertion point and DVTSourceTextView's selectedRange.
- * So what we do here is that if the call to setSelectedRange is not originated from XVim we set a flag "rangeChanged"
- * and when XVim detect it XVim sync its insernal state with Xcode's one.
- **/
-- (void)setSelectedRange:(NSRange)charRange{
-    TRACE_LOG(@"%d %d", charRange.location, charRange.length);
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    NSNumber* n = [self dataForName:@"isFromXVimSourceView"];
-    if( nil == n || [n boolValue] == NO){
-        [self setBool:YES forName:@"rangeChanged"];
+- (void)setSelectedRanges:(NSArray *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
+    for( NSValue* v in ranges ){
+        TRACE_LOG(@"Array:%d   affinity:%d   stillSelectiong:%@", ranges.count, affinity, flag?@"YES":@"NO");
+        TRACE_LOG(@"Range:(%d,%d)", v.rangeValue.location, v.rangeValue.length);
     }
-    [base setSelectedRange_:charRange];
+    [(DVTSourceTextView*)self setSelectedRanges_:ranges affinity:affinity stillSelecting:flag];
+    [(NSTextView*)self xvim_syncStateFromView];
 }
 
-- (void)setSelectedRange:(NSRange)charRange affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    TRACE_LOG(@"%d %d", charRange.location, charRange.length);
-    [base setSelectedRange_:charRange affinity:affinity stillSelecting:flag];
-}
+
 
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{

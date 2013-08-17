@@ -62,7 +62,7 @@
 }
 
 - (void)setUp{
-    [[[XVimLastActiveSourceView() xvimWindow] sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
+    [[[XVimLastActiveSourceView() xvimWindow] sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     [XVimLastActiveSourceView() setString:self.initialText];
     [XVimLastActiveSourceView() setSelectedRange:self.initialRange];
 }

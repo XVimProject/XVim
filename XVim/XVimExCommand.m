@@ -824,7 +824,7 @@
             pos_wo_space = pos;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [srcView scrollTo:[window insertionPoint]];
+        [srcView xvim_scrollTo:[window.sourceView insertionPoint]];
         return;
     }
     
@@ -1112,10 +1112,10 @@
     }
     
     if( [setCommand isEqualToString:@"wrap"] ){
-        [srcView setWrapsLines:YES];
+        [srcView xvim_setWrapsLines:YES];
     }
     else if( [setCommand isEqualToString:@"nowrap"] ){
-        [srcView setWrapsLines:NO];
+        [srcView xvim_setWrapsLines:NO];
     } else if( [setCommand isEqualToString:@"list!"] ){
       [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
     }
@@ -1145,7 +1145,7 @@
         }
     }
     
-    [view sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
+    [view xvim_sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
 }
 
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{

@@ -126,15 +126,6 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     }
 }
 
-/*
-- (NSRange)restrictSelectedRange:(NSRange)range{
-	if (range.length == 0 && ![[self sourceView] isValidCursorPosition:range.location]) {
-		--range.location;
-	}
-	return range;
-}
- */
-
 - (void)drawRect:(NSRect)rect{
 }
 

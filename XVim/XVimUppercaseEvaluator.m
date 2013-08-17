@@ -22,7 +22,7 @@
 }
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
-    [[self sourceView] makeUpperCase:motion];
+    [[self sourceView] xvim_makeUpperCase:motion];
     return nil;
 }
 

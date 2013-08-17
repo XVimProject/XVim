@@ -21,7 +21,7 @@
 }
 
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
-    [[self sourceView] makeLowerCase:motion];
+    [[self sourceView] xvim_makeLowerCase:motion];
     return nil;
 }
 

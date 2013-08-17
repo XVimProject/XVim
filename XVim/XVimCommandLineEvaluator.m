@@ -156,7 +156,7 @@
 
 - (XVimEvaluator*)ESC{
     NSTextView *sourceView = [self sourceView];
-    [sourceView scrollTo:[self.window insertionPoint]];
+    [sourceView xvim_scrollTo:[sourceView insertionPoint]];
 	return nil;
 }
 

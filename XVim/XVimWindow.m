@@ -194,7 +194,6 @@ static const char* KEY_WINDOW = "xvimwindow";
         [self _initEvaluatorStack:evaluatorStack];
     }
     [self dumpEvaluatorStack:evaluatorStack];
-    [self syncState];
     
     [self clearErrorMessage];
     
@@ -252,7 +251,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     currentEvaluator = [evaluatorStack lastObject];
     [self.commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
     [self.commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
-    [self syncState];
 }
 
 - (void)handleTextInsertion:(NSString*)text {
@@ -285,11 +283,11 @@ static const char* KEY_WINDOW = "xvimwindow";
     TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
-    NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
-    [[self sourceView] changeSelectionMode:XVIM_VISUAL_NONE];
+    NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
+    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = index;
-    [[self sourceView] move:m];
+    [[self sourceView] xvim_move:m];
 }
 
 - (void)mouseUp:(NSEvent *)event{
@@ -306,15 +304,15 @@ static const char* KEY_WINDOW = "xvimwindow";
     TRACE_LOG(@"Event:%@", event.description);
     NSPoint point = event.locationInWindow;
     NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
-    NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
+    NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
     
     if(self.sourceView.selectionMode == XVIM_VISUAL_NONE){
-        [self.sourceView changeSelectionMode:XVIM_VISUAL_CHARACTER];
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_CHARACTER];
     }
     
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = index;
-    [[self sourceView] move:m];
+    [[self sourceView] xvim_move:m];
     [self endMouseEvent:event];
      
 }
@@ -342,7 +340,7 @@ static const char* KEY_WINDOW = "xvimwindow";
 	NSTextView *sourceView = [self sourceView];
 	color = [color colorWithAlphaComponent:alphaRatio];
     NSUInteger glyphIndex = [sourceView insertionPoint];
-	NSRect glyphRect = [sourceView boundingRectForGlyphIndex:glyphIndex];
+	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
 	
 	[color set];
 	rect.size.width =rect.size.height/2;
@@ -392,10 +390,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (NSUInteger)insertionPoint {
     return [self.sourceView insertionPoint];
-}
-
-- (void)syncState{
-    [self.sourceView syncStateFromView];
 }
 
 static char s_associate_key = 0;

@@ -87,12 +87,10 @@
 - (void)becameHandler{
     [super becameHandler];
     self.startRange = [[self sourceView] selectedRange];
-    [self.sourceView insert];
+    [self.sourceView xvim_insert];
 }
 
 - (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	// NSRange range = [[self sourceView] selectedRange];
-	//return range.length == 0 ? self : [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER withRange:range] autorelease];
     return self;
 }
 
@@ -115,10 +113,6 @@
         return 0.5;
     }
     return 1.0;
-}
-
-- (NSRange)restrictSelectedRange:(NSRange)range{
-	return range;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
@@ -200,14 +194,14 @@
     }else if(self.lastInsertedText.length > 0){
         //[xvim.repeatRegister appendText:self.lastInsertedText];
     }
-    [sourceView hideCompletions];
+    [sourceView xvim_hideCompletions];
 	
     // Position for "^" is before escaped from insert mode
     NSUInteger pos = self.sourceView.insertionPoint;
     XVimMark* mark = XVimMakeMark([self.sourceView.textStorage lineNumber:pos], [self.sourceView.textStorage columnNumber:pos], self.sourceView.documentURL.path);
     [[XVim instance].marks setMark:mark forName:@"^"];
     
-    [[self sourceView] escapeFromInsert];
+    [[self sourceView] xvim_escapeFromInsert];
     
     // Position for "." is after escaped from insert mode
     pos = self.sourceView.insertionPoint;
@@ -238,7 +232,7 @@
     if (nextEvaluator == self && nil == keySelector){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
-            if( ![self.sourceView replaceCharacters:keyStroke.character count:[self numericArg]] ){
+            if( ![self.sourceView xvim_replaceCharacters:keyStroke.character count:[self numericArg]] ){
                 nextEvaluator = [XVimEvaluator invalidEvaluator];
             }else{
                 nextEvaluator = nil;
@@ -251,7 +245,6 @@
                 [self.sourceView insertText:keyStroke.xvimString];
             }else{
                 [self.sourceView interpretKeyEvents:[NSArray arrayWithObject:event]];
-                [self.sourceView syncStateFromView];
             }
         }
     }
@@ -310,7 +303,7 @@
 
 - (XVimEvaluator*)C_w{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [[self sourceView] del:m];
+    [[self sourceView] xvim_delete:m];
     return self;
 }
 

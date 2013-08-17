@@ -31,12 +31,10 @@
 #pragma mark Properties
 
 - (NSUInteger)endOfFile{
-    METHOD_TRACE_LOG();
 	return self.string.length;
 }
 
 - (NSUInteger)numberOfLines{
-    METHOD_TRACE_LOG();
     // If "self" is a DVTSourceTextStorage
     // The "numberOfLines" in DVTSourceTextStorage is called and
     // control flow does not reach here. (Its by design)
@@ -373,7 +371,6 @@
 }
 
 - (NSUInteger)lineNumber:(NSUInteger)index{
-    METHOD_TRACE_LOG();
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSUInteger newLines=1;
     for( NSUInteger pos = 0 ; pos < index && pos < self.length; pos++ ){
@@ -385,7 +382,6 @@
 }
 
 - (NSUInteger)columnNumber:(NSUInteger)index {
-    METHOD_TRACE_LOG();
     ASSERT_VALID_RANGE_WITH_EOF(index);
     
 #ifdef __USE_DVTKIT__
@@ -397,7 +393,6 @@
 }
 
 - (NSRange)characterRangeForLineRange:(NSRange)arg1{
-    METHOD_TRACE_LOG();
     // If thie is a DVTSourceTextStorage its method is called and
     // control flow does not reach here.
     NSAssert(false, @"You must implement this method if you want to use this method with NSTextStorage class." );

@@ -406,5 +406,5 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
  * a cursor can not be on a newline charaster if its not blankline
  **/
 - (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index;
-    
+
 @end

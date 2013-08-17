@@ -236,14 +236,14 @@
 
 - (XVimEvaluator*)n{
 	XVimSearch* searcher = [[XVim instance] searcher];
-    NSRange r = [searcher searchNextFrom:[self.window insertionPoint] inWindow:self.window];
+    NSRange r = [searcher searchNextFrom:[self.window.sourceView insertionPoint] inWindow:self.window];
 	[searcher selectSearchResult:r inWindow:self.window];
     return nil;
 }
 
 - (XVimEvaluator*)N{
 	XVimSearch* searcher = [[XVim instance] searcher];
-    NSRange r = [searcher searchPrevFrom:[self.window insertionPoint] inWindow:self.window];
+    NSRange r = [searcher searchPrevFrom:[self.window.sourceView insertionPoint] inWindow:self.window];
 	[searcher selectSearchResult:r inWindow:self.window];
     return nil;
 }
@@ -312,7 +312,7 @@
 - (XVimEvaluator*)searchCurrentWordInWindow:(XVimWindow*)window forward:(BOOL)forward {
 	XVimSearch* searcher = [[XVim instance] searcher];
 	
-	NSUInteger cursorLocation = [window insertionPoint];
+	NSUInteger cursorLocation = [window.sourceView insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
     NSRange found=NSMakeRange(0, 0);
     for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){

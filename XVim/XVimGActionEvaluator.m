@@ -56,8 +56,8 @@
             cur_mark.column = [self.sourceView insertionColumn];
             cur_mark.document = [self.sourceView documentURL].path;
             [[XVim instance].marks setMark:cur_mark forName:@"'"];
-            [self.sourceView move:m];
-            [self.sourceView append];
+            [self.sourceView xvim_move:m];
+            [self.sourceView xvim_append];
         }
     }
 	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];

@@ -13,32 +13,32 @@
 @implementation XVimZEvaluator
 
 - (XVimEvaluator*)b{
-    [self.sourceView scrollBottom:([self numericMode]?[self numericArg]:0) firstNonblank:NO];
+    [self.sourceView xvim_scrollBottom:([self numericMode]?[self numericArg]:0) firstNonblank:NO];
     return nil;
 }
 
 - (XVimEvaluator*)t{
-    [self.sourceView scrollTop:([self numericMode]?[self numericArg]:0) firstNonblank:NO];
+    [self.sourceView xvim_scrollTop:([self numericMode]?[self numericArg]:0) firstNonblank:NO];
     return nil;
 }
 
 - (XVimEvaluator*)z{
-    [self.sourceView scrollCenter:([self numericMode]?[self numericArg]:0) firstNonblank:NO];
+    [self.sourceView xvim_scrollCenter:([self numericMode]?[self numericArg]:0) firstNonblank:NO];
     return nil;
 }
 
 - (XVimEvaluator*)MINUS{
-    [self.sourceView scrollBottom:([self numericMode]?[self numericArg]:0) firstNonblank:YES];
+    [self.sourceView xvim_scrollBottom:([self numericMode]?[self numericArg]:0) firstNonblank:YES];
     return nil;
 }
 
 - (XVimEvaluator*)DOT{
-    [self.sourceView scrollCenter:([self numericMode]?[self numericArg]:0) firstNonblank:YES];
+    [self.sourceView xvim_scrollCenter:([self numericMode]?[self numericArg]:0) firstNonblank:YES];
     return nil;
 }
 
 - (XVimEvaluator*)CR{
-    [self.sourceView scrollTop:([self numericMode]?[self numericArg]:0) firstNonblank:YES];
+    [self.sourceView xvim_scrollTop:([self numericMode]?[self numericArg]:0) firstNonblank:YES];
     return nil;
 }
 

@@ -537,7 +537,7 @@
     if(valid) {
 		NSTextView* srcView = [window sourceView];
         [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-		[srcView scrollTo:[window insertionPoint]];
+		[srcView xvim_scrollTo:[srcView insertionPoint]];
         [srcView showFindIndicatorForRange:found];
     }else{
         [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", self.lastSearchDisplayString] ringBell:TRUE];
