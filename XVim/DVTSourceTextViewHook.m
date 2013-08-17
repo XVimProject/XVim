@@ -68,15 +68,9 @@
 }
 
 - (void)setSelectedRanges:(NSArray *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
-    for( NSValue* v in ranges ){
-        TRACE_LOG(@"Array:%d   affinity:%d   stillSelectiong:%@", ranges.count, affinity, flag?@"YES":@"NO");
-        TRACE_LOG(@"Range:(%d,%d)", v.rangeValue.location, v.rangeValue.length);
-    }
     [(DVTSourceTextView*)self setSelectedRanges_:ranges affinity:affinity stillSelecting:flag];
     [(NSTextView*)self xvim_syncStateFromView];
 }
-
-
 
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{

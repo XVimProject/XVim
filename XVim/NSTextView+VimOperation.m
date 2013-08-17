@@ -255,7 +255,6 @@
 
 - (void)xvim_escapeFromInsert{
     if( self.cursorMode == CURSOR_MODE_INSERT ){
-        [self xvim_syncStateFromView];
         self.cursorMode = CURSOR_MODE_COMMAND;
         if(![self.textStorage isBOL:self.insertionPoint]){
             [self xvim_moveCursor:self.insertionPoint-1 preserveColumn:NO];
@@ -386,7 +385,6 @@
     }
     
     
-    [self xvim_syncStateFromView];
     if(keepInsertionPoint){
         [self xvim_moveCursor:insertionPointAfterDelete preserveColumn:NO];
     }
@@ -467,7 +465,6 @@
     }
     
     [self xvim_moveCursor:insertionPointAfterYank preserveColumn:NO];
-    [self xvim_syncStateFromView];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
@@ -668,7 +665,6 @@
     for( NSUInteger pos = self.insertionPoint; pos < end; pos++){
         [self insertText:[NSString stringWithFormat:@"%c",c] replacementRange:NSMakeRange(pos, 1)];
     }
-    [self xvim_syncStateFromView];
     return YES;
 }
 
@@ -730,7 +726,6 @@
         [self xvim_joinAtLineNumber:[self.textStorage lineNumber:start]];
     }
     
-    [self xvim_syncStateFromView];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     return;
 }
@@ -757,7 +752,6 @@
     }
     
 	[self xvim_indentCharacterRange: filterRange];
-    [self xvim_syncStateFromView];
     [self xvim_moveCursor:insertionAfterFilter preserveColumn:NO];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
@@ -797,7 +791,6 @@
     NSUInteger tail = [self.textStorage endOfLine:l];
     [self setSelectedRange:NSMakeRange(tail,0)];
     [self insertNewline:self];
-    [self xvim_syncStateFromView];
 }
 
 - (void)xvim_insertNewlineAboveLine:(NSUInteger)line{
@@ -831,7 +824,6 @@
         [self setSelectedRange:NSMakeRange(0,0)];
     }
     
-    [self xvim_syncStateFromView];
 }
 
 - (void)xvim_insertNewlineAboveAndInsert{
@@ -877,7 +869,6 @@
         return;
     }
     [self insertText:[NSString stringWithFormat:@"%c",c] replacementRange:NSMakeRange(self.insertionPoint,1)];
-    [self xvim_syncStateFromView];
     return;
 }
 

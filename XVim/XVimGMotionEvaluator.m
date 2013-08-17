@@ -7,8 +7,6 @@
 //
 
 #import "XVimGMotionEvaluator.h"
-#import "XVimSourceView.h"
-#import "XVimSourceView+Vim.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimMotionOption.h"
