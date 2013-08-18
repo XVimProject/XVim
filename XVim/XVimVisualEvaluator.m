@@ -172,9 +172,15 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)m{
     // 'm{letter}' sets a local mark.
     [self.argumentString appendString:@"m"];
+    self.onChildCompleteHandler = @selector(m_completed:);
 	return [[[XVimMarkSetEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
+- (XVimEvaluator*)m_completed:(XVimEvaluator*)childEvaluator{
+    // Vim does not escape from Visual mode after makr is set by m command
+    return self;
+}
+    
 - (XVimEvaluator*)p{
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
