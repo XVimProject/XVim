@@ -40,8 +40,19 @@
             // 'q' should not work when executing register with @
             // Copy "qalllq" as a string into register and execute it
             //      The first 'q' will be ignored and "alq" should be executed.
-            // XVimMakeTestCase(@"qalq", 0, 0, @"\"ayw@a<ESC>", @"qlqalq", 2, 0),
+            XVimMakeTestCase(@"qalq", 0, 0, @"\"ayw@a<ESC>", @"qlqalq", 2, 0),
             
+            // @x shuold be ignored when executing an register.
+            // If we permit to execute reginster while executing a resgister
+            // it may go into infinite loop.
+            // Actually Vim has this bug(spec?). If Vim execute "a register in which
+            // there is "@a" Vim tries to execute "a register again and again.
+            // To prohibit this behaviour XVim does not permit execute a register inside executing a register.
+            //
+            // Text include "@a" and yank it to "a register first.
+            // Then execute "a register, which will results in ignoring "@" character when executing.
+            // (It means it  executes "laq"
+            XVimMakeTestCase(@"l@aq", 0, 0, @"\"ayW@a<ESC>", @"l@qaq", 2, 0),
             nil];
     
 }
