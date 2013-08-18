@@ -20,6 +20,11 @@
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
     
+    static NSString* text3 = @"a;a bbb ccc\n"  // 0  4  8
+                             @"ddd e-e\n"      // 12 16
+                             @"ggg hhh i_i\n"  // 20 24 28
+                             @"    jjj kkk";   // 32 36 40
+    
     return [NSArray arrayWithObjects:
             // b, B
             XVimMakeTestCase(text2,  6, 0,  @"b", text2,  4, 0),
@@ -89,6 +94,8 @@
             XVimMakeTestCase(text2, 16, 0,@"2<CR>", text2, 40, 0),
             
             // Motion with k,l should remember column position
+            XVimMakeTestCase(text3, 30, 0,  @"k", text3, 18, 0),
+            XVimMakeTestCase(text3, 30, 0,  @"kk",text3, 10, 0),
             
             // H,M,L
             //TODO: Implement test for H,M,L. These needs some special test check method since we have to calc the height of the view.

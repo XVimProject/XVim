@@ -49,6 +49,7 @@
 @end
 
 @interface NSTextView(VimOperationPrivate)
+@property BOOL xvim_lockSyncStateFromView;
 - (void)xvim_deleteLine:(NSUInteger)lineNum;
 - (void)xvim_setSelectedRange:(NSRange)range;
 - (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
@@ -1245,6 +1246,9 @@
 
 - (void)xvim_syncStateFromView{
     // TODO: handle block selection (if selectedRanges have multiple ranges )
+    if( self.xvim_lockSyncStateFromView ){
+        return;
+    }
     NSRange r = [self selectedRange];
     DEBUG_LOG(@"Selected Range: Loc:%d Len:%d", r.location, r.length);
     if( r.length == 0 ){
@@ -1258,6 +1262,16 @@
 
 
 @implementation NSTextView(VimOperationPrivate)
+#pragma mark Properties
+
+- (BOOL)xvim_lockSyncStateFromView{
+    id ret = [self dataForName:@"lockSyncStateFromView"];
+    return nil == ret ? NO : [ret boolValue];
+}
+
+- (void)setXvim_lockSyncStateFromView:(BOOL)lock{
+    [self setBool:lock forName:@"lockSyncStateFromView"];
+}
 
 /**
  * Returns start and end position of the specified motion.
@@ -1335,6 +1349,7 @@
  **/
 - (void)xvim_syncState{
     DEBUG_LOG(@"IP:%d", self.insertionPoint);
+    self.xvim_lockSyncStateFromView = YES;
     // Reset current selection
     if( self.cursorMode == CURSOR_MODE_COMMAND ){
         [self _adjustCursorPosition];
@@ -1342,6 +1357,7 @@
     [self dumpState];
     [self setSelectedRanges:[self xvim_selectedRanges]];
     [self xvim_scrollTo:self.insertionPoint];
+    self.xvim_lockSyncStateFromView = NO;
 }
 
 // xvim_setSelectedRange is an internal method
