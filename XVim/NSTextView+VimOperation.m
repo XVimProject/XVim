@@ -920,12 +920,14 @@
         [lines removeObjectsAtIndexes:removeIndices];
     }
     
+    NSUInteger insertionAfterOperation = characterRange.location;
     NSString *sortedLinesString = [[lines componentsJoinedByString:@"\n"] stringByAppendingString:@"\n"];
     if( [self shouldChangeTextInRange:characterRange replacementString:sortedLinesString] ){
         [self replaceCharactersInRange:characterRange withString:sortedLinesString];
         [self didChangeText];
     }
-    
+    self.insertionPoint = insertionAfterOperation;
+    [self xvim_syncState];
 }
 
 - (void)xvim_selectNextPlaceholder {
