@@ -25,6 +25,7 @@
 
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
     //TODO: Must be moved to XVimSearch.m
+    //TODO: Must be unified to the same method in XVimMotionEvaluator
 	XVimSearch* searcher = [[XVim instance] searcher];
 	NSUInteger cursorLocation = [self.window.sourceView insertionPoint];
 	NSUInteger searchLocation = cursorLocation;
@@ -34,19 +35,22 @@
 		searchLocation = found.location;
     }
 	
-	if (![searcher selectSearchResult:found inWindow:self.window]) {
-		return nil;
-	}
+	if (found.location == NSNotFound) {
+        self.motion = nil;
+	}else{
+        self.motion = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+        self.motion.position = found.location;
+    }
     
     return nil;
 }
 
-- (XVimEvaluator*)ASTERISK:(XVimWindow*)window{
+- (XVimEvaluator*)ASTERISK{
 	return [self searchCurrentWord:YES];
 }
 
-- (XVimEvaluator*)NUMBER:(XVimWindow*)window{
-	return [self searchCurrentWord:YES];
+- (XVimEvaluator*)NUMBER{
+	return [self searchCurrentWord:NO];
 }
 
 @end
