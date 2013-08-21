@@ -417,7 +417,7 @@
 	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:@":"
                                                                     history:[[XVim instance] exCommandHistory]
-                                                                 completion:^ XVimEvaluator* (NSString* command) 
+                                                                 completion:^ XVimEvaluator* (NSString* command, id* result)
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
                                [excmd executeCommand:command inWindow:self.window];
@@ -426,56 +426,6 @@
                                                                  onKeyPress:nil] autorelease];
 	
 	return eval;
-}
-
-- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter {
-	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
-                                                                firstLetter:firstLetter
-                                                                    history:[[XVim instance] searchHistory]
-                                                                 completion:^ XVimEvaluator* (NSString *command)
-						   {
-							   XVimSearch *searcher = [[XVim instance] searcher];
-							   NSTextView *sourceView = [self sourceView];
-							   NSRange found = [searcher executeSearch:command 
-															   display:[command substringFromIndex:1] 
-																  from:[self.window.sourceView insertionPoint]
-															  inWindow:window];
-							   //Move cursor and show the found string
-							   if (found.location != NSNotFound) {
-								   [sourceView setSelectedRange:NSMakeRange(found.location, 0)];
-								   [sourceView xvim_scrollTo:[self.window.sourceView insertionPoint]];
-								   [sourceView showFindIndicatorForRange:found];
-							   } else {
-								   [self.window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
-							   }
-							   return nil;
-						   }
-                                                                 onKeyPress:^void(NSString *command)
-                           {
-                               XVimOptions *options = [[XVim instance] options];
-                               if (options.incsearch){
-                                   XVimSearch *searcher = [[XVim instance] searcher];
-                                   NSTextView *sourceView = [self sourceView];
-                                   NSRange found = [searcher executeSearch:command 
-																   display:[command substringFromIndex:1]
-																	  from:[self.window.sourceView insertionPoint]
-																  inWindow:window];
-                                   //Move cursor and show the found string
-                                   if (found.location != NSNotFound) {
-                                       [sourceView xvim_scrollTo:found.location];
-                                       [sourceView showFindIndicatorForRange:found];
-                                   }
-                               }
-                           }] autorelease];
-	return eval;
-}
-
-- (XVimEvaluator*)QUESTION{
-	return [self executeSearch:self.window firstLetter:@"?"];
-}
-
-- (XVimEvaluator*)SLASH{
-	return [self executeSearch:self.window firstLetter:@"/"];
 }
 
 - (XVimEvaluator*)DOT{

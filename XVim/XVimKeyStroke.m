@@ -165,7 +165,7 @@ static struct key_map key_maps[] = {
     {@"'", 39, @"SQUOTE"},
     {@"(", 40, @"LPARENTHESIS"},
     {@")", 41, @"RPARENTHESIS"},
-    {@"*", 42, @"ASTERISC"},
+    {@"*", 42, @"ASTERISK"},
     {@"+", 43, @"PLUS"},
     {@",", 44, @"COMMA"},
     {@"-", 45, @"MINUS"},

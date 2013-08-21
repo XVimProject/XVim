@@ -40,6 +40,7 @@
 		_onComplete = [completeHandler copy];
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
+        _evalutionResult = nil;
 	}
 	return self;
 }
@@ -49,6 +50,7 @@
     [_history release];
     [_onComplete release];
     [_onKeyPress release];
+    [_evalutionResult release];
     [super dealloc];
 }
 
@@ -151,7 +153,10 @@
 	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	[_history addEntry:command];
     DEBUG_LOG(@"ExCommand:%@", command);
-	return _onComplete(command);
+    id result = nil;
+	XVimEvaluator* ret = _onComplete(command, &result);
+    self.evalutionResult = result;
+    return ret;
 }
 
 - (XVimEvaluator*)ESC{

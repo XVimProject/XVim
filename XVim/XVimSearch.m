@@ -17,13 +17,6 @@
 #import "IDEKit.h"
 
 @implementation XVimSearch
-@synthesize lastSearchCase = _lastSearchCase;
-@synthesize lastSearchBackword = _lastSearchBackword;
-@synthesize lastSearchCmd = _lastSearchCmd;
-@synthesize lastSearchDisplayString = _lastSearchDisplayString;
-@synthesize lastReplacementString = _lastReplacementString;
-@synthesize matchEnd = _matchEnd;
-@synthesize matchStart = _matchStart;
 
 - (id)init {
     if( self = [super init] ){
@@ -529,8 +522,7 @@
 
 }
 
-- (BOOL)selectSearchResult:(NSRange)found inWindow:(XVimWindow*)window
-{
+- (BOOL)selectSearchResult:(NSRange)found inWindow:(XVimWindow*)window{
 	BOOL valid = found.location != NSNotFound;
 	
 	// Move cursor and show the found string

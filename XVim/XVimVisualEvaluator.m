@@ -328,7 +328,7 @@ TODO: This block is from commit 42498.
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:@":'<,'>"
                                                                     history:[[XVim instance] exCommandHistory]
-                                                                 completion:^ XVimEvaluator* (NSString* command) 
+                                                                 completion:^ XVimEvaluator* (NSString* command, id* result)
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
                                [excmd executeCommand:command inWindow:self.window];
