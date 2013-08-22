@@ -153,10 +153,11 @@ The dot command ('.') is supported.
   [no]incsearch |
   [no]gdefault |
   [no]smartcase |
+  [no]number |
   guioptions | See below
   timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
-  [no]pasteboard | pasteboard is not supported anymore. Use ":set clipboard=unnamed" instead.
+  clipboard | ":set clipboard=unnamed" to share system clipboard with unnamed register
 
 
 ## guioptions
