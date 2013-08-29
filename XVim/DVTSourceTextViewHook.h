@@ -24,6 +24,7 @@
 - (void)mouseDown_:(NSEvent *)theEvent;
 - (void)mouseUp_:(NSEvent *)theEvent;
 - (void)mouseDragged_:(NSEvent *)theEvent;
+- (void)cut_:(id)sender;
 - (void)drawRect_:(NSRect)dirtyRect;
 - (BOOL) performKeyEquivalent_:(NSEvent *)theEvent;
 - (BOOL)shouldDrawInsertionPoint_;

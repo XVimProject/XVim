@@ -43,6 +43,7 @@
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
     [self hook:@"mouseDragged:"];
+    [self hook:@"cut:"];
     [self hook:@"drawRect:"];
     [self hook:@"performKeyEquivalent:"];
     [self hook:@"shouldDrawInsertionPoint"];
@@ -61,6 +62,7 @@
     [self unhook:@"keyDown:"];
     [self unhook:@"mouseDown:"];
     [self unhook:@"mouseDragged:"];
+    [self unhook:@"cut:"];
     [self unhook:@"drawRect:"];
     [self unhook:@"performKeyEquivalent:"];
     [self unhook:@"shouldDrawInsertionPoint"];
@@ -135,6 +137,14 @@
 	DVTSourceTextView *base = (DVTSourceTextView*)self;
     [base mouseDragged_:theEvent];
     return;
+}
+
+- (void)cut:(id)sender
+{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    [base cut_:sender];
+    
+    [[XVimWindow associateOf:base] setEvaluator:nil];
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
