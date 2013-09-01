@@ -63,7 +63,9 @@
 @property(readonly) XVIM_VISUAL_MODE selectionMode;
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSURL* documentURL;
-@property(strong) id yankDelegate;
+@property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
+@property BOOL needsUpdateFoundRanges;
+@property(readonly) NSArray* foundRanges;
 @property(readonly) long long currentLineNumber;
 
 #pragma mark Status
@@ -137,6 +139,18 @@
 - (void)xvim_scrollHalfPageBackward:(NSUInteger)count;
 - (void)xvim_scrollLineForward:(NSUInteger)count;
 - (void)xvim_scrollLineBackward:(NSUInteger)count;
+
+#pragma mark Search
+/**
+ * Shows the candidate of the next search result.
+ **/
+- (void)xvim_highlightNextSearchCandidate:(NSString *)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
+- (void)xvim_highlightNextSearchCandidateForward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt;
+- (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt;
+- (void)xvim_clearHighlightText;
+- (void)xvim_highlightFoundRanges;
+- (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
     
 #pragma mark Searching positions
 // TODO: Thses method should be internal. Create abstracted interface to achieve the operation uses these methods.

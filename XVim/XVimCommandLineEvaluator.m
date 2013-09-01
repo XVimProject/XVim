@@ -41,6 +41,9 @@
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
         _evalutionResult = nil;
+        XVimCommandField *commandField = self.window.commandLine.commandField;
+        [commandField setString:_firstLetter];
+        [commandField moveToEndOfLine:self];
 	}
 	return self;
 }
@@ -52,6 +55,22 @@
     [_onKeyPress release];
     [_evalutionResult release];
     [super dealloc];
+}
+
+- (void)appendString:(NSString*)str{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
+    [commandField setString:[commandField.string stringByAppendingString:str]];
+}
+
+- (XVimEvaluator*)execute{
+	XVimCommandField *commandField = self.window.commandLine.commandField;
+	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+	[_history addEntry:command];
+    DEBUG_LOG(@"Command:%@", command);
+    id result = nil;
+	XVimEvaluator* ret = _onComplete(command, &result);
+    self.evalutionResult = result;
+    return ret;
 }
 
 - (void)takeFocusFromWindow{
@@ -101,9 +120,6 @@
 - (void)becameHandler{
 	[super becameHandler];
 
-	XVimCommandField *commandField = self.window.commandLine.commandField;
-    [commandField setString:_firstLetter];
-    [commandField moveToEndOfLine:self];
 	[self takeFocusFromWindow];
 }
 
@@ -149,14 +165,7 @@
 }
 
 - (XVimEvaluator*)CR{
-	XVimCommandField *commandField = self.window.commandLine.commandField;
-	NSString *command = [[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-	[_history addEntry:command];
-    DEBUG_LOG(@"ExCommand:%@", command);
-    id result = nil;
-	XVimEvaluator* ret = _onComplete(command, &result);
-    self.evalutionResult = result;
-    return ret;
+    return [self execute];
 }
 
 - (XVimEvaluator*)ESC{

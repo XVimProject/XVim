@@ -349,9 +349,13 @@ typedef enum {
 - (NSUInteger)nextCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt;
 - (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt;
 
+// Search starts from 'index+1' to the end of the string
+- (NSRange)searchRegexForward:(NSString*)regex from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+// Search starts from 'index-1' to the beginning of the string
+- (NSRange)searchRegexBackward:(NSString*)regex from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
 - (void)toggleCaseForRange:(NSRange)range;
-    
+
 /**
  * This does all the work need to do with vim '%' motion.
  * Find match pair character in the line and find the corresponding pair.

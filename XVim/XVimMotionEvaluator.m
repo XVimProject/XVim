@@ -236,18 +236,31 @@
     return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_MIDDLE, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
+
+- (XVimEvaluator*)nN_impl:(BOOL)forward{
+    MOTION search_motion = forward? MOTION_SEARCH_FORWARD:MOTION_SEARCH_BACKWARD;
+    MOTION_OPTION opt = MOTION_OPTION_NONE;
+    if( [XVim instance].options.wrapscan ){
+        opt |= SEARCH_WRAP;
+    }
+    if( [[XVim instance].searcher isCaseInsensitive] ){
+        opt |= SEARCH_CASEINSENSITIVE;
+    }
+    XVimMotion* m = XVIM_MAKE_MOTION(search_motion , CHARACTERWISE_EXCLUSIVE, opt, self.numericArg);
+    m.regex = XVim.instance.searcher.lastSearchString;
+    if( XVim.instance.options.vimregex ){
+        // TODO: Convert Vim regex to ICU
+    }
+    self.motion = m;
+    return [self _motionFixed:m];
+}
+
 - (XVimEvaluator*)n{
-	XVimSearch* searcher = [[XVim instance] searcher];
-    NSRange r = [searcher searchNextFrom:[self.window.sourceView insertionPoint] inWindow:self.window];
-	[searcher selectSearchResult:r inWindow:self.window];
-    return nil;
+    return [self nN_impl:!XVim.instance.searcher.lastSearchBackword];
 }
 
 - (XVimEvaluator*)N{
-	XVimSearch* searcher = [[XVim instance] searcher];
-    NSRange r = [searcher searchPrevFrom:[self.window.sourceView insertionPoint] inWindow:self.window];
-	[searcher selectSearchResult:r inWindow:self.window];
-    return nil;
+    return [self nN_impl:XVim.instance.searcher.lastSearchBackword];
 }
 
 /*
@@ -312,21 +325,23 @@
 }
 
 - (XVimEvaluator*)searchCurrentWordForward:(BOOL)forward {
-	XVimSearch* searcher = [[XVim instance] searcher];
-	NSUInteger cursorLocation = [self.sourceView insertionPoint];
-	NSUInteger searchLocation = cursorLocation;
-    NSRange found=NSMakeRange(0, 0);
-    for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
-        found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:YES inWindow:self.window];
-		searchLocation = found.location;
-    }
-    
-    if( found.location == NSNotFound ){
+    XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
+    NSRange r = [self.sourceView xvim_currentWord:MOTION_OPTION_NONE];
+    if( r.location == NSNotFound ){
         return nil;
     }
+    // This is not for matching the searching word itself
+    // Vim also does this behavior( when matched string is not found )
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    m.position = found.location;
-    return [self _motionFixed:m];
+    m.position = r.location;
+    [self.sourceView xvim_move:m];
+    
+    NSString* word = [self.sourceView.string substringWithRange:r];
+    NSString* searchWord = [NSRegularExpression escapedPatternForString:word];
+    searchWord = [NSString stringWithFormat:@"%@%@%@", @"\\b", searchWord, @"\\b"];
+    [eval appendString:searchWord];
+    [eval execute];
+    return [self _motionFixed:eval.evalutionResult];
 }
 
 - (XVimEvaluator*)ASTERISK{
@@ -543,65 +558,25 @@
     return [self _motionFixed:n];
 }
 
-- (XVimEvaluator*)executeSearch:(XVimWindow*)window firstLetter:(NSString*)firstLetter {
-	XVimEvaluator *eval = [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
-                                                                firstLetter:firstLetter
-                                                                    history:[[XVim instance] searchHistory]
-                                                                 completion:^ XVimEvaluator* (NSString *command, id* result)
-						   {
-							   XVimSearch *searcher = [[XVim instance] searcher];
-							   NSRange found = [searcher executeSearch:command
-															   display:[command substringFromIndex:1] 
-																  from:[self.window.sourceView insertionPoint]
-															  inWindow:window];
-							   //Move cursor and show the found string
-							   if (found.location != NSNotFound) {
-                                   *result = [NSValue valueWithRange:found];
-							   } else {
-								   [self.window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'",searcher.lastSearchDisplayString] ringBell:TRUE];
-							   }
-							   return nil;
-						   }
-                                                                 onKeyPress:^void(NSString *command)
-                           {
-                               XVimOptions *options = [[XVim instance] options];
-                               if (options.incsearch){
-                                   XVimSearch *searcher = [[XVim instance] searcher];
-                                   NSTextView *sourceView = [self sourceView];
-                                   NSRange found = [searcher executeSearch:command 
-																   display:[command substringFromIndex:1]
-																	  from:[self.window.sourceView insertionPoint]
-																  inWindow:window];
-                                   //Move cursor and show the found string
-                                   if (found.location != NSNotFound) {
-                                       [sourceView xvim_scrollTo:found.location];
-                                       [sourceView showFindIndicatorForRange:found];
-                                   }
-                               }
-                           }] autorelease];
-	return eval;
-}
 
 // QESTION and SLASH are "motion" since it can be used as an arugment for operators.
 // "d/abc<CR>" will delete until "abc" characters.
 - (XVimEvaluator*)QUESTION{
     self.onChildCompleteHandler = @selector(onCompleteSearch:);
-	return [self executeSearch:self.window firstLetter:@"?"];
+	return [self searchEvaluatorForward:NO];
+}
+
+- (XVimEvaluator*)SLASH{
+    self.onChildCompleteHandler = @selector(onCompleteSearch:);
+	return [self searchEvaluatorForward:YES];
 }
 
 - (XVimEvaluator*)onCompleteSearch:(XVimCommandLineEvaluator*)childEvaluator{
     self.onChildCompleteHandler = nil;
     if( childEvaluator.evalutionResult != nil ){
-        XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-        m.position = [childEvaluator.evalutionResult rangeValue].location;
-        return [self _motionFixed:m];
+        return [self _motionFixed:childEvaluator.evalutionResult];
     }
     return [XVimEvaluator invalidEvaluator];
-}
-
-- (XVimEvaluator*)SLASH{
-    self.onChildCompleteHandler = @selector(onCompleteSearch:);
-	return [self executeSearch:self.window firstLetter:@"/"];
 }
 
 

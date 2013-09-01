@@ -226,3 +226,30 @@ so the pseudo code for the method is as following.
  This is what XVim is currently doing. (See acutual implementation in XVimSourceTextViewHook.m)
 
 
+
+
+### Hilight Search ###
+To achieve hilight search XVim hooks 2 methods in DVTSourceTextView
+   - didChangeText
+   - drawRect
+
+In didChangeText XVim mark that we have to update found location by searching a text(last searched string).
+(We never do searching at this timing)
+
+In drawRect XVim update found locations if didChangeText marked that we need to update found locations.
+And then according to the locations drawRect sets text attribute for the ranges of found locations. And then draw the rect.
+
+The reason why we never do searching in didChangeText but just mark that update is needed is that
+we can not update found locatiosn when a text view is initialized.
+We have to update found locations for a new content when new DVTSourceView and its content is updated.
+When Xcode changes text content to newly selected file (wehen you click a file in navigation pane) Xcode create new DVTSourceTextView and its text storage objects.
+We can know hen DVTSourceTextView is created by hooking initWithCoder method.
+But unfortunately I have not found any good method to hook to know when a "text" in DVTSourceTextView is initialized.
+A text in DVTSourceTextView is kept in DVTTextStorage and its subclasses but I could not find good property to observe.
+(No property change notifies us that the content is initialized.)
+This is one of reason why XVim tries update found locations if needed all the time it draws rect.
+
+To support to change highlighted locations when we put ":set hlsearch" or search new text, XVim sets up observing properties in XVimOption and XVimSearch object.
+
+See DVTSourceTextViewHook.m for the detail
+

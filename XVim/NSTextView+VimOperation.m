@@ -42,6 +42,7 @@
 @property XVIM_VISUAL_MODE selectionMode;
 @property CURSOR_MODE cursorMode;
 @property(strong) NSURL* documentURL;
+@property(readonly) NSMutableArray* foundRanges;
 
 // Internal properties
 @property(strong) NSString* lastYankedText;
@@ -64,6 +65,7 @@
 - (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count;
 - (NSUInteger)xvim_lineNumberAtMiddle;
 - (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
+- (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -190,12 +192,30 @@
 #endif
 }
 
-- (void)setYankDelegate:(id)yankDelegate{
-    [self setData:yankDelegate forName:@"yankDelegate"];
+- (void)setXvimDelegate:(id)xvimDelegate{
+    [self setData:xvimDelegate forName:@"xvimDelegate"];
 }
 
-- (id)yankDelegate{
-    return [self dataForName:@"yankDelegate"];
+- (id)xvimDelegate{
+    return [self dataForName:@"xvimDelegate"];
+}
+
+- (BOOL)needsUpdateFoundRanges{
+    id ret = [self dataForName:@"needsUpdateFoundRanges"];
+    return nil == ret ? NO : [ret boolValue];
+}
+
+- (void)setNeedsUpdateFoundRanges:(BOOL)needsUpdateFoundRanges{
+    [self setBool:needsUpdateFoundRanges forName:@"needsUpdateFoundRanges"];
+}
+
+- (NSMutableArray*)foundRanges{
+    id ranges = [self dataForName:@"foundRanges"];
+    if( nil == ranges ){
+        ranges = [[[NSMutableArray alloc] init] autorelease];
+        [self setData:ranges forName:@"foundRanges"];
+    }
+    return ranges;
 }
 
 #pragma mark Internal properties
@@ -381,9 +401,7 @@
     
     [self delete:nil];
     
-    if( self.yankDelegate != nil ){
-        [self.yankDelegate textDeleted:self.lastYankedText  withType:self.lastYankedType inView:self];
-    }
+    [self.xvimDelegate textView:self didDelete:self.lastYankedText  withType:self.lastYankedType];
     
     
     if(keepInsertionPoint){
@@ -461,9 +479,7 @@
         [self xvim_yankRanges:[self xvim_selectedRanges] withType:motion.type];
     }
     
-    if( self.yankDelegate != nil ){
-        [self.yankDelegate textYanked:self.lastYankedText  withType:self.lastYankedType inView:self];
-    }
+    [self.xvimDelegate textView:self didYank:self.lastYankedText  withType:self.lastYankedType];
     
     [self xvim_moveCursor:insertionPointAfterYank preserveColumn:NO];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
@@ -1163,6 +1179,101 @@
     [self xvim_lineUp:self.insertionPoint count:count];
 }
 
+#pragma mark Search
+// Thanks to  http://lists.apple.com/archives/cocoa-dev/2005/Jun/msg01909.html
+- (NSRange)xvim_visibleRange:(NSTextView *)tv{
+    NSScrollView *sv = [tv enclosingScrollView];
+    if(!sv) return NSMakeRange(0,0);
+    NSLayoutManager *lm = [tv layoutManager];
+    NSRect visRect = [tv visibleRect];
+    
+    NSPoint tco = [tv textContainerOrigin];
+    visRect.origin.x -= tco.x;
+    visRect.origin.y -= tco.y;
+    
+    NSRange glyphRange = [lm glyphRangeForBoundingRect:visRect inTextContainer:[tv textContainer]];
+    NSRange charRange = [lm characterRangeForGlyphRange:glyphRange actualGlyphRange:nil];
+    return charRange;
+}
+
+- (void)xvim_highlightNextSearchCandidate:(NSString *)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward{
+    NSRange range = NSMakeRange(NSNotFound,0);
+    if( forward ){
+        range = [self.textStorage searchRegexForward:regex from:self.insertionPoint count:count option:opt];
+    }else{
+        range = [self.textStorage searchRegexBackward:regex from:self.insertionPoint count:count option:opt];
+    }
+    if( range.location != NSNotFound ){
+        [self scrollRectToVisible:[self xvim_boundingRectForGlyphIndex:range.location]];
+        [self showFindIndicatorForRange:range];
+    }
+}
+
+- (void)xvim_highlightNextSearchCandidateForward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    [self xvim_highlightNextSearchCandidate:regex count:count option:opt forward:YES];
+}
+
+- (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    [self xvim_highlightNextSearchCandidate:regex count:count option:opt forward:NO];
+}
+
+- (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt{
+    NSAssert( nil != pattern, @"pattern munst not be nil");
+    if( !self.needsUpdateFoundRanges ){
+        return;
+    }
+    
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
+	if ( opt & SEARCH_CASEINSENSITIVE ){
+		r_opts |= NSRegularExpressionCaseInsensitive;
+	}
+
+    NSError *error = nil;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:r_opts error:&error];
+    if( nil != error){
+        return;
+    }
+    
+    // Find all the maches
+    NSString* string = self.string;
+    //NSTextStorage* storage = self.textStorage;
+    if( string == nil ){
+        return;
+    }
+    NSArray*  matches = [regex matchesInString:string options:r_opts range:NSMakeRange(0, string.length)];
+    [self.foundRanges setArray:matches];
+    
+    [self setNeedsUpdateFoundRanges:NO];
+}
+
+- (void)xvim_clearHighlightText{
+    NSTextView* view = self;
+    NSString* string = view.string;
+    [self.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:NSMakeRange(0, string.length)];
+}
+
+- (void)xvim_highlightFoundRanges{
+    // Add attributes to the each range
+    // There is 2 ways to add attributes
+    // One is to add attributes to NSAttributedString(NSTextStorage)
+    // One is to add attributes to NSLayoutManager by addTempraryAttributes
+    // Later is faster but it is valid only for one drawing action
+    
+    // Clear current highlight.
+    [self xvim_clearHighlightText];
+    // Add yellow highlight
+    NSRange visible = [self xvim_visibleRange:self];
+    for( NSTextCheckingResult* result in self.foundRanges){
+        if( NSIntersectionRange( result.range, visible).length != 0 ){
+            [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
+        }
+    }
+}
+
+- (NSRange)xvim_currentWord:(MOTION_OPTION)opt{
+    return [self.textStorage currentWord:self.insertionPoint count:1 option:opt|TEXTOBJECT_INNER];
+}
+
 #pragma mark Search Position
 /**
  * Takes point in view and returns its index.
@@ -1250,7 +1361,7 @@
         return;
     }
     NSRange r = [self selectedRange];
-    DEBUG_LOG(@"Selected Range: Loc:%d Len:%d", r.location, r.length);
+    DEBUG_LOG(@"Selected Range(TotalLen:%d): Loc:%d Len:%d", self.string.length, r.location, r.length);
     if( r.length == 0 ){
         self.selectionMode = XVIM_VISUAL_NONE;
         [self xvim_moveCursor:r.location preserveColumn:NO];
@@ -1451,6 +1562,7 @@
     NSUInteger begin = current;
     NSUInteger end = NSNotFound;
     NSUInteger tmpPos = NSNotFound;
+    
     switch (motion.motion) {
         case MOTION_NONE:
             // Do nothing
@@ -1562,6 +1674,12 @@
             break;
         case MOTION_BOTTOM:
             end = [self.textStorage firstNonblankInLine:[self.textStorage positionAtLineNumber:[self xvim_lineNumberFromBottom:motion.count]]];
+            break;
+        case MOTION_SEARCH_FORWARD:
+            end = [self.textStorage searchRegexForward:motion.regex from:self.insertionPoint count:motion.count option:motion.option].location;
+            break;
+        case MOTION_SEARCH_BACKWARD:
+            end = [self.textStorage searchRegexBackward:motion.regex from:self.insertionPoint count:motion.count option:motion.option].location;
             break;
         case TEXTOBJECT_WORD:
             range = [self.textStorage currentWord:begin count:motion.count  option:motion.option];
@@ -1801,7 +1919,18 @@
     top.y += (NSHeight(glyphRect) / 2.0f) + (NSHeight(glyphRect) * (count-1));
     return [self.textStorage lineNumber:[[scrollView documentView] characterIndexForInsertionAtPoint:top]];
 }
-         
+
+- (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward{
+    NSRange ret = NSMakeRange(NSNotFound, 0);
+    if( forward ){
+        ret = [self.textStorage searchRegexForward:regex from:self.insertionPoint count:count option:opt];
+    }else{
+        ret = [self.textStorage searchRegexBackward:regex from:self.insertionPoint count:count option:opt];
+    }
+    return ret;
+}
+
+
 /* May be used later
 - (void)hideCompletions {
 	[[[self xview] completionController] hideCompletions];

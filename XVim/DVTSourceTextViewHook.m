@@ -42,6 +42,8 @@
 }
 
 + (void)hook{
+    [self hook:@"initWithCoder:"];
+    [self hook:@"dealloc"];
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
     [self hook:@"becomeFirstResponder"];
     [self hook:@"keyDown:"];
@@ -50,11 +52,15 @@
     [self hook:@"drawRect:"];
     [self hook:@"shouldDrawInsertionPoint"];
     [self hook:@"_drawInsertionPointInRect:color:"];
+    [self hook:@"didChangeText"];
     [self hook:@"viewDidMoveToSuperview"];
+    [self hook:@"shouldChangeTextInRange:replacementString"];
     [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
 
 + (void)unhook{
+    [self unhook:@"initWithCoder:"];
+    // [self unhook:@"dealloc"]; // Once we hook initWithCoder we never unhook dealloc since there is cleanup code
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
     [self unhook:@"becomeFirstResponder"];
     [self unhook:@"keyDown:"];
@@ -63,9 +69,36 @@
     [self unhook:@"drawRect:"];
     [self unhook:@"shouldDrawInsertionPoint"];
     [self unhook:@"_drawInsertionPointInRect:color:"];
+    [self unhook:@"didChangeText"];
     [self unhook:@"viewDidMoveToSuperview"];
+    [self unhook:@"shouldChangeTextInRange:replacementString"];
     [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
+
+- (id)initWithCoder:(NSCoder*)coder{
+    TRACE_LOG(@"ENTER");
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
+    if( nil != obj ){
+        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+    }
+    return obj;
+}
+
+// This pragma is for suppressing warning that the dealloc method does not call [super dealloc]. ([base dealloc_] calls [super dealloc] so we do not need it)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+- (void)dealloc{
+    TRACE_LOG(@"ENTER");
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
+    [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    [base.textStorage removeObserver:self forKeyPath:@"string"];
+    [base dealloc_];
+    return;
+}
+#pragma GCC diagnostic pop
 
 - (void)setSelectedRanges:(NSArray *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
     [(DVTSourceTextView*)self setSelectedRanges_:ranges affinity:affinity stillSelecting:flag];
@@ -139,6 +172,18 @@
 
 - (void)drawRect:(NSRect)dirtyRect{
     @try{
+        NSTextView* view = (NSTextView*)self;
+        if( XVim.instance.options.hlsearch ){
+            MOTION_OPTION opt = MOTION_OPTION_NONE;
+            if( XVim.instance.searcher.isCaseInsensitive ){
+                opt |= SEARCH_CASEINSENSITIVE;
+            }
+            [view xvim_updateFoundRanges:XVim.instance.searcher.lastSearchString withOption:opt];
+            [view xvim_highlightFoundRanges];
+        }else{
+            [view xvim_clearHighlightText];
+        }
+        
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
         [base drawRect_:dirtyRect];
@@ -210,6 +255,12 @@
     return b;
 }
 
+- (void)didChangeText{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    [base setNeedsUpdateFoundRanges:YES];
+    [base didChangeText_];
+}
+
 - (void)viewDidMoveToSuperview {
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
@@ -240,25 +291,22 @@
     }
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath 
-					  ofObject:(id)object 
-						change:(NSDictionary *)change 
-					   context:(void *)context
-{	
-	if ([keyPath isEqualToString:@"hasVerticalScroller"])
-	{
+- (void)observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
+	if ([keyPath isEqualToString:@"hasVerticalScroller"]) {
 		NSScrollView *scrollView = object;
 		if ([scrollView hasVerticalScroller]) {
 			[scrollView setHasVerticalScroller:NO];
 		}
-	}
-	if ([keyPath isEqualToString:@"hasHorizontalScroller"])
-	{
+	}else  if ([keyPath isEqualToString:@"hasHorizontalScroller"]) {
 		NSScrollView *scrollView = object;
 		if ([scrollView hasHorizontalScroller]) {
 			[scrollView setHasHorizontalScroller:NO];
 		}
-	}
+	}else if([keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
+        NSTextView* view = (NSTextView*)self;
+        [view setNeedsUpdateFoundRanges:YES];
+        [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];
+    }
 }
 
 @end

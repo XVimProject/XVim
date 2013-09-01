@@ -25,91 +25,11 @@
         _lastSearchCase = XVimSearchCaseDefault;
         _lastSearchBackword = NO;
         _lastSearchCmd = @"";
-        [[XVim instance].options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionNew context:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewDidChangeText:) name:NSTextDidChangeNotification object:nil];
+        _lastSearchString = @"";
     }
     return self;
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
-    if( [keyPath isEqualToString:@"hlsearch"]) {
-        if( [XVim instance].options.hlsearch ){
-            [self highlightTextInView:XVimLastActiveSourceView()];
-        }else{
-            [self clearHighlightTextInView:XVimLastActiveSourceView()];
-        }
-    }
-    
-}
-
-- (void)viewDidChangeText:(NSNotification*)notification{
-    if( [NSStringFromClass([notification.object class]) isEqualToString:@"DVTSourceTextView"] ){
-        [self updateSearchStateInView:notification.object];
-    }
-}
-
-- (void)clearHighlightTextInView:(NSTextView*)view{
-    NSString* string = view.string;
-    NSTextStorage* storage = [view textStorage];
-    [storage addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, string.length)];
-    [storage endEditing];
-    [view setNeedsDisplay:YES];
-    
-}
-
-// Thanks to  http://lists.apple.com/archives/cocoa-dev/2005/Jun/msg01909.html
-- (NSRange)visibleRange:(NSTextView *)tv{
-    NSScrollView *sv = [tv enclosingScrollView];
-    if(!sv) return NSMakeRange(0,0);
-    NSLayoutManager *lm = [tv layoutManager];
-    NSRect visRect = [tv visibleRect];
-    
-    NSPoint tco = [tv textContainerOrigin];
-    visRect.origin.x -= tco.x;
-    visRect.origin.y -= tco.y;
-    
-    NSRange glyphRange = [lm glyphRangeForBoundingRect:visRect inTextContainer:[tv textContainer]];
-    NSRange charRange = [lm characterRangeForGlyphRange:glyphRange actualGlyphRange:nil];
-    return charRange;
-}
-
-- (void)highlightTextInView:(NSTextView*)view{
-    if( nil == view ){
-        return;
-    }
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-	if ([self isCaseInsensitive]) {
-		r_opts |= NSRegularExpressionCaseInsensitive;
-	}
-
-    NSError *error = NULL;
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchCmd options:r_opts error:&error];
-    NSString* string = view.string;
-    NSTextStorage* storage = [view textStorage];
-    // Find all the maches
-    NSArray*  matches = [regex matchesInString:string options:r_opts range:NSMakeRange(0, string.length)];
-    // Add attributes to the each range
-    
-    
-    // There is 2 ways to add attributes
-    // One is to add attributes to NSAttributedString(NSTextStorage)
-    // One is to add attributes to NSLayoutManager by addTempraryAttributes
-    // Later is faster so I use it here.
-    
-    // Clear current highlight.
-    [view.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:NSMakeRange(0, storage.length)];
-    // Add yellow highlight
-    for( NSTextCheckingResult* result in matches ){
-        [view.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
-    }
-    [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];
-}
-
-- (void)updateSearchStateInView:(NSTextView*)view{
-    if( [XVim instance].options.hlsearch ){
-        [self highlightTextInView:view];
-    }
-}
 
 - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window
 {
@@ -137,6 +57,7 @@
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\c" withString:@""];
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\C" withString:@""];
     
+    /*
     if([searchCmd  rangeOfString:@"\\<"].location != NSNotFound){
         self.matchStart = TRUE;
     }else {
@@ -152,15 +73,18 @@
     // \b matches word boundaries.
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\<" withString:@"(:|\\.|\\b)"];
     searchCmd = [searchCmd stringByReplacingOccurrencesOfString:@"\\>" withString:@"(:|\\.|\\b)"];
+     */
     
     // in vi, if there's no search string. use the last one specified. like you do for 'n'
     if( [searchCmd length] > 1 ){
         self.lastSearchCmd = [searchCmd substringFromIndex:1];
     }
     NSRange r = [self searchNextFrom:from inWindow:window];
+    /*
     if( [XVim instance].options.hlsearch ){
         [self highlightTextInView:window.sourceView];
     }
+     */
     return r;
 }
 
@@ -178,8 +102,7 @@
 	return ignorecase;
 }
 
-- (NSRange)searchForwardFrom:(NSUInteger)from inWindow:(XVimWindow*)window 
-{
+- (NSRange)searchForwardFrom:(NSUInteger)from inWindow:(XVimWindow*)window{
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
 	if (!self.lastSearchCmd) {
@@ -194,7 +117,7 @@
     NSTextView* srcView = [window sourceView];
     NSUInteger search_base = from;
     
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines | NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
 	{
 		r_opts |= NSRegularExpressionCaseInsensitive;
@@ -227,6 +150,7 @@
         [window errorMessage:[NSString stringWithFormat:
                              @"Search wrapped for '%@'",self.lastSearchDisplayString] ringBell:TRUE];
     }
+    /*
     if((self.matchStart || self.matchEnd) && found.location != NSNotFound){
         //figure out the true start and end of the word because the NSRegularExpression engine treats
         // . and : characters are part of the larger word and will not match on a \b regular expression search. 
@@ -240,6 +164,7 @@
             found.length--;
         }
     }
+     */
 #endif
     return found;
 }
@@ -262,7 +187,7 @@
     NSTextView* srcView = [window sourceView];
     NSUInteger search_base = from;
     
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
 	if ([self isCaseInsensitive])
 	{
 		r_opts |= NSRegularExpressionCaseInsensitive;
@@ -281,7 +206,7 @@
     
     NSArray*  matches = [regex matchesInString:[srcView string]
                                        options:r_opts
-                                         range:NSMakeRange(0, [[srcView string] length]-1)];
+                                         range:NSMakeRange(0, [[srcView string] length])];
     
     // search above base
     if (search_base > 0) {
@@ -293,7 +218,7 @@
             found = tmp;
         }
     }
-    // if wrapscan is on, search below base as well
+    // if wrapscan is on, search below base as well.
     if (found.location == NSNotFound && options.wrapscan == TRUE) {
         if ([matches count] > 0) {
             NSTextCheckingResult *match = ([matches objectAtIndex:[matches count]-1]);
@@ -302,6 +227,7 @@
         }
     }
     
+    /*
     if((self.matchStart || self.matchEnd) && found.location != NSNotFound){
         //figure out the true start and end of the word because the NSRegularExpression engine treats
         // . and : characters are part of the larger word and will not match on a \b regular expression search. 
@@ -315,6 +241,7 @@
             found.length--;
         }
     }    
+     */
 #endif
     return found;
 }
@@ -348,6 +275,7 @@
     NSUInteger searchStart = NSNotFound;
     NSUInteger firstNonblank = NSNotFound;
 	
+    // TODO: must be moved to NSTextStorage+VimOperation
 	for (NSUInteger i = begin.location; ![view.textStorage isEOF:i]; ++i)
 	{
         unichar curChar = [string characterAtIndex:i];
@@ -401,13 +329,20 @@
     }
 
     NSString *searchString = [(forward ? @"/" : @"?") stringByAppendingString:escapedSearchWord];
-    found = [self executeSearch:searchString display:searchWord from:from inWindow:window];
+    if( forward ){
+        found = [self executeSearch:searchString display:searchWord from:from<wordEnd?from:wordEnd inWindow:window];
+    }
+    else{
+        found = [self executeSearch:searchString display:searchWord from:wordStart<from?wordStart:from inWindow:window];
+    }
 
+    /*
     if (found.location != NSNotFound &&
         ((!forward && begin.location != wordRange.location) ||
          (forward && searchStart != begin.location))){
 			found = [self searchNextFrom:found.location inWindow:window];
     }
+     */
 #endif
     return found;
 }
@@ -522,20 +457,5 @@
 
 }
 
-- (BOOL)selectSearchResult:(NSRange)found inWindow:(XVimWindow*)window{
-	BOOL valid = found.location != NSNotFound;
-	
-	// Move cursor and show the found string
-    if(valid) {
-		NSTextView* srcView = [window sourceView];
-        [srcView setSelectedRange:NSMakeRange(found.location, 0)];
-		[srcView xvim_scrollTo:[srcView insertionPoint]];
-        [srcView showFindIndicatorForRange:found];
-    }else{
-        [window errorMessage:[NSString stringWithFormat: @"Cannot find '%@'", self.lastSearchDisplayString] ringBell:TRUE];
-    }
-	
-	return valid;
-}
 
 @end

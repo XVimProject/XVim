@@ -35,6 +35,7 @@ XVimMotionEvaluator
 #import "XVimRegister.h"
 #import "NSTextView+VimOperation.h"
 
+@class XVimCommandLineEvaluator;
 @class XVimMotionEvaluator;
 @class XVimKeyStroke;
 @class XVimKeymap;
@@ -43,7 +44,7 @@ XVimMotionEvaluator
 @class XVimRegister;
 @protocol XVimKeymapProvider;
 
-@interface XVimEvaluator : NSObject <XVimTextViewDelegate>
+@interface XVimEvaluator : NSObject <XVimTextViewDelegateProtocol>
 @property(strong) XVimWindow* window;
 @property(strong) XVimEvaluator* parent;
 @property NSUInteger numericArg;
@@ -129,9 +130,6 @@ XVimMotionEvaluator
 
 - (NSTextView*)sourceView;
 
-- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view;
-- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view;
-
 ////////////////////////////////////////////////
 // Context convenience functions
 
@@ -145,6 +143,8 @@ XVimMotionEvaluator
 - (NSUInteger)numericArg;
 
 - (BOOL)numericMode;
+
+- (XVimCommandLineEvaluator*)searchEvaluatorForward:(BOOL)forward;
 @end
 
 

@@ -21,4 +21,7 @@ typedef void (^OnKeyPressHandler) (NSString* command);
 			 history:(XVimHistoryHandler*)history
 		  completion:(OnCompleteHandler)completeHandler
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler;
+
+- (void)appendString:(NSString*)str;
+- (XVimEvaluator*)execute;
 @end

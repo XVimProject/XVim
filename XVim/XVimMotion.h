@@ -50,6 +50,8 @@ typedef enum _MOTION{
     MOTION_HOME,                    // H
     MOTION_MIDDLE,                  // M
     MOTION_BOTTOM,                  // L
+    MOTION_SEARCH_FORWARD,          // /
+    MOTION_SEARCH_BACKWARD,         // ?
     TEXTOBJECT_WORD,
     //TEXTOBJECT_BIGWORD,           // Use motion option
     TEXTOBJECT_SENTENCE,
@@ -75,6 +77,7 @@ typedef enum _MOTION{
 @property NSUInteger column;
 @property NSUInteger position;
 @property unichar character;
+@property(strong) NSString* regex;
 @property XVimMotionInfo* info;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;

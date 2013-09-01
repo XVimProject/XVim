@@ -18,6 +18,11 @@
 @end
 
 @interface DVTSourceTextView(Hook)
+- (id)initWithCoder_:(NSCoder*)rect;
+// When initialize Xcode just calls initWithCoder and do not call these 2 initializer
+// - (id)initWithFrame_:(NSRect)rect;
+// - (id)initWithFrame_:(NSRect)rect textContainer:(NSTextContainer *)container;
+- (void)dealloc_;
 - (void)setSelectedRanges_:(NSArray*)array affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag;
 - (void)keyDown_:(NSEvent *)theEvent;
 - (void)mouseDown_:(NSEvent *)theEvent;
@@ -28,5 +33,6 @@
 - (BOOL)shouldDrawInsertionPoint_;
 - (void)_drawInsertionPointInRect_:(NSRect)aRect color:(NSColor*)aColor;
 - (BOOL)becomeFirstResponder_;
+- (void)didChangeText_;
 - (void)viewDidMoveToSuperview_;
 @end

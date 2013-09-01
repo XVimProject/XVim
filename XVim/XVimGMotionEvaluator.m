@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 JugglerShu.Net. All rights reserved.
 //
 
+#import "XVimCommandLineEvaluator.h"
 #import "XVimGMotionEvaluator.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimKeyStroke.h"
@@ -24,24 +25,23 @@
 }
 
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
-    //TODO: Must be moved to XVimSearch.m
-    //TODO: Must be unified to the same method in XVimMotionEvaluator
-	XVimSearch* searcher = [[XVim instance] searcher];
-	NSUInteger cursorLocation = [self.window.sourceView insertionPoint];
-	NSUInteger searchLocation = cursorLocation;
-    NSRange found = NSMakeRange(0, 0);
-    for (NSUInteger i = 0; i < [self numericArg] && found.location != NSNotFound; ++i){
-        found = [searcher searchCurrentWordFrom:searchLocation forward:forward matchWholeWord:NO inWindow:self.window];
-		searchLocation = found.location;
-    }
-	
-	if (found.location == NSNotFound) {
-        self.motion = nil;
-	}else{
-        self.motion = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-        self.motion.position = found.location;
+    XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
+    NSRange r = [self.sourceView xvim_currentWord:MOTION_OPTION_NONE];
+    if( r.location == NSNotFound ){
+        return nil;
     }
     
+    // This is not for matching the searching word itself
+    // Vim also does this behavior( when matched string is not found )
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    m.position = r.location;
+    [self.sourceView xvim_move:m];
+    
+    NSString* word = [self.sourceView.string substringWithRange:r];
+    NSString* searchWord = [NSRegularExpression escapedPatternForString:word];
+    [eval appendString:searchWord];
+    [eval execute];
+    self.motion = eval.evalutionResult;
     return nil;
 }
 

@@ -17,10 +17,9 @@
  * Text views want to communicate with XVim handlers(evaluators) must implement this protocol.
  **/
 
-
-@protocol XVimTextViewDelegate <NSObject>
-- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view;
-- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view;
+@protocol XVimTextViewDelegateProtocol
+- (void)textView:(NSTextView*)view didYank:(NSString*)yankedText withType:(TEXT_TYPE)type;
+- (void)textView:(NSTextView*)view didDelete:(NSString*)deletedText withType:(TEXT_TYPE)type;
 @end
 
 typedef enum {
@@ -42,10 +41,6 @@ typedef enum {
 @property(readonly) NSUInteger selectedColumns; // Number of columns selected (0 if not in selection mode)
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSUInteger preservedColumn;
-
-// Delegates
-@property(strong) id<XVimTextViewDelegate> delegate;
-
 
 // Selection Mode
 - (void)changeSelectionMode:(XVIM_VISUAL_MODE)mode;

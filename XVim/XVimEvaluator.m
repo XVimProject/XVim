@@ -6,6 +6,8 @@
 //  Copyright 2012 JugglerShu.Net. All rights reserved.  
 //
 
+#import "XVim.h"
+#import "XVimOptions.h"
 #import "XVimEvaluator.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimKeyStroke.h"
@@ -16,6 +18,8 @@
 #import "XVimVisualEvaluator.h"
 #import "XVim.h"
 #import "NSTextView+VimOperation.h"
+#import "XVimSearch.h"
+#import "XVimCommandLineEvaluator.h"
 
 static XVimEvaluator* _invalidEvaluator = nil;
 static XVimEvaluator* _noOperationEvaluator = nil;
@@ -102,11 +106,11 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
    
 - (void)becameHandler{
-    self.sourceView.yankDelegate = self;
+    self.sourceView.xvimDelegate = self;
 }
 
 - (void)didEndHandler{
-    self.sourceView.yankDelegate = nil;
+    self.sourceView.xvimDelegate = nil;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -215,17 +219,79 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     }
 }
 
-- (void)textYanked:(NSString*)yankedText withType:(TEXT_TYPE)type inView:(id)view{
-    TRACE_LOG(@"yanked text: %@", yankedText);
+- (void)textView:(NSTextView*)view didYank:(NSString*)yankedText withType:(TEXT_TYPE)type{
     [[[XVim instance] registerManager] yank:yankedText withType:type onRegister:self.yankRegister];
     return;
 }
 
-- (void)textDeleted:(NSString*)deletedText withType:(TEXT_TYPE)type inView:(id)view{
-    TRACE_LOG(@"deleted text: %@", deletedText);
+- (void)textView:(NSTextView*)view didDelete:(NSString*)deletedText withType:(TEXT_TYPE)type{
     [[[XVim instance] registerManager] delete:deletedText withType:type onRegister:self.yankRegister];
     return;
 }
+
+- (XVimCommandLineEvaluator*)searchEvaluatorForward:(BOOL)forward{
+	return [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
+                                                 firstLetter:forward?@"/":@"?"
+                                                     history:[[XVim instance] searchHistory]
+                                                  completion:^ XVimEvaluator* (NSString *command, id* result)
+             {
+                 if( command.length == 0 ){
+                     return nil;
+                 }
+                 
+                 MOTION_OPTION opt = MOTION_OPTION_NONE;
+                 if( [XVim instance].options.wrapscan ){
+                     opt |= SEARCH_WRAP;
+                 }
+                 if( [XVim instance].options.ignorecase ){
+                     opt |= SEARCH_CASEINSENSITIVE;
+                 }
+                 
+                 [XVim instance].searcher.lastSearchString = [command substringFromIndex:1];
+                 
+                 if( [XVim instance].options.vimregex ){
+                     // TODO:
+                     // Convert Vim regex to ICU regex
+                 }
+                 XVimMotion* m = nil;
+                 if( [command characterAtIndex:0] == '/' ){
+                     XVim.instance.searcher.lastSearchBackword = NO;
+                     m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, opt, self.numericArg);
+                 }else{
+                     XVim.instance.searcher.lastSearchBackword = YES;
+                     m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, opt, self.numericArg);
+                 }
+                 m.regex = [XVim instance].searcher.lastSearchString;
+                 *result = m;
+                 return nil;
+             }
+             onKeyPress:^void(NSString *command)
+             {
+                 if( command.length == 0 ){
+                     return;
+                 }
+                 
+                 MOTION_OPTION opt = MOTION_OPTION_NONE;
+                 if( [XVim instance].options.wrapscan ){
+                     opt |= SEARCH_WRAP;
+                 }
+                 if( [XVim instance].options.ignorecase ){
+                     opt |= SEARCH_CASEINSENSITIVE;
+                 }
+                 
+                 NSString* str = [command substringFromIndex:1];
+                 if( [XVim instance].options.vimregex ){
+                     // TODO:
+                     // Convert Vim regex to ICU regex
+                 }
+                 if( [command characterAtIndex:0] == '/' ){
+                     [self.sourceView xvim_highlightNextSearchCandidateForward:str count:self.numericArg option:opt];
+                 }else{
+                     [self.sourceView xvim_highlightNextSearchCandidateBackward:str count:self.numericArg option:opt];
+                 }
+             }] autorelease];
+}
+
 @end
 
 

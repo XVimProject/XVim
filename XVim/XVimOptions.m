@@ -33,6 +33,7 @@
          @"laststatus",@"ls",
          @"hlsearch",@"hls",
          @"number", @"nu",
+         @"vimregex", @"vr",
          nil];
         
         // Default values
@@ -48,6 +49,7 @@
         _laststatus = 2;
         _hlsearch = NO;
         _number = NO;
+        _vimregex = NO;
     }
     return self;
 }

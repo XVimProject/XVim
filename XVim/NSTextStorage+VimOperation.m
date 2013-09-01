@@ -1176,6 +1176,97 @@
     return NSNotFound;
 }
 
+- (NSRange)searchRegexForward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSAssert(pattern != nil, @"pattern must not be nil");
+    
+    NSRange ret = NSMakeRange(NSNotFound,0);
+    
+    NSRegularExpressionOptions options = NSRegularExpressionAnchorsMatchLines;
+    if( opt & SEARCH_CASEINSENSITIVE ){
+        options |= NSRegularExpressionCaseInsensitive;
+    }
+    NSError* err = nil;
+    NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&err];
+    if( err != nil ){
+        return ret;
+    }
+    // Search whole text
+    NSArray* matches =  [regex matchesInString:self.string options:0 range:NSMakeRange(0, self.length)];
+    
+    // First we look for the position in range of [index+1, EOF]
+    for( NSTextCheckingResult* result in matches ){
+        if( result.range.location > index ){
+            count--;
+            if( 0 == count){
+                ret = [result range];
+            }
+        }
+    }
+    
+    // Then look for the position in range of [BOF,index] if SEARCH_WRAP
+    if( 0 != count && opt & SEARCH_WRAP ){
+        for( NSTextCheckingResult* result in matches ){
+            if( result.range.location <= index ){
+                count--;
+                if( 0 == count){
+                    ret = [result range];
+                }
+            }else{
+                break;
+            }
+        }
+    }
+    
+    return ret;
+}
+
+- (NSRange)searchRegexBackward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSAssert(pattern != nil, @"pattern must not be nil");
+    
+    NSRange ret = NSMakeRange(NSNotFound,0);
+    
+    NSRegularExpressionOptions options = NSRegularExpressionAnchorsMatchLines;
+    if( opt & SEARCH_CASEINSENSITIVE ){
+        options |= NSRegularExpressionCaseInsensitive;
+    }
+    NSError* err = nil;
+    NSRegularExpression* regex = [NSRegularExpression regularExpressionWithPattern:pattern options:options error:&err];
+    if( err != nil ){
+        return ret;
+    }
+    // Search whole text
+    NSArray* matches =  [regex matchesInString:self.string options:0 range:NSMakeRange(0, self.length)];
+    
+    // First we look for the position in range of [BOF, index-1] in backwards
+    for( NSTextCheckingResult* result in [matches reverseObjectEnumerator] ){
+        if( result.range.location < index ){
+            count--;
+            if( 0 == count){
+                ret = [result range];
+            }
+        }
+    }
+    
+    // Then look for the position in range of [index,EOF] if SEARCH_WRAP
+    if( 0 != count && opt & SEARCH_WRAP ){
+        for( NSTextCheckingResult* result in [matches reverseObjectEnumerator] ){
+            if( result.range.location >= index ){
+                count--;
+                if( 0 == count){
+                    ret = [result range];
+                }
+            }else{
+                break;
+            }
+        }
+    }
+    
+    return ret;
+    
+}
+
 - (void)toggleCaseForRange:(NSRange)range {
     NSString* text = [self string];
 	

@@ -12,29 +12,74 @@
 #import "XVimTester.h"
 
 - (NSArray*)search_testcases{
-    /*
-    static NSString* text2 = @"ddd\n"
-                             @"111\n"
-                             @"aaa\n"
-                             @"XXX\n"
-                             @"xxx\n"
-                             @"uuu\n"
-                             @"\n"
-                             @"111\n";
+    static NSString* text1 = @"aaa\n"   // 0  (index of each WORD)
+                             @"bbb\n"   // 4
+                             @"ccc";    // 8
     
-    static NSString* sort_result1 =
-                                    @"\n"
-                                    @"111\n"
-                                    @"111\n"
-                                    @"XXX\n"
-                                    @"aaa\n"
-                                    @"ddd\n"
-                                    @"uuu\n"
-                                    @"xxx\n";
+    static NSString* text2 = @"a;a bbb ccc\n"  // 0  4  8
+                             @"ddd e-e fff\n"  // 12 16 20
+                             @"ggg bbb i_i\n"  // 24 28 32
+                             @"    jjj bbb";   // 36 40 44
     
-     */
+    static NSString* text3 = @"a;a bbb ccc\n"  // 0  4  8
+                             @"ddd e-e fff\n"  // 12 16 20
+                             @"ggggbbbii_i\n"  // 24 28 32
+                             @"    jjj bbb";   // 36 40 44
+    
+    static NSString* text4 = @"a;a bbb ccc\n"  // 0  4  8
+                             @"ddd e-e fff\n"  // 12 16 20
+                             @"ggg BBB i_i\n"  // 24 28 32
+                             @"    jjj BbB";   // 36 40 44
+    
     return [NSArray arrayWithObjects:
-      //      XVimMakeTestCase(text2, 0,  0, @"VG:sort<CR>", sort_result1, 0, 0),
-    nil];
+            // Search (/,?)
+            XVimMakeTestCase(text1, 0,  0, @"/bbb<CR>", text1, 4, 0),
+            XVimMakeTestCase(text1, 8,  0, @"?bbb<CR>", text1, 4, 0),
+            
+            // Repeating search
+            XVimMakeTestCase(text2, 0,  0, @"/bbb<CR>n" , text2, 28, 0),
+            XVimMakeTestCase(text2, 0,  0, @"/bbb<CR>nN", text2,  4, 0),
+            XVimMakeTestCase(text2,40,  0, @"?bbb<CR>n" , text2,  4, 0),
+            XVimMakeTestCase(text2,40,  0, @"?bbb<CR>nN", text2, 28, 0),
+            
+            // Search words (*,#,g*,g#)
+            XVimMakeTestCase(text2, 5,  0, @"*" , text2, 28, 0),
+            XVimMakeTestCase(text2, 5,  0, @"2*", text2, 44, 0),
+            XVimMakeTestCase(text2,45,  0, @"#" , text2, 28, 0),
+            XVimMakeTestCase(text2,45,  0, @"2#", text2,  4, 0),
+            
+            // * or # should only word boundary
+            XVimMakeTestCase(text3, 5,  0, @"*" , text3, 44, 0),
+            XVimMakeTestCase(text3,45,  0, @"#" , text3,  4, 0),
+            // g* or g# should match without word boundary
+            XVimMakeTestCase(text2, 5,  0, @"*" , text2, 28, 0),
+            XVimMakeTestCase(text2,45,  0, @"#" , text2, 28, 0),
+            
+            // # must not match the searched word itself
+            XVimMakeTestCase(text2, 29,  0, @"#" , text2, 4, 0),
+            
+            // Search with * or # must be saved in search history
+            XVimMakeTestCase(text2, 5,  0, @"*/<UP><CR>" , text2, 44, 0),
+            XVimMakeTestCase(text2,45,  0, @"#?<UP><CR>" , text2, 4, 0),
+            
+            // Operations with search
+            // Currently operations with search is supported but not exactly compatible to Vim's behavior.
+            // This is related to the fact that XVim moves cursor before doing */# search not to match the searched string itsself.
+            // XVimMakeTestCase(text2, 5,  0, @"2d*" , operation_result1, 5, 0),
+            // XVimMakeTestCase(text2,45,  0, @"2d#" , operation_result2, 4, 0),
+            
+            // Options for search
+            // wrapscan
+            XVimMakeTestCase(text2, 45,  0, @":set wrapscan<CR>*", text2, 4, 0),
+            XVimMakeTestCase(text2, 5,  0, @":set wrapscan<CR>#", text2, 44, 0),
+            // if no match string is found the cursor move the the head of the word
+            XVimMakeTestCase(text2, 45,  0, @":set nowrapscan<CR>*" , text2, 44, 0),
+            XVimMakeTestCase(text2, 5,  0, @":set nowrapscan<CR>#" , text2, 4, 0),
+            
+            // ignorecase
+            XVimMakeTestCase(text4, 5,  0, @":set ignorecase<CR>*", text4, 28, 0),
+            XVimMakeTestCase(text4, 5,  0, @":set noignorecase<CR>*", text4, 4, 0),
+            
+            nil];
 }
 @end

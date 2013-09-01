@@ -106,7 +106,7 @@
             
             // Motion type enforcing(v,V, Ctrl-v)
             
-            // Searches (/,?,n,N,*,#)
+            // Searches (/,?,n,N,*,#) are implemented in XVimTester+Search.m
             
             // , ; (comma semicolon) for f F
             XVimMakeTestCase(text2, 0, 0,  @"2fb;", text2, 6, 0),
