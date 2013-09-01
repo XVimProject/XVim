@@ -52,6 +52,7 @@
     [self hook:@"drawRect:"];
     [self hook:@"shouldDrawInsertionPoint"];
     [self hook:@"_drawInsertionPointInRect:color:"];
+    [self hook:@"drawInsertionPointInRect:color:turnedOn:"];
     [self hook:@"didChangeText"];
     [self hook:@"viewDidMoveToSuperview"];
     [self hook:@"shouldChangeTextInRange:replacementString"];
@@ -69,6 +70,7 @@
     [self unhook:@"drawRect:"];
     [self unhook:@"shouldDrawInsertionPoint"];
     [self unhook:@"_drawInsertionPointInRect:color:"];
+    [self unhook:@"_drawInsertionPointInRect:color:turnedOn:"];
     [self unhook:@"didChangeText"];
     [self unhook:@"viewDidMoveToSuperview"];
     [self unhook:@"shouldChangeTextInRange:replacementString"];
@@ -220,23 +222,23 @@
         // [base _drawInsertionPointInRect_:glyphRect color:aColor];
         
         // Call our drawing method
-        NSRect rect = [window drawInsertionPointInRect:aRect color:aColor];
+        [window drawInsertionPointInRect:aRect color:aColor];
         
-        // Change NSTextView internal variable named "_insertionPointRect"
-        // NSTextView has a instance of NSTextViewIvars class.
-        // NSTextViewIvars class has various varibles to keep private variables for NSTextView
-        // _insertionPointRect in the class is used when clearing the caret we draw.
-        // We are not writing any code to clear caret but NSTextView does it automatically if we set
-        // this internal varible properly.
-        id nsTextViewIvars;
-        object_getInstanceVariable(base, "_ivars", (void**)&nsTextViewIvars);
-        [nsTextViewIvars setValue:[NSValue valueWithRect:rect] forKey:@"_insertionPointRect"];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
 }
 
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor *)color turnedOn:(BOOL)flag{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    // Call super class first.
+    [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+    // Then tell the view to redraw to clear a caret.
+    if( !flag ){
+        [base setNeedsDisplay:YES];
+    }
+}
 - (BOOL)becomeFirstResponder{
     // Since XVimWindow manages multiple DVTSourceTextView
     // we have to switch current text view when the first responder changed.

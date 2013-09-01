@@ -32,6 +32,7 @@
 - (BOOL) performKeyEquivalent_:(NSEvent *)theEvent;
 - (BOOL)shouldDrawInsertionPoint_;
 - (void)_drawInsertionPointInRect_:(NSRect)aRect color:(NSColor*)aColor;
+- (void)drawInsertionPointInRect_:(NSRect)aRect color:(NSColor*)aColor turnedOn:(BOOL)flag;
 - (BOOL)becomeFirstResponder_;
 - (void)didChangeText_;
 - (void)viewDidMoveToSuperview_;
