@@ -253,3 +253,50 @@ To support to change highlighted locations when we put ":set hlsearch" or search
 
 See DVTSourceTextViewHook.m for the detail
 
+
+### Handling DVTFoldingTextStorage ###
+DVTSourceTextView has a DVTFoldingTextStorage as its text storage.
+The big difference between DVTFoldingTextStorage and NSTextStorage is supporting folding.
+In DVTFoldingTextStorage you can not simply calculate the character index. For example, text following
+
+abcd <#placeholder#>
+
+has a folding. DVTFoldingTextStorage represents place holder with <#and#>.
+The text above results in
+
+abcd placeholder
+
+where "placeholder" part is place holder(blue background color) and counted as one character.
+DVTFoldingTextStorage manages the relation between these 2 text and gives us an interface to access both.
+
+To access "raw" string representation you just call [storage string] method. This never considers a folding and returns "raw" string.
+If you want to know the length of raw string just call [storage string].length .
+
+To access "folded" string, before you call [storage string] you have to call [storage increaseUsingFoldedRanges] method.
+This method tells DVTFoldingTextStorage that we want to access "folded" representation of the storage. After calling this method
+all the method calls to the storage will be handled to the "folded" string. You have to call [storage decreaseUsingFoldedRanges] after 
+finished to access to the folded representation because someone else who are using it later considers that default state of the storage is
+"raw" string accessing mode.
+So usually what you have to write is
+
+[storage increaseUsingFoldedRanges];
+[storage string]; // or what ever you want to do on the folded string representation
+[storage decreaseUsingFoldedRanges];
+
+The example above has a text "abcd " and one placeholder.
+In this case the length of the string of folded representation is 6 (5 + 1 for placeholder).
+The character at placeholder returns 0xFFFC. This means the code below
+
+[storage increaseUsingFoldedRanges];
+unichar c = [[storage string] characterAtIndex:5];
+[storage decreaseUsingFoldedRanges];
+
+make 'c' to have 0xFFFC.
+
+0xFFFC is a NSAttachmentCharacter (See NSTextAttachment class reference).
+This means that this character is handled as an attachment by layout manager (DVTLayoutManager) and will be drawn as 
+a special glyph.
+
+In XVim, we usually do not want to handle "raw" representation of the folded storage but "folded" representation.
+So if we want to make some changes or calculate positions in a DVTFoldingTextStorage we usually need to call increaseUsingFoldedRanges.
+

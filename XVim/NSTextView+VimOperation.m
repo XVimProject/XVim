@@ -1282,20 +1282,16 @@
  * less than real index in the string.
  **/
 - (NSUInteger)xvim_glyphIndexForPoint:(NSPoint)point {
-	NSUInteger index = [[self layoutManager] glyphIndexForPoint:point inTextContainer:[self textContainer]];
-    DVTFoldingTextStorage* storage = [(DVTSourceTextView*)self textStorage];
-    return [storage realLocationForFoldedLocation:index];
+	return [[self layoutManager] glyphIndexForPoint:point inTextContainer:[self textContainer]];
 }
 
 - (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
-    DVTFoldingTextStorage* storage = [(DVTSourceTextView*)self textStorage];
-    NSUInteger foldedIndex = [storage foldedLocationForRealLocation:glyphIndex];
     NSRect glyphRect;
     if( [self.textStorage isEOF:glyphIndex] ){
         // When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
-        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 0)  inTextContainer:[self textContainer]];
+        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 0)  inTextContainer:[self textContainer]];
     }else{
-        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(foldedIndex, 1)  inTextContainer:[self textContainer]];
+        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
     }
     return glyphRect;
 }
@@ -1466,7 +1462,9 @@
         [self _adjustCursorPosition];
     }
     [self dumpState];
-    [self setSelectedRanges:[self xvim_selectedRanges]];
+    [(DVTFoldingTextStorage*)self.textStorage increaseUsingFoldedRanges];
+    [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
+    [(DVTFoldingTextStorage*)self.textStorage decreaseUsingFoldedRanges];
     [self xvim_scrollTo:self.insertionPoint];
     self.xvim_lockSyncStateFromView = NO;
 }

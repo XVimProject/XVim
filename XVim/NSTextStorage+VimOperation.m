@@ -385,8 +385,10 @@
     ASSERT_VALID_RANGE_WITH_EOF(index);
     
 #ifdef __USE_DVTKIT__
-    if( [self.class isSubclassOfClass:DVTSourceTextStorage.class]){
-        return (NSUInteger)[((DVTSourceTextStorage*)self) columnForPositionConvertingTabs:index];
+    if( [self.class isSubclassOfClass:DVTFoldingTextStorage.class]){
+        DVTFoldingTextStorage* storage = (DVTFoldingTextStorage*)self;
+        NSUInteger column = (NSUInteger)[storage columnForPositionConvertingTabs:[storage realLocationForFoldedLocation:index]];
+        return column;
     }
 #endif
     return index - [self beginningOfLine:index];
