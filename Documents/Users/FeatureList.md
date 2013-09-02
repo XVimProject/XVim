@@ -72,7 +72,7 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
   C-w q    | Delete one assistant editor
   C-w s    | Add new assistant editor horizontally
   C-w v    | Add new assistant editor vertically
-C-w h,j,k,l| Move forcus between editors
+C-w h,j,k,l| Move focus between editors
 
 
 ## Search and Replace
