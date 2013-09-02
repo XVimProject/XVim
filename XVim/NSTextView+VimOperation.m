@@ -1240,7 +1240,7 @@
     if( string == nil ){
         return;
     }
-    NSArray*  matches = [regex matchesInString:string options:r_opts range:NSMakeRange(0, string.length)];
+    NSArray*  matches = [regex matchesInString:string options:0 range:NSMakeRange(0, string.length)];
     [self.foundRanges setArray:matches];
     
     [self setNeedsUpdateFoundRanges:NO];

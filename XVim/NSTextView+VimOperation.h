@@ -68,9 +68,6 @@
 @property(readonly) NSArray* foundRanges;
 @property(readonly) long long currentLineNumber;
 
-#pragma mark Status
-- (NSUInteger)xvim_numberOfLinesInVisibleRect;
-
 #pragma mark Changing state
 - (void)xvim_changeSelectionMode:(XVIM_VISUAL_MODE)mode;
 - (void)xvim_escapeFromInsert;

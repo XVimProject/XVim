@@ -138,14 +138,14 @@
     // search text beyond the search_base
     if( [[srcView string] length]-1 > search_base){
         found = [regex rangeOfFirstMatchInString:[srcView string] 
-                                         options:r_opts
+                                         options:0
                                            range:NSMakeRange(search_base+1, [[srcView string] length] - search_base - 1)];
     }
     
     // if wrapscan is on, wrap to the top and search
     if (found.location == NSNotFound && options.wrapscan== TRUE) {
         found = [regex rangeOfFirstMatchInString:[srcView string] 
-                                         options:r_opts
+                                         options:0
                                            range:NSMakeRange(0, [[srcView string] length])];
         [window errorMessage:[NSString stringWithFormat:
                              @"Search wrapped for '%@'",self.lastSearchDisplayString] ringBell:TRUE];
@@ -205,7 +205,7 @@
     }
     
     NSArray*  matches = [regex matchesInString:[srcView string]
-                                       options:r_opts
+                                       options:0
                                          range:NSMakeRange(0, [[srcView string] length])];
     
     // search above base
@@ -374,7 +374,7 @@
     }
     
     // search text beyond the search_base
-    found = [regex rangeOfFirstMatchInString:[srcView string] options:r_opts range:NSMakeRange(from, [[srcView string] length] - from)];
+    found = [regex rangeOfFirstMatchInString:[srcView string] options:0 range:NSMakeRange(from, [[srcView string] length] - from)];
     
     if( found.location >= to) {
         return NSMakeRange(NSNotFound, 0);
