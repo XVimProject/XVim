@@ -12,6 +12,7 @@
 #import <Foundation/Foundation.h>
 
 @class XVimWindow;
+@class XVimMotion;
 
 typedef enum {
     XVimSearchCaseDefault,
@@ -40,6 +41,8 @@ typedef enum {
 // Returns whether range.location is valid
 // - (BOOL)selectSearchResult:(NSRange)r inWindow:(XVimWindow*)window;
 
+- (XVimMotion*)motionForRepeatSearch;
+- (XVimMotion*)motionForSearch:(NSString*)string forward:(BOOL)forward;
 - (void)substitute:(NSString*)searchCmd from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window;
 
 @end

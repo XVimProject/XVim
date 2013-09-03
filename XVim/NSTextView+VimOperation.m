@@ -1231,6 +1231,7 @@
     NSError *error = nil;
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:r_opts error:&error];
     if( nil != error){
+        [self.foundRanges removeAllObjects];
         return;
     }
     
@@ -1249,7 +1250,7 @@
 - (void)xvim_clearHighlightText{
     NSTextView* view = self;
     NSString* string = view.string;
-    [self.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:NSMakeRange(0, string.length)];
+    [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] forCharacterRange:NSMakeRange(0, string.length)];
 }
 
 - (void)xvim_highlightFoundRanges{

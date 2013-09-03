@@ -237,30 +237,21 @@
 }
 
 
-- (XVimEvaluator*)nN_impl:(BOOL)forward{
-    MOTION search_motion = forward? MOTION_SEARCH_FORWARD:MOTION_SEARCH_BACKWARD;
-    MOTION_OPTION opt = MOTION_OPTION_NONE;
-    if( [XVim instance].options.wrapscan ){
-        opt |= SEARCH_WRAP;
-    }
-    if( [[XVim instance].searcher isCaseInsensitive] ){
-        opt |= SEARCH_CASEINSENSITIVE;
-    }
-    XVimMotion* m = XVIM_MAKE_MOTION(search_motion , CHARACTERWISE_EXCLUSIVE, opt, self.numericArg);
-    m.regex = XVim.instance.searcher.lastSearchString;
-    if( XVim.instance.options.vimregex ){
-        // TODO: Convert Vim regex to ICU
+- (XVimEvaluator*)nN_impl:(BOOL)opposite{
+    XVimMotion* m = [XVim.instance.searcher motionForRepeatSearch];
+    if( opposite ){
+        m.motion = (m.motion == MOTION_SEARCH_FORWARD) ? MOTION_SEARCH_BACKWARD : MOTION_SEARCH_FORWARD;
     }
     self.motion = m;
     return [self _motionFixed:m];
 }
 
 - (XVimEvaluator*)n{
-    return [self nN_impl:!XVim.instance.searcher.lastSearchBackword];
+    return [self nN_impl:NO];
 }
 
 - (XVimEvaluator*)N{
-    return [self nN_impl:XVim.instance.searcher.lastSearchBackword];
+    return [self nN_impl:YES];
 }
 
 /*

@@ -62,4 +62,30 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return isKeyword([self characterAtIndex:index]);
 }
 
+- (NSString*)convertToICURegex:(NSRegularExpressionOptions*)options{
+    // TODO: These conversion may replace '\\<' into '\\b'
+    //       (Note that characters here is NOT C language expression. So these string has 2 backslashes and one letter.)
+    //       The 2 backshashes above should be processed as one backslash after processing REGEX escape.
+    //       Since our code here replaces '\<' into '\b' the conversion happens.
+    //       Buth the conversion should not be done and '\\<' should stay the same.
+    
+    // Word boundary
+    // Vim : \<, \>
+    // ICU : \b
+    NSString* tmp = [self stringByReplacingOccurrencesOfString:@"\\<" withString:@"\\b"];
+    tmp = [tmp stringByReplacingOccurrencesOfString:@"\\>" withString:@"\\b"];
+    
+    // Ignorecase
+    if( [tmp rangeOfString:@"\\C"].location != NSNotFound ){
+        *options &= ~NSRegularExpressionCaseInsensitive;
+        tmp = [tmp stringByReplacingOccurrencesOfString:@"\\C" withString:@""];
+    }
+    if( [tmp rangeOfString:@"\\c"].location != NSNotFound ){
+        *options |= NSRegularExpressionCaseInsensitive;
+        tmp = [tmp stringByReplacingOccurrencesOfString:@"\\c" withString:@""];
+    }
+    
+    return tmp;
+}
+
 @end

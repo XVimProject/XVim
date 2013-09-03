@@ -408,15 +408,25 @@ static char s_associate_key = 0;
 
 // NSTextInputClient Protocol
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange{
-    [self.tmpBuffer setString:@""];
-    [self handleXVimString:aString];
+    @try{
+        [self.tmpBuffer setString:@""];
+        [self handleXVimString:aString];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
+    }
+    
     //return [[self.sourceView view] insertText:aString replacementRange:replacementRange];
 }
 
 - (void)doCommandBySelector:(SEL)aSelector{
-    TRACE_LOG(@"Selector:%@", NSStringFromSelector(aSelector));
-    [self handleXVimString:self.tmpBuffer];
-    [self.tmpBuffer setString:@""];
+    @try{
+        [self handleXVimString:self.tmpBuffer];
+        [self.tmpBuffer setString:@""];
+    }@catch (NSException* exception) {
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
+    }
     /*
     NSString* selector = NSStringFromSelector(aSelector);
     if( [selector isEqualToString:@"cancelOperation:"] ){

@@ -33,6 +33,8 @@ If you want to open the file under the cursor you can use 'gd' instead of 'gf' i
 ## Insert
 a, A, i, I, o, O
 
+You can use <C-o> to enter to temparary normal mode during insert mode.
+
 ## Yank, put and change
 
 d, dd(d_), D, y, yy(y_), Y, c, cc(c_), C, r, s, S, x, X
@@ -79,7 +81,7 @@ C-w h,j,k,l| Move focus between editors
 
 /, ?, #, \*, g*, g#, :s, n, N
 
-Regex search is supported using the ICU regex format.
+Regex search is supported using the [ICU regex](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSRegularExpression_Class/Reference/Reference.html) format.
 
 Substitution does not work as Vim does. When you input command following
 
@@ -142,7 +144,6 @@ The dot command ('.') is supported.
   :ncounterpart | Invoke "jump to next counterpart". ":nc" does the same.
   :pcounterpart | Invoke "jump to previous counterpart". ":pc" does the same.
 
-
 ## Options
 
  Command       | Note
@@ -160,6 +161,7 @@ The dot command ('.') is supported.
   timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
   clipboard | ":set clipboard=unnamed" to share system clipboard with unnamed register
+  [no]vimregex | Tells XVim to use Vim's regular expression. Currently support \<,\> for word boundary, \c,\C for specifying case (in)sensitiveness.
 
 
 ## guioptions

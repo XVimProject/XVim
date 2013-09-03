@@ -30,6 +30,45 @@
     return self;
 }
 
+- (XVimMotion*)motionForRepeatSearch{
+    return [self motionForSearch:self.lastSearchString forward:!self.lastSearchBackword];
+}
+
+- (XVimMotion*)motionForSearch:(NSString *)string forward:(BOOL)forward{
+    XVimMotion* m = nil;
+    if( forward ){
+        XVim.instance.searcher.lastSearchBackword = NO;
+        m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    }else{
+        XVim.instance.searcher.lastSearchBackword = YES;
+        m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    }
+    m.regex = string;
+    
+    // Find if it is case sensitive from 2 options(ignorecase/smartcase)
+    BOOL ignorecase = XVim.instance.options.ignorecase;
+    if (ignorecase && XVim.instance.options.smartcase){
+        if( ![m.regex isEqualToString:[m.regex lowercaseString]] ){
+            ignorecase = NO;
+        }
+    }
+    
+    // Case sensitiveness above can be overridden by Vim regex (\c,\C)
+    NSRegularExpressionOptions options = ignorecase ? NSRegularExpressionCaseInsensitive:0;
+    if( [XVim instance].options.vimregex ){
+        m.regex = [m.regex convertToICURegex:&options];
+    }
+    // The last case sensitiveness is found at this point
+    if( options & NSRegularExpressionCaseInsensitive ){
+        m.option |= SEARCH_CASEINSENSITIVE;
+    }
+    
+    if( [XVim instance].options.wrapscan ){
+        m.option |= SEARCH_WRAP;
+    }
+    
+    return m;
+}
 
 - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window
 {

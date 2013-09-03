@@ -20,6 +20,7 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimSearch.h"
 #import "XVimCommandLineEvaluator.h"
+#import "NSString+VimHelper.h"
 
 static XVimEvaluator* _invalidEvaluator = nil;
 static XVimEvaluator* _noOperationEvaluator = nil;
@@ -239,55 +240,33 @@ static XVimEvaluator* _noOperationEvaluator = nil;
                      return nil;
                  }
                  
-                 MOTION_OPTION opt = MOTION_OPTION_NONE;
-                 if( [XVim instance].options.wrapscan ){
-                     opt |= SEARCH_WRAP;
-                 }
-                 if( [XVim instance].options.ignorecase ){
-                     opt |= SEARCH_CASEINSENSITIVE;
-                 }
-                 
-                 [XVim instance].searcher.lastSearchString = [command substringFromIndex:1];
-                 
-                 if( [XVim instance].options.vimregex ){
-                     // TODO:
-                     // Convert Vim regex to ICU regex
-                 }
-                 XVimMotion* m = nil;
-                 if( [command characterAtIndex:0] == '/' ){
-                     XVim.instance.searcher.lastSearchBackword = NO;
-                     m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, opt, self.numericArg);
+                 BOOL forward = [command characterAtIndex:0] == '/';
+                 if( command.length == 1 ){
+                     // Repeat search
+                     XVimMotion* m = [XVim.instance.searcher motionForRepeatSearch];
+                     m.motion = forward ? MOTION_SEARCH_FORWARD : MOTION_SEARCH_BACKWARD;
+                     m.count = self.numericArg;
+                     *result = m;
                  }else{
-                     XVim.instance.searcher.lastSearchBackword = YES;
-                     m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, opt, self.numericArg);
+                     XVim.instance.searcher.lastSearchString = [command substringFromIndex:1];
+                     XVimMotion* m = [XVim.instance.searcher motionForSearch:[command substringFromIndex:1] forward:forward];
+                     m.count = self.numericArg;
+                     *result = m;
                  }
-                 m.regex = [XVim instance].searcher.lastSearchString;
-                 *result = m;
                  return nil;
              }
              onKeyPress:^void(NSString *command)
              {
-                 if( command.length == 0 ){
+                 if( command.length < 2 ){
                      return;
                  }
                  
-                 MOTION_OPTION opt = MOTION_OPTION_NONE;
-                 if( [XVim instance].options.wrapscan ){
-                     opt |= SEARCH_WRAP;
-                 }
-                 if( [XVim instance].options.ignorecase ){
-                     opt |= SEARCH_CASEINSENSITIVE;
-                 }
-                 
-                 NSString* str = [command substringFromIndex:1];
-                 if( [XVim instance].options.vimregex ){
-                     // TODO:
-                     // Convert Vim regex to ICU regex
-                 }
+                 BOOL forward = [command characterAtIndex:0] == '/';
+                 XVimMotion* m = [XVim.instance.searcher motionForSearch:[command substringFromIndex:1] forward:forward];
                  if( [command characterAtIndex:0] == '/' ){
-                     [self.sourceView xvim_highlightNextSearchCandidateForward:str count:self.numericArg option:opt];
+                     [self.sourceView xvim_highlightNextSearchCandidateForward:m.regex count:self.numericArg option:m.option];
                  }else{
-                     [self.sourceView xvim_highlightNextSearchCandidateBackward:str count:self.numericArg option:opt];
+                     [self.sourceView xvim_highlightNextSearchCandidateBackward:m.regex count:self.numericArg option:m.option];
                  }
              }] autorelease];
 }

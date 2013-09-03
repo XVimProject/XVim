@@ -83,6 +83,7 @@
     id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
     if( nil != obj ){
         [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
     }
     return obj;
@@ -176,12 +177,11 @@
     @try{
         NSTextView* view = (NSTextView*)self;
         if( XVim.instance.options.hlsearch ){
-            MOTION_OPTION opt = MOTION_OPTION_NONE;
-            if( XVim.instance.searcher.isCaseInsensitive ){
-                opt |= SEARCH_CASEINSENSITIVE;
+            XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
+            if( nil != lastSearch.regex ){
+                [view xvim_updateFoundRanges:lastSearch.regex withOption:lastSearch.option];
+                [view xvim_highlightFoundRanges];
             }
-            [view xvim_updateFoundRanges:XVim.instance.searcher.lastSearchString withOption:opt];
-            [view xvim_highlightFoundRanges];
         }else{
             [view xvim_clearHighlightText];
         }
@@ -304,7 +304,7 @@
 		if ([scrollView hasHorizontalScroller]) {
 			[scrollView setHasHorizontalScroller:NO];
 		}
-	}else if([keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
+	}else if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
         NSTextView* view = (NSTextView*)self;
         [view setNeedsUpdateFoundRanges:YES];
         [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];

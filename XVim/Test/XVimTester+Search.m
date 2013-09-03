@@ -31,6 +31,11 @@
                              @"ggg BBB i_i\n"  // 24 28 32
                              @"    jjj BbB";   // 36 40 44
     
+    static NSString* text5 = @"a;a bbb ccc\n"  // 0  4  8
+                             @"ddd e-e fff\n"  // 12 16 20
+                             @"ggg BBB i_i\n"  // 24 28 32
+                             @"    jjj bbb";   // 36 40 44
+    
     return [NSArray arrayWithObjects:
             // Search (/,?)
             XVimMakeTestCase(text1, 0,  0, @"/bbb<CR>", text1, 4, 0),
@@ -79,6 +84,19 @@
             // ignorecase
             XVimMakeTestCase(text4, 5,  0, @":set ignorecase<CR>*", text4, 28, 0),
             XVimMakeTestCase(text4, 5,  0, @":set noignorecase<CR>*", text4, 4, 0),
+            
+            // vimregex
+            // \c, \C specify case insensitive or sensitive.
+            // These specifier overrides 'ignorecase' or 'smartcase' option
+            XVimMakeTestCase(text5, 5, 0, @":set vimregex<CR>:set noignorecase<CR>/bbb\\c<CR>" , text5, 28, 0), // should ignore case
+            XVimMakeTestCase(text5, 5, 0, @":set vimregex<CR>:set ignorecase<CR>/bbb\\C<CR>" , text5,  44, 0), // should not ignore case
+            // \<,\> must match word boundary (converted to \b internally)
+            XVimMakeTestCase(text3, 5,  0, @":set vimregex<CR>/\\<bbb\\><CR>" , text3, 44, 0),
+            XVimMakeTestCase(text3,44,  0, @":set vimregex<CR>?\\<bbb\\><CR>" , text3,  4, 0),
+            
+            // * or # should only word boundary - should work also when vimregex is on
+            XVimMakeTestCase(text3, 5,  0, @":set vimregex<CR>*" , text3, 44, 0),
+            XVimMakeTestCase(text3,45,  0, @":set vimregex<CR>#" , text3,  4, 0),
             
             nil];
 }

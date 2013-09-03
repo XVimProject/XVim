@@ -25,4 +25,12 @@ BOOL isKeyword(unichar ch);
 - (BOOL) isNewline:(NSUInteger)index;
 - (BOOL) isNonblank:(NSUInteger)index;
 - (BOOL) isKeyword:(NSUInteger)index;
+
+/**
+ * Convert Vim regex to ICU regex.
+ * If some control options are specified in Vim regex it will be returned via "options" argument.
+ * This method never initialize passed "options".
+ * This means that if nothing is specified in the Vim regex, "options" stays unchanged.
+ **/
+- (NSString*)convertToICURegex:(NSRegularExpressionOptions*)options;
 @end
