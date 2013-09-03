@@ -10,5 +10,4 @@
 
 @interface XVimHookManager : NSObject
 + (void)hookWhenPluginLoaded;
-+ (void)hookWhenDidFinishLaunching;
 @end

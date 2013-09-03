@@ -61,53 +61,11 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 // For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{
     if( [notification.name hasPrefix:@"IDE"] || [notification.name hasPrefix:@"DVT"] ){
-        TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
+       TRACE_LOG(@"Got notification name : %@    object : %@", notification.name, NSStringFromClass([[notification object] class]));
     }
 }
 
-
-+ (void) load{
-    NSBundle* app = [NSBundle mainBundle];
-    NSString* identifier = [app bundleIdentifier];
-    
-    // Load only into Xcode
-    if( ![identifier isEqualToString:@"com.apple.dt.Xcode"] ){
-        return;
-    }
-    
-    // Entry Point of the Plugin.
-    [Logger defaultLogger].level = LogTrace;
-    
-    // This looks strange but this is what intended to.
-    // [XVim instance] part initialize all the internal objects which does not depends on each other
-    // (If some initialization of a object which is held by XVim class(such as XVimSearch) access
-    //  [XVim instance] inside it, it causes dead lock because of dispatch_once in [XVim instance] method.
-    // So after initializing all the independent object we do initialize dependent objects in init2
-    [[XVim instance] init2];
-    
-    //Caution: parseRcFile can potentially invoke +instance on XVim (e.g. if "set ..." is
-    //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
-    [[XVim instance] parseRcFile];
-    
-    
-    // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
-    //[[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
-    
-    // Do the hooking after the App has finished launching,
-    // Otherwise, we may miss some classes.
-
-    // Command line window is not setuped if hook is too late.
-    [XVimHookManager hookWhenPluginLoaded];
-
-    NSNotificationCenter* notificationCenter = [NSNotificationCenter defaultCenter];
-   [notificationCenter addObserver: [self class]
-                                  selector: @selector( applicationDidFinishLaunching )
-                                   name: NSApplicationDidFinishLaunchingNotification
-                                object: nil];
-}
-
-+ (void)applicationDidFinishLaunching{
-    [XVimHookManager hookWhenDidFinishLaunching];
++ (void) addXVimMenu{
     // Add XVim menu
     // I have tried to add the item into "Editor" but did not work.
     // It looks that the initialization of "Editor" menu is done later...
@@ -137,6 +95,51 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
     [menu insertItem:item atIndex:editorIndex];
     return;
+    
+}
+
++ (void) load{
+    NSBundle* app = [NSBundle mainBundle];
+    NSString* identifier = [app bundleIdentifier];
+    
+    // Load only into Xcode
+    if( ![identifier isEqualToString:@"com.apple.dt.Xcode"] ){
+        return;
+    }
+    
+    // Entry Point of the Plugin.
+    [Logger defaultLogger].level = LogTrace;
+    
+    // This looks strange but this is what intended to.
+    // [XVim instance] part initialize all the internal objects which does not depends on each other
+    // (If some initialization of a object which is held by XVim class(such as XVimSearch) access
+    //  [XVim instance] inside it, it causes dead lock because of dispatch_once in [XVim instance] method.
+    // So after initializing all the independent object we do initialize dependent objects in init2
+    [[XVim instance] init2];
+    
+    //Caution: parseRcFile can potentially invoke +instance on XVim (e.g. if "set ..." is
+    //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
+    [[XVim instance] parseRcFile];
+    
+    [self addXVimMenu];
+    
+    // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
+    // [[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
+    
+    // Do the hooking after the App has finished launching,
+    // Otherwise, we may miss some classes.
+
+    // Command line window is not setuped if hook is too late.
+    [XVimHookManager hookWhenPluginLoaded];
+    
+    // We used to observer NSApplicationDidFinishLaunchingNotification to wait for all the classes in Xcode are loaded.
+    // When notification comes we hook some classes so that we do not miss any classes.
+    // But unfortunately the notification often not delivered (I do not know why)
+    // And as far as I test in Xcode 4.6 all the classes(frameworks/plugins) we requre to hook have loaded when this "load" method is called.
+    // So we do not observer it now.
+    // This is related to issue #12
+    // If we need it again (waiting for some classes to be loaded) we probably should use NSBundleDidLoadNotification to know classes our interest
+    // have loaded.
 }
 
 + (XVim*)instance{

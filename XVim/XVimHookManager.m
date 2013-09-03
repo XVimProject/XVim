@@ -17,9 +17,6 @@
 
 + (void)hookWhenPluginLoaded{
     [IDEEditorAreaHook hook];
-}
-
-+ (void)hookWhenDidFinishLaunching{
     [IDEWorkspaceWindowHook hook];
 	[DVTSourceTextViewHook hook];
 	[IDESourceCodeEditorHook hook];
