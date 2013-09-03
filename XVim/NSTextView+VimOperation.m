@@ -40,7 +40,7 @@
 @property NSUInteger selectionBegin;
 //@property XVimPosition selectionBeginPosition; // This is readonly also internally
 @property XVIM_VISUAL_MODE selectionMode;
-@property CURSOR_MODE cursorMode;
+@property CURSOR_MODE cursorode;
 @property(strong) NSURL* documentURL;
 @property(readonly) NSMutableArray* foundRanges;
 
@@ -248,6 +248,11 @@
     return -1;
 }
 
+
+- (NSString*)xvim_string{
+    return [self.textStorage xvim_string];
+}
+
 #pragma mark Status
 
 - (NSUInteger)xvim_numberOfLinesInVisibleRect{
@@ -341,7 +346,7 @@
 
 - (void)xvim_delete:(XVimMotion*)motion{
     NSAssert( !(self.selectionMode == XVIM_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
-    if( self.insertionPoint == 0 && [[self string] length] == 0 ){
+    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
     
@@ -572,7 +577,7 @@
 }
 
 - (void)xvim_swapCase:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self string] length] == 0 ){
+    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
     
@@ -613,11 +618,11 @@
 }
 
 - (void)xvim_makeLowerCase:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self string] length] == 0 ){
+    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
     
-    NSString* s = [self string];
+    NSString* s = [self xvim_string];
     if( self.selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
         XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
@@ -640,11 +645,11 @@
 }
 
 - (void)xvim_makeUpperCase:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self string] length] == 0 ){
+    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
     
-    NSString* s = [self string];
+    NSString* s = [self xvim_string];
     if( self.selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
         XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
@@ -748,7 +753,7 @@
 }
 
 - (void)xvim_filter:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self string] length] == 0 ){
+    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
     
@@ -901,7 +906,7 @@
     }
     
     NSRange characterRange = [self.textStorage characterRangeForLineRange:NSMakeRange(line1-1, line2-line1+1)];
-    NSString *str = [[self string] substringWithRange:characterRange];
+    NSString *str = [[self xvim_string] substringWithRange:characterRange];
     
     NSMutableArray *lines = [[[str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy] autorelease];
     if ([[lines lastObject] length] == 0) {
@@ -1306,7 +1311,7 @@
     NSMutableArray* placeholders = [[NSMutableArray alloc] initWithCapacity:2];
     NSUInteger p = [self.textStorage firstOfLine:position];
     
-    for(NSUInteger curPos = p; curPos < [[self string] length]; curPos++){
+    for(NSUInteger curPos = p; curPos < [[self xvim_string] length]; curPos++){
         NSRange retval = [(DVTCompletingTextView*)self rangeOfPlaceholderFromCharacterIndex:curPos forward:YES wrap:NO limit:50];
         if(retval.location != NSNotFound){
             curPos = retval.location + retval.length;
@@ -1389,9 +1394,9 @@
 - (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
     // This method only update the internal state(like self.insertionPoint)
     
-    if( pos > [self string].length){
+    if( pos > [self xvim_string].length){
         DEBUG_LOG(@"Position specified exceeds the length of the text");
-        pos = [self string].length;
+        pos = [self xvim_string].length;
     }
     
     if( self.cursorMode == CURSOR_MODE_COMMAND && !(self.selectionMode == XVIM_VISUAL_BLOCK)){
@@ -1684,34 +1689,34 @@
             range = [self.textStorage currentWord:begin count:motion.count  option:motion.option];
             break;
         case TEXTOBJECT_BRACES:
-            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '{', '}');
+            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '{', '}');
             break;
         case TEXTOBJECT_PARAGRAPH:
             // Not supported
             break;
         case TEXTOBJECT_PARENTHESES:
-            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
             break;
         case TEXTOBJECT_SENTENCE:
             // Not supported
             break;
         case TEXTOBJECT_ANGLEBRACKETS:
-            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '<', '>');
+            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '<', '>');
             break;
         case TEXTOBJECT_SQUOTE:
-            range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\'');
+            range = xv_current_quote([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\'');
             break;
         case TEXTOBJECT_DQUOTE:
-            range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\"');
+            range = xv_current_quote([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\"');
             break;
         case TEXTOBJECT_TAG:
             // Not supported
             break;
         case TEXTOBJECT_BACKQUOTE:
-            range = xv_current_quote([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '`');
+            range = xv_current_quote([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '`');
             break;
         case TEXTOBJECT_SQUAREBRACKETS:
-            range = xv_current_block([self string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '[', ']');
+            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '[', ']');
             break;
         case MOTION_LINE_COLUMN:
             end = [self.textStorage positionAtLineNumber:motion.line column:motion.column];
@@ -1738,7 +1743,7 @@
 }
 
 - (NSRange)xvim_getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type {
-    if( [[self string] length] == 0 ){
+    if( [[self xvim_string] length] == 0 ){
         NSMakeRange(0,0); // No range
     }
     
@@ -1818,7 +1823,7 @@
 }
 
 - (void)xvim_shfit:(XVimMotion*)motion right:(BOOL)right{
-    if( self.insertionPoint == 0 && [[self string] length] == 0 ){
+    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
     

@@ -204,7 +204,6 @@ static const char* KEY_WINDOW = "xvimwindow";
     // Evaluate key stroke
 	XVimEvaluator* currentEvaluator = [evaluatorStack lastObject];
     currentEvaluator.window = self;
-    [((DVTFoldingTextStorage*)self.sourceView.textStorage) increaseUsingFoldedRanges];
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
     
     // Manipulate evaluator stack
@@ -248,8 +247,6 @@ static const char* KEY_WINDOW = "xvimwindow";
             break;
         }
     }
-    
-    [((DVTFoldingTextStorage*)self.sourceView.textStorage) decreaseUsingFoldedRanges];
     
     currentEvaluator = [evaluatorStack lastObject];
     [self.commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];

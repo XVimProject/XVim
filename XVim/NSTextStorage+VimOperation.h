@@ -94,6 +94,8 @@ typedef enum {
 
 @interface NSTextStorage (VimOperation)
 
+- (NSString*)xvim_string;
+
 #pragma mark Properties
 // Returns position of eof
 - (NSUInteger)endOfFile;
