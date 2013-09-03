@@ -120,9 +120,10 @@ The dot command ('.') is supported.
   :w[rite] | 
   :wq      | 
   :q[uit]  |
+  :register| Show contents of registers
   :s[ubstitute]|
   :set     | See Options for supported variables
-  :map     | Maps globally across XVim, in all modes
+  :map     | Show all the current mapping. When with arguments maps globally across XVim, in all modes
   :nmap    | Maps normal mode
   :vmap    | Maps visual mode
   :imap    | Maps insert mode
@@ -154,6 +155,7 @@ The dot command ('.') is supported.
   [no]gdefault |
   [no]smartcase |
   [no]number |
+  [no]hlsearch |
   guioptions | See below
   timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
