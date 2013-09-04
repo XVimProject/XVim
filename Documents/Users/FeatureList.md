@@ -202,7 +202,7 @@ Example:
     set guioptions=r
     nmap n e
 
-# Known problems
+## Known problems
  See XVim issue page.
 
 
