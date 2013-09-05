@@ -328,19 +328,35 @@
     if( r.end == NSNotFound ){
         return;
     }
-    switch( motion.motion ){
-        case MOTION_LINE_BACKWARD:
-        case MOTION_LINE_FORWARD:
-        case MOTION_LASTLINE:
-        case MOTION_LINENUMBER:
-            // TODO: Preserve column option can be included in motion object
-            [self xvim_moveCursor:r.end preserveColumn:YES];
-            break;
-        default:
-            [self xvim_moveCursor:r.end preserveColumn:NO];
-            break;
-    }
     
+    if( self.selectionMode != XVIM_VISUAL_NONE && [motion isTextObject]){
+        if( self.selectionMode == XVIM_VISUAL_LINE){
+            // Motion with text object in VISUAL LINE changes visual mode to VISUAL CHARACTER
+            [self setSelectionMode:XVIM_VISUAL_CHARACTER];
+        }
+        
+        if( self.insertionPoint < self.selectionBegin ){
+            // When insertionPoint < selectionBegin it only changes insertion point to begining of the text object
+            [self xvim_moveCursor:r.begin preserveColumn:NO];
+        }else{
+            // Otherwise, selectionBegin is set to begining of the text object and insertion point goes to end of the text object
+            self.selectionBegin = r.begin;
+            [self xvim_moveCursor:r.end preserveColumn:NO];
+        }
+    }else{
+        switch( motion.motion ){
+            case MOTION_LINE_BACKWARD:
+            case MOTION_LINE_FORWARD:
+            case MOTION_LASTLINE:
+            case MOTION_LINENUMBER:
+                // TODO: Preserve column option can be included in motion object
+                [self xvim_moveCursor:r.end preserveColumn:YES];
+                break;
+            default:
+                [self xvim_moveCursor:r.end preserveColumn:NO];
+                break;
+        }
+    }
     [self xvim_syncState];
 }
 
@@ -469,7 +485,7 @@
                 }
             }
         }
-        r = [self xvim_getOperationRangeFrom:self.insertionPoint To:to.end Type:motion.type];
+        r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
         BOOL eof = [self.textStorage isEOF:to.end];
         BOOL blank = [self.textStorage isBlankline:to.end];
         if( motion.type == LINEWISE && blank && eof){
@@ -589,9 +605,9 @@
                 return;
             }
             if( m.info->reachedEndOfLine ){
-                [self.textStorage toggleCaseForRange:[self xvim_getOperationRangeFrom:self.insertionPoint To:r.end Type:CHARACTERWISE_INCLUSIVE]];
+                [self.textStorage toggleCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_INCLUSIVE]];
             }else{
-                [self.textStorage toggleCaseForRange:[self xvim_getOperationRangeFrom:self.insertionPoint To:r.end Type:CHARACTERWISE_EXCLUSIVE]];
+                [self.textStorage toggleCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_EXCLUSIVE]];
             }
             [self xvim_moveCursor:r.end preserveColumn:NO];
         }else{
@@ -600,7 +616,7 @@
             if( to.end == NSNotFound){
                 return;
             }
-            r = [self xvim_getOperationRangeFrom:self.insertionPoint To:to.end Type:motion.type];
+            r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
             [self.textStorage toggleCaseForRange:r];
             [self xvim_moveCursor:r.location preserveColumn:NO];
         }
@@ -629,7 +645,7 @@
         if( to.end == NSNotFound ){
             return;
         }
-        r = [self xvim_getOperationRangeFrom:self.insertionPoint To:to.end Type:motion.type];
+        r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
         [self insertText:[[s substringWithRange:r] lowercaseString] replacementRange:r];
         [self xvim_moveCursor:r.location preserveColumn:NO];
     }else{
@@ -656,7 +672,7 @@
         if( to.end == NSNotFound ){
             return;
         }
-        r = [self xvim_getOperationRangeFrom:self.insertionPoint To:to.end Type:motion.type];  // TODO: use to.begin instead of insertionPoint
+        r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];  // TODO: use to.begin instead of insertionPoint
         [self insertText:[[s substringWithRange:r] uppercaseString] replacementRange:r];
         [self xvim_moveCursor:r.location preserveColumn:NO];
     }else{
@@ -764,7 +780,7 @@
         if( to.end == NSNotFound ){
             return;
         }
-        filterRange = [self xvim_getOperationRangeFrom:self.insertionPoint To:to.end Type:LINEWISE];
+        filterRange = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:LINEWISE];
     }else{
         insertionAfterFilter = [[[self xvim_selectedRanges] lastObject] rangeValue].location;
         NSUInteger start = [[[self xvim_selectedRanges] objectAtIndex:0] rangeValue].location;
@@ -1395,7 +1411,7 @@
     // This method only update the internal state(like self.insertionPoint)
     
     if( pos > [self xvim_string].length){
-        DEBUG_LOG(@"Position specified exceeds the length of the text");
+        ERROR_LOG(@"Position specified exceeds the length of the text");
         pos = [self xvim_string].length;
     }
     
@@ -1834,7 +1850,7 @@
         if( to.end == NSNotFound ){
             return;
         }
-        NSRange r = [self xvim_getOperationRangeFrom:self.insertionPoint To:to.end Type:LINEWISE];
+        NSRange r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:LINEWISE];
         insertionAfterShift = r.location;
         [self xvim_setSelectedRange:r];
     }else{

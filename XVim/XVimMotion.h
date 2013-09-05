@@ -81,4 +81,5 @@ typedef enum _MOTION{
 @property XVimMotionInfo* info;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;
+- (BOOL) isTextObject;
 @end 

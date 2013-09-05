@@ -113,11 +113,15 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)a{
-    // FIXME
-	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
     [self.argumentString appendString:@"a"];
-	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
-	return evaluator;
+	return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
+}
+
+// TODO: There used to be "b:" and "B:" methods here. Take a look how they have been.
+
+- (XVimEvaluator*)i{
+    [self.argumentString appendString:@"i"];
+    return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
 }
 
 - (XVimEvaluator*)c{
@@ -156,14 +160,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return [[[XVimGVisualEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
-- (XVimEvaluator*)i{
-    // FIXME
-	//XVimOperatorAction *action = [[XVimSelectAction alloc] init];
-    [self.argumentString appendString:@"i"];
-	XVimEvaluator *evaluator = [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
-	return evaluator;
-}
-
 - (XVimEvaluator*)J{
 	[[self sourceView] xvim_join:[self numericArg]];
     return nil;
@@ -178,6 +174,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)m_completed:(XVimEvaluator*)childEvaluator{
     // Vim does not escape from Visual mode after makr is set by m command
+    self.onChildCompleteHandler = nil;
     return self;
 }
     
@@ -197,7 +194,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	// As far as I can tell this is equivalent to change
 	return [self c];
 }
-
 
 - (XVimEvaluator*)u{
 	NSTextView *view = [self sourceView];
@@ -278,7 +274,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)Y{
-    //TODO: support yunk linewise
     [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_LINE];
     [[self sourceView] xvim_yank:nil];
     return nil;
@@ -431,12 +426,14 @@ TODO: This block is from commit 42498.
 	return nil;
 }
 
+/*
 - (XVimEvaluator*)motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = to;
     [[self sourceView] xvim_move:m];
     return self;
 }
+ */
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     [[self sourceView] xvim_move:motion];

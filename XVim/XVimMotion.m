@@ -32,4 +32,8 @@
     free(_info);
     [super dealloc];
 }
+
+- (BOOL)isTextObject{
+    return TEXTOBJECT_SENTENCE <= self.motion && self.motion <= TEXTOBJECT_BACKQUOTE;
+}
 @end

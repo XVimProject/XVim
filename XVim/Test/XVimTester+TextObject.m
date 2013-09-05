@@ -20,6 +20,7 @@
     static NSString* text_object6 = @"ggg`ggg`ggg";
     static NSString* text_object7 = @"hhh hhh hhh";
     
+    // Text object results with delete
     static NSString* text_object_i_result0 = @"aaa()aaa";
     static NSString* text_object_a_result0 = @"aaaaaa";
     static NSString* text_object_i_result1 = @"bbb\"\"bbb";
@@ -37,6 +38,10 @@
     static NSString* text_object_i_result7 = @"hhh  hhh";
     static NSString* text_object_a_result7 = @"hhh hhh";
     
+    // Text object results with yank
+    static NSString* text_object_yi_result0 = @"aaaaaa(aaa)aaa";
+    static NSString* text_object_ya_result0 = @"(aaa)aaa(aaa)aaa";
+    
     // Text Objects(TODO: with Numeric Arg)
     return [NSArray arrayWithObjects:
         // (), b
@@ -46,7 +51,14 @@
         XVimMakeTestCase(text_object0, 5, 0, @"da)", text_object_a_result0 , 3, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"dib", text_object_i_result0 , 4, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"dab", text_object_a_result0 , 3, 0),
-        
+            
+        XVimMakeTestCase(text_object0, 5, 0, @"yi(0P", text_object_yi_result0 , 2, 0),
+        XVimMakeTestCase(text_object0, 5, 0, @"yi)0P", text_object_yi_result0 , 2, 0),
+        XVimMakeTestCase(text_object0, 5, 0, @"ya(0P", text_object_ya_result0 , 4, 0),
+        XVimMakeTestCase(text_object0, 5, 0, @"ya)0P", text_object_ya_result0 , 4, 0),
+        XVimMakeTestCase(text_object0, 5, 0, @"yib0P", text_object_yi_result0 , 2, 0),
+        XVimMakeTestCase(text_object0, 5, 0, @"yab0P", text_object_ya_result0 , 4, 0),
+            
         // "
         XVimMakeTestCase(text_object1, 5, 0, @"di\"", text_object_i_result1 , 4, 0),
         XVimMakeTestCase(text_object1, 5, 0, @"da\"", text_object_a_result1 , 3, 0),
