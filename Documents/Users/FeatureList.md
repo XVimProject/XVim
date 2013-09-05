@@ -70,12 +70,17 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
 
  Input     | Operation
 -----------|---------------------------
-  C-w n    | Add new assistant editor
+  C-w n    | Add new assistant (Use layout of the last)
   C-w q    | Delete one assistant editor
-  C-w s    | Add new assistant editor horizontally
-  C-w v    | Add new assistant editor vertically
+  C-w s    | Add new assistant editor. Assistant editors are laid out holizontally.
+  C-w v    | Add new assistant editor. Assistant editors are laid out vertically.
 C-w h,j,k,l| Move focus between editors
 
+The behaviour of window manipulations is slitely different from Vim's one. This is becuase that Xcode doesn't have a concept of multiple equivalent text views in a window.
+Instead, Xcode has a concept of a main editor and assistant editors. A main editor always stays in a window and you can add/remove multiple assistant editors.
+You can NOT split a main editor but just can add assistant editors.
+All the manipulations XVim does is add/split assistant editors.
+The layout is forced to change with Ctrl-w,s or Ctrl-w,v .
 
 ## Search and Replace
 

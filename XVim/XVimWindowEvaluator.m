@@ -110,7 +110,7 @@
 
 - (XVimEvaluator*)v{
     [self addEditorWindow];
-    [[self tabController:self.window] changeToAssistantLayout_BV:self];
+    [[self tabController:self.window] changeToAssistantLayout_RV:self];
     return nil;
 }
 
