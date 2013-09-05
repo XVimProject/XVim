@@ -66,6 +66,7 @@
 - (NSUInteger)xvim_lineNumberAtMiddle;
 - (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
+- (void)xvim_swapCaseForRange:(NSRange)range;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -605,9 +606,9 @@
                 return;
             }
             if( m.info->reachedEndOfLine ){
-                [self.textStorage toggleCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_INCLUSIVE]];
+                [self xvim_swapCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_INCLUSIVE]];
             }else{
-                [self.textStorage toggleCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_EXCLUSIVE]];
+                [self xvim_swapCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_EXCLUSIVE]];
             }
             [self xvim_moveCursor:r.end preserveColumn:NO];
         }else{
@@ -617,13 +618,15 @@
                 return;
             }
             r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
-            [self.textStorage toggleCaseForRange:r];
+            [self.undoManager beginUndoGrouping];
+            [self xvim_swapCaseForRange:r];
+            [self.undoManager endUndoGrouping];
             [self xvim_moveCursor:r.location preserveColumn:NO];
         }
     }else{
         NSArray* ranges = [self xvim_selectedRanges];
         for( NSValue* val in ranges){
-            [self.textStorage toggleCaseForRange:[val rangeValue]];
+            [self xvim_swapCaseForRange:[val rangeValue]];
         }
         [self xvim_moveCursor:[[ranges objectAtIndex:0] rangeValue].location preserveColumn:NO];
     }
@@ -1950,6 +1953,25 @@
     return ret;
 }
 
+- (void)xvim_swapCaseForRange:(NSRange)range {
+    NSString* text = [self xvim_string];
+	
+	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
+	for (NSUInteger i = 0; i < range.length; ++i) {
+		NSRange currentRange = NSMakeRange(i, 1);
+		NSString *currentCase = [substring substringWithRange:currentRange];
+		NSString *upperCase = [currentCase uppercaseString];
+		
+		NSRange replaceRange = NSMakeRange(i, 1);
+		if ([currentCase isEqualToString:upperCase]){
+			[substring replaceCharactersInRange:replaceRange withString:[currentCase lowercaseString]];
+		}else{
+			[substring replaceCharactersInRange:replaceRange withString:upperCase];
+		}	
+	}
+	
+    [self insertText:substring replacementRange:range];
+}
 
 /* May be used later
 - (void)hideCompletions {

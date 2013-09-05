@@ -356,7 +356,6 @@ typedef enum {
 // Search starts from 'index-1' to the beginning of the string
 - (NSRange)searchRegexBackward:(NSString*)regex from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
 
-- (void)toggleCaseForRange:(NSRange)range;
 
 /**
  * This does all the work need to do with vim '%' motion.
