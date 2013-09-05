@@ -4,13 +4,14 @@
 #### Announcement
   Finally we are really pleased to announce release of XVim v1.0 alpha version.
   The main improvements include
-     - Visual block (Ctrl-v)
-     - Marks supporting jumping between files
-     - More accurate operation on registers
-     - More stable recording and execution
-     - Automatic testing system (for developers)
-     - hlsearch
-     - and more...
+
+  - Visual block (Ctrl-v)
+  - Marks supporting jumping between files
+  - More accurate operation on registers
+  - More stable recording and execution
+  - Automatic testing system (for developers)
+  - hlsearch
+  - and more...
 
   See Documents/Users/FeatureList.md for all the features.
 
