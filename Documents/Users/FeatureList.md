@@ -33,7 +33,7 @@ If you want to open the file under the cursor you can use 'gd' instead of 'gf' i
 ## Insert
 a, A, i, I, o, O
 
-You can use <C-o> to enter to temparary normal mode during insert mode.
+You can use Ctrl-o to enter to temparary normal mode during insert mode.
 
 ## Yank, put and change
 
@@ -207,7 +207,7 @@ Example:
     set guioptions=r
     nmap n e
 
-# Known problems
+## Known problems
  See XVim issue page.
 
 
