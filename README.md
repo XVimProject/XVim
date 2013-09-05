@@ -2,13 +2,23 @@
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
-  Current master branch is not stable compared to the master branch which has been developed since I started this project.
-  The old branch is save as a tag named "v0.1". You can get the source code from "Releases" in the github page.
-  But We hope you also try current branch becuase your bug reports will help us to imporove the stability.
+  Finally we are really pleased to announce release of XVim v1.0 alpha version.
+  The main improvements include
+     - Visual block (Ctrl-v)
+     - Marks supporting jumping between files
+     - More accurate operation on registers
+     - More stable recording and execution
+     - Automatic testing system (for developers)
+     - hlsearch
+     - and more...
+
+  See Documents/Users/FeatureList.md for all the features.
+
+  Unfortunately current master branch is not stable compared to the master branch which has been developed since I started this project. The old branch is saved with a tag name "v0.1". You can get the source code from "Releases" in the github page.
 
 ## Support Xcode Versions
   We are developing XVim with Xcode 4.6 at the moment, So we recommend you use XVim with XCode 4.6. 
-  Xcode 5 will be supported (Currently we are working on Xcode5-DP3 to work with XVim. See Issue #402, #404, #405)
+  Xcode5 will be supported. Current master branch does not work with Xcode5.
 
 ## INSTALL
  - Download source code(of one of releases) and open XVim.xcodeproj with Xcode.
@@ -37,11 +47,8 @@
    * The text you were manipulating
    * Xcode version 
    * XVim version ( Version number of the revision you built )
- 
-  There is also a logging feature in XVim. It can be turned on/off with `:set debug` & `:set nodebug`.
-  By default, it is off; to default to on, just add `:set debug` to your `.xvimrc`.
-  When logging is on, all key input is logged in `$HOME/.xvimlog`.
-  This log file is also generally helpful for debugging.
+  
+  We appreciate if you write test case for the bug. Read "Write test" section in Documents/Developsers/PullRequest.md how to write test case. You do not need to update any source code but just write 7 items explained there in an issue you create.
 
 ## Contributions
   Any suggestions, bug reports or feature requests are welcome.
