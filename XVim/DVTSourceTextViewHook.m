@@ -138,6 +138,13 @@
     @try{
         TRACE_LOG(@"Event:%@", theEvent.description);
         DVTSourceTextView *base = (DVTSourceTextView*)self;
+        if (theEvent.modifierFlags & NSCommandKeyMask ||
+            theEvent.modifierFlags & NSAlternateKeyMask)
+        {
+            [base mouseDown_:theEvent];
+            return;
+        }
+
         XVimWindow* window = [base xvimWindow];
         [window mouseDown:theEvent];
     }@catch (NSException* exception) {
