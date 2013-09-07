@@ -25,6 +25,10 @@
 
 @implementation XVimOperatorEvaluator
 
++ (XVimEvaluator*)doOperationWithMotion:(XVimMotion*)motion onView:(NSTextView*)view{
+    return nil;
+}
+
 - (id)initWithWindow:window{
 	if (self = [super initWithWindow:window]){
 	}
@@ -72,13 +76,28 @@
     // This happens for a command like "cw..."
     if( nil == evaluator ){
         NSTextView* view = self.window.sourceView;
-        if( ![NSStringFromClass([self class]) isEqualToString:@"XVimYankEvaluator"]){
+        NSString* className = NSStringFromClass([self class]);
+        if( ![className isEqualToString:@"XVimYankEvaluator"]){
             [[XVim instance] fixOperationCommands];
-            XVimMark* mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);
+            XVimMark* mark = nil;
+            if( [className isEqualToString:@"XVimJoinEvaluator"]){
+                // This is specical case for join operation.
+                // The mark is set at the head of next line of the insertion point after the operation
+                mark = XVimMakeMark([self.sourceView insertionLine]+1, 0, view.documentURL.path);
+            }else if( [className isEqualToString:@"XVimShiftEvaluator"] ){
+                mark = XVimMakeMark([self.sourceView insertionLine], 0, view.documentURL.path);
+            }
+            else{
+                mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);
+            }
             [[XVim instance].marks setMark:mark forName:@"."];
         }
     }
     return evaluator;
+}
+
+- (XVimEvaluator*)executeOperationWithMotion:(XVimMotion*)motion{
+    return [self _motionFixed:motion];
 }
 
 - (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{

@@ -36,6 +36,7 @@
 #import "XVimMotion.h"
 #import "XVimTildeEvaluator.h"
 #import "NSTextView+VimOperation.h"
+#import "XVimJoinEvaluator.h"
 
 @interface XVimNormalEvaluator() {
 	__weak XVimRegister *_playbackRegister;
@@ -176,12 +177,9 @@
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
-// For 'J' (join line) bring the line up from below. all leading whitespac
-// of the line joined in should be stripped and then one space should be inserted 
-// between the joined lines
 - (XVimEvaluator*)J{
-    [[self sourceView] xvim_join:[self numericArg]];
-    return nil;
+    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 // Should be moved to XVimMotionEvaluator
@@ -293,16 +291,27 @@
 }
 
 - (XVimEvaluator*)v{
-    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER] autorelease];
+    if( XVim.instance.isRepeating ){
+        return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+    }else{
+        return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER] autorelease];
+    }
 }
 
 - (XVimEvaluator*)V{
-    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_LINE] autorelease];
+    if( XVim.instance.isRepeating ){
+        return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+    }else{
+        return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_LINE] autorelease];
+    }
 }
 
 - (XVimEvaluator*)C_v{
-    // Block selection
-    return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_BLOCK]  autorelease];
+    if( XVim.instance.isRepeating ){
+        return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+    }else{
+        return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_BLOCK]  autorelease];
+    }
 }
 
 - (XVimEvaluator*)C_w{

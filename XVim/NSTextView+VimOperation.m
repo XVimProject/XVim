@@ -723,10 +723,10 @@
     }
     
     // Check if we need to insert space between lines.
-    NSUInteger endOfLine = [self.textStorage endOfLine:headOfLine];
-    if( endOfLine != NSNotFound ){
+    NSUInteger lastOfLine = [self.textStorage lastOfLine:headOfLine];
+    if( lastOfLine != NSNotFound ){
         // This is not blank line so we check if the last character is space or not .
-        if( ![self.textStorage isWhitespace:endOfLine] ){
+        if( ![self.textStorage isWhitespace:lastOfLine] ){
             needSpace = YES;
         }
     }
@@ -750,6 +750,9 @@
     }else{
         [self insertText:@""  replacementRange:NSMakeRange(tail, posToJoin-tail)];
     }
+    
+    // Move cursor
+    [self xvim_moveCursor:tail preserveColumn:NO];
 }
 
 - (void)xvim_join:(NSUInteger)count{
@@ -1847,19 +1850,19 @@
     }
     
     NSUInteger count = 1;
-    NSUInteger insertionAfterShift = self.insertionPoint;
+    XVimPosition insertionAfterShift = self.insertionPosition;
     if( self.selectionMode == XVIM_VISUAL_NONE ){
         XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
         if( to.end == NSNotFound ){
             return;
         }
         NSRange r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:LINEWISE];
-        insertionAfterShift = r.location;
         [self xvim_setSelectedRange:r];
     }else{
         count = motion.count; // Only when its visual mode we treat caunt as repeating shifting
-        insertionAfterShift = [[[self xvim_selectedRanges] lastObject] rangeValue].location;
+        // The cursor after the operation is the first line of selection and the same column of current insertion point
         NSUInteger start = [[[self xvim_selectedRanges] objectAtIndex:0] rangeValue].location;
+        insertionAfterShift = XVimMakePosition( [self.textStorage lineNumber:start], insertionAfterShift.column);
         NSRange lastSelection = [[[self xvim_selectedRanges] lastObject] rangeValue];
         NSUInteger end = lastSelection.location + lastSelection.length - 1;
         [self xvim_setSelectedRange:NSMakeRange(start, end-start+1)];
@@ -1872,8 +1875,7 @@
             [(DVTSourceTextView*)self shiftLeft:self];
         }
     }
-	NSUInteger cursorLocation = [self.textStorage firstNonblankInLine:insertionAfterShift];
-    [self xvim_moveCursor:cursorLocation preserveColumn:NO];
+    [self xvim_moveCursor:[self.textStorage positionAtLineNumber:insertionAfterShift.line column:insertionAfterShift.column] preserveColumn:NO];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     [self xvim_syncState];
 }
@@ -1882,7 +1884,8 @@
 #ifdef __USE_DVTKIT__
     if ( [self.textStorage isKindOfClass:[DVTSourceTextStorage class]] ){
         [(DVTSourceTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
-     }
+    }
+    return;
 #else
 #error You must implement here
 #endif
