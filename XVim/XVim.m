@@ -79,6 +79,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [item1 setState:NSOnState];
     item1.target = [XVim instance];
     item1.action = @selector(toggleXVim:);
+    item1.keyEquivalent = @"X";
     [m addItem:item1];
     
     if( [XVim instance].options.debug ){
