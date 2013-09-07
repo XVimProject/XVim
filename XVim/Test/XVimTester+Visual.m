@@ -24,6 +24,16 @@
     static NSString* V_d_result = @"ggg hhh i_i\n"
                                   @"    jjj kkk";
     
+    static NSString* rshift_result0 = @"        a;a bbb ccc\n" 
+                                      @"        ddd e-e fff\n"
+                                      @"ggg hhh i_i\n" 
+                                      @"    jjj kkk"; 
+    
+    static NSString* rshift_result1 = @"    a;a bbb ccc\n"
+                                      @"    ddd e-e fff\n"
+                                      @"    ggg hhh i_i\n"
+                                      @"        jjj kkk";
+    
     static NSString* C_v_d_result = @" bbb ccc\n"
                                     @" e-e fff\n"
                                     @" hhh i_i\n"
@@ -46,12 +56,10 @@
                                     @"ggg hhh i_i\n"  // 24 28 32
                                     @"    jjj kkk";   // 36 40 44
     
-    /*
     static NSString* J_result = @"a;a bbb ccc "
                                 @"ddd e-e fff "
                                 @"ggg hhh i_i "
-                                @"    jjj kkk"; //36
-     */
+                                @"jjj kkk"; 
     
     static NSString* p_result = @"a;a bbb ccc\n" 
                                 @"a;a fff\n"
@@ -68,6 +76,10 @@
             XVimMakeTestCase(text2, 0,  0, @"Vjd", V_d_result, 0, 0),
             
             // XVimMakeTestCase(text2, 0,  0, @"vjD", V_d_result, 0, 0), // not supported yet
+            
+            // Shift and repeat
+            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 0, 0), // #311
+            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,32, 0),
             
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljjd", C_v_d_result, 0, 0),
             XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),
@@ -86,7 +98,7 @@
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljgU<C-v>llju", text2, 0, 0),
             
             // Concanate
-            // XVimMakeTestCase(text2, 0,  0, @"VjjjJ", J_result, 35, 0), // The correct result location is not supported now
+            XVimMakeTestCase(text2, 0,  0, @"VjjjJ", J_result, 35, 0), // The correct result location is not supported now
             
             
             // Yank , Put

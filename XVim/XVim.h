@@ -44,6 +44,7 @@ extern NSString * const XVimDocumentPathKey;
 @property  XVIM_VISUAL_MODE lastVisualMode;
 @property  XVimPosition lastVisualPosition;
 @property  XVimPosition lastVisualSelectionBegin;
+@property (nonatomic) BOOL isRepeating; // For dot(.) command repeat
 
 @property (copy) NSString* lastPlaybackRegister;
 @property (copy) NSString* document;

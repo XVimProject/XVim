@@ -18,6 +18,38 @@
     
     static NSString* text2 = @"aAa bbb ccc";
     
+    static NSString* text3 = @"aaa\n"   // 0  (index of each WORD)
+                             @"bbb \n"  // 4  (space after b is intentional for J oepration test)
+                             @"ccc\n"   // 8 
+                             @"ddd\n"   // 12
+                             @"eee\n"   // 16
+                             @"fff";    // 20
+    
+    static NSString* text4 = @"aaa\n"   // 0  (index of each WORD)
+                             @"bbb\n"   // 4 
+                             @"ccc\n"   // 8 
+                             @"ddd\n"   // 12
+                             @"eee\n"   // 16
+                             @"fff";    // 20
+    
+    static NSString* text5 = @"        aaa\n"   // 0  (index of each WORD)
+                             @"        bbb\n"   // 12 
+                             @"        ccc\n"   // 24 
+                             @"        ddd\n"   // 36 
+                             @"        eee\n"   // 48
+                             @"        fff";    // 60
+    
+    /*
+    static NSString* text4 = @"{\n"   // 0  (index of each WORD)
+                             @"aaa\n" // 2
+                             @"bbb\n" // 6
+                             @"ccc\n" // 14 
+                             @"ddd\n" // 18
+                             @"eee\n" // 22
+                             @"fff\n" // 26
+                             @"}";    // 30
+     */
+    
     static NSString* a_result  = @"aAa bbXXXb ccc\n";
     static NSString* a_result2 = @"aAa bbXXXXXXXXXb ccc\n";
     static NSString* a_result3 = @"aXXXaa\n"
@@ -160,10 +192,74 @@
     //static NSString* C_w_resutl3= @"aaabbb\n"
     //                              @"ccc";
     
+    static NSString* J_result0 = @"aaa bbb \n"
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* J_result1 = @"aaa\n"
+                                 @"bbb ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* J_result2 = @"aaa bbb ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* J_result3 = @"aaa bbb ccc\n"
+                                 @"ddd eee fff";
+    
+    static NSString* rshift_result0 = @"aaa\n"
+                                      @"    bbb\n"
+                                      @"ccc\n"
+                                      @"ddd\n"
+                                      @"eee\n"
+                                      @"fff";
+    
+    static NSString* rshift_result1 = @"aaa\n"
+                                      @"    bbb\n"
+                                      @"    ccc\n"
+                                      @"    ddd\n"
+                                      @"eee\n"
+                                      @"fff";
+    
+    static NSString* rshift_result2 = @"    aaa\n"
+                                      @"    bbb\n"
+                                      @"ccc\n"
+                                      @"    ddd\n"
+                                      @"    eee\n"
+                                      @"fff";
+    
+    static NSString* lshift_result0 = @"        aaa\n"   // 0
+                                      @"    bbb\n"       // 12 
+                                      @"        ccc\n"   // 20
+                                      @"        ddd\n"   // 32
+                                      @"        eee\n"   // 44
+                                      @"        fff";    // 56
+    
+    static NSString* lshift_result1 = @"        aaa\n"   // 0  (index of each WORD)
+                                      @"    bbb\n"       // 12 
+                                      @"    ccc\n"       // 20
+                                      @"    ddd\n"       // 28
+                                      @"        eee\n"   // 36
+                                      @"        fff";    // 48
+    
+    static NSString* lshift_result2 = @"    aaa\n"       // 0  (index of each WORD)
+                                      @"    bbb\n"       // 8
+                                      @"        ccc\n"   // 16
+                                      @"    ddd\n"       // 28
+                                      @"    eee\n"       // 38
+                                      @"        fff";    // 46
+    
     return [NSArray arrayWithObjects:
             // All changes/insertions must be repeated by dot(.)
             // All insertions must set hat(^) mark
             // All changes/insertions must set dot(.) mark
+            
+            // Tests for operations in Visual mode are implemneted in XVimTester+Visual.m
             
             // a
             XVimMakeTestCase(text0, 5,  0, @"aXXX<ESC>"    , a_result ,  8, 0), // aXXX<ESC>
@@ -276,7 +372,6 @@
             XVimMakeTestCase(text1, 1,  0, @"rXjj`^", r_result4, 2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"rXjj`.", r_result5, 1, 0), // . Mark
             
-            
             // s
             XVimMakeTestCase(text0, 1, 0, @"saaa<ESC>"   , s_result1,  3, 0),
             XVimMakeTestCase(text0, 1, 0, @"2saa<ESC>"   , s_result2,  2, 0), // Numeric arg
@@ -304,6 +399,31 @@
             XVimMakeTestCase(text1, 5, 0, @"5X"    , X_result3, 4, 0), // Numeric arg (Not exceed head of line)
             XVimMakeTestCase(text1, 2, 0, @"Xj.j." , X_result4, 6, 0), // Repeat
             XVimMakeTestCase(text1, 1, 0, @"Xjj`." , X_result5, 0, 0), // . Mark
+            
+            // J
+            XVimMakeTestCase(text3, 1, 0, @"J"     , J_result0, 3, 0), // join 2 lines
+            XVimMakeTestCase(text3, 5, 0, @"J"     , J_result1, 8, 0), // join 2 lines trailing a space
+            XVimMakeTestCase(text3, 1, 0, @"3J"    , J_result2, 8, 0), // Numeric arg
+            XVimMakeTestCase(text3, 1, 0, @"3Jj."  , J_result3,19, 0), // Repeat
+            XVimMakeTestCase(text3, 5, 0, @"J`."  ,  J_result1,12, 0), // . Mark
+            
+            // > (Shift)
+            // the following test case assumes that Xcode indent in the preference is 4 spaces
+            XVimMakeTestCase(text4, 5, 0, @">>"     , rshift_result0, 5, 0), 
+            XVimMakeTestCase(text4, 5, 0, @"3>>"    , rshift_result1, 5, 0),
+            XVimMakeTestCase(text4, 1, 0, @"2>>jjj.", rshift_result2,21, 0),
+            XVimMakeTestCase(text4, 5, 0, @">>jj`." , rshift_result0, 4, 0),
+            XVimMakeTestCase(text4, 5, 0, @">>jj'." , rshift_result0, 8, 0),
+            
+            // < (Shift)
+            // the following test case assumes that Xcode indent in the preference is 4 spaces
+            XVimMakeTestCase(text5,13, 0, @"<<"     , lshift_result0,13, 0), 
+            XVimMakeTestCase(text5,13, 0, @"3<<"    , lshift_result1,13, 0),
+            XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,29, 0),
+            XVimMakeTestCase(text5,13, 0, @"<<jj`." , lshift_result0,12, 0),
+            XVimMakeTestCase(text5,13, 0, @"<<jj'." , lshift_result0,16, 0),
+            
+            // = (filter)
             
             // gu, gU
             XVimMakeTestCase(text0, 0,  0, @"guw", guw_result, 0, 0),

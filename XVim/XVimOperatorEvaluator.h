@@ -17,6 +17,7 @@
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
 - (id)initWithWindow:(XVimWindow *)window;
+- (XVimEvaluator*)executeOperationWithMotion:(XVimMotion*)motion;
 /*
 - (XVimEvaluator*)b;
 - (XVimEvaluator*)B;
