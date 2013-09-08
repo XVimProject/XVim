@@ -281,15 +281,22 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)mouseDown:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
-    if( self.sourceView.selectedRange.length == 0 && ![_evaluatorStack.lastObject isKindOfClass:[XVimVisualEvaluator class]] ){
-        NSPoint point = event.locationInWindow;
-        NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
-        NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
-        [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-        XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-        m.position = index;
-        [[self sourceView] xvim_move:m];
+    if( self.sourceView.selectedRange.length == 0 ){
+        if( ![_evaluatorStack.lastObject isKindOfClass:[XVimVisualEvaluator class]] ){
+            NSPoint point = event.locationInWindow;
+            NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
+            NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
+            [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+            XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+            m.position = index;
+            [[self sourceView] xvim_move:m];
+        }else{
+            // If it is visual mode reset to normal
+            [self _initEvaluatorStack:_evaluatorStack];
+            [self.sourceView xvim_adjustCursorPosition];
+        }
     }else{
+        // If it has selection area enter visual mode
         [self _initEvaluatorStack:_evaluatorStack];
         [self handleOneXVimString:@"v"]; 
     }
