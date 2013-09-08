@@ -48,7 +48,6 @@
     [self hook:@"becomeFirstResponder"];
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
-    [self hook:@"mouseDragged:"];
     [self hook:@"drawRect:"];
     [self hook:@"shouldDrawInsertionPoint"];
     [self hook:@"_drawInsertionPointInRect:color:"];
@@ -66,7 +65,6 @@
     [self unhook:@"becomeFirstResponder"];
     [self unhook:@"keyDown:"];
     [self unhook:@"mouseDown:"];
-    [self unhook:@"mouseDragged:"];
     [self unhook:@"drawRect:"];
     [self unhook:@"shouldDrawInsertionPoint"];
     [self unhook:@"_drawInsertionPointInRect:color:"];
@@ -138,41 +136,14 @@
     @try{
         TRACE_LOG(@"Event:%@", theEvent.description);
         DVTSourceTextView *base = (DVTSourceTextView*)self;
-        if (theEvent.modifierFlags & NSCommandKeyMask ||
-            theEvent.modifierFlags & NSAlternateKeyMask)
-        {
-            [base mouseDown_:theEvent];
-            return;
-        }
-
+        [base mouseDown_:theEvent];
+        // When mouse down, NSTextView ( base in this case) takes the control of event loop internally
+        // and the method call above does not return immidiately and block until mouse up. mouseDragged: method is called from inside it but
+        // it never calls mouseUp: event. After mouseUp event is handled internally it returns the control.
+        // So the code here is executed AFTER mouseUp event is handled.
+        // At this point NSTextView changes its selectedRange so we usually have to sync XVim state.
         XVimWindow* window = [base xvimWindow];
         [window mouseDown:theEvent];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    return;
-}
-
--  (void)mouseUp:(NSEvent *)theEvent{
-    @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        [window mouseUp:theEvent];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-	return;
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent {
-    @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        [window mouseDragged:theEvent];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];

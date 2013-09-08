@@ -27,6 +27,7 @@
 #import "XVimUppercaseEvaluator.h"
 #import "XVimTildeEvaluator.h"
 #import "XVimJoinEvaluator.h"
+#import "NSTextView+VimOperation.h"
 
 static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
 
@@ -52,8 +53,24 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	if (self = [self initWithWindow:window]) {
         _waitForArgument = NO;
         _visual_mode = mode;
-        self.initialFromPos = XVimMakePosition(NSNotFound, NSNotFound);;
-        self.initialToPos = XVimMakePosition(NSNotFound, NSNotFound);;
+        if( [window.sourceView selectedRanges].count == 1 ){
+            if( [window.sourceView selectedRange].length == 0 ){
+                self.initialFromPos = XVimMakePosition(NSNotFound, NSNotFound);;
+                self.initialToPos = XVimMakePosition(NSNotFound, NSNotFound);;
+            }else{
+                NSUInteger start = [window.sourceView selectedRange].location;
+                NSUInteger end = [window.sourceView selectedRange].location + [window.sourceView selectedRange].length - 1; 
+                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
+                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+            }
+        }else{
+            // Treat it as block selection
+            _visual_mode = XVIM_VISUAL_BLOCK;
+            NSUInteger start = [[[window.sourceView selectedRanges] objectAtIndex:0] rangeValue].location;
+            NSUInteger end = [[[window.sourceView selectedRanges] lastObject] rangeValue].location + [[[window.sourceView selectedRanges] lastObject] rangeValue].length - 1; 
+            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
+            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+        }
 	}
     return self;
 }

@@ -281,40 +281,18 @@ static const char* KEY_WINDOW = "xvimwindow";
 
 - (void)mouseDown:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
-    NSPoint point = event.locationInWindow;
-    NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
-    NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
-    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    m.position = index;
-    [[self sourceView] xvim_move:m];
-}
-
-- (void)mouseUp:(NSEvent *)event{
-    TRACE_LOG(@"Event:%@", event.description);
-    /*1
-    NSPoint point = event.locationInWindow;
-    NSPoint pointInView = [[self.sourceView view] convertPoint:point fromView:nil];
-    NSUInteger index = [self.sourceView glyphIndexForPoint:pointInView];
-     */
-    [self endMouseEvent:event];
-}
-
-- (void)mouseDragged:(NSEvent *)event{
-    TRACE_LOG(@"Event:%@", event.description);
-    NSPoint point = event.locationInWindow;
-    NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
-    NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
-    
-    if(self.sourceView.selectionMode == XVIM_VISUAL_NONE){
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_CHARACTER];
+    if( self.sourceView.selectedRange.length == 0 && ![_evaluatorStack.lastObject isKindOfClass:[XVimVisualEvaluator class]] ){
+        NSPoint point = event.locationInWindow;
+        NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
+        NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
+        [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+        XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+        m.position = index;
+        [[self sourceView] xvim_move:m];
+    }else{
+        [self _initEvaluatorStack:_evaluatorStack];
+        [self handleOneXVimString:@"v"]; 
     }
-    
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    m.position = index;
-    [[self sourceView] xvim_move:m];
-    [self endMouseEvent:event];
-     
 }
 
 - (NSRange)restrictSelectedRange:(NSRange)range {
