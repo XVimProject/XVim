@@ -62,9 +62,12 @@
 }
 
 + (void)unhook{
-    [self unhook:@"initWithCoder:"];
-    [self unhook:@"initWithFrame:textContainer:"];
-    //[self unhook:@"dealloc"]; // Once we hook initWithCoder we never unhook dealloc since there is cleanup code
+    // We never unhook these two methods.
+    // This is because we always have to control observers for XVimOptions
+    // If we unhook these, these may be a memory leak or it leads crash when a removing observer which has not been added as a observer in dealloc method.
+    // [self unhook:@"initWithCoder:"];
+    // [self unhook:@"initWithFrame:textContainer:"];
+    // [self unhook:@"dealloc"]; 
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
     [self unhook:@"becomeFirstResponder"];
     [self unhook:@"keyDown:"];
@@ -77,7 +80,9 @@
     [self unhook:@"didChangeText"];
     [self unhook:@"viewDidMoveToSuperview"];
     [self unhook:@"shouldChangeTextInRange:replacementString"];
-    [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
+    // We do not unhook this too. Since "addObserver" is called in initWithCoder we should keep this hook
+    // (Calling observerValueForKeyPath in NSObject results in throwing exception)
+    //[self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
 
 #ifdef __XCODE5__
@@ -104,7 +109,6 @@
     return (DVTSourceTextViewHook*)[base initWithFrame_:rect];
 }
 - (id)initWithCoder:(NSCoder*)coder{
-    TRACE_LOG(@"ENTER");
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
     if( nil != obj ){
@@ -120,11 +124,10 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 - (void)dealloc{
-    TRACE_LOG(@"ENTER");
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
+    [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
     [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
-    [base.textStorage removeObserver:self forKeyPath:@"string"];
     [base dealloc_];
     return;
 }
