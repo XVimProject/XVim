@@ -5,6 +5,7 @@
 //  Created by Tomas Lundell on 31/03/12.
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
+#define __XCODE5__
 
 #import "DVTFoundation.h"
 #import "DVTKit.h"
@@ -43,6 +44,7 @@
 
 + (void)hook{
     [self hook:@"initWithCoder:"];
+    [self hook:@"initWithFrame:textContainer:"];
     [self hook:@"dealloc"];
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
     [self hook:@"becomeFirstResponder"];
@@ -61,7 +63,8 @@
 
 + (void)unhook{
     [self unhook:@"initWithCoder:"];
-    // [self unhook:@"dealloc"]; // Once we hook initWithCoder we never unhook dealloc since there is cleanup code
+    [self unhook:@"initWithFrame:textContainer:"];
+    //[self unhook:@"dealloc"]; // Once we hook initWithCoder we never unhook dealloc since there is cleanup code
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
     [self unhook:@"becomeFirstResponder"];
     [self unhook:@"keyDown:"];
@@ -77,6 +80,29 @@
     [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
 
+#ifdef __XCODE5__
+- (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
+    TRACE_LOG(@"ENTER");
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    id obj =  (DVTSourceTextViewHook*)[base initWithFrame_:rect textContainer:container];
+    if( nil != obj ){
+        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+    }
+    return obj;
+}
+
+- (id)initWithCoder:(NSCoder*)coder{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    return (DVTSourceTextViewHook*)[base initWithCoder_:coder];
+}
+#else
+- (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
+    TRACE_LOG(@"ENTER");
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    return (DVTSourceTextViewHook*)[base initWithFrame_:rect];
+}
 - (id)initWithCoder:(NSCoder*)coder{
     TRACE_LOG(@"ENTER");
     DVTSourceTextView *base = (DVTSourceTextView*)self;
@@ -88,6 +114,7 @@
     }
     return obj;
 }
+#endif
 
 // This pragma is for suppressing warning that the dealloc method does not call [super dealloc]. ([base dealloc_] calls [super dealloc] so we do not need it)
 #pragma GCC diagnostic push

@@ -6,6 +6,7 @@
 //
 //
 
+#define __XCODE5__
 #define __USE_DVTKIT__
 
 #ifdef __USE_DVTKIT__
@@ -1490,9 +1491,14 @@
         [self _adjustCursorPosition];
     }
     [self dumpState];
+
+#ifdef __XCODE5__
+    [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
+#else
     [(DVTFoldingTextStorage*)self.textStorage increaseUsingFoldedRanges];
     [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
     [(DVTFoldingTextStorage*)self.textStorage decreaseUsingFoldedRanges];
+#endif
     [self xvim_scrollTo:self.insertionPoint];
     self.xvim_lockSyncStateFromView = NO;
 }
@@ -1882,8 +1888,8 @@
 
 - (void)xvim_indentCharacterRange:(NSRange)range{
 #ifdef __USE_DVTKIT__
-    if ( [self.textStorage isKindOfClass:[DVTSourceTextStorage class]] ){
-        [(DVTSourceTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
+    if ( [self.textStorage isKindOfClass:[DVTTextStorage class]] ){
+        [(DVTTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
     }
     return;
 #else
