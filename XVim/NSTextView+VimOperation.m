@@ -1387,11 +1387,9 @@
     }
     NSRange r = [self selectedRange];
     DEBUG_LOG(@"Selected Range(TotalLen:%d): Loc:%d Len:%d", self.string.length, r.location, r.length);
-    if( r.length == 0 ){
-        self.selectionMode = XVIM_VISUAL_NONE;
-        [self xvim_moveCursor:r.location preserveColumn:NO];
-        self.selectionBegin = self.insertionPoint;
-    }
+    self.selectionMode = XVIM_VISUAL_NONE;
+    [self xvim_moveCursor:r.location preserveColumn:NO];
+    self.selectionBegin = self.insertionPoint;
 }
 
 @end
