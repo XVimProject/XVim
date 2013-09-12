@@ -210,7 +210,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     while(YES){
         if( nil == nextEvaluator ){
             // current evaluator finished its task
-            XVimEvaluator* completeEvaluator = [evaluatorStack lastObject];
+            XVimEvaluator* completeEvaluator = [[[evaluatorStack lastObject] retain] autorelease]; // We have to retain here not to be dealloced in didEndHandler method.
             [evaluatorStack removeLastObject]; // remove current evaluator from the stack
             [completeEvaluator didEndHandler];
             if( [evaluatorStack count] == 0 ){
