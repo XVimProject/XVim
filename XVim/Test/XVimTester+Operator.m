@@ -192,6 +192,15 @@
     //static NSString* C_w_resutl3= @"aaabbb\n"
     //                              @"ccc";
     
+    static NSString* C_y_result= @"aaa\n"
+                                 @"baabb\n"
+                                 @"ccc";
+    
+    static NSString* C_e_result= @"aaa\n"
+                                 @"bccbb\n"
+                                 @"ccc";
+    
+    
     static NSString* J_result0 = @"aaa bbb \n"
                                  @"ccc\n"
                                  @"ddd\n"
@@ -451,6 +460,12 @@
             XVimMakeTestCase(text0, 11, 0, @"a<C-w><ESC>", C_w_result, 7, 0),
             XVimMakeTestCase(text0, 11, 0, @"i<C-w><ESC>", C_w_result2, 7, 0),
             // XVimMakeTestCase(text1, 4 , 0, @"i<C-w><ESC>", C_w_result3, 2, 0), // C-w should delete LF but not works currently
+            
+            // Insert and Ctrl-y
+            XVimMakeTestCase(text1, 4, 0, @"a<C-y><C-y><ESC>", C_y_result, 6, 0),
+            
+            // Insert and Ctrl-e
+            XVimMakeTestCase(text1, 4, 0, @"a<C-e><C-e><ESC>", C_e_result, 6, 0),
             nil];
     
 }

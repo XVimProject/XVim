@@ -35,6 +35,12 @@ a, A, i, I, o, O
 
 You can use Ctrl-o to enter to temparary normal mode during insert mode.
 
+Ctrl-w,Ctrl-y,Ctrl-e commands in insert mode are suppported. If you want to use Ctrl-e as "move to end of line" in insert mode (which is default Xcode behaviour),
+you can specify following line in .xvimrc.
+
+     inoremap <C-e> <C-o>$
+      
+
 ## Yank, put and change
 
 d, dd(d_), D, y, yy(y_), Y, c, cc(c_), C, r, s, S, x, X
