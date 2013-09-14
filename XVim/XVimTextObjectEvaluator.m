@@ -31,6 +31,10 @@
     [super dealloc];
 }
 
+- (XVimEvaluator*)defaultNextEvaluator{
+    return nil;
+}
+
 - (float)insertionPointHeightRatio{
     return 0.5;
 }
@@ -115,6 +119,10 @@
 
 - (XVimEvaluator*)BACKQUOTE{
     self.textobject = TEXTOBJECT_BACKQUOTE;
+    return nil;
+}
+
+- (XVimEvaluator*)ESC{
     return nil;
 }
 

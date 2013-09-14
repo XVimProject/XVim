@@ -146,6 +146,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)a{
+    self.onChildCompleteHandler = @selector(onComplete_ai:);
     [self.argumentString appendString:@"a"];
 	return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
 }
@@ -153,8 +154,22 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 // TODO: There used to be "b:" and "B:" methods here. Take a look how they have been.
 
 - (XVimEvaluator*)i{
+    self.onChildCompleteHandler = @selector(onComplete_ai:);
     [self.argumentString appendString:@"i"];
     return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
+}
+
+
+- (XVimEvaluator*)onComplete_ai:(XVimTextObjectEvaluator*)childEvaluator{
+    self.onChildCompleteHandler = nil;
+    if( childEvaluator.textobject == MOTION_NONE ){
+        return self;
+    }else{
+        MOTION_OPTION opt = ((XVimTextObjectEvaluator*)childEvaluator).inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
+        opt |= ((XVimTextObjectEvaluator*)childEvaluator).bigword ? BIGWORD : MOTION_OPTION_NONE;
+        XVimMotion* m = XVIM_MAKE_MOTION(((XVimTextObjectEvaluator*)childEvaluator).textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
+        return [self _motionFixed:m];
+    }
 }
 
 - (XVimEvaluator*)c{
