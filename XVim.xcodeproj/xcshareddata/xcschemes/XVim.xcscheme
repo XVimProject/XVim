@@ -40,7 +40,7 @@
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
       <PathRunnable
-         FilePath = "/Applications/Xcode5-DP3.app">
+         FilePath = "/Applications/Xcode 2.app">
       </PathRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
