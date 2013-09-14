@@ -254,14 +254,14 @@ To support to change highlighted locations when we put ":set hlsearch" or search
 See DVTSourceTextViewHook.m for the detail
 
 
-### Handling DVTFoldingTextStorage ###
+### Handling DVTFoldingTextStorage (This is only for Xcode4) ###
 DVTSourceTextView has a DVTFoldingTextStorage as its text storage.
 The big difference between DVTFoldingTextStorage and NSTextStorage is supporting folding.
 In DVTFoldingTextStorage you can not simply calculate the character index. For example, text following
 
-abcd <#placeholder#>
+abcd < #placeholder# >
 
-has a folding. DVTFoldingTextStorage represents place holder with <#and#>.
+has a folding. DVTFoldingTextStorage represents place holder with '< #' and '# >'.  (I intentionally add space between < and # not to be handled as a placeholder here. In actual text there is no space.)
 The text above results in
 
 abcd placeholder
@@ -300,3 +300,56 @@ a special glyph.
 In XVim, we usually do not want to handle "raw" representation of the folded storage but "folded" representation.
 So if we want to make some changes or calculate positions in a DVTFoldingTextStorage we usually need to call increaseUsingFoldedRanges.
 
+
+
+### View Controllers and View relations ###
+
+Xcode has a lot of view controllers and associated views.
+Here is the hierarchy. Each entity is a class name or a property/method name Xcode uses.
+This is because sometimes it is not understandable the meaning of a entity only from its class name.
+Arrow represent has-a or has-many relation ship.
+
+   Controllers                                   Window/Views
+
+IDEWorkspaceWindowController  -------------------------------->  IDEWorkspaceWindow  
+ |
+ |-> IDEWorkspaceTabController   ----------------------------->  designAreaSplitView(DVTSplitView)
+      |                                                     |->  navReplacementView(DVTReplaceMentView)
+      |                                                     |->  editorReplacementView(DVTReplacementView)
+      |                                                     |->  utilityAreaSplitView (DVTSplitView)
+      |                                                     |->  inspectorReplacementView (DVTReplacementView)
+      |                                                     |->  libraryReplacementView (DVTReplacementView)
+      |                                              
+      |-> IDEEditorArea 
+      |    |-> IDEEditorModeViewController(*1) 
+      |    |      |-> primaryEditorContext ------------------->  IDEEditor (*2)
+      |    |      |-> (secondaryEditorContext)
+      |    |
+      |    |-> IDEEditorContext(lastActiveEditorContext)
+      |    |-> IDEDebugBar
+      |    |-> IDEDebugArea
+      |    |
+      |    |-> lastActiveEditorContext(*3)
+      |
+      |-> IDENavigatorArea
+      |
+      |-> libraryArea
+      |
+      |-> inspectorArea
+
+
+
+(*1) IDEEditorModeViewController is a super class of following 3 classes
+      - IDEEditorBasicMode
+      - IDEEditorGeniusMode
+      - IDEEditorVersionMode
+     These 3 mode corresponds the icons on top right side of Xcode window labeled "Editor"
+     Genius mode has 2 editor context (primary and secondary)
+
+
+(*2) IDEEditor is a common super class of all kinds of editors in Xcode.
+     IDEEditor includes IDESourceCodeEditor, IDEComparisonEditor.
+     These editors are provided plugins (See Xcode.app/Contents/Plugins directory).
+     
+
+(*3) lastActiveEditorContext is a IDEEditorContext object which has had focus most recently.
