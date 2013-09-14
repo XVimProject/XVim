@@ -146,6 +146,10 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 	return other == self;
 }
 
+- (void)resetCompletionHandler{
+    self.onChildCompleteHandler = @selector(onChildComplete:);
+}
+
 - (XVimEvaluator*)D_d{
     // This is for debugging purpose.
     // Write any debugging process to confirme some behaviour.

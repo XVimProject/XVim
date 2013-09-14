@@ -304,6 +304,10 @@
             XVimMakeTestCase(text1, 1,  0, @"c_aaa<ESC>jj`^" , cc_result4,  2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"c_aaa<ESC>jj`." , cc_result4,  2, 0), // . Mark
             
+            // Combination c and f,t
+            XVimMakeTestCase(text0, 4,  0, @"cfcbbb c<ESC>hhhh" , text0, 4, 0),
+            XVimMakeTestCase(text0, 4,  0, @"ctcbbb <ESC>hhh"   , text0, 4, 0),  // #447
+            
             // d
             XVimMakeTestCase(text1, 1, 0, @"dw"    , d_result1, 0, 0),
             XVimMakeTestCase(text1, 1, 0, @"2dw"   , d_result2, 0, 0),    // Numeric arg

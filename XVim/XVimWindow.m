@@ -237,6 +237,7 @@ static const char* KEY_WINDOW = "xvimwindow";
                 [currentEvaluator becameHandler];
                  SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
+                [currentEvaluator resetCompletionHandler];
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
             [xvim cancelOperationCommands];
