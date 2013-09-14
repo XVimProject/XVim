@@ -24,7 +24,7 @@
 @class IDEWorkspaceWindow;
 @class XVimEvaluatorContext;
 
-@interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate>
+@interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
 
 @property(readonly) NSTextView* sourceView; // This represents currently focused sourceView
 
@@ -36,9 +36,6 @@
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
 - (void)mouseDown:(NSEvent*)event;
-
-// XVimCommandFieldDelegate
-- (void)commandFieldLostFocus:(XVimCommandField*)commandField;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;

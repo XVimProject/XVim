@@ -90,7 +90,6 @@
 
 - (void)relinquishFocusToWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
-	[commandField absorbFocusEvent];
 	[commandField setDelegate:nil];
     [self.window setForcusBackToSourceView];
     [commandField setHidden:YES];
