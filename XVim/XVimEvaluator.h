@@ -126,6 +126,8 @@ XVimMotionEvaluator
 
 - (NSTextView*)sourceView;
 
+- (void)resetCompletionHandler;
+
 ////////////////////////////////////////////////
 // Context convenience functions
 
