@@ -57,6 +57,15 @@
     [super dealloc];
 }
 
+- (void)becameHandler{
+	[self takeFocusFromWindow];
+	[super becameHandler];
+}
+
+- (void)didEndHandler{
+    [self relinquishFocusToWindow];
+}
+
 - (void)appendString:(NSString*)str{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
     [commandField setString:[commandField.string stringByAppendingString:str]];
@@ -84,6 +93,7 @@
 	[commandField absorbFocusEvent];
 	[commandField setDelegate:nil];
     [self.window setForcusBackToSourceView];
+    [commandField setHidden:YES];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
@@ -104,9 +114,7 @@
 		_historyNo = 0; // Typing always resets history
 	}
 	
-	if (next != self){
-		[self relinquishFocusToWindow];
-    } else if (_onKeyPress != nil) {
+    if (_onKeyPress != nil) {
         _onKeyPress([[commandField string] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]);
     }
             
@@ -117,11 +125,6 @@
 	return [keymapProvider keymapForMode:XVIM_MODE_CMDLINE];
 }
 
-- (void)becameHandler{
-	[super becameHandler];
-
-	[self takeFocusFromWindow];
-}
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
 	return nil;

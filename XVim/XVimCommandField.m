@@ -20,12 +20,13 @@
 @implementation XVimCommandField
 
 - (BOOL)becomeFirstResponder{
-	[self show];
+	[self setEditable:YES];
+	[self setHidden:NO];
 	return YES;
 }
 
 - (BOOL)resignFirstResponder{
-	[self hide];
+	[self setEditable:NO];
 	
 	if (!_absorbFocusEvent){
 		[_delegate commandFieldLostFocus:self];
@@ -59,18 +60,6 @@
     } else {
         [self setNeedsDisplayInRect:self.visibleRect avoidAdditionalLayout:NO];
     }
-}
-
-- (void)hide
-{
-	[self setEditable:NO];
-	[self setHidden:YES];
-}
-
-- (void)show
-{
-	[self setEditable:YES];
-	[self setHidden:NO];
 }
 
 - (void)keyDown:(NSEvent*)event {
