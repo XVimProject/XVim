@@ -21,8 +21,6 @@
 
 - (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate;
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
-- (void)show;
-- (void)hide;
 
 // Hack: Prevents commandFieldLostFocus when command field disappears naturally
 - (void)absorbFocusEvent;

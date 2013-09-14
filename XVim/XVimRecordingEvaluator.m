@@ -50,14 +50,6 @@
     return self;
 }
 
-- (void)drawRect:(NSRect)rect{
-    [[self.evaluatorStack lastObject] drawRect:rect];
-}
-
-- (BOOL)shouldDrawInsertionPoint{
-    return [[self.evaluatorStack lastObject] shouldDrawInsertionPoint];
-}
-
 - (float)insertionPointHeightRatio{
     return [[self.evaluatorStack lastObject] insertionPointHeightRatio];
 }

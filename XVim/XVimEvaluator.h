@@ -114,10 +114,6 @@ XVimMotionEvaluator
  **/
 - (void)didEndHandler;
 - (XVimEvaluator*)defaultNextEvaluator;
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event;
-//- (NSRange)restrictSelectedRange:(NSRange)range;
-- (void)drawRect:(NSRect)rect;
-- (BOOL)shouldDrawInsertionPoint;
 - (float)insertionPointHeightRatio;
 - (float)insertionPointWidthRatio;
 - (float)insertionPointAlphaRatio;

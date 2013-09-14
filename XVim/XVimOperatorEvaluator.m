@@ -35,10 +35,6 @@
 	return self;
 }
 
-- (void)drawRect:(NSRect)rect{
-	return [self.parent drawRect:rect];
-}
-
 - (void)dealloc {
     [super dealloc];
 }

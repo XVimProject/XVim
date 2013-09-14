@@ -27,6 +27,7 @@
 #import "XVimUppercaseEvaluator.h"
 #import "XVimTildeEvaluator.h"
 #import "XVimJoinEvaluator.h"
+#import "NSTextView+VimOperation.h"
 
 static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
 
@@ -52,8 +53,24 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	if (self = [self initWithWindow:window]) {
         _waitForArgument = NO;
         _visual_mode = mode;
-        self.initialFromPos = XVimMakePosition(NSNotFound, NSNotFound);;
-        self.initialToPos = XVimMakePosition(NSNotFound, NSNotFound);;
+        if( [window.sourceView selectedRanges].count == 1 ){
+            if( [window.sourceView selectedRange].length == 0 ){
+                self.initialFromPos = XVimMakePosition(NSNotFound, NSNotFound);;
+                self.initialToPos = XVimMakePosition(NSNotFound, NSNotFound);;
+            }else{
+                NSUInteger start = [window.sourceView selectedRange].location;
+                NSUInteger end = [window.sourceView selectedRange].location + [window.sourceView selectedRange].length - 1; 
+                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
+                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+            }
+        }else{
+            // Treat it as block selection
+            _visual_mode = XVIM_VISUAL_BLOCK;
+            NSUInteger start = [[[window.sourceView selectedRanges] objectAtIndex:0] rangeValue].location;
+            NSUInteger end = [[[window.sourceView selectedRanges] lastObject] rangeValue].location + [[[window.sourceView selectedRanges] lastObject] rangeValue].length - 1; 
+            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
+            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+        }
 	}
     return self;
 }
@@ -114,30 +131,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return [keymapProvider keymapForMode:XVIM_MODE_VISUAL];
 }
 
-- (void)drawRect:(NSRect)rect{
-    NSTextView* sourceView = [self sourceView];
-	
-	NSUInteger glyphIndex = [sourceView insertionPoint];
-	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
-	
-	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
-	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
-}
-
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     [XVim instance].lastVisualMode = self.sourceView.selectionMode;
     [XVim instance].lastVisualPosition = self.sourceView.insertionPosition;
     [XVim instance].lastVisualSelectionBegin = self.sourceView.selectionBeginPosition;
     
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
-    /**
-     * The folloing code is to draw insertion point when its visual mode.
-     * Original NSTextView does not draw insertion point so we have to do it manually.
-     **/
-    [self.sourceView lockFocus];
-    [self drawRect:[self.sourceView xvim_boundingRectForGlyphIndex:self.sourceView.insertionPoint]];
-    [self.sourceView setNeedsDisplayInRect:[self.sourceView visibleRect] avoidAdditionalLayout:NO];
-    [self.sourceView unlockFocus];
     
     if( [XVimEvaluator invalidEvaluator] == nextEvaluator ){
         return self;

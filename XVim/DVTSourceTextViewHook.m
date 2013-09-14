@@ -24,6 +24,7 @@
 #import "NSEvent+VimHelper.h"
 #import "NSObject+ExtraData.h"
 #import "XVim.h"
+#import "XVimUtil.h"
 #import "XVimSearch.h"
 #import <objc/runtime.h>
 #import <string.h>
@@ -47,12 +48,9 @@
     [self hook:@"initWithFrame:textContainer:"];
     [self hook:@"dealloc"];
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
-    [self hook:@"becomeFirstResponder"];
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
-    [self hook:@"mouseDragged:"];
     [self hook:@"drawRect:"];
-    [self hook:@"shouldDrawInsertionPoint"];
     [self hook:@"_drawInsertionPointInRect:color:"];
     [self hook:@"drawInsertionPointInRect:color:turnedOn:"];
     [self hook:@"didChangeText"];
@@ -69,12 +67,9 @@
     // [self unhook:@"initWithFrame:textContainer:"];
     // [self unhook:@"dealloc"]; 
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
-    [self unhook:@"becomeFirstResponder"];
     [self unhook:@"keyDown:"];
     [self unhook:@"mouseDown:"];
-    [self unhook:@"mouseDragged:"];
     [self unhook:@"drawRect:"];
-    [self unhook:@"shouldDrawInsertionPoint"];
     [self unhook:@"_drawInsertionPointInRect:color:"];
     [self unhook:@"_drawInsertionPointInRect:color:turnedOn:"];
     [self unhook:@"didChangeText"];
@@ -152,6 +147,7 @@
         DEBUG_LOG(@"Obj:%p keyDown : keyCode:%d firstCharacter:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [[theEvent characters] characterAtIndex:0], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
         
         if( [window handleKeyEvent:theEvent] ){
+            [base updateInsertionPointStateAndRestartTimer:YES];
             return;
         }
         // Call Original keyDown:
@@ -168,34 +164,14 @@
     @try{
         TRACE_LOG(@"Event:%@", theEvent.description);
         DVTSourceTextView *base = (DVTSourceTextView*)self;
+        [base mouseDown_:theEvent];
+        // When mouse down, NSTextView ( base in this case) takes the control of event loop internally
+        // and the method call above does not return immidiately and block until mouse up. mouseDragged: method is called from inside it but
+        // it never calls mouseUp: event. After mouseUp event is handled internally it returns the control.
+        // So the code here is executed AFTER mouseUp event is handled.
+        // At this point NSTextView changes its selectedRange so we usually have to sync XVim state.
         XVimWindow* window = [base xvimWindow];
         [window mouseDown:theEvent];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    return;
-}
-
--  (void)mouseUp:(NSEvent *)theEvent{
-    @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        [window mouseUp:theEvent];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-	return;
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent {
-    @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        [window mouseDragged:theEvent];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -217,26 +193,19 @@
         }
         
         DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
         [base drawRect_:dirtyRect];
-        [window drawRect:dirtyRect];
+        if( base.selectionMode != XVIM_VISUAL_NONE ){
+            // NSTextView does not draw insertion point when selecting text. We have to draw insertion point by ourselves.
+            NSUInteger glyphIndex = [base insertionPoint];
+            NSRect glyphRect = [base xvim_boundingRectForGlyphIndex:glyphIndex];
+            [[[base insertionPointColor] colorWithAlphaComponent:0.5] set];
+            NSRectFillUsingOperation( glyphRect, NSCompositeSourceOver);
+        }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
     return;
-}
-
-- (BOOL)shouldDrawInsertionPoint{
-    @try{
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        return [window shouldDrawInsertionPoint];
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    return YES;
 }
 
 // Drawing Caret
@@ -268,23 +237,6 @@
     if( !flag ){
         [base setNeedsDisplay:YES];
     }
-}
-- (BOOL)becomeFirstResponder{
-    // Since XVimWindow manages multiple DVTSourceTextView
-    // we have to switch current text view when the first responder changed.
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    XVimWindow* window = [base xvimWindow];
-    BOOL b = [base becomeFirstResponder_];
-    @try{
-        if (b) {
-            TRACE_LOG(@"DVTSourceTextView:%p became first responder", self);
-            window.sourceView = (NSTextView*)base;
-        }
-    }@catch (NSException* exception) {
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    return b;
 }
 
 - (void)didChangeText{
