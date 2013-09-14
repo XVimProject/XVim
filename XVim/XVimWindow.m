@@ -21,6 +21,7 @@
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
 
+
 @interface XVimWindow() {
     NSMutableArray* _evaluatorStack;
 	XVimKeymapContext* _keymapContext;
@@ -282,9 +283,13 @@ static const char* KEY_WINDOW = "xvimwindow";
         [self _initEvaluatorStack:_evaluatorStack];
         [self.sourceView xvim_adjustCursorPosition];
     }else{
+        // Manually initialize stack evaluator.
+        // This is because Normal evaluator initialize selection length to 0.
+        // We want to keep current selection length and handle it by a VisualEvaluator
         [[self _currentEvaluator] didEndHandler];
-        [self _initEvaluatorStack:_evaluatorStack];
-        [self handleOneXVimString:@"v"]; 
+        [_evaluatorStack removeAllObjects];
+        [_evaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease]];
+        [self handleOneXVimString:@"v"];
     }
 }
 
