@@ -54,7 +54,7 @@
     
 - (void)becameHandler{
     [super becameHandler];
-    //[self.sourceView changeSelectionMode:XVIM_VISUAL_NONE];
+    [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
 - (NSString*)modeString {

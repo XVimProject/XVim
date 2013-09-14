@@ -12,8 +12,7 @@
 #import "Logger.h"
 
 @interface XVimCommandField() {
-	XVimWindow<XVimCommandFieldDelegate>* _delegate;
-	BOOL _absorbFocusEvent;
+	XVimWindow* _delegate;
 }
 @end
 
@@ -25,22 +24,8 @@
 	return YES;
 }
 
-- (BOOL)resignFirstResponder{
-	[self setEditable:NO];
-	
-	if (!_absorbFocusEvent){
-		[_delegate commandFieldLostFocus:self];
-	}
-	_absorbFocusEvent = NO;
-	return YES;
-}
-
-- (void)setDelegate:(XVimWindow<XVimCommandFieldDelegate>*)delegate{
+- (void)setDelegate:(XVimWindow*)delegate{
 	_delegate = delegate;
-}
-
-- (void)absorbFocusEvent{
-	_absorbFocusEvent = YES;
 }
 
 // Drawing Caret

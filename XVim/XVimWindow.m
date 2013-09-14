@@ -18,6 +18,8 @@
 #import "IDEEditorArea+XVim.h"
 #import "XVimSearch.h"
 #import "NSTextView+VimOperation.h"
+#import "XVimCommandLineEvaluator.h"
+#import "XVimInsertEvaluator.h"
 
 @interface XVimWindow() {
     NSMutableArray* _evaluatorStack;
@@ -266,27 +268,21 @@ static const char* KEY_WINDOW = "xvimwindow";
 	[[self sourceView] insertText:text];
 }
 
-- (void)commandFieldLostFocus:(XVimCommandField*)commandField {
-	[commandField setDelegate:nil];
-    [self _initEvaluatorStack:_evaluatorStack];
-}
-
 - (void)mouseDown:(NSEvent *)event{
-    TRACE_LOG(@"Event:%@", event.description);
+    // TODO: To make it simple we should forward mouse events
+    //       to handleKeyStroke as a special key stroke
+    //       and the key stroke should be handled by the current evaluator.
+    if( [[self _currentEvaluator] isKindOfClass:[XVimInsertEvaluator class]] ){
+        return;
+    }
+    
     if( self.sourceView.selectedRange.length == 0 ){
-        if( ![_evaluatorStack.lastObject isKindOfClass:[XVimVisualEvaluator class]] ){
-            NSUInteger index = self.sourceView.selectedRange.location;
-            [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-            XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-            m.position = index;
-            [[self sourceView] xvim_move:m];
-        }else{
-            // If it is visual mode reset to normal
-            [self _initEvaluatorStack:_evaluatorStack];
-            [self.sourceView xvim_adjustCursorPosition];
-        }
+        // If it is visual mode reset to normal
+        [[self _currentEvaluator] didEndHandler];
+        [self _initEvaluatorStack:_evaluatorStack];
+        [self.sourceView xvim_adjustCursorPosition];
     }else{
-        // If it has selection area enter visual mode
+        [[self _currentEvaluator] didEndHandler];
         [self _initEvaluatorStack:_evaluatorStack];
         [self handleOneXVimString:@"v"]; 
     }
