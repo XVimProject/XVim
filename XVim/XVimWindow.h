@@ -26,17 +26,13 @@
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate, XVimCommandFieldDelegate>
 
-@property(strong) NSTextView* sourceView; // This represents currently focused sourceView
+@property(readonly) NSTextView* sourceView; // This represents currently focused sourceView
 
 - (XVimCommandLine*)commandLine;
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)stack;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (BOOL)handleXVimString:(XVimString*)strokes;
-- (void)beginMouseEvent:(NSEvent*)event;
-- (void)endMouseEvent:(NSEvent*)event;
-- (void)drawRect:(NSRect)rect;
-- (BOOL)shouldDrawInsertionPoint;
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
 - (void)mouseDown:(NSEvent*)event;

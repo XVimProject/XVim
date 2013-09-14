@@ -131,30 +131,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 	return [keymapProvider keymapForMode:XVIM_MODE_VISUAL];
 }
 
-- (void)drawRect:(NSRect)rect{
-    NSTextView* sourceView = [self sourceView];
-	
-	NSUInteger glyphIndex = [sourceView insertionPoint];
-	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
-	
-	[[[sourceView insertionPointColor] colorWithAlphaComponent:0.5] set];
-	NSRectFillUsingOperation(glyphRect, NSCompositeSourceOver);
-}
-
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     [XVim instance].lastVisualMode = self.sourceView.selectionMode;
     [XVim instance].lastVisualPosition = self.sourceView.insertionPosition;
     [XVim instance].lastVisualSelectionBegin = self.sourceView.selectionBeginPosition;
     
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
-    /**
-     * The folloing code is to draw insertion point when its visual mode.
-     * Original NSTextView does not draw insertion point so we have to do it manually.
-     **/
-    [self.sourceView lockFocus];
-    [self drawRect:[self.sourceView xvim_boundingRectForGlyphIndex:self.sourceView.insertionPoint]];
-    [self.sourceView setNeedsDisplayInRect:[self.sourceView visibleRect] avoidAdditionalLayout:NO];
-    [self.sourceView unlockFocus];
     
     if( [XVimEvaluator invalidEvaluator] == nextEvaluator ){
         return self;

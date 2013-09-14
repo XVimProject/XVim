@@ -122,22 +122,6 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     return [XVimEvaluator invalidEvaluator];
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	if( self.sourceView.selectionMode == XVIM_VISUAL_NONE){
-        return [[[XVimNormalEvaluator alloc] init] autorelease];
-    }else{
-        //return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER withRange:NSMakeRange(0,0)] autorelease];
-        return [[[XVimNormalEvaluator alloc] init] autorelease];
-    }
-}
-
-- (void)drawRect:(NSRect)rect{
-}
-
-- (BOOL)shouldDrawInsertionPoint{
-	return YES;
-}
-
 - (float)insertionPointHeightRatio{
     return 1.0;
 }

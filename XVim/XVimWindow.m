@@ -7,6 +7,7 @@
 
 #import "XVimWindow.h"
 #import "XVim.h"
+#import "XVimUtil.h"
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVimKeyStroke.h"
@@ -32,7 +33,6 @@
 @end
 
 @implementation XVimWindow
-@synthesize sourceView = _sourceView;
 @synthesize editorArea = _editorArea;
 static const char* KEY_WINDOW = "xvimwindow";
 
@@ -43,6 +43,10 @@ static const char* KEY_WINDOW = "xvimwindow";
 + (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea{
     XVimWindow* w = [[[XVimWindow alloc] initWithIDEEditorArea:editorArea] autorelease];
 	objc_setAssociatedObject(editorArea, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
+}
+
+- (NSTextView*)sourceView{
+    return [[[[[self editorArea] lastActiveEditorContext] editor] mainScrollView] documentView];
 }
 
 - (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
@@ -62,7 +66,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (void)dealloc{
     [_keymapContext release];
     [_staticString release];
-    [_sourceView release];
     self.editorArea = nil;
     self.inputContext = nil;
     self.tmpBuffer = nil;
@@ -262,30 +265,11 @@ static const char* KEY_WINDOW = "xvimwindow";
     [self _initEvaluatorStack:_evaluatorStack];
 }
 
-- (void)beginMouseEvent:(NSEvent*)event {
-    TRACE_LOG(@"Event:%@", event.description);
-	_handlingMouseEvent = YES;
-}
-
-- (void)endMouseEvent:(NSEvent*)event {
-    TRACE_LOG(@"Event:%@", event.description);
-    [self clearErrorMessage];
-	_handlingMouseEvent = NO;
-	XVimEvaluator* next = [[self _currentEvaluator] handleMouseEvent:event];
-    if( nil != next ){
-        [_evaluatorStack addObject:next];
-    }else{
-        [self _initEvaluatorStack:_evaluatorStack];
-    }
-}
-
 - (void)mouseDown:(NSEvent *)event{
     TRACE_LOG(@"Event:%@", event.description);
     if( self.sourceView.selectedRange.length == 0 ){
         if( ![_evaluatorStack.lastObject isKindOfClass:[XVimVisualEvaluator class]] ){
-            NSPoint point = event.locationInWindow;
-            NSPoint pointInView = [self.sourceView convertPoint:point fromView:nil];
-            NSUInteger index = [self.sourceView xvim_glyphIndexForPoint:pointInView];
+            NSUInteger index = self.sourceView.selectedRange.location;
             [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
             m.position = index;
@@ -307,14 +291,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 		//range = [[self _currentEvaluator] restrictSelectedRange:range];
 	}
 	return range;
-}
-
-- (void)drawRect:(NSRect)rect {
-	[[self _currentEvaluator] drawRect:rect];
-}
-
-- (BOOL)shouldDrawInsertionPoint {
-	return [[self _currentEvaluator] shouldDrawInsertionPoint];
 }
 
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
@@ -397,8 +373,6 @@ static char s_associate_key = 0;
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
-    
-    //return [[self.sourceView view] insertText:aString replacementRange:replacementRange];
 }
 
 - (void)doCommandBySelector:(SEL)aSelector{
@@ -409,13 +383,6 @@ static char s_associate_key = 0;
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
-    /*
-    NSString* selector = NSStringFromSelector(aSelector);
-    if( [selector isEqualToString:@"cancelOperation:"] ){
-        [self handleXVimString:XVimStringFromKeyNotation(@"<ESC>")];
-    }
-     */
-    //return [[self.sourceView view] doCommandBySelector:aSelector];
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange{

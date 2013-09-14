@@ -90,10 +90,6 @@
     [self.sourceView xvim_insert];
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-    return self;
-}
-
 - (float)insertionPointHeightRatio{
     if(_oneCharMode){
         return 0.25;

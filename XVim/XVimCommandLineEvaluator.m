@@ -127,19 +127,6 @@
 	return nil;
 }
 
-- (XVimEvaluator*)handleMouseEvent:(NSEvent*)event{
-	[self relinquishFocusToWindow];
-	return nil;
-}
-
-- (void)drawRect:(NSRect)rect{
-	[self.parent drawRect:rect];
-}
-
-- (BOOL)shouldDrawInsertionPointInWindow:(XVimWindow*)window{
-	return NO;
-}
-
 - (float)insertionPointHeightRatio{
     return 0.0;
 }
