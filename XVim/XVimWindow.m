@@ -46,7 +46,13 @@ static const char* KEY_WINDOW = "xvimwindow";
 }
 
 - (NSTextView*)sourceView{
-    return [[[[[self editorArea] lastActiveEditorContext] editor] mainScrollView] documentView];
+    int mode = [[self editorArea] editorMode];
+    IDEEditor* editor = [[[self editorArea] lastActiveEditorContext] editor];
+    if( mode ==  2 && [editor isKindOfClass:[IDEComparisonEditor class]]){
+         return [[[((IDEComparisonEditor*)[[[self editorArea] lastActiveEditorContext] editor])  keyEditor] mainScrollView] documentView];
+    }else{
+        return [[[[[self editorArea] lastActiveEditorContext] editor] mainScrollView] documentView];
+    }
 }
 
 - (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
