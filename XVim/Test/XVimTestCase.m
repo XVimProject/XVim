@@ -84,16 +84,16 @@
 }
 
 - (void)tearDown{
-    NSInteger num = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowNumber];
-    NSGraphicsContext* context = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] graphicsContext];
+    NSInteger num = [[XVimLastActiveWindowController() window] windowNumber];
+    NSGraphicsContext* context = [[XVimLastActiveWindowController() window] graphicsContext];
     NSEvent* event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0,0) modifierFlags:0 timestamp:0 windowNumber:num context:context characters:@"\x1B" charactersIgnoringModifiers:@"\x1B" isARepeat:NO keyCode:53];
     [NSApp sendEvent:event];
     [XVimLastActiveSourceView() display];
 }
 
 - (void)executeInput{
-    NSInteger num = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowNumber];
-    NSGraphicsContext* context = [[IDEWorkspaceWindow lastActiveWorkspaceWindow] graphicsContext];
+    NSInteger num = [[XVimLastActiveWindowController() window] windowNumber];
+    NSGraphicsContext* context = [[XVimLastActiveWindowController() window] graphicsContext];
     NSArray* strokes = XVimKeyStrokesFromKeyNotation(self.input);
     for( XVimKeyStroke* stroke in strokes ){
         NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
