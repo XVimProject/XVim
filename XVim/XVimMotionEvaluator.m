@@ -374,7 +374,9 @@
     cur_mark.line = [self.sourceView.textStorage lineNumber:cur_pos];
     cur_mark.column = [self.sourceView.textStorage columnNumber:cur_pos];
     cur_mark.document = [self.sourceView documentURL].path;
-    [[XVim instance].marks setMark:cur_mark forName:@"'"];
+    if( nil != mark.document ){
+        [[XVim instance].marks setMark:cur_mark forName:@"'"];
+    }
     
     XVimMotion* m =XVIM_MAKE_MOTION(MOTION_POSITION, motionType, MOTION_OPTION_NONE, self.numericArg);
     m.position = to;

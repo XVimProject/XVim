@@ -187,7 +187,11 @@
 
 - (NSURL*)documentURL{
 #ifdef __USE_DVTKIT__
-    return [(IDEEditorDocument*)((IDEEditor*)self.delegate).document fileURL];
+    if( [self.delegate isKindOfClass:[IDEEditor class]] ){
+        return [(IDEEditorDocument*)((IDEEditor*)self.delegate).document fileURL];
+    }else{
+        return nil;
+    }
 #else
     return nil;
 #endif
