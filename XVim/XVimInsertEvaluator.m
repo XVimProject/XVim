@@ -195,14 +195,18 @@
     // Position for "^" is before escaped from insert mode
     NSUInteger pos = self.sourceView.insertionPoint;
     XVimMark* mark = XVimMakeMark([self.sourceView.textStorage lineNumber:pos], [self.sourceView.textStorage columnNumber:pos], self.sourceView.documentURL.path);
-    [[XVim instance].marks setMark:mark forName:@"^"];
+    if( nil != mark.document ){
+        [[XVim instance].marks setMark:mark forName:@"^"];
+    }
     
     [[self sourceView] xvim_escapeFromInsert];
     
     // Position for "." is after escaped from insert mode
     pos = self.sourceView.insertionPoint;
     mark = XVimMakeMark([self.sourceView.textStorage lineNumber:pos], [self.sourceView.textStorage columnNumber:pos], self.sourceView.documentURL.path);
-    [[XVim instance].marks setMark:mark forName:@"."];
+    if( nil != mark.document ){
+        [[XVim instance].marks setMark:mark forName:@"."];
+    }
     
 }
 

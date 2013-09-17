@@ -226,8 +226,8 @@ typedef enum {
 - (NSUInteger)beginningOfLine:(NSUInteger)index;
 
 /**
- * Returns position of the tail of current line. 
- * Tail of line is one of followings
+ * Returns position of the end of current line. 
+ * end of line is one of followings
  *    - Newline character at the end of a line.
  *    - EOF of the last line of the document.
  * Blankline also has tail of line.

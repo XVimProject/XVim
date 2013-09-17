@@ -447,11 +447,7 @@
         return NSNotFound;
     }
     NSUInteger eol = [self endOfLine:pos];
-    if (eol == NSNotFound){
-        at.length = 1;
-    }else{
-        at.length = eol - at.location + 1;
-    }
+    at.length = eol - at.location;
 
     NSString* search_string = [s substringWithRange:at];
     NSString* start_with;
