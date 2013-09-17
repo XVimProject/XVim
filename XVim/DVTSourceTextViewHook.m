@@ -182,15 +182,16 @@
 - (void)drawRect:(NSRect)dirtyRect{
     @try{
         NSTextView* view = (NSTextView*)self;
+        
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
             if( nil != lastSearch.regex ){
                 [view xvim_updateFoundRanges:lastSearch.regex withOption:lastSearch.option];
-                [view xvim_highlightFoundRanges];
             }
         }else{
             [view xvim_clearHighlightText];
         }
+       
         
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base drawRect_:dirtyRect];
