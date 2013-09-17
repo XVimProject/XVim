@@ -25,6 +25,11 @@
                              @"ggg hhh i_i\n"  // 20 24 28
                              @"    jjj kkk";   // 32 36 40
     
+    static NSString* text4 = @"a;a {bb ccc\n"  // 0  4  8
+                             @"d(d e-) ddd\n"  // 12 16 20
+                             @"g[g }hh i_i\n"  // 24 28 32
+                             @"    jj] kkk";   // 36 40 44
+    
     return [NSArray arrayWithObjects:
             // b, B
             XVimMakeTestCase(text2,  6, 0,  @"b", text2,  4, 0),
@@ -84,6 +89,21 @@
             XVimMakeTestCase(text2, 36, 0,   @"^", text2, 40, 0),
             XVimMakeTestCase(text2, 36, 0,   @"_", text2, 40, 0),
             XVimMakeTestCase(text2, 32, 0,  @"2_", text2, 40, 0),
+            
+            // %
+            XVimMakeTestCase(text4, 0, 0, @"%", text4, 28, 0),
+            XVimMakeTestCase(text4,12, 0, @"%", text4, 18, 0),
+            XVimMakeTestCase(text4,16, 0, @"%", text4, 13, 0),
+            XVimMakeTestCase(text4,24, 0, @"%", text4, 42, 0),
+            XVimMakeTestCase(text4,40, 0, @"%", text4, 25, 0),
+            XVimMakeTestCase(text4,26, 0, @"%", text4,  4, 0),
+            XVimMakeTestCase(text4, 8, 0, @"%", text4,  8, 0),
+            
+            // numericArg + %
+            // Go to the position of specified percentage down from head
+            // Must keep current column position
+            //XVimMakeTestCase(text4,12, 0, @"2%",text4,  4, 0), // Not supported correctly
+            
             
             // +, -, <CR>
             XVimMakeTestCase(text2, 28, 0,  @"+", text2, 40, 0),

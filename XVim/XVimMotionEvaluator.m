@@ -448,7 +448,7 @@
     return [self _motionFixed:m];
 }
 
-- (XVimEvaluator*)PERCENT:(XVimWindow*)window {
+- (XVimEvaluator*)PERCENT {
     if( self.numericMode ){
         return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_PERCENT, LINEWISE, MOTION_OPTION_NONE, [self numericArg])];
     }else{
