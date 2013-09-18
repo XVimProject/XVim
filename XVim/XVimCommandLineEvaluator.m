@@ -24,6 +24,7 @@
 	OnKeyPressHandler _onKeyPress;
 	NSUInteger _historyNo;
 }
+@property(strong) NSTextView* lastTextView;
 @end
 
 @implementation XVimCommandLineEvaluator
@@ -41,6 +42,7 @@
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
         _evalutionResult = nil;
+        self.lastTextView = window.sourceView;
         XVimCommandField *commandField = self.window.commandLine.commandField;
         [commandField setString:_firstLetter];
         [commandField moveToEndOfLine:self];
@@ -54,6 +56,7 @@
     [_onComplete release];
     [_onKeyPress release];
     [_evalutionResult release];
+    self.lastTextView = nil;
     [super dealloc];
 }
 
@@ -91,7 +94,7 @@
 - (void)relinquishFocusToWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:nil];
-    [self.window setForcusBackToSourceView];
+    [[self.lastTextView window] makeFirstResponder:self.lastTextView];
     [commandField setHidden:YES];
 }
 

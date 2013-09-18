@@ -51,7 +51,10 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (NSTextView*)sourceView{
     int mode = [[self editorArea] editorMode];
     IDEEditor* editor = [[[self editorArea] lastActiveEditorContext] editor];
-    if( mode ==  2 && [editor isKindOfClass:[IDEComparisonEditor class]]){
+    if( [[[[[[self editorArea] workspaceTabController] windowController] window] firstResponder] isKindOfClass:[DVTSourceTextView class]]){
+        return (NSTextView*)[[[[[self editorArea] workspaceTabController] windowController] window] firstResponder];
+    }
+    else if( mode ==  2 && [editor isKindOfClass:[IDEComparisonEditor class]]){
          return [[[((IDEComparisonEditor*)[[[self editorArea] lastActiveEditorContext] editor])  keyEditor] mainScrollView] documentView];
     }else{
         return [[[[[self editorArea] lastActiveEditorContext] editor] mainScrollView] documentView];

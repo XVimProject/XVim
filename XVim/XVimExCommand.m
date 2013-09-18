@@ -1194,7 +1194,7 @@
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w
-    [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
+    [NSApp sendAction:@selector(ide_saveDocument:) to:nil from:self];
 }
 
 - (NSMenuItem*)findMenuItemIn:(NSMenu*)menu forAction:(NSString*)actionName{

@@ -86,7 +86,10 @@
             else{
                 mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);
             }
-            [[XVim instance].marks setMark:mark forName:@"."];
+            
+            if( nil != mark.document){
+                [[XVim instance].marks setMark:mark forName:@"."];
+            }
         }
     }
     return evaluator;
