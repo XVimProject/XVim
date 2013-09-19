@@ -95,6 +95,12 @@
 
 - (id)initWithCoder:(NSCoder*)coder{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
+    id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
+    if( nil != obj ){
+        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+    }
     return (DVTSourceTextViewHook*)[base initWithCoder_:coder];
 }
 #else
@@ -120,9 +126,15 @@
 #pragma GCC diagnostic ignored "-Wall"
 - (void)dealloc{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
-    [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
-    [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    @try{
+        [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
+        [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
+        [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    }
+    @catch (NSException* ex){
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:ex];
+    }
     [base dealloc_];
     return;
 }
