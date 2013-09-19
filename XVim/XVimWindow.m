@@ -65,7 +65,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         self.editorArea = editorArea;
         _evaluatorStack = [[NSMutableArray alloc] init];
         self.inputContext = [[NSTextInputContext alloc] initWithClient:self];
-        self.tmpBuffer = [[XVimMutableString alloc] init];
+        self.tmpBuffer = [[[XVimMutableString alloc] init] autorelease];
         [self _initEvaluatorStack:_evaluatorStack];
         
 	}

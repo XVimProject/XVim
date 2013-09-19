@@ -125,11 +125,11 @@
     [tableView setDelegate:self];
    
     // Create Columns
-    NSTableColumn* column1 = [[NSTableColumn alloc] initWithIdentifier:@"Description" ];
+    NSTableColumn* column1 = [[[NSTableColumn alloc] initWithIdentifier:@"Description" ] autorelease];
     [column1.headerCell setStringValue:@"Description"];
-    NSTableColumn* column2 = [[NSTableColumn alloc] initWithIdentifier:@"Pass/Fail" ];
+    NSTableColumn* column2 = [[[NSTableColumn alloc] initWithIdentifier:@"Pass/Fail" ] autorelease];
     [column2.headerCell setStringValue:@"Pass/Fail"];
-    NSTableColumn* column3 = [[NSTableColumn alloc] initWithIdentifier:@"Message" ];
+    NSTableColumn* column3 = [[[NSTableColumn alloc] initWithIdentifier:@"Message" ] autorelease];
     [column3.headerCell setStringValue:@"Message"];
     [column3 setWidth:500.0];
     

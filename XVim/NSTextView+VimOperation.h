@@ -147,7 +147,6 @@
 - (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt;
 - (void)xvim_clearHighlightText;
-- (void)xvim_highlightFoundRanges;
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
     
 #pragma mark Searching positions

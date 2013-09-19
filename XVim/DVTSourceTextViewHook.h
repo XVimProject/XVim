@@ -18,10 +18,10 @@
 @end
 
 @interface DVTSourceTextView(Hook)
+// When initialize Xcode calls initWithCoder for Xcode4 and initWithFrame:textContainer: for Xcode5
 - (id)initWithCoder_:(NSCoder*)rect;
-// When initialize Xcode just calls initWithCoder and do not call these 2 initializer
-// - (id)initWithFrame_:(NSRect)rect;
-// - (id)initWithFrame_:(NSRect)rect textContainer:(NSTextContainer *)container;
+// - (id)initWithFrame_:(NSRect)rect; // We do not need to hook this
+- (id)initWithFrame_:(NSRect)rect textContainer:(NSTextContainer *)container;
 - (void)dealloc_;
 - (void)setSelectedRanges_:(NSArray*)array affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag;
 - (void)keyDown_:(NSEvent *)theEvent;

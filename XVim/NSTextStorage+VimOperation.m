@@ -15,6 +15,7 @@
 //    See "columnNumber" method in this category for the typical
 // implementation of the code using DVTKit related class/methods.
 
+#define __XCODE5__
 #define __USE_DVTKIT__
 
 #import "NSString+VimHelper.h"
@@ -31,6 +32,13 @@
 - (NSString*)xvim_string{
 #ifdef __USE_DVTKIT__
     NSString* str;
+#ifdef __XCODE5__
+    if( [self.class isSubclassOfClass:DVTTextStorage.class]){
+        DVTTextStorage* storage = (DVTTextStorage*)self;
+        str = storage.string;
+        return str;
+    }
+#else
     if( [self.class isSubclassOfClass:DVTFoldingTextStorage.class]){
         DVTFoldingTextStorage* storage = (DVTFoldingTextStorage*)self;
         [storage increaseUsingFoldedRanges];
@@ -38,6 +46,7 @@
         [storage decreaseUsingFoldedRanges];
         return str;
     }
+#endif
 #endif
     return self.string;
 }
@@ -397,13 +406,20 @@
 
 - (NSUInteger)columnNumber:(NSUInteger)index {
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    
 #ifdef __USE_DVTKIT__
+#ifdef __XCODE5__
+    if( [self.class isSubclassOfClass:DVTTextStorage.class]){
+        DVTTextStorage* storage = (DVTTextStorage*)self;
+        NSUInteger column = (NSUInteger)[storage columnForPositionConvertingTabs:index];
+        return column;
+    }
+#else
     if( [self.class isSubclassOfClass:DVTFoldingTextStorage.class]){
         DVTFoldingTextStorage* storage = (DVTFoldingTextStorage*)self;
         NSUInteger column = (NSUInteger)[storage columnForPositionConvertingTabs:[storage realLocationForFoldedLocation:index]];
         return column;
     }
+#endif
 #endif
     return index - [self beginningOfLine:index];
 }

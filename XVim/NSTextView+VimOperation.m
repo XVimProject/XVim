@@ -6,6 +6,7 @@
 //
 //
 
+#define __XCODE5__
 #define __USE_DVTKIT__
 
 #ifdef __USE_DVTKIT__
@@ -340,8 +341,13 @@
             // When insertionPoint < selectionBegin it only changes insertion point to begining of the text object
             [self xvim_moveCursor:r.begin preserveColumn:NO];
         }else{
-            // Otherwise, selectionBegin is set to begining of the text object and insertion point goes to end of the text object
-            self.selectionBegin = r.begin;
+            // Text object expands one text object ( the text object under insertion point + 1 )
+            if( ![self.textStorage isEOF:self.insertionPoint+1]){
+                r = [self xvim_getMotionRange:self.insertionPoint+1 Motion:motion];
+            }
+            if( self.selectionBegin > r.begin ){
+                self.selectionBegin = r.begin;
+            }
             [self xvim_moveCursor:r.end preserveColumn:NO];
         }
     }else{
@@ -1271,31 +1277,24 @@
     NSArray*  matches = [regex matchesInString:string options:0 range:NSMakeRange(0, string.length)];
     [self.foundRanges setArray:matches];
     
+    // Clear current highlight.
+    [self xvim_clearHighlightText];
+    // Add yellow highlight
+    for( NSTextCheckingResult* result in self.foundRanges){
+        [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
+    }
+    
     [self setNeedsUpdateFoundRanges:NO];
 }
 
 - (void)xvim_clearHighlightText{
-    NSTextView* view = self;
-    NSString* string = view.string;
-    [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] forCharacterRange:NSMakeRange(0, string.length)];
-}
-
-- (void)xvim_highlightFoundRanges{
-    // Add attributes to the each range
-    // There is 2 ways to add attributes
-    // One is to add attributes to NSAttributedString(NSTextStorage)
-    // One is to add attributes to NSLayoutManager by addTempraryAttributes
-    // Later is faster but it is valid only for one drawing action
-    
-    // Clear current highlight.
-    [self xvim_clearHighlightText];
-    // Add yellow highlight
-    NSRange visible = [self xvim_visibleRange:self];
-    for( NSTextCheckingResult* result in self.foundRanges){
-        if( NSIntersectionRange( result.range, visible).length != 0 ){
-            [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
-        }
+    if( !self.needsUpdateFoundRanges ){
+        return;
     }
+    NSString* string = self.string;
+    [self.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:NSMakeRange(0,string.length)];
+    // [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] forCharacterRange:NSMakeRange(0, string.length)];
+    [self setNeedsUpdateFoundRanges:NO];
 }
 
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt{
@@ -1488,9 +1487,14 @@
         [self _adjustCursorPosition];
     }
     [self dumpState];
+
+#ifdef __XCODE5__
+    [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
+#else
     [(DVTFoldingTextStorage*)self.textStorage increaseUsingFoldedRanges];
     [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
     [(DVTFoldingTextStorage*)self.textStorage decreaseUsingFoldedRanges];
+#endif
     [self xvim_scrollTo:self.insertionPoint];
     self.xvim_lockSyncStateFromView = NO;
 }
@@ -1880,8 +1884,8 @@
 
 - (void)xvim_indentCharacterRange:(NSRange)range{
 #ifdef __USE_DVTKIT__
-    if ( [self.textStorage isKindOfClass:[DVTSourceTextStorage class]] ){
-        [(DVTSourceTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
+    if ( [self.textStorage isKindOfClass:[DVTTextStorage class]] ){
+        [(DVTTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
     }
     return;
 #else

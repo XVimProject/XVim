@@ -34,6 +34,6 @@
 }
 
 - (BOOL)isTextObject{
-    return TEXTOBJECT_SENTENCE <= self.motion && self.motion <= TEXTOBJECT_BACKQUOTE;
+    return TEXTOBJECT_WORD <= self.motion && self.motion <= TEXTOBJECT_BACKQUOTE;
 }
 @end
