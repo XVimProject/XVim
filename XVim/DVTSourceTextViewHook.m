@@ -131,9 +131,9 @@
         [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
         [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
     }
-    @catch (NSException* ex){
+    @catch (NSException* exception){
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:ex];
+        [Logger logStackTrace:exception];
     }
     [base dealloc_];
     return;
