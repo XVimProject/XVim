@@ -18,8 +18,8 @@
   Unfortunately current master branch is not stable compared to the master branch which has been developed since I started this project. The old branch is saved with a tag name "v0.1". You can get the source code from "Releases" in the github page.
 
 ## Support Xcode Versions
-  We are developing XVim with Xcode 4.6 at the moment, So we recommend you use XVim with XCode 4.6. 
-  Xcode5 will be supported. Current master branch does not work with Xcode5.
+  - Xcode4 (Use Master branch)
+  - Xcode5 (Use Xcode5Support branch)
 
 ## INSTALL
  - Download source code(of one of releases) and open XVim.xcodeproj with Xcode.

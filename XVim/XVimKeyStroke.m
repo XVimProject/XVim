@@ -496,7 +496,7 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 @implementation NSEvent(XVimKeyStroke)
 
 - (XVimKeyStroke*)toXVimKeyStroke{
-    unichar c = [[self charactersIgnoringModifiers] characterAtIndex:0];
+    unichar c = self.unmodifiedKeyCode;
     // We unset NSFunctionKeyMask bit for function keys (7F00 and above)
     NSUInteger mod = self.modifierFlags;
     if( c >= 0x7F00 ){
@@ -508,7 +508,7 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 
 - (XVimString*)toXVimString{
     NSAssert( self.type == NSKeyDown , @"Event type must be NSKeyDown");
-    NSAssert( self.charactersIgnoringModifiers.length != 0, @"Event does not contain any character");
+//    NSAssert( self.characters.length != 0, @"Event does not contain any character");
     return [[self toXVimKeyStroke] xvimString];
 }
 @end
