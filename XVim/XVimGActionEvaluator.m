@@ -74,7 +74,7 @@
 
 - (XVimEvaluator*)v{
     // Select previous visual selection
-    return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+    return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)TILDE{

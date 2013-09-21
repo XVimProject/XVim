@@ -239,7 +239,7 @@
 - (XVimEvaluator*)onComplete_q:(XVimRegisterEvaluator*)childEvaluator{
     if( [[[XVim instance] registerManager] isValidForRecording:childEvaluator.reg] ){
         self.onChildCompleteHandler = @selector(onComplete_Recording:);
-        return [[XVimRecordingEvaluator alloc] initWithWindow:self.window withRegister:childEvaluator.reg];
+        return [[[XVimRecordingEvaluator alloc] initWithWindow:self.window withRegister:childEvaluator.reg] autorelease];
     }
     [[XVim instance] ringBell];
     return nil;
@@ -292,7 +292,7 @@
 
 - (XVimEvaluator*)v{
     if( XVim.instance.isRepeating ){
-        return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+        return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
     }else{
         return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_CHARACTER] autorelease];
     }
@@ -300,7 +300,7 @@
 
 - (XVimEvaluator*)V{
     if( XVim.instance.isRepeating ){
-        return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+        return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
     }else{
         return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_LINE] autorelease];
     }
@@ -308,7 +308,7 @@
 
 - (XVimEvaluator*)C_v{
     if( XVim.instance.isRepeating ){
-        return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+        return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
     }else{
         return [[[XVimVisualEvaluator alloc] initWithWindow:self.window mode:XVIM_VISUAL_BLOCK]  autorelease];
     }

@@ -1281,31 +1281,24 @@
     NSArray*  matches = [regex matchesInString:string options:0 range:NSMakeRange(0, string.length)];
     [self.foundRanges setArray:matches];
     
+    // Clear current highlight.
+    [self xvim_clearHighlightText];
+    // Add yellow highlight
+    for( NSTextCheckingResult* result in self.foundRanges){
+        [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
+    }
+    
     [self setNeedsUpdateFoundRanges:NO];
 }
 
 - (void)xvim_clearHighlightText{
-    NSTextView* view = self;
-    NSString* string = view.string;
-    [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] forCharacterRange:NSMakeRange(0, string.length)];
-}
-
-- (void)xvim_highlightFoundRanges{
-    // Add attributes to the each range
-    // There is 2 ways to add attributes
-    // One is to add attributes to NSAttributedString(NSTextStorage)
-    // One is to add attributes to NSLayoutManager by addTempraryAttributes
-    // Later is faster but it is valid only for one drawing action
-    
-    // Clear current highlight.
-    [self xvim_clearHighlightText];
-    // Add yellow highlight
-    NSRange visible = [self xvim_visibleRange:self];
-    for( NSTextCheckingResult* result in self.foundRanges){
-        if( NSIntersectionRange( result.range, visible).length != 0 ){
-            [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
-        }
+    if( !self.needsUpdateFoundRanges ){
+        return;
     }
+    NSString* string = self.string;
+    [self.layoutManager removeTemporaryAttribute:NSBackgroundColorAttributeName forCharacterRange:NSMakeRange(0,string.length)];
+    // [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] forCharacterRange:NSMakeRange(0, string.length)];
+    [self setNeedsUpdateFoundRanges:NO];
 }
 
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt{
