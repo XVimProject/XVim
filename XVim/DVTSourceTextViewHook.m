@@ -108,16 +108,13 @@
 
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
+        TRACE_LOG(@"Event:%@, XVimNotation:%@", theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
         if( nil == window ){
             [base keyDown_:theEvent];
             return;
         }
-        
-        unichar charcode __unused = [theEvent unmodifiedKeyCode];
-        DEBUG_LOG(@"Obj:%p keyDown : keyCode:%d firstCharacter:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [[theEvent characters] characterAtIndex:0], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
         
         if( [window handleKeyEvent:theEvent] ){
             [base updateInsertionPointStateAndRestartTimer:YES];
