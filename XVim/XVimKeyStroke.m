@@ -496,7 +496,7 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 @implementation NSEvent(XVimKeyStroke)
 
 - (XVimKeyStroke*)toXVimKeyStroke{
-    if( t s[self charactersIgnoringModifiers].length == 0 ){
+    if( [self charactersIgnoringModifiers].length == 0 ){
         return nil;
     }
     unichar c = [[self charactersIgnoringModifiers] characterAtIndex:0];
