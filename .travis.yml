@@ -1,0 +1,4 @@
+language: objective-c
+env:
+  - XCCONFIGURATION=Release
+  - XCCONFIGURATION=Debug
