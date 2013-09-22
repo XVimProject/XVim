@@ -30,7 +30,7 @@
 }
 @property(strong) IDEEditorArea* editorArea;
 @property(strong,nonatomic) NSTextInputContext* inputContext;
-@property(strong,nonatomic) XVimMutableString* tmpBuffer;
+@property(strong,nonatomic) NSEvent* tmpBuffer;
 - (id)initWithIDEEditorArea:(IDEEditorArea*)editorArea;
 - (void)_initEvaluatorStack:(NSMutableArray*)stack;
 @end
@@ -51,7 +51,10 @@ static const char* KEY_WINDOW = "xvimwindow";
 - (NSTextView*)sourceView{
     int mode = [[self editorArea] editorMode];
     IDEEditor* editor = [[[self editorArea] lastActiveEditorContext] editor];
-    if( mode ==  2 && [editor isKindOfClass:[IDEComparisonEditor class]]){
+    if( [[[[[[self editorArea] workspaceTabController] windowController] window] firstResponder] isKindOfClass:[DVTSourceTextView class]]){
+        return (NSTextView*)[[[[[self editorArea] workspaceTabController] windowController] window] firstResponder];
+    }
+    else if( mode ==  2 && [editor isKindOfClass:[IDEComparisonEditor class]]){
          return [[[((IDEComparisonEditor*)[[[self editorArea] lastActiveEditorContext] editor])  keyEditor] mainScrollView] documentView];
     }else{
         return [[[[[self editorArea] lastActiveEditorContext] editor] mainScrollView] documentView];
@@ -65,7 +68,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         self.editorArea = editorArea;
         _evaluatorStack = [[NSMutableArray alloc] init];
         self.inputContext = [[NSTextInputContext alloc] initWithClient:self];
-        self.tmpBuffer = [[XVimMutableString alloc] init];
+        self.tmpBuffer = nil;
         [self _initEvaluatorStack:_evaluatorStack];
         
 	}
@@ -122,7 +125,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         // If it is obserbed we do not do anything anymore and handle insertText: or doCommandBySelector:
         
         // Keep the key input temporary buffer
-        [self.tmpBuffer setString:[event toXVimString]];
+        self.tmpBuffer = event;
         
         // The apple document says that we can not call 'activate' method directly
         // but if we do not call this the input is not handled by the input context we own.
@@ -375,7 +378,7 @@ static char s_associate_key = 0;
 // NSTextInputClient Protocol
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange{
     @try{
-        [self.tmpBuffer setString:@""];
+        self.tmpBuffer = nil;
         [self handleXVimString:aString];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
@@ -385,8 +388,8 @@ static char s_associate_key = 0;
 
 - (void)doCommandBySelector:(SEL)aSelector{
     @try{
-        [self handleXVimString:self.tmpBuffer];
-        [self.tmpBuffer setString:@""];
+        [self handleXVimString:[self.tmpBuffer toXVimString]];
+        self.tmpBuffer = nil;
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];

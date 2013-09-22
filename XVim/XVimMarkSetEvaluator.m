@@ -32,7 +32,9 @@
     mark.line = [self.sourceView.textStorage lineNumber:r.location];
     mark.column = [self.sourceView.textStorage columnNumber:r.location];
     mark.document = [[self.sourceView documentURL] path];
-    [[XVim instance].marks setMark:mark forName:keyStr];
+    if( nil != mark.document ){
+        [[XVim instance].marks setMark:mark forName:keyStr];
+    }
     return nil;
 }
 

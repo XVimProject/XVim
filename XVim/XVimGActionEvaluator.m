@@ -52,7 +52,9 @@
             cur_mark.line = [self.sourceView insertionLine];
             cur_mark.column = [self.sourceView insertionColumn];
             cur_mark.document = [self.sourceView documentURL].path;
-            [[XVim instance].marks setMark:cur_mark forName:@"'"];
+            if( nil != mark.document){
+                [[XVim instance].marks setMark:cur_mark forName:@"'"];
+            }
             [self.sourceView xvim_move:m];
             [self.sourceView xvim_append];
         }
@@ -72,7 +74,7 @@
 
 - (XVimEvaluator*)v{
     // Select previous visual selection
-    return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
+    return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)TILDE{

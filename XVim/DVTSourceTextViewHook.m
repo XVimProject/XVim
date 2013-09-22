@@ -95,6 +95,12 @@
 
 - (id)initWithCoder:(NSCoder*)coder{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
+    id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
+    if( nil != obj ){
+        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+    }
     return (DVTSourceTextViewHook*)[base initWithCoder_:coder];
 }
 #else
@@ -120,9 +126,15 @@
 #pragma GCC diagnostic ignored "-Wall"
 - (void)dealloc{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
-    [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
-    [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    @try{
+        [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
+        [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
+        [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    }
+    @catch (NSException* exception){
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
+    }
     [base dealloc_];
     return;
 }
@@ -135,16 +147,13 @@
 
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
+        TRACE_LOG(@"Event:%@, XVimNotation:%@", theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
         if( nil == window ){
             [base keyDown_:theEvent];
             return;
         }
-        
-        unichar charcode __unused = [theEvent unmodifiedKeyCode];
-        DEBUG_LOG(@"Obj:%p keyDown : keyCode:%d firstCharacter:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [[theEvent characters] characterAtIndex:0], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
         
         if( [window handleKeyEvent:theEvent] ){
             [base updateInsertionPointStateAndRestartTimer:YES];
@@ -182,15 +191,16 @@
 - (void)drawRect:(NSRect)dirtyRect{
     @try{
         NSTextView* view = (NSTextView*)self;
+        
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
             if( nil != lastSearch.regex ){
                 [view xvim_updateFoundRanges:lastSearch.regex withOption:lastSearch.option];
-                [view xvim_highlightFoundRanges];
             }
         }else{
             [view xvim_clearHighlightText];
         }
+       
         
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base drawRect_:dirtyRect];
