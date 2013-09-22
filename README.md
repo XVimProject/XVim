@@ -2,20 +2,17 @@
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
-  Finally we are really pleased to announce release of XVim v1.0 alpha version.
-  The main improvements include
-
-  - Visual block (Ctrl-v)
-  - Marks supporting jumping between files
-  - More accurate operation on registers
-  - More stable recording and execution
-  - Automatic testing system (for developers)
-  - hlsearch
-  - and more...
-
-  See Documents/Users/FeatureList.md for all the features.
-
-  Unfortunately current master branch is not stable compared to the master branch which has been developed since I started this project. The old branch is saved with a tag name "v0.1". You can get the source code from "Releases" in the github page.
+  Google Group for XVim developers has been created.
+  https://groups.google.com/d/forum/xvim-developers
+  This group is for XVim developers and testers(reporters).
+  We are going to talk here non issue related problems such as
+    - What we should implement next
+    - How to design XVim
+    - Any suggestions for XVim
+    - Annoucement for testers before a release of XVim
+    - and so on
+  If you are interested in helping XVim project join the group.
+  Just testing new release and reporting problem is great help for us. Join the group casually.
 
 ## Support Xcode Versions
   - Xcode4 (Use Master branch)
