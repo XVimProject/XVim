@@ -6,11 +6,13 @@
   https://groups.google.com/d/forum/xvim-developers
   This group is for XVim developers and testers(reporters).
   We are going to talk here non issue related problems such as
-    - What we should implement next
-    - How to design XVim
-    - Any suggestions for XVim
-    - Annoucement for testers before a release of XVim
-    - and so on
+
+  - What we should implement next
+  - How to design XVim
+  - Any suggestions for XVim
+  - Annoucement for testers before a release of XVim
+  - and so on
+
   If you are interested in helping XVim project join the group.
   Just testing new release and reporting problem is great help for us. Join the group casually.
 
