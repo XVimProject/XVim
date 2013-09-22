@@ -5,7 +5,7 @@
   Google Group for XVim developers has been created.
   https://groups.google.com/d/forum/xvim-developers
   This group is for XVim developers and testers(reporters).
-  We are going to talk here non issue related problems such as
+  In this group we are going to talk about the direction of XVim such as
 
   - What we should implement next
   - How to design XVim
