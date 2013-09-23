@@ -23,7 +23,7 @@
 ## INSTALL
  - Download source code(of one of releases) and open XVim.xcodeproj with Xcode.
  - Select an appropriate Scheme for your Xcode version
-    - XVim for Xcode4.6 must be built with Xcode4.6
+    - XVim for Xcode4 must be built with Xcode4.6
     - XVim for Xcode5 must be built with Xcode5
  - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
