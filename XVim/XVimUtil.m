@@ -8,7 +8,7 @@
 
 #import "XVimUtil.h"
 #import "DVTFoundation.h"
-#import "DVTKit.H"
+#import "DVTKit.h"
 #import "IDEKit.h"
 
 
