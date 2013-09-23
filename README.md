@@ -17,13 +17,15 @@
   Just testing new release and reporting problem is great help for us. Join the group casually.
 
 ## Support Xcode Versions
-  - Xcode4 (Use Master branch)
-  - Xcode5 (Use Xcode5Support branch)
+  - Xcode4.6
+  - Xcode5
 
 ## INSTALL
  - Download source code(of one of releases) and open XVim.xcodeproj with Xcode.
- - Go to "Edit Scheme" and set "Build Configuration" as "Release"
- - (You may need to set "Base SDK" value in Build Settings to "Latest OS X")
+ - Select an appropriate Scheme for your Xcode version
+    - XVim for Xcode4.6 must be built with Xcode4.6
+    - XVim for Xcode5 must be built with Xcode5
+ - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
  - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
 
