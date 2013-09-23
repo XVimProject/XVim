@@ -15,7 +15,13 @@
 //    See "columnNumber" method in this category for the typical
 // implementation of the code using DVTKit related class/methods.
 
+
+
+
+#if XVIM_XCODE_VERSION == 5
 #define __XCODE5__
+#endif
+
 #define __USE_DVTKIT__
 
 #import "NSString+VimHelper.h"

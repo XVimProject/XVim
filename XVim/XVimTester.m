@@ -7,7 +7,7 @@
 //
 
 #import "XVimTester.h"
-#import "XVimTestCase.h"
+#import "Test/XVimTestCase.h"
 #import <objc/runtime.h>
 #import "Logger.h"
 #import "IDEKit.h"

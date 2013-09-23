@@ -6,7 +6,10 @@
 //
 //
 
+#if (XVIM_XCODE_VERSION==5)
 #define __XCODE5__
+#endif 
+
 #define __USE_DVTKIT__
 
 #ifdef __USE_DVTKIT__
