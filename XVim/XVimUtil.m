@@ -16,7 +16,7 @@ IDEWorkspaceWindowController* XVimLastActiveWindowController(){
 #if XVIM_XCODE_VERSION == 5
     // TODO: Must update IDEKit.h for Xcodr5
     return [IDEWorkspaceWindow performSelector:@selector(lastActiveWorkspaceWindowController)];
-#elif XVIM_TARGET_CODE == 4
+#elif XVIM_XCODE_VERSION == 4
     return [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowController];
 #else
     return nil;
