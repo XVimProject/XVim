@@ -1891,10 +1891,17 @@
 
 - (void)xvim_indentCharacterRange:(NSRange)range{
 #ifdef __USE_DVTKIT__
+#ifdef __XCODE5__
     if ( [self.textStorage isKindOfClass:[DVTTextStorage class]] ){
         [(DVTTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
     }
     return;
+#else
+    if ( [self.textStorage isKindOfClass:[DVTSourceTextStorage class]] ){
+        [(DVTSourceTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
+    }
+    return;
+#endif
 #else
 #error You must implement here
 #endif
