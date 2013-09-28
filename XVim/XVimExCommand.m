@@ -1233,7 +1233,7 @@
 //Title:Show Object Library    Action:showLibraryWithChoiceFromSender:
 //Title:Show Media Library    Action:showLibraryWithChoiceFromSender:
 //        [NSApp sendAction:item.action to:item.target from:self];
-          [NSApp sendAction:item.action to:item.target from:nil];
+          [NSApp sendAction:item.action to:item.target from:item];
     }
 }
 
