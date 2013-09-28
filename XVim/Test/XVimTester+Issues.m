@@ -30,9 +30,15 @@
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
     
+    static NSString* issue_216_result = @"a;a bbb ccc\n" 
+                                        @"ddd e-e fff\n" 
+                                        @"ggg hhh i_i\n" 
+                                        @"ddd e-e fff\n" 
+                                        @"    jjj kkk";  
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
             XVimMakeTestCase(text1, 24, 0, @":inoremap <lt>C-e> <lt>C-o>$<CR>i<Right><Right><Up><Up><C-e><ESC>", text1 , 10, 0),  // Issue #416
+            XVimMakeTestCase(text1, 20, 0, @"yyjp", issue_216_result, 36,0 ),
             nil];
     
 }
