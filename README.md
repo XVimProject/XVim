@@ -51,6 +51,7 @@
    * XVim version ( Version number of the revision you built )
   
   When it is hard to solve a problem with information above, take debug log according to the following movie please.
+  
   [How to get XVim debug log](http://www.youtube.com/watch?v=50Bhu8setlc&feature=youtu.be)
 
   We appreciate if you write test case for the bug. Read "Write test" section in Documents/Developsers/PullRequest.md how to write test case. You do not need to update any source code but just write 7 items explained there in an issue you create.
