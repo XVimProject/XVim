@@ -222,7 +222,9 @@
         // Fix the keymapping
         if( context.lastMappedNode != nil ){
             XVimString* newStr = [NSString stringWithFormat:@"%@%@%@", context.lastMappedNode.target, context.unmappedKeys, unProcessedString];
-            if( context.lastMappedNode.remap && infinit_loop_guard != 0){
+            // Only when its remappable map and infinite loop guard not reached to 0
+            //           and also when inputKeys is not prefix of target (because if inputKeys is prefix of the current target it means it goes to infinite loop)
+            if( context.lastMappedNode.remap && infinit_loop_guard != 0 && ![context.lastMappedNode.target hasPrefix:context.inputKeys]){
                 // Key remapping
                 XVimKeymapContext* context = [[[XVimKeymapContext alloc] init] autorelease];
                 infinit_loop_guard--;
