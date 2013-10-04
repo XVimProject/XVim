@@ -171,6 +171,12 @@
                                  @"bbb\n"
                                  @"ccc";
     
+    static NSString* p_result1 = @"aAa bbb ccc\n"
+                                 @"\n"
+                                 @"aAa bbb ccc"; //13
+    static NSString* p_result2 = @"aAa bbb ccc\n"
+                                 @"aAa bbb ccc\n"; //12
+    
     static NSString* oO_text = @"int abc(){\n"  // 0 4
     @"}\n";          // 11
     
@@ -375,8 +381,12 @@
             
             // p, P
             // TODO: Currently the insertion position after put(P) is not correct.(Must pass followings)
-            //XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
-            //XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            
+            // p at EOF
+            XVimMakeTestCase(text0, 1,  0, @"yyjp", p_result1, 13, 0),
+            XVimMakeTestCase(text0, 1,  0, @"yyjP", p_result2, 12, 0),
             
             // r
             XVimMakeTestCase(text0, 5,  0, @"rX",     r_result1, 5, 0),

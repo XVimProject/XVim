@@ -538,9 +538,8 @@
                 targetPos++;
             }
             insertionPointAfterPut = targetPos;
-            [self xvim_setSelectedRange:NSMakeRange(targetPos,0)];
             for(NSUInteger i = 0; i < count ; i++ ){
-                [self insertText:text];
+                [self insertText:text replacementRange:NSMakeRange(targetPos,0)];
             }
             insertionPointAfterPut += text.length*count - 1;
         }
@@ -551,15 +550,14 @@
         }else{
             targetPos= [self.textStorage beginningOfLine:self.insertionPoint];
         }
-        insertionPointAfterPut = self.insertionPoint;
-        [self xvim_setSelectedRange:NSMakeRange(targetPos,0)];
+        insertionPointAfterPut = targetPos;
         for(NSUInteger i = 0; i < count ; i++ ){
-            if( after && i == count-1 ){
+            if( after && i == 0 ){
                 // delete newline at the end. (TEXT_TYPE_LINES always have newline at the end of the text)
                 NSString* t = [text  substringToIndex:text.length-1];
-                [self insertText:t];
+                [self insertText:t replacementRange:NSMakeRange(targetPos,0)];
             } else{
-                [self insertText:text];
+                [self insertText:text replacementRange:NSMakeRange(targetPos,0)];
             }
         }
     }else if( type == TEXT_TYPE_BLOCK ){
