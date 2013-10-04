@@ -8,7 +8,7 @@
 
 #import "XVimEvaluator.h"
 #import "XVimNumericEvaluator.h"
-#import "XVimMotion.H"
+#import "XVimMotion.h"
 
 // This evaluator handles motions.
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
