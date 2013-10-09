@@ -807,7 +807,9 @@
         ERROR_LOG(@"command string empty");
         return;
     }
-          
+    
+    cmd = [cmd stringByReplacingOccurrencesOfString:@"\r" withString:@""];
+    
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
