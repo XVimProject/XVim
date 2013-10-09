@@ -249,6 +249,10 @@
     return nil;
 }
 
+- (XVimEvaluator*)C_w{
+    return [self w];
+}
+
 /*
  CTRL-W W   Move cursor to window above/left of current one. If there is no
             window above or left, go to bottom-right window.
