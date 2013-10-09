@@ -241,7 +241,11 @@
             no window below or right, go to top-left window.
  */
 - (XVimEvaluator*)w{
-    [self jumpFocus:YES];
+    // TODO: Must handle numericMode  properly.
+    //       Currently we do not have good way to know if current evaluator is in numericMode
+    //       Accessing parent evaluator directly is not good practice.
+    NSInteger count = NSIntegerMax < [self numericArg] ? NSIntegerMax : (NSInteger)[self numericArg] ;
+    [self jumpFocus:count relative:![self.parent numericMode]];
     return nil;
 }
 
@@ -250,14 +254,18 @@
             window above or left, go to bottom-right window.
  */
 - (XVimEvaluator*)W{
-    [self jumpFocus:NO];
+    NSInteger count = NSIntegerMax < [self numericArg] ? NSIntegerMax : (NSInteger)[self numericArg];
+    [self jumpFocus:-count  relative:![self.parent numericMode]];
     return nil;
 }
 
-- (void)jumpFocus:(BOOL)forward
-{
+// Vim does not jump focus more than 1 when it is relative jump
+// but this method generalizes it and takes count to jump from current editor when relative is YES.
+- (void)jumpFocus:(NSInteger)count relative:(BOOL)relative{
+    NSAssert( 0 != count, @"Must not be 0" );
+    NSAssert( count != NSIntegerMin, @"Can not specify NSIntegerMin value as a count");
+    
     IDEEditorArea *editorArea = [self editorArea:self.window];
-
     if ([editorArea editorMode] != 1) {
         DEBUG_LOG(@"editor not in genius mode, nothing to jump to")
         return;
@@ -266,20 +274,20 @@
     IDEWorkspaceTabController* tabCtrl = [self tabController:self.window];
     IDEViewController* current = [tabCtrl _currentFirstResponderArea];
     NSArray* allEditors = [self allEditorArea:self.window];
-    NSUInteger idx = [allEditors indexOfObject:current];
-
-    if (forward) {
-        if (idx + 1 < [allEditors count]) {
-            [allEditors[idx + 1] takeFocus];
-        } else {
-            [allEditors[0] takeFocus];
-        }
-    } else {
-        if (idx >= 1) {
-            [allEditors[idx - 1] takeFocus];
-        } else {
-            [allEditors[[allEditors count] - 1] takeFocus];
-        }
+    NSInteger numEditors= (NSInteger)[allEditors count]; // Should be no problem to cast it to NSInteger
+    if( 0 == numEditors ){
+        // Just in case
+        return;
+    }
+    
+    if( relative ){
+        // Relative index (rotation)
+        NSInteger idx = (NSInteger)[allEditors indexOfObject:current] + (count%numEditors) + numEditors; // add numEditors to make it always positive
+        [allEditors[(NSUInteger)idx%numEditors] takeFocus];
+    }else{
+        // Absolute index (Note: both count and numEditors are not 0 here)
+        count = MIN(ABS(count), numEditors) - 1; // -1 to convert it to array index
+        [allEditors[(NSUInteger)count%numEditors] takeFocus];
     }
 }
 
