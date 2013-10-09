@@ -236,4 +236,51 @@
     return nil;
 }
 
+/*
+ CTRL-W w   Move cursor to window below/right of the current one. If there is
+            no window below or right, go to top-left window.
+ */
+- (XVimEvaluator*)w{
+    [self jumpFocus:YES];
+    return nil;
+}
+
+/*
+ CTRL-W W   Move cursor to window above/left of current one. If there is no
+            window above or left, go to bottom-right window.
+ */
+- (XVimEvaluator*)W{
+    [self jumpFocus:NO];
+    return nil;
+}
+
+- (void)jumpFocus:(BOOL)forward
+{
+    IDEEditorArea *editorArea = [self editorArea:self.window];
+
+    if ([editorArea editorMode] != 1) {
+        DEBUG_LOG(@"editor not in genius mode, nothing to jump to")
+        return;
+    }
+
+    IDEWorkspaceTabController* tabCtrl = [self tabController:self.window];
+    IDEViewController* current = [tabCtrl _currentFirstResponderArea];
+    NSArray* allEditors = [self allEditorArea:self.window];
+    NSUInteger idx = [allEditors indexOfObject:current];
+
+    if (forward) {
+        if (idx + 1 < [allEditors count]) {
+            [allEditors[idx + 1] takeFocus];
+        } else {
+            [allEditors[0] takeFocus];
+        }
+    } else {
+        if (idx >= 1) {
+            [allEditors[idx - 1] takeFocus];
+        } else {
+            [allEditors[[allEditors count] - 1] takeFocus];
+        }
+    }
+}
+
 @end
