@@ -789,8 +789,8 @@
     if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
         return ;
     }
-    
-    NSUInteger insertionAfterFilter = self.insertionPoint;
+
+    NSUInteger insertionAfterFilter;
     NSRange filterRange;
     if( self.selectionMode == XVIM_VISUAL_NONE ){
         XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
@@ -799,18 +799,21 @@
         }
         filterRange = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:LINEWISE];
     }else{
-        insertionAfterFilter = [[[self xvim_selectedRanges] lastObject] rangeValue].location;
         NSUInteger start = [[[self xvim_selectedRanges] objectAtIndex:0] rangeValue].location;
         NSRange lastSelection = [[[self xvim_selectedRanges] lastObject] rangeValue];
         NSUInteger end = lastSelection.location + lastSelection.length - 1;
         filterRange  = NSMakeRange(start, end-start+1);
     }
-    
+
+    NSString *lineString = [[self xvim_string] substringWithRange:filterRange];
+    NSRange whiteSpaceRange = [lineString rangeOfString:@"^\\s*" options:NSRegularExpressionSearch];
+    lineString = [lineString stringByReplacingCharactersInRange:whiteSpaceRange withString:@""];
+
 	[self xvim_indentCharacterRange: filterRange];
+    insertionAfterFilter = [self.textStorage firstNonblankInLine:self.insertionPoint];
     [self xvim_moveCursor:insertionAfterFilter preserveColumn:NO];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
-
 
 - (void)xvim_shiftRight:(XVimMotion*)motion{
     [self xvim_shfit:motion right:YES];
