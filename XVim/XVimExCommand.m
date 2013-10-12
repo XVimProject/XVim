@@ -546,7 +546,7 @@
                        CMD(@"wsverb", @"wsverb:inWindow:"),
                        CMD(@"wviminfo", @"viminfo:inWindow:"),
                        CMD(@"xccmd" , @"xccmd:inWindow:"),
-                       CMD(@"menucmd" , @"menucmd:inWindow:"),
+                       CMD(@"xcmenucmd" , @"xcmenucmd:inWindow:"),   // XVim original
                        CMD(@"xctabctrl", @"xctabctrl:inWindow:"),
                        CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
                        CMD(@"xit", @"exit:inWindow:"),
@@ -1229,23 +1229,21 @@
     [window setForcusBackToSourceView];
     NSMenuItem* item = [self findMenuItemIn:nil forAction:[[args arg] stringByAppendingString:@":"]];
     if( nil != item ){
-//some action crash like below, the sender must be menu item themself
-//Title:Show File Template Library    Action:showLibraryWithChoiceFromSender:
-//Title:Show Code Snippet Library    Action:showLibraryWithChoiceFromSender:
-//Title:Show Object Library    Action:showLibraryWithChoiceFromSender:
-//Title:Show Media Library    Action:showLibraryWithChoiceFromSender:
-//        [NSApp sendAction:item.action to:item.target from:self];
-          [NSApp sendAction:item.action to:item.target from:item];
+        //Sending some actions(followings) without "from:" crashes Xcode.
+        //Title:Show File Template Library    Action:showLibraryWithChoiceFromSender:
+        //Title:Show Code Snippet Library    Action:showLibraryWithChoiceFromSender:
+        //Title:Show Object Library    Action:showLibraryWithChoiceFromSender:
+        //Title:Show Media Library    Action:showLibraryWithChoiceFromSender:
+        [NSApp sendAction:item.action to:item.target from:item];
     }
 }
 
-// add by dengjinlong
 - (NSMenuItem*)findMenuItemIn:(NSMenu*)menu forTitle:(NSString*)titleName{
     if( nil == menu ){
         menu = [NSApp mainMenu];
     }
     for(NSMenuItem* mi in [menu itemArray] ){
-        if( [mi.title isEqualToString:titleName] ){
+        if( [mi.title localizedCaseInsensitiveCompare:titleName] == NSOrderedSame ){
             return mi;
         }
         if( nil != [mi submenu] ){
@@ -1260,18 +1258,13 @@
 
 // add by dengjinlong
 // I upload my .xvim to https://github.com/dengcqw/XVim-config-file FYI
-- (void)menucmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+- (void)xcmenucmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
 // I comment below, to resign focus, but failed. I also simulate mouse click.
 // simulate mouse click - [NSMenu performActionForItemAtIndex:]
 // It is better to open Utilities, and focus its text field.
 // [window setForcusBackToSourceView];
-    NSString *prefix = @"Title:";
-    if (![[args arg] hasPrefix:prefix]) {
-        return;
-    }
-    NSString *title = [[args arg] substringFromIndex:prefix.length];
-    NSMenuItem* item = [self findMenuItemIn:nil forTitle:title];
-   if( nil == item ){
+    NSMenuItem* item = [self findMenuItemIn:nil forTitle:args.arg];
+   if( nil == item || item.action == @selector(submenuAction:)){
        return;
    }
     
