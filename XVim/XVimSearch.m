@@ -16,6 +16,33 @@
 #import "XVimUtil.h"
 #import "IDEKit.h"
 
+#pragma mark - XVimSearchMatch
+
+@interface XVimSearchMatch : NSObject
+
+@property (nonatomic, assign) NSRange range;
+@property (nonatomic, assign) XVimPosition begin;
+@property (nonatomic, assign) XVimPosition end;
+@property (nonatomic, strong) NSTextCheckingResult *result;
+
+@end
+
+@implementation XVimSearchMatch
+
++ (instancetype)matchWithTextCheckingResult:(NSTextCheckingResult *)result inTextStorage:(NSTextStorage *)text
+{
+    XVimSearchMatch *match = [[self alloc] init];
+    match.result = result;
+    match.range = result.range;
+    match.begin = XVimMakePosition([text lineNumber:result.range.location], [text columnNumber:result.range.location]);
+    match.end = XVimMakePosition([text lineNumber:NSMaxRange(result.range)], [text columnNumber:NSMaxRange(result.range)]);
+    return match;
+}
+
+@end
+
+#pragma mark - XVimSearch
+
 @implementation XVimSearch
 
 - (id)init {
@@ -386,6 +413,7 @@
     return found;
 }
 
+
 - (NSRange)replaceForwardFrom:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
 {
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
@@ -427,75 +455,222 @@
     return found;
 }
 
-- (void)substitute:(NSString*)ex_command from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
+#define arg_next(len)  (MIN(len, cur.length) > 0 ? [ex_arg substringWithRange:NSMakeRange(cur.location, MIN(len, cur.length))] : nil); cur = NSMakeRange(cur.location + MIN(len, cur.length), cur.length - MIN(len, cur.length));
+#define arg_find(str)  ([ex_arg rangeOfString:str options:0 range:cur])
+#define arg_seek(str)  arg_next(arg_find(str).location == NSNotFound ? cur.length : arg_find(str).location - cur.location)
+#define str_contains(string, characterSet)  ([string rangeOfCharacterFromSet:characterSet].location != NSNotFound)
+
+/*
+ Perform a substitution from line eap->line1 to line eap->line2 using the
+ command pointed to by eap->arg which should be of the form:
+
+ /pattern/substitution/{flags}
+
+ */
+- (void)substitute:(NSString*)ex_arg from:(NSUInteger)fromLine to:(NSUInteger)toLine inWindow:(XVimWindow *)window
 {
 	XVimOptions *options = [[XVim instance] options];
-    // Split the string into the various components
-    NSString* replaced = @"";
-    NSString* replacement = @"";
-    unichar previous = 0;
-    int component = 0;
-    BOOL global = options.gdefault;
-    BOOL confirmation = NO;
-    if ([ex_command length] >= 3) {
-        unichar delimiter = [ex_command characterAtIndex:0];
-        for(NSUInteger i=1;i<[ex_command length];++i) {
-            unichar current = [ex_command characterAtIndex:i];
-            if (current == delimiter && previous != '\\') {
-                component++;
-            } else {
-                if (component == 0) {
-                    replaced = [NSString stringWithFormat:@"%@%C",replaced,current];
-                } else if (component == 1) {
-                    replacement = [NSString stringWithFormat:@"%@%C",replacement,current];
-                } else {
-                    if (current == 'g') {
-                        global = !global;
-                    } else if (current == 'c') {
-                        confirmation = YES;
-                    } else {
-                        ERROR_LOG("Unknown replace option %C",current);
-                    }
-                }
-                previous = current;
-            }
-        }
-        TRACE_LOG("replaced=%@",replaced);
-        TRACE_LOG("replacement=%@",replacement);
-    }
-    self.lastSearchCmd = replaced;
-    self.lastSearchDisplayString = replaced;
-    self.lastReplacementString = replacement;
-    
-    // Find the position to start searching
-    NSUInteger replace_start_location = [window.sourceView.textStorage positionAtLineNumber:from column:0];
-    if( NSNotFound == replace_start_location){
+   
+    NSUInteger fromCol = 0;
+
+    BOOL isGlobal = options.gdefault;
+    BOOL isConfirm = NO;
+    BOOL isIgnoreErrors = NO;
+    BOOL isIgnoreCase = NO;
+
+    NSString *delimiter;
+    NSString *search;
+    NSString *replace;
+
+    NSRange cur = NSMakeRange(0, [ex_arg length]);
+
+    // pattern
+
+    delimiter = arg_next(1);
+
+    if (str_contains(delimiter, [NSCharacterSet alphanumericCharacterSet])) {
+        ERROR_LOG(@"Regular expressions can't be delimited by letters, got '%@'", delimiter);
+        [window errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Regular expressions can't be delimited by letters, got '%@'", nil), delimiter] ringBell:TRUE];
         return;
     }
-    
-    // Find the position to end the searching
-    NSUInteger endOfReplacement = [window.sourceView.textStorage positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
-    if( NSNotFound == endOfReplacement ){
-        endOfReplacement = [[[window sourceView] string] length];
-    }
-    // This is lazy implementation.
-    // When text is substituted the end location may be smaller or greater than original end position.
-    // I'll implement correct version later.
-    
-    // Replace all the occurrences
-    int numReplacements = 0;
-    NSRange found;
-    do {
-        found = [self replaceForwardFrom:replace_start_location to:endOfReplacement inWindow:window];
-        if (found.location != NSNotFound) {
-            numReplacements++;
-        }
-		replace_start_location = found.location + [replacement length];
-		endOfReplacement = endOfReplacement + [replacement length] - found.length;
-    } while(found.location != NSNotFound && global && replace_start_location < endOfReplacement);
-    [window errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
 
+    search = arg_seek(delimiter);
+    arg_next(1);
+
+    replace = arg_seek(delimiter);
+    arg_next(1);
+
+    if (search == nil) search = @""; 
+    if (replace == nil) replace = @"";
+
+    // flags
+
+    NSString *flag = arg_next(1);
+
+    while (flag) {
+        if ([flag isEqualToString:@"g"]) isGlobal = !isGlobal;
+        if ([flag isEqualToString:@"c"]) isConfirm = !isConfirm;
+        if ([flag isEqualToString:@"e"]) isIgnoreErrors = !isIgnoreErrors;
+        if ([flag isEqualToString:@"i"]) isIgnoreCase = YES;
+        if ([flag isEqualToString:@"I"]) isIgnoreCase = NO;
+        flag = arg_next(1);
+    }
+
+    // compile regex
+
+    DEBUG_LOG(@"substitute: <delimiter = '%@', search = '%@', replace = '%@', isGlobal = %d, isConfirm = %d, isIgnoreErrors = %d, isIgnoreCase = %d, from = %d:%d, to = %d:%d>", delimiter, search, replace, isGlobal, isConfirm, isIgnoreErrors, isIgnoreCase, fromLine, fromCol, toLine, 0);
+
+    self.lastSearchCmd = search;
+    self.lastSearchDisplayString = search;
+    self.lastReplacementString = replace;
+
+    NSError *error;
+    NSRegularExpression *regex = [self compileRegexWithSearch:search replace:replace ignoreCase:isIgnoreCase error:&error];
+
+    if (!regex) {
+        // test: "s/\xXX/x/"
+        ERROR_LOG(@"Invalid regular expression '%@', %@", search, error);
+        if (!isIgnoreErrors) {
+            [window errorMessage:[NSString stringWithFormat:NSLocalizedString(@"Invalid expression, %@", nil), error.localizedFailureReason] ringBell:YES];
+        }
+        return;
+    }
+   
+    // match each line
+
+    NSTextStorage *text = window.sourceView.textStorage;
+
+    NSUInteger idx = [text positionAtLineNumber:fromLine column:fromCol];
+    NSUInteger lastIdx = 0;
+
+    NSUInteger count = 0;
+
+    [text beginEditing];
+
+    /*
+     * Search each line for matches that being in the line. Adjust parameters
+     * for lines and chars added/removed as we go.
+     */
+    for (NSUInteger line = [text lineNumber:idx]; line <= toLine; line = [text lineNumber:idx])
+    {
+        /*
+	     * Loop until nothing more to replace in this line.
+	     * 1. Handle match with empty string.
+	     * 2. If do_ask is set, ask for confirmation.
+	     * 3. substitute the string.
+	     * 4. if do_all is set, find next match
+	     * 5. break if there isn't another match in this line
+	     */
+        for ( ; [text isValidCursorPosition:idx] ; )
+        {
+            DEBUG_LOG(@"  on <line = %d, idx = %d>: %@", line, idx, [text.xvim_string substringWithRange:NSMakeRange(idx, MIN([text endOfLine:idx] - idx, 50))]);
+
+            NSRange range = NSMakeRange(idx, text.endOfFile - idx);
+            NSTextCheckingResult *result = [regex firstMatchInString:text.xvim_string options:0 range:range];
+
+            if (result == nil) {
+                break; // nothing more on this line
+            }
+
+            XVimSearchMatch *match = [XVimSearchMatch matchWithTextCheckingResult:result inTextStorage:text];
+
+            if (match.begin.line != line) {
+                break; // match begins on next line
+            }
+
+            /*
+             * 1. Match empty string does not count, except for first
+             * match.  This reproduces the strange vi behaviour.
+             * This also catches endless loops.
+             */
+
+            if (match.begin.column == match.end.column
+                && match.begin.line == match.end.line
+                && lastIdx
+            ) {
+                break;
+            }
+
+            lastIdx = idx;
+
+            NSString *replacementString = [regex replacementStringForResult:match.result inString:window.sourceView.string offset:0 template:replace];
+
+            /*
+             * 2. If do_count is set only increase the counter.
+             *    If `isConfirm` is set, ask for confirmation.
+             */
+
+            if (isConfirm) {
+                DEBUG_LOG(@"replace with %s (y/n/a/q/l/^E/^Y)?", replacementString);
+            }
+
+            /*
+             * 3. Substitute the string.
+             *    We call [NSTextStorage replaceCharactersInRange:withString:]
+             *    instead of [NSTextView insertText:replacementRange:] to avoid
+             *    position errors with undo/redo.
+             */
+
+            if ([window.sourceView shouldChangeTextInRange:match.range replacementString:replacementString]) {
+                [window.sourceView.textStorage replaceCharactersInRange:match.range withString:replacementString];
+            }
+
+            count++;                          // increase count
+            idx  = match.range.location;      // advance cursor to end of match
+            idx -= match.range.length;        // adjust for length differences
+            idx += replacementString.length;
+
+            /*
+             * 4. If `isGlobal` is set, find next match.
+             * Prevent endless loop with patterns that match empty
+             * strings, e.g. :s/$/pat/g or :s/[a-z]* /(&)/g.
+             * But ":s/\n/#/" is OK.
+             */
+
+            if (!isGlobal) {
+                break;
+            }
+        }
+
+        idx = [text nextLine:idx column:0 count:1 option:MOTION_OPTION_NONE];
+       
+        if ([text isLastCharacter:idx]) {
+            break;
+        }
+       
+        if (line + 1 != [text lineNumber:idx]) {
+            // TODO: this gets stuck
+            DEBUG_LOG(@"line count adjustment: before <nextLine = %d, toLine = %d>, adjusted <nextLine = %d, toLine = %d>, <diff = %+d>", line + 1, toLine, [text lineNumber:idx], toLine + ([text lineNumber:idx] - line), ([text lineNumber:idx] - line));
+            toLine += [text lineNumber:idx] - line;
+        }
+    }
+
+    [text endEditing];
+
+    DEBUG_LOG(@"%lu substitutions", count);
+    [window statusMessage:[NSString stringWithFormat:NSLocalizedString(@"%lu substitutions", @"{replacement count} substitutions"), count]];
 }
 
+- (NSRegularExpression *)compileRegexWithSearch:(NSString *)search replace:(NSString *)replace ignoreCase:(BOOL)ignoreCase error:(NSError **)error
+{
+    NSRegularExpression *regex;
+    NSRegularExpressionOptions opts = 0;
+
+    opts |= NSRegularExpressionAnchorsMatchLines;
+    opts |= NSRegularExpressionUseUnicodeWordBoundaries;
+
+    if (ignoreCase) {
+        opts |= NSRegularExpressionCaseInsensitive;
+    }
+
+    *error = nil;
+    regex = [NSRegularExpression regularExpressionWithPattern:search options:opts error:error];
+
+    if (*error) {
+        return nil;
+    }
+
+    return regex;
+}
 
 @end
