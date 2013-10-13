@@ -48,6 +48,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 	XVimHistoryHandler *_searchHistory;
 	XVimKeymap* _keymaps[XVIM_MODE_COUNT];
     NSFileHandle* _logFile;
+    XVimTester* testRunner;
 }
 @property (strong,nonatomic) XVimRegisterManager* registerManager;
 @property (strong,nonatomic) XVimMutableString* lastOperationCommands;
@@ -305,7 +306,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 
 - (void)runTest:(id)sender{
-    [[[[XVimTester alloc] init] autorelease] runTest];
+//    [[[[XVimTester alloc] init] autorelease] runTest];
+    testRunner = [[XVimTester alloc] init];
+    
+    [testRunner runTest];
 }
 
 - (void)toggleXVim:(id)sender{
