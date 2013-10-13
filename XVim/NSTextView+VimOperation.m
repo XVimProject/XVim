@@ -1595,6 +1595,8 @@
     NSUInteger begin = current;
     NSUInteger end = NSNotFound;
     NSUInteger tmpPos = NSNotFound;
+    NSUInteger start = NSNotFound;
+    NSUInteger starts_end = NSNotFound;
     
     switch (motion.motion) {
         case MOTION_NONE:
@@ -1722,9 +1724,20 @@
             break;
         case TEXTOBJECT_PARAGRAPH:
             // Not supported
+            start = self.insertionPoint;
+            if(start != 0){
+                start = [self.textStorage paragraphsBackward:self.insertionPoint count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+            }
+            starts_end = [self.textStorage paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+            end = [self.textStorage paragraphsForward:self.insertionPoint count:motion.count option:MOPT_PARA_BOUND_BLANKLINE];
+            
+            if(starts_end != end){
+                start = starts_end;
+            }
+            range = NSMakeRange(start, end - start);
             break;
         case TEXTOBJECT_PARENTHESES:
-            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+           range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
             break;
         case TEXTOBJECT_SENTENCE:
             // Not supported
