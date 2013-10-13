@@ -10,6 +10,8 @@
 #import "XVimNumericEvaluator.h"
 #import "XVimMotion.h"
 
+@class XVimMark;
+
 // This evaluator handles motions.
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
 
@@ -33,6 +35,7 @@
 // Do not override this method
 - (XVimEvaluator*)_motionFixed:(XVimMotion*)motion;
 
+- (XVimEvaluator*)jumpToMark:(XVimMark*)mark firstOfLine:(BOOL)fist;
 
 // These are only for surpress warning
 - (XVimEvaluator*)b;
