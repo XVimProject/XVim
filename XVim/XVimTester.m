@@ -65,8 +65,15 @@
  * Test cases you wrote automatically included and run.
  **/
 
-@implementation XVimTester
 
+
+
+@implementation XVimTester{
+    
+    NSWindow* results;
+    NSTableView* tableView;
+    BOOL showPassing;
+}
 
 - (id)init{
     return [self initWithTestCategory:nil];
@@ -87,6 +94,8 @@
                 [self.testCases addObjectsFromArray:[self performSelector:sel]];
             }
         }
+        
+        showPassing = false;
     }
     return self;
     
@@ -117,10 +126,11 @@
     // Run test for all the cases
     for( NSUInteger i = 0; i < testArray.count; i++ ){
         [(XVimTestCase*)[testArray objectAtIndex:i] run];
+        usleep(100);
     }
     
     // Setup Talbe view to show result
-    NSTableView* tableView= [[[NSTableView alloc] init] autorelease];
+    tableView = [[[NSTableView alloc] init] autorelease];
     [tableView setDataSource:self];
     [tableView setDelegate:self];
    
@@ -139,33 +149,88 @@
     [tableView setAllowsMultipleSelection:YES];
     [tableView reloadData];
     
+    //setup a window to show the tableview, scrollview, and results toggling button.
+    NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
+    results = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false] retain];
+    
     // Setup the table view into scroll view
-    NSScrollView* scroll = [[[NSScrollView alloc] initWithFrame:NSMakeRect(0,0,600,300)] autorelease];
+    NSScrollView* scroll = [[[NSScrollView alloc] initWithFrame:NSMakeRect(0, 35, 700, 450)] autorelease];
+    [scroll setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [scroll setDocumentView:tableView];
     [scroll setHasVerticalScroller:YES];
     [scroll setHasHorizontalScroller:YES];
     
-    // Show it as a modal
-    alert = [[[NSAlert alloc] init] autorelease];
-    [alert setMessageText:@"Result"];
-    [alert setAccessoryView:scroll];
-    [alert addButtonWithTitle:@"OK"];
-    [alert runModal];
+    //setup the results toggle button
+    NSButton* toggleResultsButton = [[NSButton alloc] initWithFrame:NSMakeRect(0, 0, 200, 30)];
+    [toggleResultsButton setTitle:@"Toggle Results"];
+    [toggleResultsButton setBezelStyle:NSRoundedBezelStyle];
+    [toggleResultsButton setTarget:self];
+    [toggleResultsButton setAction:@selector(toggleResults:)];
+    
+    //setup the main content view for the window and add the controls to it.
+    NSView * resultsView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 700, 450)];
+    
+    [results setContentView:resultsView];
+    
+    [resultsView addSubview:scroll];
+    [resultsView addSubview:toggleResultsButton];
+    [resultsView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+    
+    [results makeKeyAndOrderFront:results];
 }
-
+-(IBAction) toggleResults: (id) sender {
+    showPassing = !showPassing;
+    [tableView reloadData];
+}
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView{
-    return (NSInteger)[self.testCases count];
+    if(showPassing){
+       return (NSInteger)[self.testCases count];
+    }else
+    {
+        NSInteger runningCount = 0;
+        for(XVimTestCase* tc in self.testCases){
+            if(!tc.success){
+                runningCount++;
+            }
+        }
+        return runningCount;
+    }
 }
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex{
+    
+    XVimTestCase* resultRow;
+    
+    if(showPassing){
+        resultRow = (XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)rowIndex];
+    }else{
+       NSInteger index = [self getIndexOfNthFailingTestcase:rowIndex];
+       resultRow = (XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)index];
+    }
+    
     if( [aTableColumn.identifier isEqualToString:@"Description"] ){
-        return [(XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)rowIndex] description];
+        return [resultRow description];
     }else if( [aTableColumn.identifier isEqualToString:@"Pass/Fail"] ){
-        return ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)rowIndex]).success ? @"Pass" : @"Fail";
+        return (resultRow.success) ? @"Pass" : @"Fail";
     }else if( [aTableColumn.identifier isEqualToString:@"Message"] ){
-        return ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)rowIndex]).message;
+        return resultRow.message;
     }
     return nil;
+}
+
+-(NSInteger) getIndexOfNthFailingTestcase:(NSInteger)nth{
+    NSInteger runningCount = -1;
+    NSInteger retval = -1;
+    for(XVimTestCase* tc in self.testCases){
+        retval++;
+        if(!tc.success){
+            runningCount++;
+            if (runningCount == nth) {
+                break;
+            }
+        }
+    }
+    return  retval;
 }
 
 - (float)heightForString:(NSString*)myString withFont:(NSFont*)myFont withWidth:(float)myWidth{
@@ -183,20 +248,26 @@
             usedRectForTextContainer:textContainer].size.height;
 }
 
-- (CGFloat)tableView:(NSTableView *)tableView heightOfRow:(NSInteger)row{
+- (CGFloat)tableView:(NSTableView *)tv heightOfRow:(NSInteger)row{
     NSFont* font;
-    NSTableColumn* column = [tableView tableColumnWithIdentifier:@"Message"];
+    NSTableColumn* column = [tv tableColumnWithIdentifier:@"Message"];
     if( nil != column ){
         NSCell* cell = (NSCell*)[column dataCell];
         font = [NSFont fontWithName:@"Menlo" size:13];
         [cell setFont:font]; // FIXME: This should not be done here.
         float width = column.width;
-        NSString* msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)row]).message;
+        NSString* msg;
+        if(showPassing){
+            msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)row]).message;
+        }else{
+            NSInteger index = [self getIndexOfNthFailingTestcase:row];
+            msg = ((XVimTestCase*)[self.testCases objectAtIndex:index]).message;
+        }
         if( nil == msg || [msg isEqualToString:@""] ){
             msg = @" ";
         }
         float ret = [self heightForString:msg withFont:font withWidth:width];
-        return ret + 5;
+        return ret + 10;
     }
     return 13.0;
 }
