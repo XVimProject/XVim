@@ -545,8 +545,9 @@
         }
     }else if( type == TEXT_TYPE_LINES ){
         if( after ){
-            [self xvim_insertNewlineBelow];
-            targetPos = self.insertionPoint;
+            NSUInteger line = [self.textStorage lineNumber:self.insertionPoint];
+            [self xvim_insertNewlineBelowLine:line];
+            targetPos = [self.textStorage positionAtLineNumber:line+1];
         }else{
             targetPos= [self.textStorage beginningOfLine:self.insertionPoint];
         }
