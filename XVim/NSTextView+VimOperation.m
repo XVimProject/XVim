@@ -545,9 +545,8 @@
         }
     }else if( type == TEXT_TYPE_LINES ){
         if( after ){
-            NSUInteger line = [self.textStorage lineNumber:self.insertionPoint];
-            [self xvim_insertNewlineBelowLine:line];
-            targetPos = [self.textStorage positionAtLineNumber:line+1];
+            [self xvim_insertNewlineBelowCurrentLine];
+            targetPos = self.insertionPoint;
         }else{
             targetPos= [self.textStorage beginningOfLine:self.insertionPoint];
         }
@@ -841,10 +840,12 @@
     [self xvim_syncState];
 }
 
-- (void)xvim_insertNewlineBelow{
-    NSUInteger l = self.insertionPoint;
-    // TODO: Use self.insertionPoint to move cursor
-    NSUInteger tail = [self.textStorage endOfLine:l];
+- (void)xvim_insertNewlineBelowCurrentLine{
+    [self xvim_insertNewlineBelowLine:[self.textStorage lineNumber:self.insertionPoint]];
+}
+
+- (void)xvim_insertNewlineBelowCurrentLineWithIndent{
+    NSUInteger tail = [self.textStorage endOfLine:self.insertionPoint];
     [self setSelectedRange:NSMakeRange(tail,0)];
     [self insertNewline:self];
 }
@@ -863,33 +864,33 @@
     }
 }
 
-- (void)xvim_insertNewlineAbove{
-    NSUInteger l = self.insertionPoint;
-    NSUInteger head = [self.textStorage firstOfLine:l];
+- (void)xvim_insertNewlineAboveCurrentLine{
+    [self xvim_insertNewlineAboveLine:[self.textStorage lineNumber:self.insertionPoint]];
+}
+
+- (void)xvim_insertNewlineAboveCurrentLineWithIndent{
+    NSUInteger head = [self.textStorage firstOfLine:self.insertionPoint];
     if( NSNotFound == head ){
-        head = l;
+        head = self.insertionPoint;
     }
     if( 0 != head ){
-        // TODO: Use self.insertionPoint to move cursor
         [self setSelectedRange:NSMakeRange(head-1,0)];
         [self insertNewline:self];
     }else{
-        // TODO: Use self.insertionPoint to move cursor
         [self setSelectedRange:NSMakeRange(head,0)];
         [self insertNewline:self];
         [self setSelectedRange:NSMakeRange(0,0)];
     }
-    
 }
 
-- (void)xvim_insertNewlineAboveAndInsert{
+- (void)xvim_insertNewlineAboveAndInsertWithIndent{
     self.cursorMode = CURSOR_MODE_INSERT;
-    [self xvim_insertNewlineAbove];
+    [self xvim_insertNewlineAboveCurrentLineWithIndent];
 }
 
-- (void)xvim_insertNewlineBelowAndInsert{
+- (void)xvim_insertNewlineBelowAndInsertWithIndent{
     self.cursorMode = CURSOR_MODE_INSERT;
-    [self xvim_insertNewlineBelow];
+    [self xvim_insertNewlineBelowCurrentLineWithIndent];
 }
 
 - (void)xvim_append{

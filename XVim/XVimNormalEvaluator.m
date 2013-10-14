@@ -197,13 +197,13 @@
 
 - (XVimEvaluator*)o{
     NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineBelowAndInsert];
+    [view xvim_insertNewlineBelowAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
     NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineAboveAndInsert];
+    [view xvim_insertNewlineAboveAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
