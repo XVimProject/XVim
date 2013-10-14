@@ -53,6 +53,12 @@ J
 
 Normal mode: >, >>, <, <<
 
+## Filter
+
+Normal mode: ==
+
+Visual mode: =
+
 ## Case change operations
 
 Normal mode: ~, gu, gU, g~
