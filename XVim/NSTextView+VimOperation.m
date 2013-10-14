@@ -545,7 +545,7 @@
         }
     }else if( type == TEXT_TYPE_LINES ){
         if( after ){
-            [self xvim_insertNewlineBelow];
+            [self xvim_insertNewlineBelowCurrentLine];
             targetPos = self.insertionPoint;
         }else{
             targetPos= [self.textStorage beginningOfLine:self.insertionPoint];
@@ -843,10 +843,12 @@
     [self xvim_syncState];
 }
 
-- (void)xvim_insertNewlineBelow{
-    NSUInteger l = self.insertionPoint;
-    // TODO: Use self.insertionPoint to move cursor
-    NSUInteger tail = [self.textStorage endOfLine:l];
+- (void)xvim_insertNewlineBelowCurrentLine{
+    [self xvim_insertNewlineBelowLine:[self.textStorage lineNumber:self.insertionPoint]];
+}
+
+- (void)xvim_insertNewlineBelowCurrentLineWithIndent{
+    NSUInteger tail = [self.textStorage endOfLine:self.insertionPoint];
     [self setSelectedRange:NSMakeRange(tail,0)];
     [self insertNewline:self];
 }
@@ -865,33 +867,33 @@
     }
 }
 
-- (void)xvim_insertNewlineAbove{
-    NSUInteger l = self.insertionPoint;
-    NSUInteger head = [self.textStorage firstOfLine:l];
+- (void)xvim_insertNewlineAboveCurrentLine{
+    [self xvim_insertNewlineAboveLine:[self.textStorage lineNumber:self.insertionPoint]];
+}
+
+- (void)xvim_insertNewlineAboveCurrentLineWithIndent{
+    NSUInteger head = [self.textStorage firstOfLine:self.insertionPoint];
     if( NSNotFound == head ){
-        head = l;
+        head = self.insertionPoint;
     }
     if( 0 != head ){
-        // TODO: Use self.insertionPoint to move cursor
         [self setSelectedRange:NSMakeRange(head-1,0)];
         [self insertNewline:self];
     }else{
-        // TODO: Use self.insertionPoint to move cursor
         [self setSelectedRange:NSMakeRange(head,0)];
         [self insertNewline:self];
         [self setSelectedRange:NSMakeRange(0,0)];
     }
-    
 }
 
-- (void)xvim_insertNewlineAboveAndInsert{
+- (void)xvim_insertNewlineAboveAndInsertWithIndent{
     self.cursorMode = CURSOR_MODE_INSERT;
-    [self xvim_insertNewlineAbove];
+    [self xvim_insertNewlineAboveCurrentLineWithIndent];
 }
 
-- (void)xvim_insertNewlineBelowAndInsert{
+- (void)xvim_insertNewlineBelowAndInsertWithIndent{
     self.cursorMode = CURSOR_MODE_INSERT;
-    [self xvim_insertNewlineBelow];
+    [self xvim_insertNewlineBelowCurrentLineWithIndent];
 }
 
 - (void)xvim_append{
@@ -1598,6 +1600,8 @@
     NSUInteger begin = current;
     NSUInteger end = NSNotFound;
     NSUInteger tmpPos = NSNotFound;
+    NSUInteger start = NSNotFound;
+    NSUInteger starts_end = NSNotFound;
     
     switch (motion.motion) {
         case MOTION_NONE:
@@ -1725,9 +1729,20 @@
             break;
         case TEXTOBJECT_PARAGRAPH:
             // Not supported
+            start = self.insertionPoint;
+            if(start != 0){
+                start = [self.textStorage paragraphsBackward:self.insertionPoint count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+            }
+            starts_end = [self.textStorage paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+            end = [self.textStorage paragraphsForward:self.insertionPoint count:motion.count option:MOPT_PARA_BOUND_BLANKLINE];
+            
+            if(starts_end != end){
+                start = starts_end;
+            }
+            range = NSMakeRange(start, end - start);
             break;
         case TEXTOBJECT_PARENTHESES:
-            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+           range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
             break;
         case TEXTOBJECT_SENTENCE:
             // Not supported
