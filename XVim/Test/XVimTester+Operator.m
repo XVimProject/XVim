@@ -39,16 +39,22 @@
                              @"        eee\n"   // 48
                              @"        fff";    // 60
     
-    /*
-    static NSString* text4 = @"{\n"   // 0  (index of each WORD)
-                             @"aaa\n" // 2
-                             @"bbb\n" // 6
-                             @"ccc\n" // 14 
-                             @"ddd\n" // 18
-                             @"eee\n" // 22
-                             @"fff\n" // 26
-                             @"}";    // 30
-     */
+    static NSString* text6 = @"aaa\n"   // 0  (index of each WORD)
+                             @"bbb\n"   // 4 
+                             @"ccc\n"   // 8 
+                             @"ddd\n"   // 12
+                             @"eee\n"   // 16
+                             @"fff\n"   // 20
+                             @"bbb\n"   // 24 
+                             @"ccc\n"   // 28 
+                             @"ddd\n"   // 32
+                             @"eee\n"   // 36
+                             @"fff\n"   // 40
+                             @"bbb\n"   // 44 
+                             @"ccc\n"   // 48 
+                             @"ddd\n"   // 52
+                             @"eee\n"   // 56
+                             @"fff\n";  // 60
     
     static NSString* a_result  = @"aAa bbXXXb ccc\n";
     static NSString* a_result2 = @"aAa bbXXXXXXXXXb ccc\n";
@@ -170,6 +176,42 @@
                                  @"aaa\n"
                                  @"bbb\n"
                                  @"ccc";
+    
+    static NSString* y_result4 = @"aaa\n"
+                                 @"bbb\n" // --- 
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n" // pasted
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n"
+                                 @"ddd\n" // ----
+                                 @"bbb\n" // ---- 
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n" // yanked 
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n"
+                                 @"ddd\n"  // ---
+                                 @"eee\n"
+                                 @"fff\n";
+    
+    static NSString* p_result1 = @"aAa bbb ccc\n"
+                                 @"\n"
+                                 @"aAa bbb ccc"; //13
+    static NSString* p_result2 = @"aAa bbb ccc\n"
+                                 @"aAa bbb ccc\n"; //12
     
     static NSString* oO_text = @"int abc(){\n"  // 0 4
     @"}\n";          // 11
@@ -368,6 +410,10 @@
             XVimMakeTestCase(text0, 0,  0, @"ywP", y_result1,  3, 0),
             XVimMakeTestCase(text2, 8,  0, @"ywP", y_result2, 10, 0), // Yank to end of file
             
+            // y + numericArg(>10) + motion  (Issue #489)
+            XVimMakeTestCase(text6, 4,  0, @"y12jP", y_result4,  4, 0),
+            
+            
             // yy
             XVimMakeTestCase(text1, 1,  0, @"yyp", y_result3,  4, 0),
             // y_ does the same as yy
@@ -375,8 +421,12 @@
             
             // p, P
             // TODO: Currently the insertion position after put(P) is not correct.(Must pass followings)
-            //XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
-            //XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            
+            // p at EOF
+            XVimMakeTestCase(text0, 1,  0, @"yyjp", p_result1, 13, 0),
+            XVimMakeTestCase(text0, 1,  0, @"yyjP", p_result2, 12, 0),
             
             // r
             XVimMakeTestCase(text0, 5,  0, @"rX",     r_result1, 5, 0),

@@ -34,7 +34,7 @@
 #import "XVimCommandLine.h"
 #import "DVTSourceTextViewHook.h"
 #import "XVimMarks.h"
-#import "xvimMotion.h"
+#import "XVimMotion.h"
 #import "XVimTester.h"
 #import "XVimUtil.h"
 #import "IDEKit.h"

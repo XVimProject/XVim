@@ -538,28 +538,27 @@
                 targetPos++;
             }
             insertionPointAfterPut = targetPos;
-            [self xvim_setSelectedRange:NSMakeRange(targetPos,0)];
             for(NSUInteger i = 0; i < count ; i++ ){
-                [self insertText:text];
+                [self insertText:text replacementRange:NSMakeRange(targetPos,0)];
             }
             insertionPointAfterPut += text.length*count - 1;
         }
     }else if( type == TEXT_TYPE_LINES ){
         if( after ){
-            [self xvim_insertNewlineBelow];
-            targetPos = self.insertionPoint;
+            NSUInteger line = [self.textStorage lineNumber:self.insertionPoint];
+            [self xvim_insertNewlineBelowLine:line];
+            targetPos = [self.textStorage positionAtLineNumber:line+1];
         }else{
             targetPos= [self.textStorage beginningOfLine:self.insertionPoint];
         }
-        insertionPointAfterPut = self.insertionPoint;
-        [self xvim_setSelectedRange:NSMakeRange(targetPos,0)];
+        insertionPointAfterPut = targetPos;
         for(NSUInteger i = 0; i < count ; i++ ){
-            if( after && i == count-1 ){
+            if( after && i == 0 ){
                 // delete newline at the end. (TEXT_TYPE_LINES always have newline at the end of the text)
                 NSString* t = [text  substringToIndex:text.length-1];
-                [self insertText:t];
+                [self insertText:t replacementRange:NSMakeRange(targetPos,0)];
             } else{
-                [self insertText:text];
+                [self insertText:text replacementRange:NSMakeRange(targetPos,0)];
             }
         }
     }else if( type == TEXT_TYPE_BLOCK ){
@@ -1597,6 +1596,8 @@
     NSUInteger begin = current;
     NSUInteger end = NSNotFound;
     NSUInteger tmpPos = NSNotFound;
+    NSUInteger start = NSNotFound;
+    NSUInteger starts_end = NSNotFound;
     
     switch (motion.motion) {
         case MOTION_NONE:
@@ -1724,9 +1725,20 @@
             break;
         case TEXTOBJECT_PARAGRAPH:
             // Not supported
+            start = self.insertionPoint;
+            if(start != 0){
+                start = [self.textStorage paragraphsBackward:self.insertionPoint count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+            }
+            starts_end = [self.textStorage paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
+            end = [self.textStorage paragraphsForward:self.insertionPoint count:motion.count option:MOPT_PARA_BOUND_BLANKLINE];
+            
+            if(starts_end != end){
+                start = starts_end;
+            }
+            range = NSMakeRange(start, end - start);
             break;
         case TEXTOBJECT_PARENTHESES:
-            range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+           range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
             break;
         case TEXTOBJECT_SENTENCE:
             // Not supported
@@ -1891,10 +1903,17 @@
 
 - (void)xvim_indentCharacterRange:(NSRange)range{
 #ifdef __USE_DVTKIT__
+#ifdef __XCODE5__
     if ( [self.textStorage isKindOfClass:[DVTTextStorage class]] ){
         [(DVTTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
     }
     return;
+#else
+    if ( [self.textStorage isKindOfClass:[DVTSourceTextStorage class]] ){
+        [(DVTSourceTextStorage*)self.textStorage indentCharacterRange:range undoManager:self.undoManager];
+    }
+    return;
+#endif
 #else
 #error You must implement here
 #endif
