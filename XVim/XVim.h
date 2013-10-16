@@ -24,6 +24,7 @@
 @class XVimMarks;
 @class XVimMotion;
 @class XVimRegisterManager;
+@class XVimTester;
 
 
 extern NSString * const XVimDocumentChangedNotification;
@@ -37,6 +38,7 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong) XVimMotion* lastCharacterSearchMotion;
 @property (strong) XVimExCommand* excmd;
 @property (readonly) XVimMarks* marks;
+@property (readonly) XVimTester* testRunner;
 @property (readonly) XVimRegisterManager* registerManager;
 @property (readonly) XVimHistoryHandler* exCommandHistory;
 @property (readonly) XVimHistoryHandler* searchHistory;
