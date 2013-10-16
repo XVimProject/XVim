@@ -8,7 +8,7 @@
 
 #import <objc/runtime.h>
 #import "IDEEditorArea+XVim.h"
-#import "XvimWindow.h"
+#import "XVimWindow.h"
 
 static const char* KEY_COMMAND_LINE = "commandLine";
 
