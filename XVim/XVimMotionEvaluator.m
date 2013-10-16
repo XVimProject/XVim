@@ -194,7 +194,12 @@
 }
 
 - (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
-    return [self _motionFixed:childEvaluator.motion];
+    if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
+        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
+        return [self jumpToMark:mark firstOfLine:NO];
+    }else{
+        return [self _motionFixed:childEvaluator.motion];
+    }
 }
 
 

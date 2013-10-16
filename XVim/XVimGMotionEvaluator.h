@@ -7,7 +7,9 @@
 //
 
 #import "XVimEvaluator.h"
+#import "XVimKeyStroke.h"
 
 @interface XVimGMotionEvaluator : XVimEvaluator
 @property(strong) XVimMotion* motion;
+@property(strong) XVimKeyStroke* key;
 @end

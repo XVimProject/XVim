@@ -93,11 +93,13 @@
 - (void)xvim_shiftLeft:(XVimMotion*)motion;
 - (void)xvim_insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
 - (void)xvim_insertNewlineBelowLine:(NSUInteger)line;
-- (void)xvim_insertNewlineBelow;
+- (void)xvim_insertNewlineBelowCurrentLine;
+- (void)xvim_insertNewlineBelowCurrentLineWithIndent;
 - (void)xvim_insertNewlineAboveLine:(NSUInteger)line;
-- (void)xvim_insertNewlineAbove;
-- (void)xvim_insertNewlineAboveAndInsert;
-- (void)xvim_insertNewlineBelowAndInsert;
+- (void)xvim_insertNewlineAboveCurrentLine;
+- (void)xvim_insertNewlineAboveCurrentLineWithIndent;
+- (void)xvim_insertNewlineAboveAndInsertWithIndent;
+- (void)xvim_insertNewlineBelowAndInsertWithIndent;
 - (void)xvim_append;
 - (void)xvim_insert;
 - (void)xvim_appendAtEndOfLine;

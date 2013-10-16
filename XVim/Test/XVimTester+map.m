@@ -6,7 +6,7 @@
 //
 //
 
-#import "XVimtester.h"
+#import "XVimTester.h"
 
 @implementation XVimTester (map)
 - (NSArray*)map_testcases{
