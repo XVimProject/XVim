@@ -66,44 +66,54 @@
  **/
 
 
-
-
-@implementation XVimTester{
-    
+@interface XVimTester(){
     NSWindow* results;
     NSTableView* tableView;
     BOOL showPassing;
 }
+@property (strong) NSMutableArray* testCases;
+@end
+
+
+@implementation XVimTester
 
 - (id)init{
-    return [self initWithTestCategory:nil];
-}
-
-- (id)initWithTestCategory:(NSString*)category{
     if( self = [super init] ){
-    if( nil == category ){
-        category = @"";
-    }
         self.testCases = [[NSMutableArray alloc] init];
-        unsigned int count = 0;
-        Method* m = 0;
-        m = class_copyMethodList([XVimTester class],  &count);
-        for( unsigned int i = 0 ; i < count; i++ ){
-            SEL sel = method_getName(m[i]);
-            if( [NSStringFromSelector(sel) rangeOfString:[category stringByAppendingString:@"_testcases"]].location != NSNotFound ){
-                [self.testCases addObjectsFromArray:[self performSelector:sel]];
-            }
-        }
-        
         showPassing = false;
     }
     return self;
-    
 }
 
 - (void)dealloc{
+    [results release];
+    [tableView release];
     self.testCases = nil;
     [super dealloc];
+}
+
+- (NSArray*)categories{
+    NSMutableArray* arr = [[[NSMutableArray alloc] init] autorelease];
+    unsigned int count = 0;
+    Method* m = 0;
+    m = class_copyMethodList([XVimTester class],  &count);
+    for( unsigned int i = 0 ; i < count; i++ ){
+        SEL sel = method_getName(m[i]);
+        if( [NSStringFromSelector(sel) hasSuffix:@"_testcases"] ){
+            [arr addObject:[[NSStringFromSelector(sel) componentsSeparatedByString:@"_"] objectAtIndex:0]];
+        }
+    }
+    return arr;
+}
+
+- (void)selectCategories:(NSArray*)categories{
+    [self.testCases removeAllObjects];
+    for( NSString* c in categories){
+        SEL sel = NSSelectorFromString([c stringByAppendingString:@"_testcases"]);
+        if( [self respondsToSelector:sel]){
+            [self.testCases addObjectsFromArray:[self performSelector:sel]];
+        }
+    }
 }
 
 - (void)runTest{

@@ -1175,7 +1175,8 @@
 }
 
 - (void)test:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [[[[XVimTester alloc] initWithTestCategory:args.arg] autorelease] runTest];
+    [[XVim instance].testRunner selectCategories:@[args.arg]];
+    [[XVim instance].testRunner runTest];
 }
 
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
