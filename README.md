@@ -29,6 +29,9 @@
  - master : Most stable branch. Critical bug fixes and stable feature developed in 'develop' branch are merged into 'master'. If you find a critical bug in a release, try latest 'master' branch.
  - develop : New features and non critical bug fixes are merged into this branch. If you want experimental features use this branch.
 
+ Any other branches are temporary branches to develop features or bug fixes which will be merged into 'develop' branch after all.
+ Any pull requests should be made to 'develop' branch.
+
 ## Uninstall
   Delete the following directory:
 
