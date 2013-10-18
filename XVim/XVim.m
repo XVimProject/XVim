@@ -72,40 +72,42 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     NSMenuItem* item = [[[NSMenuItem alloc] init] autorelease];
     NSMenu* m = [[[NSMenu alloc] initWithTitle:@"XVim"] autorelease];
     [item setSubmenu:m];
-    NSMenuItem* item1 = [[[NSMenuItem alloc] init] autorelease];
-    item1.title = @"Enable";
-    [item1 setEnabled:YES];
-    [item1 setState:NSOnState];
-    item1.target = [XVim instance];
-    item1.action = @selector(toggleXVim:);
-    item1.keyEquivalent = @"X";
-    [m addItem:item1];
     
-    NSMenuItem* item2 = nil;
+    NSMenuItem* subitem = [[[NSMenuItem alloc] init] autorelease];
+    subitem.title = @"Enable";
+    [subitem setEnabled:YES];
+    [subitem setState:NSOnState];
+    subitem.target = [XVim instance];
+    subitem.action = @selector(toggleXVim:);
+    subitem.keyEquivalent = @"X";
+    [m addItem:subitem];
+    
     if( [XVim instance].options.debug ){
         // Add category sub menu
         NSMenuItem* subm = [[[NSMenuItem alloc] init] autorelease];
         subm.title = @"Test categories";
         NSMenu* cat_menu = [[[NSMenu alloc] init] autorelease];
         for( NSString* c in [[XVim instance].testRunner categories]){
-            NSMenuItem* item2 = [[[NSMenuItem alloc] init] autorelease];
-            item2.title = c;
-            item2.target = [XVim instance];
-            item2.action = @selector(toggleMenu:);
-            [item2 setEnabled:YES];
-            [item2 setState:NSOnState];
-            [cat_menu addItem:item2];
+            NSMenuItem* subitem = [[[NSMenuItem alloc] init] autorelease];
+            subitem.title = c;
+            subitem.target = [XVim instance];
+            subitem.action = @selector(toggleMenu:);
+            [subitem setEnabled:YES];
+            [subitem setState:NSOnState];
+            NSString* path = [NSString stringWithFormat:@"%@%@", @"TestCategories.", c ];
+            [subitem bind:@"value" toObject:self.instance.info withKeyPath:path options:nil];
+            [cat_menu addItem:subitem];
         }
         [m addItem:subm];
         [subm setSubmenu:cat_menu];
         
-        item2 = [[[NSMenuItem alloc] init] autorelease];
-        item2.title = @"Run tests";
-        item2.target = [XVim instance];
-        item2.action = @selector(runTest:);
-        [item2 setEnabled:YES];
-        [item2 setRepresentedObject:subm]; // Add test categories menu here to get enabled tests later
-        [m addItem:item2];
+        subitem = [[[NSMenuItem alloc] init] autorelease];
+        subitem.title = @"Run tests";
+        subitem.target = [XVim instance];
+        subitem.action = @selector(runTest:);
+        [subitem setEnabled:YES];
+        [subitem setRepresentedObject:subm]; // Add test categories menu here to get enabled tests later
+        [m addItem:subitem];
     }
     
     // Add XVim menu next to Editor menu
@@ -188,6 +190,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     _lastCharacterSearchMotion = nil;
     _marks = [[XVimMarks alloc] init];
     _testRunner= [[XVimTester alloc] init];
+    _info = [[XVimInfo alloc] init];
     
     self.excmd = [[[XVimExCommand alloc] init] autorelease];
     self.lastPlaybackRegister = nil;
@@ -222,6 +225,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [_logFile release];
     [_marks release];
     [_testRunner release];
+    [_info release];
     self.options = nil;
     
 	[super dealloc];
