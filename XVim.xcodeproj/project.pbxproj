@@ -133,6 +133,8 @@
 		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
 		A2D48B1F15347B5C0088AB71 /* NSString+VimHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */; };
+		A2E22DB8180FE0F200158A70 /* XVimInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E22DB7180FE0F200158A70 /* XVimInfo.m */; };
+		A2E22DB9180FE0F200158A70 /* XVimInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = A2E22DB7180FE0F200158A70 /* XVimInfo.m */; };
 		A2E7E45717F03113008F045A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
 		A2E7E45917F037EF008F045A /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45817F037EF008F045A /* IDEKit.framework */; };
 		A2E7E45B17F037F4008F045A /* IDEFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45A17F037F4008F045A /* IDEFoundation.framework */; };
@@ -306,6 +308,8 @@
 		A2D48B1D15347B5C0088AB71 /* NSString+VimHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+VimHelper.h"; path = "XVim/NSString+VimHelper.h"; sourceTree = SOURCE_ROOT; };
 		A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+VimHelper.m"; path = "XVim/NSString+VimHelper.m"; sourceTree = SOURCE_ROOT; };
 		A2D5ADFF17A0172F00430761 /* UserDefaultsList.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = UserDefaultsList.txt; sourceTree = "<group>"; };
+		A2E22DB6180FE0F200158A70 /* XVimInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimInfo.h; path = XVim/XVimInfo.h; sourceTree = SOURCE_ROOT; };
+		A2E22DB7180FE0F200158A70 /* XVimInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimInfo.m; path = XVim/XVimInfo.m; sourceTree = SOURCE_ROOT; };
 		A2E7E45217EF0219008F045A /* XVim.xcplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = XVim.xcplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		A2E7E45517EFF677008F045A /* Info_Xcode5.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info_Xcode5.plist; path = XVim/Info_Xcode5.plist; sourceTree = SOURCE_ROOT; };
 		A2E7E45817F037EF008F045A /* IDEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEKit.framework; path = "../../../../Applications/Xcode 2.app/Contents/Frameworks/IDEKit.framework"; sourceTree = "<group>"; };
@@ -674,6 +678,8 @@
 				A2A736351527484B0051E8E4 /* XVimExCommand.m */,
 				A293A38616CE8A8000E1E827 /* XVimDebug.h */,
 				A293A38716CE8A8000E1E827 /* XVimDebug.m */,
+				A2E22DB6180FE0F200158A70 /* XVimInfo.h */,
+				A2E22DB7180FE0F200158A70 /* XVimInfo.m */,
 				A2A6BA2C152A544B00F0EB5F /* XVimSearch.h */,
 				A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */,
 				A23771571611CD4200FE5F8B /* XVimMotion.h */,
@@ -892,6 +898,7 @@
 				A28F425817EEDBC200A3F7AE /* NSEvent+VimHelper.m in Sources */,
 				A28F425917EEDBC200A3F7AE /* XVimMotion.m in Sources */,
 				A28F425A17EEDBC200A3F7AE /* XVimDebug.m in Sources */,
+				A2E22DB9180FE0F200158A70 /* XVimInfo.m in Sources */,
 				A28F425B17EEDBC200A3F7AE /* Utils.m in Sources */,
 				A28F425C17EEDBC200A3F7AE /* XVimMark.m in Sources */,
 				A2F2621C182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */,
@@ -973,6 +980,7 @@
 				BF07A94215EBF404006E6984 /* NSEvent+VimHelper.m in Sources */,
 				A23771591611CD4300FE5F8B /* XVimMotion.m in Sources */,
 				A293A38816CE8A8000E1E827 /* XVimDebug.m in Sources */,
+				A2E22DB8180FE0F200158A70 /* XVimInfo.m in Sources */,
 				A2C1BB5316CEAC7F0066F420 /* Utils.m in Sources */,
 				A2126B7516FB30B0000BE21C /* XVimMark.m in Sources */,
 				A2F2621B182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */,
