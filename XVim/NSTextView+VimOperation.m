@@ -807,9 +807,18 @@
 
     NSString *lineString = [[self xvim_string] substringWithRange:filterRange];
     NSRange whiteSpaceRange = [lineString rangeOfString:@"^\\s*" options:NSRegularExpressionSearch];
-    lineString = [lineString stringByReplacingCharactersInRange:whiteSpaceRange withString:@""];
+    if (whiteSpaceRange.length == filterRange.length) {
+        whiteSpaceRange.length = whiteSpaceRange.length - 1;
+        lineString = [lineString stringByReplacingCharactersInRange:whiteSpaceRange withString:@""];
+        whiteSpaceRange.location = filterRange.location + whiteSpaceRange.location;
+        [self insertText:lineString replacementRange:filterRange];
+        filterRange.length = filterRange.length - whiteSpaceRange.length;
+        self.insertionPoint = filterRange.location;
+    }
+    else {
+        [self xvim_indentCharacterRange: filterRange];
+    }
 
-	[self xvim_indentCharacterRange: filterRange];
     insertionAfterFilter = [self.textStorage firstNonblankInLine:self.insertionPoint];
     [self xvim_moveCursor:insertionAfterFilter preserveColumn:NO];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
