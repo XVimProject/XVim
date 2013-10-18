@@ -13,7 +13,7 @@
   - Xcode5
 
 ## INSTALL
- - Download source code(of one of releases) and open XVim.xcodeproj with Xcode.
+ - Download source code(See also "Branches and Releases" section) and open XVim.xcodeproj with Xcode.
  - Select an appropriate Scheme for your Xcode version
     - XVim for Xcode4 must be built with Xcode4.6
     - XVim for Xcode5 must be built with Xcode5
@@ -21,8 +21,13 @@
  - Build it. It automatically installs the plugin into the correct directory.
  - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
 
-## Releases
- See releases in github. There are explanations for each releases. Use appropreate one.
+## Branches and Releases
+ XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
+ Here is an explanation about each release and branch.
+ 
+ - Releases(tags) : Releases are tags on master branch. All the code and documents on these tags are well arranged. Usual XVim user should use one of releases.
+ - master : Most stable branch. Critical bug fixes and stable feature developed in 'develop' branch are merged into 'master'. If you find a critical bug in a release, try latest 'master' branch.
+ - develop : New features and non critical bug fixes are merged into this branch. If you want experimental features use this branch.
 
 ## Uninstall
   Delete the following directory:
@@ -51,8 +56,13 @@
 
 ## Contributions
   Any suggestions, bug reports or feature requests are welcome.
-  Any pull requests are very much appreciated.
-  Before you make pull request see Documents/Developers/PullRequest.md
+  
+  If you want to add a feature or fix bugs by yourself the following videos are good help for you.
+ - [How to get debug log](http://www.youtube.com/watch?v=50Bhu8setlc)
+ - [How to debug XVim](http://www.youtube.com/watch?v=AbC6f86VW9A)
+ - [How to write a test case](http://www.youtube.com/watch?v=kn-kkRTtRcE)
+
+  Any pull requests are very much appreciated. Before you make a pull request see [Make a Pull Request](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/PullRequest.md)
 
 ## Donations
   If you think the plugin is useful, please donate.
