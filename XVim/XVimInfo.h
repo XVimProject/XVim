@@ -16,9 +16,8 @@
 
 #import <Foundation/Foundation.h>
 
-@interface XVimInfo : NSMutableDictionary
+@interface XVimInfo : NSObject
 
 - (void)save;
-- (NSMutableDictionary*)testCategories;
 
 @end

@@ -94,8 +94,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
             subitem.action = @selector(toggleMenu:);
             [subitem setEnabled:YES];
             [subitem setState:NSOnState];
-            NSString* path = [NSString stringWithFormat:@"%@%@", @"TestCategories.", c ];
-            [subitem bind:@"value" toObject:self.instance.info withKeyPath:path options:nil];
+            ///NSString* path = [NSString stringWithFormat:@"%@%@", @"TestCategories.", c ];
+            //[subitem bind:@"value" toObject:self.instance.info withKeyPath:path options:nil];
             [cat_menu addItem:subitem];
         }
         [m addItem:subm];
@@ -190,7 +190,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     _lastCharacterSearchMotion = nil;
     _marks = [[XVimMarks alloc] init];
     _testRunner= [[XVimTester alloc] init];
-    _info = [[XVimInfo alloc] init];
+    //_info = [[XVimInfo alloc] init];
     
     self.excmd = [[[XVimExCommand alloc] init] autorelease];
     self.lastPlaybackRegister = nil;
@@ -225,7 +225,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [_logFile release];
     [_marks release];
     [_testRunner release];
-    [_info release];
+    //[_info release];
     self.options = nil;
     
 	[super dealloc];
