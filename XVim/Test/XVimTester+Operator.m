@@ -241,9 +241,11 @@
                                  @"baabb\n"
                                  @"ccc";
     
+    /*
     static NSString* C_e_result= @"aaa\n"
                                  @"bccbb\n"
                                  @"ccc";
+     */
     
     
     static NSString* J_result0 = @"aaa bbb \n"
