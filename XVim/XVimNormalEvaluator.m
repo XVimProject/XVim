@@ -221,6 +221,7 @@
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [[XVim instance] fixOperationCommands];
     return nil;
 }
 
@@ -228,6 +229,7 @@
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
     [view xvim_put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
+    [[XVim instance] fixOperationCommands];
     return nil;
 }
 
