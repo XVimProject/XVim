@@ -55,7 +55,20 @@
   [How to get XVim debug log](http://www.youtube.com/watch?v=50Bhu8setlc&feature=youtu.be)
 
   We appreciate if you write test case for the bug. Read "Write test" section in Documents/Developsers/PullRequest.md how to write test case. You do not need to update any source code but just write 7 items explained there in an issue you create.
- 
+
+## Bug issue handling 
+
+  Reported bugs are handled following order.
+
+  1. Confirm if the bug reproduce and the issue labeled as 'Bug'
+  2. Fix the bug in 'develop' branch
+  3. Confirm the fix by the reporter
+  4. The issue is labeled 'Done'
+  5. Confirm that the fix does not make another side effect.
+  6. Merged into 'master'
+  7. The issue is closed.
+
+  This order is only applied to 'Bug' issues.
 
 ## Contributions
   Any suggestions, bug reports or feature requests are welcome.
