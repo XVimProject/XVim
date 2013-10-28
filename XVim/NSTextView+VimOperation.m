@@ -427,14 +427,16 @@
             }
         }
         [self xvim_yankRanges:[NSArray arrayWithObject:[NSValue valueWithRange:r]] withType:motion.type];
-        [self xvim_setSelectedRange:r];
+        [self insertText:@"" replacementRange:r];
     }else{
         // Currently not supportin deleting EOF with selection mode.
         // This is because of the fact that NSTextView does not allow select EOF
         [self xvim_yankRanges:[self xvim_selectedRanges] withType:motion.type];
+        for( NSValue* v in [[self xvim_selectedRanges] reverseObjectEnumerator]){
+            [self insertText:@"" replacementRange:v.rangeValue];
+        }
     }
     
-    [self delete:nil];
     
     [self.xvimDelegate textView:self didDelete:self.lastYankedText  withType:self.lastYankedType];
     

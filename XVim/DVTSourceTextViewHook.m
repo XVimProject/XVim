@@ -48,6 +48,11 @@
     [self hook:@"initWithFrame:textContainer:"];
     [self hook:@"dealloc"];
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
+    [self hook:@"selectAll:"];
+    // [self hook:@"cut:"];  // Cut calls delete: after all. Do not need to hook
+    // [self hook:@"copy:"];  // Does not change any state. Do not need to hook
+    [self hook:@"paste:"];  
+    [self hook:@"delete:"];  
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
     [self hook:@"drawRect:"];
@@ -67,6 +72,11 @@
     // [self unhook:@"initWithFrame:textContainer:"];
     // [self unhook:@"dealloc"]; 
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
+    [self unhook:@"selectAll:"];
+    [self unhook:@"cut:"]; 
+    [self unhook:@"copy:"]; 
+    [self unhook:@"paste:"];  
+    [self unhook:@"delete:"];  
     [self unhook:@"keyDown:"];
     [self unhook:@"mouseDown:"];
     [self unhook:@"drawRect:"];
@@ -145,6 +155,28 @@
     [(NSTextView*)self xvim_syncStateFromView];
 }
 
+- (void)selectAll:(id)sender{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    [base selectAll_:sender];
+    [window syncEvaluatorStack];  
+}
+
+- (void)paste:(id)sender{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    [base paste_:sender];
+    [window syncEvaluatorStack];  
+    
+}
+
+- (void)delete:(id)sender{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    [base delete_:sender];
+    [window syncEvaluatorStack];  
+}
+
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{
         TRACE_LOG(@"Event:%@, XVimNotation:%@", theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
@@ -179,14 +211,19 @@
         // it never calls mouseUp: event. After mouseUp event is handled internally it returns the control.
         // So the code here is executed AFTER mouseUp event is handled.
         // At this point NSTextView changes its selectedRange so we usually have to sync XVim state.
+        
+        // TODO: To make it simple we should forward mouse events
+        //       to handleKeyStroke as a special key stroke
+        //       and the key stroke should be handled by the current evaluator.
         XVimWindow* window = [base xvimWindow];
-        [window mouseDown:theEvent];
+        [window syncEvaluatorStack];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
     return;
 }
+
 
 - (void)drawRect:(NSRect)dirtyRect{
     @try{

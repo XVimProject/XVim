@@ -35,8 +35,6 @@
 - (BOOL)handleXVimString:(XVimString*)strokes;
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
-- (void)mouseDown:(NSEvent*)event;
-
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;
 - (void)clearErrorMessage;
@@ -48,5 +46,6 @@
 
 - (IDEWorkspaceWindow*)currentWorkspaceWindow;
 
+- (void)syncEvaluatorStack;
 
 @end

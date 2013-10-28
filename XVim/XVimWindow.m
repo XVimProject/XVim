@@ -273,30 +273,6 @@ static const char* KEY_WINDOW = "xvimwindow";
 	[[self sourceView] insertText:text];
 }
 
-- (void)mouseDown:(NSEvent *)event{
-    // TODO: To make it simple we should forward mouse events
-    //       to handleKeyStroke as a special key stroke
-    //       and the key stroke should be handled by the current evaluator.
-    if( [[self _currentEvaluator] isKindOfClass:[XVimInsertEvaluator class]] ){
-        return;
-    }
-    
-    if( self.sourceView.selectedRange.length == 0 ){
-        // If it is visual mode reset to normal
-        [[self _currentEvaluator] didEndHandler];
-        [self _initEvaluatorStack:_evaluatorStack];
-        [self.sourceView xvim_adjustCursorPosition];
-    }else{
-        // Manually initialize stack evaluator.
-        // This is because Normal evaluator initialize selection length to 0.
-        // We want to keep current selection length and handle it by a VisualEvaluator
-        [[self _currentEvaluator] didEndHandler];
-        [_evaluatorStack removeAllObjects];
-        [_evaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease]];
-        [self handleOneXVimString:@"v"];
-    }
-}
-
 - (NSRange)restrictSelectedRange:(NSRange)range {
 	if (_handlingMouseEvent) {
 		//range = [[self _currentEvaluator] restrictSelectedRange:range];
@@ -326,6 +302,28 @@ static const char* KEY_WINDOW = "xvimwindow";
 	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
     
     return rect;
+}
+
+- (void)syncEvaluatorStack{
+    if( [[self _currentEvaluator] isKindOfClass:[XVimInsertEvaluator class]] ){
+        return;
+    }
+    
+    if( self.sourceView.selectedRange.length == 0 ){
+        // If it is visual mode reset to normal
+        [[self _currentEvaluator] didEndHandler];
+        [self _initEvaluatorStack:_evaluatorStack];
+        [self.sourceView xvim_adjustCursorPosition];
+    }else{
+        // Manually initialize stack evaluator.
+        // This is because Normal evaluator initialize selection length to 0.
+        // We want to keep current selection length and handle it by a VisualEvaluator
+        [[self _currentEvaluator] didEndHandler];
+        [_evaluatorStack removeAllObjects];
+        [_evaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease]];
+        [self handleOneXVimString:@"v"];
+    }
+    [self.commandLine setModeString:[[[_evaluatorStack lastObject] modeString] stringByAppendingString:_staticString]];
 }
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
