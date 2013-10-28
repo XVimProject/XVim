@@ -24,10 +24,13 @@
 - (id)initWithFrame_:(NSRect)rect textContainer:(NSTextContainer *)container;
 - (void)dealloc_;
 - (void)setSelectedRanges_:(NSArray*)array affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag;
+- (void)selectAll_:(id)sender;
+- (void)cut_:(id)sender;
+- (void)copy_:(id)sender;
+- (void)paste_:(id)sender;
+- (void)delete_:(id)sender;
 - (void)keyDown_:(NSEvent *)theEvent;
 - (void)mouseDown_:(NSEvent *)theEvent;
-- (void)mouseUp_:(NSEvent *)theEvent;
-- (void)mouseDragged_:(NSEvent *)theEvent;
 - (void)drawRect_:(NSRect)dirtyRect;
 - (BOOL) performKeyEquivalent_:(NSEvent *)theEvent;
 - (BOOL)shouldDrawInsertionPoint_;
