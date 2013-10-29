@@ -790,36 +790,26 @@
         return ;
     }
 
-    NSUInteger insertionAfterFilter;
-    NSRange filterRange;
-    if( self.selectionMode == XVIM_VISUAL_NONE ){
-        XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
-        if( to.end == NSNotFound ){
-            return;
+    NSArray* ranges = [self xvim_selectedRanges];
+    self.insertionPoint = [[ranges objectAtIndex:0] rangeValue].location;
+    NSUInteger insertionAfterFilter = [self.textStorage firstNonblankInLine:self.insertionPoint];
+
+    for( NSValue* val in ranges){
+        NSRange filterRange = val.rangeValue;
+        NSString *lineString = [[self xvim_string] substringWithRange:filterRange];
+        NSRange whiteSpaceRange = [lineString rangeOfString:@"^\\s*" options:NSRegularExpressionSearch];
+        if (whiteSpaceRange.length == filterRange.length) {
+            whiteSpaceRange.length = whiteSpaceRange.length - 1;
+            lineString = [lineString stringByReplacingCharactersInRange:whiteSpaceRange withString:@""];
+            whiteSpaceRange.location = filterRange.location + whiteSpaceRange.location;
+            [self insertText:lineString replacementRange:filterRange];
+            filterRange.length = filterRange.length - whiteSpaceRange.length;
         }
-        filterRange = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:LINEWISE];
-    }else{
-        NSUInteger start = [[[self xvim_selectedRanges] objectAtIndex:0] rangeValue].location;
-        NSRange lastSelection = [[[self xvim_selectedRanges] lastObject] rangeValue];
-        NSUInteger end = lastSelection.location + lastSelection.length - 1;
-        filterRange  = NSMakeRange(start, end-start+1);
+        else {
+            [self xvim_indentCharacterRange: filterRange];
+        }
     }
 
-    NSString *lineString = [[self xvim_string] substringWithRange:filterRange];
-    NSRange whiteSpaceRange = [lineString rangeOfString:@"^\\s*" options:NSRegularExpressionSearch];
-    if (whiteSpaceRange.length == filterRange.length) {
-        whiteSpaceRange.length = whiteSpaceRange.length - 1;
-        lineString = [lineString stringByReplacingCharactersInRange:whiteSpaceRange withString:@""];
-        whiteSpaceRange.location = filterRange.location + whiteSpaceRange.location;
-        [self insertText:lineString replacementRange:filterRange];
-        filterRange.length = filterRange.length - whiteSpaceRange.length;
-        self.insertionPoint = filterRange.location;
-    }
-    else {
-        [self xvim_indentCharacterRange: filterRange];
-    }
-
-    insertionAfterFilter = [self.textStorage firstNonblankInLine:self.insertionPoint];
     [self xvim_moveCursor:insertionAfterFilter preserveColumn:NO];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
@@ -1568,18 +1558,20 @@
             [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
         }
     }else if(self.selectionMode == XVIM_VISUAL_LINE ){
-        NSUInteger min = MIN(self.insertionPoint,self.selectionBegin);
-        NSUInteger max = MAX(self.insertionPoint,self.selectionBegin);
-        selectionStart = [self.textStorage beginningOfLine:min];
-        selectionEnd   = [self.textStorage endOfLine:max];
-        if( [self.textStorage isEOF:selectionStart] ){
-            // EOF can not be selected
-            [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]];
-        }else if( [self.textStorage isEOF:selectionEnd] ){
-            selectionEnd--;
-            [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
-        }else{
-            [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
+        NSUInteger top    = MIN( [self.textStorage lineNumber:self.insertionPoint], [self.textStorage lineNumber:self.selectionBegin] );
+        NSUInteger bottom = MAX( [self.textStorage lineNumber:self.insertionPoint], [self.textStorage lineNumber:self.selectionBegin] );
+        for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
+            selectionStart = [self.textStorage positionAtLineNumber:top+i column:0];
+            selectionEnd = [self.textStorage positionAtLineNumber:top+i column:[self.textStorage numberOfLines]];
+            if( [self.textStorage isEOF:selectionStart] || [self.textStorage isEOL:selectionStart]){
+                // EOF or EOL can not be selected
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]]; // 0 means No selection. This information is important and used in operators like 'delete'
+            }else if( [self.textStorage isEOF:selectionEnd] || [self.textStorage isEOL:selectionEnd]){
+                selectionEnd--;
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
+            }else{
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
+            }
         }
     }else if( self.selectionMode == XVIM_VISUAL_BLOCK){
         // Define the block as a rect by line and column number
