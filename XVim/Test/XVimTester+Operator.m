@@ -55,7 +55,16 @@
                              @"ddd\n"   // 52
                              @"eee\n"   // 56
                              @"fff\n";  // 60
-    
+
+    static NSString* text7 = @"aaa\n"         // 0  (index of each WORD)
+                             @"{\n"           // 4
+                             @"        bbb\n" // 6
+                             @"}\n";          // 18
+
+    static NSString* text8 = @"    \n";       // 0  (index of each WORD)
+
+    static NSString* text9 = @"\t\t\n";       // 0  (index of each WORD)
+
     static NSString* a_result  = @"aAa bbXXXb ccc\n";
     static NSString* a_result2 = @"aAa bbXXXXXXXXXb ccc\n";
     static NSString* a_result3 = @"aXXXaa\n"
@@ -309,7 +318,14 @@
                                       @"    ddd\n"       // 28
                                       @"    eee\n"       // 38
                                       @"        fff";    // 46
-    
+
+    static NSString* filter_result0 = @"aaa\n"           // 0  (index of each WORD)
+                                      @"{\n"             // 4
+                                      @"    bbb\n"       // 6
+                                      @"}\n";            // 14
+
+    static NSString* filter_result1 = @"\n";             // 0  (index of each WORD)
+
     return [NSArray arrayWithObjects:
             // All changes/insertions must be repeated by dot(.)
             // All insertions must set hat(^) mark
@@ -492,9 +508,12 @@
             XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,29, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj`." , lshift_result0,12, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj'." , lshift_result0,16, 0),
-            
+
             // = (filter)
-            
+            XVimMakeTestCase(text7, 16, 0, @"==", filter_result0, 10, 0),
+            XVimMakeTestCase(text8, 3, 0, @"==", filter_result1, 0, 0),
+            XVimMakeTestCase(text9, 1, 0, @"==", filter_result1, 0, 0),
+
             // gu, gU
             XVimMakeTestCase(text0, 0,  0, @"guw", guw_result, 0, 0),
             XVimMakeTestCase(text0, 0,  0, @"gUw", gUw_result, 0, 0),
