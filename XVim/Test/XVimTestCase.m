@@ -90,6 +90,11 @@
     for( XVimKeyStroke* stroke in strokes ){
         NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
         [[IDEApplication sharedApplication] sendEvent:event];
+        
+        // Tells NSUndoManager to end grouping (Little hacky)
+        // This is because the loop here emulates NSApplication's run loop.
+        // To make NSUndoManager work properly we have to call this after each event
+        [NSUndoManager performSelector:@selector(_endTopLevelGroupings)];
     }
 }
 
