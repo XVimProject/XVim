@@ -71,6 +71,7 @@
 - (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
+- (void)xvim_registerInsertionPointForUndo;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -380,6 +381,8 @@
         return ;
     }
     
+    [self xvim_registerInsertionPointForUndo];
+    
     NSUInteger insertionPointAfterDelete = self.insertionPoint;
     BOOL keepInsertionPoint = NO;
     if( self.selectionMode != XVIM_VISUAL_NONE ){
@@ -448,6 +451,9 @@
 }
 
 - (void)xvim_change:(XVimMotion*)motion{
+    // We do not need to call this since this method uses xvim_delete to operate on text
+    //[self xvim_registerInsertionPointForUndo]; 
+    
     BOOL insertNewline = NO;
     if( motion.type == LINEWISE || self.selectionMode == XVIM_VISUAL_LINE){
         // 'cc' deletes the lines but need to keep the last newline.
@@ -523,6 +529,8 @@
 }
 
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count{
+    [self xvim_registerInsertionPointForUndo];
+    
     TRACE_LOG(@"text:%@  type:%d   afterCursor:%d   count:%d", text, type, after, count);
     if( self.selectionMode != XVIM_VISUAL_NONE ){
         // FIXME: Make them not to change text from register...
@@ -631,9 +639,7 @@
                 return;
             }
             r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
-            [self.undoManager beginUndoGrouping];
             [self xvim_swapCaseForRange:r];
-            [self.undoManager endUndoGrouping];
             [self xvim_moveCursor:r.location preserveColumn:NO];
         }
     }else{
@@ -1988,7 +1994,9 @@
 }
 
 - (void)xvim_swapCaseForRange:(NSRange)range {
+    [self xvim_registerInsertionPointForUndo];
     NSString* text = [self xvim_string];
+    
 	
 	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
 	for (NSUInteger i = 0; i < range.length; ++i) {
@@ -2007,6 +2015,15 @@
     [self insertText:substring replacementRange:range];
 }
 
+- (void)xvim_registerInsertionPointForUndo{
+    NSUInteger undoInsertionPoint = [self selectedRange].location;
+    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:undoInsertionPoint]];
+}
+
+- (void)xvim_undoCursorPos:(NSNumber*)num{
+    [self xvim_moveCursor:[num unsignedIntegerValue] preserveColumn:NO];
+    [self xvim_syncState];
+}
 /* May be used later
 - (void)hideCompletions {
 	[[[self xview] completionController] hideCompletions];
