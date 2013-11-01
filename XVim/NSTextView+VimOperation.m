@@ -465,6 +465,7 @@
     if( motion.motion == MOTION_WORD_FORWARD && [self.textStorage isNonblank:self.insertionPoint] ){
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
+        motion.option |= MOTION_OPTION_CHANGE_WORD;
     }
     self.cursorMode = CURSOR_MODE_INSERT;
     [self xvim_delete:motion];
