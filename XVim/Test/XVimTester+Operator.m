@@ -55,6 +55,7 @@
                              @"ddd\n"   // 52
                              @"eee\n"   // 56
                              @"fff\n";  // 60
+    static NSString* text7 = @"a bbb ccc";
     
     static NSString* a_result  = @"aAa bbXXXb ccc\n";
     static NSString* a_result2 = @"aAa bbXXXXXXXXXb ccc\n";
@@ -75,6 +76,8 @@
     static NSString* cw_result5 = @"XXX\n"
                                   @"bbb\n"
                                   @"ccc";
+    static NSString* cw_result6 = @"AAA bbb ccc";
+    static NSString* cw_result7 = @"AAA BBB ccc";
     
     static NSString* C_result1 = @"aAa baaa\n";
     static NSString* C_result2 = @"aaaa\n"
@@ -338,6 +341,8 @@
             XVimMakeTestCase(text0, 5,  0, @"2cwXXX<ESC>.." , cw_result4, 11, 0), // Repeat
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`^", cw_result5,  2, 0), // ^ Mark
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`.", cw_result5,  2, 0), // . Mark
+            XVimMakeTestCase(text7, 0,  0, @"cwAAA<ESC>"     , cw_result6,  2, 0),
+            XVimMakeTestCase(text7, 0,  0, @"2cwAAA BBB<ESC>", cw_result7,  6, 0),
             
             // C
             XVimMakeTestCase(text0, 5,  0, @"Caaa<ESC>"     , C_result1,  7, 0),
