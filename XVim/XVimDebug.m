@@ -41,11 +41,4 @@
     [[view textStorage] endEditing];
 }
 
-- (void)setTestCategories:(NSArray*)params withWindow:(XVimWindow*)window{
-    for( NSString* s in params){
-        NSString* path = [NSString stringWithFormat:@"%@%@", @"testCategories.", s];
-        [[XVim instance].info setValue:[NSNumber numberWithBool:YES] forKeyPath:path];
-    }
-}
-
 @end

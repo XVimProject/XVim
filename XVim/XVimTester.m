@@ -136,7 +136,6 @@
     // Run test for all the cases
     for( NSUInteger i = 0; i < testArray.count; i++ ){
         [(XVimTestCase*)[testArray objectAtIndex:i] run];
-        usleep(100);
     }
     
     // Setup Talbe view to show result
