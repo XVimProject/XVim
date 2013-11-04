@@ -6,6 +6,7 @@
 //
 //
 
+#import "XVim.h"
 #import "XVimDebug.h"
 #import "XVimWindow.h"
 #import "Logger.h"
@@ -39,4 +40,5 @@
     [[view textStorage] addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, view.string.length)];
     [[view textStorage] endEditing];
 }
+
 @end
