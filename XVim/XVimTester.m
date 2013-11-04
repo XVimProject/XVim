@@ -69,7 +69,10 @@
 @interface XVimTester(){
     NSWindow* results;
     NSTableView* tableView;
+    NSTextField* resultsString;
     BOOL showPassing;
+    NSNumber* totalTests;
+    NSNumber* passingTests;
 }
 @property (strong) NSMutableArray* testCases;
 @end
@@ -88,6 +91,7 @@
 - (void)dealloc{
     [results release];
     [tableView release];
+    [resultsString release];
     self.testCases = nil;
     [super dealloc];
 }
@@ -163,7 +167,7 @@
     results = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false] retain];
     
     // Setup the table view into scroll view
-    NSScrollView* scroll = [[[NSScrollView alloc] initWithFrame:NSMakeRect(0, 35, 700, 450)] autorelease];
+    NSScrollView* scroll = [[[NSScrollView alloc] initWithFrame:NSMakeRect(0, 40, 700, 445)] autorelease];
     [scroll setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [scroll setDocumentView:tableView];
     [scroll setHasVerticalScroller:YES];
@@ -176,17 +180,48 @@
     [toggleResultsButton setTarget:self];
     [toggleResultsButton setAction:@selector(toggleResults:)];
     
+    
+    resultsString = [[NSTextField alloc] initWithFrame:NSMakeRect(550, 0, 200, 40)];
+    [resultsString setStringValue:@"0 out of 0 test passing"];
+    [resultsString setAutoresizingMask:NSViewMinXMargin | NSViewMaxYMargin];
+    [resultsString setBezeled:NO];
+    [resultsString setDrawsBackground:NO];
+    [resultsString setEditable:NO];
+    [resultsString setSelectable:NO];
+    
     //setup the main content view for the window and add the controls to it.
     NSView * resultsView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 700, 450)];
     
     [results setContentView:resultsView];
     
     [resultsView addSubview:scroll];
+    [resultsView addSubview:resultsString];
     [resultsView addSubview:toggleResultsButton];
     [resultsView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     
+    [self updateResultsString];
+    
     [results makeKeyAndOrderFront:results];
 }
+
+-(void) updateResultsString{
+    NSInteger totalCases = 0;
+    NSInteger passingCases = 0;
+    NSInteger failingCases = 0;
+    
+    for(XVimTestCase* tc in self.testCases){
+        if(!tc.success){
+            failingCases++;
+        }
+        else{
+            passingCases++;
+        }
+        totalCases++;
+    }
+    
+    [resultsString setStringValue: [NSString stringWithFormat:@"%lu Passing Tests\n%lu Failing Tests", passingCases, failingCases]];
+}
+
 -(IBAction) toggleResults: (id) sender {
     showPassing = !showPassing;
     [tableView reloadData];
