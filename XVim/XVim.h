@@ -11,7 +11,6 @@
 #import "XVimKeymapProvider.h"
 #import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
-#import "XVimInfo.h"
 
 @class XVimKeymap;
 @class XVimOptions;
@@ -40,7 +39,6 @@ extern NSString * const XVimDocumentPathKey;
 @property (strong) XVimExCommand* excmd;
 @property (readonly) XVimMarks* marks;
 @property (readonly) XVimTester* testRunner;
-@property (readonly) XVimInfo* info;
 @property (readonly) XVimRegisterManager* registerManager;
 @property (readonly) XVimHistoryHandler* exCommandHistory;
 @property (readonly) XVimHistoryHandler* searchHistory;
