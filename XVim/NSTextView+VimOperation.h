@@ -46,6 +46,7 @@
 #import "XVimTextViewProtocol.h"
 #import "NSTextStorage+VimOperation.h"
 #import <Cocoa/Cocoa.h>
+#import "XVimHighlight.h"
 
 @interface NSTextView (VimOperation)
 // TODO: Method names in category should have prefix like xvim_
@@ -64,6 +65,7 @@
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSURL* documentURL;
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
+@property(strong) XVimHighlightGroups* highlightGroups;
 @property BOOL needsUpdateFoundRanges;
 @property(readonly) NSArray* foundRanges;
 @property(readonly) long long currentLineNumber;

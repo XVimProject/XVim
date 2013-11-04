@@ -39,6 +39,7 @@
 #import "XVimUtil.h"
 #import "IDEKit.h"
 #import "objc/runtime.h"
+#import "XVimHighlight.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -171,6 +172,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     _searcher = [[XVimSearch alloc] init];
     _lastCharacterSearchMotion = nil;
     _marks = [[XVimMarks alloc] init];
+    _highlightGroups = [[XVimHighlightGroups alloc] init];
     
     self.excmd = [[[XVimExCommand alloc] init] autorelease];
     self.lastPlaybackRegister = nil;
@@ -204,6 +206,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [_excmd release];
     [_logFile release];
     [_marks release];
+    [_highlightGroups release];
     self.options = nil;
     
 	[super dealloc];

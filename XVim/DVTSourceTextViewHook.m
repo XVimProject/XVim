@@ -96,6 +96,7 @@
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     id obj =  (DVTSourceTextViewHook*)[base initWithFrame_:rect textContainer:container];
     if( nil != obj ){
+        [obj setHighlightGroups:XVim.instance.highlightGroups];
         [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
@@ -107,6 +108,7 @@
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
     if( nil != obj ){
+        [obj setHighlightGroups:XVim.instance.highlightGroups];
         [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
@@ -123,6 +125,7 @@
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
     if( nil != obj ){
+        [obj setHighlightGroups:XVim.instance.highlightGroups];
         [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
         [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];

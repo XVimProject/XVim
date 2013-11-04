@@ -33,6 +33,9 @@ NS_INLINE NSPoint RightTop(NSRect r){
 }
 // You do not need LeftBottom.
 
-@interface Utils : NSObject
+@interface NSColor(StringExpression)
++(NSColor*)colorWithString:(NSString*)stringExpr;
+@end
 
+@interface Utils : NSObject
 @end

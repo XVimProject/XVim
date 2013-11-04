@@ -26,6 +26,7 @@
 #import "XVimKeymap.h"
 #import "XVimUtil.h"
 #import "XVimTester.h"
+#import "XVimHighlight.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
@@ -869,6 +870,25 @@
 - (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :wq
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
     [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
+}
+
+- (void)highlight:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    // ":highlight" command format is 
+    // :highlight GroupName key1=arg1 key2=arg2 ...
+    // Currently only guibg is supported
+    NSArray* parts = [args.arg componentsSeparatedByString:@" "];
+    if( [parts count] < 2 ){
+        return;
+    }
+    NSString* groupName = [parts objectAtIndex:0];
+    for( NSUInteger i = 1; i < [parts count]; i++ ){
+        NSString* kv_pair = [parts objectAtIndex:i];
+        NSArray* kv =  [kv_pair componentsSeparatedByString:@"="];
+        if( [kv count] != 2 ){
+            continue;
+        }
+        [XVim.instance.highlightGroups setHighlightGroupForName:groupName key:[kv objectAtIndex:0] arg:[kv objectAtIndex:1]];
+    }
 }
 
 - (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window{

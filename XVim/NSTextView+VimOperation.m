@@ -209,6 +209,14 @@
 - (id)xvimDelegate{
     return [self dataForName:@"xvimDelegate"];
 }
+        
+- (void)setHighlightGroups:(id)groups{
+    [self setData:groups forName:@"highlightGroups"];
+}
+
+- (XVimHighlightGroups*)highlightGroups{
+    return [self dataForName:@"highlightGroups"];
+}
 
 - (BOOL)needsUpdateFoundRanges{
     id ret = [self dataForName:@"needsUpdateFoundRanges"];
@@ -1266,40 +1274,39 @@
 }
 
 - (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt{
-    NSAssert( nil != pattern, @"pattern munst not be nil");
-    if( !self.needsUpdateFoundRanges ){
-        return;
-    }
+    NSAssert( nil != pattern, @"pattern must not be nil");
+    // For performance reason we update ranges found by a search only when the search string is changed
+    if( self.needsUpdateFoundRanges ){
+        NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
+        if ( opt & SEARCH_CASEINSENSITIVE ){
+            r_opts |= NSRegularExpressionCaseInsensitive;
+        }
+        
+        NSError *error = nil;
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:r_opts error:&error];
+        if( nil != error){
+            [self.foundRanges removeAllObjects];
+            return;
+        }
+        
+        // Find all the maches
+        NSString* string = self.string;
+        //NSTextStorage* storage = self.textStorage;
+        if( string == nil ){
+            return;
+        }
+        NSArray*  matches = [regex matchesInString:string options:0 range:NSMakeRange(0, string.length)];
+        [self.foundRanges setArray:matches];
     
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-	if ( opt & SEARCH_CASEINSENSITIVE ){
-		r_opts |= NSRegularExpressionCaseInsensitive;
-	}
-
-    NSError *error = nil;
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:r_opts error:&error];
-    if( nil != error){
-        [self.foundRanges removeAllObjects];
-        return;
     }
-    
-    // Find all the maches
-    NSString* string = self.string;
-    //NSTextStorage* storage = self.textStorage;
-    if( string == nil ){
-        return;
-    }
-    NSArray*  matches = [regex matchesInString:string options:0 range:NSMakeRange(0, string.length)];
-    [self.foundRanges setArray:matches];
-    
     // Clear current highlight.
     [self xvim_clearHighlightText];
-    // Add yellow highlight
+    // Add highlight
     for( NSTextCheckingResult* result in self.foundRanges){
-        [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
+        [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[self.highlightGroups highlightGroup:@"Search"].guibg forCharacterRange:result.range];
     }
-    
     [self setNeedsUpdateFoundRanges:NO];
+    
 }
 
 - (void)xvim_clearHighlightText{

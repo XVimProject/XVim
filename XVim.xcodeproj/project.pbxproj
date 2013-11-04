@@ -144,6 +144,8 @@
 		A2E7E46417F0382E008F045A /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45817F037EF008F045A /* IDEKit.framework */; };
 		A2E7E46517F03835008F045A /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45E17F03802008F045A /* DVTFoundation.framework */; };
 		A2E7E46617F03835008F045A /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45C17F037FF008F045A /* DVTKit.framework */; };
+		A2F26217182555C100AD3DC4 /* XVimHighlight.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F26216182555C100AD3DC4 /* XVimHighlight.m */; };
+		A2F262181826936300AD3DC4 /* XVimHighlight.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F26216182555C100AD3DC4 /* XVimHighlight.m */; };
 		A2F4A33E14F00B25006DA5A5 /* XVimNormalEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */; };
 		A2F4A34314F00BD3006DA5A5 /* XVimVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34214F00BD3006DA5A5 /* XVimVisualEvaluator.m */; };
 		A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */; };
@@ -311,6 +313,8 @@
 		A2E7E45C17F037FF008F045A /* DVTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTKit.framework; path = "../../../../Applications/Xcode 2.app/Contents/SharedFrameworks/DVTKit.framework"; sourceTree = "<group>"; };
 		A2E7E45E17F03802008F045A /* DVTFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTFoundation.framework; path = "../../../../Applications/Xcode 2.app/Contents/SharedFrameworks/DVTFoundation.framework"; sourceTree = "<group>"; };
 		A2E7E46017F0380F008F045A /* IDESourceEditor.ideplugin */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = IDESourceEditor.ideplugin; path = "../../../../Applications/Xcode 2.app/Contents/PlugIns/IDESourceEditor.ideplugin"; sourceTree = "<group>"; };
+		A2F26215182555C100AD3DC4 /* XVimHighlight.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimHighlight.h; path = XVim/XVimHighlight.h; sourceTree = SOURCE_ROOT; };
+		A2F26216182555C100AD3DC4 /* XVimHighlight.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimHighlight.m; path = XVim/XVimHighlight.m; sourceTree = SOURCE_ROOT; };
 		A2F4A33C14F00B25006DA5A5 /* XVimNormalEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimNormalEvaluator.h; path = XVim/XVimNormalEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = XVimNormalEvaluator.m; path = XVim/XVimNormalEvaluator.m; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		A2F4A34114F00BD3006DA5A5 /* XVimVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimVisualEvaluator.h; path = XVim/XVimVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -678,6 +682,8 @@
 				A2126B7416FB30B0000BE21C /* XVimMark.m */,
 				A2126B7616FB4806000BE21C /* XVimMarks.h */,
 				A2126B7716FB4806000BE21C /* XVimMarks.m */,
+				A2F26215182555C100AD3DC4 /* XVimHighlight.h */,
+				A2F26216182555C100AD3DC4 /* XVimHighlight.m */,
 				A26E5F6217A6BCAF0087C9B6 /* NSTextStorage+VimOperation.h */,
 				A26E5F6317A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m */,
 				A2640CC717ACE651003D197D /* NSTextView+VimOperation.h */,
@@ -835,6 +841,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A2F262181826936300AD3DC4 /* XVimHighlight.m in Sources */,
 				A28F422817EEDBC200A3F7AE /* Logger.m in Sources */,
 				A28F422917EEDBC200A3F7AE /* XVim.m in Sources */,
 				A28F422A17EEDBC200A3F7AE /* XVimCommandField.m in Sources */,
@@ -939,6 +946,7 @@
 				C38A5B4715272DCD00E1448D /* IDESourceCodeEditorHook.m in Sources */,
 				C38A5B4D1527CEA500E1448D /* XVimNumericEvaluator.m in Sources */,
 				C366C23B15287EE30008C58E /* XVimKeymap.m in Sources */,
+				A2F26217182555C100AD3DC4 /* XVimHighlight.m in Sources */,
 				A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */,
 				A2A6BA2E152A544C00F0EB5F /* XVimSearch.m in Sources */,
 				A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */,

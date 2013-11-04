@@ -9,6 +9,7 @@
 #import "XVimDebug.h"
 #import "XVimWindow.h"
 #import "Logger.h"
+#import "DVTKit.h"
 
 // You can invoke methods in this class by
 // ":debug xxxx [args]" where xxx is a method name.
@@ -27,10 +28,8 @@
 }
 
 - (void)highlight:(NSArray*)params withWindow:(XVimWindow*)window{
-    NSTextView* view = window.sourceView;
-    [[view textStorage] beginEditing];
-    [[view textStorage] addAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] range:NSMakeRange(0,5)];
-    [[view textStorage] endEditing];
+    id theme = [DVTTextAnnotationTheme defaultTheme];
+    theme = theme;
 }
 
 - (void)highlightclear:(NSArray*)params withWindow:(XVimWindow*)window{
