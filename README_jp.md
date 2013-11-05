@@ -17,9 +17,9 @@
  - 利用するXcodeバージョンに合ったスキームを選択します
     - XVim for Xcode4はXcode4.6でビルドしてください
     - XVim for Xcode5はXcode5でビルドしてください
- - "Edit Scheme"を選択し"Build Configuration"を"Release"に設定する
+ - "Edit Scheme"を選択し"Build Configuration"を"Release"に設定します
  - ビルドする。このとき自動的に正しいディレクトリにプラグインがインストールされます
- - Xcodeを再起動します。（確実にXcodeプロセスが完全に終了させてください。）
+ - Xcodeを再起動します。（Xcodeプロセスを完全に終了させてください。）
 
 ## ブランチとリリース
  XVimにはいくつかのブランチとリリースがあります。通常はリリースの一つをダウンロードし、利用してください。
