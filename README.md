@@ -1,4 +1,8 @@
-# XVim [日本語版](https://github.com/JugglerShu/XVim/blob/master/README_jp.md)
+<div align="right">
+<a href="https://github.com/JugglerShu/XVim/blob/master/README_jp.md">[日本語版]</a>
+</div>
+
+# XVim
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
