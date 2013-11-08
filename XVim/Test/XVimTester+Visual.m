@@ -122,6 +122,9 @@
             XVimMakeTestCase(text3, 0,  0, @"Vjyjp", Vyp_result, 16, 0), // yank and paste with visual line
             XVimMakeTestCase(text3, 0,  0, @"VjyjP", VyP_result, 8, 0), // yank and paste with visual line
             
+            // Cusror position after put (Issue #506)
+            XVimMakeTestCase(text1, 0, 0, @"vllypu", text1, 0, 0),  
+            
             // Change
             XVimMakeTestCase(text1, 0,  0, @"vlllcxxx<ESC>", v_c_result, 2, 0), // change in visual
             

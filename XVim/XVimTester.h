@@ -11,7 +11,13 @@
 #import "Test/XVimTestCase.h"
 
 @interface XVimTester : NSObject<NSTableViewDataSource, NSTableViewDelegate>
-@property (strong) NSMutableArray* testCases;
-- (id)initWithTestCategory:(NSString*)category;
+
+// Get all the caregory of tests
+- (NSArray*)categories;
+
+// Select test categories to run
+- (void)selectCategories:(NSArray*)categories;
+
+// Run tests
 - (void)runTest;
 @end

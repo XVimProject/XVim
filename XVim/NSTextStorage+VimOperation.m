@@ -221,6 +221,24 @@
     return index;
 }
 
+- (NSUInteger)nextDigitInLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    while (index < [[self xvim_string] length]) {
+        if( [self isNewline:index] ){
+            return NSNotFound; // Characters left in a line is whitespaces
+        }
+        if ( isDigit([[self xvim_string] characterAtIndex:index])){
+            break;
+        }
+        index++;
+    }
+    
+    if( [self isEOF:index]){
+        return NSNotFound;
+    }
+    return index;
+}
+
 - (NSUInteger)nextNewline:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSUInteger length = [[self xvim_string] length];
@@ -880,7 +898,12 @@
         return index;
     }
     
-    NSUInteger p = index+1; // We start searching end of word from next character
+    NSUInteger p;
+    if( opt & MOTION_OPTION_CHANGE_WORD ){
+        p = index;
+    } else {
+        p = index+1; // We start searching end of word from next character
+    }
     NSString *string = [self xvim_string];
     while( ![self isLastCharacter:p] ){
         unichar curChar = [string characterAtIndex:p];
@@ -889,7 +912,7 @@
         // Vim defines "Blank Line as a word" but 'e' does not stop on blank line.
         // Thats why we are not seeing blank line as a border of a word here (commented out the condition currently)
         // We may add some option to specify if we count a blank line as a word here.
-        if( opt == BIGWORD ){
+        if( opt & BIGWORD ){
             if( /*[self isBlankline:p]                               || */// blank line
                (isNonblank(curChar) && !isNonblank(nextChar))             // non blank to blank
                ){

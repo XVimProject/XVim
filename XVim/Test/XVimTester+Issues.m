@@ -35,10 +35,17 @@
                                         @"ggg hhh i_i\n" 
                                         @"ddd e-e fff\n" 
                                         @"    jjj kkk";  
+    
+    static NSString* issue_429_result = @"bbb bbb ccc\n";
+    
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
             XVimMakeTestCase(text1, 24, 0, @":inoremap <lt>C-e> <lt>C-o>$<CR>i<Right><Right><Up><Up><C-e><ESC>", text1 , 10, 0),  // Issue #416
             XVimMakeTestCase(text1, 20, 0, @"yyjp", issue_216_result, 36,0 ),
+            XVimMakeTestCase(text1, 4, 0, @"vll<D-x>ibbb<ESC>", text1, 6,0 ),  // Issue #429
+            XVimMakeTestCase(text1, 4, 0, @"vll<D-c>", text1, 4,3 ),  // Issue #429 related (Cmd-c should not change selected range)
+            XVimMakeTestCase(text0, 4, 0, @"vll<D-c><ESC>0vll<D-v>0", issue_429_result, 0, 0 ),  // Issue #429 related (Cmd-v should overwrite the selection and exit from visual)
+            
             nil];
     
 }

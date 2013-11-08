@@ -83,24 +83,29 @@
     return YES;
 }
 
-- (void)tearDown{
+- (void)executeInput:(NSString*)notation{
     NSInteger num = [[XVimLastActiveWindowController() window] windowNumber];
     NSGraphicsContext* context = [[XVimLastActiveWindowController() window] graphicsContext];
-    NSEvent* event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0,0) modifierFlags:0 timestamp:0 windowNumber:num context:context characters:@"\x1B" charactersIgnoringModifiers:@"\x1B" isARepeat:NO keyCode:53];
-    [NSApp sendEvent:event];
+    NSArray* strokes = XVimKeyStrokesFromKeyNotation(notation);
+    for( XVimKeyStroke* stroke in strokes ){
+        NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
+        [[IDEApplication sharedApplication] sendEvent:event];
+        
+        // Tells NSUndoManager to end grouping (Little hacky)
+        // This is because the loop here emulates NSApplication's run loop.
+        // To make NSUndoManager work properly we have to call this after each event
+        [NSUndoManager performSelector:@selector(_endTopLevelGroupings)];
+    }
+}
+
+- (void)tearDown{
+    [self executeInput:@"<ESC>"];
+    [self executeInput:@":mapclear<CR>"];
     [XVimLastActiveSourceView() display];
 }
 
 - (void)executeInput{
-    NSInteger num = [[XVimLastActiveWindowController() window] windowNumber];
-    NSGraphicsContext* context = [[XVimLastActiveWindowController() window] graphicsContext];
-    NSArray* strokes = XVimKeyStrokesFromKeyNotation(self.input);
-    for( XVimKeyStroke* stroke in strokes ){
-        NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
-        //event.context = context;
-        //NSEvent* event = [NSEvent keyEventWithType:NSKeyDown location:NSMakePoint(0,0) modifierFlags:0 timestamp:0 windowNumber:num context:context characters:[NSString stringWithFormat:@"%C",c] charactersIgnoringModifiers:[NSString stringWithFormat:@"%C",c] isARepeat:NO keyCode:0];
-        [[IDEApplication sharedApplication] sendEvent:event];
-    }
+    [self executeInput:self.input];
 }
 
 - (BOOL)run{

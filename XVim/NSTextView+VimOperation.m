@@ -71,6 +71,7 @@
 - (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
+- (void)xvim_registerInsertionPointForUndo;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -380,6 +381,8 @@
         return ;
     }
     
+    [self xvim_registerInsertionPointForUndo];
+    
     NSUInteger insertionPointAfterDelete = self.insertionPoint;
     BOOL keepInsertionPoint = NO;
     if( self.selectionMode != XVIM_VISUAL_NONE ){
@@ -427,14 +430,16 @@
             }
         }
         [self xvim_yankRanges:[NSArray arrayWithObject:[NSValue valueWithRange:r]] withType:motion.type];
-        [self xvim_setSelectedRange:r];
+        [self insertText:@"" replacementRange:r];
     }else{
         // Currently not supportin deleting EOF with selection mode.
         // This is because of the fact that NSTextView does not allow select EOF
         [self xvim_yankRanges:[self xvim_selectedRanges] withType:motion.type];
+        for( NSValue* v in [[self xvim_selectedRanges] reverseObjectEnumerator]){
+            [self insertText:@"" replacementRange:v.rangeValue];
+        }
     }
     
-    [self delete:nil];
     
     [self.xvimDelegate textView:self didDelete:self.lastYankedText  withType:self.lastYankedType];
     
@@ -446,6 +451,9 @@
 }
 
 - (void)xvim_change:(XVimMotion*)motion{
+    // We do not need to call this since this method uses xvim_delete to operate on text
+    //[self xvim_registerInsertionPointForUndo]; 
+    
     BOOL insertNewline = NO;
     if( motion.type == LINEWISE || self.selectionMode == XVIM_VISUAL_LINE){
         // 'cc' deletes the lines but need to keep the last newline.
@@ -457,6 +465,7 @@
     if( motion.motion == MOTION_WORD_FORWARD && [self.textStorage isNonblank:self.insertionPoint] ){
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
+        motion.option |= MOTION_OPTION_CHANGE_WORD;
     }
     self.cursorMode = CURSOR_MODE_INSERT;
     [self xvim_delete:motion];
@@ -521,6 +530,8 @@
 }
 
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count{
+    [self xvim_registerInsertionPointForUndo];
+    
     TRACE_LOG(@"text:%@  type:%d   afterCursor:%d   count:%d", text, type, after, count);
     if( self.selectionMode != XVIM_VISUAL_NONE ){
         // FIXME: Make them not to change text from register...
@@ -629,9 +640,7 @@
                 return;
             }
             r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
-            [self.undoManager beginUndoGrouping];
             [self xvim_swapCaseForRange:r];
-            [self.undoManager endUndoGrouping];
             [self xvim_moveCursor:r.location preserveColumn:NO];
         }
     }else{
@@ -927,6 +936,40 @@
     }
     [self insertText:[NSString stringWithFormat:@"%c",c] replacementRange:NSMakeRange(self.insertionPoint,1)];
     return;
+}
+
+- (void)xvim_incrementNumber:(int64_t)offset{
+    NSUInteger pos = [self.textStorage nextDigitInLine:self.insertionPoint];
+    NSRange range;
+
+    if (pos == NSNotFound) {
+        range = [self xvim_currentNumber];
+    } else {
+        self.insertionPoint = pos;
+        range = [self xvim_currentNumber];
+    }
+    if (range.location == NSNotFound) {
+        return;
+    }
+
+    const char *s = [[self.xvim_string substringWithRange:range] UTF8String];
+    NSString *repl;
+    int64_t number = strtoll(s, NULL, 0);
+
+    number += offset;
+
+    if (strncmp(s, "0x", 2) == 0) {
+        repl = [NSString stringWithFormat:@"0x%0*llx", (int)strlen(s) - 2, number];
+    } else if (number && *s == '+') {
+        repl = [NSString stringWithFormat:@"%+lld", number];
+    } else if (number && *s == '0' && s[1] && !strchr(s, '9') && !strchr(s, '8')) {
+        repl = [NSString stringWithFormat:@"0%0*llo", (int)strlen(s) - 1, number];
+    } else {
+        repl = [NSString stringWithFormat:@"%lld", number];
+    }
+
+    [self insertText:repl replacementRange:range];
+    self.insertionPoint = range.location + repl.length - 1;
 }
 
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options{
@@ -1306,6 +1349,74 @@
 
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt{
     return [self.textStorage currentWord:self.insertionPoint count:1 option:opt|TEXTOBJECT_INNER];
+}
+
+- (NSRange)xvim_currentNumber{
+    NSUInteger insertPoint = self.insertionPoint;
+    NSUInteger n_start, n_end;
+    NSUInteger x_start, x_end;
+    NSString *s = self.xvim_string;
+    unichar c;
+    BOOL isOctal = YES;
+
+    n_start = insertPoint;
+    while (n_start > 0 && [s isDigit:n_start - 1]) {
+        if (![s isOctDigit:n_start]) {
+            isOctal = NO;
+        }
+        n_start--;
+    }
+    n_end = insertPoint;
+    while (n_end < s.length && [s isDigit:n_end]) {
+        if (![s isOctDigit:n_end]) {
+            isOctal = NO;
+        }
+        n_end++;
+    }
+
+    x_start = n_start;
+    while (x_start > 0 && [s isHexDigit:x_start - 1]) {
+        x_start--;
+    }
+    x_end = n_end;
+    while (x_end < s.length && [s isHexDigit:x_end]) {
+        x_end++;
+    }
+
+    // first deal with Hex: 0xNNNNN
+    // case 1: check for insertion point on the '0' or 'x'
+    if (x_end - x_start == 1) {
+        NSUInteger end = x_end;
+        if (end < s.length && [s characterAtIndex:end] == 'x') {
+            do {
+                end++;
+            } while (end < s.length && [s isHexDigit:end]);
+            if (insertPoint < end && end - x_start > 2) {
+                // YAY it's hex for real!!!
+                return NSMakeRange(x_start, end - x_start);
+            }
+        }
+    }
+
+    // case 2: check whether we're after 0x
+    if (insertPoint < x_end && x_end - x_start >= 1) {
+        if (x_start > 2 && [s characterAtIndex:x_start - 1] == 'x' && [s characterAtIndex:x_start - 2] == '0') {
+            return NSMakeRange(x_start - 2, x_end - x_start + 2);
+        }
+    }
+
+    if (insertPoint == n_end || n_start - n_end == 0) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+
+    // okay it's not hex, if it's not octal, check for leading +/-
+    if (n_start > 0 && !(isOctal && [s characterAtIndex:n_start] == '0')) {
+        c = [s characterAtIndex:n_start - 1];
+        if (c == '+' || c == '-') {
+            n_start--;
+        }
+    }
+    return NSMakeRange(n_start, n_end - n_start);
 }
 
 #pragma mark Search Position
@@ -1986,7 +2097,9 @@
 }
 
 - (void)xvim_swapCaseForRange:(NSRange)range {
+    [self xvim_registerInsertionPointForUndo];
     NSString* text = [self xvim_string];
+    
 	
 	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
 	for (NSUInteger i = 0; i < range.length; ++i) {
@@ -2005,6 +2118,15 @@
     [self insertText:substring replacementRange:range];
 }
 
+- (void)xvim_registerInsertionPointForUndo{
+    NSUInteger undoInsertionPoint = [self selectedRange].location;
+    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:undoInsertionPoint]];
+}
+
+- (void)xvim_undoCursorPos:(NSNumber*)num{
+    [self xvim_moveCursor:[num unsignedIntegerValue] preserveColumn:NO];
+    [self xvim_syncState];
+}
 /* May be used later
 - (void)hideCompletions {
 	[[[self xview] completionController] hideCompletions];
