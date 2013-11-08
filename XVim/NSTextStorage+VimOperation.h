@@ -180,6 +180,14 @@ typedef enum {
 - (NSUInteger)nextNonblankInLine:(NSUInteger)index; // May return NSNotFound
 
 /**
+ * Returns next digit character position after the position "index" in a current line.
+ * If no digit character is found or the line is a blank line this returns NSNotFound.
+ * NOTE: This searches digit characters from "index" and NOT "index+1"
+ *       If the character at "index" is a digit this returns "index" itself
+ **/ 
+- (NSUInteger)nextDigitInLine:(NSUInteger)index; // May return NSNotFound
+
+/**
  * Returns position of the first newline character when searching forwards from "index+1"
  * Searching starts from position "index"+1. The position index is not included to search newline.
  * Returns NSNotFound if no newline character is found.

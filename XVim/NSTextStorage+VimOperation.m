@@ -221,6 +221,24 @@
     return index;
 }
 
+- (NSUInteger)nextDigitInLine:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    while (index < [[self xvim_string] length]) {
+        if( [self isNewline:index] ){
+            return NSNotFound; // Characters left in a line is whitespaces
+        }
+        if ( isDigit([[self xvim_string] characterAtIndex:index])){
+            break;
+        }
+        index++;
+    }
+    
+    if( [self isEOF:index]){
+        return NSNotFound;
+    }
+    return index;
+}
+
 - (NSUInteger)nextNewline:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSUInteger length = [[self xvim_string] length];

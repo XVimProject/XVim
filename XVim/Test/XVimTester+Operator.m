@@ -333,7 +333,7 @@
             XVimMakeTestCase(text0, 5,  0, @"AXXX<ESC>.."  , A_result2, 19, 0), // Repeat
             XVimMakeTestCase(text1, 0,  0, @"AXXX<ESC>jj`^", A_result3,  5, 0), // ^ Mark
             XVimMakeTestCase(text1, 0,  0, @"AXXX<ESC>jj`.", A_result3,  5, 0), // . Mark
-            
+
             // c
             XVimMakeTestCase(text0, 5,  0, @"cwaaa<ESC>"    , cw_result1,  7, 0),
             XVimMakeTestCase(text0, 9,  0, @"cwaaa<ESC>"    , cw_result2, 11, 0),
@@ -526,6 +526,13 @@
             // Insert and Ctrl-y
             XVimMakeTestCase(text1, 4, 0, @"a<C-y><C-y><ESC>", C_y_result, 6, 0),
             
+            // C_a
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>", @" 11JK",  2, 0),
+            XVimMakeTestCase(@"10JK",   0, 0, @"<C-a>", @"11JK",   1, 0),
+            XVimMakeTestCase(@"10JK",   2, 0, @"<C-a>", @"10JK",   2, 0),
+            XVimMakeTestCase(@"017JK",  0, 0, @"<C-a>", @"020JK",  2, 0),
+            XVimMakeTestCase(@"0x19JK", 0, 0, @"<C-a>", @"0x1aJK", 3, 0),
+
             // Insert and Ctrl-e
             //   The following test case sometimes fails. I do not know when it occurs but occasionally it happens.
             //   It looks that <C-e> conflicts to the Xcode native key map(end of line) and not processed
