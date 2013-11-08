@@ -105,6 +105,7 @@
 - (void)xvim_appendAtEndOfLine;
 - (void)xvim_insertBeforeFirstNonblank;
 - (void)xvim_overwriteCharacter:(unichar)c;
+- (void)xvim_incrementNumber:(int64_t)offset;
 
 /**
  * Sort specified lines.
@@ -150,6 +151,7 @@
 - (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt;
 - (void)xvim_clearHighlightText;
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
+- (BOOL)xvim_currentNumber:(NSRange *)range;
     
 #pragma mark Searching positions
 // TODO: Thses method should be internal. Create abstracted interface to achieve the operation uses these methods.

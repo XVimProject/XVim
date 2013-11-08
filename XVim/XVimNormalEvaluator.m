@@ -86,6 +86,12 @@
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
+- (XVimEvaluator*)C_a{
+    NSTextView* view = [self sourceView];
+    [view xvim_incrementNumber:(int64_t)self.numericArg];
+    return nil;
+}
+
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b{
     [[self sourceView] xvim_scrollPageBackward:[self numericArg]];
@@ -336,6 +342,12 @@
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:NO] autorelease];
     eval.parent = self;
     return [eval performSelector:@selector(h)];
+}
+
+- (XVimEvaluator*)C_x{
+    NSTextView* view = [self sourceView];
+    [view xvim_incrementNumber:-(int64_t)self.numericArg];
+    return nil;
 }
 
 - (XVimEvaluator*)Y{
