@@ -938,6 +938,40 @@
     return;
 }
 
+- (void)xvim_incrementNumber:(int64_t)offset{
+    NSUInteger pos = [self.textStorage nextDigitInLine:self.insertionPoint];
+    NSRange range;
+
+    if (pos == NSNotFound) {
+        range = [self xvim_currentNumber];
+    } else {
+        self.insertionPoint = pos;
+        range = [self xvim_currentNumber];
+    }
+    if (range.location == NSNotFound) {
+        return;
+    }
+
+    const char *s = [[self.xvim_string substringWithRange:range] UTF8String];
+    NSString *repl;
+    int64_t number = strtoll(s, NULL, 0);
+
+    number += offset;
+
+    if (strncmp(s, "0x", 2) == 0) {
+        repl = [NSString stringWithFormat:@"0x%0*llx", (int)strlen(s) - 2, number];
+    } else if (number && *s == '+') {
+        repl = [NSString stringWithFormat:@"%+lld", number];
+    } else if (number && *s == '0' && s[1] && !strchr(s, '9') && !strchr(s, '8')) {
+        repl = [NSString stringWithFormat:@"0%0*llo", (int)strlen(s) - 1, number];
+    } else {
+        repl = [NSString stringWithFormat:@"%lld", number];
+    }
+
+    [self insertText:repl replacementRange:range];
+    self.insertionPoint = range.location + repl.length - 1;
+}
+
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options{
     NSAssert( line1 > 0, @"line1 must be greater than 0.");
     NSAssert( line2 > 0, @"line2 must be greater than 0.");
@@ -1315,6 +1349,74 @@
 
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt{
     return [self.textStorage currentWord:self.insertionPoint count:1 option:opt|TEXTOBJECT_INNER];
+}
+
+- (NSRange)xvim_currentNumber{
+    NSUInteger insertPoint = self.insertionPoint;
+    NSUInteger n_start, n_end;
+    NSUInteger x_start, x_end;
+    NSString *s = self.xvim_string;
+    unichar c;
+    BOOL isOctal = YES;
+
+    n_start = insertPoint;
+    while (n_start > 0 && [s isDigit:n_start - 1]) {
+        if (![s isOctDigit:n_start]) {
+            isOctal = NO;
+        }
+        n_start--;
+    }
+    n_end = insertPoint;
+    while (n_end < s.length && [s isDigit:n_end]) {
+        if (![s isOctDigit:n_end]) {
+            isOctal = NO;
+        }
+        n_end++;
+    }
+
+    x_start = n_start;
+    while (x_start > 0 && [s isHexDigit:x_start - 1]) {
+        x_start--;
+    }
+    x_end = n_end;
+    while (x_end < s.length && [s isHexDigit:x_end]) {
+        x_end++;
+    }
+
+    // first deal with Hex: 0xNNNNN
+    // case 1: check for insertion point on the '0' or 'x'
+    if (x_end - x_start == 1) {
+        NSUInteger end = x_end;
+        if (end < s.length && [s characterAtIndex:end] == 'x') {
+            do {
+                end++;
+            } while (end < s.length && [s isHexDigit:end]);
+            if (insertPoint < end && end - x_start > 2) {
+                // YAY it's hex for real!!!
+                return NSMakeRange(x_start, end - x_start);
+            }
+        }
+    }
+
+    // case 2: check whether we're after 0x
+    if (insertPoint < x_end && x_end - x_start >= 1) {
+        if (x_start > 2 && [s characterAtIndex:x_start - 1] == 'x' && [s characterAtIndex:x_start - 2] == '0') {
+            return NSMakeRange(x_start - 2, x_end - x_start + 2);
+        }
+    }
+
+    if (insertPoint == n_end || n_start - n_end == 0) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+
+    // okay it's not hex, if it's not octal, check for leading +/-
+    if (n_start > 0 && !(isOctal && [s characterAtIndex:n_start] == '0')) {
+        c = [s characterAtIndex:n_start - 1];
+        if (c == '+' || c == '-') {
+            n_start--;
+        }
+    }
+    return NSMakeRange(n_start, n_end - n_start);
 }
 
 #pragma mark Search Position

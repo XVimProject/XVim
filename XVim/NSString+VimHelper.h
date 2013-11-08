@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 BOOL isDigit(unichar ch);
+BOOL isOctDigit(unichar ch);
+BOOL isHexDigit(unichar ch);
 BOOL isAlpha(unichar ch);
 BOOL isDelimeter(unichar ch);
 BOOL isWhitespace(unichar ch);
@@ -18,6 +20,8 @@ BOOL isKeyword(unichar ch);
 
 @interface NSString (VimHelper)
 - (BOOL) isDigit:(NSUInteger)index;
+- (BOOL) isOctDigit:(NSUInteger)index;
+- (BOOL) isHexDigit:(NSUInteger)index;
 - (BOOL) isAlpha:(NSUInteger)index;
 - (BOOL) isDelimeter:(NSUInteger)index;
 - (BOOL) isWhitespace:(NSUInteger)index;
