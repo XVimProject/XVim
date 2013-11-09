@@ -60,6 +60,7 @@
 - (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (void)xvim_syncState; // update self's properties with our variables
 - (NSArray*)xvim_selectedRanges;
+- (NSArray*)xvim_selectedRangesAsSeparatedLines;
 - (XVimRange)xvim_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion;
 - (NSRange)xvim_getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (void)xvim_yankRanges:(NSArray*)ranges withType:(MOTION_TYPE)type;
@@ -1701,6 +1702,32 @@
         }
     }
     return rangeArray;
+}
+
+- (NSArray*)xvim_selectedRangesAsSeparatedLines{
+    NSUInteger selectionStart, selectionEnd = NSNotFound;
+    NSMutableArray* rangeArray = [[[NSMutableArray alloc] init] autorelease];
+    // And then select new selection area
+    if( self.selectionMode == XVIM_VISUAL_LINE){
+        NSUInteger top    = MIN( [self.textStorage lineNumber:self.insertionPoint], [self.textStorage lineNumber:self.selectionBegin] );
+        NSUInteger bottom = MAX( [self.textStorage lineNumber:self.insertionPoint], [self.textStorage lineNumber:self.selectionBegin] );
+        for( NSUInteger i = 0; i < bottom-top+1 ; i++ ){
+            selectionStart = [self.textStorage positionAtLineNumber:top+i column:0];
+            selectionEnd = [self.textStorage positionAtLineNumber:top+i column:[self.textStorage numberOfLines]];
+            if( [self.textStorage isEOF:selectionStart] || [self.textStorage isEOL:selectionStart]){
+                // EOF or EOL can not be selected
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,0)]]; // 0 means No selection. This information is important and used in operators like 'delete'
+            }else if( [self.textStorage isEOF:selectionEnd] || [self.textStorage isEOL:selectionEnd]){
+                selectionEnd--;
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
+            }else{
+                [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(selectionStart,selectionEnd-selectionStart+1)]];
+            }
+        }        
+        return rangeArray;
+    }else{
+        return [self xvim_selectedRanges];
+    }
 }
 
 - (XVimRange)xvim_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion{
