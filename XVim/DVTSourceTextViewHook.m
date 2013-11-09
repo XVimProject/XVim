@@ -298,24 +298,8 @@
         [base viewDidMoveToSuperview_];
         
         // Hide scroll bars according to options
-        XVimOptions *options = [[XVim instance] options];
-        NSString *guioptions = options.guioptions;
         NSScrollView * scrollView = [base enclosingScrollView];
         [scrollView setPostsBoundsChangedNotifications:YES];
-        if ([guioptions rangeOfString:@"r"].location == NSNotFound) {
-            [scrollView addObserver:self
-                         forKeyPath:@"hasVerticalScroller"
-                            options:NSKeyValueObservingOptionNew
-                            context:nil];
-            [scrollView setHasVerticalScroller:NO];
-        }
-        if ([guioptions rangeOfString:@"b"].location == NSNotFound) {
-            [scrollView addObserver:self
-                         forKeyPath:@"hasHorizontalScroller"
-                            options:NSKeyValueObservingOptionNew
-                            context:nil];
-            [scrollView setHasHorizontalScroller:NO];
-        }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -323,17 +307,7 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
-	if ([keyPath isEqualToString:@"hasVerticalScroller"]) {
-		NSScrollView *scrollView = object;
-		if ([scrollView hasVerticalScroller]) {
-			[scrollView setHasVerticalScroller:NO];
-		}
-	}else  if ([keyPath isEqualToString:@"hasHorizontalScroller"]) {
-		NSScrollView *scrollView = object;
-		if ([scrollView hasHorizontalScroller]) {
-			[scrollView setHasHorizontalScroller:NO];
-		}
-	}else if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
+	if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
         NSTextView* view = (NSTextView*)self;
         [view setNeedsUpdateFoundRanges:YES];
         [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];
