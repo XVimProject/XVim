@@ -1,0 +1,2 @@
+*.m     diff=objc
+*.h     diff=objc
