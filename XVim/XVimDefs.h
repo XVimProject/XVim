@@ -27,6 +27,15 @@ typedef enum {
     XVIM_VISUAL_BLOCK, // for 'CTRL-V'
 }XVIM_VISUAL_MODE;
 
+typedef enum {
+    _XVIM_VISUAL_RIGHT  = 1,
+    _XVIM_VISUAL_BOTTOM = 2,
+
+    XVIM_VISUAL_TOPLEFT     = 0,
+    XVIM_VISUAL_TOPRIGHT    = 1,
+    XVIM_VISUAL_BOTTOMLEFT  = 2,
+    XVIM_VISUAL_BOTTOMRIGHT = 3,
+} XVIM_VISUAL_CORNER;
 
 typedef struct _XVimRange {
     NSUInteger begin; // begin may be greater than end
@@ -39,10 +48,11 @@ typedef struct _XVimPosition{
 } XVimPosition;
 
 typedef struct _XVimSelection {
-    NSUInteger top;
-    NSUInteger left;
-    NSUInteger bottom;
-    NSUInteger right;
+    XVIM_VISUAL_CORNER corner;
+    NSUInteger         top;
+    NSUInteger         left;
+    NSUInteger         bottom;
+    NSUInteger         right;
 } XVimSelection;
 
 NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
