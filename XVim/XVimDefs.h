@@ -52,4 +52,16 @@ NS_INLINE XVimPosition XVimMakePosition(NSUInteger line, NSUInteger column) {
     return p;
 }
 
+NS_INLINE XVimRange XVimRangeSwap(XVimRange range)
+{
+    return XVimMakeRange(range.end, range.begin);
+}
+
+/** Returns an NSRange from start to end inclusive
+ */
+NS_INLINE NSRange XVimMakeNSRange(XVimRange range)
+{
+    return NSMakeRange(range.begin, range.end - range.begin + 1);
+}
+
 #endif
