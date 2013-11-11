@@ -532,6 +532,7 @@
             XVimMakeTestCase(@"10JK",   2, 0, @"<C-a>", @"10JK",   2, 0),
             XVimMakeTestCase(@"017JK",  0, 0, @"<C-a>", @"020JK",  2, 0),
             XVimMakeTestCase(@"0x19JK", 0, 0, @"<C-a>", @"0x1aJK", 3, 0),
+            XVimMakeTestCase(@" 10JK\n01234",  0, 0, @"<C-a>j", @" 11JK\n01234",  8, 0),
 
             // Insert and Ctrl-e
             //   The following test case sometimes fails. I do not know when it occurs but occasionally it happens.
