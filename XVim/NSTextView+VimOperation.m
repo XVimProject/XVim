@@ -970,7 +970,7 @@
     }
 
     [self insertText:repl replacementRange:range];
-    self.insertionPoint = range.location + repl.length - 1;
+    [self xvim_moveCursor:range.location + repl.length - 1 preserveColumn:NO];
 }
 
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options{
