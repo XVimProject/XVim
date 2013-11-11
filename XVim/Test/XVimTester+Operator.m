@@ -527,12 +527,15 @@
             XVimMakeTestCase(text1, 4, 0, @"a<C-y><C-y><ESC>", C_y_result, 6, 0),
             
             // C_a
-            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>", @" 11JK",  2, 0),
-            XVimMakeTestCase(@"10JK",   0, 0, @"<C-a>", @"11JK",   1, 0),
-            XVimMakeTestCase(@"10JK",   2, 0, @"<C-a>", @"10JK",   2, 0),
-            XVimMakeTestCase(@"017JK",  0, 0, @"<C-a>", @"020JK",  2, 0),
-            XVimMakeTestCase(@"0x19JK", 0, 0, @"<C-a>", @"0x1aJK", 3, 0),
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>",    @" 11JK",  2, 0),
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>.",   @" 12JK",  2, 0),
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>.uu", @" 10JK",  0, 0),
+            XVimMakeTestCase(@"10JK",   0, 0, @"<C-a>",    @"11JK",   1, 0),
+            XVimMakeTestCase(@"10JK",   2, 0, @"<C-a>",    @"10JK",   2, 0),
+            XVimMakeTestCase(@"017JK",  0, 0, @"<C-a>",    @"020JK",  2, 0),
+            XVimMakeTestCase(@"0x19JK", 0, 0, @"<C-a>",    @"0x1aJK", 3, 0),
             XVimMakeTestCase(@" 10JK\n01234",  0, 0, @"<C-a>j", @" 11JK\n01234",  8, 0),
+            XVimMakeTestCase(@"0x0 123",    0, 0, @"<C-x><C-a>", @"0x0000000000000000 123", 17, 0),
 
             // Insert and Ctrl-e
             //   The following test case sometimes fails. I do not know when it occurs but occasionally it happens.

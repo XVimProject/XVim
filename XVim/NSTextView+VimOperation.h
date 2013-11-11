@@ -105,7 +105,7 @@
 - (void)xvim_appendAtEndOfLine;
 - (void)xvim_insertBeforeFirstNonblank;
 - (void)xvim_overwriteCharacter:(unichar)c;
-- (void)xvim_incrementNumber:(int64_t)offset;
+- (BOOL)xvim_incrementNumber:(int64_t)offset;
 
 /**
  * Sort specified lines.

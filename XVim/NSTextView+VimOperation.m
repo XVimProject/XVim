@@ -73,6 +73,7 @@
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
 - (void)xvim_registerInsertionPointForUndo;
+- (void)xvim_registerPositionForUndo:(NSUInteger)pos;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -939,38 +940,45 @@
     return;
 }
 
-- (void)xvim_incrementNumber:(int64_t)offset{
-    NSUInteger pos = [self.textStorage nextDigitInLine:self.insertionPoint];
+- (BOOL)xvim_incrementNumber:(int64_t)offset{
+    NSUInteger ip = self.insertionPoint;
     NSRange range;
 
-    if (pos == NSNotFound) {
-        range = [self xvim_currentNumber];
-    } else {
+    range = [self xvim_currentNumber];
+    if (range.location == NSNotFound) {
+        NSUInteger pos = [self.textStorage nextDigitInLine:ip];
+        if (pos == NSNotFound) {
+            return NO;
+        }
         self.insertionPoint = pos;
         range = [self xvim_currentNumber];
+        if (range.location == NSNotFound) {
+            // should not happen
+            self.insertionPoint = ip;
+            return NO;
+        }
     }
-    if (range.location == NSNotFound) {
-        return;
-    }
+
+    [self xvim_registerPositionForUndo:ip];
 
     const char *s = [[self.xvim_string substringWithRange:range] UTF8String];
     NSString *repl;
-    int64_t number = strtoll(s, NULL, 0);
-
-    number += offset;
+    uint64_t u = strtoull(s, NULL, 0);
+    int64_t i = strtoll(s, NULL, 0);
 
     if (strncmp(s, "0x", 2) == 0) {
-        repl = [NSString stringWithFormat:@"0x%0*llx", (int)strlen(s) - 2, number];
-    } else if (number && *s == '+') {
-        repl = [NSString stringWithFormat:@"%+lld", number];
-    } else if (number && *s == '0' && s[1] && !strchr(s, '9') && !strchr(s, '8')) {
-        repl = [NSString stringWithFormat:@"0%0*llo", (int)strlen(s) - 1, number];
+        repl = [NSString stringWithFormat:@"0x%0*llx", (int)strlen(s) - 2, u + (uint64_t)offset];
+    } else if (u && *s == '0' && s[1] && !strchr(s, '9') && !strchr(s, '8')) {
+        repl = [NSString stringWithFormat:@"0%0*llo", (int)strlen(s) - 1, u + (uint64_t)offset];
+    } else if (u && *s == '+') {
+        repl = [NSString stringWithFormat:@"%+lld", i + offset];
     } else {
-        repl = [NSString stringWithFormat:@"%lld", number];
+        repl = [NSString stringWithFormat:@"%lld", i + offset];
     }
 
     [self insertText:repl replacementRange:range];
     [self xvim_moveCursor:range.location + repl.length - 1 preserveColumn:NO];
+    return YES;
 }
 
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options{
@@ -1401,7 +1409,7 @@
 
     // case 2: check whether we're after 0x
     if (insertPoint < x_end && x_end - x_start >= 1) {
-        if (x_start > 2 && [s characterAtIndex:x_start - 1] == 'x' && [s characterAtIndex:x_start - 2] == '0') {
+        if (x_start >= 2 && [s characterAtIndex:x_start - 1] == 'x' && [s characterAtIndex:x_start - 2] == '0') {
             return NSMakeRange(x_start - 2, x_end - x_start + 2);
         }
     }
@@ -2145,9 +2153,12 @@
     [self insertText:substring replacementRange:range];
 }
 
+- (void)xvim_registerPositionForUndo:(NSUInteger)pos{
+    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:pos]];
+}
+
 - (void)xvim_registerInsertionPointForUndo{
-    NSUInteger undoInsertionPoint = [self selectedRange].location;
-    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:undoInsertionPoint]];
+    [self xvim_registerPositionForUndo:self.selectedRange.location];
 }
 
 - (void)xvim_undoCursorPos:(NSNumber*)num{

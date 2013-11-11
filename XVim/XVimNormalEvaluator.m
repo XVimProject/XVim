@@ -88,7 +88,11 @@
 
 - (XVimEvaluator*)C_a{
     NSTextView* view = [self sourceView];
-    [view xvim_incrementNumber:(int64_t)self.numericArg];
+    if ([view xvim_incrementNumber:(int64_t)self.numericArg]) {
+        [[XVim instance] fixOperationCommands];
+    } else {
+        [[XVim instance] cancelOperationCommands];
+    }
     return nil;
 }
 
@@ -348,7 +352,12 @@
 
 - (XVimEvaluator*)C_x{
     NSTextView* view = [self sourceView];
-    [view xvim_incrementNumber:-(int64_t)self.numericArg];
+
+    if ([view xvim_incrementNumber:-(int64_t)self.numericArg]) {
+        [[XVim instance] fixOperationCommands];
+    } else {
+        [[XVim instance] cancelOperationCommands];
+    }
     return nil;
 }
 
