@@ -253,7 +253,7 @@ static struct key_map key_maps[] = {
     {@"|",124, @"BAR"}, // Default notation
     {@"}",125, @"RBRACE"},
     {@"~",126, @"TILDE"},
-    {@"DEL",127, @"DEL"},
+    {@"BS",127, @"BS"},
     {@"UP",63232, @"Up"},
     {@"DOWN", 63233, @"Down"},
     {@"LEFT", 63234, @"Left"},
@@ -270,7 +270,7 @@ static struct key_map key_maps[] = {
     {@"F10", 63245, @"F10"},
     {@"F11", 63246, @"F11"},
     {@"F12", 63247, @"F12"},
-    {@"FORWARD_DELETE", 63272, @"ForwardDelete"},
+    {@"DEL", 63272, @"DEL"},
     {@"HOME", 63273, @"Home"},
     {@"END", 63275, @"End"},
     {@"PAGEUP", 63276, @"Pageup"},

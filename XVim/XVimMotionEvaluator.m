@@ -469,9 +469,9 @@
 }
 
 /*
- * Delete (DEL) acts like 'h' in vi. moves cursor backward
+ * BackSpace (BS) acts like 'h' in vi. moves cursor backward
  */
-- (XVimEvaluator*)DEL{
+- (XVimEvaluator*)BS{
     return [self h];
 }
 
