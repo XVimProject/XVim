@@ -13,6 +13,30 @@
 
 @implementation XVimGVisualEvaluator
 
+- (XVimEvaluator *)f{
+    [self.window errorMessage:@"{visual}gf unimplemented" ringBell:NO];
+    return [XVimEvaluator popEvaluator];
+}
+
+- (XVimEvaluator *)F{
+    return [self f];
+}
+
+- (XVimEvaluator *)C_g{
+    [self.window errorMessage:@"{Visual}g CTRL-G unimplemented" ringBell:NO];
+    return [XVimEvaluator popEvaluator];
+}
+
+- (XVimEvaluator*)J{
+    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
+}
+
+- (XVimEvaluator *)q{
+    [self.window errorMessage:@"{visual}gq unimplemented" ringBell:NO];
+    return [XVimEvaluator popEvaluator];
+}
+
 - (XVimEvaluator*)u{
 	NSTextView *view = [self sourceView];
     [view xvim_makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
@@ -25,9 +49,14 @@
 	return nil;
 }
 
-- (XVimEvaluator*)J{
-    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
+- (XVimEvaluator *)w{
+    [self.window errorMessage:@"{visual}gq unimplemented" ringBell:NO];
+    return [XVimEvaluator popEvaluator];
+}
+
+- (XVimEvaluator *)QUESTION{
+    [self.window errorMessage:@"{visual}g? unimplemented" ringBell:NO];
+    return [XVimEvaluator popEvaluator];
 }
 
 - (XVimEvaluator*)TILDE{
