@@ -312,7 +312,6 @@ typedef enum {
  **/
 - (NSRange)characterRangeForLineRange:(NSRange)arg1;
 
-
 #pragma mark Vim operation related methods
 
 - (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;

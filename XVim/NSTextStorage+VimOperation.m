@@ -359,7 +359,25 @@
 
 - (NSUInteger)positionAtLineNumber:(NSUInteger)num{
     NSAssert(0 != num, @"line number starts from 1");
-    
+
+#ifdef __USE_DVTKIT__
+    NSRange range;
+#ifdef __XCODE5__
+    if (num > self.numberOfLines) {
+        return NSNotFound;
+    }
+    if ([self isKindOfClass:[DVTTextStorage class]] ){
+        range = [(DVTTextStorage *)self characterRangeForLineRange:NSMakeRange(num - 1, 1)];
+        return range.location;
+    }
+#else
+    if ([self isKindOfClass:[DVTSourceTextStorage class]]){
+        range = [(DVTSourceTextStorage*)self characterRangeForLineRange:NSMakeRange(num - 1, 1)];
+        return range.location;
+    }
+#endif
+#endif
+
     // Primitive search to find line number
     // TODO: we may need to keep track line number and position by hooking insertText: method.
     NSUInteger pos = 0;
@@ -436,6 +454,26 @@
 
 - (NSUInteger)lineNumber:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
+
+#ifdef __USE_DVTKIT__
+    NSRange range;
+
+    if ([self isEOF:index]) {
+        return self.numberOfLines;
+    }
+#ifdef __XCODE5__
+    if ([self isKindOfClass:[DVTTextStorage class]] ){
+        range = [(DVTTextStorage *)self lineRangeForCharacterRange:NSMakeRange(index, 0)];
+        return range.location + 1;
+    }
+#else
+    if ([self isKindOfClass:[DVTSourceTextStorage class]]){
+        range = [(DVTSourceTextStorage*)self lineRangeForCharacterRange:NSMakeRange(index, 0)];
+        return range.location + 1;
+    }
+#endif
+#endif
+
     NSUInteger newLines=1;
     for( NSUInteger pos = 0 ; pos < index && pos < self.length; pos++ ){
         if( [self isNewline:pos] ){

@@ -59,8 +59,8 @@
 @property(readonly) NSUInteger selectionBegin;
 @property(readonly) XVimPosition selectionBeginPosition;
 @property(readonly) NSUInteger numberOfSelectedLines;
-@property(readonly) NSUInteger numberOfSelectedColumns;
 @property(readonly) XVIM_VISUAL_MODE selectionMode;
+@property(readonly) BOOL selectionToEOL;
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSURL* documentURL;
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
@@ -86,7 +86,6 @@
 - (void)xvim_makeLowerCase:(XVimMotion*)motion;
 - (void)xvim_makeUpperCase:(XVimMotion*)motion;
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count;
-- (void)xvim_joinAtLineNumber:(NSUInteger)line;
 - (void)xvim_join:(NSUInteger)count;
 - (void)xvim_filter:(XVimMotion*)motion;
 - (void)xvim_shiftRight:(XVimMotion*)motion;
