@@ -223,7 +223,7 @@ static const char* KEY_WINDOW = "xvimwindow";
     
     // Manipulate evaluator stack
     while(YES){
-        if( nil == nextEvaluator ){
+        if( nil == nextEvaluator || nextEvaluator == [XVimEvaluator popEvaluator]){
             // current evaluator finished its task
             XVimEvaluator* completeEvaluator = [[[evaluatorStack lastObject] retain] autorelease]; // We have to retain here not to be dealloced in didEndHandler method.
             [evaluatorStack removeLastObject]; // remove current evaluator from the stack
@@ -238,7 +238,10 @@ static const char* KEY_WINDOW = "xvimwindow";
                 // Pass current evaluator to the evaluator below the current evaluator
                 currentEvaluator = [evaluatorStack lastObject];
                 [currentEvaluator becameHandler];
-                 SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
+                if (nextEvaluator) {
+                    break;
+                }
+                SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
                 [currentEvaluator resetCompletionHandler];
             }
