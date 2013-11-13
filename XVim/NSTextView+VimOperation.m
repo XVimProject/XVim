@@ -675,16 +675,10 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
     if (self.insertionPoint == 0 && [[self xvim_string] length] == 0) {
         return ;
     }
+    NSUInteger newPos = NSNotFound;
     
     [self xvim_registerInsertionPointForUndo];
     
-    NSUInteger insertionPointAfterDelete = self.insertionPoint;
-    BOOL keepInsertionPoint = NO;
-    if (self.selectionMode != XVIM_VISUAL_NONE) {
-        insertionPointAfterDelete = MIN(self.insertionPoint, self.selectionBegin);
-        keepInsertionPoint = YES;
-    }
-
     motion.info->deleteLastLine = NO;
     if (self.selectionMode == XVIM_VISUAL_NONE) {
         NSRange r;
@@ -726,7 +720,11 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
         }
         [self _xvim_yankRange:r withType:motion.type];
         [self insertText:@"" replacementRange:r];
+        if (motion.type == LINEWISE) {
+            newPos = [self.textStorage firstNonblankInLine:self.insertionPoint];
+        }
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
+        BOOL toFirstNonBlank = (self.selectionMode == XVIM_VISUAL_LINE);
         NSRange range = [self _xvim_selectedRange];
 
         // Currently not supportin deleting EOF with selection mode.
@@ -734,18 +732,24 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
 
         [self _xvim_yankRange:range withType:DEFAULT_MOTION_TYPE];
         [self insertText:@"" replacementRange:range];
+        if (toFirstNonBlank) {
+            newPos = [self.textStorage firstNonblankInLine:range.location];
+        } else {
+            newPos = range.location;
+        }
     } else {
         XVimSelection sel = [self _xvim_selectedBlock];
         [self _xvim_yankSelection:sel];
         [self _xvim_killSelection:sel];
+
+        newPos = [self.textStorage positionAtLineNumber:sel.top column:sel.left];
     }
 
     [self.xvimDelegate textView:self didDelete:self.lastYankedText  withType:self.lastYankedType];
-
-    if(keepInsertionPoint){
-        [self xvim_moveCursor:insertionPointAfterDelete preserveColumn:NO];
-    }
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    if (newPos != NSNotFound) {
+        [self xvim_moveCursor:newPos preserveColumn:NO];
+    }
 }
 
 - (void)xvim_change:(XVimMotion*)motion{
@@ -781,10 +785,7 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
 
 - (void)xvim_yank:(XVimMotion*)motion{
     NSAssert( !(self.selectionMode == XVIM_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
-    NSUInteger insertionPointAfterYank = self.insertionPoint;
-    if (self.selectionMode != XVIM_VISUAL_NONE) {
-        insertionPointAfterYank = MIN(self.insertionPoint, self.selectionBegin);
-    }
+    NSUInteger newPos = NSNotFound;
 
     if( self.selectionMode == XVIM_VISUAL_NONE ){
         NSRange r;
@@ -821,14 +822,21 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
         }
         [self _xvim_yankRange:r withType:motion.type];
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
-        [self _xvim_yankRange:[self _xvim_selectedRange] withType:DEFAULT_MOTION_TYPE];
+        NSRange range = [self _xvim_selectedRange];
+
+        newPos = range.location;
+        [self _xvim_yankRange:range withType:DEFAULT_MOTION_TYPE];
     } else {
-        [self _xvim_yankSelection:[self _xvim_selectedBlock]];
+        XVimSelection sel = [self _xvim_selectedBlock];
+
+        newPos = [self.textStorage positionAtLineNumber:sel.top column:sel.left];
+        [self _xvim_yankSelection:sel];
     }
     
     [self.xvimDelegate textView:self didYank:self.lastYankedText  withType:self.lastYankedType];
-    
-    [self xvim_moveCursor:insertionPointAfterYank preserveColumn:NO];
+    if (newPos != NSNotFound) {
+        [self xvim_moveCursor:newPos preserveColumn:NO];
+    }
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
