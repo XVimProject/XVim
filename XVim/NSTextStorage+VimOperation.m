@@ -1941,7 +1941,7 @@ static NSCharacterSet *get_search_set(unichar initialChar, NSCharacterSet *wsSet
 	}
 	else
 	{
-		NSMutableCharacterSet *charSet = [[wordSet invertedSet] mutableCopy];
+		NSMutableCharacterSet *charSet = [[[wordSet invertedSet] mutableCopy] autorelease];
 		[charSet removeCharactersInString:@" \t"];
 		searchSet = charSet;
 	}

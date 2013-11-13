@@ -2399,6 +2399,7 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
 	}
 	
     [self insertText:substring replacementRange:range];
+    [substring release];
 }
 
 - (void)xvim_registerPositionForUndo:(NSUInteger)pos{
