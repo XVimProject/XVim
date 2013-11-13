@@ -159,7 +159,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)A{
-    [self.window errorMessage:@"{Visual}A not implemented yet" ringBell:NO];
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        return self;
+    }
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_APPEND] autorelease];
     return self;
 }
 
@@ -183,16 +186,18 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)c{
     if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
-        [self.window errorMessage:@"{Visual Block}c not implemented yet" ringBell:NO];
-        return self;
+        return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL] autorelease];
     }
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 }
 
 - (XVimEvaluator *)C{
-    [self.window errorMessage:@"{Visual}C not implemented yet" ringBell:NO];
-    return self;
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        return self;
+    }
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL_EOL] autorelease];
+    return [self I];
 }
 
 - (XVimEvaluator*)C_b{
@@ -240,8 +245,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)I{
-    [self.window errorMessage:@"{Visual}I not implemented yet" ringBell:NO];
-    return self;
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        return self;
+    }
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_DEFAULT] autorelease];
 }
 
 - (XVimEvaluator*)J{

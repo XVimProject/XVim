@@ -32,6 +32,9 @@
     BOOL _insertedEventsAbort;
     NSMutableArray* _insertedEvents;
     BOOL _oneCharMode;
+    NSUInteger _blockEditColumn;
+    XVimRange _blockLines;
+    XVimInsertionPoint _mode;
 }
 
 @synthesize startRange = _startRange;
@@ -43,12 +46,15 @@
 
 
 - (id)initWithWindow:(XVimWindow *)window{
-    return [self initWithWindow:window oneCharMode:NO];
+    return [self initWithWindow:window oneCharMode:NO mode:XVIM_INSERT_DEFAULT];
 }
 
-- (id)initWithWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode{
+- (id)initWithWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode mode:(XVimInsertionPoint)mode{
     self = [super initWithWindow:window];
     if (self) {
+        _mode = mode;
+        _blockEditColumn = NSNotFound;
+        _blockLines = XVimMakeRange(NSNotFound, NSNotFound);
         _lastInsertedText = [@"" retain];
         _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
@@ -86,8 +92,8 @@
 
 - (void)becameHandler{
     [super becameHandler];
+    [self.sourceView xvim_insert:_mode blockColumn:&_blockEditColumn blockLines:&_blockLines];
     self.startRange = [[self sourceView] selectedRange];
-    [self.sourceView xvim_insert];
 }
 
 - (float)insertionPointHeightRatio{
@@ -115,7 +121,7 @@
 	return [keymapProvider keymapForMode:XVIM_MODE_INSERT];
 }
 
-- (NSString*)getInsertedText{
+- (NSString*)insertedText{
     NSTextView* view = [self sourceView];
     NSUInteger startLoc = self.startRange.location;
     NSUInteger endLoc = [view selectedRange].location;
@@ -145,7 +151,7 @@
 
 /*
 - (void)recordTextIntoRegister:(XVimRegister*)xregister{
-    NSString *text = [self getInsertedText];
+    NSString *text = [self insertedText];
     if (text.length > 0){
         [xregister appendText:text];
     }
@@ -160,7 +166,7 @@
         self.movementKeyPressed = YES;
         
         // Store off any needed text
-        self.lastInsertedText = [self getInsertedText];
+        self.lastInsertedText = [self insertedText];
         //[self recordTextIntoRegister:[XVim instance].recordingRegister];
     }
     
@@ -171,14 +177,19 @@
 - (void)didEndHandler{
     [super didEndHandler];
 	NSTextView *sourceView = [self sourceView];
-	
+
     if( !_insertedEventsAbort && !_oneCharMode ){
-        NSString *text = [self getInsertedText];
+        NSString *text = [self insertedText];
         for( int i = 0 ; i < [self numericArg]-1; i++ ){
             [sourceView insertText:text];
         }
+
+        if (_blockEditColumn != NSNotFound) {
+            [sourceView xvim_blockInsertFixupWithText:text mode:_mode count:self.numericArg
+                                               column:_blockEditColumn lines:_blockLines];
+        }
     }
-    
+
     // Store off any needed text
     XVim *xvim = [XVim instance];
     xvim.lastVisualMode = self.sourceView.selectionMode;

@@ -76,14 +76,11 @@
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a{
-    [[self sourceView] xvim_append];
-	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_APPEND] autorelease];
 }
 
 - (XVimEvaluator*)A{
-    NSTextView* view = [self sourceView];
-    [view xvim_appendAtEndOfLine];
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_APPEND_EOL] autorelease];
 }
 
 - (XVimEvaluator*)C_a{
@@ -188,8 +185,7 @@
 }
 
 - (XVimEvaluator*)I{
-    [[self sourceView] xvim_insertBeforeFirstNonblank];
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BEFORE_FIRST_NONBLANK] autorelease];
 }
 
 - (XVimEvaluator*)J{
@@ -276,7 +272,7 @@
 
 - (XVimEvaluator*)r{
 	[self.argumentString appendString:@"r"];
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:YES] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:YES mode:XVIM_INSERT_DEFAULT] autorelease];
 }
 
 - (XVimEvaluator*)s{

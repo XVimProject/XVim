@@ -100,12 +100,11 @@
 - (void)xvim_insertNewlineAboveCurrentLineWithIndent;
 - (void)xvim_insertNewlineAboveAndInsertWithIndent;
 - (void)xvim_insertNewlineBelowAndInsertWithIndent;
-- (void)xvim_append;
-- (void)xvim_insert;
-- (void)xvim_appendAtEndOfLine;
-- (void)xvim_insertBeforeFirstNonblank;
+- (void)xvim_insert:(XVimInsertionPoint)mode blockColumn:(NSUInteger *)column blockLines:(XVimRange *)lines;
 - (void)xvim_overwriteCharacter:(unichar)c;
 - (BOOL)xvim_incrementNumber:(int64_t)offset;
+- (void)xvim_blockInsertFixupWithText:(NSString *)text mode:(XVimInsertionPoint)mode
+                                count:(NSUInteger)count column:(NSUInteger)column lines:(XVimRange)lines;
 
 /**
  * Sort specified lines.
