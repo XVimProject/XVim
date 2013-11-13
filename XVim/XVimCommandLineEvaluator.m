@@ -67,6 +67,7 @@
 
 - (void)didEndHandler{
     [self relinquishFocusToWindow];
+    [super didEndHandler];
 }
 
 - (void)appendString:(NSString*)str{

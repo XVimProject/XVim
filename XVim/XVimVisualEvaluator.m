@@ -144,9 +144,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
     
-    if( [XVimEvaluator invalidEvaluator] == nextEvaluator ){
+    if ([XVimEvaluator invalidEvaluator] == nextEvaluator) {
         return self;
-    }else{
+    } else {
         return nextEvaluator;
     }
 }
@@ -172,15 +172,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 
 - (XVimEvaluator*)onComplete_ai:(XVimTextObjectEvaluator*)childEvaluator{
+    XVimMotion *m = childEvaluator.motion;
+
     self.onChildCompleteHandler = nil;
-    if( childEvaluator.textobject == MOTION_NONE ){
-        return self;
-    }else{
-        MOTION_OPTION opt = ((XVimTextObjectEvaluator*)childEvaluator).inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
-        opt |= ((XVimTextObjectEvaluator*)childEvaluator).bigword ? BIGWORD : MOTION_OPTION_NONE;
-        XVimMotion* m = XVIM_MAKE_MOTION(((XVimTextObjectEvaluator*)childEvaluator).textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
+    if (m.motion != MOTION_NONE) {
         return [self _motionFixed:m];
     }
+    return self;
 }
 
 - (XVimEvaluator*)c{
@@ -229,7 +227,16 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)g{
     [self.argumentString appendString:@"g"];
+    self.onChildCompleteHandler = @selector(g_completed:);
     return [[[XVimGVisualEvaluator alloc] initWithWindow:self.window] autorelease];
+}
+
+- (XVimEvaluator *)g_completed:(XVimEvaluator *)childEvaluator{
+    if (childEvaluator == [XVimEvaluator invalidEvaluator]) {
+        [self.argumentString setString:@""];
+        return self;
+    }
+    return childEvaluator;
 }
 
 - (XVimEvaluator*)I{
@@ -550,6 +557,7 @@ TODO: This block is from commit 42498.
         [[self sourceView] xvim_move:motion];
         [self resetNumericArg];
     }
+    [self.argumentString setString:@""];
     return self;
 }
 

@@ -37,10 +37,6 @@
     [[[XVim instance] registerManager] startRecording:self.reg];
 }
 
-- (void)didEndHandler{
-    
-}
-
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     if( keyStroke.modifier == 0 && keyStroke.character == 'q' ){
         [[[XVim instance] registerManager] stopRecording:NO];

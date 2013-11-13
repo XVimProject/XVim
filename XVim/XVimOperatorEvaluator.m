@@ -100,11 +100,8 @@
 }
 
 - (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{
-    if( [childEvaluator isKindOfClass:[XVimTextObjectEvaluator class]] ){
-        MOTION_OPTION opt = ((XVimTextObjectEvaluator*)childEvaluator).inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
-        opt |= ((XVimTextObjectEvaluator*)childEvaluator).bigword ? BIGWORD : MOTION_OPTION_NONE;
-        XVimMotion* m = XVIM_MAKE_MOTION(((XVimTextObjectEvaluator*)childEvaluator).textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
-        return [self _motionFixed:m];
+    if ([childEvaluator isKindOfClass:[XVimTextObjectEvaluator class]]) {
+        return [self _motionFixed:[(XVimTextObjectEvaluator *)childEvaluator motion]];
     }
     return nil;
 }

@@ -598,7 +598,7 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
             }
             [self xvim_moveCursor:r.end preserveColumn:NO];
         }
-    }else{
+    } else {
         switch( motion.motion ){
             case MOTION_LINE_BACKWARD:
             case MOTION_LINE_FORWARD:
@@ -621,6 +621,7 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
                 break;
         }
     }
+    [self setNeedsDisplay:YES];
     [self xvim_syncState];
 }
 
