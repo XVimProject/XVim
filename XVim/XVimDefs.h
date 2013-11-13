@@ -9,6 +9,16 @@
 #ifndef XVim_XVimDefs_h
 #define XVim_XVimDefs_h
 
+#import <Foundation/Foundation.h>
+
+#ifndef NS_REQUIRES_SUPER
+#if __has_attribute(objc_requires_super)
+#define NS_REQUIRES_SUPER __attribute__((objc_requires_super))
+#else
+#define NS_REQUIRES_SUPER
+#endif
+#endif
+
 typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
     XVIM_INSERT_DEFAULT,
     XVIM_INSERT_APPEND,
