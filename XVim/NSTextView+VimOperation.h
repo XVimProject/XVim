@@ -87,7 +87,7 @@
 - (void)xvim_makeLowerCase:(XVimMotion*)motion;
 - (void)xvim_makeUpperCase:(XVimMotion*)motion;
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count;
-- (void)xvim_join:(NSUInteger)count;
+- (void)xvim_join:(NSUInteger)count addSpace:(BOOL)addSpace;
 - (void)xvim_filter:(XVimMotion*)motion;
 - (void)xvim_shiftRight:(XVimMotion*)motion;
 - (void)xvim_shiftLeft:(XVimMotion*)motion;

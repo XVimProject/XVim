@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+#import "XVimJoinEvaluator.h"
 #import "XVimGActionEvaluator.h"
 #import "XVimTildeEvaluator.h"
 #import "XVimLowercaseEvaluator.h"
@@ -60,6 +61,11 @@
         }
     }
 	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+}
+
+- (XVimEvaluator*)J{
+    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)u{
