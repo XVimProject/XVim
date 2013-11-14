@@ -79,6 +79,61 @@
 
 #pragma mark internal helpers
 
+- (void)_xvim_insertSpaces:(NSUInteger)count replacementRange:(NSRange)replacementRange
+{
+    if (count || replacementRange.length) {
+        [self insertText:[NSString stringMadeOfSpaces:count] replacementRange:replacementRange];
+    }
+}
+
+- (void)_xvim_removeSpacesAtLine:(NSUInteger)line column:(NSUInteger)column count:(NSUInteger)count
+{
+    NSTextStorage *ts = self.textStorage;
+    NSUInteger tabWidth = ts.tabWidth;
+    NSUInteger pos = [ts positionAtLineNumber:line column:column];
+    NSUInteger end = pos;
+    NSUInteger width = 0;
+    NSString *s = self.xvim_string;
+
+    if ([ts isEOL:pos]) {
+        return;
+    }
+
+    if ([s characterAtIndex:pos] == '\t') {
+        NSUInteger col = [ts columnNumber:pos];
+
+        if (col < column) {
+            [self _xvim_insertSpaces:tabWidth - (col % tabWidth) replacementRange:NSMakeRange(pos, 1)];
+            pos += column - col;
+        }
+    }
+
+    while (width < count) {
+        unichar c = [s characterAtIndex:end];
+
+        if (c == ' ') {
+            end++;
+            width++;
+        } else if (c == '\t') {
+            NSUInteger col = column + width;
+            NSUInteger tw  = tabWidth - (col % tabWidth);
+
+            if (width + tw > count) {
+                [self _xvim_insertSpaces:tw replacementRange:NSMakeRange(end, 1)];
+                end  += count - width;
+                width = count;
+            } else {
+                end   += tw;
+                width += tw;
+            }
+        } else {
+            break;
+        }
+    }
+
+    [self insertText:@"" replacementRange:NSMakeRange(pos, end - pos)];
+}
+
 - (XVimRange)_xvim_selectedLines{
     if (self.selectionMode == XVIM_VISUAL_NONE) { // its not in selecting mode
         return (XVimRange){ NSNotFound, NSNotFound };
@@ -211,13 +266,6 @@
     TRACE_LOG(@"YANKED STRING : %@", s);
 }
 
-NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
-{
-    while (count-- > 0) {
-        [s appendString:@" "];
-    }
-}
-
 - (void)_xvim_yankSelection:(XVimSelection)sel
 {
     NSTextStorage *ts = self.textStorage;
@@ -243,7 +291,7 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
                     /* if rpos points to the same tab, truncate it to the right also */
                     count = sel.right - sel.left + 1;
                 }
-                _addNSpaces(ybuf, count);
+                [ybuf appendString:[NSString stringMadeOfSpaces:count]];
                 lpos++;
             }
         }
@@ -280,7 +328,7 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
                 }
 
                 if (mustPad) {
-                    _addNSpaces(ybuf, sel.right - rcol + 1);
+                    [ybuf appendString:[NSString stringMadeOfSpaces:sel.right - rcol + 1]];
                 }
             }
         }
@@ -908,11 +956,9 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
             NSAssert( max != NSNotFound , @"Should not be NSNotFound");
             if( column > max ){
                 // If the line does not have enough column pad it with spaces
-                NSUInteger spaces = column - max;
                 NSUInteger end = [self.textStorage endOfLine:head];
-                for( NSUInteger i = 0 ; i < spaces; i++){
-                    [self insertText:@" " replacementRange:NSMakeRange(end,0)];
-                }
+
+                [self _xvim_insertSpaces:column - max replacementRange:NSMakeRange(end, 0)];
             }
             for(NSUInteger i = 0; i < count ; i++ ){
                 [self xvim_insertText:line line:targetLine column:column];
@@ -1366,18 +1412,13 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
             if (mode != XVIM_INSERT_APPEND) {
                 continue;
             }
-            for (NSUInteger col = [ts columnNumber:pos]; col < column; col++, pos++) {
-                [self insertText:@" " replacementRange:NSMakeRange(pos, 0)];
-            }
+            [self _xvim_insertSpaces:column - [ts columnNumber:pos] replacementRange:NSMakeRange(pos, 0)];
         }
         if (tabWidth && [self.xvim_string characterAtIndex:pos] == '\t') {
             NSUInteger col = [ts columnNumber:pos];
 
             if (col < column) {
-                [self insertText:@" " replacementRange:NSMakeRange(pos, 1)];
-                for (NSUInteger i = col % tabWidth; ++i < tabWidth; ) {
-                    [self insertText:@" " replacementRange:NSMakeRange(pos, 0)];
-                }
+                [self _xvim_insertSpaces:tabWidth - (col % tabWidth) replacementRange:NSMakeRange(pos, 1)];
                 pos += column - col;
             }
         }
