@@ -716,7 +716,8 @@
     [self xvim_syncState];
 }
 
-- (void)xvim_delete:(XVimMotion*)motion{
+- (void)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank
+{
     NSAssert( !(self.selectionMode == XVIM_VISUAL_NONE && motion == nil),
              @"motion must be specified if current selection mode is not visual");
     if (self.insertionPoint == 0 && [[self xvim_string] length] == 0) {
@@ -765,7 +766,9 @@
                 r.length++;
             }
         }
-        [self _xvim_yankRange:r withType:motion.type];
+        if (yank) {
+            [self _xvim_yankRange:r withType:motion.type];
+        }
         [self insertText:@"" replacementRange:r];
         if (motion.type == LINEWISE) {
             newPos = [self.textStorage firstNonblankInLine:self.insertionPoint];
@@ -777,7 +780,9 @@
         // Currently not supportin deleting EOF with selection mode.
         // This is because of the fact that NSTextView does not allow select EOF
 
-        [self _xvim_yankRange:range withType:DEFAULT_MOTION_TYPE];
+        if (yank) {
+            [self _xvim_yankRange:range withType:DEFAULT_MOTION_TYPE];
+        }
         [self insertText:@"" replacementRange:range];
         if (toFirstNonBlank) {
             newPos = [self.textStorage firstNonblankInLine:range.location];
@@ -786,7 +791,9 @@
         }
     } else {
         XVimSelection sel = [self _xvim_selectedBlock];
-        [self _xvim_yankSelection:sel];
+        if (yank) {
+            [self _xvim_yankSelection:sel];
+        }
         [self _xvim_killSelection:sel];
 
         newPos = [self.textStorage positionAtLineNumber:sel.top column:sel.left];
@@ -817,7 +824,7 @@
         motion.option |= MOTION_OPTION_CHANGE_WORD;
     }
     self.cursorMode = CURSOR_MODE_INSERT;
-    [self xvim_delete:motion];
+    [self xvim_delete:motion andYank:YES];
     if( motion.info->deleteLastLine){
         [self xvim_insertNewlineAboveLine:[self.textStorage lineNumber:self.insertionPoint]];
     }
@@ -894,7 +901,7 @@
     if( self.selectionMode != XVIM_VISUAL_NONE ){
         // FIXME: Make them not to change text from register...
         text = [NSString stringWithString:text]; // copy string because the text may be changed with folloing delete if it is from the same register...
-        [self xvim_delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1)];
+        [self xvim_delete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) andYank:YES];
         after = NO;
     }
     

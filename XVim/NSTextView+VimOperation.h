@@ -79,7 +79,7 @@
 - (void)xvim_moveToPosition:(XVimPosition)pos;
 - (void)xvim_move:(XVimMotion*)motion;
 - (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;
-- (void)xvim_delete:(XVimMotion*)motion;
+- (void)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank;
 - (void)xvim_change:(XVimMotion*)motion;
 - (void)xvim_yank:(XVimMotion*)motion;
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
