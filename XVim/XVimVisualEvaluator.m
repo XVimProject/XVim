@@ -190,7 +190,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator *)C{
     if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        return self;
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+        return [self c];
     }
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL_EOL] autorelease];
 }
@@ -215,6 +216,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)D{
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+        return [self d];
+    }
+
     // FIXME: doesn't work ask expected in any visual mode
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
@@ -301,7 +307,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator *)S{
-    [self.window errorMessage:@"{Visual}r{char} not implemented yet" ringBell:NO];
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    }
+    [self.window errorMessage:@"{Visual}S not implemented yet" ringBell:NO];
     return self;
 }
 
@@ -352,16 +361,22 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)X{
-    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
-        return [self d];
-    } else {
-        return [self D];
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
     }
+    return [self d];
 }
 
 - (XVimEvaluator*)y{
     [[self sourceView] xvim_yank:nil];
     return nil;
+}
+
+- (XVimEvaluator*)Y{
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    }
+    return [self y];
 }
 
 - (XVimEvaluator*)DQUOTE{
@@ -383,12 +398,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     }
     _waitForArgument = NO;
     return self;
-}
-
-- (XVimEvaluator*)Y{
-    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_LINE];
-    [[self sourceView] xvim_yank:nil];
-    return nil;
 }
 
 /*
