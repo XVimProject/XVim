@@ -465,19 +465,11 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)GREATERTHAN{
-    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
-        [self.window errorMessage:@"{Visual Block}> not implemented yet" ringBell:NO];
-        return self;
-    }
     XVimShiftEvaluator* eval = [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:NO] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)LESSTHAN{
-    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
-        [self.window errorMessage:@"{Visual Block}< not implemented yet" ringBell:NO];
-        return self;
-    }
     XVimShiftEvaluator* eval = [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:YES] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }

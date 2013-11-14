@@ -185,8 +185,9 @@
         }
 
         if (_blockEditColumn != NSNotFound) {
+            XVimRange range = XVimMakeRange(_blockLines.begin + 1, _blockLines.end);
             [sourceView xvim_blockInsertFixupWithText:text mode:_mode count:self.numericArg
-                                               column:_blockEditColumn lines:_blockLines];
+                                               column:_blockEditColumn lines:range];
         }
     }
 
