@@ -15,9 +15,9 @@
  * See IDEKit.h to refer original IDEEditorArea class.
  */
 @interface IDEEditorArea (XVim)
-- (XVimWindow*)xvimWindow;
-- (XVimCommandLine*)commandLine;
-- (NSView*)textViewArea;
-- (void)setupCommandLine;
-- (void)teardownCommandLine;
+@property (readonly, strong) XVimWindow *xvimWindow;
+
+- (void)setupXVim;
+- (void)teardownXVim;
+
 @end

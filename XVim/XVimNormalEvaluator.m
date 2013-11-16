@@ -147,9 +147,9 @@
     // process
     XVimWindow* window = self.window;
     NSRange range = [[window sourceView] selectedRange];
-    NSUInteger numberOfLines = [window.sourceView.textStorage numberOfLines];
+    NSUInteger numberOfLines = [window.sourceView.textStorage xvim_numberOfLines];
     long long lineNumber = [window.sourceView currentLineNumber];
-    NSUInteger columnNumber = [window.sourceView.textStorage columnNumber:range.location];
+    NSUInteger columnNumber = [window.sourceView.textStorage xvim_columnOfIndex:range.location];
     NSURL* documentURL = [[window sourceView] documentURL];
 	if( [documentURL isFileURL] ) {
 		NSString* filename = [documentURL path];
@@ -486,6 +486,7 @@
             continue;
         }
         nonNumFound = YES;
+        TRACE_LOG("Feeding stroke: %@", stroke);
         [self.window handleKeyStroke:stroke onStack:stack];
     }
     [[XVim instance] endRepeat];

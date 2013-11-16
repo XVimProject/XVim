@@ -45,7 +45,7 @@
     XVimInsertionPoint mode = XVIM_INSERT_DEFAULT;
 
 	if ( mark.line != NSNotFound) {
-        NSUInteger newPos = [self.sourceView.textStorage positionAtLineNumber:mark.line column:mark.column];
+        NSUInteger newPos = [self.sourceView.textStorage xvim_indexOfLineNumber:mark.line column:mark.column];
         if( NSNotFound != newPos ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
             m.position = newPos;

@@ -65,6 +65,11 @@
 	[super becameHandler];
 }
 
+- (void)cancelHandler {
+    [self relinquishFocusToWindow];
+    [super cancelHandler];
+}
+
 - (void)didEndHandler{
     [self relinquishFocusToWindow];
     [super didEndHandler];

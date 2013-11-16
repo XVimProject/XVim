@@ -13,10 +13,9 @@
 BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
 BOOL isOctDigit(unichar ch) { return ch >= '0' && ch <= '7'; }
 BOOL isHexDigit(unichar ch) { return isDigit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'); }
-BOOL isWhitespace(unichar ch) { return ch == ' ' || ch == '\t'; }
-BOOL isNewline(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
-BOOL isNonAscii(unichar ch) { return ch > 128; } // is this not ch >= 128 ? (JugglerShu)
-BOOL isAlpha(unichar ch) { 
+BOOL isWhitespace(unichar ch) { return [[NSCharacterSet whitespaceCharacterSet] characterIsMember:ch]; }
+BOOL isNewline(unichar ch) { return [[NSCharacterSet newlineCharacterSet] characterIsMember:ch]; }
+BOOL isAlpha(unichar ch) {
     return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_';
 }
 BOOL isDelimeter(unichar ch) {
@@ -65,20 +64,8 @@ static NSString *precomputed[9] = {
     return isDelimeter([self characterAtIndex:index]);
 }
 
-- (BOOL) isWhitespace:(NSUInteger)index{
-    return isWhitespace([self characterAtIndex:index]);
-}
-
-- (BOOL) isNonAscii:(NSUInteger)index{
-    return isNonAscii([self characterAtIndex:index]);
-}
-
 - (BOOL) isNewline:(NSUInteger)index{
     return isNewline([self characterAtIndex:index]); }
-
-- (BOOL) isNonblank:(NSUInteger)index{
-    return isNonblank([self characterAtIndex:index]);
-}
 
 - (BOOL) isKeyword:(NSUInteger)index{
     return isKeyword([self characterAtIndex:index]);

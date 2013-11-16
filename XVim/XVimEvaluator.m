@@ -30,9 +30,11 @@ static XVimEvaluator *_popEvaluator = nil;
 
 + (void)initialize
 {
-    _invalidEvaluator = [[XVimEvaluator alloc] init];
-    _noOperationEvaluator = [[XVimEvaluator alloc] init];
-    _popEvaluator = [[XVimEvaluator alloc] init];
+    if (self == [XVimEvaluator class]) {
+        _invalidEvaluator = [[XVimEvaluator alloc] init];
+        _noOperationEvaluator = [[XVimEvaluator alloc] init];
+        _popEvaluator = [[XVimEvaluator alloc] init];
+    }
 }
 
 + (XVimEvaluator*)invalidEvaluator{
@@ -74,7 +76,8 @@ static XVimEvaluator *_popEvaluator = nil;
     [super dealloc];
 }
 
-- (NSTextView*)sourceView{
+- (NSTextView*)sourceView
+{
     return self.window.sourceView;
 }
 
@@ -102,6 +105,10 @@ static XVimEvaluator *_popEvaluator = nil;
    
 - (void)becameHandler{
     self.sourceView.xvimDelegate = self;
+}
+
+- (void)cancelHandler{
+    self.sourceView.xvimDelegate = nil;
 }
 
 - (void)didEndHandler{

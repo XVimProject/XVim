@@ -62,16 +62,16 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
             }else{
                 NSUInteger start = [window.sourceView selectedRange].location;
                 NSUInteger end = [window.sourceView selectedRange].location + [window.sourceView selectedRange].length - 1; 
-                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
-                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:start], [window.sourceView.textStorage xvim_columnOfIndex:start]);
+                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:end], [window.sourceView.textStorage xvim_columnOfIndex:end]);
             }
         }else{
             // Treat it as block selection
             _visual_mode = XVIM_VISUAL_BLOCK;
             NSUInteger start = [[[window.sourceView selectedRanges] objectAtIndex:0] rangeValue].location;
             NSUInteger end = [[[window.sourceView selectedRanges] lastObject] rangeValue].location + [[[window.sourceView selectedRanges] lastObject] rangeValue].length - 1; 
-            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
-            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:start], [window.sourceView.textStorage xvim_columnOfIndex:start]);
+            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:end], [window.sourceView.textStorage xvim_columnOfIndex:end]);
         }
 	}
     return self;
@@ -124,12 +124,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (void)didEndHandler{
-    if( !_waitForArgument ){
-        [super didEndHandler];
+    if (!_waitForArgument) {
         [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
         // TODO:
         //[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     }
+    [super didEndHandler];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
