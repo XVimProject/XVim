@@ -407,84 +407,52 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
  * Find match pair character in the line and find the corresponding pair.
  * Returns NSNotFound if not found.
  **/
-- (NSUInteger)positionOfMatchedPair:(NSUInteger)pos{
+- (NSUInteger)positionOfMatchedPair:(NSUInteger)pos
+{
+    NSString *s = self.xvim_string;
+
     // find matching bracketing character and go to it
     // as long as the nesting level matches up
-    NSString* s = self.string;
-    NSRange at =  NSMakeRange(pos,0);
-    if (pos >= s.length-1) {
-        return NSNotFound;
-    }
-    NSUInteger eol = [self xvim_endOfLine:pos];
-    at.length = eol - at.location;
 
-    NSString* search_string = [s substringWithRange:at];
-    NSString* start_with;
-    NSString* look_for;
+    xvim_string_buffer_t sb;
+    xvim_sb_init(&sb, s, pos, NSMakeRange(pos, [self xvim_endOfLine:pos] - pos));
 
-    // note: these two must match up with regards to character order
-    NSString *open_chars = @"{[(";
-    NSString *close_chars = @"}])";
-    NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:[open_chars stringByAppendingString:close_chars]];
+#define pairs "{}[]()"
+    NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:@pairs];
 
-    NSInteger direction = 0;
-    NSUInteger start_location = 0;
-    NSRange search = [search_string rangeOfCharacterFromSet:charset];
-    if (search.location != NSNotFound) {
-        start_location = at.location + search.location;
-        start_with = [search_string substringWithRange:search];
-        NSRange search = [open_chars rangeOfString:start_with];
-        if (search.location == NSNotFound){
-            direction = -1;
-            search = [close_chars rangeOfString:start_with];
-            look_for = [open_chars substringWithRange:search];
-        }else{
-            direction = 1;
-            look_for = [close_chars substringWithRange:search];
-        }
-    }else{
+    unichar start_with_c, look_for_c;
+    BOOL search_forward;
+    NSInteger nest_level = 0;
+
+    if (xvim_sb_find_forward(&sb, charset)) {
+        start_with_c = xvim_sb_peek(&sb);
+        xvim_sb_init(&sb, s, xvim_sb_index(&sb), NSMakeRange(0, s.length));
+
+        NSUInteger pos = (NSUInteger)(strchr(pairs, start_with_c) - pairs);
+
+        look_for_c     = (unichar)pairs[pos ^ 1];
+        search_forward = !(pos & 1);
+    } else {
         // src is not an open or close char
         // vim does not produce an error msg for this so we won't either i guess
         return NSNotFound;
     }
+#undef pairs
 
-    unichar start_with_c = [start_with characterAtIndex:0];
-    unichar look_for_c = [look_for characterAtIndex:0];
-    NSInteger nest_level = 0;
+    do {
+        unichar c = xvim_sb_peek(&sb);
 
-    search.location = NSNotFound;
-    search.length = 0;
-
-    if (direction > 0) {
-        for(NSUInteger x=start_location; x < s.length; x++) {
-            if ([s characterAtIndex:x] == look_for_c) {
-                nest_level--;
-                if (nest_level == 0) { // found match at proper level
-                    search.location = x;
-                    break;
-                }
-            } else if ([s characterAtIndex:x] == start_with_c) {
-                nest_level++;
+        if (c == look_for_c) {
+            if (--nest_level == 0) {
+                // found match at proper level
+                return xvim_sb_index(&sb);
             }
+        } else {
+            nest_level += (c == start_with_c);
         }
-    } else {
-        for(NSUInteger x=start_location; ; x--) {
-            if ([s characterAtIndex:x] == look_for_c) {
-                nest_level--;
-                if (nest_level == 0) { // found match at proper level
-                    search.location = x;
-                    break;
-                }
-            } else if ([s characterAtIndex:x] == start_with_c) {
-                nest_level++;
-            }
-            if( 0 == x ){
-                break;
-            }
-        }
-    }
+    } while (search_forward ? xvim_sb_next(&sb) : xvim_sb_prev(&sb));
 
-    return search.location;
+    return NSNotFound;
 }
 
 #pragma mark Vim operation related methods
