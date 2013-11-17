@@ -22,6 +22,7 @@
 // 
 
 #import "XVim.h"
+#import "XVimBuffer.h"
 #import "Logger.h"
 #import "XVimSearch.h"
 #import "XVimExCommand.h"
@@ -40,8 +41,8 @@
 #import "IDEKit.h"
 #import "objc/runtime.h"
 
-NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
-NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
+NSString * const XVimBufferChangedNotification = @"XVimBufferChangedNotification";
+NSString * const XVimBufferKey = @"XVimBufferKey";
 
 @interface XVim() {
 	XVimHistoryHandler *_exCommandHistory;
@@ -233,26 +234,34 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if( [keyPath isEqualToString:@"debug"]) {
         if( [[XVim instance] options].debug ){
-            NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
-            NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
+            NSString *logPath = [@"~/.xvimlog" stringByExpandingTildeInPath];
             [[Logger defaultLogger] setLogFile:logPath];
         }else{
             [[Logger defaultLogger] setLogFile:nil];
         }
     } else if( [keyPath isEqualToString:@"document"] ){
-        NSString *documentPath = [[[object document] fileURL] path];
-        self.document = documentPath;
-        
-        if (documentPath != nil) {
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:documentPath forKey:XVimDocumentPathKey];
-            [[NSNotificationCenter defaultCenter] postNotificationName:XVimDocumentChangedNotification object:nil userInfo:userInfo];
+        NSDocument *document = [object document];
+
+        if (![document respondsToSelector:@selector(textStorage)]) {
+            return;
+        }
+
+        NSTextStorage *textStorage = [[object document] textStorage];
+        XVimBuffer *buffer = document.xvim_buffer;
+
+        self.document = document.fileURL.path;
+        if (!buffer) {
+            buffer = [XVimBuffer makeBufferForDocument:document textStorage:textStorage];
+        }
+        if (buffer) {
+            NSDictionary *userInfo = @{ XVimBufferKey: buffer };
+            [[NSNotificationCenter defaultCenter] postNotificationName:XVimBufferChangedNotification object:nil userInfo:userInfo];
         }
     }
 }
     
 - (void)parseRcFile {
-    NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
-    NSString *keymapPath = [homeDir stringByAppendingString: @"/.xvimrc"]; 
+    NSString *keymapPath = [@"~/.xvimrc" stringByExpandingTildeInPath];
     NSString *keymapData = [[[NSString alloc] initWithContentsOfFile:keymapPath
                                                            encoding:NSUTF8StringEncoding
 															  error:NULL] autorelease];

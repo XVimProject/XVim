@@ -10,6 +10,7 @@
 #import "NSString+VimHelper.h"
 #import "NSTextStorage+VimOperation.h"
 #import "Logger.h"
+#import "XVimUndo.h"
 
 @implementation NSTextStorage (VimOperation)
 

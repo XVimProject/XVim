@@ -241,7 +241,6 @@
  */
 - (NSUInteger)xvim_nextDigitInLine:(NSUInteger)index;
 
-
 @end
 
 typedef NSTextStorage<XVimTextStoring> XVimTextStorage;

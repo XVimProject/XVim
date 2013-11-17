@@ -14,12 +14,13 @@
 #import <objc/runtime.h>
 #import "XVim.h"
 #import "XVimOptions.h"
+#import "XVimBuffer.h"
 
 #define STATUS_LINE_HEIGHT 18 
 
 @interface XVimStatusLine ()
 
-- (void)_documentChangedNotification:(NSNotification *)notification;
+- (void)_bufferChangedNotification:(NSNotification *)notification;
 
 @end
 
@@ -39,7 +40,7 @@
         _status.backgroundColor = [NSColor clearColor];
         [_status setEditable:NO];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:) name:XVimDocumentChangedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_bufferChangedNotification:) name:XVimBufferChangedNotification object:nil];
         
         [self addSubview:_background];
         [self addSubview:_status];
@@ -98,11 +99,13 @@
      
 }
 
-- (void)_documentChangedNotification:(NSNotification *)notification
+- (void)_bufferChangedNotification:(NSNotification *)notification
 {
-    NSString *documentPath = [[notification userInfo] objectForKey:XVimDocumentPathKey];
-    if (documentPath != nil) {
-        [_status setString:documentPath];
+    XVimBuffer *buffer = [notification.userInfo objectForKey:XVimBufferKey];
+    NSString   *path = buffer.document.fileURL.path;
+
+    if (path) {
+        [_status setString:path];
     }
 }
 

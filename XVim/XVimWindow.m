@@ -52,8 +52,8 @@
         [self _resetEvaluatorStack:_evaluatorStack activateNormalHandler:YES];
         _commandLine = [[XVimCommandLine alloc] init];
 
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:)
-                                                     name:XVimDocumentChangedNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_bufferChangedNotification:)
+                                                     name:XVimBufferChangedNotification object:nil];
 	}
     return self;
 }
@@ -116,7 +116,7 @@
     }
 }
 
-- (void)_documentChangedNotification:(NSNotification *)notification
+- (void)_bufferChangedNotification:(NSNotification *)notification
 {
     DEBUG_LOG("Document changed, reset evaluator stack");
     [self.currentEvaluator cancelHandler];

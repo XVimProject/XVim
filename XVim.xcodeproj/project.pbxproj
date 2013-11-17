@@ -10,6 +10,8 @@
 		6E2B332C1836E42F00EFE4E2 /* XVimBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B332B1836E42F00EFE4E2 /* XVimBuffer.m */; };
 		6E2B332D1836E42F00EFE4E2 /* XVimBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B332B1836E42F00EFE4E2 /* XVimBuffer.m */; };
 		6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */; };
+		6E6865D618390702008D5FBB /* XVimUndo.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E6865D518390702008D5FBB /* XVimUndo.m */; };
+		6E6865D718390702008D5FBB /* XVimUndo.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E6865D518390702008D5FBB /* XVimUndo.m */; };
 		A2126B7516FB30B0000BE21C /* XVimMark.m in Sources */ = {isa = PBXBuildFile; fileRef = A2126B7416FB30B0000BE21C /* XVimMark.m */; };
 		A2126B7816FB4806000BE21C /* XVimMarks.m in Sources */ = {isa = PBXBuildFile; fileRef = A2126B7716FB4806000BE21C /* XVimMarks.m */; };
 		A216F3A1156560FE00AD2529 /* IDEEditorArea+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */; };
@@ -209,6 +211,8 @@
 		6E2B332E1836E47500EFE4E2 /* XVimTextStoring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTextStoring.h; path = XVim/XVimTextStoring.h; sourceTree = SOURCE_ROOT; };
 		6E2B33321836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DVTTextStorage+XVimTextStoring.h"; path = "XVim/DVTTextStorage+XVimTextStoring.h"; sourceTree = SOURCE_ROOT; };
 		6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "DVTTextStorage+XVimTextStoring.m"; path = "XVim/DVTTextStorage+XVimTextStoring.m"; sourceTree = SOURCE_ROOT; };
+		6E6865D418390702008D5FBB /* XVimUndo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimUndo.h; path = XVim/XVimUndo.h; sourceTree = SOURCE_ROOT; };
+		6E6865D518390702008D5FBB /* XVimUndo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimUndo.m; path = XVim/XVimUndo.m; sourceTree = SOURCE_ROOT; };
 		6EAFF976183777A6003EADAE /* XVimStringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimStringBuffer.h; path = XVim/XVimStringBuffer.h; sourceTree = SOURCE_ROOT; };
 		A2126B7316FB30B0000BE21C /* XVimMark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMark.h; path = XVim/XVimMark.h; sourceTree = SOURCE_ROOT; };
 		A2126B7416FB30B0000BE21C /* XVimMark.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMark.m; path = XVim/XVimMark.m; sourceTree = SOURCE_ROOT; };
@@ -421,6 +425,8 @@
 				6E2B332E1836E47500EFE4E2 /* XVimTextStoring.h */,
 				A26E5F6217A6BCAF0087C9B6 /* NSTextStorage+VimOperation.h */,
 				A26E5F6317A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m */,
+				6E6865D418390702008D5FBB /* XVimUndo.h */,
+				6E6865D518390702008D5FBB /* XVimUndo.m */,
 				6E2B332A1836E42F00EFE4E2 /* XVimBuffer.h */,
 				6E2B332B1836E42F00EFE4E2 /* XVimBuffer.m */,
 			);
@@ -916,6 +922,7 @@
 				A28F425817EEDBC200A3F7AE /* NSEvent+VimHelper.m in Sources */,
 				A28F425917EEDBC200A3F7AE /* XVimMotion.m in Sources */,
 				A28F425A17EEDBC200A3F7AE /* XVimDebug.m in Sources */,
+				6E6865D718390702008D5FBB /* XVimUndo.m in Sources */,
 				A28F425B17EEDBC200A3F7AE /* Utils.m in Sources */,
 				A28F425C17EEDBC200A3F7AE /* XVimMark.m in Sources */,
 				A2F2621C182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */,
@@ -1016,6 +1023,7 @@
 				A250950D1787B3340090F857 /* XVimTester+Register.m in Sources */,
 				A2AFD7341790F300009B442B /* XVimRecordingEvaluator.m in Sources */,
 				A2AFD73717914ACE009B442B /* XVimTester+Recording.m in Sources */,
+				6E6865D618390702008D5FBB /* XVimUndo.m in Sources */,
 				A2771E6B179EF520003B621E /* XVimTester+Issues.m in Sources */,
 				A26E5F6417A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m in Sources */,
 				A2640CC917ACE651003D197D /* NSTextView+VimOperation.m in Sources */,

@@ -23,6 +23,8 @@
 #import "NSTextView+VimOperation.h"
 #import "NSTextStorage+VimOperation.h"
 #import "Logger.h"
+#import "XVimUndo.h"
+#import "XVimBuffer.h"
 
 #define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             self.selectionMode,            \
@@ -70,7 +72,7 @@
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
 - (void)xvim_registerInsertionPointForUndo;
-- (void)xvim_registerPositionForUndo:(NSUInteger)pos;
+- (void)xvim_registerPositionForUndo:(XVimPosition)pos;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -1228,7 +1230,8 @@
     [undoManager beginUndoGrouping];
 
     if (!blockMode) {
-        [self xvim_registerPositionForUndo:[ts xvim_firstNonblankInLineAtIndex:pos allowEOL:YES]];
+        NSUInteger col = [ts xvim_columnOfIndex:[ts xvim_firstNonblankInLineAtIndex:pos allowEOL:YES]];
+        [self xvim_registerPositionForUndo:XVimMakePosition(lines.begin, col)];
     }
 
     if (right) {
@@ -1404,22 +1407,22 @@
     NSUInteger ip = self.insertionPoint;
     NSRange range;
 
-    range = [self xvim_currentNumber];
+    range = [self xvim_numberAtIndex:ip];
     if (range.location == NSNotFound) {
         NSUInteger pos = [self.textStorage xvim_nextDigitInLine:ip];
         if (pos == NSNotFound) {
             return NO;
         }
-        self.insertionPoint = pos;
-        range = [self xvim_currentNumber];
+        range = [self xvim_numberAtIndex:pos];
         if (range.location == NSNotFound) {
             // should not happen
             self.insertionPoint = ip;
             return NO;
         }
+        ip = pos;
     }
 
-    [self xvim_registerPositionForUndo:ip];
+    [self xvim_registerInsertionPointForUndo];
 
     const char *s = [[self.xvim_string substringWithRange:range] UTF8String];
     NSString *repl;
@@ -1872,22 +1875,22 @@
     return [self.textStorage currentWord:self.insertionPoint count:1 option:opt|TEXTOBJECT_INNER];
 }
 
-- (NSRange)xvim_currentNumber{
-    NSUInteger insertPoint = self.insertionPoint;
+- (NSRange)xvim_numberAtIndex:(NSUInteger)index
+{
     NSUInteger n_start, n_end;
     NSUInteger x_start, x_end;
     NSString *s = self.xvim_string;
     unichar c;
     BOOL isOctal = YES;
 
-    n_start = insertPoint;
+    n_start = index;
     while (n_start > 0 && [s isDigit:n_start - 1]) {
         if (![s isOctDigit:n_start]) {
             isOctal = NO;
         }
         n_start--;
     }
-    n_end = insertPoint;
+    n_end = index;
     while (n_end < s.length && [s isDigit:n_end]) {
         if (![s isOctDigit:n_end]) {
             isOctal = NO;
@@ -1912,7 +1915,7 @@
             do {
                 end++;
             } while (end < s.length && [s isHexDigit:end]);
-            if (insertPoint < end && end - x_start > 2) {
+            if (index < end && end - x_start > 2) {
                 // YAY it's hex for real!!!
                 return NSMakeRange(x_start, end - x_start);
             }
@@ -1920,13 +1923,13 @@
     }
 
     // case 2: check whether we're after 0x
-    if (insertPoint < x_end && x_end - x_start >= 1) {
+    if (index < x_end && x_end - x_start >= 1) {
         if (x_start >= 2 && [s characterAtIndex:x_start - 1] == 'x' && [s characterAtIndex:x_start - 2] == '0') {
             return NSMakeRange(x_start - 2, x_end - x_start + 2);
         }
     }
 
-    if (insertPoint == n_end || n_start - n_end == 0) {
+    if (index == n_end || n_start - n_end == 0) {
         return NSMakeRange(NSNotFound, 0);
     }
 
@@ -2478,29 +2481,20 @@
     [substring release];
 }
 
-- (void)xvim_registerPositionForUndo:(NSUInteger)pos{
-    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:pos]];
+- (void)xvim_registerPositionForUndo:(XVimPosition)pos
+{
+    XVimBuffer *buffer = self.textStorage.xvim_buffer;
+    NSUndoManager *undoManager = buffer.undoManager;
+    XVimUndoCursorPositionOperation *op;
+
+    op = [[XVimUndoCursorPositionOperation alloc] initWithPosition:pos undoManager:undoManager];
+    [undoManager registerUndoWithTarget:buffer selector:@selector(undoRedo:) object:op];
+    [op release];
 }
 
-- (void)xvim_registerInsertionPointForUndo{
-    [self xvim_registerPositionForUndo:self.selectedRange.location];
+- (void)xvim_registerInsertionPointForUndo
+{
+    [self xvim_registerPositionForUndo:self.insertionPosition];
 }
 
-- (void)xvim_undoCursorPos:(NSNumber*)num{
-    [self xvim_moveCursor:[num unsignedIntegerValue] preserveColumn:NO];
-    [self xvim_syncState];
-}
-/* May be used later
-- (void)hideCompletions {
-	[[[self xview] completionController] hideCompletions];
-}
-
-- (void)selectNextPlaceholder {
-	[[self xview] selectNextPlaceholder:self];
-}
-
-- (void)selectPreviousPlaceholder {
-	[[self xview] selectPreviousPlaceholder:self];
-}
- */
 @end

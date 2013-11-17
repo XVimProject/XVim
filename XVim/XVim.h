@@ -27,8 +27,8 @@
 @class XVimTester;
 
 
-extern NSString * const XVimDocumentChangedNotification;
-extern NSString * const XVimDocumentPathKey;
+extern NSString * const XVimBufferChangedNotification;
+extern NSString * const XVimBufferKey;
 
 @interface XVim : NSObject<XVimKeymapProvider>
 
