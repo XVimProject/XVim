@@ -76,6 +76,11 @@
     return editor.mainScrollView.documentView;
 }
 
+- (XVimBuffer *)currentBuffer
+{
+    return self.sourceView.textStorage.xvim_buffer;
+}
+
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];

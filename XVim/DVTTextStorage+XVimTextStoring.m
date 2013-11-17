@@ -10,12 +10,18 @@
 #import "NSString+VimHelper.h"
 #import "DVTTextStorage+XVimTextStoring.h"
 #import "Logger.h"
+#import "XVimBuffer.h"
 
 #if XVIM_XCODE_VERSION != 5
 #define DVTTextStorage DVTSourceTextStorage
 #endif
 
 @implementation DVTTextStorage (XVimTextStoring)
+
+- (NSString *)xvim_string
+{
+    return self.string;
+}
 
 - (NSUInteger)xvim_numberOfLines
 {
@@ -36,7 +42,6 @@
 {
     xvim_string_buffer_t sb;
 
-    NSAssert(num > 0, @"Line numbers start at 1");
     if (num <= self.numberOfLines) {
         NSRange range = [self characterRangeForLineRange:NSMakeRange(num - 1, 1)];
 
@@ -53,15 +58,12 @@
 
 - (NSRange)xvim_indexRangeForLines:(NSRange)range
 {
-    NSAssert(range.location > 0, @"Line numbers start at 1");
-
     range.location--;
     return [self characterRangeForLineRange:range];
 }
 
 - (NSUInteger)xvim_lineNumberAtIndex:(NSUInteger)index
 {
-    ASSERT_VALID_RANGE_WITH_EOF(index);
     if (index >= self.length) {
         return self.numberOfLines;
     }

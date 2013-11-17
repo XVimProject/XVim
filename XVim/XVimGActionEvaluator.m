@@ -43,9 +43,10 @@
 - (XVimEvaluator*)i{
     XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.sourceView.documentURL.path];
     XVimInsertionPoint mode = XVIM_INSERT_DEFAULT;
+    XVimBuffer *buffer = self.window.currentBuffer;
 
 	if ( mark.line != NSNotFound) {
-        NSUInteger newPos = [self.sourceView.textStorage xvim_indexOfLineNumber:mark.line column:mark.column];
+        NSUInteger newPos = [buffer indexOfLineNumber:mark.line column:mark.column];
         if( NSNotFound != newPos ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
             m.position = newPos;

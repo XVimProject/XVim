@@ -594,26 +594,27 @@
     unichar* tmp;
     NSUInteger count;
     unichar mark;
+    XVimBuffer *buffer = window.currentBuffer;
     
     // Parse base addr (line number)
     switch (*parsing)
     {
         case '.':
             parsing++;
-            addr = [view.textStorage xvim_lineNumberAtIndex:begin];
+            addr = [buffer lineNumberAtIndex:begin];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
-            addr = [view.textStorage xvim_numberOfLines];
+            addr = [buffer numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
             if( '<' == mark ){
-                addr = [view.textStorage xvim_lineNumberAtIndex:begin];
+                addr = [buffer lineNumberAtIndex:begin];
                 parsing+=2;
             }else if( '>' == mark ){
-                addr = [view.textStorage xvim_lineNumberAtIndex:end];
+                addr = [buffer lineNumberAtIndex:end];
                 parsing+=2;
             }else{
                 // Other marks or invalid character. XVim does not support this.
@@ -733,12 +734,13 @@
     exarg.lineEnd = NSNotFound;
 	
     NSTextView* view = [window sourceView];
+    XVimBuffer *buffer = window.currentBuffer;
     for(;;){
         NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [view.textStorage xvim_numberOfLines];
+                exarg.lineEnd = buffer.numberOfLines;
                 parsing++;
             }
         }else{
@@ -758,7 +760,7 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        exarg.lineBegin = [view.textStorage xvim_lineNumberAtIndex:view.insertionPoint];
+        exarg.lineBegin = [buffer lineNumberAtIndex:view.insertionPoint];
         exarg.lineEnd =  exarg.lineBegin;
     }
     
@@ -815,14 +817,14 @@
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
 		NSTextView* srcView = [window sourceView];
-        NSTextStorage* storage = srcView.textStorage;
-		
+        XVimBuffer *buffer = window.currentBuffer;
+
         // Jump to location
-        NSUInteger pos = [storage xvim_indexOfLineNumber:exarg.lineBegin column:0];
-        if( NSNotFound == pos ){
-            pos = [srcView.textStorage xvim_indexOfLineNumber:[srcView.textStorage xvim_numberOfLines] column:0];
+        NSUInteger pos = [buffer indexOfLineNumber:exarg.lineBegin column:0];
+        if (NSNotFound == pos) {
+            pos = [buffer startOfLine:buffer.length];
         }
-        NSUInteger pos_wo_space = [srcView.textStorage xvim_nextNonblankInLineAtIndex:pos allowEOL:NO];
+        NSUInteger pos_wo_space = [buffer nextNonblankInLineAtIndex:pos allowEOL:NO];
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }

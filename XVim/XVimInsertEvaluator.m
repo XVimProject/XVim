@@ -206,7 +206,8 @@
 	
     // Position for "^" is before escaped from insert mode
     NSUInteger pos = self.sourceView.insertionPoint;
-    XVimMark* mark = XVimMakeMark([self.sourceView.textStorage xvim_lineNumberAtIndex:pos], [self.sourceView.textStorage xvim_columnOfIndex:pos], self.sourceView.documentURL.path);
+    XVimBuffer *buffer = self.window.currentBuffer;
+    XVimMark *mark = XVimMakeMark([buffer lineNumberAtIndex:pos], [buffer columnOfIndex:pos], buffer.document.fileURL.path);
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:@"^"];
     }
@@ -215,7 +216,7 @@
     
     // Position for "." is after escaped from insert mode
     pos = self.sourceView.insertionPoint;
-    mark = XVimMakeMark([self.sourceView.textStorage xvim_lineNumberAtIndex:pos], [self.sourceView.textStorage xvim_columnOfIndex:pos], self.sourceView.documentURL.path);
+    mark = XVimMakeMark([buffer lineNumberAtIndex:pos], [buffer columnOfIndex:pos], buffer.document.fileURL.path);
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:@"."];
     }
@@ -286,15 +287,16 @@
 }
 
 - (void)C_yC_eHelper:(BOOL)handlingC_y {
+    XVimBuffer *buffer = self.window.currentBuffer;
     NSUInteger currentCursorIndex = [self.sourceView selectedRange].location;
-    NSUInteger currentColumnIndex = [self.sourceView.textStorage xvim_columnOfIndex:currentCursorIndex];
+    NSUInteger currentColumnIndex = [buffer columnOfIndex:currentCursorIndex];
     NSUInteger newCharIndex;
     if (handlingC_y) {
         newCharIndex = [self.sourceView.textStorage prevLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
     } else {
         newCharIndex = [self.sourceView.textStorage nextLine:currentCursorIndex column:currentColumnIndex count:[self numericArg] option:MOTION_OPTION_NONE];
     }
-    NSUInteger newColumnIndex = [self.sourceView.textStorage xvim_columnOfIndex:newCharIndex];
+    NSUInteger newColumnIndex = [buffer columnOfIndex:newCharIndex];
     NSLog(@"Old column: %ld\tNew column: %ld", currentColumnIndex, newColumnIndex);
     if (currentColumnIndex == newColumnIndex) {
         unichar u = [[[self sourceView] string] characterAtIndex:newCharIndex];

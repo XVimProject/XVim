@@ -351,6 +351,7 @@
 // This is internal method used by SQUOTE, BACKQUOTE
 // TODO: rename firstOfLine -> firstNonblankOfLine
 - (XVimEvaluator*)jumpToMark:(XVimMark*)mark firstOfLine:(BOOL)fol{
+    XVimBuffer *buffer = self.window.currentBuffer;
     NSUInteger cur_pos = self.sourceView.insertionPoint;
 	MOTION_TYPE motionType = fol?LINEWISE:CHARACTERWISE_EXCLUSIVE;
     
@@ -365,19 +366,19 @@
         [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
     }
     
-    NSUInteger to = [self.sourceView.textStorage xvim_indexOfLineNumber:mark.line column:mark.column];
+    NSUInteger to = [buffer indexOfLineNumber:mark.line column:mark.column];
     if( NSNotFound == to ){
         return [XVimEvaluator invalidEvaluator];
     }
     
     if( fol ){
-        to = [self.sourceView.textStorage xvim_firstNonblankInLineAtIndex:to allowEOL:YES]; // This never returns NSNotFound
+        to = [buffer firstNonblankInLineAtIndex:to allowEOL:YES]; // This never returns NSNotFound
     }
 	
     // set the position before the jump
     XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-    cur_mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:cur_pos];
-    cur_mark.column = [self.sourceView.textStorage xvim_columnOfIndex:cur_pos];
+    cur_mark.line = [buffer lineNumberAtIndex:cur_pos];
+    cur_mark.column = [buffer columnOfIndex:cur_pos];
     cur_mark.document = [self.sourceView documentURL].path;
     if( nil != mark.document ){
         [[XVim instance].marks setMark:cur_mark forName:@"'"];
@@ -438,11 +439,12 @@
 // it will moves to start of the numeric argument - 1 lines down.
 - (XVimEvaluator*)UNDERSCORE{
     // TODO add this motion interface to NSTextView
-    NSTextView* view = [self.window sourceView];
+    NSTextView *view = [self.window sourceView];
+    XVimBuffer *buffer = self.window.currentBuffer;
     NSRange r = [view selectedRange];
     NSUInteger repeat = self.numericArg;
     NSUInteger linesUpCursorloc = [view.textStorage nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
-    NSUInteger head = [view.textStorage xvim_firstNonblankInLineAtIndex:linesUpCursorloc allowEOL:NO];
+    NSUInteger head = [buffer firstNonblankInLineAtIndex:linesUpCursorloc allowEOL:NO];
     if( NSNotFound == head && linesUpCursorloc != NSNotFound){
         head = linesUpCursorloc;
     }else if(NSNotFound == head){

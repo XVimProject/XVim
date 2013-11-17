@@ -22,6 +22,7 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
+    XVimBuffer *buffer = self.window.currentBuffer;
     NSString* keyStr = [keyStroke toSelectorString];
 	if ([keyStr length] != 1) {
         return [XVimEvaluator invalidEvaluator];
@@ -29,8 +30,8 @@
     
     XVimMark* mark = [[[XVimMark alloc] init] autorelease];
 	NSRange r = [self.sourceView selectedRange];
-    mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:r.location];
-    mark.column = [self.sourceView.textStorage xvim_columnOfIndex:r.location];
+    mark.line = [buffer lineNumberAtIndex:r.location];
+    mark.column = [buffer columnOfIndex:r.location];
     mark.document = [[self.sourceView documentURL] path];
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:keyStr];

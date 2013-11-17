@@ -143,18 +143,22 @@
     return nil;
 }
 
-- (XVimEvaluator*)C_g{
+- (XVimEvaluator*)C_g
+{
     // process
-    XVimWindow* window = self.window;
-    NSRange range = [[window sourceView] selectedRange];
-    NSUInteger numberOfLines = [window.sourceView.textStorage xvim_numberOfLines];
+    XVimWindow *window = self.window;
+    XVimBuffer *buffer = window.currentBuffer;
+    NSRange range = window.sourceView.selectedRange;
+
+    NSUInteger numberOfLines = [buffer numberOfLines];
     long long lineNumber = [window.sourceView currentLineNumber];
-    NSUInteger columnNumber = [window.sourceView.textStorage xvim_columnOfIndex:range.location];
-    NSURL* documentURL = [[window sourceView] documentURL];
-	if( [documentURL isFileURL] ) {
-		NSString* filename = [documentURL path];
-		NSString* text = [NSString stringWithFormat:@"%@   line %lld of %ld --%d%%-- col %ld",
-                          filename, lineNumber, numberOfLines, (int)((float)lineNumber*100.0/(float)numberOfLines), columnNumber+1 ];
+    NSUInteger columnNumber = [buffer columnOfIndex:range.location];
+    NSURL *documentURL = buffer.document.fileURL;
+
+	if ([documentURL isFileURL]) {
+		NSString *text = [NSString stringWithFormat:@"%@   line %lld of %ld --%d%%-- col %ld",
+                          documentURL.path, lineNumber, numberOfLines,
+                          (int)((float)lineNumber*100.0/(float)numberOfLines), columnNumber+1 ];
         
 		[window statusMessage:text];
 	}

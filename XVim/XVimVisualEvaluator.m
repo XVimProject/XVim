@@ -52,6 +52,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
     
 - (id)initWithWindow:(XVimWindow *)window mode:(XVIM_VISUAL_MODE)mode {
+    XVimBuffer *buffer = window.currentBuffer;
+
 	if (self = [self initWithWindow:window]) {
         _waitForArgument = NO;
         _visual_mode = mode;
@@ -62,16 +64,16 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
             }else{
                 NSUInteger start = [window.sourceView selectedRange].location;
                 NSUInteger end = [window.sourceView selectedRange].location + [window.sourceView selectedRange].length - 1; 
-                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:start], [window.sourceView.textStorage xvim_columnOfIndex:start]);
-                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:end], [window.sourceView.textStorage xvim_columnOfIndex:end]);
+                self.initialFromPos = XVimMakePosition([buffer lineNumberAtIndex:start], [buffer columnOfIndex:start]);
+                self.initialToPos =  XVimMakePosition([buffer lineNumberAtIndex:end], [buffer columnOfIndex:end]);
             }
         }else{
             // Treat it as block selection
             _visual_mode = XVIM_VISUAL_BLOCK;
             NSUInteger start = [[[window.sourceView selectedRanges] objectAtIndex:0] rangeValue].location;
             NSUInteger end = [[[window.sourceView selectedRanges] lastObject] rangeValue].location + [[[window.sourceView selectedRanges] lastObject] rangeValue].length - 1; 
-            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:start], [window.sourceView.textStorage xvim_columnOfIndex:start]);
-            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:end], [window.sourceView.textStorage xvim_columnOfIndex:end]);
+            self.initialFromPos = XVimMakePosition([buffer lineNumberAtIndex:start], [buffer columnOfIndex:start]);
+            self.initialToPos =  XVimMakePosition([buffer lineNumberAtIndex:end], [buffer columnOfIndex:end]);
         }
 	}
     return self;

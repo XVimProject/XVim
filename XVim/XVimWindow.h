@@ -9,6 +9,7 @@
 #import "XVimCommandLine.h"
 #import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
+#import "XVimBuffer.h"
 
 /*
  * This class manages 1 window. (The term "window" here is different from NSWindow)
@@ -28,6 +29,7 @@
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
 @property(readonly) NSTextView *sourceView; // This represents currently focused sourceView
 @property(readonly) XVimCommandLine *commandLine;
+@property(readonly) XVimBuffer *currentBuffer;
 
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea;
 
