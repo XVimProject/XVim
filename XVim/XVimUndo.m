@@ -10,14 +10,20 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimBuffer.h"
 
-// AppKit class dump on 10.9
 @interface NSTextView (NSPrivate)
+/* Cocoa Internal:
+ *   Cocoa seems to call that when -undo is called,
+ *   presumably to prevent the view from refreshing.
+ */
 - (void)_setUndoRedoInProgress:(BOOL)arg1;
 @end
 
-// AppKit class dump on 10.9
 @interface NSTextStorage (NSUndo)
-// return type is presumably an NSAttributedString
+/* Cocoa Internal:
+ *   Looking at a class dump, this NSUndo category looks intersting
+ *   and breaking on it in a debugger shows that it's called to capture
+ *   the text being replaced in the undo operation, let's mimic that.
+ */
 - (id)_undoRedoAttributedSubstringFromRange:(NSRange)arg1;
 @end
 
@@ -69,44 +75,44 @@
 - (void)_undoOp:(NSUInteger)i textStorage:(NSTextStorage *)ts range:(NSRange)range
 {
     NSUInteger index= 3 * i + 2;
-        NSAttributedString *oldText = [_values objectAtIndex:index];
-            NSAttributedString *newText = [ts _undoRedoAttributedSubstringFromRange:range];
+    NSAttributedString *oldText = [_values objectAtIndex:index];
+    NSAttributedString *newText = [ts _undoRedoAttributedSubstringFromRange:range];
 
-            [ts replaceCharactersInRange:range withAttributedString:oldText];
-            [_values replaceObjectAtIndex:index withObject:newText];
-        }
+    [ts replaceCharactersInRange:range withAttributedString:oldText];
+    [_values replaceObjectAtIndex:index withObject:newText];
+}
 
-        - (void)undoRedo:(XVimBuffer *)buffer view:(NSTextView *)view
-        {
-            NSTextStorage *ts = buffer.textStorage;
-            NSUInteger count = _values.count / 3;
+- (void)undoRedo:(XVimBuffer *)buffer view:(NSTextView *)view
+{
+    NSTextStorage *ts = buffer.textStorage;
+    NSUInteger count = _values.count / 3;
 
-            [view _setUndoRedoInProgress:YES];
-            if (!view || [view shouldChangeTextInRange:NSMakeRange(NSNotFound, 0) replacementString:@""]) {
-                [ts beginEditing];
-                if ([_undoManager isUndoing]) {
-                    for (NSUInteger i = count; i-- > 0; ) {
-                        [self _undoOp:i textStorage:ts range:[[_values objectAtIndex:3 * i + 1] rangeValue]];
-                    }
-                } else {
-                    for (NSUInteger i = 0; i < count; i ++ ) {
-                        [self _undoOp:i textStorage:ts range:[[_values objectAtIndex:3 * i + 0] rangeValue]];
-                    }
-                }
-                [ts endEditing];
-                [self registerForBuffer:buffer];
+    [view _setUndoRedoInProgress:YES];
+    if (!view || [view shouldChangeTextInRange:NSMakeRange(NSNotFound, 0) replacementString:@""]) {
+        [ts beginEditing];
+        if ([_undoManager isUndoing]) {
+            for (NSUInteger i = count; i-- > 0; ) {
+                [self _undoOp:i textStorage:ts range:[[_values objectAtIndex:3 * i + 1] rangeValue]];
             }
-            NSUInteger index = [_undoManager isUndoing] ? _startIndex : _endIndex;
-            if (index != NSNotFound) {
-                [view xvim_moveToIndex:index];
+        } else {
+            for (NSUInteger i = 0; i < count; i ++ ) {
+                [self _undoOp:i textStorage:ts range:[[_values objectAtIndex:3 * i + 0] rangeValue]];
             }
-            [view _setUndoRedoInProgress:NO];
         }
+        [ts endEditing];
+        [self registerForBuffer:buffer];
+    }
+    NSUInteger index = [_undoManager isUndoing] ? _startIndex : _endIndex;
+    if (index != NSNotFound) {
+        [view xvim_moveToIndex:index];
+    }
+    [view _setUndoRedoInProgress:NO];
+}
 
-        - (void)registerForBuffer:(XVimBuffer *)buffer
-        {
-            _undoManager = [buffer.undoManager retain];
-            [_undoManager registerUndoWithTarget:buffer selector:@selector(undoRedo:) object:self];
-        }
+- (void)registerForBuffer:(XVimBuffer *)buffer
+{
+    _undoManager = [buffer.undoManager retain];
+    [_undoManager registerUndoWithTarget:buffer selector:@selector(undoRedo:) object:self];
+}
 
-        @end
+@end

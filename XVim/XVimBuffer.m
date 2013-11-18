@@ -11,17 +11,14 @@
 #import "XVimBuffer.h"
 #import "XVimUndo.h"
 #import "XVimTextStoring.h"
+#import "NSString+VimHelper.h"
 
 static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
-
-NS_INLINE BOOL isNewline(unichar ch)
-{
-    return [[NSCharacterSet newlineCharacterSet] characterIsMember:ch];
-}
 
 @implementation XVimBuffer {
     NSDocument    *__unsafe_unretained _document;
     NSTextStorage *__unsafe_unretained _textStorage;
+    XVimUndoOperation *_curOp;
 
     struct {
         unsigned has_xvim_string : 1;
@@ -63,6 +60,12 @@ NS_INLINE BOOL isNewline(unichar ch)
         }
     }
     return self;
+}
+
+- (void)dealloc
+{
+    [_curOp release];
+    [super dealloc];
 }
 
 + (XVimBuffer *)makeBufferForDocument:(NSDocument *)document
@@ -419,12 +422,118 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     [op undoRedo:self view:nil];
 }
 
-- (void)replaceCharactersInRange:(NSRange)range
-                      withString:(NSString *)string
-                      undoObject:(XVimUndoOperation *)op
+- (void)beginEditingAtIndex:(NSUInteger)index
 {
-    [op addUndoRange:range replacementRange:NSMakeRange(range.location, string.length) buffer:self];
+    NSAssert(!_curOp, @"you can't call -beginEditingAtIndex: twice");
+    [_curOp release];
+    _curOp = [[XVimUndoOperation alloc] initWithIndex:index];
+}
+
+- (void)endEditingAtIndex:(NSUInteger)index
+{
+    [_curOp setEndIndex:index];
+    [_curOp registerForBuffer:self];
+    [_curOp release];
+    _curOp = nil;
+}
+
+- (void)replaceCharactersInRange:(NSRange)range withString:(NSString *)string
+{
+    NSAssert(_curOp, @"you must call -beginEditingAtIndex: first");
+    [_curOp addUndoRange:range replacementRange:NSMakeRange(range.location, string.length) buffer:self];
     [_textStorage replaceCharactersInRange:range withString:string];
+}
+
+- (void)_removeSpacesAtLine:(NSUInteger)line column:(NSUInteger)column count:(NSUInteger)count
+{
+    NSUInteger  tabWidth = self.tabWidth;
+    NSUInteger  spaces = 0, width = 0, start;
+    xvim_string_buffer_t sb;
+
+    start = [self indexOfLineNumber:line column:column];
+
+    xvim_sb_init(&sb, self.string, start, start, self.length);
+    if (xvim_sb_peek(&sb) == '\t') {
+        spaces = column - [self columnOfIndex:start];
+    } else if (xvim_sb_peek(&sb) != ' ') {
+        return;
+    }
+
+    while (width < count) {
+        unichar c = xvim_sb_peek(&sb);
+
+        if (c != ' ' && c != '\t') {
+            break;
+        }
+        if (c == '\t') {
+            width += tabWidth - ((column + width) % tabWidth);
+        } else {
+            width++;
+        }
+
+        if (!xvim_sb_next(&sb)) {
+            break;
+        }
+    }
+
+    if (width > count) {
+        spaces += width - count;
+    }
+
+    NSRange range = xvim_sb_range_to_start(&sb);
+    [self replaceCharactersInRange:range withString:[NSString stringMadeOfSpaces:spaces]];
+}
+
+- (NSUInteger)shiftLines:(XVimRange)lines column:(NSUInteger)column
+                   count:(NSUInteger)count right:(BOOL)right block:(BOOL)blockMode
+{
+    NSString *string = self.string;
+
+    [_textStorage beginEditing];
+
+    if (right) {
+        NSString  *s = [NSString stringMadeOfSpaces:count];
+        NSUInteger tabWidth = self.tabWidth;
+
+        for (NSUInteger line = lines.begin; line <= lines.end; line++) {
+            NSUInteger index, spaces = 0;
+
+            index = [self indexOfLineNumber:line column:column];
+            if (index >= self.length || isNewline([string characterAtIndex:index])) {
+                if (column == 0 || [self columnOfIndex:column] < column) {
+                    continue;
+                }
+            }
+
+            if (tabWidth && [string characterAtIndex:index] == '\t') {
+                NSUInteger col = [self columnOfIndex:index];
+
+                spaces = tabWidth - (col % tabWidth);
+            }
+
+            if (spaces) {
+                NSString *s2 = [NSString stringMadeOfSpaces:count + spaces];
+                [self replaceCharactersInRange:NSMakeRange(index, 1) withString:s2];
+            } else {
+                [self replaceCharactersInRange:NSMakeRange(index, 0) withString:s];
+            }
+        }
+    } else {
+        for (NSUInteger line = lines.begin; line <= lines.end; line++) {
+            [self _removeSpacesAtLine:line column:column count:count];
+        }
+    }
+
+    NSUInteger pos;
+    if (blockMode) {
+        pos = [self indexOfLineNumber:lines.begin column:column];
+    } else {
+        pos = [self indexOfLineNumber:lines.begin];
+        pos = [self firstNonblankInLineAtIndex:pos allowEOL:YES];
+    }
+
+    [_textStorage endEditing];
+    return pos;
 }
 
 @end

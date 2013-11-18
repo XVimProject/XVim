@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimDefs.h"
 
 #pragma mark Macros
 
@@ -272,9 +273,14 @@
 
 - (void)undoRedo:(XVimUndoOperation *)op;
 
+- (void)beginEditingAtIndex:(NSUInteger)index;
+- (void)endEditingAtIndex:(NSUInteger)index;
+
 - (void)replaceCharactersInRange:(NSRange)range
-                      withString:(NSString *)string
-                      undoObject:(XVimUndoOperation *)op;
+                      withString:(NSString *)string;
+
+- (NSUInteger)shiftLines:(XVimRange)lines column:(NSUInteger)column
+                   count:(NSUInteger)count right:(BOOL)right block:(BOOL)block;
 
 @end
 
