@@ -276,7 +276,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         return 0;
     }
 
-    xvim_sb_init(&sb, self.string, range.location, range);
+    xvim_sb_init_range(&sb, self.string, range);
     return xvim_sb_count_columns(&sb, self.tabWidth);
 }
 
@@ -285,7 +285,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     NSRange range = [self indexRangeForLineAtIndex:index newLineLength:NULL];
     xvim_string_buffer_t sb;
 
-    xvim_sb_init(&sb, self.string, range.location, range);
+    xvim_sb_init_range(&sb, self.string, range);
     return xvim_sb_count_columns(&sb, self.tabWidth);
 }
 
@@ -302,7 +302,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     NSUInteger col = 0;
     xvim_string_buffer_t sb;
 
-    xvim_sb_init(&sb, self.string, range.location, range);
+    xvim_sb_init_range(&sb, self.string, range);
     do {
         if (xvim_sb_peek(&sb) == '\t') {
             col += tabWidth;
@@ -370,13 +370,12 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 - (NSUInteger)nextNonblankInLineAtIndex:(NSUInteger)index allowEOL:(BOOL)allowEOL
 {
     NSString *s = self.string;
-    NSUInteger length = s.length;
     xvim_string_buffer_t sb;
     unichar c;
 
     ASSERT_VALID_RANGE_WITH_EOF(index);
 
-    xvim_sb_init(&sb, s, index, NSMakeRange(index, length - index));
+    xvim_sb_init(&sb, s, index, index, s.length);
     xvim_sb_skip_forward(&sb, [NSCharacterSet whitespaceCharacterSet]);
     c = xvim_sb_peek(&sb);
 
@@ -395,10 +394,8 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 - (NSUInteger)nextDigitInLine:(NSUInteger)index
 {
     xvim_string_buffer_t sb;
-    NSRange range;
+    xvim_sb_init(&sb, self.string, index, index, [self endOfLine:index]);
 
-    range = [self indexRangeForLineAtIndex:index newLineLength:NULL];
-    xvim_sb_init(&sb, self.string, index, range);
     if (xvim_sb_find_forward(&sb, [NSCharacterSet decimalDigitCharacterSet])) {
         return xvim_sb_index(&sb);
     }
@@ -408,9 +405,26 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 
 #pragma mark Support for modifications
 
-- (void)undoRedo:(id<XVimUndoing>)op
+- (void)undoRedo:(XVimUndoOperation *)op
 {
-    [op undoRedo:self];
+    for (NSLayoutManager *mgr in _textStorage.layoutManagers) {
+        NSTextView *view = mgr.firstTextView;
+
+        if (view.textStorage == _textStorage) {
+            [op undoRedo:self view:view];
+            return;
+        }
+    }
+
+    [op undoRedo:self view:nil];
+}
+
+- (void)replaceCharactersInRange:(NSRange)range
+                      withString:(NSString *)string
+                      undoObject:(XVimUndoOperation *)op
+{
+    [op addUndoRange:range replacementRange:NSMakeRange(range.location, string.length) buffer:self];
+    [_textStorage replaceCharactersInRange:range withString:string];
 }
 
 @end

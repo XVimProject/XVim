@@ -118,7 +118,7 @@
     // as long as the nesting level matches up
 
     xvim_string_buffer_t sb;
-    xvim_sb_init(&sb, s, pos, NSMakeRange(pos, [buffer endOfLine:pos] - pos));
+    xvim_sb_init(&sb, s, pos, pos, [buffer endOfLine:pos]);
 
 #define pairs "{}[]()"
     NSCharacterSet *charset = [NSCharacterSet characterSetWithCharactersInString:@pairs];
@@ -129,7 +129,7 @@
 
     if (xvim_sb_find_forward(&sb, charset)) {
         start_with_c = xvim_sb_peek(&sb);
-        xvim_sb_init(&sb, s, xvim_sb_index(&sb), NSMakeRange(0, s.length));
+        xvim_sb_init(&sb, s, xvim_sb_index(&sb), 0, s.length);
 
         NSUInteger pos = (NSUInteger)(strchr(pairs, start_with_c) - pairs);
 

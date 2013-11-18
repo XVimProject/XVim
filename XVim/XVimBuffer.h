@@ -25,7 +25,7 @@
 #define ASSERT_VALID_CURSOR_POS(x)
 #endif
 
-@protocol XVimUndoing;
+@class XVimUndoOperation;
 
 /** @brief class to represent an XVim Buffer
  *
@@ -270,7 +270,11 @@
 
 #pragma mark Support for modifications
 
-- (void)undoRedo:(id<XVimUndoing>)op;
+- (void)undoRedo:(XVimUndoOperation *)op;
+
+- (void)replaceCharactersInRange:(NSRange)range
+                      withString:(NSString *)string
+                      undoObject:(XVimUndoOperation *)op;
 
 @end
 

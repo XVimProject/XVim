@@ -45,7 +45,7 @@
     if (num <= self.numberOfLines) {
         NSRange range = [self characterRangeForLineRange:NSMakeRange(num - 1, 1)];
 
-        xvim_sb_init(&sb, self.xvim_string, range.location, range);
+        xvim_sb_init_range(&sb, self.xvim_string, range);
         xvim_sb_find_backward(&sb, [NSCharacterSet newlineCharacterSet]);
 
         if (newLineLength) *newLineLength = xvim_sb_range_to_end(&sb).length;

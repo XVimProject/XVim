@@ -7,19 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XVimDefs.h"
 
 @class XVimBuffer;
 
-@protocol XVimUndoing
+@interface XVimUndoOperation : NSObject
 
-- (void)undoRedo:(XVimBuffer *)text;
+- (instancetype)initWithIndex:(NSUInteger)index;
 
-@end
+- (void)undoRedo:(XVimBuffer *)buffer view:(NSTextView *)view;
 
-@interface XVimUndoCursorPositionOperation : NSObject<XVimUndoing>
+- (void)addUndoRange:(NSRange)range
+    replacementRange:(NSRange)replacementRange
+              buffer:(XVimBuffer *)buffer;
 
-- (instancetype)initWithPosition:(XVimPosition)pos
-                     undoManager:(NSUndoManager *)undoManager;
+- (void)setEndIndex:(NSUInteger)index;
+
+- (void)registerForBuffer:(XVimBuffer *)buffer;
 
 @end

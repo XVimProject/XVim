@@ -51,15 +51,17 @@ NS_INLINE void _xvim_sb_load(xvim_string_buffer_t *sb)
 }
 
 /* returns NO if at end */
-NS_INLINE void xvim_sb_init(xvim_string_buffer_t *sb, NSString *s, NSUInteger index, NSRange forRange)
+NS_INLINE void xvim_sb_init(xvim_string_buffer_t *sb, NSString *s,
+                            NSUInteger index, NSUInteger min, NSUInteger max)
 {
     sb->s = s;
-    sb->s_min = forRange.location;
-    sb->s_max = sb->s_min + forRange.length;
+    sb->s_min = min;
+    sb->s_max = max;
 
-    NSCAssert(index >= sb->s_min && index <= sb->s_max, @"bad caller");
+    NSCAssert(min <= max, @"Bad xvim_sb_init");
+    NSCAssert(index >= sb->s_min && index <= sb->s_max, @"bad xvim_sb_init");
 
-    if (forRange.length < _xvim_sb_size() || index - _xvim_sb_size() / 2 < sb->s_min) {
+    if (max - min < _xvim_sb_size() || index - _xvim_sb_size() / 2 < sb->s_min) {
         sb->s_index = sb->s_min;
     } else if (index + _xvim_sb_size() >= sb->s_max) {
         sb->s_index = sb->s_max - _xvim_sb_size() + 1;
@@ -68,6 +70,11 @@ NS_INLINE void xvim_sb_init(xvim_string_buffer_t *sb, NSString *s, NSUInteger in
     }
     sb->b_index = index - sb->s_index;
     _xvim_sb_load(sb);
+}
+
+NS_INLINE void xvim_sb_init_range(xvim_string_buffer_t *sb, NSString *s, NSRange range)
+{
+    xvim_sb_init(sb, s, range.location, range.location, NSMaxRange(range));
 }
 
 NS_INLINE NSUInteger xvim_sb_index(xvim_string_buffer_t *sb)

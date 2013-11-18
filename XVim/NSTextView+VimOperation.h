@@ -75,6 +75,7 @@
 
 #pragma mark Operations (Has effect to internal state)
 - (void)xvim_adjustCursorPosition;
+- (void)xvim_moveToIndex:(NSUInteger)index;
 - (void)xvim_moveToPosition:(XVimPosition)pos;
 - (void)xvim_move:(XVimMotion*)motion;
 - (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;

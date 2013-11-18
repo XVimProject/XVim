@@ -25,6 +25,7 @@
 #import "Logger.h"
 #import "XVimUndo.h"
 #import "XVimBuffer.h"
+#import "XVimStringBuffer.h"
 
 #define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             self.selectionMode,            \
@@ -72,7 +73,7 @@
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
 - (void)xvim_registerInsertionPointForUndo;
-- (void)xvim_registerPositionForUndo:(XVimPosition)pos;
+- (void)xvim_registerIndexForUndo:(NSUInteger)index;
 @end
 
 @implementation NSTextView (VimOperation)
@@ -87,52 +88,45 @@
 }
 
 - (void)_xvim_removeSpacesAtLine:(NSUInteger)line column:(NSUInteger)column count:(NSUInteger)count
+                   undoOperation:(XVimUndoOperation *)op
 {
-    NSTextStorage *ts = self.textStorage;
-    XVimBuffer *buffer = ts.xvim_buffer;
-    NSUInteger tabWidth = buffer.tabWidth;
-    NSUInteger pos = [buffer indexOfLineNumber:line column:column];
-    NSUInteger end = pos;
-    NSUInteger width = 0;
-    NSString *s = self.xvim_string;
+    XVimBuffer *buffer = self.textStorage.xvim_buffer;
+    NSUInteger  tabWidth = buffer.tabWidth;
+    NSUInteger  spaces = 0, width = 0, start;
+    xvim_string_buffer_t sb;
 
-    if ([ts isEOL:pos]) {
+    start = [buffer indexOfLineNumber:line column:column];
+
+    xvim_sb_init(&sb, buffer.string, start, start, buffer.length);
+    if (xvim_sb_peek(&sb) == '\t') {
+        spaces = column - [buffer columnOfIndex:start];
+    } else if (xvim_sb_peek(&sb) != ' ') {
         return;
     }
 
-    if ([s characterAtIndex:pos] == '\t') {
-        NSUInteger col = [buffer columnOfIndex:pos];
-
-        if (col < column) {
-            [self _xvim_insertSpaces:tabWidth - (col % tabWidth) replacementRange:NSMakeRange(pos, 1)];
-            pos += column - col;
-        }
-    }
-
     while (width < count) {
-        unichar c = [s characterAtIndex:end];
+        unichar c = xvim_sb_peek(&sb);
 
-        if (c == ' ') {
-            end++;
-            width++;
-        } else if (c == '\t') {
-            NSUInteger col = column + width;
-            NSUInteger tw  = tabWidth - (col % tabWidth);
-
-            if (width + tw > count) {
-                [self _xvim_insertSpaces:tw replacementRange:NSMakeRange(end, 1)];
-                end  += count - width;
-                width = count;
-            } else {
-                end   += tw;
-                width += tw;
-            }
+        if (c != ' ' && c != '\t') {
+            break;
+        }
+        if (c == '\t') {
+            width += tabWidth - ((column + width) % tabWidth);
         } else {
+            width++;
+        }
+
+        if (!xvim_sb_next(&sb)) {
             break;
         }
     }
 
-    [self insertText:@"" replacementRange:NSMakeRange(pos, end - pos)];
+    if (width > count) {
+        spaces += width - count;
+    }
+
+    NSRange range = xvim_sb_range_to_start(&sb);
+    [buffer replaceCharactersInRange:range withString:[NSString stringMadeOfSpaces:spaces] undoObject:op];
 }
 
 - (XVimRange)_xvim_selectedLines{
@@ -624,10 +618,14 @@
     return;
 }
 
-- (void)xvim_moveToPosition:(XVimPosition)pos{
-    NSUInteger index = [self.textStorage.xvim_buffer indexOfLineNumber:pos.line column:pos.column];
+- (void)xvim_moveToIndex:(NSUInteger)index{
     [self xvim_moveCursor:index preserveColumn:NO];
     [self xvim_syncState];
+}
+
+- (void)xvim_moveToPosition:(XVimPosition)pos{
+    NSUInteger index = [self.textStorage.xvim_buffer indexOfLineNumber:pos.line column:pos.column];
+    [self xvim_moveToIndex:index];
 }
 
 - (void)xvim_move:(XVimMotion*)motion{
@@ -1214,7 +1212,6 @@
     NSUInteger column = 0;
     XVimRange  lines;
     BOOL blockMode = NO;
-    NSUndoManager *undoManager = self.undoManager;
 
     if (self.selectionMode == XVIM_VISUAL_NONE) {
         XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
@@ -1235,20 +1232,25 @@
     }
 
     NSUInteger pos = [buffer indexOfLineNumber:lines.begin column:0];
-    [undoManager setGroupsByEvent:NO];
-    [undoManager beginUndoGrouping];
+    XVimUndoOperation *op = nil;
 
-    if (!blockMode) {
-        NSUInteger col = [buffer columnOfIndex:[buffer firstNonblankInLineAtIndex:pos allowEOL:YES]];
-        [self xvim_registerPositionForUndo:XVimMakePosition(lines.begin, col)];
+    if (blockMode) {
+        pos = [buffer indexOfLineNumber:lines.begin column:column];
+    } else {
+        pos = [buffer indexOfLineNumber:lines.begin column:0];
+        pos = [buffer firstNonblankInLineAtIndex:pos allowEOL:YES];
     }
 
     if (right) {
         NSString *s = [NSString stringMadeOfSpaces:shiftWidth];
+
+        [self xvim_registerIndexForUndo:[buffer firstNonblankInLineAtIndex:pos allowEOL:YES]];
         [self xvim_blockInsertFixupWithText:s mode:XVIM_INSERT_SPACES count:1 column:column lines:lines];
     } else {
+        op = [[XVimUndoOperation alloc] initWithIndex:pos];
+        [buffer.textStorage beginEditing];
         for (NSUInteger line = lines.begin; line <= lines.end; line++) {
-            [self _xvim_removeSpacesAtLine:line column:column count:shiftWidth];
+            [self _xvim_removeSpacesAtLine:line column:column count:shiftWidth undoOperation:op];
         }
     }
 
@@ -1257,10 +1259,14 @@
     } else {
         pos = [buffer firstNonblankInLineAtIndex:pos allowEOL:YES];
     }
-
     [self xvim_moveCursor:pos preserveColumn:NO];
-    [undoManager endUndoGrouping];
-    [undoManager setGroupsByEvent:YES];
+
+    if (op) {
+        [op setEndIndex:pos];
+        [op registerForBuffer:buffer];
+        [op release];
+        [buffer.textStorage endEditing];
+    }
 
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
@@ -2496,20 +2502,16 @@
     [substring release];
 }
 
-- (void)xvim_registerPositionForUndo:(XVimPosition)pos
+- (void)xvim_registerIndexForUndo:(NSUInteger)index
 {
-    XVimBuffer *buffer = self.textStorage.xvim_buffer;
-    NSUndoManager *undoManager = buffer.undoManager;
-    XVimUndoCursorPositionOperation *op;
-
-    op = [[XVimUndoCursorPositionOperation alloc] initWithPosition:pos undoManager:undoManager];
-    [undoManager registerUndoWithTarget:buffer selector:@selector(undoRedo:) object:op];
+    XVimUndoOperation *op = [[XVimUndoOperation alloc] initWithIndex:index];
+    [op registerForBuffer:self.textStorage.xvim_buffer];
     [op release];
 }
 
 - (void)xvim_registerInsertionPointForUndo
 {
-    [self xvim_registerPositionForUndo:self.insertionPosition];
+    [self xvim_registerIndexForUndo:self.insertionPoint];
 }
 
 @end
