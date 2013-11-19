@@ -16,6 +16,5 @@
 
 - (id)initWithWindow:(XVimWindow*)window mode:(XVIM_VISUAL_MODE)mode;
 - (id)initWithLastVisualStateWithWindow:(XVimWindow *)window;
-    
 
 @end

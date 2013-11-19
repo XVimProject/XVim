@@ -74,7 +74,27 @@ typedef struct _XVimSelection {
     NSUInteger         right;
 } XVimSelection;
 
+typedef struct {
+    XVIM_VISUAL_MODE mode;
+    NSUInteger       colwant;
+    XVimPosition     start;
+    XVimPosition     end;
+} XVimVisualInfo;
+
 #define XVimSelectionEOL  (NSIntegerMax - 1)
+
+NS_INLINE NSUInteger XVimVisualInfoColumns(XVimVisualInfo *vi)
+{
+    if (vi->end.column == XVimSelectionEOL) {
+        return XVimSelectionEOL;
+    }
+    return MAX(vi->end.column, vi->start.column) - MIN(vi->end.column, vi->start.column) + 1;
+}
+
+NS_INLINE NSUInteger XVimVisualInfoLines(XVimVisualInfo *vi)
+{
+    return MAX(vi->end.line, vi->start.line) - MIN(vi->end.line, vi->start.line) + 1;
+}
 
 NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
     XVimRange r;

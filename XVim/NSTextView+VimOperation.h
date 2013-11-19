@@ -57,8 +57,6 @@
 @property(readonly) NSUInteger insertionLine;
 @property(readonly) NSUInteger preservedColumn;
 @property(readonly) NSUInteger selectionBegin;
-@property(readonly) XVimPosition selectionBeginPosition;
-@property(readonly) NSUInteger numberOfSelectedLines;
 @property(readonly) XVIM_VISUAL_MODE selectionMode;
 @property(readonly) BOOL selectionToEOL;
 @property(readonly) CURSOR_MODE cursorMode;

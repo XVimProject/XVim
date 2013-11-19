@@ -45,7 +45,6 @@
 //@property NSUInteger insertionLine;    // This is readonly also internally
 @property NSUInteger preservedColumn;
 @property NSUInteger selectionBegin;
-//@property XVimPosition selectionBeginPosition; // This is readonly also internally
 @property XVIM_VISUAL_MODE selectionMode;
 @property BOOL selectionToEOL;
 @property CURSOR_MODE cursorode;
@@ -394,20 +393,6 @@
     [self setUnsignedInteger:selectionBegin forName:@"selectionBegin"];
 }
 
-- (XVimPosition)selectionBeginPosition{
-    XVimBuffer *buffer = self.textStorage.xvim_buffer;
-    return XVimMakePosition([buffer lineNumberAtIndex:self.selectionBegin], [buffer columnOfIndex:self.selectionBegin]);
-}
-
-- (NSUInteger)numberOfSelectedLines{
-    if (XVIM_VISUAL_NONE == self.selectionMode) {
-        return 0;
-    }
-
-    XVimRange lines = [self _xvim_selectedLines];
-    return lines.end - lines.begin + 1;
-}
-
 - (BOOL)selectionToEOL{
     return [[self dataForName:@"selectionToEOL"] boolValue];
 }
@@ -423,7 +408,6 @@
 
 - (void)setSelectionMode:(XVIM_VISUAL_MODE)selectionMode{
     if (self.selectionMode != selectionMode) {
-        self.selectionToEOL = NO;
         [self setInteger:selectionMode forName:@"selectionMode"];
     }
 }

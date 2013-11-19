@@ -103,7 +103,10 @@
  *
  */
 
-@interface XVimBuffer : NSObject
+@interface XVimBuffer : NSObject {
+@public
+    XVimVisualInfo visualInfo;
+}
 
 @property (nonatomic, readonly) NSDocument    *document;
 @property (nonatomic, readonly) NSTextStorage *textStorage;
@@ -179,6 +182,14 @@
  * This never returns NSNotFound.
  */
 - (NSUInteger)columnOfIndex:(NSUInteger)index;
+
+/** @brief returns the XVim Posiion of \a index
+ *
+ * Column numbers starts at 0.
+ *
+ * This never returns NSNotFound.
+ */
+- (XVimPosition)positionOfIndex:(NSUInteger)index;
 
 /** @brief returns number of columns for the line containing \a index.
  *

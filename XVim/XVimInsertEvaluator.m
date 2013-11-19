@@ -193,7 +193,6 @@
 
     // Store off any needed text
     XVim *xvim = [XVim instance];
-    xvim.lastVisualMode = self.sourceView.selectionMode;
     [xvim fixOperationCommands];
     if( _oneCharMode ){
     }else if (!self.movementKeyPressed){

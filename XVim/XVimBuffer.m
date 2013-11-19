@@ -283,6 +283,11 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return xvim_sb_count_columns(&sb, self.tabWidth);
 }
 
+- (XVimPosition)positionOfIndex:(NSUInteger)index
+{
+    return XVimMakePosition([self lineNumberAtIndex:index], [self columnOfIndex:index]);
+}
+
 - (NSUInteger)numberOfColumnsInLineAtIndex:(NSUInteger)index
 {
     NSRange range = [self indexRangeForLineAtIndex:index newLineLength:NULL];
