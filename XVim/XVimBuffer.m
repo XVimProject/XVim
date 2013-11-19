@@ -429,9 +429,15 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     _curOp = [[XVimUndoOperation alloc] initWithIndex:index];
 }
 
+- (void)cancelEditing
+{
+    [_curOp release];
+    _curOp = nil;
+}
+
 - (void)endEditingAtIndex:(NSUInteger)index
 {
-    [_curOp setEndIndex:index];
+    _curOp.endIndex = index;
     [_curOp registerForBuffer:self];
     [_curOp release];
     _curOp = nil;
@@ -534,6 +540,116 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 
     [_textStorage endEditing];
     return pos;
+}
+
+- (NSRange)_numberAtIndex:(NSUInteger)index
+{
+    NSUInteger n_start, n_end;
+    NSUInteger x_start, x_end;
+    NSString *s = self.string;
+    unichar c;
+    BOOL isOctal = YES;
+
+    n_start = index;
+    while (n_start > 0 && [s isDigit:n_start - 1]) {
+        if (![s isOctDigit:n_start]) {
+            isOctal = NO;
+        }
+        n_start--;
+    }
+    n_end = index;
+    while (n_end < s.length && [s isDigit:n_end]) {
+        if (![s isOctDigit:n_end]) {
+            isOctal = NO;
+        }
+        n_end++;
+    }
+
+    x_start = n_start;
+    while (x_start > 0 && [s isHexDigit:x_start - 1]) {
+        x_start--;
+    }
+    x_end = n_end;
+    while (x_end < s.length && [s isHexDigit:x_end]) {
+        x_end++;
+    }
+
+    // first deal with Hex: 0xNNNNN
+    // case 1: check for insertion point on the '0' or 'x'
+    if (x_end - x_start == 1) {
+        NSUInteger end = x_end;
+        if (end < s.length && [s characterAtIndex:end] == 'x') {
+            do {
+                end++;
+            } while (end < s.length && [s isHexDigit:end]);
+            if (index < end && end - x_start > 2) {
+                // YAY it's hex for real!!!
+                return NSMakeRange(x_start, end - x_start);
+            }
+        }
+    }
+
+    // case 2: check whether we're after 0x
+    if (index < x_end && x_end - x_start >= 1) {
+        if (x_start >= 2 && [s characterAtIndex:x_start - 1] == 'x' && [s characterAtIndex:x_start - 2] == '0') {
+            return NSMakeRange(x_start - 2, x_end - x_start + 2);
+        }
+    }
+
+    if (index == n_end || n_start - n_end == 0) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+
+    // okay it's not hex, if it's not octal, check for leading +/-
+    if (n_start > 0 && !(isOctal && [s characterAtIndex:n_start] == '0')) {
+        c = [s characterAtIndex:n_start - 1];
+        if (c == '+' || c == '-') {
+            n_start--;
+        }
+    }
+    return NSMakeRange(n_start, n_end - n_start);
+}
+
+- (NSUInteger)incrementNumberAtIndex:(NSUInteger)index by:(int64_t)offset
+{
+    NSRange range;
+    BOOL doOp = _curOp == nil;
+
+    range = [self _numberAtIndex:index];
+    if (range.location == NSNotFound) {
+        NSUInteger pos = [self.textStorage.xvim_buffer nextDigitInLine:index];
+        if (pos == NSNotFound) {
+            return NSNotFound;
+        }
+        range = [self _numberAtIndex:pos];
+        if (range.location == NSNotFound) {
+            // should not happen
+            return NSNotFound;
+        }
+    }
+
+    const char *s = [[self.string substringWithRange:range] UTF8String];
+    NSString *repl;
+    uint64_t u = strtoull(s, NULL, 0);
+    int64_t i = strtoll(s, NULL, 0);
+
+    if (strncmp(s, "0x", 2) == 0) {
+        repl = [NSString stringWithFormat:@"0x%0*llx", (int)strlen(s) - 2, u + (uint64_t)offset];
+    } else if (u && *s == '0' && s[1] && !strchr(s, '9') && !strchr(s, '8')) {
+        repl = [NSString stringWithFormat:@"0%0*llo", (int)strlen(s) - 1, u + (uint64_t)offset];
+    } else if (u && *s == '+') {
+        repl = [NSString stringWithFormat:@"%+lld", i + offset];
+    } else {
+        repl = [NSString stringWithFormat:@"%lld", i + offset];
+    }
+
+    if (doOp) [self beginEditingAtIndex:index];
+    [_textStorage beginEditing];
+    [self replaceCharactersInRange:range withString:repl];
+    [_textStorage endEditing];
+    index = range.location + repl.length - 1;
+    if (doOp) [self endEditingAtIndex:index];
+    return index;
 }
 
 @end

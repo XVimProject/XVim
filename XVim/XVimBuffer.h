@@ -279,8 +279,12 @@
 - (void)replaceCharactersInRange:(NSRange)range
                       withString:(NSString *)string;
 
+// Never fails
 - (NSUInteger)shiftLines:(XVimRange)lines column:(NSUInteger)column
                    count:(NSUInteger)count right:(BOOL)right block:(BOOL)block;
+
+// May return NSNotFound
+- (NSUInteger)incrementNumberAtIndex:(NSUInteger)index by:(int64_t)offset;
 
 @end
 

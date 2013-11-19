@@ -150,8 +150,7 @@
 - (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt;
 - (void)xvim_clearHighlightText;
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
-- (NSRange)xvim_numberAtIndex:(NSUInteger)index;
-    
+
 #pragma mark Searching positions
 // TODO: Thses method should be internal. Create abstracted interface to achieve the operation uses these methods.
 /**
