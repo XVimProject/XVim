@@ -66,7 +66,6 @@
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
 @property BOOL needsUpdateFoundRanges;
 @property(readonly) NSArray* foundRanges;
-@property(readonly) long long currentLineNumber;
 
 #pragma mark Changing state
 - (void)xvim_changeSelectionMode:(XVIM_VISUAL_MODE)mode;

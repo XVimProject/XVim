@@ -151,12 +151,12 @@
     NSRange range = window.sourceView.selectedRange;
 
     NSUInteger numberOfLines = [buffer numberOfLines];
-    long long lineNumber = [window.sourceView currentLineNumber];
+    NSUInteger lineNumber = [buffer lineNumberAtIndex:range.location];
     NSUInteger columnNumber = [buffer columnOfIndex:range.location];
     NSURL *documentURL = buffer.document.fileURL;
 
 	if ([documentURL isFileURL]) {
-		NSString *text = [NSString stringWithFormat:@"%@   line %lld of %ld --%d%%-- col %ld",
+		NSString *text = [NSString stringWithFormat:@"%@   line %ld of %ld --%d%%-- col %ld",
                           documentURL.path, lineNumber, numberOfLines,
                           (int)((float)lineNumber*100.0/(float)numberOfLines), columnNumber+1 ];
         

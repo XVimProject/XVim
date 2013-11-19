@@ -438,15 +438,7 @@
 }
 
 - (NSURL*)documentURL{
-#ifdef __USE_DVTKIT__
-    if( [self.delegate isKindOfClass:[IDEEditor class]] ){
-        return [(IDEEditorDocument*)((IDEEditor*)self.delegate).document fileURL];
-    }else{
-        return nil;
-    }
-#else
-    return nil;
-#endif
+    return self.textStorage.xvim_buffer.document.fileURL;
 }
 
 - (void)setXvimDelegate:(id)xvimDelegate{
@@ -492,19 +484,6 @@
 - (void) setLastYankedType:(TEXT_TYPE)type{
     [self setInteger:type forName:@"lastYankedType"];
 }
-
-- (long long)currentLineNumber {
-#ifdef __USE_DVTKIT__
-    if( [self isKindOfClass:[DVTSourceTextView class]] ){
-        return [(DVTSourceTextView*)self _currentLineNumber];
-    }
-#else
-#error You must implement here.
-#endif
-    NSAssert(NO, @"You must implement here if you do not use this with DVTSourceTextView");
-    return -1;
-}
-
 
 - (NSString *)xvim_string
 {
