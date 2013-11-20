@@ -1962,7 +1962,6 @@
     NSUInteger end = NSNotFound;
     NSUInteger tmpPos = NSNotFound;
     NSUInteger start = NSNotFound;
-    NSUInteger starts_end = NSNotFound;
     NSTextStorage *ts = self.textStorage;
     XVimBuffer *buffer = ts.xvim_buffer;
     
@@ -2014,10 +2013,10 @@
             end = [ts sentencesBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_PARAGRAPH_FORWARD:
-            end = [ts paragraphsForward:begin count:motion.count option:motion.option];
+            end = [ts moveFromIndex:begin paragraphs:motion.scount option:motion.option];
             break;
         case MOTION_PARAGRAPH_BACKWARD:
-            end = [ts paragraphsBackward:begin count:motion.count option:motion.option];
+            end = [ts moveFromIndex:begin paragraphs:-motion.scount option:motion.option];
             break;
         case MOTION_NEXT_CHARACTER:
             end = [ts nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
@@ -2092,16 +2091,8 @@
             break;
         case TEXTOBJECT_PARAGRAPH:
             // Not supported
-            start = self.insertionPoint;
-            if(start != 0){
-                start = [ts paragraphsBackward:self.insertionPoint count:1 option:MOPT_PARA_BOUND_BLANKLINE];
-            }
-            starts_end = [ts paragraphsForward:start count:1 option:MOPT_PARA_BOUND_BLANKLINE];
-            end = [ts paragraphsForward:self.insertionPoint count:motion.count option:MOPT_PARA_BOUND_BLANKLINE];
-            
-            if(starts_end != end){
-                start = starts_end;
-            }
+            start = [ts moveFromIndex:self.insertionPoint paragraphs:-1 option:MOPT_PARA_BOUND_BLANKLINE];
+            end   = [ts moveFromIndex:self.insertionPoint paragraphs:motion.scount option:MOPT_PARA_BOUND_BLANKLINE];
             range = NSMakeRange(start, end - start);
             break;
         case TEXTOBJECT_PARENTHESES:

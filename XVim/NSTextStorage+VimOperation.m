@@ -671,103 +671,50 @@
  paragraph boundary |posix|.
  */
 
-- (NSUInteger)paragraphsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
-    NSUInteger pos = index;
-    NSString* s = self.xvim_buffer.string;
+- (NSUInteger)moveFromIndex:(NSUInteger)index paragraphs:(NSInteger)count option:(MOTION_OPTION)opt
+{
     XVimBuffer *buffer = self.xvim_buffer;
+    NSUInteger  length = buffer.length;
+    NSUInteger  nlLen;
+    BOOL skippingBlankLines = YES, forward;
+    NSRange range;
 
-    if( 0 == pos ){
-        pos = 1;
+    if (count > 0) {
+        forward = YES;
+    } else {
+        forward = NO;
+        count   = -count;
     }
-    NSUInteger prevpos = pos - 1;
-    
-    NSUInteger paragraph_head = NSNotFound;
-    int paragraph_found = 0;
-    BOOL newlines_skipped = NO;
-    for( ; pos < s.length && NSNotFound == paragraph_head ; pos++,prevpos++ ){
-        unichar c = [s characterAtIndex:pos];
-        unichar prevc = [s characterAtIndex:prevpos];
-        if(isNewline(prevc) && !isNewline(c)){
-            if([buffer nextNonblankInLineAtIndex:pos allowEOL:NO] == NSNotFound && opt == MOPT_PARA_BOUND_BLANKLINE){
-                paragraph_found++;
-                if(count == paragraph_found){
-                    paragraph_head = pos;
-                    break;
-                }
+
+    while (forward ? index < length : index-- > 0) {
+        BOOL isParaSep = NO;
+
+        range = [buffer indexRangeForLineAtIndex:index newLineLength:&nlLen];
+        if (!forward) {
+            index = range.location;
+        }
+        if (range.length == 0) {
+            isParaSep = YES;
+        } else if (opt & MOPT_PARA_BOUND_BLANKLINE) {
+            if ([buffer firstNonblankInLineAtIndex:index allowEOL:NO] == NSNotFound) {
+                isParaSep = YES;
             }
         }
-        if( (isNewline(c) && isNewline(prevc)) ){
-            if( newlines_skipped ){
-                paragraph_found++;
-                if( count  == paragraph_found ){
-                    paragraph_head = pos;
-                    break;
-                }else{
-                    newlines_skipped = NO;
-                }
-            }else{
-                // skip continuous newlines 
-                continue;
+        if (skippingBlankLines) {
+            skippingBlankLines = isParaSep;
+        } else if (isParaSep) {
+            if (--count == 0) {
+                return index;
             }
-        }else{
-            newlines_skipped = YES;
+            skippingBlankLines = YES;
+        }
+        if (forward) {
+            index = NSMaxRange(range) + nlLen;
         }
     }
-    
-    if( NSNotFound == paragraph_head   ){
-        // end of document
-        paragraph_head = s.length;
-        while( ![self isValidCursorPosition:paragraph_head] ){
-            paragraph_head--;
-        }
-    }
-    
-    return paragraph_head;
+
+    return forward ? length : 0;
 }
-
-- (NSUInteger)paragraphsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
-    NSUInteger pos = index;
-    NSString* s = self.xvim_buffer.string;
-    if( pos == 0 ){
-        return NSNotFound;
-    }
-    if( pos == s.length )
-    {
-        pos = pos - 1;
-    }
-    NSUInteger prevpos = pos - 1;
-    NSUInteger paragraph_head = NSNotFound;
-    int paragraph_found = 0;
-    BOOL newlines_skipped = NO;
-    for( ; pos > 0 && NSNotFound == paragraph_head ; pos--,prevpos-- ){
-        unichar c = [s characterAtIndex:pos];
-        unichar prevc = [s characterAtIndex:prevpos];
-        if(isNewline(c) && isNewline(prevc)){
-            if( newlines_skipped ){
-                paragraph_found++;
-                if( count == paragraph_found ){
-                    paragraph_head = pos;
-                    break;
-                }else{
-                    newlines_skipped = NO;
-                }
-            }else{
-                // skip continuous newlines 
-                continue;
-            }
-        }else{
-            newlines_skipped = YES;
-        }
-    }
-    
-    if( NSNotFound == paragraph_head   ){
-        // begining of document
-        paragraph_head = 0;
-    }
-    
-    return paragraph_head;
-}
-
 
 - (NSUInteger)sectionsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
     return 0;

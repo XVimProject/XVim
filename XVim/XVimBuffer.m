@@ -133,14 +133,15 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
 
     NSString  *string = self.string;
     NSUInteger length = self.length;
-    NSUInteger lineNum = 0, end = 0, contentsEnd;
+    NSUInteger lineNum = 0, end = 0, pos, contentsEnd;
 
     do {
+        pos = end;
         [string getLineStart:NULL end:&end contentsEnd:&contentsEnd forRange:NSMakeRange(end, 0)];
         lineNum++;
         if (lineNum == num) {
             if (newLineLength) *newLineLength = end - contentsEnd;
-            return NSMakeRange(end, contentsEnd - end);
+            return NSMakeRange(pos, contentsEnd - pos);
         }
     } while (end < length);
 
@@ -168,7 +169,7 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     // TODO: we may need to keep track line number and position by hooking insertText: method.
     // FIXME: this code is actually never called in XVim for XCode, it probably has bugs, it's not tested
     NSString  *string = self.string;
-    NSUInteger length = self.length, start;
+    NSUInteger length = self.length, start = 0;
     NSUInteger lineNum = 0, end = 0, contentsEnd;
 
     do {
@@ -208,7 +209,7 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     }
 
     [string getLineStart:&index end:&end contentsEnd:&contentEnd forRange:NSMakeRange(index, 0)];
-    if (newLineLength) *newLineLength = contentEnd - end;
+    if (newLineLength) *newLineLength = end - contentEnd;
     return NSMakeRange(index, contentEnd - index);
 }
 

@@ -73,6 +73,7 @@ typedef enum _MOTION{
 @property MOTION_TYPE type;
 @property MOTION_OPTION option;
 @property NSUInteger count;
+@property NSInteger  scount;
 @property NSUInteger line;
 @property NSUInteger column;
 @property NSUInteger position;
