@@ -19,7 +19,6 @@
 #import "Logger.h"
 #import "XVimYankEvaluator.h"
 #import "NSTextStorage+VimOperation.h"
-#import "NSString+VimHelper.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimCommandLineEvaluator.h"
@@ -35,11 +34,8 @@
 // How the motion is treated depends on a subclass of the XVimMotionEvaluator.
 // For example, XVimDeleteEvaluator will delete the letters represented by motion.
 
-
-
 @interface XVimMotionEvaluator() {
     MOTION_TYPE _forcedMotionType;
-	BOOL _toggleInclusiveExclusive;
 }
 @end
 
@@ -89,7 +85,9 @@
  */
 
 -(XVimEvaluator*)_motionFixed:(XVimMotion*)motion{
-    if( _forcedMotionType == CHARACTERWISE_EXCLUSIVE){ // CHARACTERWISE_EXCLUSIVE means 'v' is pressed and it means toggle inclusive/exclusive. So its not always "exclusive"
+    if( _forcedMotionType == CHARACTERWISE_EXCLUSIVE){
+        // CHARACTERWISE_EXCLUSIVE means 'v' is pressed and it means toggle inclusive/exclusive.
+        // So its not always "exclusive"
         if( motion.type == LINEWISE ){
             motion.type = CHARACTERWISE_EXCLUSIVE;
         }else{
@@ -285,20 +283,18 @@
 }
 
 - (XVimEvaluator*)v{
-    _forcedMotionType = CHARACTERWISE_EXCLUSIVE; // This does not mean the motion will always be "exclusive". This is just for remembering that its type is "characterwise" forced.
-                                                 // Actual motion is decided by motions' default inclusive/exclusive attribute and _toggleInclusiveExclusive flag.
-    _toggleInclusiveExclusive = !_toggleInclusiveExclusive;
+    // This does not mean the motion will always be "exclusive".
+    // This is just for remembering that its type is "characterwise" forced.
+    _forcedMotionType = CHARACTERWISE_EXCLUSIVE;
     return self;
 }
 
 - (XVimEvaluator*)V{
-    _toggleInclusiveExclusive = NO;
     _forcedMotionType = LINEWISE;
     return self;
 }
 
 - (XVimEvaluator*)C_v{
-    _toggleInclusiveExclusive = NO;
     _forcedMotionType = BLOCKWISE;
     return self;
 }

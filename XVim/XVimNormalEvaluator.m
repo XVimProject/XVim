@@ -23,7 +23,6 @@
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
-#import "NSString+VimHelper.h"
 #import "XVimKeymapProvider.h"
 #import "Logger.h"
 #import "XVimCommandLineEvaluator.h"

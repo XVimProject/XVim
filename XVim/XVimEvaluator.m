@@ -20,7 +20,6 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimSearch.h"
 #import "XVimCommandLineEvaluator.h"
-#import "NSString+VimHelper.h"
 
 static XVimEvaluator *_invalidEvaluator = nil;
 static XVimEvaluator *_noOperationEvaluator = nil;
