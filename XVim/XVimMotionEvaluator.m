@@ -36,17 +36,16 @@
 
 @interface XVimMotionEvaluator() {
     MOTION_TYPE _forcedMotionType;
+    XVimMotion *_motion;
 }
 @end
 
 @implementation XVimMotionEvaluator
-@synthesize motion = _motion;
 
 - (id)initWithWindow:(XVimWindow *)window{
     self = [super initWithWindow:window];
     if (self) {
         _forcedMotionType = DEFAULT_MOTION_TYPE;
-        _motion = [XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) retain];
     }
     return self;
 }
@@ -155,25 +154,23 @@
     }
      */
     
-    self.motion.count = self.numericArg;
-    self.motion.character = childEvaluator.keyStroke.character;
-    [XVim instance].lastCharacterSearchMotion = self.motion;
-    return [self _motionFixed:self.motion];
+    _motion.count = self.numericArg;
+    _motion.character = childEvaluator.keyStroke.character;
+    [XVim instance].lastCharacterSearchMotion = _motion;
+    return [self _motionFixed:_motion];
 }
                                    
 - (XVimEvaluator*)f{
     [self.argumentString appendString:@"f"];
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
-    self.motion.motion = MOTION_NEXT_CHARACTER;
-    self.motion.type = CHARACTERWISE_INCLUSIVE;
+    _motion = [XVIM_MAKE_MOTION(MOTION_NEXT_CHARACTER, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) retain];
     return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)F{
     [self.argumentString appendString:@"F"];
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
-    self.motion.motion = MOTION_PREV_CHARACTER;
-    self.motion.type = CHARACTERWISE_EXCLUSIVE;
+    _motion = [XVIM_MAKE_MOTION(MOTION_PREV_CHARACTER, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1) retain];
     return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
@@ -202,11 +199,12 @@
 
 
 - (XVimEvaluator*)G{
-    XVimMotion* m =XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, LEFT_RIGHT_NOWRAP, [self numericArg]);
-    if([self numericMode]){
+    XVimMotion *m;
+    if ([self numericMode]){
+        m = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, LEFT_RIGHT_NOWRAP, [self numericArg]);
         m.line = [self numericArg];
     }else{
-        m.motion = MOTION_LASTLINE;
+        m = XVIM_MAKE_MOTION(MOTION_LASTLINE, LINEWISE, LEFT_RIGHT_NOWRAP, [self numericArg]);
     }
     return [self _motionFixed:m];
 }
@@ -245,7 +243,8 @@
     if( opposite ){
         m.motion = (m.motion == MOTION_SEARCH_FORWARD) ? MOTION_SEARCH_BACKWARD : MOTION_SEARCH_FORWARD;
     }
-    self.motion = m;
+    [_motion release];
+    _motion = [m retain];
     return [self _motionFixed:m];
 }
 
@@ -269,16 +268,14 @@
 - (XVimEvaluator*)t{
     [self.argumentString appendString:@"t"];
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
-    self.motion.motion = MOTION_TILL_NEXT_CHARACTER;
-    self.motion.type = CHARACTERWISE_INCLUSIVE;
+    _motion = [XVIM_MAKE_MOTION(MOTION_TILL_NEXT_CHARACTER, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) retain];
     return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)T{
     [self.argumentString appendString:@"T"];
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
-    self.motion.motion = MOTION_TILL_PREV_CHARACTER;
-    self.motion.type = CHARACTERWISE_EXCLUSIVE;
+    _motion = [XVIM_MAKE_MOTION(MOTION_TILL_PREV_CHARACTER, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1) retain];
     return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
