@@ -7,7 +7,6 @@
 //
 
 #import "XVimHookManager.h"
-#import "IDESourceCodeEditorHook.h"
 #import "IDEEditor+XVim.h"
 #import "IDEEditorArea+XVim.h"
 #import "IDEWorkspaceWindowHook.h"
@@ -21,7 +20,6 @@
     [IDEEditorArea xvim_initialize];
     [IDEWorkspaceWindowHook hook];
     [DVTSourceTextScrollViewHook hook];
-    [IDESourceCodeEditorHook hook];
     [IDEEditor xvim_initialize];
     [IDEComparisonEditor xvim_initialize];
     [XVimView class];
