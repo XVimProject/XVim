@@ -251,7 +251,7 @@
 
     NSUInteger lno = [buffer lineNumberAtIndex:index];
 
-    lno = lno < count ? 1 : lno - count;
+    lno = lno <= count ? 1 : lno - count;
     return [buffer indexOfLineNumber:lno column:column];
 }
 
