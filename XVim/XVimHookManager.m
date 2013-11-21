@@ -7,18 +7,20 @@
 //
 
 #import "XVimHookManager.h"
-#import "IDEEditorAreaHook.h"
 #import "DVTSourceTextViewHook.h"
 #import "DVTTextSidebarViewHook.h"
 #import "IDESourceCodeEditorHook.h"
 #import "IDEEditorHook.h"
+#import "IDESourceCodeEditorHook.h"
+#import "IDEEditorArea+XVim.h"
 #import "IDEWorkspaceWindowHook.h"
 #import "DVTSourceTextScrollViewHook.h"
 
 @implementation XVimHookManager
 
-+ (void)hookWhenPluginLoaded{
-    [IDEEditorAreaHook hook];
++ (void)hookWhenPluginLoaded
+{
+    [IDEEditorArea xvim_initialize];
     [IDEWorkspaceWindowHook hook];
     [DVTSourceTextViewHook hook];
     [DVTTextSidebarViewHook hook];
