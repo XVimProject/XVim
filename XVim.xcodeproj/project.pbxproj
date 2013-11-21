@@ -92,7 +92,6 @@
 		A28F424D17EEDBC200A3F7AE /* XVimHistoryHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */; };
 		A28F424E17EEDBC200A3F7AE /* XVimMarkSetEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F114154267BA007410ED /* XVimMarkSetEvaluator.m */; };
 		A28F424F17EEDBC200A3F7AE /* XVimArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F11715427AE6007410ED /* XVimArgumentEvaluator.m */; };
-		A28F425017EEDBC200A3F7AE /* IDEEditorAreaHook.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADAB821545C18F0093A908 /* IDEEditorAreaHook.m */; };
 		A28F425117EEDBC200A3F7AE /* XVimStatusLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ABFE1215497A3C002220E8 /* XVimStatusLine.m */; };
 		A28F425217EEDBC200A3F7AE /* XVimHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C345DDBA154CE12A009F232E /* XVimHookManager.m */; };
 		A28F425317EEDBC200A3F7AE /* IDEEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */; };
@@ -133,7 +132,6 @@
 		A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A736351527484B0051E8E4 /* XVimExCommand.m */; };
 		A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
 		A2ABFE1315497A3C002220E8 /* XVimStatusLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ABFE1215497A3C002220E8 /* XVimStatusLine.m */; };
-		A2ADAB831545C18F0093A908 /* IDEEditorAreaHook.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADAB821545C18F0093A908 /* IDEEditorAreaHook.m */; };
 		A2AFD7341790F300009B442B /* XVimRecordingEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AFD7331790F2FF009B442B /* XVimRecordingEvaluator.m */; };
 		A2AFD73717914ACE009B442B /* XVimTester+Recording.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AFD73617914ACE009B442B /* XVimTester+Recording.m */; };
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
@@ -300,8 +298,6 @@
 		A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLine.m; path = XVim/XVimCommandLine.m; sourceTree = SOURCE_ROOT; };
 		A2ABFE1115497A3C002220E8 /* XVimStatusLine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimStatusLine.h; path = XVim/XVimStatusLine.h; sourceTree = SOURCE_ROOT; };
 		A2ABFE1215497A3C002220E8 /* XVimStatusLine.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimStatusLine.m; path = XVim/XVimStatusLine.m; sourceTree = SOURCE_ROOT; };
-		A2ADAB811545C18F0093A908 /* IDEEditorAreaHook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEEditorAreaHook.h; path = XVim/IDEEditorAreaHook.h; sourceTree = SOURCE_ROOT; };
-		A2ADAB821545C18F0093A908 /* IDEEditorAreaHook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = IDEEditorAreaHook.m; path = XVim/IDEEditorAreaHook.m; sourceTree = SOURCE_ROOT; };
 		A2AFD7321790F2FD009B442B /* XVimRecordingEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRecordingEvaluator.h; path = XVim/XVimRecordingEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2AFD7331790F2FF009B442B /* XVimRecordingEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRecordingEvaluator.m; path = XVim/XVimRecordingEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A2AFD73617914ACE009B442B /* XVimTester+Recording.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Recording.m"; path = "XVim/XVimTester+Recording.m"; sourceTree = SOURCE_ROOT; };
@@ -782,8 +778,6 @@
 				A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m */,
 				C38A5B4515272DCC00E1448D /* IDESourceCodeEditorHook.h */,
 				C38A5B4615272DCD00E1448D /* IDESourceCodeEditorHook.m */,
-				A2ADAB811545C18F0093A908 /* IDEEditorAreaHook.h */,
-				A2ADAB821545C18F0093A908 /* IDEEditorAreaHook.m */,
 				A26ACC4C154F2D6600B27D69 /* IDEEditor+XVim.h */,
 				A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */,
 				A2702B0016FE537D005ADD76 /* IDEWorkspaceWindowHook.h */,
@@ -932,7 +926,6 @@
 				A28F424D17EEDBC200A3F7AE /* XVimHistoryHandler.m in Sources */,
 				A28F424E17EEDBC200A3F7AE /* XVimMarkSetEvaluator.m in Sources */,
 				A28F424F17EEDBC200A3F7AE /* XVimArgumentEvaluator.m in Sources */,
-				A28F425017EEDBC200A3F7AE /* IDEEditorAreaHook.m in Sources */,
 				A28F425117EEDBC200A3F7AE /* XVimStatusLine.m in Sources */,
 				A28F425217EEDBC200A3F7AE /* XVimHookManager.m in Sources */,
 				6E2B332D1836E42F00EFE4E2 /* XVimBuffer.m in Sources */,
@@ -1016,7 +1009,6 @@
 				C3552DA8153AC6F800D57577 /* XVimHistoryHandler.m in Sources */,
 				C3E8F115154267BA007410ED /* XVimMarkSetEvaluator.m in Sources */,
 				C3E8F11815427AE6007410ED /* XVimArgumentEvaluator.m in Sources */,
-				A2ADAB831545C18F0093A908 /* IDEEditorAreaHook.m in Sources */,
 				A2ABFE1315497A3C002220E8 /* XVimStatusLine.m in Sources */,
 				C345DDBB154CE12A009F232E /* XVimHookManager.m in Sources */,
 				6E2B332C1836E42F00EFE4E2 /* XVimBuffer.m in Sources */,

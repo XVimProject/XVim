@@ -7,9 +7,9 @@
 //
 
 #import "XVimHookManager.h"
-#import "IDEEditorAreaHook.h"
 #import "IDESourceCodeEditorHook.h"
 #import "IDEEditor+XVim.h"
+#import "IDEEditorArea+XVim.h"
 #import "IDEWorkspaceWindowHook.h"
 #import "DVTSourceTextScrollViewHook.h"
 #import "XVimView.h"
@@ -18,7 +18,7 @@
 
 + (void)hookWhenPluginLoaded
 {
-    [IDEEditorAreaHook hook];
+    [IDEEditorArea xvim_initialize];
     [IDEWorkspaceWindowHook hook];
     [DVTSourceTextScrollViewHook hook];
     [IDESourceCodeEditorHook hook];

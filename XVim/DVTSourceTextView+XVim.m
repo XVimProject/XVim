@@ -17,6 +17,6 @@
 }
 
 - (XVimWindow*)xvimWindow{
-    return [[self editorArea] xvimWindow];
+    return [[self editorArea] xvim_window];
 }
 @end
