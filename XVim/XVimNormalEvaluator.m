@@ -44,13 +44,6 @@
 
 @implementation XVimNormalEvaluator
 
--(id)initWithWindow:(XVimWindow *)window{
-	self = [super initWithWindow:window];
-    if (self) {
-    }
-    return self;
-}
-    
 - (void)becameHandler{
     [super becameHandler];
     [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
@@ -147,7 +140,7 @@
     // process
     XVimWindow *window = self.window;
     XVimBuffer *buffer = window.currentBuffer;
-    NSRange range = window.sourceView.selectedRange;
+    NSRange range = self.sourceView.selectedRange;
 
     NSUInteger numberOfLines = [buffer numberOfLines];
     NSUInteger lineNumber = [buffer lineNumberAtIndex:range.location];
@@ -172,7 +165,7 @@
 
 - (XVimEvaluator*)onComplete_g:(XVimGActionEvaluator*)childEvaluator{
     if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
-        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
+        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:self.window.currentBuffer.document];
         return [self jumpToMark:mark firstOfLine:NO];
     }else{
         if( childEvaluator.motion != nil ){

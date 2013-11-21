@@ -190,7 +190,7 @@
 
 - (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
     if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
-        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
+        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:self.window.currentBuffer.document];
         return [self jumpToMark:mark firstOfLine:NO];
     }else{
         return [self _motionFixed:childEvaluator.motion];
@@ -352,7 +352,7 @@
         return [XVimEvaluator invalidEvaluator];
     }
     
-    if( ![mark.document isEqualToString:self.sourceView.documentURL.path]){
+    if( ![mark.document isEqualToString:buffer.document.fileURL.path]){
         IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
         NSError* error;
         NSURL* doc = [NSURL fileURLWithPath:mark.document];
@@ -372,7 +372,7 @@
     XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
     cur_mark.line = [buffer lineNumberAtIndex:cur_pos];
     cur_mark.column = [buffer columnOfIndex:cur_pos];
-    cur_mark.document = [self.sourceView documentURL].path;
+    cur_mark.document = buffer.document.fileURL.path;
     if( nil != mark.document ){
         [[XVim instance].marks setMark:cur_mark forName:@"'"];
     }
@@ -398,7 +398,7 @@
     // This will work for Ctrl-c as register c but it should not
     //NSString* key = [childEvaluator.keyStroke toString];
     NSString* key = [NSString stringWithFormat:@"%c", childEvaluator.keyStroke.character];
-    XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
+    XVimMark* mark = [[XVim instance].marks markForName:key forDocument:self.window.currentBuffer.document];
     return [self jumpToMark:mark firstOfLine:YES];
 }
 
@@ -413,7 +413,7 @@
     // This will work for Ctrl-c as register c but it should not
     // NSString* key = [childEvaluator.keyStroke toString];
     NSString* key = [NSString stringWithFormat:@"%c", childEvaluator.keyStroke.character];
-    XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
+    XVimMark* mark = [[XVim instance].marks markForName:key forDocument:self.window.currentBuffer.document];
     return [self jumpToMark:mark firstOfLine:NO];
 }
 
@@ -432,7 +432,7 @@
 // it will moves to start of the numeric argument - 1 lines down.
 - (XVimEvaluator*)UNDERSCORE{
     // TODO add this motion interface to NSTextView
-    NSTextView *view = [self.window sourceView];
+    NSTextView *view = self.sourceView;
     XVimBuffer *buffer = self.window.currentBuffer;
     NSRange r = [view selectedRange];
     NSUInteger repeat = self.numericArg;

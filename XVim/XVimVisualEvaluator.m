@@ -55,8 +55,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
     
 - (id)initWithWindow:(XVimWindow *)window mode:(XVIM_VISUAL_MODE)mode {
-    NSUInteger start = [[[window.sourceView selectedRanges] objectAtIndex:0] rangeValue].location;
-    NSUInteger end = NSMaxRange([[[window.sourceView selectedRanges] lastObject] rangeValue]);
+    NSTextView *sourceView = window.currentView.textView;
+    NSUInteger start = [[sourceView.selectedRanges objectAtIndex:0] rangeValue].location;
+    NSUInteger end = NSMaxRange([sourceView.selectedRanges.lastObject rangeValue]);
     XVimBuffer *buffer = window.currentBuffer;
 
     if (end > start) {
@@ -72,7 +73,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
         _initial.end.column   = [buffer columnOfIndex:end];
         _initial.colwant      = _initial.end.column;
 
-        if ([window.sourceView selectedRanges].count > 1) {
+        if (sourceView.selectedRanges.count > 1) {
             // Treat it as block selection
             _initial.mode = XVIM_VISUAL_BLOCK;
         }

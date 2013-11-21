@@ -14,7 +14,6 @@
 #import "XVimOptions.h"
 #import "Logger.h"
 #import "XVimUtil.h"
-#import "IDEKit.h"
 
 @implementation XVimSearch
 
@@ -153,7 +152,7 @@
 #ifdef __MAC_10_7
     XVimOptions *options = [[XVim instance] options];
     
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
     NSUInteger search_base = from;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines | NSRegularExpressionUseUnicodeWordBoundaries;
@@ -223,7 +222,7 @@
     NSRange found = {NSNotFound, 0};
 #ifdef __MAC_10_7    
 	XVimOptions *options = [[XVim instance] options];
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
     NSUInteger search_base = from;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
@@ -307,7 +306,7 @@
 {
     NSRange found = {NSNotFound,0};
 #ifdef __MAC_10_7
-    NSTextView *view = [window sourceView];
+    NSTextView *view = window.currentView.textView;
 
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
@@ -395,7 +394,7 @@
     
 #ifdef __MAC_10_7    
     
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
@@ -477,7 +476,7 @@
     // Find the position to end the searching
     NSUInteger endOfReplacement = [buffer indexOfLineNumber:to+1 column:0]; // Next line of the end of range.
     if( NSNotFound == endOfReplacement ){
-        endOfReplacement = [[[window sourceView] string] length];
+        endOfReplacement = buffer.length;
     }
     // This is lazy implementation.
     // When text is substituted the end location may be smaller or greater than original end position.

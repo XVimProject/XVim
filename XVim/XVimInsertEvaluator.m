@@ -206,7 +206,7 @@
     // Position for "^" is before escaped from insert mode
     NSUInteger pos = self.sourceView.insertionPoint;
     XVimBuffer *buffer = self.window.currentBuffer;
-    XVimMark *mark = XVimMakeMark([buffer lineNumberAtIndex:pos], [buffer columnOfIndex:pos], buffer.document.fileURL.path);
+    XVimMark *mark = XVimMakeMark([buffer lineNumberAtIndex:pos], [buffer columnOfIndex:pos], buffer.document);
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:@"^"];
     }
@@ -215,7 +215,7 @@
     
     // Position for "." is after escaped from insert mode
     pos = self.sourceView.insertionPoint;
-    mark = XVimMakeMark([buffer lineNumberAtIndex:pos], [buffer columnOfIndex:pos], buffer.document.fileURL.path);
+    mark = XVimMakeMark([buffer lineNumberAtIndex:pos], [buffer columnOfIndex:pos], buffer.document);
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:@"."];
     }

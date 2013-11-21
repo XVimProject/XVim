@@ -10,6 +10,7 @@
 #import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
 #import "XVimBuffer.h"
+#import "XVimView.h"
 
 /*
  * This class manages 1 window. (The term "window" here is different from NSWindow)
@@ -18,7 +19,6 @@
  * the associated XVimWindow object first and it handles the event.
  */
 
-@class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
 @class IDEEditorArea;
@@ -27,9 +27,9 @@
 @class IDEEditorArea;
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
-@property(readonly) NSTextView *sourceView; // This represents currently focused sourceView
-@property(readonly) XVimCommandLine *commandLine;
-@property(readonly) XVimBuffer *currentBuffer;
+@property(nonatomic, readonly) XVimCommandLine *commandLine;
+@property(nonatomic, readonly) XVimBuffer *currentBuffer;
+@property(nonatomic, readonly) XVimView *currentView;
 
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea;
 

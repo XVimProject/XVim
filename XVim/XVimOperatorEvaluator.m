@@ -16,6 +16,9 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "NSTextView+VimOperation.h"
+#import "XVimYankEvaluator.h"
+#import "XVimShiftEvaluator.h"
+#import "XVimJoinEvaluator.h"
 
 @interface XVimOperatorEvaluator() {
 }
@@ -27,12 +30,6 @@
 
 + (XVimEvaluator*)doOperationWithMotion:(XVimMotion*)motion onView:(NSTextView*)view{
     return nil;
-}
-
-- (id)initWithWindow:window{
-	if (self = [super initWithWindow:window]){
-	}
-	return self;
 }
 
 - (void)dealloc {
@@ -71,20 +68,20 @@
     // We do not fix the change here if next evaluator is not nil becaust it waits more input for fix the command.
     // This happens for a command like "cw..."
     if( nil == evaluator ){
-        NSTextView* view = self.window.sourceView;
-        NSString* className = NSStringFromClass([self class]);
-        if( ![className isEqualToString:@"XVimYankEvaluator"]){
+        XVimBuffer *buffer = self.window.currentBuffer;
+        Class aClass = self.class;
+
+        if (aClass != [XVimYankEvaluator class]) {
             [[XVim instance] fixOperationCommands];
             XVimMark* mark = nil;
-            if( [className isEqualToString:@"XVimJoinEvaluator"]){
+            if (aClass == [XVimJoinEvaluator class]) {
                 // This is specical case for join operation.
                 // The mark is set at the head of next line of the insertion point after the operation
-                mark = XVimMakeMark([self.sourceView insertionLine]+1, 0, view.documentURL.path);
-            }else if( [className isEqualToString:@"XVimShiftEvaluator"] ){
-                mark = XVimMakeMark([self.sourceView insertionLine], 0, view.documentURL.path);
-            }
-            else{
-                mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);
+                mark = XVimMakeMark([self.sourceView insertionLine]+1, 0, buffer.document);
+            } else if (aClass == [XVimShiftEvaluator class]) {
+                mark = XVimMakeMark([self.sourceView insertionLine], 0, buffer.document);
+            } else {
+                mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], buffer.document);
             }
             
             if( nil != mark.document){

@@ -27,7 +27,7 @@
         // J and 2J is the same
         motion.count--;
     }
-    [self.window.sourceView xvim_join:motion.count addSpace:_addSpace];
+    [self.sourceView xvim_join:motion.count addSpace:_addSpace];
     return nil;
 }
 

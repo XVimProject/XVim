@@ -12,8 +12,27 @@
 #import "XVimUndo.h"
 #import "XVimTextStoring.h"
 #import "NSString+VimHelper.h"
+#import "Logger.h"
 
 static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
+
+@implementation NSTextStorage (XVimBuffer)
+
+- (XVimBuffer *)xvim_buffer
+{
+    return objc_getAssociatedObject(self, XVIM_KEY_BUFFER);
+}
+
+@end
+
+@implementation NSDocument (XVimBuffer)
+
+- (XVimBuffer *)xvim_buffer
+{
+    return objc_getAssociatedObject(self, XVIM_KEY_BUFFER);
+}
+
+@end
 
 @implementation XVimBuffer {
     NSDocument    *__unsafe_unretained _document;
@@ -47,6 +66,8 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
         objc_setAssociatedObject(document, XVIM_KEY_BUFFER, self, OBJC_ASSOCIATION_RETAIN);
         objc_setAssociatedObject(textStorage, XVIM_KEY_BUFFER, self, OBJC_ASSOCIATION_RETAIN);
 
+        DEBUG_LOG("Buffer %p created for %@, backed by %@", self, document, textStorage);
+
         if ([_textStorage conformsToProtocol:@protocol(XVimTextStoring)]) {
 #define CHECK(k, sel)  _flags.has_xvim_##k = (bool)[_textStorage respondsToSelector:sel]
             CHECK(string, @selector(xvim_string));
@@ -64,6 +85,8 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
 
 - (void)dealloc
 {
+    DEBUG_LOG("Buffer %p destroyed", self);
+
     [_curOp release];
     [super dealloc];
 }
@@ -71,10 +94,6 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
 + (XVimBuffer *)makeBufferForDocument:(NSDocument *)document
                           textStorage:(NSTextStorage *)textStorage
 {
-    XVimBuffer *buffer = document.xvim_buffer;
-
-    if (buffer) return buffer;
-
     return [[[[self class] alloc] initWithDocument:document textStorage:textStorage] autorelease];
 }
 
@@ -656,24 +675,6 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     index = range.location + repl.length - 1;
     if (doOp) [self endEditingAtIndex:index];
     return index;
-}
-
-@end
-
-@implementation NSTextStorage (XVimBuffer)
-
-- (XVimBuffer *)xvim_buffer
-{
-    return objc_getAssociatedObject(self, XVIM_KEY_BUFFER);
-}
-
-@end
-
-@implementation NSDocument (XVimBuffer)
-
-- (XVimBuffer *)xvim_buffer
-{
-    return objc_getAssociatedObject(self, XVIM_KEY_BUFFER);
 }
 
 @end

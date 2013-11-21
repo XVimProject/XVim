@@ -28,11 +28,14 @@
 
 
 extern NSString * const XVimBufferChangedNotification;
+extern NSString * const XVimEnabledStatusChangedNotification;
 extern NSString * const XVimBufferKey;
 
 @interface XVim : NSObject<XVimKeymapProvider>
 
 + (XVim*)instance;
+@property (nonatomic, readonly) BOOL disabled;
+
 @property (strong) XVimOptions* options;
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimMotion* lastCharacterSearchMotion;

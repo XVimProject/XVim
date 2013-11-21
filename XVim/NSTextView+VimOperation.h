@@ -60,7 +60,6 @@
 @property(readonly) XVIM_VISUAL_MODE selectionMode;
 @property(readonly) BOOL selectionToEOL;
 @property(readonly) CURSOR_MODE cursorMode;
-@property(readonly) NSURL* documentURL;
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
 @property BOOL needsUpdateFoundRanges;
 @property(readonly) NSArray* foundRanges;

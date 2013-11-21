@@ -585,7 +585,7 @@
 // This method correnspons parsing part of get_address in ex_cmds.c
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
 {
-    NSTextView* view = [window sourceView];
+    NSTextView* view = window.currentView.textView;
     //DVTFoldingTextStorage* storage = [view textStorage];
     //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
     NSUInteger addr = NSNotFound;
@@ -733,7 +733,7 @@
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
 	
-    NSTextView* view = [window sourceView];
+    NSTextView* view = window.currentView.textView;
     XVimBuffer *buffer = window.currentBuffer;
     for(;;){
         NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
@@ -816,7 +816,7 @@
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
-		NSTextView* srcView = [window sourceView];
+		NSTextView* srcView = window.currentView.textView;
         XVimBuffer *buffer = window.currentBuffer;
 
         // Jump to location
@@ -829,7 +829,7 @@
             pos_wo_space = pos;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [srcView xvim_scrollTo:[window.sourceView insertionPoint]];
+        [srcView xvim_scrollTo:[window.currentView.textView insertionPoint]];
         return;
     }
     
@@ -1001,7 +1001,7 @@
 }
 
 - (void)marks:(XVimExArg*)args inWindow:(XVimWindow*)window{ // This is currently impelemented for debugging purpose
-    NSString* local = [[XVim instance].marks dumpMarksForDocument:window.sourceView.documentURL.path];
+    NSString* local = [[XVim instance].marks dumpMarksForDocument:window.currentBuffer.document.fileURL.path];
     NSString* file = [[XVim instance].marks dumpFileMarks];
     [[XVim instance] writeToConsole:@"----LOCAL MARKS----\n%@", local];
     [[XVim instance] writeToConsole:@"----FILE MARKS----\n%@", file];
@@ -1097,7 +1097,7 @@
 
 - (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
 	XVimOptions* options = [[XVim instance] options];
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
@@ -1127,7 +1127,7 @@
 }
 
 - (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window{
-    NSTextView *view = [window sourceView];
+    NSTextView *view = window.currentView.textView;
     
     NSString *cmdString = [[args cmd] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *argsString = [args arg];

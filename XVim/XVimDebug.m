@@ -27,18 +27,22 @@
     }
 }
 
-- (void)highlight:(NSArray*)params withWindow:(XVimWindow*)window{
-    NSTextView* view = window.sourceView;
-    [[view textStorage] beginEditing];
-    [[view textStorage] addAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] range:NSMakeRange(0,5)];
-    [[view textStorage] endEditing];
+- (void)highlight:(NSArray*)params withWindow:(XVimWindow*)window
+{
+    NSTextStorage *ts = window.currentBuffer.textStorage;
+
+    [ts beginEditing];
+    [ts addAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] range:NSMakeRange(0,5)];
+    [ts endEditing];
 }
 
-- (void)highlightclear:(NSArray*)params withWindow:(XVimWindow*)window{
-    NSTextView* view = window.sourceView;
-    [[view textStorage] beginEditing];
-    [[view textStorage] addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, view.string.length)];
-    [[view textStorage] endEditing];
+- (void)highlightclear:(NSArray*)params withWindow:(XVimWindow*)window
+{
+    NSTextStorage *ts = window.currentBuffer.textStorage;
+
+    [ts beginEditing];
+    [ts addAttribute:NSBackgroundColorAttributeName value:[NSColor clearColor] range:NSMakeRange(0, ts.length)];
+    [ts endEditing];
 }
 
 @end

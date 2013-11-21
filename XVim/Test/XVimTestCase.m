@@ -62,9 +62,12 @@
 }
 
 - (void)setUp{
-    [[[XVimLastActiveSourceView() xvimWindow] sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-    [XVimLastActiveSourceView() setString:self.initialText];
-    [XVimLastActiveSourceView() setSelectedRange:self.initialRange];
+    XVimWindow *window = XVimLastActiveSourceView().xvimWindow;
+    NSTextView *view = window.currentView.textView;
+
+    [view xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    [view setString:self.initialText];
+    [view setSelectedRange:self.initialRange];
 }
 
 - (BOOL)assert{

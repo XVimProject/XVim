@@ -44,6 +44,7 @@
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea
 {
     if (self = [super init]){
+        DEBUG_LOG("Window %p created on %@", self, editorArea);
 		_staticString = [@"" retain];
 		_keymapContext = [[XVimKeymapContext alloc] init];
         _editorArea = [editorArea retain];
@@ -61,28 +62,30 @@
 - (NSTextView *)sourceView
 {
     IDEEditor *editor = _editorArea.lastActiveEditorContext.editor;
-    id obj;
 
-    obj = _editorArea.workspaceTabController.windowController.window.firstResponder;
-    if ([obj isKindOfClass:[DVTSourceTextView class]]){
-        return obj;
+    if ([editor isKindOfClass:[IDEComparisonEditor class]]) {
+        editor = [(id)editor keyEditor];
     }
 
-    if (_editorArea.editorMode == 2 && [editor isKindOfClass:[IDEComparisonEditor class]]) {
-        obj = [[(IDEComparisonEditor *)editor keyEditor] mainScrollView].documentView;
-        return obj;
+    if ([editor isKindOfClass:NSClassFromString(@"IDESourceCodeEditor")]) {
+        return [(id)editor textView];
     }
+    return nil;
+}
 
-    return editor.mainScrollView.documentView;
+- (XVimView *)currentView
+{
+    return self.sourceView.xvim_view;
 }
 
 - (XVimBuffer *)currentBuffer
 {
-    return self.sourceView.textStorage.xvim_buffer;
+    return self.currentView.textView.textStorage.xvim_buffer;
 }
 
 - (void)dealloc
 {
+    DEBUG_LOG("Window %p deleted", self);
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_keymapContext release];
     [_staticString release];
@@ -237,9 +240,11 @@
     [xvim appendOperationKeyStroke:[keyStroke xvimString]];
 
     // Evaluate key stroke
-	XVimEvaluator* currentEvaluator = [evaluatorStack lastObject];
+    XVimEvaluator* currentEvaluator = [[evaluatorStack lastObject] retain];
     currentEvaluator.window = self;
-	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
+
+    XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
+    [currentEvaluator release];
 
     // Manipulate evaluator stack
     while(YES){

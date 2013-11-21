@@ -42,7 +42,7 @@
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
         _evalutionResult = nil;
-        self.lastTextView = window.sourceView;
+        self.lastTextView = self.sourceView;
         XVimCommandField *commandField = self.window.commandLine.commandField;
         [commandField setString:_firstLetter];
         [commandField moveToEndOfLine:self];
@@ -94,7 +94,7 @@
 - (void)takeFocusFromWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:self.window];
-	[[[self.window sourceView] window] makeFirstResponder:commandField];
+	[self.sourceView.window  makeFirstResponder:commandField];
 }
 
 - (void)relinquishFocusToWindow{

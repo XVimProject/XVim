@@ -41,7 +41,7 @@
 }
 
 - (XVimEvaluator*)i{
-    XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.sourceView.documentURL.path];
+    XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.window.currentBuffer.document];
     XVimInsertionPoint mode = XVIM_INSERT_DEFAULT;
     XVimBuffer *buffer = self.window.currentBuffer;
 
@@ -55,7 +55,7 @@
             XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
             cur_mark.line = [self.sourceView insertionLine];
             cur_mark.column = [self.sourceView insertionColumn];
-            cur_mark.document = [self.sourceView documentURL].path;
+            cur_mark.document = self.window.currentBuffer.document.fileURL.path;
             if( nil != mark.document){
                 [[XVim instance].marks setMark:cur_mark forName:@"'"];
             }

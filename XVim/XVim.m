@@ -33,7 +33,6 @@
 #import "XVimHistoryHandler.h"
 #import "XVimHookManager.h"
 #import "XVimCommandLine.h"
-#import "DVTSourceTextViewHook.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
 #import "XVimTester.h"
@@ -42,6 +41,7 @@
 #import "objc/runtime.h"
 
 NSString * const XVimBufferChangedNotification = @"XVimBufferChangedNotification";
+NSString * const XVimEnabledStatusChangedNotification = @"XVimBufferEnableNotification";
 NSString * const XVimBufferKey = @"XVimBufferKey";
 
 @interface XVim() {
@@ -57,6 +57,7 @@ NSString * const XVimBufferKey = @"XVimBufferKey";
 @end
 
 @implementation XVim
+@synthesize disabled = _disabled;
 
 // For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{
@@ -241,8 +242,8 @@ NSString * const XVimBufferKey = @"XVimBufferKey";
         NSTextStorage *textStorage = [[object document] textStorage];
         XVimBuffer *buffer = document.xvim_buffer;
 
-        self.document = document.fileURL.path;
-        if (!buffer) {
+        if (!buffer && [document.fileURL isFileURL]) {
+            self.document = document.fileURL.path;
             buffer = [XVimBuffer makeBufferForDocument:document textStorage:textStorage];
         }
         if (buffer) {
@@ -337,14 +338,17 @@ NSString * const XVimBufferKey = @"XVimBufferKey";
     [self.testRunner runTest];
 }
 
-- (void)toggleXVim:(id)sender{
-    if( [(NSCell*)sender state] == NSOnState ){
-        [DVTSourceTextViewHook unhook];
-        [(NSCell*)sender setState:NSOffState];
-    }else{
-        [DVTSourceTextViewHook hook];
-        [(NSCell*)sender setState:NSOnState];
+- (void)toggleXVim:(NSCell *)sender{
+    if ([sender state] == NSOnState) {
+        _disabled = YES;
+        [sender setState:NSOffState];
+    } else {
+        _disabled = NO;
+        [sender setState:NSOnState];
     }
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:XVimEnabledStatusChangedNotification
+                                                        object:nil userInfo:nil];
 }
 
 @end

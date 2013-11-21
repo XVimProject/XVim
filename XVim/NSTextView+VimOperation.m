@@ -48,7 +48,6 @@
 @property XVIM_VISUAL_MODE selectionMode;
 @property BOOL selectionToEOL;
 @property CURSOR_MODE cursorode;
-@property(strong) NSURL* documentURL;
 @property(readonly) NSMutableArray* foundRanges;
 
 // Internal properties
@@ -61,7 +60,6 @@
 - (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (void)xvim_syncState; // update self's properties with our variables
 - (NSArray*)xvim_selectedRanges;
-- (void)xvim_setSelectedRange:(NSRange)range;
 - (XVimRange)xvim_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion;
 - (NSRange)xvim_getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (void)xvim_indentCharacterRange:(NSRange)range;
@@ -419,10 +417,6 @@
 
 - (void)setCursorMode:(CURSOR_MODE)cursorMode{
     [self setInteger:cursorMode forName:@"cursorMode"];
-}
-
-- (NSURL*)documentURL{
-    return self.textStorage.xvim_buffer.document.fileURL;
 }
 
 - (void)setXvimDelegate:(id)xvimDelegate{
@@ -1900,32 +1894,6 @@
 }
 
 - (void)dumpState{
-    LOG_STATE();
-}
-
-// xvim_setSelectedRange is an internal method
-// This is used when you want to call [self setSelectedRrange];
-// The difference is that this checks the bounds(range can not be include EOF) and protect from Assersion
-// Cursor can be on EOF but EOF can not be selected.
-// It means that
-//   - setSelectedRange:NSMakeRange( indexOfEOF, 0 )   is allowed
-//   - setSelectedRange:NSMakeRange( indexOfEOF, 1 )   is not allowed
-- (void)xvim_setSelectedRange:(NSRange)range{
-    if( [self.textStorage isEOF:range.location] ){
-        [self setSelectedRange:NSMakeRange(range.location,0)];
-        return;
-    }
-    if( 0 == range.length ){
-        // No need to check bounds
-    }else{
-        NSUInteger lastIndex = range.location + range.length - 1;
-        if( [self.textStorage isEOF:lastIndex] ){
-            range.length--;
-        }else{
-            // No need to change the selection area
-        }
-    }
-    [self setSelectedRange:range];
     LOG_STATE();
 }
 

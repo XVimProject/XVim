@@ -32,7 +32,7 @@
 	NSRange r = [self.sourceView selectedRange];
     mark.line = [buffer lineNumberAtIndex:r.location];
     mark.column = [buffer columnOfIndex:r.location];
-    mark.document = [[self.sourceView documentURL] path];
+    mark.document = buffer.document.fileURL.path;
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:keyStr];
     }

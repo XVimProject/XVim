@@ -55,6 +55,7 @@ static XVimEvaluator *_popEvaluator = nil;
 
 - (id)initWithWindow:(XVimWindow*)window{
     NSAssert( nil != window, @"window must not be nil");
+    DEBUG_LOG("created %@ evaluator with window %@", self.class, window);
     if(self = [super init]){
         self.window = window;
         self.parent = nil;
@@ -75,9 +76,9 @@ static XVimEvaluator *_popEvaluator = nil;
     [super dealloc];
 }
 
-- (NSTextView*)sourceView
+- (NSTextView *)sourceView
 {
-    return self.window.sourceView;
+    return self.window.currentView.textView;
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{

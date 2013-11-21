@@ -92,7 +92,9 @@ static NSString* FILE_MARKS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     
 }
 
-- (XVimMark*)markForName:(NSString*)name forDocument:(NSString *)documentPath{
+- (XVimMark*)markForName:(NSString*)name forDocument:(NSDocument *)document
+{
+    NSString *documentPath = document.fileURL.path;
     NSAssert(nil != name, @"name can not be nil");
     NSAssert(nil != documentPath, @"documentPath can not be nil");
     

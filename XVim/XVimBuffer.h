@@ -26,7 +26,15 @@
 #define ASSERT_VALID_CURSOR_POS(x)
 #endif
 
-@class XVimUndoOperation;
+@class XVimUndoOperation, XVimBuffer;
+
+@interface NSTextStorage (XVimBuffer)
+@property (nonatomic, readonly) XVimBuffer *xvim_buffer;
+@end
+
+@interface NSDocument (XVimBuffer)
+@property (nonatomic, readonly) XVimBuffer *xvim_buffer;
+@end
 
 /** @brief class to represent an XVim Buffer
  *
@@ -297,12 +305,4 @@
 // May return NSNotFound
 - (NSUInteger)incrementNumberAtIndex:(NSUInteger)index by:(int64_t)offset;
 
-@end
-
-@interface NSTextStorage (XVimBuffer)
-@property (nonatomic, readonly) XVimBuffer *xvim_buffer;
-@end
-
-@interface NSDocument (XVimBuffer)
-@property (nonatomic, readonly) XVimBuffer *xvim_buffer;
 @end
