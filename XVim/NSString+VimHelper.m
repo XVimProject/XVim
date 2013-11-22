@@ -97,6 +97,22 @@ static NSString *precomputed[9] = {
     return tmp;
 }
 
+- (NSMutableString *)newMutableSubstringWithRange:(NSRange)range
+{
+    NSMutableString *s = [[NSMutableString alloc] initWithCapacity:NSMaxRange(range)];
+    unichar buf[1024];
+
+    while (range.length) {
+        NSUInteger count = MIN(1024, range.length);
+
+        [self getCharacters:buf range:NSMakeRange(range.location, count)];
+        [s appendCharacters:buf length:count];
+        range.location += count;
+        range.length -= count;
+    }
+    return s;
+}
+
 + (NSString *)stringMadeOfSpaces:(NSUInteger)count
 {
     if (count <= 8) {
@@ -120,6 +136,11 @@ static NSString *precomputed[9] = {
         [s appendString:precomputed[count]];
     }
     return [s autorelease];
+}
+
+- (void)appendCharacters:(const unichar *)chars length:(NSUInteger)length
+{
+    CFStringAppendCharacters((CFMutableStringRef)self, chars, (CFIndex)length);
 }
 
 @end

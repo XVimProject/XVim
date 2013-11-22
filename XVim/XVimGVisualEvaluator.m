@@ -10,6 +10,7 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimWindow.h"
 #import "XVimJoinEvaluator.h"
+#import "XVim.h"
 
 @implementation XVimGVisualEvaluator
 
@@ -52,14 +53,18 @@
 }
 
 - (XVimEvaluator*)u{
-	NSTextView *view = [self sourceView];
-    [view xvim_makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
+    [self.argumentString appendString:@"u"];
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_LOWER];
+    [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }
 
 - (XVimEvaluator*)U{
-	NSTextView *view = [self sourceView];
-    [view xvim_makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
+    [self.argumentString appendString:@"U"];
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_UPPER];
+    [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }
 
@@ -69,13 +74,18 @@
 }
 
 - (XVimEvaluator *)QUESTION{
-    [self.window errorMessage:@"{visual}g? unimplemented" ringBell:NO];
-    return [XVimEvaluator popEvaluator];
+    [self.argumentString appendString:@"?"];
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_ROT13];
+    [[XVim instance] fixOperationCommands];
+	return [XVimEvaluator invalidEvaluator];
 }
 
 - (XVimEvaluator*)TILDE{
-	NSTextView *view = [self sourceView];
-    [view xvim_swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
+    [self.argumentString appendString:@"~"];
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
+    [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }
 

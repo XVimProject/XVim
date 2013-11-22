@@ -23,9 +23,7 @@
 #import "XVim.h"
 #import "XVimYankEvaluator.h"
 #import "XVimShiftEvaluator.h"
-#import "XVimLowercaseEvaluator.h"
-#import "XVimUppercaseEvaluator.h"
-#import "XVimTildeEvaluator.h"
+#import "XVimSwapCharsEvaluator.h"
 #import "XVimJoinEvaluator.h"
 #import "NSTextView+VimOperation.h"
 
@@ -331,12 +329,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)u{
-    XVimLowercaseEvaluator* eval = [[[XVimLowercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimSwapCharsEvaluator *eval = [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_LOWER] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)U{
-    XVimUppercaseEvaluator* eval = [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimSwapCharsEvaluator *eval = [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_UPPER] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
@@ -567,7 +565,7 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)TILDE{
-    XVimTildeEvaluator* eval = [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimSwapCharsEvaluator *eval = [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_CASE] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 }
 

@@ -475,6 +475,88 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     [_textStorage replaceCharactersInRange:range withString:string];
 }
 
+NS_INLINE unichar rot13(unichar c)
+{
+    switch (c) {
+    case 'a' ... 'a' + 12:
+    case 'A' ... 'A' + 12:
+        return c + 13;
+    case 'z' - 12 ... 'z':
+    case 'Z' - 12 ... 'Z':
+        return c - 13;
+    }
+    return c;
+}
+
+- (void)swapCharactersInRange:(NSRange)range mode:(int)mode
+{
+    NSMutableString *s, *L, *U;
+    unichar  buf[XVIM_STRING_BUFFER_SIZE];
+    unsigned pos = 0;
+    xvim_string_buffer_t sb;
+
+    NSAssert(_curOp, @"you must call -beginEditingAtIndex: first");
+    if (!range.length) {
+        return;
+    }
+
+    CFLocaleRef locale = CFLocaleCopyCurrent();
+
+    if (mode == XVIM_BUFFER_SWAP_UPPER || mode == XVIM_BUFFER_SWAP_LOWER) {
+        s = [self.string newMutableSubstringWithRange:range];
+        if (mode == XVIM_BUFFER_SWAP_LOWER) {
+            CFStringLowercase((CFMutableStringRef)s, locale);
+        } else {
+            CFStringUppercase((CFMutableStringRef)s, locale);
+        }
+    } else if (mode == XVIM_BUFFER_SWAP_ROT13) {
+        xvim_sb_init_range(&sb, self.string, range);
+        s = [[NSMutableString alloc] initWithCapacity:range.length];
+
+        do {
+            buf[pos++] = rot13(xvim_sb_peek(&sb));
+            if (pos >= XVIM_STRING_BUFFER_SIZE) {
+                [s appendCharacters:buf length:pos];
+                pos = 0;
+            }
+        } while (xvim_sb_next(&sb));
+        if (pos) {
+            [s appendCharacters:buf length:pos];
+        }
+    } else {
+        xvim_sb_init_range(&sb, self.string, range);
+        s = [[NSMutableString alloc] initWithCapacity:range.length];
+        L = [[NSMutableString alloc] initWithCapacity:1];
+        U = [[NSMutableString alloc] initWithCapacity:1];
+
+        do {
+            unichar ch = xvim_sb_peek(&sb);
+
+            [L replaceCharactersInRange:NSMakeRange(0, L.length) withString:@""];
+            [L appendCharacters:&ch length:1];
+            [U replaceCharactersInRange:NSMakeRange(0, U.length) withString:@""];
+            [U appendCharacters:&ch length:1];
+
+            CFStringUppercase((CFMutableStringRef)U, locale);
+            if ([L isEqualToString:U]) {
+                CFStringLowercase((CFMutableStringRef)L, locale);
+                [s appendString:L];
+            } else {
+                [s appendString:U];
+            }
+        } while (xvim_sb_next(&sb));
+
+        [L release];
+        [U release];
+    }
+
+    [_textStorage beginEditing];
+    [self replaceCharactersInRange:range withString:s];
+    [_textStorage endEditing];
+    [s release];
+    CFRelease(locale);
+}
+
 - (void)_removeSpacesAtLine:(NSUInteger)line column:(NSUInteger)column count:(NSUInteger)count
 {
     NSUInteger  tabWidth = self.tabWidth;

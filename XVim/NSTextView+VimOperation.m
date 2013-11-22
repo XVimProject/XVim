@@ -64,7 +64,6 @@
 - (NSRange)xvim_getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (void)xvim_indentCharacterRange:(NSRange)range;
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
-- (void)xvim_swapCaseForRange:(NSRange)range;
 - (void)xvim_registerInsertionPointForUndo;
 - (void)xvim_registerIndexForUndo:(NSUInteger)index;
 @end
@@ -897,100 +896,59 @@
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
-- (void)xvim_swapCase:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
-        return ;
+- (void)xvim_swapCharacters:(XVimMotion *)motion mode:(int)mode
+{
+    XVimBuffer *buffer = self.textStorage.xvim_buffer;
+    NSUInteger undoPos = self.insertionPoint;
+    NSUInteger endPos;
+
+    if (buffer.length == 0) {
+        return;
     }
-    
-    if( self.selectionMode == XVIM_VISUAL_NONE ){
-        if( motion.motion == MOTION_NONE ){
-            XVimMotion* m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,LEFT_RIGHT_NOWRAP,motion.count);
-            XVimRange r = [self xvim_getMotionRange:self.insertionPoint Motion:m];
-            if( r.end == NSNotFound){
+
+    if (self.selectionMode == XVIM_VISUAL_NONE) {
+        NSRange    range;
+
+        if (motion.motion == MOTION_NONE) {
+            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,LEFT_RIGHT_NOWRAP,motion.count);
+            XVimRange   r = [self xvim_getMotionRange:undoPos Motion:m];
+
+            if (r.end == NSNotFound) {
                 return;
             }
-            if( m.info->reachedEndOfLine ){
-                [self xvim_swapCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_INCLUSIVE]];
-            }else{
-                [self xvim_swapCaseForRange:[self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_EXCLUSIVE]];
+            if (m.info->reachedEndOfLine) {
+                range = [self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_INCLUSIVE];
+            } else {
+                range = [self xvim_getOperationRangeFrom:r.begin To:r.end Type:CHARACTERWISE_EXCLUSIVE];
             }
-            [self xvim_moveCursor:r.end preserveColumn:NO];
-        }else{
-            NSRange r;
-            XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
-            if( to.end == NSNotFound){
+            endPos = r.end;
+        } else {
+            XVimRange to = [self xvim_getMotionRange:undoPos Motion:motion];
+            if (to.end == NSNotFound) {
                 return;
             }
-            r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
-            [self xvim_swapCaseForRange:r];
-            [self xvim_moveCursor:r.location preserveColumn:NO];
+
+            range  = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
+            endPos = range.location;
         }
-    }else{
-        NSArray* ranges = [self xvim_selectedRanges];
-        for( NSValue* val in ranges){
-            [self xvim_swapCaseForRange:[val rangeValue]];
+
+        [buffer beginEditingAtIndex:undoPos];
+        [buffer swapCharactersInRange:range mode:mode];
+        [buffer endEditingAtIndex:endPos];
+    } else {
+        NSArray *ranges = [self xvim_selectedRanges];
+
+        endPos = undoPos = [[ranges objectAtIndex:0] rangeValue].location;
+        [buffer beginEditingAtIndex:undoPos];
+        for (NSValue *v in ranges) {
+            [buffer swapCharactersInRange:v.rangeValue mode:mode];
         }
-        [self xvim_moveCursor:[[ranges objectAtIndex:0] rangeValue].location preserveColumn:NO];
+        [buffer endEditingAtIndex:endPos];
     }
 
+    [self xvim_moveCursor:endPos preserveColumn:NO];
     [self xvim_syncState];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-    
-}
-
-- (void)xvim_makeLowerCase:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
-        return ;
-    }
-    
-    NSString* s = [self xvim_string];
-    if( self.selectionMode == XVIM_VISUAL_NONE ){
-        NSRange r;
-        XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
-        if( to.end == NSNotFound ){
-            return;
-        }
-        r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
-        [self insertText:[[s substringWithRange:r] lowercaseString] replacementRange:r];
-        [self xvim_moveCursor:r.location preserveColumn:NO];
-    }else{
-        NSArray* ranges = [self xvim_selectedRanges];
-        for( NSValue* val in ranges){
-            [self insertText:[[s substringWithRange:val.rangeValue] lowercaseString] replacementRange:val.rangeValue];
-        }
-        [self xvim_moveCursor:[[ranges objectAtIndex:0] rangeValue].location preserveColumn:NO];
-    }
-
-    [self xvim_syncState];
-    [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-}
-
-- (void)xvim_makeUpperCase:(XVimMotion*)motion{
-    if( self.insertionPoint == 0 && [[self xvim_string] length] == 0 ){
-        return ;
-    }
-    
-    NSString* s = [self xvim_string];
-    if( self.selectionMode == XVIM_VISUAL_NONE ){
-        NSRange r;
-        XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
-        if( to.end == NSNotFound ){
-            return;
-        }
-        r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];  // TODO: use to.begin instead of insertionPoint
-        [self insertText:[[s substringWithRange:r] uppercaseString] replacementRange:r];
-        [self xvim_moveCursor:r.location preserveColumn:NO];
-    }else{
-        NSArray* ranges = [self xvim_selectedRanges];
-        for( NSValue* val in ranges){
-            [self insertText:[[s substringWithRange:val.rangeValue] uppercaseString] replacementRange:val.rangeValue];
-        }
-        [self xvim_moveCursor:[[ranges objectAtIndex:0] rangeValue].location preserveColumn:NO];
-    }
-
-    [self xvim_syncState];
-    [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-    
 }
 
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count{
@@ -1954,29 +1912,6 @@
         ret = [self.textStorage searchRegexBackward:regex from:self.insertionPoint count:count option:opt];
     }
     return ret;
-}
-
-- (void)xvim_swapCaseForRange:(NSRange)range {
-    [self xvim_registerInsertionPointForUndo];
-    NSString* text = [self xvim_string];
-    
-	
-	NSMutableString *substring = [[text substringWithRange:range] mutableCopy];
-	for (NSUInteger i = 0; i < range.length; ++i) {
-		NSRange currentRange = NSMakeRange(i, 1);
-		NSString *currentCase = [substring substringWithRange:currentRange];
-		NSString *upperCase = [currentCase uppercaseString];
-		
-		NSRange replaceRange = NSMakeRange(i, 1);
-		if ([currentCase isEqualToString:upperCase]){
-			[substring replaceCharactersInRange:replaceRange withString:[currentCase lowercaseString]];
-		}else{
-			[substring replaceCharactersInRange:replaceRange withString:upperCase];
-		}	
-	}
-	
-    [self insertText:substring replacementRange:range];
-    [substring release];
 }
 
 - (void)xvim_registerIndexForUndo:(NSUInteger)index

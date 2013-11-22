@@ -8,9 +8,7 @@
 
 #import "XVimJoinEvaluator.h"
 #import "XVimGActionEvaluator.h"
-#import "XVimTildeEvaluator.h"
-#import "XVimLowercaseEvaluator.h"
-#import "XVimUppercaseEvaluator.h"
+#import "XVimSwapCharsEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
@@ -73,12 +71,12 @@
 
 - (XVimEvaluator*)u{
     [self.argumentString appendString:@"u"];
-	return [[[XVimLowercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_LOWER] autorelease];
 }
 
 - (XVimEvaluator*)U{
     [self.argumentString appendString:@"U"];
-	return [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_UPPER] autorelease];
 }
 
 - (XVimEvaluator*)v{
@@ -86,9 +84,14 @@
     return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
 }
 
+- (XVimEvaluator*)QUESTION{
+    [self.argumentString appendString:@"?"];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_ROT13] autorelease];
+}
+
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-	return [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_CASE] autorelease];
 }
 
 @end

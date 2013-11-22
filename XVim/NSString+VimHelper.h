@@ -35,9 +35,13 @@ BOOL isKeyword(unichar ch);
  **/
 - (NSString*)convertToICURegex:(NSRegularExpressionOptions*)options;
 
+- (NSMutableString *)newMutableSubstringWithRange:(NSRange)range;
+
 + (NSString *)stringMadeOfSpaces:(NSUInteger)count;
+
 @end
 
 @interface NSMutableString (VimHelper)
 + (NSMutableString *)mutableStringMadeOfSpaces:(NSUInteger)count;
+- (void)appendCharacters:(const unichar *)chars length:(NSUInteger)length;
 @end

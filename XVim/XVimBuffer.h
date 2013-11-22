@@ -295,8 +295,13 @@
 - (void)beginEditingAtIndex:(NSUInteger)index;
 - (void)endEditingAtIndex:(NSUInteger)index;
 
-- (void)replaceCharactersInRange:(NSRange)range
-                      withString:(NSString *)string;
+- (void)replaceCharactersInRange:(NSRange)range withString:(NSString *)string;
+
+#define XVIM_BUFFER_SWAP_UPPER  0
+#define XVIM_BUFFER_SWAP_LOWER  1
+#define XVIM_BUFFER_SWAP_CASE   2
+#define XVIM_BUFFER_SWAP_ROT13  3
+- (void)swapCharactersInRange:(NSRange)range mode:(int)mode;
 
 // Never fails
 - (NSUInteger)shiftLines:(XVimRange)lines column:(NSUInteger)column

@@ -76,9 +76,7 @@
 		A28F424017EEDBC200A3F7AE /* XVimExCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A736351527484B0051E8E4 /* XVimExCommand.m */; };
 		A28F424117EEDBC200A3F7AE /* XVimSearch.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */; };
 		A28F424217EEDBC200A3F7AE /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
-		A28F424317EEDBC200A3F7AE /* XVimTildeEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */; };
-		A28F424417EEDBC200A3F7AE /* XVimLowercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */; };
-		A28F424517EEDBC200A3F7AE /* XVimUppercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */; };
+		A28F424417EEDBC200A3F7AE /* XVimSwapCharsEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7229152F1B1700C61D97 /* XVimSwapCharsEvaluator.m */; };
 		A28F424617EEDBC200A3F7AE /* XVimWindowEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F15805C61530B4000031175A /* XVimWindowEvaluator.m */; };
 		A28F424717EEDBC200A3F7AE /* XVimTextObjectEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */; };
 		A28F424817EEDBC200A3F7AE /* XVimWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FA1A1C1532648700059BF6 /* XVimWindow.m */; };
@@ -157,9 +155,7 @@
 		C36C104E153131C600CE1D62 /* XVimTextObjectEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */; };
 		C38A5B301526C6B100E1448D /* XVimKeyStroke.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B2F1526C6B100E1448D /* XVimKeyStroke.m */; };
 		C38A5B4D1527CEA500E1448D /* XVimNumericEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C38A5B4C1527CEA400E1448D /* XVimNumericEvaluator.m */; };
-		C3AA7226152F186A00C61D97 /* XVimTildeEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */; };
-		C3AA722A152F1B1800C61D97 /* XVimLowercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */; };
-		C3AA722D152F1B2800C61D97 /* XVimUppercaseEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */; };
+		C3AA722A152F1B1800C61D97 /* XVimSwapCharsEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3AA7229152F1B1700C61D97 /* XVimSwapCharsEvaluator.m */; };
 		C3E8F115154267BA007410ED /* XVimMarkSetEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F114154267BA007410ED /* XVimMarkSetEvaluator.m */; };
 		C3E8F11815427AE6007410ED /* XVimArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F11715427AE6007410ED /* XVimArgumentEvaluator.m */; };
 		C3FA1A1D1532648700059BF6 /* XVimWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FA1A1C1532648700059BF6 /* XVimWindow.m */; };
@@ -344,12 +340,8 @@
 		C38A5B2F1526C6B100E1448D /* XVimKeyStroke.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimKeyStroke.m; path = XVim/XVimKeyStroke.m; sourceTree = SOURCE_ROOT; };
 		C38A5B4B1527CEA400E1448D /* XVimNumericEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimNumericEvaluator.h; path = XVim/XVimNumericEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C38A5B4C1527CEA400E1448D /* XVimNumericEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimNumericEvaluator.m; path = XVim/XVimNumericEvaluator.m; sourceTree = SOURCE_ROOT; };
-		C3AA7224152F186A00C61D97 /* XVimTildeEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTildeEvaluator.h; path = XVim/XVimTildeEvaluator.h; sourceTree = SOURCE_ROOT; };
-		C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTildeEvaluator.m; path = XVim/XVimTildeEvaluator.m; sourceTree = SOURCE_ROOT; };
-		C3AA7228152F1B1700C61D97 /* XVimLowercaseEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimLowercaseEvaluator.h; path = XVim/XVimLowercaseEvaluator.h; sourceTree = SOURCE_ROOT; };
-		C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimLowercaseEvaluator.m; path = XVim/XVimLowercaseEvaluator.m; sourceTree = SOURCE_ROOT; };
-		C3AA722B152F1B2700C61D97 /* XVimUppercaseEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimUppercaseEvaluator.h; path = XVim/XVimUppercaseEvaluator.h; sourceTree = SOURCE_ROOT; };
-		C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimUppercaseEvaluator.m; path = XVim/XVimUppercaseEvaluator.m; sourceTree = SOURCE_ROOT; };
+		C3AA7228152F1B1700C61D97 /* XVimSwapCharsEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimSwapCharsEvaluator.h; path = XVim/XVimSwapCharsEvaluator.h; sourceTree = SOURCE_ROOT; };
+		C3AA7229152F1B1700C61D97 /* XVimSwapCharsEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimSwapCharsEvaluator.m; path = XVim/XVimSwapCharsEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C3E8F113154267BA007410ED /* XVimMarkSetEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMarkSetEvaluator.h; path = XVim/XVimMarkSetEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C3E8F114154267BA007410ED /* XVimMarkSetEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMarkSetEvaluator.m; path = XVim/XVimMarkSetEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C3E8F11615427AE6007410ED /* XVimArgumentEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimArgumentEvaluator.h; path = XVim/XVimArgumentEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -445,12 +437,8 @@
 				A2277EDA14F80D5000A6B70C /* XVimYankEvaluator.m */,
 				A2277ED214F80BCB00A6B70C /* XVimDeleteEvaluator.h */,
 				A2277ED314F80BCB00A6B70C /* XVimDeleteEvaluator.m */,
-				C3AA7224152F186A00C61D97 /* XVimTildeEvaluator.h */,
-				C3AA7225152F186A00C61D97 /* XVimTildeEvaluator.m */,
-				C3AA7228152F1B1700C61D97 /* XVimLowercaseEvaluator.h */,
-				C3AA7229152F1B1700C61D97 /* XVimLowercaseEvaluator.m */,
-				C3AA722B152F1B2700C61D97 /* XVimUppercaseEvaluator.h */,
-				C3AA722C152F1B2700C61D97 /* XVimUppercaseEvaluator.m */,
+				C3AA7228152F1B1700C61D97 /* XVimSwapCharsEvaluator.h */,
+				C3AA7229152F1B1700C61D97 /* XVimSwapCharsEvaluator.m */,
 				C36C104C153131C500CE1D62 /* XVimTextObjectEvaluator.h */,
 				C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */,
 				A23D002217DA0C7D007EBB21 /* XVimJoinEvaluator.h */,
@@ -874,9 +862,7 @@
 				6EF220D7183E2A1400B814B8 /* NSObject+XVimAdditions.m in Sources */,
 				A28F424117EEDBC200A3F7AE /* XVimSearch.m in Sources */,
 				A28F424217EEDBC200A3F7AE /* XVimOptions.m in Sources */,
-				A28F424317EEDBC200A3F7AE /* XVimTildeEvaluator.m in Sources */,
-				A28F424417EEDBC200A3F7AE /* XVimLowercaseEvaluator.m in Sources */,
-				A28F424517EEDBC200A3F7AE /* XVimUppercaseEvaluator.m in Sources */,
+				A28F424417EEDBC200A3F7AE /* XVimSwapCharsEvaluator.m in Sources */,
 				A28F424617EEDBC200A3F7AE /* XVimWindowEvaluator.m in Sources */,
 				A28F424717EEDBC200A3F7AE /* XVimTextObjectEvaluator.m in Sources */,
 				A28F424817EEDBC200A3F7AE /* XVimWindow.m in Sources */,
@@ -953,9 +939,7 @@
 				A2A736381527484B0051E8E4 /* XVimExCommand.m in Sources */,
 				A2A6BA2E152A544C00F0EB5F /* XVimSearch.m in Sources */,
 				A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */,
-				C3AA7226152F186A00C61D97 /* XVimTildeEvaluator.m in Sources */,
-				C3AA722A152F1B1800C61D97 /* XVimLowercaseEvaluator.m in Sources */,
-				C3AA722D152F1B2800C61D97 /* XVimUppercaseEvaluator.m in Sources */,
+				C3AA722A152F1B1800C61D97 /* XVimSwapCharsEvaluator.m in Sources */,
 				F15805C71530B4000031175A /* XVimWindowEvaluator.m in Sources */,
 				C36C104E153131C600CE1D62 /* XVimTextObjectEvaluator.m in Sources */,
 				C3FA1A1D1532648700059BF6 /* XVimWindow.m in Sources */,

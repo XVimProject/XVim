@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#define XVIM_STRING_BUFFER_SIZE  64
+
 /** @brief structure used for fast search in an NSString
  *
  * This has complex invariants:
@@ -26,26 +28,21 @@ typedef struct xvim_string_buffer_s {
     NSUInteger s_index;  // index of buffer[0] in s
     NSUInteger b_index;  // index in buffer being read
     NSUInteger b_len;    // number of characters read in buffer
-    unichar    buffer[64];
+    unichar    buffer[XVIM_STRING_BUFFER_SIZE];
 } xvim_string_buffer_t;
 
 #define XVimInvalidChar  ((unichar)-1)
 
-NS_INLINE NSUInteger _xvim_sb_size(void)
-{
-    return sizeof(((xvim_string_buffer_t *)NULL)->buffer) / sizeof(unichar);
-}
-
 NS_INLINE void _xvim_sb_load(xvim_string_buffer_t *sb)
 {
-    NSUInteger len = MIN(sb->s_max - sb->s_index, _xvim_sb_size());
+    NSUInteger len = MIN(sb->s_max - sb->s_index, XVIM_STRING_BUFFER_SIZE);
 
     sb->b_len = len;
-    NSCAssert(sb->b_len <= _xvim_sb_size(), @"b_len is bogus");
+    NSCAssert(sb->b_len <= XVIM_STRING_BUFFER_SIZE, @"b_len is bogus");
     if (len > 0) {
         [sb->s getCharacters:sb->buffer range:NSMakeRange(sb->s_index, len)];
     }
-    if (len < _xvim_sb_size()) {
+    if (len < XVIM_STRING_BUFFER_SIZE) {
         sb->buffer[len] = XVimInvalidChar;
     }
 }
@@ -60,13 +57,14 @@ NS_INLINE void xvim_sb_init(xvim_string_buffer_t *sb, NSString *s,
 
     NSCAssert(min <= max, @"Bad xvim_sb_init");
     NSCAssert(index >= sb->s_min && index <= sb->s_max, @"bad xvim_sb_init");
+    NSCAssert(max <= s.length, @"bad xvim_sb_init");
 
-    if (max - min < _xvim_sb_size() || index - _xvim_sb_size() / 2 < sb->s_min) {
+    if (max - min < XVIM_STRING_BUFFER_SIZE || index - XVIM_STRING_BUFFER_SIZE / 2 < sb->s_min) {
         sb->s_index = sb->s_min;
-    } else if (index + _xvim_sb_size() >= sb->s_max) {
-        sb->s_index = sb->s_max - _xvim_sb_size() + 1;
+    } else if (index + XVIM_STRING_BUFFER_SIZE >= sb->s_max) {
+        sb->s_index = sb->s_max - XVIM_STRING_BUFFER_SIZE + 1;
     } else {
-        sb->s_index = index - _xvim_sb_size() / 2;
+        sb->s_index = index - XVIM_STRING_BUFFER_SIZE / 2;
     }
     sb->b_index = index - sb->s_index;
     _xvim_sb_load(sb);
@@ -122,11 +120,11 @@ NS_INLINE BOOL xvim_sb_next(xvim_string_buffer_t *sb)
     if (sb->b_index < sb->b_len) {
         return YES;
     }
-    if (sb->b_len < _xvim_sb_size()) {
+    if (sb->b_len < XVIM_STRING_BUFFER_SIZE) {
         return NO;
     }
-    sb->s_index += _xvim_sb_size() / 2;
-    sb->b_index  = _xvim_sb_size() / 2;
+    sb->s_index += XVIM_STRING_BUFFER_SIZE / 2;
+    sb->b_index  = XVIM_STRING_BUFFER_SIZE / 2;
     _xvim_sb_load(sb);
     return sb->b_index < sb->b_len;
 }
@@ -139,7 +137,7 @@ NS_INLINE BOOL xvim_sb_prev(xvim_string_buffer_t *sb)
         return YES;
     }
 
-    NSUInteger diff = MIN(sb->s_index - sb->s_min, _xvim_sb_size() / 2);
+    NSUInteger diff = MIN(sb->s_index - sb->s_min, XVIM_STRING_BUFFER_SIZE / 2);
     if (diff > 0) {
         sb->s_index -= diff;
         sb->b_index  = diff;

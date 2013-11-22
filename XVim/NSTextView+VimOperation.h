@@ -78,9 +78,7 @@
 - (void)xvim_change:(XVimMotion*)motion;
 - (void)xvim_yank:(XVimMotion*)motion;
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
-- (void)xvim_swapCase:(XVimMotion*)motion;
-- (void)xvim_makeLowerCase:(XVimMotion*)motion;
-- (void)xvim_makeUpperCase:(XVimMotion*)motion;
+- (void)xvim_swapCharacters:(XVimMotion *)motion mode:(int)mode;
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count;
 - (void)xvim_join:(NSUInteger)count addSpace:(BOOL)addSpace;
 - (void)xvim_filter:(XVimMotion*)motion;

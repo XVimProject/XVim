@@ -33,7 +33,6 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
-#import "XVimTildeEvaluator.h"
 #import "NSTextView+VimOperation.h"
 #import "XVimJoinEvaluator.h"
 
@@ -491,9 +490,9 @@
 
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-    XVimTildeEvaluator* swap = [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
-    // TODO: support tildeop option
-    return [swap fixWithNoMotion:self.numericArg];
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg);
+    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
+    return nil;
 }
 
 - (XVimEvaluator*)ForwardDelete{
