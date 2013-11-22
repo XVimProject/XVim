@@ -753,6 +753,8 @@
 				A24782BA14D6F56E003B6433 /* XVimCommandField.m */,
 				A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */,
 				A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */,
+				A26ACC4C154F2D6600B27D69 /* IDEEditor+XVim.h */,
+				A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */,
 				A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */,
 				A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */,
 				A257C28D156567250098CA09 /* DVTSourceTextView+XVim.h */,
@@ -768,8 +770,6 @@
 			children = (
 				A2F26219182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.h */,
 				A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m */,
-				A26ACC4C154F2D6600B27D69 /* IDEEditor+XVim.h */,
-				A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */,
 				C345DDB9154CE12A009F232E /* XVimHookManager.h */,
 				C345DDBA154CE12A009F232E /* XVimHookManager.m */,
 			);

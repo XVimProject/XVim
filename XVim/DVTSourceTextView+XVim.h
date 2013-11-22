@@ -13,6 +13,5 @@
 #import "DVTKit.h"
 
 @interface DVTSourceTextView (XVim)
-- (IDEEditorArea*)editorArea;
 - (XVimWindow*)xvimWindow;
 @end
