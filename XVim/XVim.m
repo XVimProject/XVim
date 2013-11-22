@@ -31,7 +31,6 @@
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
-#import "XVimHookManager.h"
 #import "XVimCommandLine.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
@@ -147,7 +146,7 @@ NSString * const XVimBufferKey = @"XVimBufferKey";
     // Otherwise, we may miss some classes.
 
     // Command line window is not setuped if hook is too late.
-    [XVimHookManager hookWhenPluginLoaded];
+    [XVimWindow class];
     
     // We used to observer NSApplicationDidFinishLaunchingNotification to wait for all the classes in Xcode are loaded.
     // When notification comes we hook some classes so that we do not miss any classes.

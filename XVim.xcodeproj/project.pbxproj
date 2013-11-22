@@ -56,7 +56,6 @@
 		A28F422917EEDBC200A3F7AE /* XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B814D6F56E003B6433 /* XVim.m */; };
 		A28F422A17EEDBC200A3F7AE /* XVimCommandField.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782BA14D6F56E003B6433 /* XVimCommandField.m */; };
 		A28F422B17EEDBC200A3F7AE /* XVimCommandLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */; };
-		A28F422C17EEDBC200A3F7AE /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A28F422D17EEDBC200A3F7AE /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
 		A28F422E17EEDBC200A3F7AE /* XVimNormalEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */; };
 		A28F422F17EEDBC200A3F7AE /* XVimVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34214F00BD3006DA5A5 /* XVimVisualEvaluator.m */; };
@@ -91,7 +90,6 @@
 		A28F424E17EEDBC200A3F7AE /* XVimMarkSetEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F114154267BA007410ED /* XVimMarkSetEvaluator.m */; };
 		A28F424F17EEDBC200A3F7AE /* XVimArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F11715427AE6007410ED /* XVimArgumentEvaluator.m */; };
 		A28F425117EEDBC200A3F7AE /* XVimStatusLine.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ABFE1215497A3C002220E8 /* XVimStatusLine.m */; };
-		A28F425217EEDBC200A3F7AE /* XVimHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C345DDBA154CE12A009F232E /* XVimHookManager.m */; };
 		A28F425317EEDBC200A3F7AE /* IDEEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */; };
 		A28F425417EEDBC200A3F7AE /* NSInsetTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = C30886591554C8380024161D /* NSInsetTextView.m */; };
 		A28F425517EEDBC200A3F7AE /* IDEEditorArea+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */; };
@@ -133,7 +131,6 @@
 		A2AFD73717914ACE009B442B /* XVimTester+Recording.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AFD73617914ACE009B442B /* XVimTester+Recording.m */; };
 		A2BA3EA2152E372A00C18FB4 /* XVimOptions.m in Sources */ = {isa = PBXBuildFile; fileRef = A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */; };
 		A2C1BB5316CEAC7F0066F420 /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C1BB5216CEAC7F0066F420 /* Utils.m */; };
-		A2C4E79814E7F35300751199 /* Hooker.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79714E7F35300751199 /* Hooker.m */; };
 		A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */; };
 		A2D48B1F15347B5C0088AB71 /* NSString+VimHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A2D48B1E15347B5C0088AB71 /* NSString+VimHelper.m */; };
 		A2E7E45717F03113008F045A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2B4BABB14D59F6600D817B0 /* Cocoa.framework */; };
@@ -147,15 +144,14 @@
 		A2E7E46417F0382E008F045A /* IDEKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45817F037EF008F045A /* IDEKit.framework */; };
 		A2E7E46517F03835008F045A /* DVTFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45E17F03802008F045A /* DVTFoundation.framework */; };
 		A2E7E46617F03835008F045A /* DVTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A2E7E45C17F037FF008F045A /* DVTKit.framework */; };
-		A2F2621B182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m */; };
-		A2F2621C182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m */; };
+		A2F2621B182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m */; };
+		A2F2621C182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m */; };
 		A2F4A33E14F00B25006DA5A5 /* XVimNormalEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */; };
 		A2F4A34314F00BD3006DA5A5 /* XVimVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2F4A34214F00BD3006DA5A5 /* XVimVisualEvaluator.m */; };
 		A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A2FF17D01502B291003FE648 /* XVimMotionEvaluator.m */; };
 		BF07A94215EBF404006E6984 /* NSEvent+VimHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = BF050D7A15EBF3E100CD0D12 /* NSEvent+VimHelper.m */; };
 		C308865A1554C8380024161D /* NSInsetTextView.m in Sources */ = {isa = PBXBuildFile; fileRef = C30886591554C8380024161D /* NSInsetTextView.m */; };
 		C324BE0115390E8500C13558 /* XVimGVisualEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C324BE0015390E8500C13558 /* XVimGVisualEvaluator.m */; };
-		C345DDBB154CE12A009F232E /* XVimHookManager.m in Sources */ = {isa = PBXBuildFile; fileRef = C345DDBA154CE12A009F232E /* XVimHookManager.m */; };
 		C3552D9B153948D200D57577 /* XVimCommandLineEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3552D9A153948D200D57577 /* XVimCommandLineEvaluator.m */; };
 		C3552DA8153AC6F800D57577 /* XVimHistoryHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */; };
 		C361DE681538F18400037B4B /* XVimGActionEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C361DE671538F18400037B4B /* XVimGActionEvaluator.m */; };
@@ -303,8 +299,6 @@
 		A2BA3EA1152E372A00C18FB4 /* XVimOptions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOptions.m; path = XVim/XVimOptions.m; sourceTree = SOURCE_ROOT; };
 		A2C1BB5116CEAC7F0066F420 /* Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Utils.h; path = XVim/Utils.h; sourceTree = "<group>"; };
 		A2C1BB5216CEAC7F0066F420 /* Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Utils.m; path = XVim/Utils.m; sourceTree = "<group>"; };
-		A2C4E79614E7F35300751199 /* Hooker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hooker.h; path = XVim/Hooker.h; sourceTree = "<group>"; };
-		A2C4E79714E7F35300751199 /* Hooker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Hooker.m; path = XVim/Hooker.m; sourceTree = "<group>"; };
 		A2C4E79A14E7F36B00751199 /* XVimEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimEvaluator.h; path = XVim/XVimEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2C4E79B14E7F36B00751199 /* XVimEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = XVimEvaluator.m; path = XVim/XVimEvaluator.m; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		A2C55FC917EE9F49000EBEA7 /* DVTFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTFoundation.h; path = XcodeClasses/Xcode4/DVTFoundation.h; sourceTree = SOURCE_ROOT; };
@@ -322,8 +316,8 @@
 		A2E7E45C17F037FF008F045A /* DVTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTKit.framework; path = "../../../../Applications/Xcode 2.app/Contents/SharedFrameworks/DVTKit.framework"; sourceTree = "<group>"; };
 		A2E7E45E17F03802008F045A /* DVTFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DVTFoundation.framework; path = "../../../../Applications/Xcode 2.app/Contents/SharedFrameworks/DVTFoundation.framework"; sourceTree = "<group>"; };
 		A2E7E46017F0380F008F045A /* IDESourceEditor.ideplugin */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = IDESourceEditor.ideplugin; path = "../../../../Applications/Xcode 2.app/Contents/PlugIns/IDESourceEditor.ideplugin"; sourceTree = "<group>"; };
-		A2F26219182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTSourceTextScrollViewHook.h; path = XVim/DVTSourceTextScrollViewHook.h; sourceTree = SOURCE_ROOT; };
-		A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVTSourceTextScrollViewHook.m; path = XVim/DVTSourceTextScrollViewHook.m; sourceTree = SOURCE_ROOT; };
+		A2F26219182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DVTSourceTextScrollView+XVim.h"; path = "XVim/DVTSourceTextScrollView+XVim.h"; sourceTree = SOURCE_ROOT; };
+		A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "DVTSourceTextScrollView+XVim.m"; path = "XVim/DVTSourceTextScrollView+XVim.m"; sourceTree = SOURCE_ROOT; };
 		A2F4A33C14F00B25006DA5A5 /* XVimNormalEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimNormalEvaluator.h; path = XVim/XVimNormalEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A2F4A33D14F00B25006DA5A5 /* XVimNormalEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = XVimNormalEvaluator.m; path = XVim/XVimNormalEvaluator.m; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		A2F4A34114F00BD3006DA5A5 /* XVimVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimVisualEvaluator.h; path = XVim/XVimVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -337,8 +331,6 @@
 		C324BDFF15390E8500C13558 /* XVimGVisualEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimGVisualEvaluator.h; path = XVim/XVimGVisualEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C324BE0015390E8500C13558 /* XVimGVisualEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimGVisualEvaluator.m; path = XVim/XVimGVisualEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimKeymapProvider.h; path = XVim/XVimKeymapProvider.h; sourceTree = SOURCE_ROOT; };
-		C345DDB9154CE12A009F232E /* XVimHookManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimHookManager.h; path = XVim/XVimHookManager.h; sourceTree = SOURCE_ROOT; };
-		C345DDBA154CE12A009F232E /* XVimHookManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimHookManager.m; path = XVim/XVimHookManager.m; sourceTree = SOURCE_ROOT; };
 		C3552D99153948D200D57577 /* XVimCommandLineEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimCommandLineEvaluator.h; path = XVim/XVimCommandLineEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C3552D9A153948D200D57577 /* XVimCommandLineEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimCommandLineEvaluator.m; path = XVim/XVimCommandLineEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C3552DA6153AC6F800D57577 /* XVimHistoryHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimHistoryHandler.h; path = XVim/XVimHistoryHandler.h; sourceTree = SOURCE_ROOT; };
@@ -572,7 +564,6 @@
 				A24782B814D6F56E003B6433 /* XVim.m */,
 				A22A009E1708914D0003046C /* XVimUtil.h */,
 				A22A009F1708914D0003046C /* XVimUtil.m */,
-				C345DDB8154CCF79009F232E /* Event Dispatchers */,
 				A2F4A34014F00B35006DA5A5 /* Event Handlers(Evaluators) */,
 				C345DDB7154CCF1F009F232E /* Xcode Dependent Classes */,
 				C345DDB4154CCE5E009F232E /* XCode Independent Classes */,
@@ -599,8 +590,6 @@
 		A2C4E78F14E7EA0B00751199 /* Support */ = {
 			isa = PBXGroup;
 			children = (
-				A2C4E79614E7F35300751199 /* Hooker.h */,
-				A2C4E79714E7F35300751199 /* Hooker.m */,
 				A2C1BB5116CEAC7F0066F420 /* Utils.h */,
 				A2C1BB5216CEAC7F0066F420 /* Utils.m */,
 				A2702B0916FEA313005ADD76 /* NSObject+ExtraData.h */,
@@ -757,23 +746,14 @@
 				A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */,
 				A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */,
 				A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */,
+				A2F26219182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.h */,
+				A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m */,
 				A257C28D156567250098CA09 /* DVTSourceTextView+XVim.h */,
 				A257C28E156567250098CA09 /* DVTSourceTextView+XVim.m */,
 				6E2B33321836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.h */,
 				6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */,
 			);
 			name = "Xcode Dependent Classes";
-			sourceTree = "<group>";
-		};
-		C345DDB8154CCF79009F232E /* Event Dispatchers */ = {
-			isa = PBXGroup;
-			children = (
-				A2F26219182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.h */,
-				A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m */,
-				C345DDB9154CE12A009F232E /* XVimHookManager.h */,
-				C345DDBA154CE12A009F232E /* XVimHookManager.m */,
-			);
-			name = "Event Dispatchers";
 			sourceTree = "<group>";
 		};
 		C38A5B481527C9EE00E1448D /* Xcode Class Definitions */ = {
@@ -878,7 +858,6 @@
 				A28F422917EEDBC200A3F7AE /* XVim.m in Sources */,
 				A28F422A17EEDBC200A3F7AE /* XVimCommandField.m in Sources */,
 				A28F422B17EEDBC200A3F7AE /* XVimCommandLine.m in Sources */,
-				A28F422C17EEDBC200A3F7AE /* Hooker.m in Sources */,
 				A28F422D17EEDBC200A3F7AE /* XVimEvaluator.m in Sources */,
 				A28F422E17EEDBC200A3F7AE /* XVimNormalEvaluator.m in Sources */,
 				A28F422F17EEDBC200A3F7AE /* XVimVisualEvaluator.m in Sources */,
@@ -914,7 +893,6 @@
 				A28F424E17EEDBC200A3F7AE /* XVimMarkSetEvaluator.m in Sources */,
 				A28F424F17EEDBC200A3F7AE /* XVimArgumentEvaluator.m in Sources */,
 				A28F425117EEDBC200A3F7AE /* XVimStatusLine.m in Sources */,
-				A28F425217EEDBC200A3F7AE /* XVimHookManager.m in Sources */,
 				6E2B332D1836E42F00EFE4E2 /* XVimBuffer.m in Sources */,
 				A28F425317EEDBC200A3F7AE /* IDEEditor+XVim.m in Sources */,
 				A28F425417EEDBC200A3F7AE /* NSInsetTextView.m in Sources */,
@@ -927,7 +905,7 @@
 				6E6865D718390702008D5FBB /* XVimUndo.m in Sources */,
 				A28F425B17EEDBC200A3F7AE /* Utils.m in Sources */,
 				A28F425C17EEDBC200A3F7AE /* XVimMark.m in Sources */,
-				A2F2621C182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */,
+				A2F2621C182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m in Sources */,
 				A28F425D17EEDBC200A3F7AE /* XVimMarks.m in Sources */,
 				A28F425F17EEDBC200A3F7AE /* NSObject+ExtraData.m in Sources */,
 				A28F426017EEDBC200A3F7AE /* XVimUtil.m in Sources */,
@@ -960,7 +938,6 @@
 				A24782C114D6F56E003B6433 /* XVim.m in Sources */,
 				A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */,
 				A2A8A50014E41C66002EA6C8 /* XVimCommandLine.m in Sources */,
-				A2C4E79814E7F35300751199 /* Hooker.m in Sources */,
 				A2C4E79C14E7F36B00751199 /* XVimEvaluator.m in Sources */,
 				A2F4A33E14F00B25006DA5A5 /* XVimNormalEvaluator.m in Sources */,
 				A2F4A34314F00BD3006DA5A5 /* XVimVisualEvaluator.m in Sources */,
@@ -995,7 +972,6 @@
 				C3E8F115154267BA007410ED /* XVimMarkSetEvaluator.m in Sources */,
 				C3E8F11815427AE6007410ED /* XVimArgumentEvaluator.m in Sources */,
 				A2ABFE1315497A3C002220E8 /* XVimStatusLine.m in Sources */,
-				C345DDBB154CE12A009F232E /* XVimHookManager.m in Sources */,
 				6E2B332C1836E42F00EFE4E2 /* XVimBuffer.m in Sources */,
 				A26ACC4E154F2D6800B27D69 /* IDEEditor+XVim.m in Sources */,
 				C308865A1554C8380024161D /* NSInsetTextView.m in Sources */,
@@ -1007,7 +983,7 @@
 				A293A38816CE8A8000E1E827 /* XVimDebug.m in Sources */,
 				A2C1BB5316CEAC7F0066F420 /* Utils.m in Sources */,
 				A2126B7516FB30B0000BE21C /* XVimMark.m in Sources */,
-				A2F2621B182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.m in Sources */,
+				A2F2621B182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m in Sources */,
 				A2126B7816FB4806000BE21C /* XVimMarks.m in Sources */,
 				A2702B0B16FEA313005ADD76 /* NSObject+ExtraData.m in Sources */,
 				6EF220D6183E2A1400B814B8 /* NSObject+XVimAdditions.m in Sources */,

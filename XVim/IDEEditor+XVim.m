@@ -17,7 +17,6 @@
 #import "NSObject+XVimAdditions.h"
 #import "DVTSourceTextView+XVim.h"
 #import "Logger.h"
-#import "Hooker.h"
 
 static char const * const DID_REGISTER_OBSERVER_KEY = "net.JugglerShu.IDEEditorHook._didRegisterObserver";
 

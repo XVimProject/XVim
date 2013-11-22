@@ -5,6 +5,7 @@
 //  Created by Tomas Lundell on 9/04/12.
 //
 
+#import <objc/runtime.h>
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimUtil.h"
@@ -14,12 +15,38 @@
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
 #import "Logger.h"
-#import <objc/runtime.h>
-#import "IDEEditorArea+XVim.h"
 #import "XVimSearch.h"
+
+#import "IDEEditor+XVim.h"
+#import "IDEEditorArea+XVim.h"
+#import "DVTSourceTextScrollView+XVim.h"
 #import "NSTextView+VimOperation.h"
+#import "NSEvent+VimHelper.h"
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
+
+@implementation IDEWorkspaceWindow (XVim)
+
++ (void)xvim_initialize
+{
+#if 0 // Only useful for debugging purposes
+    if (self == [IDEWorkspaceWindow class]) {
+        [self xvim_swizzleInstanceMethod:@selector(sendEvent:)
+                                    with:@selector(xvim_sendEvent:)];
+    }
+#endif
+}
+
+- (void)xvim_sendEvent:(NSEvent *)event
+{
+    if (event.type == NSKeyDown) {
+        TRACE_LOG(@"Window:%p keyCode:%d characters:%@ charsIgnoreMod:%@ cASCII:%d",
+                  self, event.keyCode, event.characters, event.charactersIgnoringModifiers, event.unmodifiedKeyCode);
+    }
+    [self xvim_sendEvent:event];
+}
+
+@end
 
 @interface XVimWindow () {
     NSMutableArray     *_evaluatorStack;
@@ -40,6 +67,18 @@
 @implementation XVimWindow
 @synthesize commandLine = _commandLine;
 @synthesize tmpBuffer = _tmpBuffer;
+
++ (void)initialize
+{
+    if (self == [XVimWindow class]) {
+        [IDEWorkspaceWindow xvim_initialize];
+        [IDEEditorArea xvim_initialize];
+        [DVTSourceTextScrollView xvim_initialize];
+        [IDEEditor xvim_initialize];
+        [IDEComparisonEditor xvim_initialize];
+        [XVimView class];
+    }
+}
 
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea
 {
