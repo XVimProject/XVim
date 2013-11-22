@@ -7,7 +7,6 @@
 
 #import <Cocoa/Cocoa.h>
 #import "XVimCommandLine.h"
-#import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
 #import "XVimBuffer.h"
 #import "XVimView.h"

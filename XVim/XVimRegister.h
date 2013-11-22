@@ -7,13 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimDefs.h"
 #import "XVimKeyStroke.h"
-
-typedef enum{
-    TEXT_TYPE_CHARACTERS,
-    TEXT_TYPE_BLOCK,
-    TEXT_TYPE_LINES
-}TEXT_TYPE;
 
 @interface XVimRegister : NSObject
 -(void) appendXVimString:(XVimString*)string;

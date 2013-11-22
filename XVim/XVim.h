@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "XVimDefs.h"
 #import "XVimKeymapProvider.h"
-#import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
 
 @class XVimKeymap;

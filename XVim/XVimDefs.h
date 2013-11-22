@@ -28,6 +28,17 @@ typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
     XVIM_INSERT_BLOCK_KILL_EOL,
 };
 
+typedef enum{
+    TEXT_TYPE_CHARACTERS,
+    TEXT_TYPE_BLOCK,
+    TEXT_TYPE_LINES
+} TEXT_TYPE;
+
+typedef enum {
+    CURSOR_MODE_INSERT,
+    CURSOR_MODE_COMMAND
+} CURSOR_MODE;
+
 typedef enum {
     XVIM_MODE_NONE,
     XVIM_MODE_NORMAL,
@@ -44,7 +55,7 @@ typedef enum {
     XVIM_VISUAL_CHARACTER, // for 'v'
     XVIM_VISUAL_LINE, // for 'V'
     XVIM_VISUAL_BLOCK, // for 'CTRL-V'
-}XVIM_VISUAL_MODE;
+} XVIM_VISUAL_MODE;
 
 typedef enum {
     _XVIM_VISUAL_RIGHT  = 1,

@@ -43,9 +43,8 @@
 // All the method in this caregory must have a prefix "xvim_"
 // This is to avoid a conflict with method names in NSTextView.
 
-#import "XVimTextViewProtocol.h"
+#import "XVimView.h"
 #import "NSTextStorage+VimOperation.h"
-#import <Cocoa/Cocoa.h>
 
 @interface NSTextView (VimOperation)
 // TODO: Method names in category should have prefix like xvim_
