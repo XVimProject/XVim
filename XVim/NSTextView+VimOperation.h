@@ -116,25 +116,6 @@
 - (void)xvim_selectPreviousPlaceholder;
 - (void)xvim_hideCompletions;
 
-#pragma mark Scroll
-- (NSUInteger)xvim_lineUp:(NSUInteger)index count:(NSUInteger)count;
-- (NSUInteger)xvim_lineDown:(NSUInteger)index count:(NSUInteger)count;
-- (void)xvim_scroll:(CGFloat)ratio count:(NSUInteger)count;
-- (void)xvim_scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (void)xvim_scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (void)xvim_scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (void)xvim_scrollTo:(NSUInteger)location;
-- (void)xvim_pageForward:(NSUInteger)index count:(NSUInteger)count;
-- (void)xvim_pageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (void)xvim_halfPageForward:(NSUInteger)index count:(NSUInteger)count;
-- (void)xvim_halfPageBackward:(NSUInteger)index count:(NSUInteger)count;
-- (void)xvim_scrollPageForward:(NSUInteger)count;
-- (void)xvim_scrollPageBackward:(NSUInteger)count;
-- (void)xvim_scrollHalfPageForward:(NSUInteger)count;
-- (void)xvim_scrollHalfPageBackward:(NSUInteger)count;
-- (void)xvim_scrollLineForward:(NSUInteger)count;
-- (void)xvim_scrollLineBackward:(NSUInteger)count;
-
 #pragma mark Search
 /**
  * Shows the candidate of the next search result.
@@ -147,15 +128,6 @@
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
 
 #pragma mark Searching positions
-// TODO: Thses method should be internal. Create abstracted interface to achieve the operation uses these methods.
-/**
- * Takes point in view and returns its index.
- * This method automatically convert the "folded index" to "real index"
- * When some characters are folded( like placeholders) the pure index for a specifix point is
- * less than real index in the string.
- **/
-- (NSUInteger)xvim_glyphIndexForPoint:(NSPoint)point;
-- (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex;
 
 /**
  * Return number of lines in current visible view.

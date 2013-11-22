@@ -138,7 +138,7 @@
 	return nil;
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return 0.0;
 }
 
@@ -167,8 +167,7 @@
 }
 
 - (XVimEvaluator*)ESC{
-    NSTextView *sourceView = [self sourceView];
-    [sourceView xvim_scrollTo:[sourceView insertionPoint]];
+    [self.currentView scrollTo:self.sourceView.insertionPoint];
 	return nil;
 }
 

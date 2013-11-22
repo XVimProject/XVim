@@ -213,12 +213,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)C_b{
-    [[self sourceView] xvim_scrollPageBackward:[self numericArg]];
+    [self.currentView scrollPageBackward:self.numericArg];
     return self;
 }
 
 - (XVimEvaluator*)C_d{
-    [[self sourceView] xvim_scrollHalfPageForward:[self numericArg]];
+    [self.currentView scrollHalfPageForward:self.numericArg];
     return self;
 }
 
@@ -243,7 +243,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)C_f{
-    [[self sourceView] xvim_scrollPageForward:[self numericArg]];
+    [self.currentView scrollPageForward:self.numericArg];
     return self;
 }
 
@@ -341,7 +341,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)C_u{
-    [[self sourceView] xvim_scrollHalfPageBackward:[self numericArg]];
+    [self.currentView scrollHalfPageBackward:self.numericArg];
     return self;
 }
 

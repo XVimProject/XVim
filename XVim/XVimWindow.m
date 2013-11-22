@@ -359,29 +359,15 @@
 
 #pragma mark - Visual gimmicks
 
-- (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
 {
     XVimEvaluator *current = self.currentEvaluator;
-	float heightRatio = [current insertionPointHeightRatio];
-    float widthRatio = [current insertionPointWidthRatio];
-    float alphaRatio = [current insertionPointAlphaRatio];
+	CGFloat heightRatio = [current insertionPointHeightRatio];
+    CGFloat widthRatio = [current insertionPointWidthRatio];
+    CGFloat alphaRatio = [current insertionPointAlphaRatio];
 
-	NSTextView *sourceView = [self sourceView];
-    NSUInteger glyphIndex = [sourceView insertionPoint];
-	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
-
-	[[color colorWithAlphaComponent:alphaRatio] set];
-	rect.size.width = rect.size.height/2;
-	if (glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width)  {
-		rect.size.width = glyphRect.size.width;
-    }
-
-	rect.origin.y += (1 - heightRatio) * rect.size.height;
-	rect.size.height *= heightRatio;
-    rect.size.width *= widthRatio;
-
-	NSRectFillUsingOperation(rect, NSCompositeSourceOver);
-    return rect;
+    [self.currentView drawInsertionPointInRect:rect color:color
+                                   heightRatio:heightRatio widthRatio:widthRatio alpha:alphaRatio];
 }
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell

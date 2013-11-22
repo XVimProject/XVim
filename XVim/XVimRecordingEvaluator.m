@@ -48,15 +48,15 @@
     return self;
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return [[self.evaluatorStack lastObject] insertionPointHeightRatio];
 }
 
-- (float)insertionPointWidthRatio{
+- (CGFloat)insertionPointWidthRatio{
     return [[self.evaluatorStack lastObject] insertionPointWidthRatio];
 }
 
-- (float)insertionPointAlphaRatio{
+- (CGFloat)insertionPointAlphaRatio{
     return [[self.evaluatorStack lastObject] insertionPointAlphaRatio];
 }
 

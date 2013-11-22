@@ -33,4 +33,26 @@
 
 - (instancetype)initWithView:(NSTextView *)view window:(XVimWindow *)window;
 
+#pragma mark *** Drawing ***
+
+- (NSUInteger)lineNumberInScrollView:(CGFloat)ratio offset:(NSInteger)offset;
+
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor *)color
+                     heightRatio:(CGFloat)heightRatio
+                      widthRatio:(CGFloat)widthRatio
+                           alpha:(CGFloat)alpha;
+
+#pragma mark *** Scrolling ***
+
+- (void)scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
+- (void)scrollTo:(NSUInteger)location;
+- (void)scrollPageForward:(NSUInteger)count;
+- (void)scrollPageBackward:(NSUInteger)count;
+- (void)scrollHalfPageForward:(NSUInteger)count;
+- (void)scrollHalfPageBackward:(NSUInteger)count;
+- (void)scrollLineForward:(NSUInteger)count;
+- (void)scrollLineBackward:(NSUInteger)count;
+
 @end

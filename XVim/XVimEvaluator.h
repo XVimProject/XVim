@@ -117,9 +117,9 @@ XVimMotionEvaluator
  **/
 - (void)didEndHandler NS_REQUIRES_SUPER;
 - (XVimEvaluator*)defaultNextEvaluator;
-- (float)insertionPointHeightRatio;
-- (float)insertionPointWidthRatio;
-- (float)insertionPointAlphaRatio;
+- (CGFloat)insertionPointHeightRatio;
+- (CGFloat)insertionPointWidthRatio;
+- (CGFloat)insertionPointAlphaRatio;
 
 - (NSString*)modeString;
 - (XVIM_MODE)mode;
@@ -127,7 +127,8 @@ XVimMotionEvaluator
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
 
-- (NSTextView*)sourceView;
+- (NSTextView *)sourceView;
+- (XVimView *)currentView;
 
 - (void)resetCompletionHandler;
 

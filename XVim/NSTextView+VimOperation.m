@@ -63,10 +63,6 @@
 - (XVimRange)xvim_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion;
 - (NSRange)xvim_getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (void)xvim_indentCharacterRange:(NSRange)range;
-- (void)xvim_scrollCommon_moveCursorPos:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count;
-- (NSUInteger)xvim_lineNumberAtMiddle;
-- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
 - (void)xvim_registerInsertionPointForUndo;
@@ -1455,214 +1451,6 @@
 #endif
 }
 
-#pragma mark Scroll
-- (NSUInteger)xvim_lineUp:(NSUInteger)index count:(NSUInteger)count {
-  [self scrollLineUp:self];
-  NSRect visibleRect = [[self enclosingScrollView] contentView].bounds;
-  NSRect currentInsertionRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:[self textContainer]];
-  NSPoint relativeInsertionPoint = SubPoint(currentInsertionRect.origin, visibleRect.origin);
-  if (relativeInsertionPoint.y > visibleRect.size.height) {
-    [self moveUp:self];
-    NSPoint newPoint = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:[self textContainer]].origin;
-    index = [self xvim_glyphIndexForPoint:newPoint];
-  }
-  return index;
-}
-
-- (NSUInteger)xvim_lineDown:(NSUInteger)index count:(NSUInteger)count {
-  [self scrollLineDown:self];
-  NSRect visibleRect = [[self enclosingScrollView] contentView].bounds;
-  NSRect currentInsertionRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(index,0) inTextContainer:[self textContainer]];
-  if (currentInsertionRect.origin.y < visibleRect.origin.y) {
-    [self moveDown:self];
-    NSPoint newPoint = NSMakePoint(currentInsertionRect.origin.x, visibleRect.origin.y);
-    index = [self xvim_glyphIndexForPoint:newPoint];
-  }
-  return index;
-}
-
-- (void)xvim_scroll:(CGFloat)ratio count:(NSUInteger)count{
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSRect visibleRect = [scrollView contentView].bounds;
-    CGFloat scrollSize = visibleRect.size.height * ratio * count;
-    NSPoint scrollPoint = NSMakePoint(visibleRect.origin.x, visibleRect.origin.y + scrollSize ); // This may be beyond the beginning or end of document (intentionally)
-    
-    // Cursor position relative to left-top origin shold be kept after scroll ( Exception is when it scrolls beyond the beginning or end of document)
-    NSRect currentInsertionRect = [self xvim_boundingRectForGlyphIndex:self.insertionPoint];
-    NSPoint relativeInsertionPoint = SubPoint(currentInsertionRect.origin, visibleRect.origin);
-    //TRACE_LOG(@"Rect:%f %f    realIndex:%d   foldedIndex:%d", currentInsertionRect.origin.x, currentInsertionRect.origin.y, self.insertionPoint, index);
-    
-    // Cursor Position after scroll
-    NSPoint cursorAfterScroll = AddPoint(scrollPoint,relativeInsertionPoint);
-    
-    // Nearest character index to the cursor position after scroll
-    // TODO: consider blank-EOF line. Xcode does not return blank-EOF index with following method...
-    NSUInteger cursorIndexAfterScroll= [self xvim_glyphIndexForPoint:cursorAfterScroll];
-    
-    // We do not want to change the insert point relative position from top of visible rect
-    // We have to calc the distance between insertion point befor/after scrolling to keep the position.
-    NSRect insertionRectAfterScroll = [self xvim_boundingRectForGlyphIndex:cursorIndexAfterScroll];
-    NSPoint relativeInsertionPointAfterScroll = SubPoint(insertionRectAfterScroll.origin, scrollPoint);
-    CGFloat heightDiff = relativeInsertionPointAfterScroll.y - relativeInsertionPoint.y;
-    scrollPoint.y += heightDiff;
-    // Prohibit scroll beyond the bounds of document
-    if( scrollPoint.y > [[scrollView documentView] frame].size.height - visibleRect.size.height ){
-        scrollPoint.y = [[scrollView documentView] frame].size.height - visibleRect.size.height ;
-    } else if (scrollPoint.y < 0.0) {
-      scrollPoint.y = 0.0;
-    }
-  
-    [[scrollView contentView] scrollToPoint:scrollPoint];
-    [scrollView reflectScrolledClipView:[scrollView contentView]];
-
-    cursorIndexAfterScroll = [self.textStorage.xvim_buffer firstNonblankInLineAtIndex:cursorIndexAfterScroll allowEOL:YES];
-    [self xvim_moveCursor:cursorIndexAfterScroll preserveColumn:NO];
-    [self xvim_syncState];
-    
-}
-
-- (void)xvim_scrollBottom:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{ // zb / z-
-    [self xvim_scrollCommon_moveCursorPos:lineNumber firstNonblank:fnb];
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(self.insertionPoint,0) inTextContainer:container];
-    NSPoint bottom = NSMakePoint(0.0f, NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f);
-    bottom.y -= NSHeight([[scrollView contentView] bounds]);
-    if( bottom.y < 0.0 ){
-        bottom.y = 0.0;
-    }
-    [[scrollView contentView] scrollToPoint:bottom];
-    [scrollView reflectScrolledClipView:[scrollView contentView]];
-}
-
-- (void)xvim_scrollCenter:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{ // zz / z.
-    [self xvim_scrollCommon_moveCursorPos:lineNumber firstNonblank:fnb];
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(self.insertionPoint,0) inTextContainer:container];
-    NSPoint center = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
-    center.y -= NSHeight([[scrollView contentView] bounds]) / 2.0f;
-    if( center.y < 0.0 ){
-        center.y = 0.0;
-    }
-    [[scrollView contentView] scrollToPoint:center];
-    [scrollView reflectScrolledClipView:[scrollView contentView]];
-}
-
-- (void)xvim_scrollTop:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{ // zt / z<CR>
-    [self xvim_scrollCommon_moveCursorPos:lineNumber firstNonblank:fnb];
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(self.insertionPoint,0) inTextContainer:container];
-    NSPoint top = NSMakePoint(0.0f, NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f);
-    [[scrollView contentView] scrollToPoint:top];
-    [scrollView reflectScrolledClipView:[scrollView contentView]];
-}
-
-- (void)xvim_scrollTo:(NSUInteger)location {
-    // Update: I do not know if we really need Following block.
-    //         It looks that they need it to call ensureLayoutForGlyphRange but do not know when it needed
-    //         What I changed was the way calc "glyphRec". Not its using [self boundingRectForGlyphIndex] which coniders
-    //         text folding when calc the rect.
-    /*
-	BOOL isBlankline =
-		(location == [[self string] length] || isNewline([[self string] characterAtIndex:location])) &&
-		(location == 0 || isNewline([[self string] characterAtIndex:location-1]));
-
-    NSRange characterRange;
-    characterRange.location = location;
-    characterRange.length = isBlankline ? 0 : 1;
-    
-    // Must call ensureLayoutForGlyphRange: to fix a bug where it will not scroll
-    // to the appropriate glyph due to non contiguous layout
-    NSRange glyphRange = [[self layoutManager] glyphRangeForCharacterRange:characterRange actualCharacterRange:NULL];
-    [[self layoutManager] ensureLayoutForGlyphRange:NSMakeRange(0, glyphRange.location + glyphRange.length)];
-     */
-    
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:location];
-
-    CGFloat glyphLeft = NSMidX(glyphRect) - NSWidth(glyphRect) / 2.0f;
-    CGFloat glyphRight = NSMidX(glyphRect) + NSWidth(glyphRect) / 2.0f;
-
-    NSRect contentRect = [[scrollView contentView] bounds];
-    CGFloat viewLeft = contentRect.origin.x;
-    CGFloat viewRight = contentRect.origin.x + NSWidth(contentRect);
-
-    NSPoint scrollPoint = contentRect.origin;
-    if (glyphRight > viewRight){
-        scrollPoint.x = glyphLeft - NSWidth(contentRect) / 2.0f;
-    }else if (glyphLeft < viewLeft){
-        scrollPoint.x = glyphRight - NSWidth(contentRect) / 2.0f;
-    }
-
-    CGFloat glyphBottom = NSMidY(glyphRect) + NSHeight(glyphRect) / 2.0f;
-    CGFloat glyphTop = NSMidY(glyphRect) - NSHeight(glyphRect) / 2.0f;
-
-    CGFloat viewTop = contentRect.origin.y;
-    CGFloat viewBottom = contentRect.origin.y + NSHeight(contentRect);
-
-    if (glyphTop < viewTop){
-        if (viewTop - glyphTop > NSHeight(contentRect)){
-            scrollPoint.y = glyphBottom - NSHeight(contentRect) / 2.0f;
-        }else{
-            scrollPoint.y = glyphTop;
-        }
-    }else if (glyphBottom > viewBottom){
-        if (glyphBottom - viewBottom > NSHeight(contentRect)) {
-            scrollPoint.y = glyphBottom - NSHeight(contentRect) / 2.0f;
-        }else{
-            scrollPoint.y = glyphBottom - NSHeight(contentRect);
-        }
-    }
-
-    scrollPoint.x = MAX(0, scrollPoint.x);
-    scrollPoint.y = MAX(0, scrollPoint.y);
-
-    [[scrollView  contentView] scrollToPoint:scrollPoint];
-    [scrollView reflectScrolledClipView:[scrollView contentView]];
-}
-
-- (void)xvim_pageForward:(NSUInteger)index count:(NSUInteger)count { // C-f
-	[self xvim_scroll:1.0 count:count];
-}
-
-- (void)xvim_pageBackward:(NSUInteger)index count:(NSUInteger)count { // C-b
-	[self xvim_scroll:-1.0 count:count];
-}
-
-- (void)xvim_halfPageForward:(NSUInteger)index count:(NSUInteger)count { // C-d
-	[self xvim_scroll:0.5 count:count];
-}
-
-- (void)xvim_halfPageBackward:(NSUInteger)index count:(NSUInteger)count { // C-u
-	[self xvim_scroll:-0.5 count:count];
-}
-
-- (void)xvim_scrollPageForward:(NSUInteger)count{
-    [self xvim_pageForward:self.insertionPoint count:count];
-}
-
-- (void)xvim_scrollPageBackward:(NSUInteger)count{
-    [self xvim_pageBackward:self.insertionPoint count:count];
-}
-
-- (void)xvim_scrollHalfPageForward:(NSUInteger)count{
-    [self xvim_halfPageForward:self.insertionPoint count:count];
-}
-
-- (void)xvim_scrollHalfPageBackward:(NSUInteger)count{
-    [self xvim_halfPageBackward:self.insertionPoint count:count];
-}
-
-- (void)xvim_scrollLineForward:(NSUInteger)count{
-    [self xvim_lineDown:self.insertionPoint count:count];
-}
-
-- (void)xvim_scrollLineBackward:(NSUInteger)count{
-    [self xvim_lineUp:self.insertionPoint count:count];
-}
-
 #pragma mark Search
 // Thanks to  http://lists.apple.com/archives/cocoa-dev/2005/Jun/msg01909.html
 - (NSRange)xvim_visibleRange:(NSTextView *)tv{
@@ -1688,7 +1476,7 @@
         range = [self.textStorage searchRegexBackward:regex from:self.insertionPoint count:count option:opt];
     }
     if( range.location != NSNotFound ){
-        [self scrollRectToVisible:[self xvim_boundingRectForGlyphIndex:range.location]];
+        [self.xvim_view scrollTo:range.location];
         [self showFindIndicatorForRange:range];
     }
 }
@@ -1753,26 +1541,6 @@
 }
 
 #pragma mark Search Position
-/**
- * Takes point in view and returns its index.
- * This method automatically convert the "folded index" to "real index"
- * When some characters are folded( like placeholders) the pure index for a specifix point is
- * less than real index in the string.
- **/
-- (NSUInteger)xvim_glyphIndexForPoint:(NSPoint)point {
-	return [[self layoutManager] glyphIndexForPoint:point inTextContainer:[self textContainer]];
-}
-
-- (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
-    NSRect glyphRect;
-    if( [self.textStorage isEOF:glyphIndex] ){
-        // When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
-        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 0)  inTextContainer:[self textContainer]];
-    }else{
-        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
-    }
-    return glyphRect;
-}
 
 /**
  *Find and return an NSArray* with the placeholders in a current line.
@@ -1889,7 +1657,7 @@
     [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
     [(DVTFoldingTextStorage*)self.textStorage decreaseUsingFoldedRanges];
 #endif
-    [self xvim_scrollTo:self.insertionPoint];
+    [self.xvim_view scrollTo:self.insertionPoint];
     self.xvim_lockSyncStateFromView = NO;
 }
 
@@ -1932,7 +1700,8 @@
     NSUInteger start = NSNotFound;
     NSTextStorage *ts = self.textStorage;
     XVimBuffer *buffer = ts.xvim_buffer;
-    
+    XVimView *xview = self.xvim_view;
+
     switch (motion.motion) {
         case MOTION_NONE:
             // Do nothing
@@ -2037,13 +1806,16 @@
             end = [buffer indexOfLineNumber:[buffer numberOfLines] column:self.preservedColumn];
             break;
         case MOTION_HOME:
-            end = [buffer firstNonblankInLineAtIndex:[buffer indexOfLineNumber:[self xvim_lineNumberFromTop:motion.count]] allowEOL:YES];
+            tmpPos = [xview lineNumberInScrollView:0.0 offset:motion.scount - 1];
+            end    = [buffer firstNonblankInLineAtIndex:[buffer indexOfLineNumber:tmpPos] allowEOL:YES];
             break;
         case MOTION_MIDDLE:
-            end = [buffer firstNonblankInLineAtIndex:[buffer indexOfLineNumber:[self xvim_lineNumberAtMiddle]] allowEOL:YES];
+            tmpPos = [xview lineNumberInScrollView:0.5 offset:0];
+            end    = [buffer firstNonblankInLineAtIndex:[buffer indexOfLineNumber:tmpPos] allowEOL:YES];
             break;
         case MOTION_BOTTOM:
-            end = [buffer firstNonblankInLineAtIndex:[buffer indexOfLineNumber:[self xvim_lineNumberFromBottom:motion.count]] allowEOL:YES];
+            tmpPos = [xview lineNumberInScrollView:1.0 offset:1 - motion.scount];
+            end    = [buffer firstNonblankInLineAtIndex:[buffer indexOfLineNumber:tmpPos] allowEOL:YES];
             break;
         case MOTION_SEARCH_FORWARD:
             end = [ts searchRegexForward:motion.regex from:self.insertionPoint count:motion.count option:motion.option].location;
@@ -2173,57 +1945,6 @@
 }
          
 #pragma mark scrolling
-// This is used by scrollBottom,Top,Center as a common method
-- (void)xvim_scrollCommon_moveCursorPos:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb{
-    if( lineNumber != 0 ){
-        NSUInteger pos = [self.textStorage.xvim_buffer indexOfLineNumber:lineNumber];
-        if( NSNotFound == pos ){
-            pos = self.textStorage.length;
-        }
-        [self xvim_moveCursor:pos preserveColumn:NO];
-        [self xvim_syncState];
-    }
-    if( fnb ){
-        NSUInteger pos = [self.textStorage.xvim_buffer firstNonblankInLineAtIndex:self.insertionPoint allowEOL:YES];
-        [self xvim_moveCursor:pos preserveColumn:NO];
-        [self xvim_syncState];
-    }
-}
-
-- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count { // L
-    NSAssert( 0 != count , @"count starts from 1" );
-    if( count > [self xvim_numberOfLinesInVisibleRect] ){
-        count = [self xvim_numberOfLinesInVisibleRect];
-    }
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint bottom = [[scrollView contentView] bounds].origin;
-    // This calculate the position of the bottom line and substruct height of "count" of lines to upwards
-    bottom.y += [[scrollView contentView] bounds].size.height - (NSHeight(glyphRect) / 2.0f) - (NSHeight(glyphRect) * (count-1));
-    return [self.textStorage.xvim_buffer lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:bottom]];
-}
-
-- (NSUInteger)xvim_lineNumberAtMiddle{
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSPoint center = [[scrollView contentView] bounds].origin;
-    center.y += [[scrollView contentView] bounds].size.height / 2;
-    return [self.textStorage.xvim_buffer lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:center]];
-}
-
-- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count{
-    NSAssert( 0 != count , @"count starts from 1" );
-    if( count > [self xvim_numberOfLinesInVisibleRect] ){
-        count = [self xvim_numberOfLinesInVisibleRect];
-    }
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint top = [[scrollView contentView] bounds].origin;
-    // Add height of "count" of lines to downwards
-    top.y += (NSHeight(glyphRect) / 2.0f) + (NSHeight(glyphRect) * (count-1));
-    return [self.textStorage.xvim_buffer lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:top]];
-}
 
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward{
     NSRange ret = NSMakeRange(NSNotFound, 0);

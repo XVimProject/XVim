@@ -96,21 +96,21 @@
     self.startRange = [[self sourceView] selectedRange];
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     if(_oneCharMode){
         return 0.25;
     }
     return 1.0;
 }
 
-- (float)insertionPointWidthRatio{
+- (CGFloat)insertionPointWidthRatio{
     if(_oneCharMode){
         return 1.0;
     }
     return 0.15;
 }
 
-- (float)insertionPointAlphaRatio{
+- (CGFloat)insertionPointAlphaRatio{
     if(_oneCharMode){
         return 0.5;
     }

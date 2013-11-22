@@ -76,6 +76,11 @@ static XVimEvaluator *_popEvaluator = nil;
     [super dealloc];
 }
 
+- (XVimView *)currentView
+{
+    return self.window.currentView;
+}
+
 - (NSTextView *)sourceView
 {
     return self.window.currentView.textView;
@@ -123,15 +128,15 @@ static XVimEvaluator *_popEvaluator = nil;
     return [XVimEvaluator invalidEvaluator];
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return 1.0;
 }
 
-- (float)insertionPointWidthRatio{
+- (CGFloat)insertionPointWidthRatio{
     return 1.0;
 }
 
-- (float)insertionPointAlphaRatio{
+- (CGFloat)insertionPointAlphaRatio{
     return 0.5;
 }
 

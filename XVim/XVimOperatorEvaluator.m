@@ -36,7 +36,7 @@
     [super dealloc];
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return 0.5;
 }
 

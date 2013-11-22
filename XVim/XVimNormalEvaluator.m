@@ -87,7 +87,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b{
-    [[self sourceView] xvim_scrollPageBackward:[self numericArg]];
+    [self.currentView scrollPageBackward:self.numericArg];
     return nil;
 }
 
@@ -107,7 +107,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d{
-    [[self sourceView] xvim_scrollHalfPageForward:[self numericArg]];
+    [self.currentView scrollHalfPageForward:self.numericArg];
     return nil;
 }
 
@@ -125,13 +125,13 @@
 }
 
 - (XVimEvaluator*)C_e{
-    [[self sourceView] xvim_scrollLineForward:[self numericArg]];
+    [self.currentView scrollLineForward:self.numericArg];
     return nil;
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f{
-    [[self sourceView] xvim_scrollPageForward:[self numericArg]];
+    [self.currentView scrollPageForward:self.numericArg];
     return nil;
 }
 
@@ -150,7 +150,7 @@
 	if ([documentURL isFileURL]) {
 		NSString *text = [NSString stringWithFormat:@"%@   line %ld of %ld --%d%%-- col %ld",
                           documentURL.path, lineNumber, numberOfLines,
-                          (int)((float)lineNumber*100.0/(float)numberOfLines), columnNumber+1 ];
+                          (int)((CGFloat)lineNumber*100.0/(CGFloat)numberOfLines), columnNumber+1 ];
         
 		[window statusMessage:text];
 	}
@@ -295,7 +295,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u{
-    [[self sourceView] xvim_scrollHalfPageBackward:[self numericArg]];
+    [self.currentView scrollHalfPageBackward:self.numericArg];
     return nil;
 }
 
@@ -365,7 +365,7 @@
 }
 
 - (XVimEvaluator*)C_y{
-    [[self sourceView] xvim_scrollLineBackward:[self numericArg]];
+    [self.currentView scrollLineBackward:self.numericArg];
     return nil;
 }
 

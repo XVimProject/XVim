@@ -278,7 +278,7 @@
     return  retval;
 }
 
-- (float)heightForString:(NSString*)myString withFont:(NSFont*)myFont withWidth:(float)myWidth{
+- (CGFloat)heightForString:(NSString*)myString withFont:(NSFont*)myFont withWidth:(CGFloat)myWidth{
     NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithString:myString] autorelease];
     NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithContainerSize:NSMakeSize(myWidth, FLT_MAX)] autorelease];
     NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
@@ -300,7 +300,7 @@
         NSCell* cell = (NSCell*)[column dataCell];
         font = [NSFont fontWithName:@"Menlo" size:13];
         [cell setFont:font]; // FIXME: This should not be done here.
-        float width = column.width;
+        CGFloat width = column.width;
         NSString* msg;
         if(showPassing){
             msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)row]).message;
@@ -311,7 +311,7 @@
         if( nil == msg || [msg isEqualToString:@""] ){
             msg = @" ";
         }
-        float ret = [self heightForString:msg withFont:font withWidth:width];
+        CGFloat ret = [self heightForString:msg withFont:font withWidth:width];
         return ret + 10;
     }
     return 13.0;

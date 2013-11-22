@@ -816,8 +816,9 @@
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
-		NSTextView* srcView = window.currentView.textView;
-        XVimBuffer *buffer = window.currentBuffer;
+        XVimBuffer *buffer  = window.currentBuffer;
+        XVimView   *xview   = window.currentView;
+		NSTextView *srcView = xview.textView;
 
         // Jump to location
         NSUInteger pos = [buffer indexOfLineNumber:exarg.lineBegin column:0];
@@ -829,7 +830,7 @@
             pos_wo_space = pos;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [srcView xvim_scrollTo:[window.currentView.textView insertionPoint]];
+        [xview scrollTo:srcView.insertionPoint];
         return;
     }
     
