@@ -29,6 +29,7 @@ BOOL isPrintable(unichar c);
 @property unichar character;
 @property unsigned char modifier;
 @property (nonatomic, readonly) BOOL isNumeric;
+@property (nonatomic, readonly) BOOL isPrintable;
 
 - (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod;
 

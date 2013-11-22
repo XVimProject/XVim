@@ -592,6 +592,11 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
     return [str autorelease];
 }
 
+- (BOOL)isPrintable
+{
+    return !self.modifier && isPrintable(self.character);
+}
+
 - (NSString*)keyNotation{
 	NSMutableString *keyStr = [[NSMutableString alloc] init];
 	unichar charcode = self.character;

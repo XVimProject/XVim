@@ -244,7 +244,9 @@
     if (nextEvaluator == self && nil == keySelector){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
-            if( ![self.sourceView xvim_replaceCharacters:keyStroke.character count:[self numericArg]] ){
+            if (!keyStroke.isPrintable) {
+                nextEvaluator = [XVimEvaluator invalidEvaluator];
+            } else if (![self.sourceView xvim_replaceCharacters:keyStroke.character count:[self numericArg]]) {
                 nextEvaluator = [XVimEvaluator invalidEvaluator];
             }else{
                 nextEvaluator = nil;
