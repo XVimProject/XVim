@@ -26,6 +26,13 @@ static XVimEvaluator *_noOperationEvaluator = nil;
 static XVimEvaluator *_popEvaluator = nil;
 
 @implementation XVimEvaluator
+@synthesize window = _window;
+@synthesize parent = _parent;
+@synthesize numericArg = _numericArg;
+@synthesize numericMode = _numericMode;
+@synthesize argumentString = _argumentString;
+@synthesize yankRegister = _yankRegister;
+@synthesize onChildCompleteHandler = _onChildCompleteHandler;
 
 + (void)initialize
 {

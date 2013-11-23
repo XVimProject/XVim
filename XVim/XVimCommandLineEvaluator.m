@@ -28,6 +28,8 @@
 @end
 
 @implementation XVimCommandLineEvaluator
+@synthesize evalutionResult = _evalutionResult;
+@synthesize lastTextView = _lastTextView;
 
 - (id)initWithWindow:(XVimWindow *)window
 		 firstLetter:(NSString*)firstLetter

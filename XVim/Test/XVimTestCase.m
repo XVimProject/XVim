@@ -16,6 +16,15 @@
 #import "XVimView.h"
 
 @implementation XVimTestCase
+@synthesize initialText;
+@synthesize initialRange;
+@synthesize input;
+@synthesize expectedText;
+@synthesize expectedRange;
+@synthesize description;
+@synthesize message;
+@synthesize success;
+
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
                     initialRange:(NSRange)ir
                                    input:(NSString*)in
@@ -79,6 +88,7 @@
     }
     
     NSRange resultRange = [XVimLastActiveSourceView() selectedRange];
+
     if( self.expectedRange.location != resultRange.location ||
         self.expectedRange.length   != resultRange.length
        ){

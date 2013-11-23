@@ -79,6 +79,7 @@
 
 
 @implementation XVimTester
+@synthesize testCases;
 
 - (id)init{
     if( self = [super init] ){

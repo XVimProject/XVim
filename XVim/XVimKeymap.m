@@ -22,6 +22,10 @@
 @end
 
 @implementation XVimKeymapNode
+@synthesize dict;
+@synthesize remap;
+@synthesize target;
+
 - (id)init{
 	if (self = [super init]){
 		self.dict = [[[NSMutableDictionary alloc] init] autorelease];
@@ -45,6 +49,11 @@
 
 
 @implementation XVimKeymapContext
+@synthesize inputKeys;
+@synthesize lastMappedKeys;
+@synthesize lastMappedNode;
+@synthesize node;
+
 - (id)init {
 	if (self = [super init]){
 		self.inputKeys = [[[NSMutableString alloc] init] autorelease];
@@ -84,6 +93,8 @@
 @end
 
 @implementation XVimKeymap
+@synthesize root;
+
 - (id)init{
 	self = [super init];
 	if (self) {

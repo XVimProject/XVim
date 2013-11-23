@@ -16,6 +16,7 @@
 #import "Logger.h"
 
 @implementation XVimGMotionEvaluator
+@synthesize motion, key;
 
 - (XVimEvaluator*)eval:(XVimKeyStroke *)keyStroke{
     self.key = keyStroke;

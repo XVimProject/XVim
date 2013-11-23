@@ -57,6 +57,22 @@ NSString * const XVimBufferKey = @"XVimBufferKey";
 
 @implementation XVim
 @synthesize disabled = _disabled;
+@synthesize options = _options;
+@synthesize searcher = _searcher;
+@synthesize lastCharacterSearchMotion = _lastCharacterSearchMotion;
+@synthesize excmd = _excmd;
+@synthesize marks = _marks;
+@synthesize testRunner = _testRunner;
+@synthesize registerManager = _registerManager;
+@synthesize exCommandHistory = _exCommandHistory;
+@synthesize searchHistory = _searchHistory;
+@synthesize lastOperationCommands = _lastOperationCommands;
+@synthesize isRepeating = _isRepeating;
+@synthesize tempRepeatRegister = _tempRepeatRegister;
+@synthesize lastPlaybackRegister = _lastPlaybackRegister;
+@synthesize document = _document;
+@synthesize isExecuting = _isExecuting;
+
 
 // For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{

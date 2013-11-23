@@ -16,6 +16,20 @@
 @end
 
 @implementation XVimOptions
+@synthesize ignorecase = _ignorecase;
+@synthesize wrapscan = _wrapscan;
+@synthesize errorbells = _errorbells;
+@synthesize incsearch = _incsearch;
+@synthesize gdefault = _gdefault;
+@synthesize smartcase = _smartcase;
+@synthesize debug = _debug;
+@synthesize hlsearch = _hlsearch;
+@synthesize number = _number;
+@synthesize clipboard = _clipboard;
+@synthesize guioptions = _guioptions;
+@synthesize timeoutlen = _timeoutlen;
+@synthesize laststatus = _laststatus;
+@synthesize vimregex = _vimregex;
 
 - (id)init{
     if( self = [super init] ){

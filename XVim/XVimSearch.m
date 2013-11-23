@@ -17,6 +17,14 @@
 #import "NSTextStorage+VimOperation.h"
 
 @implementation XVimSearch
+@synthesize lastSearchBackword = _lastSearchBackword;
+@synthesize lastSearchCase = _lastSearchCase;
+@synthesize lastSearchCmd = _lastSearchCmd;
+@synthesize lastSearchString = _lastSearchString;
+@synthesize lastSearchDisplayString = _lastSearchDisplayString;
+@synthesize lastReplacementString = _lastReplacementString;
+@synthesize matchStart = _matchStart;
+@synthesize matchEnd = _matchEnd;
 
 - (id)init {
     if( self = [super init] ){

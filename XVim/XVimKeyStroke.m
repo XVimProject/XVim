@@ -517,6 +517,7 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 
 
 @implementation XVimKeyStroke
+@synthesize character, modifier;
 
 - (id)initWithCharacter:(unichar)c modifier:(unsigned char)mod{
     if( self = [super init] ){

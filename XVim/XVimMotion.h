@@ -85,12 +85,12 @@ typedef enum _MOTION{
 @property MOTION_TYPE type;
 @property MOTION_OPTION option;
 @property NSUInteger count;
-@property NSInteger  scount;
+@property (readonly) NSInteger  scount;
 @property NSUInteger line;
 @property NSUInteger column;
 @property NSUInteger position;
 @property unichar character;
-@property(strong) NSString* regex;
+@property (strong) NSString* regex;
 @property XVimMotionInfo* info;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;

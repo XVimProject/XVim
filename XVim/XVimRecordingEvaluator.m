@@ -18,6 +18,8 @@
 @end
 
 @implementation XVimRecordingEvaluator
+@synthesize reg = _reg, evaluatorStack = _evaluatorStack;
+
 - (id)initWithWindow:(XVimWindow *)window withRegister:(NSString*)reg{
     if( self = [super initWithWindow:window] ){
         self.evaluatorStack = [[[NSMutableArray alloc] init] autorelease];
