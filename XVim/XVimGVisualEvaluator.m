@@ -7,7 +7,7 @@
 //
 
 #import "XVimGVisualEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimWindow.h"
 #import "XVimJoinEvaluator.h"
 #import "XVim.h"
@@ -55,7 +55,7 @@
 - (XVimEvaluator*)u{
     [self.argumentString appendString:@"u"];
     XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_LOWER];
+    [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_LOWER];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }
@@ -63,7 +63,7 @@
 - (XVimEvaluator*)U{
     [self.argumentString appendString:@"U"];
     XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_UPPER];
+    [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_UPPER];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }
@@ -76,7 +76,7 @@
 - (XVimEvaluator *)QUESTION{
     [self.argumentString appendString:@"?"];
     XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_ROT13];
+    [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_ROT13];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }
@@ -84,7 +84,7 @@
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
     XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
+    [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
 }

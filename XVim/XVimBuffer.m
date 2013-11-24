@@ -9,6 +9,7 @@
 #import <objc/runtime.h>
 #import "XVimStringBuffer.h"
 #import "XVimBuffer.h"
+#import "XVimView.h"
 #import "XVimUndo.h"
 #import "XVimTextStoring.h"
 #import "NSString+VimHelper.h"
@@ -38,6 +39,7 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     NSDocument    *__unsafe_unretained _document;
     NSTextStorage *__unsafe_unretained _textStorage;
     XVimUndoOperation *_curOp;
+    NSUInteger         _editCount;
 
     struct {
         unsigned has_xvim_string : 1;
@@ -234,6 +236,7 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
 
 - (NSUInteger)indexOfLineNumber:(NSUInteger)num
 {
+    NSAssert(num > 0, @"line number start at 1");
     if (num == 1) {
         return 0;
     }
@@ -433,13 +436,18 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 
 #pragma mark Support for modifications
 
+- (BOOL)isEditing
+{
+    return _editCount > 0;
+}
+
 - (void)undoRedo:(XVimUndoOperation *)op
 {
     for (NSLayoutManager *mgr in _textStorage.layoutManagers) {
         NSTextView *view = mgr.firstTextView;
 
         if (view.textStorage == _textStorage) {
-            [op undoRedo:self view:view];
+            [op undoRedo:self view:view.xvim_view];
             return;
         }
     }
@@ -449,23 +457,25 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 
 - (void)beginEditingAtIndex:(NSUInteger)index
 {
-    NSAssert(!_curOp, @"you can't call -beginEditingAtIndex: twice");
-    [_curOp release];
-    _curOp = [[XVimUndoOperation alloc] initWithIndex:index];
-}
-
-- (void)cancelEditing
-{
-    [_curOp release];
-    _curOp = nil;
+    NSAssert(!_curOp || _editCount, @"invalid undo state");
+    if (_curOp) {
+        _editCount++;
+        _curOp.startIndex = index;
+    } else {
+        _curOp = [[XVimUndoOperation alloc] initWithIndex:index];
+        _editCount = 1;
+    }
 }
 
 - (void)endEditingAtIndex:(NSUInteger)index
 {
     _curOp.endIndex = index;
-    [_curOp registerForBuffer:self];
-    [_curOp release];
-    _curOp = nil;
+
+    if (--_editCount == 0) {
+        [_curOp registerForBuffer:self];
+        [_curOp release];
+        _curOp = nil;
+    }
 }
 
 - (void)replaceCharactersInRange:(NSRange)range withString:(NSString *)string
@@ -473,6 +483,15 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     NSAssert(_curOp, @"you must call -beginEditingAtIndex: first");
     [_curOp addUndoRange:range replacementRange:NSMakeRange(range.location, string.length) buffer:self];
     [_textStorage replaceCharactersInRange:range withString:string];
+}
+
+- (void)replaceCharactersInRange:(NSRange)range withSpaces:(NSUInteger)count
+{
+    if (count == 0) {
+        [self replaceCharactersInRange:range withString:@""];
+    } else if (range.length) {
+        [self replaceCharactersInRange:range withString:[NSString stringMadeOfSpaces:count]];
+    }
 }
 
 NS_INLINE unichar rot13(unichar c)
@@ -550,9 +569,7 @@ NS_INLINE unichar rot13(unichar c)
         [U release];
     }
 
-    [_textStorage beginEditing];
     [self replaceCharactersInRange:range withString:s];
-    [_textStorage endEditing];
     [s release];
     CFRelease(locale);
 }
@@ -602,8 +619,6 @@ NS_INLINE unichar rot13(unichar c)
 {
     NSString *string = self.string;
 
-    [_textStorage beginEditing];
-
     if (right) {
         NSString  *s = [NSString stringMadeOfSpaces:count];
         NSUInteger tabWidth = self.tabWidth;
@@ -644,8 +659,6 @@ NS_INLINE unichar rot13(unichar c)
         pos = [self indexOfLineNumber:lines.begin];
         pos = [self firstNonblankInLineAtIndex:pos allowEOL:YES];
     }
-
-    [_textStorage endEditing];
     return pos;
 }
 
@@ -720,11 +733,10 @@ NS_INLINE unichar rot13(unichar c)
 - (NSUInteger)incrementNumberAtIndex:(NSUInteger)index by:(int64_t)offset
 {
     NSRange range;
-    BOOL doOp = _curOp == nil;
 
     range = [self _numberAtIndex:index];
     if (range.location == NSNotFound) {
-        NSUInteger pos = [self.textStorage.xvim_buffer nextDigitInLine:index];
+        NSUInteger pos = [self nextDigitInLine:index];
         if (pos == NSNotFound) {
             return NSNotFound;
         }
@@ -750,12 +762,10 @@ NS_INLINE unichar rot13(unichar c)
         repl = [NSString stringWithFormat:@"%lld", i + offset];
     }
 
-    if (doOp) [self beginEditingAtIndex:index];
-    [_textStorage beginEditing];
+    [self beginEditingAtIndex:index];
     [self replaceCharactersInRange:range withString:repl];
-    [_textStorage endEditing];
     index = range.location + repl.length - 1;
-    if (doOp) [self endEditingAtIndex:index];
+    [self endEditingAtIndex:index];
     return index;
 }
 

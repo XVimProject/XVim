@@ -55,34 +55,6 @@
     [super dealloc];
 }
 
-// This is helper method commonly used by many key event handlers.
-// You do not need to use this if this is not proper to express the motion.
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{
-    NSTextView* view = [self sourceView];
-	NSUInteger motionTo = (NSUInteger)[view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, type, MOTION_OPTION_NONE, [self numericArg]);
-    m.position = motionTo;
-    return [self _motionFixed:m];
-}
-
-/*
-- (XVimEvaluator*)_motionFixedFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type{
-    TRACE_LOG(@"from:%d to:%d type:%d", from, to, type);
-    if( _forcedMotionType != CHARACTERWISE_EXCLUSIVE){
-		if ( type == LINEWISE) {
-			type = CHARACTERWISE_EXCLUSIVE;
-		} else if ( type == CHARACTERWISE_EXCLUSIVE ){
-            type = CHARACTERWISE_INCLUSIVE;
-        } else if(type == CHARACTERWISE_INCLUSIVE) {
-            type = CHARACTERWISE_EXCLUSIVE;
-        }
-	}
-	
-	XVimEvaluator *ret = [self motionFixedFrom:from To:to Type:type];
-	return ret;
-}
- */
-
 -(XVimEvaluator*)_motionFixed:(XVimMotion*)motion{
     if( _forcedMotionType == CHARACTERWISE_EXCLUSIVE){
         // CHARACTERWISE_EXCLUSIVE means 'v' is pressed and it means toggle inclusive/exclusive.
@@ -315,7 +287,7 @@
 
 - (XVimEvaluator*)searchCurrentWordForward:(BOOL)forward {
     XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
-    NSRange r = [self.sourceView xvim_currentWord:MOTION_OPTION_NONE];
+    NSRange r = [self.currentView xvim_currentWord:MOTION_OPTION_NONE];
     if( r.location == NSNotFound ){
         return nil;
     }
@@ -323,9 +295,9 @@
     // Vim also does this behavior( when matched string is not found )
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = r.location;
-    [self.sourceView xvim_move:m];
+    [self.currentView moveCursorWithMotion:m];
     
-    NSString* word = [self.sourceView.string substringWithRange:r];
+    NSString* word = [self.currentView.buffer.string substringWithRange:r];
     NSString* searchWord = [NSRegularExpression escapedPatternForString:word];
     searchWord = [NSString stringWithFormat:@"%@%@%@", @"\\b", searchWord, @"\\b"];
     [eval appendString:searchWord];
@@ -345,7 +317,7 @@
 // TODO: rename firstOfLine -> firstNonblankOfLine
 - (XVimEvaluator*)jumpToMark:(XVimMark*)mark firstOfLine:(BOOL)fol{
     XVimBuffer *buffer = self.window.currentBuffer;
-    NSUInteger cur_pos = self.sourceView.insertionPoint;
+    NSUInteger cur_pos = self.currentView.insertionPoint;
 	MOTION_TYPE motionType = fol?LINEWISE:CHARACTERWISE_EXCLUSIVE;
     
     if( mark.line == NSNotFound ){
@@ -430,18 +402,19 @@
 // Underscore ( "_") moves the cursor to the start of the line (past leading whitespace)
 // Note: underscore without any numeric arguments behaves like caret but with a numeric argument greater than 1
 // it will moves to start of the numeric argument - 1 lines down.
-- (XVimEvaluator*)UNDERSCORE{
+- (XVimEvaluator*)UNDERSCORE
+{
     // TODO add this motion interface to NSTextView
-    NSTextView *view = self.sourceView;
-    XVimBuffer *buffer = self.window.currentBuffer;
-    NSRange r = [view selectedRange];
+    XVimView   *xview  = self.currentView;
+    XVimBuffer *buffer = xview.buffer;
+    NSUInteger pos = xview.insertionPoint;
     NSUInteger repeat = self.numericArg;
-    NSUInteger linesUpCursorloc = [view.textStorage nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
+    NSUInteger linesUpCursorloc = [buffer.textStorage nextLine:pos column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
     NSUInteger head = [buffer firstNonblankInLineAtIndex:linesUpCursorloc allowEOL:NO];
-    if( NSNotFound == head && linesUpCursorloc != NSNotFound){
+    if (NSNotFound == head && linesUpCursorloc != NSNotFound) {
         head = linesUpCursorloc;
     }else if(NSNotFound == head){
-        head = r.location;
+        head = pos;
     }
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
     m.position = head;

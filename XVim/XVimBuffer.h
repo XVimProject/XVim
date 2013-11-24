@@ -290,12 +290,15 @@
 
 #pragma mark Support for modifications
 
+@property (nonatomic, readonly) BOOL isEditing;
+
 - (void)undoRedo:(XVimUndoOperation *)op;
 
 - (void)beginEditingAtIndex:(NSUInteger)index;
 - (void)endEditingAtIndex:(NSUInteger)index;
 
 - (void)replaceCharactersInRange:(NSRange)range withString:(NSString *)string;
+- (void)replaceCharactersInRange:(NSRange)range withSpaces:(NSUInteger)count;
 
 #define XVIM_BUFFER_SWAP_UPPER  0
 #define XVIM_BUFFER_SWAP_LOWER  1

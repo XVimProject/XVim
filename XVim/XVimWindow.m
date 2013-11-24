@@ -8,6 +8,7 @@
 #import <objc/runtime.h>
 #import "XVimWindow.h"
 #import "XVim.h"
+#import "XVimView.h"
 #import "XVimUtil.h"
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
@@ -20,7 +21,6 @@
 #import "IDEEditor+XVim.h"
 #import "IDEEditorArea+XVim.h"
 #import "DVTSourceTextScrollView+XVim.h"
-#import "NSTextView+VimOperation.h"
 #import "NSEvent+VimHelper.h"
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
@@ -119,7 +119,7 @@
 
 - (XVimBuffer *)currentBuffer
 {
-    return self.currentView.textView.textStorage.xvim_buffer;
+    return self.currentView.buffer;
 }
 
 - (void)dealloc
@@ -338,7 +338,8 @@
 
 - (void)syncEvaluatorStack
 {
-    BOOL needsVisual = (self.sourceView.selectedRange.length != 0);
+    XVimView *xview = self.currentView;
+    BOOL needsVisual = (xview.textView.selectedRange.length != 0);
 
     if (!needsVisual && [self.currentEvaluator isKindOfClass:[XVimInsertEvaluator class]]) {
         return;
@@ -352,7 +353,7 @@
         // FIXME:JAS this doesn't work if v is remaped (yeah I know it's silly but...)
         [self handleOneXVimString:@"v"];
     } else {
-        [self.sourceView xvim_adjustCursorPosition];
+        [xview adjustCursorPosition];
     }
     [_commandLine setModeString:[self.currentEvaluator.modeString stringByAppendingString:_staticString]];
 }

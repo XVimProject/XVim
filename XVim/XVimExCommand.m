@@ -10,7 +10,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
@@ -585,17 +585,15 @@
 // This method correnspons parsing part of get_address in ex_cmds.c
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
 {
-    NSTextView* view = window.currentView.textView;
-    //DVTFoldingTextStorage* storage = [view textStorage];
-    //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
-    NSUInteger addr = NSNotFound;
-    NSUInteger begin = view.selectionBegin;
-    NSUInteger end = view.insertionPoint;
-    unichar* tmp;
-    NSUInteger count;
-    unichar mark;
+    XVimView   *xview = window.currentView;
     XVimBuffer *buffer = window.currentBuffer;
-    
+    NSUInteger  addr = NSNotFound;
+    NSUInteger  begin = xview.selectionBegin;
+    NSUInteger  end = xview.insertionPoint;
+    unichar    *tmp;
+    NSUInteger  count;
+    unichar     mark;
+
     // Parse base addr (line number)
     switch (*parsing)
     {
@@ -732,8 +730,8 @@
     // 3. parse range
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
-	
-    NSTextView* view = window.currentView.textView;
+
+    XVimView   *xview  = window.currentView;
     XVimBuffer *buffer = window.currentBuffer;
     for(;;){
         NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
@@ -760,8 +758,8 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        exarg.lineBegin = [buffer lineNumberAtIndex:view.insertionPoint];
-        exarg.lineEnd =  exarg.lineBegin;
+        exarg.lineBegin = xview.insertionLine;
+        exarg.lineEnd   = exarg.lineBegin;
     }
     
     // 4. parse command
@@ -818,7 +816,6 @@
     if( exarg.cmd == nil ) {
         XVimBuffer *buffer  = window.currentBuffer;
         XVimView   *xview   = window.currentView;
-		NSTextView *srcView = xview.textView;
 
         // Jump to location
         NSUInteger pos = [buffer indexOfLineNumber:exarg.lineBegin column:0];
@@ -829,8 +826,8 @@
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }
-        [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [xview scrollTo:srcView.insertionPoint];
+        [xview.textView setSelectedRange:NSMakeRange(pos_wo_space,0)];
+        [xview scrollTo:xview.insertionPoint];
         return;
     }
     
@@ -1098,8 +1095,8 @@
 
 - (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSTextView* srcView = window.currentView.textView;
 	XVimOptions* options = [[XVim instance] options];
+    XVimView *xview = window.currentView;
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
         // "set XXX=YYY" form
@@ -1118,18 +1115,16 @@
     }
     
     if( [setCommand isEqualToString:@"wrap"] ){
-        [srcView xvim_setWrapsLines:YES];
+        [xview xvim_setWrapsLines:YES];
     }
     else if( [setCommand isEqualToString:@"nowrap"] ){
-        [srcView xvim_setWrapsLines:NO];
+        [xview xvim_setWrapsLines:NO];
     } else if( [setCommand isEqualToString:@"list!"] ){
       [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
     }
 }
 
 - (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window{
-    NSTextView *view = window.currentView.textView;
-    
     NSString *cmdString = [[args cmd] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *argsString = [args arg];
     XVimSortOptions options = 0;
@@ -1150,8 +1145,9 @@
             options |= XVimSortOptionRemoveDuplicateLines;
         }
     }
-    
-    [view xvim_sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
+
+    XVimRange range = XVimMakeRange(args.lineBegin, args.lineEnd);
+    [window.currentView doSortLines:range withOptions:options];
 }
 
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{

@@ -7,7 +7,7 @@
 //
 
 #import "XVimUndo.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimBuffer.h"
 
 @interface NSTextView (NSPrivate)
@@ -55,6 +55,13 @@
     [super dealloc];
 }
 
+- (void)setStartIndex:(NSUInteger)index
+{
+    if (_startIndex == NSNotFound) {
+        _startIndex = index;
+    }
+}
+
 - (void)setEndIndex:(NSUInteger)index
 {
     _endIndex = index;
@@ -82,10 +89,11 @@
     [_values replaceObjectAtIndex:index withObject:newText];
 }
 
-- (void)undoRedo:(XVimBuffer *)buffer view:(NSTextView *)view
+- (void)undoRedo:(XVimBuffer *)buffer view:(XVimView *)xview
 {
-    NSTextStorage *ts = buffer.textStorage;
-    NSUInteger count = _values.count / 3;
+    NSTextStorage *ts   = buffer.textStorage;
+    NSTextView    *view = xview.textView;
+    NSUInteger    count = _values.count / 3;
 
     [view _setUndoRedoInProgress:YES];
     if (!view || [view shouldChangeTextInRange:NSMakeRange(NSNotFound, 0) replacementString:@""]) {
@@ -104,7 +112,7 @@
     }
     NSUInteger index = [_undoManager isUndoing] ? _startIndex : _endIndex;
     if (index != NSNotFound) {
-        [view xvim_moveToIndex:index];
+        [xview moveCursorToIndex:index];
     }
     [view _setUndoRedoInProgress:NO];
 }

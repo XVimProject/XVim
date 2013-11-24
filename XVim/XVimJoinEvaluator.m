@@ -7,7 +7,7 @@
 //
 
 #import "XVimJoinEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimWindow.h"
 
 @implementation XVimJoinEvaluator {
@@ -27,7 +27,7 @@
         // J and 2J is the same
         motion.count--;
     }
-    [self.sourceView xvim_join:motion.count addSpace:_addSpace];
+    [self.currentView doJoin:motion.count addSpace:_addSpace];
     return nil;
 }
 

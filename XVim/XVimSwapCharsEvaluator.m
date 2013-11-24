@@ -57,7 +57,7 @@
 
 - (XVimEvaluator *)motionFixed:(XVimMotion*)motion
 {
-    [self.sourceView xvim_swapCharacters:motion mode:_mode];
+    [self.currentView doSwapCharacters:motion mode:_mode];
     return nil;
 }
 

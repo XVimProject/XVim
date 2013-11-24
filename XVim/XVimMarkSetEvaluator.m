@@ -13,7 +13,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVim.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @implementation XVimMarkSetEvaluator
 
@@ -22,18 +22,21 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
+    XVimView   *xview  = self.currentView;
     XVimBuffer *buffer = self.window.currentBuffer;
-    NSString* keyStr = [keyStroke toSelectorString];
+
+    NSString  *keyStr = [keyStroke toSelectorString];
 	if ([keyStr length] != 1) {
         return [XVimEvaluator invalidEvaluator];
     }
     
-    XVimMark* mark = [[[XVimMark alloc] init] autorelease];
-	NSRange r = [self.sourceView selectedRange];
-    mark.line = [buffer lineNumberAtIndex:r.location];
-    mark.column = [buffer columnOfIndex:r.location];
+    XVimMark *mark = [[[XVimMark alloc] init] autorelease];
+    XVimPosition pos = xview.insertionPosition;
+
+    mark.line = pos.line;
+    mark.column = pos.column;
     mark.document = buffer.document.fileURL.path;
-    if( nil != mark.document ){
+    if (nil != mark.document) {
         [[XVim instance].marks setMark:mark forName:keyStr];
     }
     return nil;

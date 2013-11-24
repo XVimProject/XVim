@@ -17,8 +17,6 @@
 
 @interface XVimMotionEvaluator : XVimNumericEvaluator
 
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
-
 /**
  * The difference between motionFixed and _motionFixed:
  * _motionFixed is called internaly from its inherited classes.

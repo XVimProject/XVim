@@ -8,7 +8,6 @@
 
 #import <Foundation/Foundation.h>
 #import "XVimMotionType.h"
-#import "XVimMotionOption.h"
 
 typedef struct {
     BOOL reachedEndOfLine;
@@ -19,6 +18,19 @@ typedef struct {
 }XVimMotionInfo;
 
 #define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
+
+typedef enum {
+    MOTION_OPTION_NONE = 0x00,
+    LEFT_RIGHT_WRAP = 0x01,
+    LEFT_RIGHT_NOWRAP = 0x02,
+    BIGWORD = 0x04, // for 'WORD' motion
+    INCLUSIVE = 0x08,
+    MOPT_PARA_BOUND_BLANKLINE = 0x10,
+    TEXTOBJECT_INNER = 0x20,
+    SEARCH_WRAP= 0x40,
+    SEARCH_CASEINSENSITIVE = 0x80,
+    MOTION_OPTION_CHANGE_WORD = 0x100, // for 'cw','cW'
+} MOTION_OPTION;
 
 typedef enum _MOTION{
     MOTION_NONE,                    

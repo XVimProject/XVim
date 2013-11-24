@@ -33,7 +33,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimJoinEvaluator.h"
 
 @interface XVimNormalEvaluator() {
@@ -45,7 +45,7 @@
 
 - (void)becameHandler{
     [super becameHandler];
-    [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    self.currentView.selectionMode = XVIM_VISUAL_NONE;
 }
 
 - (NSString*)modeString {
@@ -75,8 +75,7 @@
 }
 
 - (XVimEvaluator*)C_a{
-    NSTextView* view = [self sourceView];
-    if ([view xvim_incrementNumber:(int64_t)self.numericArg]) {
+    if ([self.currentView doIncrementNumber:(int64_t)self.numericArg]) {
         [[XVim instance] fixOperationCommands];
     } else {
         [[XVim instance] cancelOperationCommands];
@@ -137,19 +136,18 @@
 - (XVimEvaluator*)C_g
 {
     // process
-    XVimWindow *window = self.window;
-    XVimBuffer *buffer = window.currentBuffer;
-    NSRange range = self.sourceView.selectedRange;
+    XVimWindow  *window = self.window;
+    XVimBuffer  *buffer = window.currentBuffer;
+    XVimView    *xview  = self.currentView;
+    XVimPosition pos    = xview.insertionPosition;
 
     NSUInteger numberOfLines = [buffer numberOfLines];
-    NSUInteger lineNumber = [buffer lineNumberAtIndex:range.location];
-    NSUInteger columnNumber = [buffer columnOfIndex:range.location];
     NSURL *documentURL = buffer.document.fileURL;
 
 	if ([documentURL isFileURL]) {
 		NSString *text = [NSString stringWithFormat:@"%@   line %ld of %ld --%d%%-- col %ld",
-                          documentURL.path, lineNumber, numberOfLines,
-                          (int)((CGFloat)lineNumber*100.0/(CGFloat)numberOfLines), columnNumber+1 ];
+                          documentURL.path, pos.line, numberOfLines,
+                          (int)((CGFloat)pos.line*100.0/(CGFloat)numberOfLines), pos.column + 1 ];
         
 		[window statusMessage:text];
 	}
@@ -197,14 +195,12 @@
 }
 
 - (XVimEvaluator*)o{
-    NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineBelowAndInsertWithIndent];
+    [self.currentView insertNewlineBelowAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
-    NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineAboveAndInsertWithIndent];
+    [self.currentView insertNewlineAboveAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
@@ -219,17 +215,15 @@
 }
 
 - (XVimEvaluator*)p{
-    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [self.currentView doPut:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     [[XVim instance] fixOperationCommands];
     return nil;
 }
 
 - (XVimEvaluator*)P{
-    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view xvim_put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
+    [self.currentView doPut:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     [[XVim instance] fixOperationCommands];
     return nil;
 }
@@ -257,10 +251,12 @@
     return nil;
 }
 
-- (XVimEvaluator*)C_r{
-    NSTextView* view = [self sourceView];
-    for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-		[view.undoManager redo];
+- (XVimEvaluator*)C_r
+{
+    XVimBuffer *buffer = self.window.currentBuffer;
+
+    for (NSUInteger i = 0; i < [self numericArg]; i++) {
+        [buffer.undoManager redo];
     }
     return nil;
 }
@@ -284,10 +280,12 @@
     return [d performSelector:@selector(c)];
 }
 
-- (XVimEvaluator*)u{
-    NSTextView* view = [self sourceView];
-    for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [view.undoManager undo];
+- (XVimEvaluator*)u
+{
+    XVimBuffer *buffer = self.window.currentBuffer;
+
+    for (NSUInteger i = 0; i < [self numericArg]; i++) {
+        [buffer.undoManager undo];
     }
     return nil;
 }
@@ -342,9 +340,7 @@
 }
 
 - (XVimEvaluator*)C_x{
-    NSTextView* view = [self sourceView];
-
-    if ([view xvim_incrementNumber:-(int64_t)self.numericArg]) {
+    if ([self.currentView doIncrementNumber:-(int64_t)self.numericArg]) {
         [[XVim instance] fixOperationCommands];
     } else {
         [[XVim instance] cancelOperationCommands];
@@ -437,7 +433,7 @@
 }
 
 - (XVimEvaluator*)HT{
-    [[self sourceView] xvim_selectNextPlaceholder];
+    [self.currentView selectNextPlaceholder];
     return nil;
 }
 
@@ -491,7 +487,8 @@
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
     XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg);
-    [self.sourceView xvim_swapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
+    [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
+    [XVim.instance fixOperationCommands];
     return nil;
 }
 
@@ -508,7 +505,7 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
-    [[self sourceView] xvim_move:motion];
+    [self.currentView moveCursorWithMotion:motion];
     return nil;
 }
 

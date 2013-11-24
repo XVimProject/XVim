@@ -17,7 +17,7 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVim.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimSearch.h"
 #import "XVimCommandLineEvaluator.h"
 
@@ -81,11 +81,6 @@ static XVimEvaluator *_popEvaluator = nil;
     return self.window.currentView;
 }
 
-- (NSTextView *)sourceView
-{
-    return self.window.currentView.textView;
-}
-
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     // This is default implementation of evaluator.
     // Only keyDown events are supposed to be passed here.	
@@ -109,15 +104,15 @@ static XVimEvaluator *_popEvaluator = nil;
 }
    
 - (void)becameHandler{
-    self.sourceView.xvimDelegate = self;
+    self.currentView.delegate = self;
 }
 
 - (void)cancelHandler{
-    self.sourceView.xvimDelegate = nil;
+    self.currentView.delegate = nil;
 }
 
 - (void)didEndHandler{
-    self.sourceView.xvimDelegate = nil;
+    self.currentView.delegate = nil;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -216,7 +211,10 @@ static XVimEvaluator *_popEvaluator = nil;
     return;
 }
 
-- (XVimCommandLineEvaluator*)searchEvaluatorForward:(BOOL)forward{
+- (XVimCommandLineEvaluator*)searchEvaluatorForward:(BOOL)forward
+{
+    XVimView *xview = self.currentView;
+
 	return [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                  firstLetter:forward?@"/":@"?"
                                                      history:[[XVim instance] searchHistory]
@@ -250,9 +248,9 @@ static XVimEvaluator *_popEvaluator = nil;
                  BOOL forward = [command characterAtIndex:0] == '/';
                  XVimMotion* m = [XVim.instance.searcher motionForSearch:[command substringFromIndex:1] forward:forward];
                  if( [command characterAtIndex:0] == '/' ){
-                     [self.sourceView xvim_highlightNextSearchCandidateForward:m.regex count:self.numericArg option:m.option];
+                     [xview xvim_highlightNextSearchCandidateForward:m.regex count:self.numericArg option:m.option];
                  }else{
-                     [self.sourceView xvim_highlightNextSearchCandidateBackward:m.regex count:self.numericArg option:m.option];
+                     [xview xvim_highlightNextSearchCandidateBackward:m.regex count:self.numericArg option:m.option];
                  }
              }] autorelease];
 }

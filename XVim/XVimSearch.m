@@ -7,13 +7,14 @@
 //
 
 #import "XVimSearch.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "NSString+VimHelper.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimOptions.h"
 #import "Logger.h"
 #import "XVimUtil.h"
+#import "NSTextStorage+VimOperation.h"
 
 @implementation XVimSearch
 
@@ -314,7 +315,7 @@
     NSUInteger firstNonblank = NSNotFound;
 	
     // TODO: must be moved to NSTextStorage+VimOperation
-	for (NSUInteger i = begin.location; ![view.textStorage isEOF:i]; ++i)
+	for (NSUInteger i = begin.location; i < string.length; ++i)
 	{
         unichar curChar = [string characterAtIndex:i];
         if (isNewline(curChar)){

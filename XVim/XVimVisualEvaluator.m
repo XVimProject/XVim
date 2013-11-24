@@ -25,7 +25,7 @@
 #import "XVimShiftEvaluator.h"
 #import "XVimSwapCharsEvaluator.h"
 #import "XVimJoinEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @"-- VISUAL BLOCK --"};
 
@@ -52,7 +52,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return self;
 }
     
-- (id)initWithWindow:(XVimWindow *)window mode:(XVIM_VISUAL_MODE)mode {
+- (id)initWithWindow:(XVimWindow *)window mode:(XVimVisualMode)mode {
     NSTextView *sourceView = window.currentView.textView;
     NSUInteger start = [[sourceView.selectedRanges objectAtIndex:0] rangeValue].location;
     NSUInteger end = NSMaxRange([sourceView.selectedRanges.lastObject rangeValue]);
@@ -87,16 +87,20 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return XVIM_MODE_VISUAL;
 }
 
-- (void)becameHandler{
+- (void)becameHandler
+{
+    XVimView *xview = self.currentView;
+
     [super becameHandler];
 
     if (_initial.mode) {
         if (XVim.instance.isRepeating) {
-            [self.sourceView xvim_changeSelectionMode:_initial.mode];
-
             NSUInteger   columns = XVimVisualInfoColumns(&_initial);
             NSUInteger   lines   = XVimVisualInfoLines(&_initial);
-            XVimPosition pos     = self.sourceView.insertionPosition;
+            XVimPosition pos;
+
+            xview.selectionMode = _initial.mode;
+            pos = xview.insertionPosition;
 
             // When repeating we have to set initial selected range
             if (_initial.mode == XVIM_VISUAL_CHARACTER) {
@@ -115,11 +119,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
                 pos.line   += lines - 1;
             }
 
-            [self.sourceView xvim_moveToPosition:pos];
+            [xview moveCursorToPosition:pos];
         } else {
-            [self.sourceView xvim_moveToPosition:_initial.start];
-            [self.sourceView xvim_changeSelectionMode:_initial.mode];
-            [self.sourceView xvim_moveToPosition:_initial.end];
+            [xview moveCursorToPosition:_initial.start];
+            xview.selectionMode = _initial.mode;
+            [xview moveCursorToPosition:_initial.end];
             // TODO: self.sourceView.preservedColumn = _initial.colwant;
         }
         if (_initial.end.column == XVimSelectionEOL) {
@@ -131,7 +135,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (void)didEndHandler{
     if (!_waitForArgument) {
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+        self.currentView.selectionMode = XVIM_VISUAL_NONE;
         // TODO:
         //[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     }
@@ -144,16 +148,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     if (!XVim.instance.isRepeating) {
-        XVimBuffer *buffer = self.window.currentBuffer;
-        XVimVisualInfo *vi = &buffer->visualInfo;
-
-        vi->mode    = self.sourceView.selectionMode;
-        vi->end     = self.sourceView.insertionPosition;
-        vi->start   = [buffer positionOfIndex:self.sourceView.selectionBegin];
-        vi->colwant = self.sourceView.preservedColumn;
-        if (self.sourceView.selectionToEOL) {
-            vi->end.column = XVimSelectionEOL;
-        }
+        [self.currentView saveVisualInfoForBuffer:self.window.currentBuffer];
     }
 
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
@@ -195,7 +190,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)c{
-    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
+    if (self.currentView.inBlockMode) {
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL] autorelease];
     }
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
@@ -203,8 +198,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator *)C{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    XVimView *xview = self.currentView;
+
+    if (!xview.inBlockMode) {
+        xview.selectionMode = XVIM_VISUAL_LINE;
         return [self c];
     }
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL_EOL] autorelease];
@@ -230,8 +227,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)D{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    XVimView *xview = self.currentView;
+
+    if (!xview.inBlockMode) {
+        xview.selectionMode = XVIM_VISUAL_LINE;
         return [self d];
     }
 
@@ -260,7 +259,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)I{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+    if (!self.currentView.inBlockMode) {
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BEFORE_FIRST_NONBLANK] autorelease];
     }
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_DEFAULT] autorelease];
@@ -285,19 +284,18 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator *)o{
-    [self.sourceView xvim_selectSwapEndsOnSameLine:NO];
+    [self.currentView selectSwapCorners:NO];
     return self;
 }
 
 - (XVimEvaluator *)O{
-    [self.sourceView xvim_selectSwapEndsOnSameLine:YES];
+    [self.currentView selectSwapCorners:YES];
     return self;
 }
 
 - (XVimEvaluator*)p{
-    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [self.currentView doPut:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     return nil;
 }
 
@@ -321,8 +319,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator *)S{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    XVimView *xview = self.currentView;
+
+    if (!xview.inBlockMode) {
+        xview.selectionMode = XVIM_VISUAL_LINE;
     }
     [self.window errorMessage:@"{Visual}S not implemented yet" ringBell:NO];
     return self;
@@ -344,29 +344,32 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)v{
-	NSTextView *view = [self sourceView];
-    if( view.selectionMode == XVIM_VISUAL_CHARACTER ){
-        return  [self ESC];
+    XVimView *xview = self.currentView;
+
+    if (xview.selectionMode == XVIM_VISUAL_CHARACTER) {
+        return [self ESC];
     }
-    [view xvim_changeSelectionMode:XVIM_VISUAL_CHARACTER];
+    xview.selectionMode = XVIM_VISUAL_CHARACTER;
     return self;
 }
 
 - (XVimEvaluator*)V{
-	NSTextView *view = [self sourceView];
-    if( view.selectionMode == XVIM_VISUAL_LINE){
+    XVimView *xview = self.currentView;
+
+    if (xview.selectionMode == XVIM_VISUAL_LINE) {
         return  [self ESC];
     }
-    [view xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    xview.selectionMode = XVIM_VISUAL_LINE;
     return self;
 }
 
 - (XVimEvaluator*)C_v{
-	NSTextView *view = [self sourceView];
-    if( view.selectionMode == XVIM_VISUAL_BLOCK){
+    XVimView *xview = self.currentView;
+
+    if (xview.selectionMode == XVIM_VISUAL_BLOCK) {
         return  [self ESC];
     }
-    [view xvim_changeSelectionMode:XVIM_VISUAL_BLOCK];
+    xview.selectionMode = XVIM_VISUAL_BLOCK;
     return self;
 }
 
@@ -375,20 +378,24 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)X{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    XVimView *xview = self.currentView;
+
+    if (!xview.inBlockMode) {
+        xview.selectionMode = XVIM_VISUAL_LINE;
     }
     return [self d];
 }
 
 - (XVimEvaluator*)y{
-    [[self sourceView] xvim_yank:nil];
+    [self.currentView doYank:nil];
     return nil;
 }
 
 - (XVimEvaluator*)Y{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    XVimView *xview = self.currentView;
+
+    if (!xview.inBlockMode) {
+        xview.selectionMode = XVIM_VISUAL_LINE;
     }
     return [self y];
 }
@@ -442,7 +449,7 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)ESC{
-    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    self.currentView.selectionMode = XVIM_VISUAL_NONE;
     return nil;
 }
 
@@ -467,9 +474,8 @@ TODO: This block is from commit 42498.
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
                                [excmd executeCommand:command inWindow:self.window];
-                               
-							   //NSTextView *sourceView = [window sourceView];
-                               [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+
+                               self.currentView.selectionMode = XVIM_VISUAL_NONE;
                                return nil;
                            }
                                                                  onKeyPress:nil];
@@ -571,7 +577,7 @@ TODO: This block is from commit 42498.
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     if(!XVim.instance.isRepeating){
-        [[self sourceView] xvim_move:motion];
+        [self.currentView moveCursorWithMotion:motion];
         [self resetNumericArg];
     }
     [self.argumentString setString:@""];

@@ -43,7 +43,6 @@
 		A2575409172F6698003D8A97 /* XVimTester+Mark.m in Sources */ = {isa = PBXBuildFile; fileRef = A2575408172F6698003D8A97 /* XVimTester+Mark.m */; };
 		A257540C1732A58F003D8A97 /* XVimTester+Visual.m in Sources */ = {isa = PBXBuildFile; fileRef = A257540B1732A58E003D8A97 /* XVimTester+Visual.m */; };
 		A257C28F156567250098CA09 /* DVTSourceTextView+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A257C28E156567250098CA09 /* DVTSourceTextView+XVim.m */; };
-		A2640CC917ACE651003D197D /* NSTextView+VimOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A2640CC817ACE651003D197D /* NSTextView+VimOperation.m */; };
 		A26ACC4E154F2D6800B27D69 /* IDEEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */; };
 		A26DC88615DF33C600779CB4 /* XVimTester.m in Sources */ = {isa = PBXBuildFile; fileRef = A26DC88515DF33C600779CB4 /* XVimTester.m */; };
 		A26E5F6417A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A26E5F6317A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m */; };
@@ -113,7 +112,6 @@
 		A28F426A17EEDBC200A3F7AE /* XVimTester+Recording.m in Sources */ = {isa = PBXBuildFile; fileRef = A2AFD73617914ACE009B442B /* XVimTester+Recording.m */; };
 		A28F426B17EEDBC200A3F7AE /* XVimTester+Issues.m in Sources */ = {isa = PBXBuildFile; fileRef = A2771E6A179EF520003B621E /* XVimTester+Issues.m */; };
 		A28F426C17EEDBC200A3F7AE /* NSTextStorage+VimOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A26E5F6317A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m */; };
-		A28F426D17EEDBC200A3F7AE /* NSTextView+VimOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A2640CC817ACE651003D197D /* NSTextView+VimOperation.m */; };
 		A28F426E17EEDBC200A3F7AE /* XVimTester+ExCmd.m in Sources */ = {isa = PBXBuildFile; fileRef = A24BE47417AD0D30001F797B /* XVimTester+ExCmd.m */; };
 		A28F426F17EEDBC200A3F7AE /* XVimTester+Search.m in Sources */ = {isa = PBXBuildFile; fileRef = A28D895617BFF434002709D8 /* XVimTester+Search.m */; };
 		A28F427017EEDBC200A3F7AE /* XVimJoinEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = A23D002317DA0C7D007EBB21 /* XVimJoinEvaluator.m */; };
@@ -255,8 +253,6 @@
 		A257540B1732A58E003D8A97 /* XVimTester+Visual.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Visual.m"; path = "XVim/Test/XVimTester+Visual.m"; sourceTree = SOURCE_ROOT; };
 		A257C28D156567250098CA09 /* DVTSourceTextView+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DVTSourceTextView+XVim.h"; path = "XVim/DVTSourceTextView+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A257C28E156567250098CA09 /* DVTSourceTextView+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "DVTSourceTextView+XVim.m"; path = "XVim/DVTSourceTextView+XVim.m"; sourceTree = SOURCE_ROOT; };
-		A2640CC717ACE651003D197D /* NSTextView+VimOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSTextView+VimOperation.h"; path = "XVim/NSTextView+VimOperation.h"; sourceTree = SOURCE_ROOT; };
-		A2640CC817ACE651003D197D /* NSTextView+VimOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSTextView+VimOperation.m"; path = "XVim/NSTextView+VimOperation.m"; sourceTree = SOURCE_ROOT; };
 		A26ACC4C154F2D6600B27D69 /* IDEEditor+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEEditor+XVim.h"; path = "XVim/IDEEditor+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEEditor+XVim.m"; path = "XVim/IDEEditor+XVim.m"; sourceTree = SOURCE_ROOT; };
 		A26DC88415DF33C600779CB4 /* XVimTester.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTester.h; path = XVim/XVimTester.h; sourceTree = SOURCE_ROOT; };
@@ -330,7 +326,6 @@
 		C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimHistoryHandler.m; path = XVim/XVimHistoryHandler.m; sourceTree = SOURCE_ROOT; };
 		C361DE661538F18400037B4B /* XVimGActionEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimGActionEvaluator.h; path = XVim/XVimGActionEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C361DE671538F18400037B4B /* XVimGActionEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimGActionEvaluator.m; path = XVim/XVimGActionEvaluator.m; sourceTree = SOURCE_ROOT; };
-		C36266CB153455C9000C79D8 /* XVimMotionOption.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimMotionOption.h; path = XVim/XVimMotionOption.h; sourceTree = SOURCE_ROOT; };
 		C366C23915287EE30008C58E /* XVimKeymap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimKeymap.h; path = XVim/XVimKeymap.h; sourceTree = SOURCE_ROOT; };
 		C366C23A15287EE30008C58E /* XVimKeymap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimKeymap.m; path = XVim/XVimKeymap.m; sourceTree = SOURCE_ROOT; };
 		C36C1045153104EC00CE1D62 /* XVimMotionType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimMotionType.h; path = XVim/XVimMotionType.h; sourceTree = SOURCE_ROOT; };
@@ -409,8 +404,6 @@
 			children = (
 				6E2C392D183E4BA20056E30F /* XVimView.h */,
 				6E2C392E183E4BA20056E30F /* XVimView.m */,
-				A2640CC717ACE651003D197D /* NSTextView+VimOperation.h */,
-				A2640CC817ACE651003D197D /* NSTextView+VimOperation.m */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -674,7 +667,6 @@
 				C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */,
 				C36C1045153104EC00CE1D62 /* XVimMotionType.h */,
 				C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */,
-				C36266CB153455C9000C79D8 /* XVimMotionOption.h */,
 				F17D0139150861DC00A8111B /* XVimRegister.h */,
 				F17D013A150861DC00A8111B /* XVimRegister.m */,
 				C38A5B2E1526C6B100E1448D /* XVimKeyStroke.h */,
@@ -904,7 +896,6 @@
 				A28F426A17EEDBC200A3F7AE /* XVimTester+Recording.m in Sources */,
 				A28F426B17EEDBC200A3F7AE /* XVimTester+Issues.m in Sources */,
 				A28F426C17EEDBC200A3F7AE /* NSTextStorage+VimOperation.m in Sources */,
-				A28F426D17EEDBC200A3F7AE /* NSTextView+VimOperation.m in Sources */,
 				A28F426E17EEDBC200A3F7AE /* XVimTester+ExCmd.m in Sources */,
 				A28F426F17EEDBC200A3F7AE /* XVimTester+Search.m in Sources */,
 				A28F427017EEDBC200A3F7AE /* XVimJoinEvaluator.m in Sources */,
@@ -980,7 +971,6 @@
 				6E6865D618390702008D5FBB /* XVimUndo.m in Sources */,
 				A2771E6B179EF520003B621E /* XVimTester+Issues.m in Sources */,
 				A26E5F6417A6BCAF0087C9B6 /* NSTextStorage+VimOperation.m in Sources */,
-				A2640CC917ACE651003D197D /* NSTextView+VimOperation.m in Sources */,
 				A24BE47517AD0D31001F797B /* XVimTester+ExCmd.m in Sources */,
 				A28D895717BFF434002709D8 /* XVimTester+Search.m in Sources */,
 				6E2C392F183E4BA20056E30F /* XVimView.m in Sources */,

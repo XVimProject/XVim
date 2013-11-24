@@ -8,7 +8,7 @@
 
 #import "Logger.h"
 #import "XVimCommandLineEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimKeymapProvider.h"
 #import "XVimWindow.h"
 #import "XVimCommandField.h"
@@ -42,7 +42,7 @@
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
         _evalutionResult = nil;
-        self.lastTextView = self.sourceView;
+        self.lastTextView = window.currentView.textView;
         XVimCommandField *commandField = self.window.commandLine.commandField;
         [commandField setString:_firstLetter];
         [commandField moveToEndOfLine:self];
@@ -94,13 +94,13 @@
 - (void)takeFocusFromWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:self.window];
-	[self.sourceView.window  makeFirstResponder:commandField];
+	[self.lastTextView.window makeFirstResponder:commandField];
 }
 
 - (void)relinquishFocusToWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:nil];
-    [[self.lastTextView window] makeFirstResponder:self.lastTextView];
+    [self.lastTextView.window makeFirstResponder:self.lastTextView];
     [commandField setHidden:YES];
 }
 
@@ -167,7 +167,7 @@
 }
 
 - (XVimEvaluator*)ESC{
-    [self.currentView scrollTo:self.sourceView.insertionPoint];
+    [self.currentView scrollTo:self.currentView.insertionPoint];
 	return nil;
 }
 

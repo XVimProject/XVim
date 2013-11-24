@@ -8,7 +8,6 @@
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymapProvider.h"
-#import "XVimMotionOption.h"
 
 @interface XVimTextObjectEvaluator() {
     BOOL   _inner;

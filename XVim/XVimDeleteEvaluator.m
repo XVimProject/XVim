@@ -9,7 +9,7 @@
 #import "XVimDeleteEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimWindow.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimTextObjectEvaluator.h"
 #import "Logger.h"
 #import "XVim.h"
@@ -70,13 +70,14 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
-        [[self sourceView] xvim_change:motion];
+        [self.currentView doChange:motion];
         [self resetNumericArg];
         // Do not call [[XVim instance] fixRepeatCommand] here.
         // It will be called after XVimInsertEvaluator finish handling key input.
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
-    }else{
-        [[self sourceView] xvim_delete:motion andYank:YES];
+    } else {
+        [self.currentView doDelete:motion andYank:YES];
+        [self.currentView adjustCursorPosition];
     }
     return nil;
 }

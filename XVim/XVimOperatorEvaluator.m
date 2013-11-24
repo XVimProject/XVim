@@ -15,7 +15,7 @@
 #import "XVimKeymapProvider.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimYankEvaluator.h"
 #import "XVimShiftEvaluator.h"
 #import "XVimJoinEvaluator.h"
@@ -69,22 +69,25 @@
     // This happens for a command like "cw..."
     if( nil == evaluator ){
         XVimBuffer *buffer = self.window.currentBuffer;
+        XVimView   *xview  = self.currentView;
         Class aClass = self.class;
 
         if (aClass != [XVimYankEvaluator class]) {
             [[XVim instance] fixOperationCommands];
-            XVimMark* mark = nil;
+            XVimMark *mark = nil;
+
             if (aClass == [XVimJoinEvaluator class]) {
                 // This is specical case for join operation.
                 // The mark is set at the head of next line of the insertion point after the operation
-                mark = XVimMakeMark([self.sourceView insertionLine]+1, 0, buffer.document);
+                mark = XVimMakeMark(xview.insertionLine + 1, 0, buffer.document);
             } else if (aClass == [XVimShiftEvaluator class]) {
-                mark = XVimMakeMark([self.sourceView insertionLine], 0, buffer.document);
+                mark = XVimMakeMark(xview.insertionLine, 0, buffer.document);
             } else {
-                mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], buffer.document);
+                XVimPosition pos = xview.insertionPosition;
+                mark = XVimMakeMark(pos.line, pos.column, buffer.document);
             }
             
-            if( nil != mark.document){
+            if (nil != mark.document) {
                 [[XVim instance].marks setMark:mark forName:@"."];
             }
         }

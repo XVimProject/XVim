@@ -10,7 +10,6 @@
 #import "XVimGMotionEvaluator.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimKeyStroke.h"
-#import "XVimMotionOption.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
@@ -31,7 +30,7 @@
 
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
     XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
-    NSRange r = [self.sourceView xvim_currentWord:MOTION_OPTION_NONE];
+    NSRange r = [self.currentView xvim_currentWord:MOTION_OPTION_NONE];
     if( r.location == NSNotFound ){
         return nil;
     }
@@ -40,9 +39,9 @@
     // Vim also does this behavior( when matched string is not found )
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
     m.position = r.location;
-    [self.sourceView xvim_move:m];
+    [self.currentView moveCursorWithMotion:m];
     
-    NSString* word = [self.sourceView.string substringWithRange:r];
+    NSString* word = [self.currentView.textView.string substringWithRange:r];
     NSString* searchWord = [NSRegularExpression escapedPatternForString:word];
     [eval appendString:searchWord];
     [eval execute];

@@ -17,7 +17,7 @@
 #import "XVimMarks.h"
 #import "XVimVisualEvaluator.h"
 #import "NSTextStorage+VimOperation.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @implementation XVimGActionEvaluator
 
@@ -39,25 +39,28 @@
 }
 
 - (XVimEvaluator*)i{
-    XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.window.currentBuffer.document];
+    XVimMark *mark = [[XVim instance].marks markForName:@"^" forDocument:self.window.currentBuffer.document];
     XVimInsertionPoint mode = XVIM_INSERT_DEFAULT;
     XVimBuffer *buffer = self.window.currentBuffer;
 
-	if ( mark.line != NSNotFound) {
+	if (mark.line != NSNotFound) {
         NSUInteger newPos = [buffer indexOfLineNumber:mark.line column:mark.column];
-        if( NSNotFound != newPos ){
-            XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
+        if (NSNotFound != newPos) {
+            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
+
             m.position = newPos;
             
             // set the position before the jump
-            XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-            cur_mark.line = [self.sourceView insertionLine];
-            cur_mark.column = [self.sourceView insertionColumn];
-            cur_mark.document = self.window.currentBuffer.document.fileURL.path;
-            if( nil != mark.document){
+            XVimMark *cur_mark = [[[XVimMark alloc] init] autorelease];
+            XVimView *xview = self.currentView;
+            XVimPosition pos = xview.insertionPosition;
+            cur_mark.line = pos.line;
+            cur_mark.column = pos.column;
+            cur_mark.document = buffer.document.fileURL.path;
+            if (nil != mark.document) {
                 [[XVim instance].marks setMark:cur_mark forName:@"'"];
             }
-            [self.sourceView xvim_move:m];
+            [xview moveCursorWithMotion:m];
             mode = XVIM_INSERT_APPEND;
         }
     }

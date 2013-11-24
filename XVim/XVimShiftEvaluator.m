@@ -7,7 +7,7 @@
 //
 
 #import "XVimShiftEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 
@@ -48,12 +48,9 @@
     return nil;
 }
 
-- (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
-    if( _unshift ){
-        [[self sourceView] xvim_shiftLeft:motion];
-    }else{
-        [[self sourceView] xvim_shiftRight:motion];
-    }
+- (XVimEvaluator*)motionFixed:(XVimMotion *)motion
+{
+    [self.currentView doShift:motion right:!_unshift];
     return nil;
 }
 @end

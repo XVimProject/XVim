@@ -33,7 +33,7 @@ XVimMotionEvaluator
 */
 
 #import "XVimRegister.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @class XVimCommandLineEvaluator;
 @class XVimMotionEvaluator;
@@ -127,7 +127,6 @@ XVimMotionEvaluator
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
 
-- (NSTextView *)sourceView;
 - (XVimView *)currentView;
 
 - (void)resetCompletionHandler;

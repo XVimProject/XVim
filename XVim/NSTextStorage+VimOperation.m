@@ -84,23 +84,8 @@
 - (BOOL) isValidCursorPosition:(NSUInteger)index
 {
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [self isBlankline:index] ){
-        return YES;
-    }
-    // "index" in not a blankline.
-    // Then the EOF is not a valid cursor position.
-    if( [self isEOF:index] ){
-        return NO;
-    }
-    
-    // index is never the position of EOF. We can call isNewline with index.
-    if( ![self isNewline:index]){
-        return YES;
-    }
-    
-    return NO;
+    return [self isBlankline:index] || ![self isEOL:index];
 }
-
 
 #pragma mark Searching Positions
 

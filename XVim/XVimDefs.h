@@ -28,6 +28,13 @@ typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
     XVIM_INSERT_BLOCK_KILL_EOL,
 };
 
+typedef NS_ENUM(NSUInteger, XVimSortOptions) {
+    XVimSortOptionReversed              = 1,
+    XVimSortOptionRemoveDuplicateLines  = 1 << 1,
+    XVimSortOptionNumericSort           = 1 << 2,
+    XVimSortOptionIgnoreCase            = 1 << 3
+};
+
 typedef enum{
     TEXT_TYPE_CHARACTERS,
     TEXT_TYPE_BLOCK,
@@ -35,8 +42,8 @@ typedef enum{
 } TEXT_TYPE;
 
 typedef enum {
+    CURSOR_MODE_COMMAND, // default must be command
     CURSOR_MODE_INSERT,
-    CURSOR_MODE_COMMAND
 } CURSOR_MODE;
 
 typedef enum {
@@ -50,12 +57,12 @@ typedef enum {
 	XVIM_MODE_COUNT,        // This is the count of modes
 } XVIM_MODE;
 
-typedef enum {
+typedef NS_ENUM(uint8_t, XVimVisualMode) {
     XVIM_VISUAL_NONE,
     XVIM_VISUAL_CHARACTER, // for 'v'
     XVIM_VISUAL_LINE, // for 'V'
     XVIM_VISUAL_BLOCK, // for 'CTRL-V'
-} XVIM_VISUAL_MODE;
+};
 
 typedef enum {
     _XVIM_VISUAL_RIGHT  = 1,
@@ -86,10 +93,10 @@ typedef struct _XVimSelection {
 } XVimSelection;
 
 typedef struct {
-    XVIM_VISUAL_MODE mode;
-    NSUInteger       colwant;
-    XVimPosition     start;
-    XVimPosition     end;
+    XVimVisualMode mode;
+    NSUInteger     colwant;
+    XVimPosition   start;
+    XVimPosition   end;
 } XVimVisualInfo;
 
 #define XVimSelectionEOL  (NSIntegerMax - 1)

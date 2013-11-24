@@ -7,7 +7,7 @@
 //
 
 #import "XVimEqualEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimMotionEvaluator.h"
 #import "XVimWindow.h"
 #import "Logger.h"
@@ -23,7 +23,7 @@
 }
 
 - (XVimEvaluator *)motionFixed:(XVimMotion *)motion{
-    [[self sourceView] xvim_filter:motion];
+    [self.currentView doFilter:motion];
     return nil;
 }
 

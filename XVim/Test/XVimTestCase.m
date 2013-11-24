@@ -13,7 +13,7 @@
 #import "DVTSourceTextView+XVim.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @implementation XVimTestCase
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
@@ -61,11 +61,13 @@
     [super dealloc];
 }
 
-- (void)setUp{
+- (void)setUp
+{
     XVimWindow *window = XVimLastActiveSourceView().xvimWindow;
-    NSTextView *view = window.currentView.textView;
+    XVimView   *xview  = window.currentView;
+    NSTextView *view   = xview.textView;
 
-    [view xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    xview.selectionMode = XVIM_VISUAL_NONE;
     [view setString:self.initialText];
     [view setSelectedRange:self.initialRange];
 }
