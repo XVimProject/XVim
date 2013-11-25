@@ -138,11 +138,13 @@
 
 - (void)dumpEvaluatorStack:(NSMutableArray*)stack
 {
+#ifdef DEBUG
     for (NSUInteger i = 0; i < stack.count; i++) {
         XVimEvaluator *e = [stack objectAtIndex:i];
 
         DEBUG_LOG(@"Evaluator%d:%@   argStr:%@   yankReg:%@", i, NSStringFromClass([e class]), e.argumentString, e.yankRegister);
     }
+#endif
 }
 
 #pragma mark - Handling keystrokes and evaluation stack
