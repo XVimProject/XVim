@@ -818,7 +818,7 @@
         XVimView   *xview   = window.currentView;
 
         // Jump to location
-        NSUInteger pos = [buffer indexOfLineNumber:exarg.lineBegin column:0];
+        NSUInteger pos = [buffer indexOfLineNumber:exarg.lineBegin];
         if (NSNotFound == pos) {
             pos = [buffer startOfLine:buffer.length];
         }

@@ -14,6 +14,8 @@
 		6E2C3930183E4BA20056E30F /* XVimView.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2C392E183E4BA20056E30F /* XVimView.m */; };
 		6E6865D618390702008D5FBB /* XVimUndo.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E6865D518390702008D5FBB /* XVimUndo.m */; };
 		6E6865D718390702008D5FBB /* XVimUndo.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E6865D518390702008D5FBB /* XVimUndo.m */; };
+		6EC4A31E1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EC4A31D1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m */; };
+		6EC4A31F1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EC4A31D1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m */; };
 		6EE2579E183F81C3006E4E1A /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = A24782C414D6F6DC003B6433 /* InfoPlist.strings */; };
 		6EF220D6183E2A1400B814B8 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EF220D5183E2A1400B814B8 /* NSObject+XVimAdditions.m */; };
 		6EF220D7183E2A1400B814B8 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 6EF220D5183E2A1400B814B8 /* NSObject+XVimAdditions.m */; };
@@ -200,6 +202,8 @@
 		6E6865D418390702008D5FBB /* XVimUndo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimUndo.h; path = XVim/XVimUndo.h; sourceTree = SOURCE_ROOT; };
 		6E6865D518390702008D5FBB /* XVimUndo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimUndo.m; path = XVim/XVimUndo.m; sourceTree = SOURCE_ROOT; };
 		6EAFF976183777A6003EADAE /* XVimStringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimStringBuffer.h; path = XVim/XVimStringBuffer.h; sourceTree = SOURCE_ROOT; };
+		6EC4A31C1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSCharacterSet+XVimAdditions.h"; path = "XVim/NSCharacterSet+XVimAdditions.h"; sourceTree = SOURCE_ROOT; };
+		6EC4A31D1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSCharacterSet+XVimAdditions.m"; path = "XVim/NSCharacterSet+XVimAdditions.m"; sourceTree = SOURCE_ROOT; };
 		6EF220D4183E2A1400B814B8 /* NSObject+XVimAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+XVimAdditions.h"; path = "XVim/NSObject+XVimAdditions.h"; sourceTree = SOURCE_ROOT; };
 		6EF220D5183E2A1400B814B8 /* NSObject+XVimAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+XVimAdditions.m"; path = "XVim/NSObject+XVimAdditions.m"; sourceTree = SOURCE_ROOT; };
 		A2126B7316FB30B0000BE21C /* XVimMark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMark.h; path = XVim/XVimMark.h; sourceTree = SOURCE_ROOT; };
@@ -413,6 +417,8 @@
 			children = (
 				6EF220D4183E2A1400B814B8 /* NSObject+XVimAdditions.h */,
 				6EF220D5183E2A1400B814B8 /* NSObject+XVimAdditions.m */,
+				6EC4A31C1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.h */,
+				6EC4A31D1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m */,
 			);
 			name = Foundation;
 			sourceTree = "<group>";
@@ -845,6 +851,7 @@
 				A28F423617EEDBC200A3F7AE /* XVimZEvaluator.m in Sources */,
 				A28F423717EEDBC200A3F7AE /* XVimEqualEvaluator.m in Sources */,
 				A28F423817EEDBC200A3F7AE /* XVimRegister.m in Sources */,
+				6EC4A31F1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m in Sources */,
 				A28F423917EEDBC200A3F7AE /* XVimRegisterEvaluator.m in Sources */,
 				A28F423A17EEDBC200A3F7AE /* XVimOperatorEvaluator.m in Sources */,
 				A28F423B17EEDBC200A3F7AE /* XVimKeyStroke.m in Sources */,
@@ -919,6 +926,7 @@
 				A28D42F514FE87AF004BC121 /* XVimGMotionEvaluator.m in Sources */,
 				A28D42F814FE8E2A004BC121 /* XVimInsertEvaluator.m in Sources */,
 				A2FF17D11502B292003FE648 /* XVimMotionEvaluator.m in Sources */,
+				6EC4A31E1843A4F5003E2BB5 /* NSCharacterSet+XVimAdditions.m in Sources */,
 				F1F2426D15041A9B00F706A4 /* XVimZEvaluator.m in Sources */,
 				F1C1E515150475ED0005C1CB /* XVimEqualEvaluator.m in Sources */,
 				F17D013B150861DC00A8111B /* XVimRegister.m in Sources */,

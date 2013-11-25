@@ -92,7 +92,7 @@ NS_INLINE NSRange xvim_sb_range_to_end(xvim_string_buffer_t *sb)
 
 NS_INLINE unichar xvim_sb_peek_prev(xvim_string_buffer_t *sb)
 {
-    return sb->b_index > 0 ? XVimInvalidChar : sb->buffer[sb->b_index];
+    return sb->b_index == 0 ? XVimInvalidChar : sb->buffer[sb->b_index - 1];
 }
 
 NS_INLINE unichar xvim_sb_peek(xvim_string_buffer_t *sb)

@@ -16,11 +16,8 @@
 // The following macros asserts the range of index.
 // WITH_EOF permits the index at EOF position.
 // WITHOUT_EOF doesn't permit the index at EOF position.
-#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [self length] || [self length] == 0, @"index can not exceed the length of string.   TextLength:%lu   SpecifiedIndex:%lu", (long)[self length], x)
-
-// Some methods assume that "index" is at valid cursor position in Normal mode.
-// See isValidCursorPosition's description the condition of the valid cursor position.
-#define ASSERT_VALID_CURSOR_POS(x) NSAssert( [self isValidCursorPosition:x], @"index can not be invalid cursor position" )
+#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [self length], \
+    @"index can not exceed the length of string.   TextLength:%lu   SpecifiedIndex:%lu", (long)[self length], x)
 #else
 #define ASSERT_VALID_RANGE_WITH_EOF(x)
 #define ASSERT_VALID_CURSOR_POS(x)
@@ -181,6 +178,14 @@
  */
 - (NSUInteger)lineNumberAtIndex:(NSUInteger)index;
 
+/** @brief returns YES when \a index is on the last line
+ */
+- (BOOL)isIndexOnLastLine:(NSUInteger)index;
+
+/** @brief returns YES when \a index is a valid cursor position for normal mode
+ */
+- (BOOL)isNormalCursorPositionValidAtIndex:(NSUInteger)index;
+
 #pragma mark Converting between Indexes and Line Numbers + Columns
 
 /** @brief returns the column number of \a index within the line.
@@ -213,6 +218,14 @@
  *   it returns the index of the endOfLine for that line
  */
 - (NSUInteger)indexOfLineNumber:(NSUInteger)num column:(NSUInteger)column;
+
+/** @brief returns the index for the given line containing \a index and column.
+ *
+ * @returns
+ *   If \a column is larger than the number of columns in that line,
+ *   it returns the index of the endOfLine for that line
+ */
+- (NSUInteger)indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column;
 
 #pragma mark Searching particular positions on the current line
 

@@ -22,11 +22,6 @@
     return self.length == index;
 }
 
-- (BOOL) isLOL:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [self isEOF:index] == NO && [self isNewline:index] == NO && [self isNewline:index+1];
-}
-
 - (BOOL) isEOL:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     return [self isNewline:index] || [self isEOF:index];
@@ -61,12 +56,6 @@
     return isWhitespace([self.xvim_buffer.string characterAtIndex:index]);
 }
 
-- (BOOL) isLastLine:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    XVimBuffer *buffer = self.xvim_buffer;
-    return [buffer lineNumberAtIndex:index] == [buffer numberOfLines];
-}
-
 - (BOOL) isNonblank:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( [self isEOF:index]){
@@ -75,6 +64,15 @@
     return isNonblank([self.xvim_buffer.string characterAtIndex:index]);
 }
 
+
+/**
+ * Determine if the position specified with "index" is blankline.
+ * Blankline is one of followings
+ *   - Newline after Newline. Ex. The second '\n' in "abc\n\nabc" is a blankline. First one is not.
+ *   - Newline at begining of the document.
+ *   - EOF after Newline. Ex. The index 4 of "abc\n" is blankline. Note that index 4 is exceed the string length. But the cursor can be there.
+ *   - EOF of 0 sized document.
+ **/
 - (BOOL)isBlankline:(NSUInteger)index
 {
     XVimBuffer *buffer = self.xvim_buffer;
@@ -1543,16 +1541,5 @@ NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCo
 }
 
 #pragma GCC diagnostic pop
-
-#pragma mark Conversions
-
-- (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    // If the current cursor position is not valid for normal mode move it.
-    if( ![self isValidCursorPosition:index] ){
-        return index-1;
-    }
-    return index;
-}
 
 @end

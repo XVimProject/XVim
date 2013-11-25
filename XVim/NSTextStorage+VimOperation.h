@@ -20,12 +20,6 @@
 
 #pragma mark Definitions
 
-// Determine if the position specified with "index" is EOF.
-- (BOOL) isEOF:(NSUInteger)index;
-
-// Determine if the position specified with "index" is LOL.
-- (BOOL) isLOL:(NSUInteger)index;
-
 // Determine if the position specified with "index" is EOL.
 - (BOOL) isEOL:(NSUInteger)index;
 
@@ -38,30 +32,9 @@
 // Determine if the position specified with "index" is white space.
 - (BOOL) isWhitespace:(NSUInteger)index;
 
-// Determine if the position is on the last line in the document
-- (BOOL) isLastLine:(NSUInteger)index;
-
 // Determine if the position is non blank character
 // EOF is a blank character
 - (BOOL) isNonblank:(NSUInteger)index;
-
-/**
- * Determine if the position specified with "index" is blankline.
- * Blankline is one of followings
- *   - Newline after Newline. Ex. The second '\n' in "abc\n\nabc" is a blankline. First one is not.
- *   - Newline at begining of the document.
- *   - EOF after Newline. Ex. The index 4 of "abc\n" is blankline. Note that index 4 is exceed the string length. But the cursor can be there.
- *   - EOF of 0 sized document.
- **/
-- (BOOL) isBlankline:(NSUInteger)index;
-
-/**
- * Determine if the position specified with "index" is valid cursor position in normal mode.
- * Valid position is followings
- *   - Non newline characters.
- *   - Blankline( including EOF after newline )
- **/
-- (BOOL) isValidCursorPosition:(NSUInteger)index;
 
 #pragma mark Vim operation related methods
 
@@ -136,15 +109,5 @@
 // even if what is '{'
 NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what, char other);
 NSRange xv_current_quote(NSString *string, NSUInteger index, NSUInteger repeatCount, BOOL inclusive, char what);
-
-
-
-#pragma mark Conversions
-/**
- * Returns nearest valid cursor position for normal mode.
- * This is usually convert cursor position on newline to previous character since
- * a cursor can not be on a newline charaster if its not blankline
- **/
-- (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index;
 
 @end

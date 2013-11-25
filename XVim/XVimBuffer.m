@@ -14,6 +14,7 @@
 #import "XVimTextStoring.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
+#import "NSCharacterSet+XVimAdditions.h"
 
 static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
 
@@ -270,6 +271,19 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     return num;
 }
 
+- (BOOL)isIndexOnLastLine:(NSUInteger)index
+{
+    return [self endOfLine:index] == self.length;
+}
+
+- (BOOL)isNormalCursorPositionValidAtIndex:(NSUInteger)index
+{
+    NSRange range = [self indexRangeForLineAtIndex:index newLineLength:NULL];
+
+    return range.length == 0 || index < NSMaxRange(range);
+}
+
+
 #pragma mark Converting between Indexes and Line Numbers + Columns
 
 static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tabWidth)
@@ -320,11 +334,9 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return xvim_sb_count_columns(&sb, self.tabWidth);
 }
 
-- (NSUInteger)indexOfLineNumber:(NSUInteger)num column:(NSUInteger)column
+- (NSUInteger)indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column
 {
-	NSUInteger index = [self indexOfLineNumber:num];
-
-    if (column == 0 || index == NSNotFound) {
+    if (column == 0) {
         return index;
     }
 
@@ -349,6 +361,16 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return xvim_sb_index(&sb);
 }
 
+- (NSUInteger)indexOfLineNumber:(NSUInteger)num column:(NSUInteger)column
+{
+	NSUInteger index = [self indexOfLineNumber:num];
+
+    if (column == 0 || index == NSNotFound) {
+        return index;
+    }
+
+    return [self indexOfLineAtIndex:index column:column];
+}
 
 #pragma mark Searching particular positions on the current line
 
@@ -410,8 +432,8 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     xvim_sb_skip_forward(&sb, [NSCharacterSet whitespaceCharacterSet]);
     c = xvim_sb_peek(&sb);
 
-    if (c == XVimInvalidChar || isNewline(c)) {
-        return allowEOL ? xvim_sb_index(&sb) : NSNotFound;
+    if (!allowEOL && (c == XVimInvalidChar || isNewline(c))) {
+        return NSNotFound;
     }
     return xvim_sb_index(&sb);
 }
@@ -664,44 +686,45 @@ NS_INLINE unichar rot13(unichar c)
 
 - (NSRange)_numberAtIndex:(NSUInteger)index
 {
-    NSUInteger n_start, n_end;
-    NSUInteger x_start, x_end;
+    NSUInteger o_start, n_start, x_start;
+    NSUInteger o_end, n_end, x_end;
     NSString *s = self.string;
     unichar c;
     BOOL isOctal = YES;
+    xvim_string_buffer_t sb;
 
-    n_start = index;
-    while (n_start > 0 && [s isDigit:n_start - 1]) {
-        if (![s isOctDigit:n_start]) {
+    xvim_sb_init(&sb, s, index, 0, s.length);
+    xvim_sb_skip_forward(&sb, [NSCharacterSet xvim_octDigitsCharacterSet]);
+    o_end = xvim_sb_index(&sb);
+    xvim_sb_skip_forward(&sb, [NSCharacterSet decimalDigitCharacterSet]);
+    n_end = xvim_sb_index(&sb);
+    if (o_end != n_end) isOctal = NO;
+    xvim_sb_skip_forward(&sb, [NSCharacterSet xvim_hexDigitsCharacterSet]);
+    x_end = xvim_sb_index(&sb);
+
+    xvim_sb_init(&sb, s, index, 0, s.length);
+    if (isOctal) {
+        xvim_sb_skip_backward(&sb, [NSCharacterSet xvim_octDigitsCharacterSet]);
+        o_start = xvim_sb_index(&sb);
+        c = xvim_sb_peek_prev(&sb);
+        if (c == '8' || c == '9' || xvim_sb_peek(&sb) != '0') {
             isOctal = NO;
         }
-        n_start--;
     }
-    n_end = index;
-    while (n_end < s.length && [s isDigit:n_end]) {
-        if (![s isOctDigit:n_end]) {
-            isOctal = NO;
-        }
-        n_end++;
-    }
-
-    x_start = n_start;
-    while (x_start > 0 && [s isHexDigit:x_start - 1]) {
-        x_start--;
-    }
-    x_end = n_end;
-    while (x_end < s.length && [s isHexDigit:x_end]) {
-        x_end++;
-    }
+    xvim_sb_skip_backward(&sb, [NSCharacterSet decimalDigitCharacterSet]);
+    n_start = xvim_sb_index(&sb);
+    xvim_sb_skip_backward(&sb, [NSCharacterSet xvim_hexDigitsCharacterSet]);
+    x_start = xvim_sb_index(&sb);
 
     // first deal with Hex: 0xNNNNN
     // case 1: check for insertion point on the '0' or 'x'
     if (x_end - x_start == 1) {
         NSUInteger end = x_end;
         if (end < s.length && [s characterAtIndex:end] == 'x') {
-            do {
-                end++;
-            } while (end < s.length && [s isHexDigit:end]);
+            xvim_sb_init(&sb, s, end + 1, 0, s.length);
+            xvim_sb_skip_forward(&sb, [NSCharacterSet xvim_hexDigitsCharacterSet]);
+            end = xvim_sb_index(&sb);
+
             if (index < end && end - x_start > 2) {
                 // YAY it's hex for real!!!
                 return NSMakeRange(x_start, end - x_start);
@@ -721,7 +744,7 @@ NS_INLINE unichar rot13(unichar c)
     }
 
     // okay it's not hex, if it's not octal, check for leading +/-
-    if (n_start > 0 && !(isOctal && [s characterAtIndex:n_start] == '0')) {
+    if (n_start > 0 && !isOctal) {
         c = [s characterAtIndex:n_start - 1];
         if (c == '+' || c == '-') {
             n_start--;

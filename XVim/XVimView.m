@@ -374,10 +374,11 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         pos = length;
     }
 
+    _insertionPoint = pos;
     if (_cursorMode == CURSOR_MODE_COMMAND && _selectionMode == XVIM_VISUAL_NONE) {
-        _insertionPoint = [_textView.textStorage convertToValidCursorPositionForNormalMode:pos];
-    } else {
-        _insertionPoint = pos;
+        if (![buffer isNormalCursorPositionValidAtIndex:pos]) {
+            _insertionPoint = pos - 1;
+        }
     }
 
     if (!preserve) {
@@ -414,8 +415,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     _syncStateLock = YES;
 
     if (_cursorMode == CURSOR_MODE_COMMAND) {
-        NSTextStorage *ts = _textView.textStorage;
-        if (![ts isValidCursorPosition:_insertionPoint]) {
+        if (![self.buffer isNormalCursorPositionValidAtIndex:_insertionPoint]) {
             NSRange placeholder = [(DVTSourceTextView *)_textView rangeOfPlaceholderFromCharacterIndex:_insertionPoint forward:NO wrap:NO limit:0];
             if (placeholder.location != NSNotFound && _insertionPoint == (placeholder.location + placeholder.length)) {
                 // The condition here means that just before current insertion point is a placeholder.
@@ -722,7 +722,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     NSRange range = _textView.selectedRange;
 
     // If the current cursor position is not valid for normal mode move it.
-    if (![_textView.textStorage isValidCursorPosition:range.location]) {
+    if (![self.buffer isNormalCursorPositionValidAtIndex:range.location]) {
         [self selectPreviousPlaceholder];
         NSRange prevPlaceHolder = _textView.selectedRange;
 
@@ -848,7 +848,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     case MOTION_LINENUMBER:
         end = [buffer indexOfLineNumber:motion.line column:_preservedColumn];
         if (NSNotFound == end) {
-            end = [buffer indexOfLineNumber:[buffer numberOfLines] column:_preservedColumn];
+            end = [buffer indexOfLineAtIndex:buffer.length column:_preservedColumn];
         }
         break;
     case MOTION_PERCENT:
@@ -858,7 +858,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         end = [ts positionOfMatchedPair:begin];
         break;
     case MOTION_LASTLINE:
-        end = [buffer indexOfLineNumber:[buffer numberOfLines] column:_preservedColumn];
+        end = [buffer indexOfLineAtIndex:buffer.length column:_preservedColumn];
         break;
     case MOTION_HOME:
         tmpPos = [self lineNumberInScrollView:0.0 offset:motion.scount - 1];
@@ -1240,7 +1240,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         }
         r = [self _getOperationRange:motionRange type:motion.type];
 
-        if (motion.type == LINEWISE && [_textView.textStorage isLastLine:motionRange.end]) {
+        if (motion.type == LINEWISE && [buffer isIndexOnLastLine:motionRange.end]) {
             if (r.location != 0) {
                 motion.info->deleteLastLine = YES;
                 r.location--;
