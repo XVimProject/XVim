@@ -313,4 +313,6 @@
 // May return NSNotFound
 - (NSUInteger)incrementNumberAtIndex:(NSUInteger)index by:(int64_t)offset;
 
+- (void)indentCharacterRange:(NSRange)range;
+
 @end

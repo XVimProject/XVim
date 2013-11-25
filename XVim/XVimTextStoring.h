@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class XVimBuffer;
+
 /** @brief Protocol that can be implemented by your NSTextStorage.
  *
  * Implementing it will likely boost XVimBuffer performance significantly
@@ -19,13 +21,11 @@
 
 @optional
 
+#pragma mark *** Content & Lines access ***
+
 @property (nonatomic, readonly) NSString  *xvim_string;
 
 @property (nonatomic, readonly) NSUInteger xvim_numberOfLines;
-
-@property (nonatomic, readonly) NSUInteger xvim_tabWidth;
-
-@property (nonatomic, readonly) NSUInteger xvim_indentWidth;
 
 /** @brief returns the index range for the given line number
  *
@@ -56,5 +56,13 @@
  *    This never returns NSNotFound.
  */
 - (NSUInteger)xvim_lineNumberAtIndex:(NSUInteger)index;
+
+#pragma mark *** Indent ***
+
+@property (nonatomic, readonly) NSUInteger xvim_tabWidth;
+
+@property (nonatomic, readonly) NSUInteger xvim_indentWidth;
+
+- (void)xvim_indentCharacterRange:(NSRange)range buffer:(XVimBuffer *)buffer;
 
 @end

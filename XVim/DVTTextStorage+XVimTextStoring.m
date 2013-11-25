@@ -70,6 +70,11 @@
     return [self lineRangeForCharacterRange:NSMakeRange(index, 0)].location + 1;
 }
 
+- (void)xvim_indentCharacterRange:(NSRange)range buffer:(XVimBuffer *)buffer
+{
+    [self indentCharacterRange:range undoManager:buffer.undoManager];
+}
+
 @end
 
 #if XVIM_XCODE_VERSION != 5

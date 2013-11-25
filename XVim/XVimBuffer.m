@@ -769,4 +769,11 @@ NS_INLINE unichar rot13(unichar c)
     return index;
 }
 
+- (void)indentCharacterRange:(NSRange)range
+{
+    if ([_textStorage respondsToSelector:@selector(xvim_indentCharacterRange:buffer:)]) {
+        [(id)_textStorage xvim_indentCharacterRange:range buffer:self];
+    }
+}
+
 @end

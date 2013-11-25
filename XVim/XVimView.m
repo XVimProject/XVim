@@ -1656,31 +1656,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     [self _syncState];
 }
 
-- (void)_indentCharacterRange:(NSRange)range
-{
-    NSTextStorage *ts  = _textView.textStorage;
-    XVimBuffer *buffer = self.buffer;
-
-#ifdef __USE_DVTKIT__
-#ifdef __XCODE5__
-    if ([ts isKindOfClass:[DVTTextStorage class]]) {
-        [(DVTTextStorage *)ts indentCharacterRange:range undoManager:buffer.undoManager];
-    }
-    return;
-#else
-    if ([self.textStorage isKindOfClass:[DVTSourceTextStorage class]]) {
-        [(DVTSourceTextStorage *)ts indentCharacterRange:range undoManager:buffer.undoManager];
-    }
-    return;
-#endif
-#else
-#error You must implement here
-#endif
-
-     NSAssert(NO, @"You must implement here if you dont use this caregory with DVTSourceTextView");
-}
-
-- (void)doFilter:(XVimMotion*)motion
+- (void)doFilter:(XVimMotion *)motion
 {
     XVimBuffer *buffer = self.buffer;
 
@@ -1688,23 +1664,31 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         return ;
     }
 
-    NSUInteger insertionAfterFilter = _insertionPoint;
     NSRange filterRange;
+    NSUInteger line, pos;
+
     if (self.selectionMode == XVIM_VISUAL_NONE) {
         XVimRange to = [self _getMotionRange:_insertionPoint motion:motion];
         if (to.end == NSNotFound) {
             return;
         }
         filterRange = [self _getOperationRange:to type:LINEWISE];
+        line = [buffer lineNumberAtIndex:filterRange.location];
     } else {
         XVimRange lines = [self _selectedLines];
         NSUInteger from = [buffer indexOfLineNumber:lines.begin];
         NSUInteger to   = [buffer indexOfLineNumber:lines.end];
+
         filterRange = [self _getOperationRange:XVimMakeRange(from, to) type:LINEWISE];
+        line = lines.begin;
     }
 
-    [self _indentCharacterRange:filterRange];
-    [self _moveCursor:insertionAfterFilter preserveColumn:NO];
+    [buffer indentCharacterRange:filterRange];
+
+    pos = [buffer indexOfLineNumber:line];
+    pos = [buffer firstNonblankInLineAtIndex:pos allowEOL:YES];
+
+    [self _moveCursor:pos preserveColumn:NO];
     self.selectionMode = XVIM_VISUAL_NONE;
     [self _syncState];
 }
