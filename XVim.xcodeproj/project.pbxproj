@@ -332,7 +332,6 @@
 		C361DE671538F18400037B4B /* XVimGActionEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimGActionEvaluator.m; path = XVim/XVimGActionEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C366C23915287EE30008C58E /* XVimKeymap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimKeymap.h; path = XVim/XVimKeymap.h; sourceTree = SOURCE_ROOT; };
 		C366C23A15287EE30008C58E /* XVimKeymap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimKeymap.m; path = XVim/XVimKeymap.m; sourceTree = SOURCE_ROOT; };
-		C36C1045153104EC00CE1D62 /* XVimMotionType.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimMotionType.h; path = XVim/XVimMotionType.h; sourceTree = SOURCE_ROOT; };
 		C36C104C153131C500CE1D62 /* XVimTextObjectEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTextObjectEvaluator.h; path = XVim/XVimTextObjectEvaluator.h; sourceTree = SOURCE_ROOT; };
 		C36C104D153131C500CE1D62 /* XVimTextObjectEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTextObjectEvaluator.m; path = XVim/XVimTextObjectEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C38A5B2E1526C6B100E1448D /* XVimKeyStroke.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimKeyStroke.h; path = XVim/XVimKeyStroke.h; sourceTree = SOURCE_ROOT; };
@@ -406,6 +405,8 @@
 		6E2C392C183E4B880056E30F /* View */ = {
 			isa = PBXGroup;
 			children = (
+				A23771571611CD4200FE5F8B /* XVimMotion.h */,
+				A23771581611CD4200FE5F8B /* XVimMotion.m */,
 				6E2C392D183E4BA20056E30F /* XVimView.h */,
 				6E2C392E183E4BA20056E30F /* XVimView.m */,
 			);
@@ -671,7 +672,6 @@
 				6E2C392C183E4B880056E30F /* View */,
 				C3552DA6153AC6F800D57577 /* XVimHistoryHandler.h */,
 				C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */,
-				C36C1045153104EC00CE1D62 /* XVimMotionType.h */,
 				C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */,
 				F17D0139150861DC00A8111B /* XVimRegister.h */,
 				F17D013A150861DC00A8111B /* XVimRegister.m */,
@@ -687,8 +687,6 @@
 				A293A38716CE8A8000E1E827 /* XVimDebug.m */,
 				A2A6BA2C152A544B00F0EB5F /* XVimSearch.h */,
 				A2A6BA2D152A544B00F0EB5F /* XVimSearch.m */,
-				A23771571611CD4200FE5F8B /* XVimMotion.h */,
-				A23771581611CD4200FE5F8B /* XVimMotion.m */,
 				A2126B7316FB30B0000BE21C /* XVimMark.h */,
 				A2126B7416FB30B0000BE21C /* XVimMark.m */,
 				A2126B7616FB4806000BE21C /* XVimMarks.h */,

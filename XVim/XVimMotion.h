@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XVimMotionType.h"
 
 typedef struct {
     BOOL reachedEndOfLine;
@@ -16,6 +15,14 @@ typedef struct {
     NSUInteger lastEndOfLine;
     NSUInteger lastEndOfWord;
 }XVimMotionInfo;
+
+typedef enum _MOTION_TYPE{
+    DEFAULT_MOTION_TYPE,
+    CHARACTERWISE_INCLUSIVE,
+    CHARACTERWISE_EXCLUSIVE,
+    LINEWISE,
+    BLOCKWISE
+} MOTION_TYPE;
 
 #define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
 
