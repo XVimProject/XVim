@@ -46,10 +46,10 @@
     XVimMotion* m = nil;
     if( forward ){
         XVim.instance.searcher.lastSearchBackword = NO;
-        m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+        m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     }else{
         XVim.instance.searcher.lastSearchBackword = YES;
-        m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+        m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     }
     m.regex = string;
     
@@ -68,11 +68,11 @@
     }
     // The last case sensitiveness is found at this point
     if( options & NSRegularExpressionCaseInsensitive ){
-        m.option |= SEARCH_CASEINSENSITIVE;
+        m.option |= MOPT_SEARCH_CASEINSENSITIVE;
     }
     
     if( [XVim instance].options.wrapscan ){
-        m.option |= SEARCH_WRAP;
+        m.option |= MOPT_SEARCH_WRAP;
     }
     
     return m;
@@ -357,11 +357,11 @@
         unichar lastChar = [string characterAtIndex:wordStart-1];
         if ((isKeyword(curChar) && isKeyword(lastChar)) ||
             (!isKeyword(curChar) && isNonblank(curChar) && !isKeyword(lastChar) && isNonblank(lastChar))){
-            wordStart = [view.textStorage wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
+            wordStart = [view.textStorage wordsBackward:searchStart count:1 option:MOPT_NOWRAP];
         }
     }
 
-    NSUInteger wordEnd = [view.textStorage wordsForward:wordStart count:1 option:LEFT_RIGHT_NOWRAP info:&info];
+    NSUInteger wordEnd = [view.textStorage wordsForward:wordStart count:1 option:MOPT_NOWRAP info:&info];
     if (info.lastEndOfWord != NSNotFound){
         wordEnd = info.lastEndOfWord;
     }

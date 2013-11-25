@@ -44,7 +44,7 @@
 
 - (XVimEvaluator*)J{
     XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator *)q{
@@ -54,7 +54,7 @@
 
 - (XVimEvaluator*)u{
     [self.argumentString appendString:@"u"];
-    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_LOWER];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
@@ -62,7 +62,7 @@
 
 - (XVimEvaluator*)U{
     [self.argumentString appendString:@"U"];
-    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_UPPER];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
@@ -75,7 +75,7 @@
 
 - (XVimEvaluator *)QUESTION{
     [self.argumentString appendString:@"?"];
-    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_ROT13];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];
@@ -83,7 +83,7 @@
 
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
     [[XVim instance] fixOperationCommands];
 	return [XVimEvaluator invalidEvaluator];

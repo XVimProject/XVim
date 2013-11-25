@@ -46,7 +46,7 @@
 	if (mark.line != NSNotFound) {
         NSUInteger newPos = [buffer indexOfLineNumber:mark.line column:mark.column];
         if (NSNotFound != newPos) {
-            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
+            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 0);
 
             m.position = newPos;
             
@@ -69,7 +69,7 @@
 
 - (XVimEvaluator*)J{
     XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)u{

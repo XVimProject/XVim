@@ -117,11 +117,11 @@
 - (void)xvim_setWrapsLines:(BOOL)wraps;
 - (void)xvim_hideCompletions;
 - (void)xvim_highlightNextSearchCandidate:(NSString *)regex count:(NSUInteger)count
-                                   option:(MOTION_OPTION)opt forward:(BOOL)forward;
-- (void)xvim_highlightNextSearchCandidateForward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt;
-- (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt;
-- (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt;
+                                   option:(XVimMotionOptions)opt forward:(BOOL)forward;
+- (void)xvim_highlightNextSearchCandidateForward:(NSString*)regex count:(NSUInteger)count option:(XVimMotionOptions)opt;
+- (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(XVimMotionOptions)opt;
+- (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(XVimMotionOptions)opt;
 - (void)xvim_clearHighlightText;
-- (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
+- (NSRange)xvim_currentWord:(XVimMotionOptions)opt;
 
 @end

@@ -326,7 +326,7 @@
 }
 
 - (XVimEvaluator*)C_w{
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     [self.currentView doDelete:m andYank:NO];
     return self;
 }

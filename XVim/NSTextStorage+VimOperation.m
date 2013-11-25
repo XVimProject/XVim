@@ -129,115 +129,6 @@
 }
 
 #pragma mark Vim operation related methods
-#define charat(x) [[self string] characterAtIndex:(x)]
-
-- (NSUInteger)prev:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    if( 0 == index){
-        return 0;
-    }
-    
-    NSString* string = self.xvim_buffer.string;
-    NSUInteger pos = index;
-    for (NSUInteger i = 0; i < count && pos != 0 ; i++)
-    {
-        //Try move to prev position and check if its valid position.
-        NSUInteger prev = pos-1; //This is the position where we are trying to move to.
-        // If the position is new line and its not wrapable we stop moving
-        if( opt == LEFT_RIGHT_NOWRAP && isNewline([self.xvim_buffer.string characterAtIndex:prev]) ){
-            break; // not update the position
-        }
-        
-        // If its wrapable, skip newline except its blankline
-        if (isNewline([string characterAtIndex:prev])) {
-            if(![self isBlankline:prev]) {
-                // skip the newline letter at the end of line
-                prev--;
-            }
-        }
-        
-        if(charat(prev) == '>' && prev){
-            //possible autocomplete glyph that we should skip.
-            if(charat(prev - 1) == '#'){
-                NSUInteger findstart = prev;
-                while (--findstart ) {
-                    if(charat(findstart) == '#'){
-                        if(charat(findstart - 1) == '<'){
-                            prev = findstart - 1;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Now the position can be move to the prev
-        pos = prev;
-    }
-    return pos;
-}
-
-- (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info{
-    info->reachedEndOfLine = NO;
-    
-    if( index == [self.xvim_buffer.string length] )
-        return [self.xvim_buffer.string length];
-    
-    NSString* string = self.xvim_buffer.string;
-    NSUInteger pos = index;
-    // If the currenct cursor position is on a newline (blank line) and not wrappable never move the cursor
-    if( opt == LEFT_RIGHT_NOWRAP && [self isBlankline:pos]){
-        return pos;
-    }
-    
-    for (NSUInteger i = 0; i < count && pos < self.length; i++) {
-        NSUInteger next = pos + 1;
-        // If the next position is the end of docuement and current position is not a newline
-        // Never move a cursor to the end of document.
-        if( [self isEOF:next] && !isNewline([string characterAtIndex:pos]) ){
-            info->reachedEndOfLine = YES;
-            break;
-        }
-        
-        if( opt == LEFT_RIGHT_NOWRAP && isNewline([string characterAtIndex:next]) ){
-            info->reachedEndOfLine = YES;
-            break;
-        }
-        
-        // If the next position is newline and not a blankline skip it
-        if (isNewline([string characterAtIndex:next])) {
-            if(![self isBlankline:next]) {
-                // skip the newline letter at the end of line
-                next++;
-            }
-        }
-        pos = next;
-    }
-    return pos;
-}
-
-- (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    XVimBuffer *buffer = self.xvim_buffer;
-
-    NSUInteger lno = [buffer lineNumberAtIndex:index];
-
-    lno = lno <= count ? 1 : lno - count;
-    return [buffer indexOfLineNumber:lno column:column];
-}
-
-- (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    XVimBuffer *buffer = self.xvim_buffer;
-
-    NSUInteger lno = [buffer lineNumberAtIndex:index] + count;
-    NSUInteger lines = buffer.numberOfLines;
-
-    if (lno > lines) {
-        lno = lines;
-    }
-    return [buffer indexOfLineNumber:lno column:column];
-}
-
 /** 
  From Vim help: word and WORD
  *word*
@@ -259,7 +150,7 @@
  next line. 
 **/
 
-- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info{
+- (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt info:(XVimMotionInfo*)info{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert(nil != info, @"Specify info");
     
@@ -317,7 +208,7 @@
                 info->lastEndOfWord = i-1;
                 wordInLineFound = NO;
             }else if(isNonblank(curChar)){
-                if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
+                if(isKeyword(lastChar) != isKeyword(curChar) && opt != MOPT_BIGWORD){
                     --count;
                     info->lastEndOfLine = i-1;
                     info->lastEndOfWord = i-1;
@@ -350,7 +241,7 @@
         }
         
         lastChar = curChar;
-        if( isNewline(curChar) && opt == LEFT_RIGHT_NOWRAP ){
+        if( isNewline(curChar) && opt == MOPT_NOWRAP ){
             pos = i-1;
             break;
         }
@@ -363,7 +254,7 @@
     return pos;
 }
 
-- (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSUInteger)wordsBackward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( 1 >= index )
         return 0;
@@ -412,13 +303,13 @@
         }
         // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
         //    - Whitespace(including newline) and Non-Blank
-        //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
-        //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
+        //    - keyword and non-keyword(without whitespace)  (only when !MOPT_BIGWORD)
+        //    - non-keyword(without whitespace) and keyword  (only when !MOPT_BIGWORD)
         //    - newline and newline(blankline) 
         else if(
            ((isWhitespace(curChar) || isNewline(curChar)) && isNonblank(lastChar))   ||
-           ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhitespace(lastChar) && !isNewline(lastChar))   ||
-           ( opt != BIGWORD && !isKeyword(curChar) && !isWhitespace(curChar) && !isNewline(lastChar) && isKeyword(lastChar) )  ||
+           ( opt != MOPT_BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhitespace(lastChar) && !isNewline(lastChar))   ||
+           ( opt != MOPT_BIGWORD && !isKeyword(curChar) && !isWhitespace(curChar) && !isNewline(lastChar) && isKeyword(lastChar) )  ||
            ( isNewline(curChar) && [self isBlankline:i+1] )
            ){
             count--; 
@@ -429,7 +320,7 @@
             pos = 0;
             break;
         }
-        if( 0 == count || (isNewline(curChar) && opt == LEFT_RIGHT_NOWRAP) ){
+        if( 0 == count || (isNewline(curChar) && opt == MOPT_NOWRAP) ){
             pos = i+1;
             break;
         }
@@ -444,7 +335,7 @@
  *       This is because Vim causes an error(beeps) when type "e" at the end of document.
  *       But currently this returns "index" as a next position to move because all evaluators does not expect NSNotFound
  **/
-- (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert( 0 != count , @"count must be greater than 0");
 
@@ -455,7 +346,7 @@
     }
 
     NSUInteger p;
-    if( opt & MOTION_OPTION_CHANGE_WORD ){
+    if( opt & MOPT_CHANGE_WORD ){
         p = index;
     } else {
         p = index+1; // We start searching end of word from next character
@@ -468,7 +359,7 @@
         // Vim defines "Blank Line as a word" but 'e' does not stop on blank line.
         // Thats why we are not seeing blank line as a border of a word here (commented out the condition currently)
         // We may add some option to specify if we count a blank line as a word here.
-        if( opt & BIGWORD ){
+        if( opt & MOPT_BIGWORD ){
             if( /*[self isBlankline:p]                               || */// blank line
                (isNonblank(curChar) && !isNonblank(nextChar))             // non blank to blank
                ){
@@ -496,7 +387,7 @@
 /**
  * Returns position of the end of count words backward.
  **/
-- (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{
     // TODO: Implement!
     return index;
 }
@@ -516,7 +407,7 @@
  */
 
 // TODO: Treat paragraph and section boundary as sections baundary as well
-- (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+- (NSUInteger)sentencesForward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{ //(
     NSUInteger pos = index+1;
     NSUInteger sentence_head = NSNotFound;
     NSString* s = self.xvim_buffer.string;
@@ -568,7 +459,7 @@
     return sentence_head;
 }
 
-- (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+- (NSUInteger)sentencesBackward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{ //(
     if( 0 == index ){
         return NSNotFound;
     }
@@ -641,7 +532,7 @@
  paragraph boundary |posix|.
  */
 
-- (NSUInteger)moveFromIndex:(NSUInteger)index paragraphs:(NSInteger)count option:(MOTION_OPTION)opt
+- (NSUInteger)moveFromIndex:(NSUInteger)index paragraphs:(NSInteger)count option:(XVimMotionOptions)opt
 {
     XVimBuffer *buffer = self.xvim_buffer;
     NSUInteger  length = buffer.length;
@@ -686,15 +577,15 @@
     return forward ? length : 0;
 }
 
-- (NSUInteger)sectionsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+- (NSUInteger)sectionsForward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{ //(
     return 0;
 }
 
-- (NSUInteger)sectionsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{ //(
+- (NSUInteger)sectionsBackward:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{ //(
     return 0;
 }
 
-- (NSUInteger)nextCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
+- (NSUInteger)nextCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(XVimMotionOptions)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( [self isEOF:index] ){
         return NSNotFound;
@@ -716,7 +607,7 @@
     return NSNotFound;
 }
 
-- (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
+- (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(XVimMotionOptions)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( 0 == index ){
         return NSNotFound;
@@ -738,14 +629,14 @@
     return NSNotFound;
 }
 
-- (NSRange)searchRegexForward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSRange)searchRegexForward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert(pattern != nil, @"pattern must not be nil");
     
     NSRange ret = NSMakeRange(NSNotFound,0);
     
     NSRegularExpressionOptions options = NSRegularExpressionAnchorsMatchLines;
-    if( opt & SEARCH_CASEINSENSITIVE ){
+    if( opt & MOPT_SEARCH_CASEINSENSITIVE ){
         options |= NSRegularExpressionCaseInsensitive;
     }
     NSError* err = nil;
@@ -766,8 +657,8 @@
         }
     }
     
-    // Then look for the position in range of [BOF,index] if SEARCH_WRAP
-    if( 0 != count && opt & SEARCH_WRAP ){
+    // Then look for the position in range of [BOF,index] if MOPT_SEARCH_WRAP
+    if( 0 != count && opt & MOPT_SEARCH_WRAP ){
         for( NSTextCheckingResult* result in matches ){
             if( result.range.location <= index ){
                 count--;
@@ -783,14 +674,14 @@
     return ret;
 }
 
-- (NSRange)searchRegexBackward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSRange)searchRegexBackward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert(pattern != nil, @"pattern must not be nil");
     
     NSRange ret = NSMakeRange(NSNotFound,0);
     
     NSRegularExpressionOptions options = NSRegularExpressionAnchorsMatchLines;
-    if( opt & SEARCH_CASEINSENSITIVE ){
+    if( opt & MOPT_SEARCH_CASEINSENSITIVE ){
         options |= NSRegularExpressionCaseInsensitive;
     }
     NSError* err = nil;
@@ -811,8 +702,8 @@
         }
     }
     
-    // Then look for the position in range of [index,EOF] if SEARCH_WRAP
-    if( 0 != count && opt & SEARCH_WRAP ){
+    // Then look for the position in range of [index,EOF] if MOPT_SEARCH_WRAP
+    if( 0 != count && opt & MOPT_SEARCH_WRAP ){
         for( NSTextCheckingResult* result in [matches reverseObjectEnumerator] ){
             if( result.range.location >= index ){
                 count--;
@@ -856,7 +747,7 @@ static void initNSStringHelper(NSStringHelper*, NSString* string, NSUInteger str
 static void initNSStringHelperBackward(NSStringHelper*, NSString* string, NSUInteger strLen);
 static unichar characterAtIndex(NSStringHelper*, NSInteger index);
 
-- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+- (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(XVimMotionOptions)opt{
     NSString* string = self.xvim_buffer.string;
     NSInteger maxIndex = self.length - 1;
     if (index > maxIndex) { return NSMakeRange(NSNotFound, 0); }
@@ -877,7 +768,7 @@ static unichar characterAtIndex(NSStringHelper*, NSInteger index);
         NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
         NSCharacterSet *wordSet = nil;
         
-        if ( opt & BIGWORD) {
+        if ( opt & MOPT_BIGWORD) {
             NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
             wordSet = charSet;
         }
@@ -901,7 +792,7 @@ static unichar characterAtIndex(NSStringHelper*, NSInteger index);
         end = seek_forwards(string, end, searchSet);
         
         // For inclusive mode, try to eat some more
-        if ( !(opt & TEXTOBJECT_INNER)) {
+        if ( !(opt & MOPT_TEXTOBJECT_INNER)) {
             NSInteger newEnd = end;
             if (end < maxIndex) {
                 if (initialCharIsWs) {

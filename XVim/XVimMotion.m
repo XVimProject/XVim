@@ -25,7 +25,7 @@
     return (NSInteger)_count;
 }
 
-- (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count{
+- (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(XVimMotionOptions)option count:(NSUInteger)count{
     if( self = [super init]){
         _motion = motion;
         _type = type;

@@ -24,21 +24,21 @@
 }
 
 - (XVimEvaluator*)g{
-    self.motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, MOTION_OPTION_NONE, 1);
+    self.motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, MOPT_NONE, 1);
     self.motion.line = self.numericArg;
     return nil;
 }
 
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
     XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
-    NSRange r = [self.currentView xvim_currentWord:MOTION_OPTION_NONE];
+    NSRange r = [self.currentView xvim_currentWord:MOPT_NONE];
     if( r.location == NSNotFound ){
         return nil;
     }
     
     // This is not for matching the searching word itself
     // Vim also does this behavior( when matched string is not found )
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     m.position = r.location;
     [self.currentView moveCursorWithMotion:m];
     

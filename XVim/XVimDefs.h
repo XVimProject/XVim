@@ -19,7 +19,7 @@
 #endif
 #endif
 
-typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
+typedef NS_ENUM(uint8_t, XVimInsertionPoint) {
     XVIM_INSERT_DEFAULT,
     XVIM_INSERT_APPEND,
     XVIM_INSERT_BEFORE_FIRST_NONBLANK,
@@ -27,11 +27,22 @@ typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
     XVIM_INSERT_BLOCK_KILL,
 };
 
-typedef NS_ENUM(NSUInteger, XVimSortOptions) {
+typedef NS_ENUM(uint8_t, XVimSortOptions) {
     XVimSortOptionReversed              = 1,
     XVimSortOptionRemoveDuplicateLines  = 1 << 1,
     XVimSortOptionNumericSort           = 1 << 2,
     XVimSortOptionIgnoreCase            = 1 << 3
+};
+
+typedef NS_OPTIONS(unsigned , XVimMotionOptions) {
+    MOPT_NONE                   = 0x00,
+    MOPT_NOWRAP                 = 0x01, // whether we stop or wrap at EOL
+    MOPT_BIGWORD                = 0x02, // for 'WORD' motion
+    MOPT_PARA_BOUND_BLANKLINE   = 0x04,
+    MOPT_TEXTOBJECT_INNER       = 0x08,
+    MOPT_SEARCH_WRAP            = 0x10,
+    MOPT_SEARCH_CASEINSENSITIVE = 0x20,
+    MOPT_CHANGE_WORD            = 0x40, // for 'cw','cW'
 };
 
 typedef enum{

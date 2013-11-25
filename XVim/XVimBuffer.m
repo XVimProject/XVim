@@ -142,6 +142,20 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
 
 #pragma mark Specific positions of the index within the line
 
+NS_INLINE NSUInteger _addClamp(NSUInteger a, NSInteger b, NSUInteger min, NSUInteger max)
+{
+#if DEBUG
+    NSCAssert(min <= a && a <= max, @"invalid parameter to _addClamp");
+#endif
+    if (b < 0 && (NSInteger)a + b <= min) {
+        return min;
+    }
+    if (b > 0 && a + (NSUInteger)b > max) {
+        return max;
+    }
+    return (NSUInteger)((NSInteger)a + b);
+}
+
 - (BOOL)isIndexOnLastLine:(NSUInteger)index
 {
     return [self endOfLine:index] == self.length;
@@ -355,7 +369,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return xvim_sb_count_columns(&sb, self.tabWidth);
 }
 
-- (NSUInteger)indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column
+- (NSUInteger)_indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column
 {
     if (column == 0) {
         return index;
@@ -390,7 +404,66 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         return index;
     }
 
-    return [self indexOfLineAtIndex:index column:column];
+    return [self _indexOfLineAtIndex:index column:column];
+}
+
+#pragma mark Motion support functions
+
+- (NSUInteger)indexOfCharMotion:(NSInteger)scount index:(NSUInteger)index options:(XVimMotionOptions)options
+{
+    NSUInteger nlLen, max;
+    NSRange range;
+
+    NSAssert((options & ~MOPT_NOWRAP) == 0, @"unhandled options passed");
+
+    if (scount == 0) {
+        return index;
+    }
+
+    if (options & MOPT_NOWRAP) {
+        range = [self indexRangeForLineAtIndex:index newLineLength:&nlLen];
+        return _addClamp(index, scount, range.location, NSMaxRange(range));
+    }
+
+    while (scount > 0) {
+        range = [self indexRangeForLineAtIndex:index newLineLength:&nlLen];
+        max   = NSMaxRange(range);
+        if (index + (NSUInteger)scount > max) {
+            scount -= max - index + 1;
+            index = max + nlLen;
+        } else {
+            return index + (NSUInteger)scount;
+        }
+    }
+
+    while (scount < 0) {
+        range  = [self indexRangeForLineAtIndex:index - 1 newLineLength:&nlLen];
+        max    = NSMaxRange(range);
+        if (index > max) {
+            // if we're just past the EOL skip it back
+            scount++;
+            index = max;
+        }
+        if ((index - range.location) >= (NSUInteger)-scount) {
+            return (NSUInteger)((NSInteger)index + scount);
+        }
+        scount += index - range.location;
+        index   = range.location;
+    }
+
+    return index;
+}
+
+- (NSUInteger)indexOfLineMotion:(NSInteger)scount index:(NSUInteger)index column:(NSUInteger)column;
+{
+    if (scount) {
+        NSUInteger line = [self lineNumberAtIndex:index];
+
+        line  = _addClamp(line, scount, 1, self.numberOfLines);
+        index = [self indexOfLineNumber:line];
+    }
+
+    return [self _indexOfLineAtIndex:index column:column];
 }
 
 #pragma mark Searching particular positions on the current line

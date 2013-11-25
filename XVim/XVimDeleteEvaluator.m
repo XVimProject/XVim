@@ -40,7 +40,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     if ([self numericArg] < 1) 
         return nil;
     
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOPT_NONE, [self numericArg]-1);
     return [self _motionFixed:m];
 }
 
@@ -54,7 +54,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     if ([self numericArg] < 1) 
         return nil;
     
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOPT_NONE, [self numericArg]-1);
     return [self _motionFixed:m];
 }
 

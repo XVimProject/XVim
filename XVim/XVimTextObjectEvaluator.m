@@ -31,8 +31,8 @@
 }
 
 - (XVimMotion *)motion {
-    MOTION_OPTION opt = _inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
-    opt |= _bigword ? BIGWORD : MOTION_OPTION_NONE;
+    XVimMotionOptions opt = _inner ? MOPT_TEXTOBJECT_INNER : MOPT_NONE;
+    opt |= _bigword ? MOPT_BIGWORD : MOPT_NONE;
     return XVIM_MAKE_MOTION(_textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
 }
 

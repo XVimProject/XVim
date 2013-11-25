@@ -359,6 +359,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 {
     if (!XVim.instance.disabled) {
         [self _syncStateFromView];
+        [self scrollTo:_insertionPoint];
     }
     [_textView setNeedsDisplay:YES];
 }
@@ -753,6 +754,31 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     [self _syncState];
 }
 
+- (NSUInteger)_fixupMotionEnd:(NSUInteger)end buffer:(XVimBuffer *)buffer motion:(XVimMotion *)motion
+{
+    NSUInteger search = end;
+    NSRange r;
+
+    if (end < buffer.length && [buffer.string characterAtIndex:end] == '#') {
+        search++;
+    }
+
+    r = [(DVTSourceTextView *)_textView rangeOfPlaceholderFromCharacterIndex:search forward:NO wrap:NO limit:0];
+    if (r.location != NSNotFound && end < NSMaxRange(r)) {
+        if (motion.motion == MOTION_FORWARD) {
+            end = NSMaxRange(r);
+        } else {
+            end = r.location;
+        }
+    }
+
+    if (![buffer isNormalCursorPositionValidAtIndex:end]) {
+        motion.info->reachedEndOfLine = YES;
+        end--;
+    }
+    return end;
+}
+
 - (XVimRange)_getMotionRange:(NSUInteger)current motion:(XVimMotion*)motion
 {
     NSRange range = NSMakeRange(NSNotFound, 0);
@@ -768,10 +794,12 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         // Do nothing
         break;
     case MOTION_FORWARD:
-        end = [ts next:begin count:motion.count option:motion.option info:motion.info];
+        end = [buffer indexOfCharMotion:motion.scount index:begin options:motion.option];
+        end = [self _fixupMotionEnd:end buffer:buffer motion:motion];
         break;
     case MOTION_BACKWARD:
-        end = [ts prev:begin count:motion.count option:motion.option ];
+        end = [buffer indexOfCharMotion:-motion.scount index:begin options:motion.option];
+        end = [self _fixupMotionEnd:end buffer:buffer motion:motion];
         break;
     case MOTION_WORD_FORWARD:
         end = [ts wordsForward:begin count:motion.count option:motion.option info:motion.info];
@@ -786,17 +814,16 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         end = [ts endOfWordsBackward:begin count:motion.count option:motion.option];
         break;
     case MOTION_LINE_FORWARD:
-        end = [ts nextLine:begin column:_preservedColumn count:motion.count option:motion.option];
+        end = [buffer indexOfLineMotion:motion.scount index:begin column:_preservedColumn];
         break;
     case MOTION_LINE_BACKWARD:
-        end = [ts prevLine:begin column:_preservedColumn count:motion.count option:motion.option];
+        end = [buffer indexOfLineMotion:-motion.scount index:begin column:_preservedColumn ];
         break;
     case MOTION_BEGINNING_OF_LINE:
         end = [buffer startOfLine:begin];
         break;
     case MOTION_END_OF_LINE:
-        end = [ts nextLine:begin column:0 count:motion.count - 1 option:MOTION_OPTION_NONE];
-        end = [buffer endOfLine:end];
+        end = [buffer indexOfLineMotion:motion.scount - 1 index:begin column:XVimSelectionEOL];
         break;
     case MOTION_SENTENCE_FORWARD:
         end = [ts sentencesForward:begin count:motion.count option:motion.option];
@@ -811,36 +838,30 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         end = [ts moveFromIndex:begin paragraphs:-motion.scount option:motion.option];
         break;
     case MOTION_NEXT_CHARACTER:
-        end = [ts nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+        end = [ts nextCharacterInLine:begin count:motion.count character:motion.character option:MOPT_NONE];
         break;
     case MOTION_PREV_CHARACTER:
-        end = [ts prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+        end = [ts prevCharacterInLine:begin count:motion.count character:motion.character option:MOPT_NONE];
         break;
     case MOTION_TILL_NEXT_CHARACTER:
-        end = [ts nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+        end = [ts nextCharacterInLine:begin count:motion.count character:motion.character option:MOPT_NONE];
         if (end != NSNotFound) {
             end--;
         }
         break;
     case MOTION_TILL_PREV_CHARACTER:
-        end = [ts prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+        end = [ts prevCharacterInLine:begin count:motion.count character:motion.character option:MOPT_NONE];
         if (end != NSNotFound) {
             end++;
         }
         break;
     case MOTION_NEXT_FIRST_NONBLANK:
-        end = [ts nextLine:begin column:0 count:motion.count option:motion.option];
-        tmpPos = [buffer nextNonblankInLineAtIndex:end allowEOL:NO];
-        if (NSNotFound != tmpPos) {
-            end = tmpPos;
-        }
+        end = [buffer indexOfLineMotion:motion.scount index:begin column:0];
+        end = [buffer firstNonblankInLineAtIndex:end allowEOL:YES];
         break;
     case MOTION_PREV_FIRST_NONBLANK:
-        end = [ts prevLine:begin column:0 count:motion.count option:motion.option];
-        tmpPos = [buffer nextNonblankInLineAtIndex:end allowEOL:NO];
-        if (NSNotFound != tmpPos) {
-            end = tmpPos;
-        }
+        end = [buffer indexOfLineMotion:-motion.scount index:begin column:0 ];
+        end = [buffer firstNonblankInLineAtIndex:end allowEOL:YES];
         break;
     case MOTION_FIRST_NONBLANK:
         end = [buffer firstNonblankInLineAtIndex:begin allowEOL:NO];
@@ -848,7 +869,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     case MOTION_LINENUMBER:
         end = [buffer indexOfLineNumber:motion.line column:_preservedColumn];
         if (NSNotFound == end) {
-            end = [buffer indexOfLineAtIndex:buffer.length column:_preservedColumn];
+            end = [buffer indexOfLineMotion:0 index:buffer.length column:_preservedColumn];
         }
         break;
     case MOTION_PERCENT:
@@ -858,7 +879,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         end = [ts positionOfMatchedPair:begin];
         break;
     case MOTION_LASTLINE:
-        end = [buffer indexOfLineAtIndex:buffer.length column:_preservedColumn];
+        end = [buffer indexOfLineMotion:0 index:buffer.length column:_preservedColumn];
         break;
     case MOTION_HOME:
         tmpPos = [self lineNumberInScrollView:0.0 offset:motion.scount - 1];
@@ -882,7 +903,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         range = [ts currentWord:begin count:motion.count  option:motion.option];
         break;
     case TEXTOBJECT_BRACES:
-        range = xv_current_block(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '{', '}');
+        range = xv_current_block(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '{', '}');
         break;
     case TEXTOBJECT_PARAGRAPH:
         // Not supported
@@ -891,28 +912,28 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         range = NSMakeRange(start, end - start);
         break;
     case TEXTOBJECT_PARENTHESES:
-       range = xv_current_block(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '(', ')');
+       range = xv_current_block(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '(', ')');
         break;
     case TEXTOBJECT_SENTENCE:
         // Not supported
         break;
     case TEXTOBJECT_ANGLEBRACKETS:
-        range = xv_current_block(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '<', '>');
+        range = xv_current_block(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '<', '>');
         break;
     case TEXTOBJECT_SQUOTE:
-        range = xv_current_quote(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\'');
+        range = xv_current_quote(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '\'');
         break;
     case TEXTOBJECT_DQUOTE:
-        range = xv_current_quote(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '\"');
+        range = xv_current_quote(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '\"');
         break;
     case TEXTOBJECT_TAG:
         // Not supported
         break;
     case TEXTOBJECT_BACKQUOTE:
-        range = xv_current_quote(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '`');
+        range = xv_current_quote(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '`');
         break;
     case TEXTOBJECT_SQUAREBRACKETS:
-        range = xv_current_block(buffer.string, current, motion.count, !(motion.option & TEXTOBJECT_INNER), '[', ']');
+        range = xv_current_block(buffer.string, current, motion.count, !(motion.option & MOPT_TEXTOBJECT_INNER), '[', ']');
         break;
     case MOTION_LINE_COLUMN:
         end = [buffer indexOfLineNumber:motion.line column:motion.column];
@@ -1309,7 +1330,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     if (motion.motion == MOTION_WORD_FORWARD && [_textView.textStorage isNonblank:_insertionPoint]) {
         motion.motion = MOTION_END_OF_WORD_FORWARD;
         motion.type = CHARACTERWISE_INCLUSIVE;
-        motion.option |= MOTION_OPTION_CHANGE_WORD;
+        motion.option |= MOPT_CHANGE_WORD;
     }
 
     [buffer beginEditingAtIndex:_insertionPoint];
@@ -1398,7 +1419,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     [buffer beginEditingAtIndex:_insertionPoint];
 
     if (self.selectionMode != XVIM_VISUAL_NONE) {
-        [self doDelete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) andYank:YES];
+        [self doDelete:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOPT_NONE, 1) andYank:YES];
         after = NO;
     }
 
@@ -1500,7 +1521,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         NSRange    range;
 
         if (motion.motion == MOTION_NONE) {
-            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,LEFT_RIGHT_NOWRAP,motion.count);
+            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_FORWARD,CHARACTERWISE_EXCLUSIVE,MOPT_NOWRAP,motion.count);
             XVimRange   r = [self _getMotionRange:undoPos motion:m];
 
             if (r.end == NSNotFound) {
@@ -1600,7 +1621,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     }
 
     // Search in next line for the position to join(skip white spaces in next line)
-    NSUInteger posToJoin = [ts nextLine:headOfLine column:0 count:1 option:MOTION_OPTION_NONE];
+    NSUInteger posToJoin = [buffer indexOfLineMotion:1 index:headOfLine column:0];
 
     posToJoin = [buffer nextNonblankInLineAtIndex:posToJoin allowEOL:YES];
     if (posToJoin < buffer.length && [buffer.string characterAtIndex:posToJoin] == ')') {
@@ -2293,7 +2314,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 #pragma mark Search
 
 - (void)xvim_highlightNextSearchCandidate:(NSString *)regex count:(NSUInteger)count
-                                   option:(MOTION_OPTION)opt forward:(BOOL)forward
+                                   option:(XVimMotionOptions)opt forward:(BOOL)forward
 {
     NSTextStorage *ts = _textView.textStorage;
     NSRange range = NSMakeRange(NSNotFound,0);
@@ -2309,17 +2330,17 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     }
 }
 
-- (void)xvim_highlightNextSearchCandidateForward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt
+- (void)xvim_highlightNextSearchCandidateForward:(NSString*)regex count:(NSUInteger)count option:(XVimMotionOptions)opt
 {
     [self xvim_highlightNextSearchCandidate:regex count:count option:opt forward:YES];
 }
 
-- (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt
+- (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(XVimMotionOptions)opt
 {
     [self xvim_highlightNextSearchCandidate:regex count:count option:opt forward:NO];
 }
 
-- (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt
+- (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(XVimMotionOptions)opt
 {
     NSAssert( nil != pattern, @"pattern munst not be nil");
 
@@ -2328,7 +2349,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     }
 
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
-	if  (opt & SEARCH_CASEINSENSITIVE) {
+	if  (opt & MOPT_SEARCH_CASEINSENSITIVE) {
 		r_opts |= NSRegularExpressionCaseInsensitive;
 	}
 
@@ -2372,9 +2393,9 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     _needsUpdateFoundRanges = NO;
 }
 
-- (NSRange)xvim_currentWord:(MOTION_OPTION)opt
+- (NSRange)xvim_currentWord:(XVimMotionOptions)opt
 {
-    return [_textView.textStorage currentWord:_insertionPoint count:1 option:opt|TEXTOBJECT_INNER];
+    return [_textView.textStorage currentWord:_insertionPoint count:1 option:opt|MOPT_TEXTOBJECT_INNER];
 }
 
 @end

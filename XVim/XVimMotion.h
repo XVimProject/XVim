@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimDefs.h"
 
 typedef struct {
     BOOL reachedEndOfLine;
@@ -25,19 +26,6 @@ typedef enum _MOTION_TYPE{
 } MOTION_TYPE;
 
 #define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
-
-typedef enum {
-    MOTION_OPTION_NONE = 0x00,
-    LEFT_RIGHT_WRAP = 0x01,
-    LEFT_RIGHT_NOWRAP = 0x02,
-    BIGWORD = 0x04, // for 'WORD' motion
-    INCLUSIVE = 0x08,
-    MOPT_PARA_BOUND_BLANKLINE = 0x10,
-    TEXTOBJECT_INNER = 0x20,
-    SEARCH_WRAP= 0x40,
-    SEARCH_CASEINSENSITIVE = 0x80,
-    MOTION_OPTION_CHANGE_WORD = 0x100, // for 'cw','cW'
-} MOTION_OPTION;
 
 typedef enum _MOTION{
     MOTION_NONE,                    
@@ -90,7 +78,7 @@ typedef enum _MOTION{
 @interface XVimMotion : NSObject
 @property MOTION motion;
 @property MOTION_TYPE type;
-@property MOTION_OPTION option;
+@property XVimMotionOptions option;
 @property NSUInteger count;
 @property (readonly) NSInteger  scount;
 @property NSUInteger line;
@@ -100,6 +88,6 @@ typedef enum _MOTION{
 @property (strong) NSString* regex;
 @property XVimMotionInfo* info;
 
-- (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;
+- (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(XVimMotionOptions)option count:(NSUInteger)count;
 - (BOOL) isTextObject;
 @end 

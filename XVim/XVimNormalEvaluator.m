@@ -183,7 +183,7 @@
 
 - (XVimEvaluator*)J{
     XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:YES] autorelease];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg)];
 }
 
 // Should be moved to XVimMotionEvaluator
@@ -486,7 +486,7 @@
 
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg);
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg);
     [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
     [XVim.instance fixOperationCommands];
     return nil;

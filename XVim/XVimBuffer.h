@@ -231,13 +231,29 @@
  */
 - (NSUInteger)indexOfLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
-/** @brief returns the index for the given line containing \a index and column.
+#pragma mark Motion support functions
+
+/** @brief returns the index for a 'h/l' movement
  *
+ * @param scount    the motion count (negative means backwards)
+ * @param index     the start index
+ * @param wrap      wether the movement blocks at line start/end or wraps
  * @returns
- *   If \a column is larger than the number of columns in that line,
- *   it returns the index of the endOfLine for that line
+ *   This never returns NSNotFound, but it can return the end of line,
+ *   and it's up to the caller to detect that if it's a problem.
  */
-- (NSUInteger)indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column;
+- (NSUInteger)indexOfCharMotion:(NSInteger)scount index:(NSUInteger)index options:(XVimMotionOptions)options;
+
+/** @brief returns the index for a 'j/k' movement
+ *
+ * @param scount  the number of lines to go forward (negative means backward).
+ * @param index   the line number containing that index is the starting line for that movement
+ * @param column  the column to try to reach
+ * @returns
+ *   this never returns NSNotFound, if the movement reaches the start
+ *   or end of the file, the resulting line number is clamped.
+ */
+- (NSUInteger)indexOfLineMotion:(NSInteger)scount index:(NSUInteger)index column:(NSUInteger)column;
 
 #pragma mark Searching particular positions on the current line
 
