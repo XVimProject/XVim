@@ -20,15 +20,6 @@
 
 #pragma mark Definitions
 
-// Determine if the position specified with "index" is EOL.
-- (BOOL) isEOL:(NSUInteger)index;
-
-// Determine if the position is a beginning of line
-- (BOOL) isBOL:(NSUInteger)index;
-
-// Determine if the position specified with "index" is newline.
-- (BOOL) isNewline:(NSUInteger)index;
-
 // Determine if the position specified with "index" is white space.
 - (BOOL) isWhitespace:(NSUInteger)index;
 

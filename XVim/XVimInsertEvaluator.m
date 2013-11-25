@@ -301,7 +301,7 @@
     } else {
         indexToCopy = [buffer indexOfLineNumber:pos.line + 1 column:pos.column];
     }
-    if (indexToCopy == NSNotFound || [buffer.textStorage isEOL:indexToCopy]) {
+    if (indexToCopy == NSNotFound || [buffer isIndexAtEndOfLine:indexToCopy]) {
         return;
     }
 

@@ -623,7 +623,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         }
         if (end >= length) {
             end--;
-        } else if (sel.right != XVimSelectionEOL && [_textView.textStorage isEOL:end]) {
+        } else if (sel.right != XVimSelectionEOL && [buffer isIndexAtEndOfLine:end]) {
             end--;
         }
         [rangeArray addObject:[NSValue valueWithRange:NSMakeRange(begin, end - begin + 1)]];
@@ -679,7 +679,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 {
     if (_cursorMode == CURSOR_MODE_INSERT) {
         _cursorMode = CURSOR_MODE_COMMAND;
-        if (![_textView.textStorage isBOL:_insertionPoint]) {
+        if (![self.buffer isIndexAtStartOfLine:_insertionPoint]) {
             [self _moveCursor:_insertionPoint - 1 preserveColumn:NO];
         }
         [self _syncState];
@@ -1180,7 +1180,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
             }
         }
 
-        if ([_textView.textStorage isEOL:rpos]) {
+        if ([buffer isIndexAtEndOfLine:rpos]) {
             rpos--;
         } else if (lpos < rpos) {
             if ([string characterAtIndex:rpos] == '\t') {
@@ -1361,7 +1361,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
             }
         }
         r = [self _getOperationRange:to type:motion.type];
-        if (motion.type == LINEWISE && to.end >= buffer.length && [_textView.textStorage isBOL:to.end]) {
+        if (motion.type == LINEWISE && to.end >= buffer.length && [buffer isIndexAtStartOfLine:to.end]) {
             if (r.location != 0) {
                 r.location--;
                 r.length++;
@@ -1408,7 +1408,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     if (type == TEXT_TYPE_CHARACTERS) {
         // Forward insertion point +1 if after flag if on
         if (0 != text.length) {
-            if (![_textView.textStorage isNewline:_insertionPoint] && after) {
+            if (![buffer isIndexAtEndOfLine:_insertionPoint] && after) {
                 targetPos++;
             }
             insertionPointAfterPut = targetPos;
@@ -1435,7 +1435,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         }
     } else if (type == TEXT_TYPE_BLOCK) {
         // Forward insertion point +1 if after flag if on
-        if (![_textView.textStorage isNewline:_insertionPoint] && _insertionPoint < buffer.length && after) {
+        if (![buffer isIndexAtEndOfLine:_insertionPoint] && after) {
             _insertionPoint++;
         }
         insertionPointAfterPut = _insertionPoint;
@@ -1841,7 +1841,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
             break;
         case XVIM_INSERT_APPEND:
             NSAssert(_cursorMode == CURSOR_MODE_COMMAND, @"_cursorMode shoud be CURSOR_MODE_COMMAND");
-            if (![_textView.textStorage isEOL:pos]) {
+            if (![buffer isIndexAtEndOfLine:pos]) {
                 _insertionPoint = pos + 1;
             }
             break;
@@ -1897,7 +1897,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     for (NSUInteger line = lines.begin; line <= lines.end; line++) {
         NSUInteger pos = [buffer indexOfLineNumber:line column:column];
 
-        if (column != XVimSelectionEOL && [_textView.textStorage isEOL:pos]) {
+        if (column != XVimSelectionEOL && [buffer isIndexAtEndOfLine:pos]) {
             if ([buffer columnOfIndex:pos] < column) {
                 if (mode != XVIM_INSERT_APPEND) {
                     continue;

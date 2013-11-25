@@ -140,6 +140,39 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     return 8;
 }
 
+#pragma mark Specific positions of the index within the line
+
+- (BOOL)isIndexOnLastLine:(NSUInteger)index
+{
+    return [self endOfLine:index] == self.length;
+}
+
+- (BOOL)isIndexAtStartOfLine:(NSUInteger)index
+{
+    if (index == 0) {
+        return YES;
+    }
+    if (!isNewline([self.string characterAtIndex:index - 1])) {
+        return NO;
+    }
+    if (index >= self.length || !isNewline([self.string characterAtIndex:index])) {
+        return YES;
+    }
+    return [self startOfLine:index] == index;
+}
+
+- (BOOL)isIndexAtEndOfLine:(NSUInteger)index
+{
+    return index >= self.length || isNewline([self.string characterAtIndex:index]);
+}
+
+- (BOOL)isNormalCursorPositionValidAtIndex:(NSUInteger)index
+{
+    NSRange range = [self indexRangeForLineAtIndex:index newLineLength:NULL];
+
+    return range.length == 0 || index < NSMaxRange(range);
+}
+
 #pragma mark Converting between Indexes and Line Numbers
 
 - (NSRange)indexRangeForLineNumber:(NSUInteger)num newLineLength:(NSUInteger *)newLineLength
@@ -269,18 +302,6 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     } while (pos < index);
 
     return num;
-}
-
-- (BOOL)isIndexOnLastLine:(NSUInteger)index
-{
-    return [self endOfLine:index] == self.length;
-}
-
-- (BOOL)isNormalCursorPositionValidAtIndex:(NSUInteger)index
-{
-    NSRange range = [self indexRangeForLineAtIndex:index newLineLength:NULL];
-
-    return range.length == 0 || index < NSMaxRange(range);
 }
 
 

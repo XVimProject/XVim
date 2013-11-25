@@ -128,6 +128,26 @@
 @property (nonatomic, readonly) NSUInteger tabWidth;
 @property (nonatomic, readonly) NSUInteger indentWidth;
 
+#pragma mark Specific positions of the index within the line
+
+/** @brief returns YES when \a index is on the last line
+ */
+- (BOOL)isIndexOnLastLine:(NSUInteger)index;
+
+/** @brief returns YES when \a index is at the beginning of its line
+ * It returns NO if \a index points to the \n of a \r\n
+ */
+- (BOOL)isIndexAtStartOfLine:(NSUInteger)index;
+
+/** @brief returns YES when \a index is at the end of its line
+ * It also returns YES if \a index points to the \n in a \r\n.
+ */
+- (BOOL)isIndexAtEndOfLine:(NSUInteger)index;
+
+/** @brief returns YES when \a index is a valid cursor position for normal mode
+ */
+- (BOOL)isNormalCursorPositionValidAtIndex:(NSUInteger)index;
+
 #pragma mark Converting between Indexes and Line Numbers
 
 /** @brief returns the index range for the given line number
@@ -177,14 +197,6 @@
  *    This never returns NSNotFound.
  */
 - (NSUInteger)lineNumberAtIndex:(NSUInteger)index;
-
-/** @brief returns YES when \a index is on the last line
- */
-- (BOOL)isIndexOnLastLine:(NSUInteger)index;
-
-/** @brief returns YES when \a index is a valid cursor position for normal mode
- */
-- (BOOL)isNormalCursorPositionValidAtIndex:(NSUInteger)index;
 
 #pragma mark Converting between Indexes and Line Numbers + Columns
 

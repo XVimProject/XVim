@@ -27,19 +27,6 @@
     return [self isNewline:index] || [self isEOF:index];
 }
 
-- (BOOL) isBOL:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( 0 == index ){
-        return YES;
-    }
-    
-    if( [self isNewline:index-1] ){
-        return YES;
-    }
-    
-    return NO;
-}
-
 - (BOOL) isNewline:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( index == self.length ){
