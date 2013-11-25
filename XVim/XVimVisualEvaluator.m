@@ -204,7 +204,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
         xview.selectionMode = XVIM_VISUAL_LINE;
         return [self c];
     }
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL_EOL] autorelease];
+    [self performSelector:@selector(DOLLAR)];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL] autorelease];
 }
 
 - (XVimEvaluator*)C_b{
@@ -229,14 +230,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)D{
     XVimView *xview = self.currentView;
 
-    if (!xview.inBlockMode) {
+    if (xview.inBlockMode) {
+        [self performSelector:@selector(DOLLAR)];
+    } else {
         xview.selectionMode = XVIM_VISUAL_LINE;
-        return [self d];
     }
 
-    // FIXME: doesn't work ask expected in any visual mode
-    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window] autorelease];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
+    return [self d];
 }
 
 - (XVimEvaluator*)C_f{
