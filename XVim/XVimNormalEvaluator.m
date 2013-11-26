@@ -287,6 +287,7 @@
     for (NSUInteger i = 0; i < [self numericArg]; i++) {
         [buffer.undoManager undo];
     }
+    [self.currentView moveCursorToIndex:self.currentView.insertionPoint];
     return nil;
 }
 
