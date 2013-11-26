@@ -213,7 +213,7 @@
         [[XVim instance].marks setMark:mark forName:@"^"];
     }
 
-    [xview escapeFromInsert];
+    [xview escapeFromInsertAndMoveBack:YES];
 
     // Position for "." is after escaped from insert mode
     pos = xview.insertionPosition;
@@ -230,7 +230,9 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
+    XVimView   *xview = self.currentView;
     XVimEvaluator *nextEvaluator = self;
+
     SEL keySelector = [keyStroke selectorForInstance:self];
     if (keySelector){
         nextEvaluator = [self performSelector:keySelector];
@@ -246,8 +248,10 @@
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {
             if (!keyStroke.isPrintable) {
+                [xview escapeFromInsertAndMoveBack:NO];
                 nextEvaluator = [XVimEvaluator invalidEvaluator];
-            } else if (![self.currentView doReplaceCharacters:keyStroke.character count:[self numericArg]]) {
+            } else if (![xview doReplaceCharacters:keyStroke.character count:[self numericArg]]) {
+                [xview escapeFromInsertAndMoveBack:NO];
                 nextEvaluator = [XVimEvaluator invalidEvaluator];
             }else{
                 nextEvaluator = nil;
@@ -257,9 +261,9 @@
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
             if (keyStroke.isPrintable){
-                [self.currentView.textView insertText:keyStroke.xvimString];
+                [xview.textView insertText:keyStroke.xvimString];
             }else{
-                [self.currentView.textView interpretKeyEvents:[NSArray arrayWithObject:event]];
+                [xview.textView interpretKeyEvents:[NSArray arrayWithObject:event]];
             }
         }
     }

@@ -396,6 +396,11 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return xvim_sb_index(&sb);
 }
 
+- (NSUInteger)indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column
+{
+    return [self _indexOfLineAtIndex:[self startOfLine:index] column:column];
+}
+
 - (NSUInteger)indexOfLineNumber:(NSUInteger)num column:(NSUInteger)column
 {
 	NSUInteger index = [self indexOfLineNumber:num];

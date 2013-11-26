@@ -231,6 +231,15 @@
  */
 - (NSUInteger)indexOfLineNumber:(NSUInteger)num column:(NSUInteger)column;
 
+/** @brief returns the index for the given line containing \a index and column.
+ *
+ * @returns
+ *   Never returns NSNotfound
+ *   If \a column is larger than the number of columns in that line,
+ *   it returns the index of the endOfLine for that line
+ */
+- (NSUInteger)indexOfLineAtIndex:(NSUInteger)index column:(NSUInteger)column;
+
 #pragma mark Motion support functions
 
 /** @brief returns the index for a 'h/l' movement

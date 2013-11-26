@@ -38,6 +38,7 @@ typedef enum _MOTION{
     MOTION_LINE_FORWARD,            // k
     MOTION_LINE_BACKWARD,           // j
     MOTION_END_OF_LINE,             // $
+    MOTION_COLUMN_OF_LINE,          // |
     MOTION_BEGINNING_OF_LINE,       // 0
     MOTION_SENTENCE_FORWARD,
     MOTION_SENTENCE_BACKWARD,

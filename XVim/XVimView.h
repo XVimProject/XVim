@@ -57,7 +57,7 @@
 
 #pragma mark *** Visual Mode and Cursor Position ***
 
-- (void)escapeFromInsert;
+- (void)escapeFromInsertAndMoveBack:(BOOL)moveBack;
 
 - (void)selectSwapCorners:(BOOL)onSameLine;
 

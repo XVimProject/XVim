@@ -285,6 +285,10 @@
     return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_BEGINNING_OF_LINE, CHARACTERWISE_INCLUSIVE, MOPT_NONE, [self numericArg])];
 }
 
+- (XVimEvaluator*)BAR{
+    return [self _motionFixed:XVIM_MAKE_MOTION(MOTION_COLUMN_OF_LINE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, [self numericArg])];
+}
+
 - (XVimEvaluator*)searchCurrentWordForward:(BOOL)forward {
     XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
     NSRange r = [self.currentView xvim_currentWord:MOPT_NONE];

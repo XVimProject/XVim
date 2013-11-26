@@ -676,11 +676,11 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     [self _syncState];
 }
 
-- (void)escapeFromInsert
+- (void)escapeFromInsertAndMoveBack:(BOOL)moveBack
 {
     if (_cursorMode == CURSOR_MODE_INSERT) {
         _cursorMode = CURSOR_MODE_COMMAND;
-        if (![self.buffer isIndexAtStartOfLine:_insertionPoint]) {
+        if (moveBack && ![self.buffer isIndexAtStartOfLine:_insertionPoint]) {
             [self _moveCursor:_insertionPoint - 1 preserveColumn:NO];
         }
         [self _syncState];
@@ -817,10 +817,17 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         end = [buffer indexOfLineMotion:motion.scount index:begin column:_preservedColumn];
         break;
     case MOTION_LINE_BACKWARD:
-        end = [buffer indexOfLineMotion:-motion.scount index:begin column:_preservedColumn ];
+        end = [buffer indexOfLineMotion:-motion.scount index:begin column:_preservedColumn];
         break;
     case MOTION_BEGINNING_OF_LINE:
         end = [buffer startOfLine:begin];
+        break;
+    case MOTION_COLUMN_OF_LINE:
+        end = [buffer indexOfLineAtIndex:begin column:motion.count - 1];
+        if (![buffer isNormalCursorPositionValidAtIndex:end]) {
+            motion.info->reachedEndOfLine = YES;
+            end--;
+        }
         break;
     case MOTION_END_OF_LINE:
         end = [buffer indexOfLineMotion:motion.scount - 1 index:begin column:XVimSelectionEOL];
@@ -987,20 +994,25 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
             [self _moveCursor:r.end preserveColumn:NO];
         }
     } else {
+        BOOL preserveColumn = YES;
+
         switch (motion.motion) {
+        case MOTION_COLUMN_OF_LINE:
+            _preservedColumn = motion.count - 1;
+            break;
         case MOTION_END_OF_LINE:
             _preservedColumn = XVimSelectionEOL;
-            /* FALLTHROUGH */
+            break;
         case MOTION_LINE_BACKWARD:
         case MOTION_LINE_FORWARD:
         case MOTION_LASTLINE:
         case MOTION_LINENUMBER:
-            [self _moveCursor:r.end preserveColumn:YES];
             break;
         default:
-            [self _moveCursor:r.end preserveColumn:NO];
+            preserveColumn = NO;
             break;
         }
+        [self _moveCursor:r.end preserveColumn:preserveColumn];
     }
     [_textView setNeedsDisplay:YES];
     [self _syncState];
@@ -1572,7 +1584,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         return NO;
     }
 
-    if (_insertionPoint + count >= end) {
+    if (_insertionPoint + count > end) {
         return NO;
     }
 
