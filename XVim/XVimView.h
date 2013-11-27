@@ -28,6 +28,14 @@
 - (void)textView:(NSTextView*)view didDelete:(NSString*)deletedText withType:(TEXT_TYPE)type;
 @end
 
+/** @brief XVimView class, representing one XVim View
+ *
+ * An XVim View is more or less what a window is in vim, namely a view
+ * on a given buffer (TextStorage). You can have several views on the same buffer.
+ *
+ * This is actually grafted on top of an NSTextView that it hooks to give it
+ * vim-like capabilities.
+ */
 @interface XVimView : NSObject
 @property (readonly, nonatomic) XVimWindow *window;
 @property (readonly, nonatomic) NSTextView *textView;
