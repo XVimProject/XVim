@@ -233,17 +233,20 @@
     XVimView   *xview = self.currentView;
     XVimEvaluator *nextEvaluator = self;
 
-    SEL keySelector = [keyStroke selectorForInstance:self];
-    if (keySelector){
+    SEL keySelector = keyStroke.selector;
+    if ([self respondsToSelector:keySelector]) {
         nextEvaluator = [self performSelector:keySelector];
-    }else if(self.movementKeyPressed){
-        // Flag movement key as not pressed until the next movement key is pressed
-        self.movementKeyPressed = NO;
-        
-        // Store off the new start range
-        self.startRange = self.currentView.textView.selectedRange;
+    } else {
+        if(self.movementKeyPressed) {
+            // Flag movement key as not pressed until the next movement key is pressed
+            self.movementKeyPressed = NO;
+
+            // Store off the new start range
+            self.startRange = self.currentView.textView.selectedRange;
+        }
+        keySelector = nil;
     }
-    
+
     if (nextEvaluator == self && nil == keySelector){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
         if (_oneCharMode) {

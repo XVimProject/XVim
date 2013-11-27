@@ -94,12 +94,11 @@ static XVimEvaluator *_popEvaluator = nil;
     // Invokes each key event handler
     // <C-k> invokes "C_k:" selector
 	
-	SEL handler = [keyStroke selectorForInstance:self];
-	if (handler) {
+	SEL handler = keyStroke.selector;
+    if ([self respondsToSelector:handler]) {
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
         return [self performSelector:handler];
-	}
-    else{
+	} else {
         TRACE_LOG(@"SELECTOR %@ not found", NSStringFromSelector(handler));
         return [self defaultNextEvaluator];
     }

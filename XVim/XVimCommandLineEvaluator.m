@@ -110,8 +110,9 @@
 	XVimEvaluator* next = self;
 
 	XVimCommandField *commandField = self.window.commandLine.commandField;
-	if ([keyStroke instanceResponds:self]) {
-		next = [self performSelector:[keyStroke selector]];
+    SEL sel = keyStroke.selector;
+    if ([self respondsToSelector:sel]) {
+		next = [self performSelector:sel];
 	}
 	else{
 		[commandField handleKeyStroke:keyStroke inWindow:self.window];

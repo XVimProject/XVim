@@ -161,7 +161,7 @@
 }
 
 - (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
-    if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
+    if( childEvaluator.key.selector == @selector(SEMICOLON) ){
         XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:self.window.currentBuffer.document];
         return [self jumpToMark:mark firstOfLine:NO];
     }else{

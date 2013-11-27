@@ -26,8 +26,8 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-	SEL handler = [keyStroke selectorForInstance:self];
-	if (handler){
+	SEL handler = keyStroke.selector;
+	if ([self respondsToSelector:handler]) {
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
         return [self performSelector:handler];
     }

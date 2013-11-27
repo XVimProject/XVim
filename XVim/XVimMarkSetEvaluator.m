@@ -25,11 +25,20 @@
     XVimView   *xview  = self.currentView;
     XVimBuffer *buffer = self.window.currentBuffer;
 
-    NSString  *keyStr = [keyStroke toSelectorString];
-	if ([keyStr length] != 1) {
+    if (keyStroke.modifier) {
         return [XVimEvaluator invalidEvaluator];
     }
-    
+    switch (keyStroke.character) {
+    case 'a' ... 'z':
+    case 'A' ... 'Z':
+    case '0' ... '9':
+    case '\'': case '"':
+    case '[': case ']':
+        break;
+    default:
+        return [XVimEvaluator invalidEvaluator];
+    }
+
     XVimMark *mark = [[[XVimMark alloc] init] autorelease];
     XVimPosition pos = xview.insertionPosition;
 
@@ -37,7 +46,8 @@
     mark.column = pos.column;
     mark.document = buffer.document.fileURL.path;
     if (nil != mark.document) {
-        [[XVim instance].marks setMark:mark forName:keyStr];
+        unichar c = keyStroke.character;
+        [[XVim instance].marks setMark:mark forName:[NSString stringWithCharacters:&c length:1]];
     }
     return nil;
 }
