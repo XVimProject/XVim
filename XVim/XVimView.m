@@ -1089,7 +1089,8 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 
 - (void)_yankRange:(NSRange)range withType:(MOTION_TYPE)type
 {
-    NSString *string = self.buffer.string;
+    XVimBuffer *buffer = self.buffer;
+    NSString *string = buffer.string;
     NSString *s;
     BOOL needsNL;
 
@@ -1099,10 +1100,10 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     if (range.length) {
         s = [string substringWithRange:range];
         if (needsNL && !isNewline([s characterAtIndex:s.length - 1])) {
-            s = [s stringByAppendingString:@"\n"];
+            s = [s stringByAppendingString:buffer.lineEnding];
         }
     } else if (needsNL) {
-        s = @"\n";
+        s = buffer.lineEnding;
     } else {
         s = @"";
     }
@@ -1179,7 +1180,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
                 }
             }
         }
-        [ybuf appendString:@"\n"];
+        [ybuf appendString:buffer.lineEnding];
     }
 
     [_lastYankedText release];
@@ -1274,10 +1275,13 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         r = [self _getOperationRange:motionRange type:motion.type];
 
         if (motion.type == LINEWISE && [buffer isIndexOnLastLine:motionRange.end]) {
-            if (r.location != 0) {
+            // eat the previous end of line as well
+            if (r.location > 0) {
+                NSUInteger endOfPreviousLine = [buffer endOfLine:r.location - 1];
+
+                r.length += r.location - endOfPreviousLine;
+                r.location = endOfPreviousLine;
                 motion.info->deleteLastLine = YES;
-                r.location--;
-                r.length++;
             }
         }
         if (yank) {
@@ -1395,9 +1399,11 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         }
         r = [self _getOperationRange:to type:motion.type];
         if (motion.type == LINEWISE && to.end >= buffer.length && [buffer isIndexAtStartOfLine:to.end]) {
-            if (r.location != 0) {
-                r.location--;
-                r.length++;
+            if (r.location > 0) {
+                NSUInteger endOfPreviousLine = [buffer endOfLine:r.location - 1];
+
+                r.length += r.location - endOfPreviousLine;
+                r.location = endOfPreviousLine;
             }
         }
         [self _yankRange:r withType:motion.type];
@@ -1476,7 +1482,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         NSUInteger insertPos = _insertionPoint;
         NSUInteger column    = [buffer columnOfIndex:insertPos];
         NSUInteger startLine = [buffer lineNumberAtIndex:insertPos];
-        NSArray   *lines     = [text componentsSeparatedByString:@"\n"];
+        NSArray   *lines     = [text componentsSeparatedByString:buffer.lineEnding];
 
         for (NSUInteger i = 0 ; i < lines.count ; i++) {
             NSString *line = [lines objectAtIndex:i];
@@ -1485,7 +1491,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 
             if (NSNotFound == head) {
                 NSAssert( targetLine != 0, @"This should not be happen");
-                [buffer replaceCharactersInRange:NSMakeRange(buffer.length, 0) withString:@"\n"];
+                [buffer replaceCharactersInRange:NSMakeRange(buffer.length, 0) withString:buffer.lineEnding];
                 head = buffer.length;
             }
             NSAssert(NSNotFound != head, @"Head of the target line must be found at this point");
@@ -1783,7 +1789,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     _insertionPoint = pos;
     [buffer beginEditingAtIndex:_insertionPoint];
     pos = [buffer endOfLine:pos];
-    [buffer replaceCharactersInRange:NSMakeRange(pos, 0) withString:@"\n"];
+    [buffer replaceCharactersInRange:NSMakeRange(pos, 0) withString:buffer.lineEnding];
     [buffer endEditingAtIndex:_insertionPoint];
 
     [self _moveCursor:pos + 1 preserveColumn:NO];
@@ -1800,7 +1806,7 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     }
     if (line == 1) {
         [buffer beginEditingAtIndex:0];
-        [buffer replaceCharactersInRange:NSMakeRange(0, 0) withString:@"\n"];
+        [buffer replaceCharactersInRange:NSMakeRange(0, 0) withString:buffer.lineEnding];
         [buffer endEditingAtIndex:0];
     } else {
         _insertionPoint = pos;
@@ -2012,7 +2018,8 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         [lines removeObjectsAtIndexes:removeIndices];
     }
 
-    NSString  *str = [[lines componentsJoinedByString:@"\n"] stringByAppendingString:@"\n"];
+    NSString  *nl  = buffer.lineEnding;
+    NSString  *str = [[lines componentsJoinedByString:nl] stringByAppendingString:nl];
 
     pos = characterRange.location;
     [buffer beginEditingAtIndex:pos];

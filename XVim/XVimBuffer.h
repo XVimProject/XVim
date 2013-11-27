@@ -123,6 +123,7 @@
 #pragma mark Properties
 
 @property (nonatomic, readonly) NSString  *string;
+@property (nonatomic, readonly) NSString  *lineEnding;
 @property (nonatomic, readonly) NSUInteger numberOfLines;
 @property (nonatomic, readonly) NSUInteger length;
 @property (nonatomic, readonly) NSUInteger tabWidth;

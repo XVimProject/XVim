@@ -41,6 +41,7 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
     NSTextStorage *__unsafe_unretained _textStorage;
     XVimUndoOperation *_curOp;
     NSUInteger         _editCount;
+    NSString          *_lineEnding;
 
     struct {
         unsigned has_xvim_string : 1;
@@ -109,6 +110,33 @@ static char const * const XVIM_KEY_BUFFER = "xvim_buffer";
         return _XVimTextStorage.xvim_string;
     }
     return _textStorage.string;
+}
+
+- (NSString *)lineEnding
+{
+    if (!_lineEnding) {
+        NSUInteger nlLen;
+        NSRange r;
+
+        r = [self indexRangeForLineAtIndex:0 newLineLength:&nlLen];
+        if (nlLen == 2) {
+            _lineEnding = @"\r\n";
+        } else if (nlLen == 1) {
+            unichar c = [self.string characterAtIndex:NSMaxRange(r)];
+            if (c == '\n') {
+                _lineEnding = @"\n";
+            } else if (c == '\r') {
+                _lineEnding = @"\r";
+            } else {
+                // WTF??
+                return @"\n";
+            }
+        } else {
+            // FIXME: use the setting
+            return @"\n";
+        }
+    }
+    return _lineEnding;
 }
 
 - (NSUInteger)numberOfLines
