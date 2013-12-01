@@ -49,8 +49,6 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 #define swizzle(sel) \
         [self xvim_swizzleInstanceMethod:@selector(sel) with:@selector(xvim_##sel)]
 
-        swizzle(dealloc);
-
         swizzle(setSelectedRanges:affinity:stillSelecting:);
         swizzle(selectAll:);
         swizzle(paste:);
@@ -62,7 +60,6 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
         swizzle(drawInsertionPointInRect:color:turnedOn:);
         swizzle(didChangeText);
         swizzle(viewDidMoveToSuperview);
-        swizzle(observeValueForKeyPath:ofObject:change:context:);
     }
 
 #undef swizzle
@@ -77,33 +74,6 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 {
     return [[[XVimView alloc] initWithView:self window:window] autorelease];
 }
-
-- (void)xvim_setupForXVimView:(XVimView *)view
-{
-    if (!self.xvim_view) {
-        [XVim.instance.options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.options addObserver:self forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.searcher addObserver:self forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-    }
-    objc_setAssociatedObject(self, XVIM_KEY_VIEW, view, OBJC_ASSOCIATION_RETAIN);
-}
-
-- (void)xvim_dealloc
-{
-    if (self.xvim_view) {
-        @try {
-            [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
-            [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"];
-            [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
-        }
-        @catch (NSException* exception){
-            ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-            [Logger logStackTrace:exception];
-        }
-    }
-    [self xvim_dealloc];
-}
-
 
 - (void)xvim_setSelectedRanges:(NSArray *)ranges
                       affinity:(NSSelectionAffinity)affinity
@@ -287,15 +257,6 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
     }
 }
 
-- (void)xvim_observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
-                             change:(NSDictionary *)change  context:(void *)context
-{
-	if ([@[ @"ignorecase", @"hlsearch", @"lastSearchString"] containsObject:keyPath]) {
-        self.xvim_view.needsUpdateFoundRanges = YES;
-        [self setNeedsDisplayInRect:self.visibleRect avoidAdditionalLayout:YES];
-    }
-}
-
 @end
 
 @implementation XVimView {
@@ -335,12 +296,18 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 
         _textView = view;
         _window   = [window retain];
-        [view xvim_setupForXVimView:self];
+
         [self _xvim_statusChanged:nil];
+
+        [XVim.instance.options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.options addObserver:self forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.searcher addObserver:self forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
 
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(_xvim_statusChanged:)
                                                      name:XVimEnabledStatusChangedNotification object:nil];
+
+        objc_setAssociatedObject(view, XVIM_KEY_VIEW, self, OBJC_ASSOCIATION_RETAIN);
     }
     return self;
 }
@@ -348,11 +315,29 @@ static char const * const XVIM_KEY_VIEW = "xvim_view";
 - (void)dealloc
 {
     DEBUG_LOG("View %p deleted", self);
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    @try {
+        [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
+        [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"];
+        [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+    }
+    @catch (NSException* exception){
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
+    }
     [_foundRanges release];
     [_lastYankedText release];
     [_window release];
     [super dealloc];
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object
+                        change:(NSDictionary *)change  context:(void *)context
+{
+    if ([@[ @"ignorecase", @"hlsearch", @"lastSearchString"] containsObject:keyPath]) {
+        _needsUpdateFoundRanges = YES;
+        [_textView setNeedsDisplayInRect:_textView.visibleRect avoidAdditionalLayout:YES];
+    }
 }
 
 - (void)_xvim_statusChanged:(id)sender
