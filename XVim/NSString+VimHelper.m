@@ -11,12 +11,9 @@
 // support functions   //
 /////////////////////////
 BOOL isDigit(unichar ch) { return ch >= '0' && ch <= '9'; }
-BOOL isOctDigit(unichar ch) { return ch >= '0' && ch <= '7'; }
-BOOL isHexDigit(unichar ch) { return isDigit(ch) || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'); }
-BOOL isWhitespace(unichar ch) { return ch == ' ' || ch == '\t'; }
-BOOL isNewline(unichar ch) { return (ch >= 0xA && ch <= 0xD) || ch == 0x85; } // What's the defference with [NSCharacterSet newlineCharacterSet] characterIsMember:] ?
-BOOL isNonAscii(unichar ch) { return ch > 128; } // is this not ch >= 128 ? (JugglerShu)
-BOOL isAlpha(unichar ch) { 
+BOOL isWhitespace(unichar ch) { return [[NSCharacterSet whitespaceCharacterSet] characterIsMember:ch]; }
+BOOL isNewline(unichar ch) { return [[NSCharacterSet newlineCharacterSet] characterIsMember:ch]; }
+BOOL isAlpha(unichar ch) {
     return (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || ch == '_';
 }
 BOOL isDelimeter(unichar ch) {
@@ -32,45 +29,19 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return isDigit(ch) || isAlpha(ch)  || ch >= 192;
 }
 
+static NSString *precomputed[9] = {
+    @"",
+    @" ",
+    @"  ",
+    @"   ",
+    @"    ",
+    @"     ",
+    @"      ",
+    @"       ",
+    @"        ",
+};
+
 @implementation NSString (VimHelper)
-- (BOOL) isDigit:(NSUInteger)index{
-    return isDigit([self characterAtIndex:index]);
-}
-
-- (BOOL) isOctDigit:(NSUInteger)index{
-    return isOctDigit([self characterAtIndex:index]);
-}
-
-- (BOOL) isHexDigit:(NSUInteger)index{
-    return isHexDigit([self characterAtIndex:index]);
-}
-
-- (BOOL) isAlpha:(NSUInteger)index{
-    return isAlpha([self characterAtIndex:index]);
-}
-
-- (BOOL) isDelimeter:(NSUInteger)index{
-    return isDelimeter([self characterAtIndex:index]);
-}
-
-- (BOOL) isWhitespace:(NSUInteger)index{
-    return isWhitespace([self characterAtIndex:index]);
-}
-
-- (BOOL) isNonAscii:(NSUInteger)index{
-    return isNonAscii([self characterAtIndex:index]);
-}
-
-- (BOOL) isNewline:(NSUInteger)index{
-    return isNewline([self characterAtIndex:index]); }
-
-- (BOOL) isNonblank:(NSUInteger)index{
-    return isNonblank([self characterAtIndex:index]);
-}
-
-- (BOOL) isKeyword:(NSUInteger)index{
-    return isKeyword([self characterAtIndex:index]);
-}
 
 - (NSString*)convertToICURegex:(NSRegularExpressionOptions*)options{
     // TODO: These conversion may replace '\\<' into '\\b'
@@ -96,6 +67,52 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     }
     
     return tmp;
+}
+
+- (NSMutableString *)newMutableSubstringWithRange:(NSRange)range
+{
+    NSMutableString *s = [[NSMutableString alloc] initWithCapacity:NSMaxRange(range)];
+    unichar buf[1024];
+
+    while (range.length) {
+        NSUInteger count = MIN(1024, range.length);
+
+        [self getCharacters:buf range:NSMakeRange(range.location, count)];
+        [s appendCharacters:buf length:count];
+        range.location += count;
+        range.length -= count;
+    }
+    return s;
+}
+
++ (NSString *)stringMadeOfSpaces:(NSUInteger)count
+{
+    if (count <= 8) {
+        return precomputed[count];
+    }
+    return [NSMutableString mutableStringMadeOfSpaces:count];
+}
+
+@end
+
+@implementation NSMutableString (VimHelper)
+
++ (NSMutableString *)mutableStringMadeOfSpaces:(NSUInteger)count
+{
+    NSMutableString *s = [[NSMutableString alloc] initWithCapacity:count];
+
+    for (; count >= 8; count -= 8) {
+        [s appendString:precomputed[8]];
+    }
+    if (count) {
+        [s appendString:precomputed[count]];
+    }
+    return [s autorelease];
+}
+
+- (void)appendCharacters:(const unichar *)chars length:(NSUInteger)length
+{
+    CFStringAppendCharacters((CFMutableStringRef)self, chars, (CFIndex)length);
 }
 
 @end

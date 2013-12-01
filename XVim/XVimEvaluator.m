@@ -17,40 +17,42 @@
 #import "XVimNormalEvaluator.h"
 #import "XVimVisualEvaluator.h"
 #import "XVim.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimSearch.h"
 #import "XVimCommandLineEvaluator.h"
-#import "NSString+VimHelper.h"
 
-static XVimEvaluator* _invalidEvaluator = nil;
-static XVimEvaluator* _noOperationEvaluator = nil;
+static XVimEvaluator *_invalidEvaluator = nil;
+static XVimEvaluator *_noOperationEvaluator = nil;
+static XVimEvaluator *_popEvaluator = nil;
 
 @implementation XVimEvaluator
+@synthesize window = _window;
+@synthesize parent = _parent;
+@synthesize numericArg = _numericArg;
+@synthesize numericMode = _numericMode;
+@synthesize argumentString = _argumentString;
+@synthesize yankRegister = _yankRegister;
+@synthesize onChildCompleteHandler = _onChildCompleteHandler;
+
++ (void)initialize
+{
+    if (self == [XVimEvaluator class]) {
+        _invalidEvaluator = [[XVimEvaluator alloc] init];
+        _noOperationEvaluator = [[XVimEvaluator alloc] init];
+        _popEvaluator = [[XVimEvaluator alloc] init];
+    }
+}
 
 + (XVimEvaluator*)invalidEvaluator{
-   	if(_invalidEvaluator){
-        return _invalidEvaluator;
-    }
-    
-	@synchronized([XVimEvaluator class]){
-		if(!_invalidEvaluator) {
-			_invalidEvaluator = [[XVimEvaluator alloc] init];
-		}
-	}
     return _invalidEvaluator;
 }
 
 + (XVimEvaluator*)noOperationEvaluator{
-   	if(_noOperationEvaluator){
-        return _noOperationEvaluator;
-    }
-    
-	@synchronized([XVimEvaluator class]){
-		if(!_noOperationEvaluator) {
-			_noOperationEvaluator = [[XVimEvaluator alloc] init];
-		}
-	}
     return _noOperationEvaluator;
+}
+
++ (XVimEvaluator *)popEvaluator{
+    return _popEvaluator;
 }
 
 - (id)init {
@@ -60,6 +62,7 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 
 - (id)initWithWindow:(XVimWindow*)window{
     NSAssert( nil != window, @"window must not be nil");
+    DEBUG_LOG("created %@ evaluator with window %@", self.class, window);
     if(self = [super init]){
         self.window = window;
         self.parent = nil;
@@ -80,8 +83,9 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     [super dealloc];
 }
 
-- (NSTextView*)sourceView{
-    return self.window.sourceView;
+- (XVimView *)currentView
+{
+    return self.window.currentView;
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
@@ -90,12 +94,11 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     // Invokes each key event handler
     // <C-k> invokes "C_k:" selector
 	
-	SEL handler = [keyStroke selectorForInstance:self];
-	if (handler) {
+	SEL handler = keyStroke.selector;
+    if ([self respondsToSelector:handler]) {
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
         return [self performSelector:handler];
-	}
-    else{
+	} else {
         TRACE_LOG(@"SELECTOR %@ not found", NSStringFromSelector(handler));
         return [self defaultNextEvaluator];
     }
@@ -107,11 +110,15 @@ static XVimEvaluator* _noOperationEvaluator = nil;
 }
    
 - (void)becameHandler{
-    self.sourceView.xvimDelegate = self;
+    self.currentView.delegate = self;
+}
+
+- (void)cancelHandler{
+    self.currentView.delegate = nil;
 }
 
 - (void)didEndHandler{
-    self.sourceView.xvimDelegate = nil;
+    self.currentView.delegate = nil;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -122,15 +129,15 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     return [XVimEvaluator invalidEvaluator];
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return 1.0;
 }
 
-- (float)insertionPointWidthRatio{
+- (CGFloat)insertionPointWidthRatio{
     return 1.0;
 }
 
-- (float)insertionPointAlphaRatio{
+- (CGFloat)insertionPointAlphaRatio{
     return 0.5;
 }
 
@@ -210,7 +217,10 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     return;
 }
 
-- (XVimCommandLineEvaluator*)searchEvaluatorForward:(BOOL)forward{
+- (XVimCommandLineEvaluator*)searchEvaluatorForward:(BOOL)forward
+{
+    XVimView *xview = self.currentView;
+
 	return [[[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                  firstLetter:forward?@"/":@"?"
                                                      history:[[XVim instance] searchHistory]
@@ -223,7 +233,7 @@ static XVimEvaluator* _noOperationEvaluator = nil;
                  BOOL forward = [command characterAtIndex:0] == '/';
                  if( command.length == 1 ){
                      // Repeat search
-                     XVimMotion* m = [XVim.instance.searcher motionForRepeatSearch];
+                     XVimMotion *m = [XVim.instance.searcher motionForRepeatSearch];
                      m.motion = forward ? MOTION_SEARCH_FORWARD : MOTION_SEARCH_BACKWARD;
                      m.count = self.numericArg;
                      *result = m;
@@ -244,9 +254,9 @@ static XVimEvaluator* _noOperationEvaluator = nil;
                  BOOL forward = [command characterAtIndex:0] == '/';
                  XVimMotion* m = [XVim.instance.searcher motionForSearch:[command substringFromIndex:1] forward:forward];
                  if( [command characterAtIndex:0] == '/' ){
-                     [self.sourceView xvim_highlightNextSearchCandidateForward:m.regex count:self.numericArg option:m.option];
+                     [xview xvim_highlightNextSearchCandidateForward:m.regex count:self.numericArg option:m.option];
                  }else{
-                     [self.sourceView xvim_highlightNextSearchCandidateBackward:m.regex count:self.numericArg option:m.option];
+                     [xview xvim_highlightNextSearchCandidateBackward:m.regex count:self.numericArg option:m.option];
                  }
              }] autorelease];
 }

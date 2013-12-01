@@ -6,8 +6,8 @@
 //  Copyright 2011 JugglerShu.Net. All rights reserved.
 //
 
+#import "XVim.h"
 #import "Logger.h"
-#import "Hooker.h"
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
 
@@ -158,9 +158,21 @@ static Logger* s_defaultLogger = nil;
 }
 
 + (void) logStackTrace:(NSException*)ex{
+    NSMutableString *s = [[NSMutableString alloc] init];
+
+    [s appendFormat:@"Exception %@ thrown { reason = %@ }\n", ex.name, ex.reason];
+    [ex.userInfo enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        [s appendFormat:@"  %@: %@\n", key, obj];
+    }];
+    [s appendFormat:@"Call Stack:\n"];
     for( NSString* e in [ex callStackSymbols]){
         TRACE_LOG(@"%@", e);
+        [s appendFormat:@"  %@\n", e];
     }
+#ifdef DEBUG
+    [[XVim instance] writeToConsole:s];
+#endif
+    [s release];
 }
 
 + (void) traceMethodList:(NSString*)class{

@@ -10,7 +10,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
 #import "XVimKeyStroke.h"
@@ -585,35 +585,34 @@
 // This method correnspons parsing part of get_address in ex_cmds.c
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
 {
-    NSTextView* view = [window sourceView];
-    //DVTFoldingTextStorage* storage = [view textStorage];
-    //TRACE_LOG(@"Storage Class:%@", NSStringFromClass([storage class]));
-    NSUInteger addr = NSNotFound;
-    NSUInteger begin = view.selectionBegin;
-    NSUInteger end = view.insertionPoint;
-    unichar* tmp;
-    NSUInteger count;
-    unichar mark;
-    
+    XVimView   *xview = window.currentView;
+    XVimBuffer *buffer = window.currentBuffer;
+    NSUInteger  addr = NSNotFound;
+    NSUInteger  begin = xview.selectionBegin;
+    NSUInteger  end = xview.insertionPoint;
+    unichar    *tmp;
+    NSUInteger  count;
+    unichar     mark;
+
     // Parse base addr (line number)
     switch (*parsing)
     {
         case '.':
             parsing++;
-            addr = [view.textStorage lineNumber:begin];
+            addr = [buffer lineNumberAtIndex:begin];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
-            addr = [view.textStorage numberOfLines];
+            addr = [buffer numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
             if( '<' == mark ){
-                addr = [view.textStorage lineNumber:begin];
+                addr = [buffer lineNumberAtIndex:begin];
                 parsing+=2;
             }else if( '>' == mark ){
-                addr = [view.textStorage lineNumber:end];
+                addr = [buffer lineNumberAtIndex:end];
                 parsing+=2;
             }else{
                 // Other marks or invalid character. XVim does not support this.
@@ -731,14 +730,15 @@
     // 3. parse range
     exarg.lineBegin = NSNotFound;
     exarg.lineEnd = NSNotFound;
-	
-    NSTextView* view = [window sourceView];
+
+    XVimView   *xview  = window.currentView;
+    XVimBuffer *buffer = window.currentBuffer;
     for(;;){
         NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [view.textStorage numberOfLines];
+                exarg.lineEnd = buffer.numberOfLines;
                 parsing++;
             }
         }else{
@@ -758,8 +758,8 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        exarg.lineBegin = [view.textStorage lineNumber:view.insertionPoint];
-        exarg.lineEnd =  exarg.lineBegin;
+        exarg.lineBegin = xview.insertionLine;
+        exarg.lineEnd   = exarg.lineBegin;
     }
     
     // 4. parse command
@@ -814,20 +814,20 @@
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
-		NSTextView* srcView = [window sourceView];
-        NSTextStorage* storage = srcView.textStorage;
-		
+        XVimBuffer *buffer  = window.currentBuffer;
+        XVimView   *xview   = window.currentView;
+
         // Jump to location
-        NSUInteger pos = [storage positionAtLineNumber:exarg.lineBegin column:0];
-        if( NSNotFound == pos ){
-            pos = [srcView.textStorage positionAtLineNumber:[srcView.textStorage numberOfLines] column:0];
+        NSUInteger pos = [buffer indexOfLineNumber:exarg.lineBegin];
+        if (NSNotFound == pos) {
+            pos = [buffer startOfLine:buffer.length];
         }
-        NSUInteger pos_wo_space = [srcView.textStorage nextNonblankInLine:pos];
+        NSUInteger pos_wo_space = [buffer nextNonblankInLineAtIndex:pos allowEOL:NO];
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }
-        [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
-        [srcView xvim_scrollTo:[window.sourceView insertionPoint]];
+        [xview.textView setSelectedRange:NSMakeRange(pos_wo_space,0)];
+        [xview scrollTo:xview.insertionPoint];
         return;
     }
     
@@ -999,7 +999,7 @@
 }
 
 - (void)marks:(XVimExArg*)args inWindow:(XVimWindow*)window{ // This is currently impelemented for debugging purpose
-    NSString* local = [[XVim instance].marks dumpMarksForDocument:window.sourceView.documentURL.path];
+    NSString* local = [[XVim instance].marks dumpMarksForDocument:window.currentBuffer.document.fileURL.path];
     NSString* file = [[XVim instance].marks dumpFileMarks];
     [[XVim instance] writeToConsole:@"----LOCAL MARKS----\n%@", local];
     [[XVim instance] writeToConsole:@"----FILE MARKS----\n%@", file];
@@ -1095,8 +1095,8 @@
 
 - (void)set:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSString* setCommand = [args.arg stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSTextView* srcView = [window sourceView];
 	XVimOptions* options = [[XVim instance] options];
+    XVimView *xview = window.currentView;
     
     if( [setCommand rangeOfString:@"="].location != NSNotFound ){
         // "set XXX=YYY" form
@@ -1115,18 +1115,16 @@
     }
     
     if( [setCommand isEqualToString:@"wrap"] ){
-        [srcView xvim_setWrapsLines:YES];
+        [xview xvim_setWrapsLines:YES];
     }
     else if( [setCommand isEqualToString:@"nowrap"] ){
-        [srcView xvim_setWrapsLines:NO];
+        [xview xvim_setWrapsLines:NO];
     } else if( [setCommand isEqualToString:@"list!"] ){
       [NSApp sendAction:@selector(toggleInvisibleCharactersShown:) to:nil from:self];
     }
 }
 
 - (void)sort:(XVimExArg *)args inWindow:(XVimWindow *)window{
-    NSTextView *view = [window sourceView];
-    
     NSString *cmdString = [[args cmd] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
     NSString *argsString = [args arg];
     XVimSortOptions options = 0;
@@ -1147,8 +1145,9 @@
             options |= XVimSortOptionRemoveDuplicateLines;
         }
     }
-    
-    [view xvim_sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
+
+    XVimRange range = XVimMakeRange(args.lineBegin, args.lineEnd);
+    [window.currentView doSortLines:range withOptions:options];
 }
 
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{

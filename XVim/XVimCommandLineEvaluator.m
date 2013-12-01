@@ -8,7 +8,7 @@
 
 #import "Logger.h"
 #import "XVimCommandLineEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimKeymapProvider.h"
 #import "XVimWindow.h"
 #import "XVimCommandField.h"
@@ -28,6 +28,8 @@
 @end
 
 @implementation XVimCommandLineEvaluator
+@synthesize evalutionResult = _evalutionResult;
+@synthesize lastTextView = _lastTextView;
 
 - (id)initWithWindow:(XVimWindow *)window
 		 firstLetter:(NSString*)firstLetter
@@ -42,7 +44,7 @@
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
         _evalutionResult = nil;
-        self.lastTextView = window.sourceView;
+        self.lastTextView = window.currentView.textView;
         XVimCommandField *commandField = self.window.commandLine.commandField;
         [commandField setString:_firstLetter];
         [commandField moveToEndOfLine:self];
@@ -65,8 +67,14 @@
 	[super becameHandler];
 }
 
+- (void)cancelHandler {
+    [self relinquishFocusToWindow];
+    [super cancelHandler];
+}
+
 - (void)didEndHandler{
     [self relinquishFocusToWindow];
+    [super didEndHandler];
 }
 
 - (void)appendString:(NSString*)str{
@@ -88,13 +96,13 @@
 - (void)takeFocusFromWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:self.window];
-	[[[self.window sourceView] window] makeFirstResponder:commandField];
+	[self.lastTextView.window makeFirstResponder:commandField];
 }
 
 - (void)relinquishFocusToWindow{
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	[commandField setDelegate:nil];
-    [[self.lastTextView window] makeFirstResponder:self.lastTextView];
+    [self.lastTextView.window makeFirstResponder:self.lastTextView];
     [commandField setHidden:YES];
 }
 
@@ -102,8 +110,9 @@
 	XVimEvaluator* next = self;
 
 	XVimCommandField *commandField = self.window.commandLine.commandField;
-	if ([keyStroke instanceResponds:self]) {
-		next = [self performSelector:[keyStroke selector]];
+    SEL sel = keyStroke.selector;
+    if ([self respondsToSelector:sel]) {
+		next = [self performSelector:sel];
 	}
 	else{
 		[commandField handleKeyStroke:keyStroke inWindow:self.window];
@@ -132,7 +141,7 @@
 	return nil;
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return 0.0;
 }
 
@@ -161,8 +170,7 @@
 }
 
 - (XVimEvaluator*)ESC{
-    NSTextView *sourceView = [self sourceView];
-    [sourceView xvim_scrollTo:[sourceView insertionPoint]];
+    [self.currentView scrollTo:self.currentView.insertionPoint];
 	return nil;
 }
 

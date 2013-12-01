@@ -484,17 +484,17 @@
             
             // > (Shift)
             // the following test case assumes that Xcode indent in the preference is 4 spaces
-            XVimMakeTestCase(text4, 5, 0, @">>"     , rshift_result0, 5, 0), 
-            XVimMakeTestCase(text4, 5, 0, @"3>>"    , rshift_result1, 5, 0),
-            XVimMakeTestCase(text4, 1, 0, @"2>>jjj.", rshift_result2,21, 0),
+            XVimMakeTestCase(text4, 5, 0, @">>"     , rshift_result0, 8, 0),
+            XVimMakeTestCase(text4, 5, 0, @"3>>"    , rshift_result1, 8, 0),
+            XVimMakeTestCase(text4, 1, 0, @"2>>jjj.", rshift_result2,24, 0),
             XVimMakeTestCase(text4, 5, 0, @">>jj`." , rshift_result0, 4, 0),
             XVimMakeTestCase(text4, 5, 0, @">>jj'." , rshift_result0, 8, 0),
             
             // < (Shift)
             // the following test case assumes that Xcode indent in the preference is 4 spaces
-            XVimMakeTestCase(text5,13, 0, @"<<"     , lshift_result0,13, 0), 
-            XVimMakeTestCase(text5,13, 0, @"3<<"    , lshift_result1,13, 0),
-            XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,29, 0),
+            XVimMakeTestCase(text5,13, 0, @"<<"     , lshift_result0,16, 0),
+            XVimMakeTestCase(text5,13, 0, @"3<<"    , lshift_result1,16, 0),
+            XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,32, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj`." , lshift_result0,12, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj'." , lshift_result0,16, 0),
             

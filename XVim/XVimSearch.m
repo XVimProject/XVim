@@ -7,16 +7,24 @@
 //
 
 #import "XVimSearch.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "NSString+VimHelper.h"
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimOptions.h"
 #import "Logger.h"
 #import "XVimUtil.h"
-#import "IDEKit.h"
+#import "NSTextStorage+VimOperation.h"
 
 @implementation XVimSearch
+@synthesize lastSearchBackword = _lastSearchBackword;
+@synthesize lastSearchCase = _lastSearchCase;
+@synthesize lastSearchCmd = _lastSearchCmd;
+@synthesize lastSearchString = _lastSearchString;
+@synthesize lastSearchDisplayString = _lastSearchDisplayString;
+@synthesize lastReplacementString = _lastReplacementString;
+@synthesize matchStart = _matchStart;
+@synthesize matchEnd = _matchEnd;
 
 - (id)init {
     if( self = [super init] ){
@@ -38,10 +46,10 @@
     XVimMotion* m = nil;
     if( forward ){
         XVim.instance.searcher.lastSearchBackword = NO;
-        m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+        m = XVIM_MAKE_MOTION(MOTION_SEARCH_FORWARD, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     }else{
         XVim.instance.searcher.lastSearchBackword = YES;
-        m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+        m = XVIM_MAKE_MOTION(MOTION_SEARCH_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 1);
     }
     m.regex = string;
     
@@ -60,11 +68,11 @@
     }
     // The last case sensitiveness is found at this point
     if( options & NSRegularExpressionCaseInsensitive ){
-        m.option |= SEARCH_CASEINSENSITIVE;
+        m.option |= MOPT_SEARCH_CASEINSENSITIVE;
     }
     
     if( [XVim instance].options.wrapscan ){
-        m.option |= SEARCH_WRAP;
+        m.option |= MOPT_SEARCH_WRAP;
     }
     
     return m;
@@ -153,7 +161,7 @@
 #ifdef __MAC_10_7
     XVimOptions *options = [[XVim instance] options];
     
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
     NSUInteger search_base = from;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines | NSRegularExpressionUseUnicodeWordBoundaries;
@@ -223,7 +231,7 @@
     NSRange found = {NSNotFound, 0};
 #ifdef __MAC_10_7    
 	XVimOptions *options = [[XVim instance] options];
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
     NSUInteger search_base = from;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
@@ -307,7 +315,7 @@
 {
     NSRange found = {NSNotFound,0};
 #ifdef __MAC_10_7
-    NSTextView *view = [window sourceView];
+    NSTextView *view = window.currentView.textView;
 
     NSRange begin = [view selectedRange];
     NSString *string = [view string];
@@ -315,7 +323,7 @@
     NSUInteger firstNonblank = NSNotFound;
 	
     // TODO: must be moved to NSTextStorage+VimOperation
-	for (NSUInteger i = begin.location; ![view.textStorage isEOF:i]; ++i)
+	for (NSUInteger i = begin.location; i < string.length; ++i)
 	{
         unichar curChar = [string characterAtIndex:i];
         if (isNewline(curChar)){
@@ -349,11 +357,11 @@
         unichar lastChar = [string characterAtIndex:wordStart-1];
         if ((isKeyword(curChar) && isKeyword(lastChar)) ||
             (!isKeyword(curChar) && isNonblank(curChar) && !isKeyword(lastChar) && isNonblank(lastChar))){
-            wordStart = [view.textStorage wordsBackward:searchStart count:1 option:LEFT_RIGHT_NOWRAP];
+            wordStart = [view.textStorage wordsBackward:searchStart count:1 option:MOPT_NOWRAP];
         }
     }
 
-    NSUInteger wordEnd = [view.textStorage wordsForward:wordStart count:1 option:LEFT_RIGHT_NOWRAP info:&info];
+    NSUInteger wordEnd = [view.textStorage wordsForward:wordStart count:1 option:MOPT_NOWRAP info:&info];
     if (info.lastEndOfWord != NSNotFound){
         wordEnd = info.lastEndOfWord;
     }
@@ -395,7 +403,7 @@
     
 #ifdef __MAC_10_7    
     
-    NSTextView* srcView = [window sourceView];
+    NSTextView* srcView = window.currentView.textView;
     
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
 	if ([self isCaseInsensitive])
@@ -466,17 +474,18 @@
     self.lastSearchCmd = replaced;
     self.lastSearchDisplayString = replaced;
     self.lastReplacementString = replacement;
-    
+
+    XVimBuffer *buffer = window.currentBuffer;
     // Find the position to start searching
-    NSUInteger replace_start_location = [window.sourceView.textStorage positionAtLineNumber:from column:0];
+    NSUInteger replace_start_location = [buffer indexOfLineNumber:from column:0];
     if( NSNotFound == replace_start_location){
         return;
     }
     
     // Find the position to end the searching
-    NSUInteger endOfReplacement = [window.sourceView.textStorage positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
+    NSUInteger endOfReplacement = [buffer indexOfLineNumber:to+1 column:0]; // Next line of the end of range.
     if( NSNotFound == endOfReplacement ){
-        endOfReplacement = [[[window sourceView] string] length];
+        endOfReplacement = buffer.length;
     }
     // This is lazy implementation.
     // When text is substituted the end location may be smaller or greater than original end position.

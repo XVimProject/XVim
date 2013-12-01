@@ -227,16 +227,4 @@
     [self layoutCmdline:[self superview]];
 }
 
-static char s_associate_key = 0;
-
-+ (XVimCommandLine*)associateOf:(id)object
-{
-	return (XVimCommandLine*)objc_getAssociatedObject(object, &s_associate_key);
-}
-
-- (void)associateWith:(id)object
-{
-	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
-}
-
 @end

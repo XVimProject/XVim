@@ -18,10 +18,12 @@
 @end
 
 @implementation XVimRecordingEvaluator
+@synthesize reg = _reg, evaluatorStack = _evaluatorStack;
+
 - (id)initWithWindow:(XVimWindow *)window withRegister:(NSString*)reg{
     if( self = [super initWithWindow:window] ){
         self.evaluatorStack = [[[NSMutableArray alloc] init] autorelease];
-        [self.evaluatorStack addObject:[[XVimNormalEvaluator alloc] initWithWindow:window]];
+        [self.evaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:window] autorelease]];
         self.reg = reg;
     }
     return self;
@@ -29,15 +31,13 @@
 
 - (void)dealloc{
     self.evaluatorStack = nil;
+    self.reg = nil;
     [super dealloc];
 }
 
 - (void)becameHandler{
+    [super becameHandler];
     [[[XVim instance] registerManager] startRecording:self.reg];
-}
-
-- (void)didEndHandler{
-    
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
@@ -50,15 +50,15 @@
     return self;
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return [[self.evaluatorStack lastObject] insertionPointHeightRatio];
 }
 
-- (float)insertionPointWidthRatio{
+- (CGFloat)insertionPointWidthRatio{
     return [[self.evaluatorStack lastObject] insertionPointWidthRatio];
 }
 
-- (float)insertionPointAlphaRatio{
+- (CGFloat)insertionPointAlphaRatio{
     return [[self.evaluatorStack lastObject] insertionPointAlphaRatio];
 }
 

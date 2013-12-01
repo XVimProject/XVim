@@ -19,14 +19,15 @@
 @end
 
 @implementation XVimRegisterEvaluator
+@synthesize reg;
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
 	return [keymapProvider keymapForMode:XVIM_MODE_NONE];
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-	SEL handler = [keyStroke selectorForInstance:self];
-	if (handler){
+	SEL handler = keyStroke.selector;
+	if ([self respondsToSelector:handler]) {
 		TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
         return [self performSelector:handler];
     }

@@ -6,10 +6,9 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+#import "XVimJoinEvaluator.h"
 #import "XVimGActionEvaluator.h"
-#import "XVimTildeEvaluator.h"
-#import "XVimLowercaseEvaluator.h"
-#import "XVimUppercaseEvaluator.h"
+#import "XVimSwapCharsEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
@@ -18,7 +17,7 @@
 #import "XVimMarks.h"
 #import "XVimVisualEvaluator.h"
 #import "NSTextStorage+VimOperation.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @implementation XVimGActionEvaluator
 
@@ -40,36 +39,47 @@
 }
 
 - (XVimEvaluator*)i{
-    XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.sourceView.documentURL.path];
-	if ( mark.line != NSNotFound) {
-        NSUInteger newPos = [self.sourceView.textStorage positionAtLineNumber:mark.line column:mark.column];
-        if( NSNotFound != newPos ){
-            XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
+    XVimMark *mark = [[XVim instance].marks markForName:@"^" forDocument:self.window.currentBuffer.document];
+    XVimInsertionPoint mode = XVIM_INSERT_DEFAULT;
+    XVimBuffer *buffer = self.window.currentBuffer;
+
+	if (mark.line != NSNotFound) {
+        NSUInteger newPos = [buffer indexOfLineNumber:mark.line column:mark.column];
+        if (NSNotFound != newPos) {
+            XVimMotion *m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, 0);
+
             m.position = newPos;
             
             // set the position before the jump
-            XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-            cur_mark.line = [self.sourceView insertionLine];
-            cur_mark.column = [self.sourceView insertionColumn];
-            cur_mark.document = [self.sourceView documentURL].path;
-            if( nil != mark.document){
+            XVimMark *cur_mark = [[[XVimMark alloc] init] autorelease];
+            XVimView *xview = self.currentView;
+            XVimPosition pos = xview.insertionPosition;
+            cur_mark.line = pos.line;
+            cur_mark.column = pos.column;
+            cur_mark.document = buffer.document.fileURL.path;
+            if (nil != mark.document) {
                 [[XVim instance].marks setMark:cur_mark forName:@"'"];
             }
-            [self.sourceView xvim_move:m];
-            [self.sourceView xvim_append];
+            [xview moveCursorWithMotion:m];
+            mode = XVIM_INSERT_APPEND;
         }
     }
-	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:mode] autorelease];
+}
+
+- (XVimEvaluator*)J{
+    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)u{
     [self.argumentString appendString:@"u"];
-	return [[[XVimLowercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_LOWER] autorelease];
 }
 
 - (XVimEvaluator*)U{
     [self.argumentString appendString:@"U"];
-	return [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_UPPER] autorelease];
 }
 
 - (XVimEvaluator*)v{
@@ -77,9 +87,14 @@
     return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
 }
 
+- (XVimEvaluator*)QUESTION{
+    [self.argumentString appendString:@"?"];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_ROT13] autorelease];
+}
+
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-	return [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimSwapCharsEvaluator alloc] initWithWindow:self.window mode:XVIM_BUFFER_SWAP_CASE] autorelease];
 }
 
 @end

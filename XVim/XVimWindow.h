@@ -7,8 +7,9 @@
 
 #import <Cocoa/Cocoa.h>
 #import "XVimCommandLine.h"
-#import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
+#import "XVimBuffer.h"
+#import "XVimView.h"
 
 /*
  * This class manages 1 window. (The term "window" here is different from NSWindow)
@@ -17,30 +18,27 @@
  * the associated XVimWindow object first and it handles the event.
  */
 
-@class XVimSourceView;
 @class XVimEvaluator;
 @class XVimRegister;
 @class IDEEditorArea;
 @class IDEWorkspaceWindow;
 @class XVimEvaluatorContext;
+@class IDEEditorArea;
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
+@property(nonatomic, readonly) XVimCommandLine *commandLine;
+@property(nonatomic, readonly) XVimBuffer *currentBuffer;
+@property(nonatomic, readonly) XVimView *currentView;
 
-@property(readonly) NSTextView* sourceView; // This represents currently focused sourceView
-
-- (XVimCommandLine*)commandLine;
+- (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea;
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)stack;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
-- (BOOL)handleXVimString:(XVimString*)strokes;
-- (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
+- (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;
 - (void)clearErrorMessage;
-
-+ (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea*)editorArea;
-+ (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea;
 
 - (void)setForcusBackToSourceView;
 

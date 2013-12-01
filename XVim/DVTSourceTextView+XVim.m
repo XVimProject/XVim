@@ -16,12 +16,7 @@
     return [wc editorArea];
 }
 
-- (XVimCommandLine*)commandLine{
-    return [[self xvimWindow] commandLine];
-}
-
-
 - (XVimWindow*)xvimWindow{
-    return [[self editorArea] xvimWindow];
+    return [[self editorArea] xvim_window];
 }
 @end

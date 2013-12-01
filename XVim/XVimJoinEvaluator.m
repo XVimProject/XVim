@@ -7,16 +7,28 @@
 //
 
 #import "XVimJoinEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimWindow.h"
 
-@implementation XVimJoinEvaluator
--(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
+@implementation XVimJoinEvaluator {
+    BOOL _addSpace;
+}
+
+- (instancetype)initWithWindow:(XVimWindow *)window addSpace:(BOOL)addSpace
+{
+    if ((self = [self initWithWindow:window])) {
+        _addSpace = addSpace;
+    }
+    return self;
+}
+
+- (XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     if( motion.count > 1 ){
         // J and 2J is the same
         motion.count--;
     }
-    [self.window.sourceView xvim_join:motion.count];
+    [self.currentView doJoin:motion.count addSpace:_addSpace];
     return nil;
 }
+
 @end

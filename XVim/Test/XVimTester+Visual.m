@@ -16,15 +16,21 @@
                              @"ddd e-e fff\n"  // 12 16 20
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
-    
+
+    static NSString* C_v_o_result = @"a;a ccc\n"
+                                    @"ddd fff\n"
+                                    @"ggg i_i\n"
+                                    @"    kkk";
+
     static NSString* text3 = @"    aaa\n"
                              @"    bbb\n";
-    
+
     static NSString* Vyp_result = @"    aaa\n"
                                   @"    bbb\n"
                                   @"    aaa\n"
                                   @"    bbb\n";
-    
+
+
     static NSString* VyP_result = @"    aaa\n"
                                   @"    aaa\n"
                                   @"    bbb\n"
@@ -91,8 +97,9 @@
             // XVimMakeTestCase(text2, 0,  0, @"vjD", V_d_result, 0, 0), // not supported yet
             
             // Shift and repeat
-            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 0, 0), // #311
-            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,32, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 8, 0), // #311
+            XVimMakeTestCase(text2, 0,  0, @"vj>..u", rshift_result0 , 8, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,36, 0),
             
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljjd", C_v_d_result, 0, 0),
             XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),
@@ -127,7 +134,14 @@
             
             // Change
             XVimMakeTestCase(text1, 0,  0, @"vlllcxxx<ESC>", v_c_result, 2, 0), // change in visual
-            
+
+            // Toggle insertion point with o/O
+            XVimMakeTestCase(@"abc\n", 1,  0, @"vlohd", @"\n", 0, 0),
+            XVimMakeTestCase(@"abc\n", 1,  0, @"vlOhd", @"\n", 0, 0),
+
+            XVimMakeTestCase(text2, 17,  0, @"<C-v>jjllokhd", C_v_o_result, 4, 0),
+            XVimMakeTestCase(text2, 41,  0, @"<C-v>llkkOkhd", C_v_o_result, 4, 0),
+
             // Toggle between v,C-v,V
             XVimMakeTestCase(text2, 0,  0, @"vllVjd", V_d_result, 0, 0), // change in visual
             XVimMakeTestCase(text2, 0,  0, @"Vjlvd", v_d_result, 0, 0), // change in visual

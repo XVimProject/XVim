@@ -13,9 +13,18 @@
 #import "DVTSourceTextView+XVim.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @implementation XVimTestCase
+@synthesize initialText;
+@synthesize initialRange;
+@synthesize input;
+@synthesize expectedText;
+@synthesize expectedRange;
+@synthesize description;
+@synthesize message;
+@synthesize success;
+
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
                     initialRange:(NSRange)ir
                                    input:(NSString*)in
@@ -61,10 +70,15 @@
     [super dealloc];
 }
 
-- (void)setUp{
-    [[[XVimLastActiveSourceView() xvimWindow] sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-    [XVimLastActiveSourceView() setString:self.initialText];
-    [XVimLastActiveSourceView() setSelectedRange:self.initialRange];
+- (void)setUp
+{
+    XVimWindow *window = XVimLastActiveSourceView().xvimWindow;
+    XVimView   *xview  = window.currentView;
+    NSTextView *view   = xview.textView;
+
+    xview.selectionMode = XVIM_VISUAL_NONE;
+    [view setString:self.initialText];
+    [view setSelectedRange:self.initialRange];
 }
 
 - (BOOL)assert{
@@ -74,6 +88,7 @@
     }
     
     NSRange resultRange = [XVimLastActiveSourceView() selectedRange];
+
     if( self.expectedRange.location != resultRange.location ||
         self.expectedRange.length   != resultRange.length
        ){

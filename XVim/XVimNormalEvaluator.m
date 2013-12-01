@@ -23,7 +23,6 @@
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
-#import "NSString+VimHelper.h"
 #import "XVimKeymapProvider.h"
 #import "Logger.h"
 #import "XVimCommandLineEvaluator.h"
@@ -34,8 +33,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
-#import "XVimTildeEvaluator.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 #import "XVimJoinEvaluator.h"
 
 @interface XVimNormalEvaluator() {
@@ -45,16 +43,9 @@
 
 @implementation XVimNormalEvaluator
 
--(id)initWithWindow:(XVimWindow *)window{
-	self = [super initWithWindow:window];
-    if (self) {
-    }
-    return self;
-}
-    
 - (void)becameHandler{
     [super becameHandler];
-    [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    self.currentView.selectionMode = XVIM_VISUAL_NONE;
 }
 
 - (NSString*)modeString {
@@ -76,19 +67,15 @@
 // Command which results in cursor motion should be implemented in XVimMotionEvaluator
 
 - (XVimEvaluator*)a{
-    [[self sourceView] xvim_append];
-	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_APPEND] autorelease];
 }
 
 - (XVimEvaluator*)A{
-    NSTextView* view = [self sourceView];
-    [view xvim_appendAtEndOfLine];
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_APPEND_EOL] autorelease];
 }
 
 - (XVimEvaluator*)C_a{
-    NSTextView* view = [self sourceView];
-    if ([view xvim_incrementNumber:(int64_t)self.numericArg]) {
+    if ([self.currentView doIncrementNumber:(int64_t)self.numericArg]) {
         [[XVim instance] fixOperationCommands];
     } else {
         [[XVim instance] cancelOperationCommands];
@@ -98,7 +85,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_b{
-    [[self sourceView] xvim_scrollPageBackward:[self numericArg]];
+    [self.currentView scrollPageBackward:self.numericArg];
     return nil;
 }
 
@@ -118,7 +105,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_d{
-    [[self sourceView] xvim_scrollHalfPageForward:[self numericArg]];
+    [self.currentView scrollHalfPageForward:self.numericArg];
     return nil;
 }
 
@@ -136,28 +123,31 @@
 }
 
 - (XVimEvaluator*)C_e{
-    [[self sourceView] xvim_scrollLineForward:[self numericArg]];
+    [self.currentView scrollLineForward:self.numericArg];
     return nil;
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f{
-    [[self sourceView] xvim_scrollPageForward:[self numericArg]];
+    [self.currentView scrollPageForward:self.numericArg];
     return nil;
 }
 
-- (XVimEvaluator*)C_g{
+- (XVimEvaluator*)C_g
+{
     // process
-    XVimWindow* window = self.window;
-    NSRange range = [[window sourceView] selectedRange];
-    NSUInteger numberOfLines = [window.sourceView.textStorage numberOfLines];
-    long long lineNumber = [window.sourceView currentLineNumber];
-    NSUInteger columnNumber = [window.sourceView.textStorage columnNumber:range.location];
-    NSURL* documentURL = [[window sourceView] documentURL];
-	if( [documentURL isFileURL] ) {
-		NSString* filename = [documentURL path];
-		NSString* text = [NSString stringWithFormat:@"%@   line %lld of %ld --%d%%-- col %ld",
-                          filename, lineNumber, numberOfLines, (int)((float)lineNumber*100.0/(float)numberOfLines), columnNumber+1 ];
+    XVimWindow  *window = self.window;
+    XVimBuffer  *buffer = window.currentBuffer;
+    XVimView    *xview  = self.currentView;
+    XVimPosition pos    = xview.insertionPosition;
+
+    NSUInteger numberOfLines = [buffer numberOfLines];
+    NSURL *documentURL = buffer.document.fileURL;
+
+	if ([documentURL isFileURL]) {
+		NSString *text = [NSString stringWithFormat:@"%@   line %ld of %ld --%d%%-- col %ld",
+                          documentURL.path, pos.line, numberOfLines,
+                          (int)((CGFloat)pos.line*100.0/(CGFloat)numberOfLines), pos.column + 1 ];
         
 		[window statusMessage:text];
 	}
@@ -171,8 +161,8 @@
 }
 
 - (XVimEvaluator*)onComplete_g:(XVimGActionEvaluator*)childEvaluator{
-    if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
-        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
+    if (childEvaluator.key.selector == @selector(SEMICOLON)) {
+        XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:self.window.currentBuffer.document];
         return [self jumpToMark:mark firstOfLine:NO];
     }else{
         if( childEvaluator.motion != nil ){
@@ -188,13 +178,12 @@
 }
 
 - (XVimEvaluator*)I{
-    [[self sourceView] xvim_insertBeforeFirstNonblank];
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BEFORE_FIRST_NONBLANK] autorelease];
 }
 
 - (XVimEvaluator*)J{
-    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window] autorelease];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
+    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:YES] autorelease];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg)];
 }
 
 // Should be moved to XVimMotionEvaluator
@@ -206,14 +195,12 @@
 }
 
 - (XVimEvaluator*)o{
-    NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineBelowAndInsertWithIndent];
+    [self.currentView insertNewlineBelowAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)O{
-    NSTextView* view = [self sourceView];
-    [view xvim_insertNewlineAboveAndInsertWithIndent];
+    [self.currentView insertNewlineAboveAndInsertWithIndent];
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
@@ -228,17 +215,15 @@
 }
 
 - (XVimEvaluator*)p{
-    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view xvim_put:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
+    [self.currentView doPut:reg.string withType:reg.type afterCursor:YES count:[self numericArg]];
     [[XVim instance] fixOperationCommands];
     return nil;
 }
 
 - (XVimEvaluator*)P{
-    NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];
-    [view xvim_put:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
+    [self.currentView doPut:reg.string withType:reg.type afterCursor:NO count:[self numericArg]];
     [[XVim instance] fixOperationCommands];
     return nil;
 }
@@ -266,17 +251,19 @@
     return nil;
 }
 
-- (XVimEvaluator*)C_r{
-    NSTextView* view = [self sourceView];
-    for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-		[view.undoManager redo];
+- (XVimEvaluator*)C_r
+{
+    XVimBuffer *buffer = self.window.currentBuffer;
+
+    for (NSUInteger i = 0; i < [self numericArg]; i++) {
+        [buffer.undoManager redo];
     }
     return nil;
 }
 
 - (XVimEvaluator*)r{
 	[self.argumentString appendString:@"r"];
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:YES] autorelease];
+    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:YES mode:XVIM_INSERT_DEFAULT] autorelease];
 }
 
 - (XVimEvaluator*)s{
@@ -293,17 +280,20 @@
     return [d performSelector:@selector(c)];
 }
 
-- (XVimEvaluator*)u{
-    NSTextView* view = [self sourceView];
-    for( NSUInteger i = 0 ; i < [self numericArg] ; i++){
-        [view.undoManager undo];
+- (XVimEvaluator*)u
+{
+    XVimBuffer *buffer = self.window.currentBuffer;
+
+    for (NSUInteger i = 0; i < [self numericArg]; i++) {
+        [buffer.undoManager undo];
     }
+    [self.currentView moveCursorToIndex:self.currentView.insertionPoint];
     return nil;
 }
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_u{
-    [[self sourceView] xvim_scrollHalfPageBackward:[self numericArg]];
+    [self.currentView scrollHalfPageBackward:self.numericArg];
     return nil;
 }
 
@@ -351,9 +341,7 @@
 }
 
 - (XVimEvaluator*)C_x{
-    NSTextView* view = [self sourceView];
-
-    if ([view xvim_incrementNumber:-(int64_t)self.numericArg]) {
+    if ([self.currentView doIncrementNumber:-(int64_t)self.numericArg]) {
         [[XVim instance] fixOperationCommands];
     } else {
         [[XVim instance] cancelOperationCommands];
@@ -373,7 +361,7 @@
 }
 
 - (XVimEvaluator*)C_y{
-    [[self sourceView] xvim_scrollLineBackward:[self numericArg]];
+    [self.currentView scrollLineBackward:self.numericArg];
     return nil;
 }
 
@@ -446,7 +434,7 @@
 }
 
 - (XVimEvaluator*)HT{
-    [[self sourceView] xvim_selectNextPlaceholder];
+    [self.currentView selectNextPlaceholder];
     return nil;
 }
 
@@ -490,6 +478,7 @@
             continue;
         }
         nonNumFound = YES;
+        TRACE_LOG("Feeding stroke: %@", stroke);
         [self.window handleKeyStroke:stroke onStack:stack];
     }
     [[XVim instance] endRepeat];
@@ -498,9 +487,10 @@
 
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-    XVimTildeEvaluator* swap = [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
-    // TODO: support tildeop option
-    return [swap fixWithNoMotion:self.numericArg];
+    XVimMotion *m = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOPT_NONE, self.numericArg);
+    [self.currentView doSwapCharacters:m mode:XVIM_BUFFER_SWAP_CASE];
+    [XVim.instance fixOperationCommands];
+    return nil;
 }
 
 - (XVimEvaluator*)ForwardDelete{
@@ -516,7 +506,7 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
-    [[self sourceView] xvim_move:motion];
+    [self.currentView moveCursorWithMotion:motion];
     return nil;
 }
 

@@ -16,9 +16,6 @@
 // Make subclass of this to implement operation on which takes motions as argument (deletion,yank...and so on.)
 
 @interface XVimMotionEvaluator : XVimNumericEvaluator
-@property (strong) XVimMotion* motion;
-
-- (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type;
 
 /**
  * The difference between motionFixed and _motionFixed:

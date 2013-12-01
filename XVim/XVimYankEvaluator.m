@@ -19,7 +19,7 @@
     if ([self numericArg] < 1) 
         return nil;
     
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, [self numericArg]-1);
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOPT_NONE, [self numericArg]-1);
     return [self _motionFixed:m];
     
 }
@@ -29,7 +29,7 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
-    [[self sourceView] xvim_yank:motion];
+    [self.currentView doYank:motion];
     return nil;
 }
 @end

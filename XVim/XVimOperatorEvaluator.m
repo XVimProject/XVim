@@ -15,7 +15,10 @@
 #import "XVimKeymapProvider.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
+#import "XVimYankEvaluator.h"
+#import "XVimShiftEvaluator.h"
+#import "XVimJoinEvaluator.h"
 
 @interface XVimOperatorEvaluator() {
 }
@@ -29,17 +32,11 @@
     return nil;
 }
 
-- (id)initWithWindow:window{
-	if (self = [super initWithWindow:window]){
-	}
-	return self;
-}
-
 - (void)dealloc {
     [super dealloc];
 }
 
-- (float)insertionPointHeightRatio{
+- (CGFloat)insertionPointHeightRatio{
     return 0.5;
 }
 
@@ -71,23 +68,26 @@
     // We do not fix the change here if next evaluator is not nil becaust it waits more input for fix the command.
     // This happens for a command like "cw..."
     if( nil == evaluator ){
-        NSTextView* view = self.window.sourceView;
-        NSString* className = NSStringFromClass([self class]);
-        if( ![className isEqualToString:@"XVimYankEvaluator"]){
+        XVimBuffer *buffer = self.window.currentBuffer;
+        XVimView   *xview  = self.currentView;
+        Class aClass = self.class;
+
+        if (aClass != [XVimYankEvaluator class]) {
             [[XVim instance] fixOperationCommands];
-            XVimMark* mark = nil;
-            if( [className isEqualToString:@"XVimJoinEvaluator"]){
+            XVimMark *mark = nil;
+
+            if (aClass == [XVimJoinEvaluator class]) {
                 // This is specical case for join operation.
                 // The mark is set at the head of next line of the insertion point after the operation
-                mark = XVimMakeMark([self.sourceView insertionLine]+1, 0, view.documentURL.path);
-            }else if( [className isEqualToString:@"XVimShiftEvaluator"] ){
-                mark = XVimMakeMark([self.sourceView insertionLine], 0, view.documentURL.path);
-            }
-            else{
-                mark = XVimMakeMark([self.sourceView insertionLine], [self.sourceView insertionColumn], view.documentURL.path);
+                mark = XVimMakeMark(xview.insertionLine + 1, 0, buffer.document);
+            } else if (aClass == [XVimShiftEvaluator class]) {
+                mark = XVimMakeMark(xview.insertionLine, 0, buffer.document);
+            } else {
+                XVimPosition pos = xview.insertionPosition;
+                mark = XVimMakeMark(pos.line, pos.column, buffer.document);
             }
             
-            if( nil != mark.document){
+            if (nil != mark.document) {
                 [[XVim instance].marks setMark:mark forName:@"."];
             }
         }
@@ -100,11 +100,8 @@
 }
 
 - (XVimEvaluator*)onChildComplete:(XVimEvaluator *)childEvaluator{
-    if( [childEvaluator isKindOfClass:[XVimTextObjectEvaluator class]] ){
-        MOTION_OPTION opt = ((XVimTextObjectEvaluator*)childEvaluator).inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;
-        opt |= ((XVimTextObjectEvaluator*)childEvaluator).bigword ? BIGWORD : MOTION_OPTION_NONE;
-        XVimMotion* m = XVIM_MAKE_MOTION(((XVimTextObjectEvaluator*)childEvaluator).textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
-        return [self _motionFixed:m];
+    if ([childEvaluator isKindOfClass:[XVimTextObjectEvaluator class]]) {
+        return [self _motionFixed:[(XVimTextObjectEvaluator *)childEvaluator motion]];
     }
     return nil;
 }

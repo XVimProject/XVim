@@ -9,11 +9,9 @@
 #import <Cocoa/Cocoa.h>
 #import "IDEKit.h"
 
-@interface IDEEditorHook : NSViewController
-+(void) hook;
-@end
+@interface IDEEditor (XVim)
 
-@interface IDEEditor(Hook)
-- (void)didSetupEditor_;
-- (void)primitiveInvalidate_;
++ (void)xvim_initialize;
+
+- (void)xvim_tryToSetupXVimView;
 @end

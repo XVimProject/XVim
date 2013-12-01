@@ -19,6 +19,7 @@
 @end
 
 @implementation XVimRegister
+@synthesize type = _type, string = _string;
 
 - (id)init{
     if(self = [super init]){
@@ -124,6 +125,10 @@
 
 
 @implementation XVimRegisterManager
+@synthesize registers = _registers;
+@synthesize recordingRegister = _recordingRegister;
+@synthesize recordingRegisterName = _recordingRegisterName;
+@synthesize lastExecutedRegister = _lastExecutedRegister;
 
 static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwxyz-*.:%/+~";
 

@@ -51,7 +51,7 @@
  * This automatically detects if it is file mark.
  * If the character is not supported as a mark this returns nil
  **/
-- (XVimMark*)markForName:(NSString*)name forDocument:(NSString*)documentPath;
+- (XVimMark*)markForName:(NSString*)name forDocument:(NSDocument *)document;
 
 /**
  * Set mark.

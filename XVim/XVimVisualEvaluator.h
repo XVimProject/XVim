@@ -14,8 +14,7 @@
 // They only rely on their interface to handle them.
 @interface XVimVisualEvaluator : XVimMotionEvaluator 
 
-- (id)initWithWindow:(XVimWindow*)window mode:(XVIM_VISUAL_MODE)mode;
+- (id)initWithWindow:(XVimWindow*)window mode:(XVimVisualMode)mode;
 - (id)initWithLastVisualStateWithWindow:(XVimWindow *)window;
-    
 
 @end

@@ -22,6 +22,7 @@
 // 
 
 #import "XVim.h"
+#import "XVimBuffer.h"
 #import "Logger.h"
 #import "XVimSearch.h"
 #import "XVimExCommand.h"
@@ -30,9 +31,7 @@
 #import "XVimKeyStroke.h"
 #import "XVimOptions.h"
 #import "XVimHistoryHandler.h"
-#import "XVimHookManager.h"
 #import "XVimCommandLine.h"
-#import "DVTSourceTextViewHook.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
 #import "XVimTester.h"
@@ -40,8 +39,9 @@
 #import "IDEKit.h"
 #import "objc/runtime.h"
 
-NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
-NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
+NSString * const XVimBufferChangedNotification = @"XVimBufferChangedNotification";
+NSString * const XVimEnabledStatusChangedNotification = @"XVimBufferEnableNotification";
+NSString * const XVimBufferKey = @"XVimBufferKey";
 
 @interface XVim() {
 	XVimHistoryHandler *_exCommandHistory;
@@ -56,6 +56,23 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @end
 
 @implementation XVim
+@synthesize disabled = _disabled;
+@synthesize options = _options;
+@synthesize searcher = _searcher;
+@synthesize lastCharacterSearchMotion = _lastCharacterSearchMotion;
+@synthesize excmd = _excmd;
+@synthesize marks = _marks;
+@synthesize testRunner = _testRunner;
+@synthesize registerManager = _registerManager;
+@synthesize exCommandHistory = _exCommandHistory;
+@synthesize searchHistory = _searchHistory;
+@synthesize lastOperationCommands = _lastOperationCommands;
+@synthesize isRepeating = _isRepeating;
+@synthesize tempRepeatRegister = _tempRepeatRegister;
+@synthesize lastPlaybackRegister = _lastPlaybackRegister;
+@synthesize document = _document;
+@synthesize isExecuting = _isExecuting;
+
 
 // For reverse engineering purpose.
 +(void)receiveNotification:(NSNotification*)notification{
@@ -116,7 +133,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     
 }
 
-+ (void) load{
++ (void) pluginDidLoad:(NSBundle *)plugin
+{
     NSBundle* app = [NSBundle mainBundle];
     NSString* identifier = [app bundleIdentifier];
     
@@ -127,13 +145,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     
     // Entry Point of the Plugin.
     [Logger defaultLogger].level = LogTrace;
-    
-    // This looks strange but this is what intended to.
-    // [XVim instance] part initialize all the internal objects which does not depends on each other
-    // (If some initialization of a object which is held by XVim class(such as XVimSearch) access
-    //  [XVim instance] inside it, it causes dead lock because of dispatch_once in [XVim instance] method.
-    // So after initializing all the independent object we do initialize dependent objects in init2
-    [[XVim instance] init2];
+
+    // be sure XVim is initialized
+    (void)[XVim instance];
     
     //Caution: parseRcFile can potentially invoke +instance on XVim (e.g. if "set ..." is
     //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
@@ -148,7 +162,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // Otherwise, we may miss some classes.
 
     // Command line window is not setuped if hook is too late.
-    [XVimHookManager hookWhenPluginLoaded];
+    [XVimWindow class];
     
     // We used to observer NSApplicationDidFinishLaunchingNotification to wait for all the classes in Xcode are loaded.
     // When notification comes we hook some classes so that we do not miss any classes.
@@ -179,34 +193,29 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 - (id)init {
 	if (self = [super init]) {
 		self.options = [[[XVimOptions alloc] init] autorelease];
-	}
-	return self;
-}
-
-- (void)init2{
-    _searchHistory = [[XVimHistoryHandler alloc] init];
-    _searcher = [[XVimSearch alloc] init];
-    _lastCharacterSearchMotion = nil;
-    _marks = [[XVimMarks alloc] init];
-    _testRunner= [[XVimTester alloc] init];
-    
-    self.excmd = [[[XVimExCommand alloc] init] autorelease];
-    self.lastPlaybackRegister = nil;
-    self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
-    self.lastOperationCommands = [[[XVimMutableString alloc] init] autorelease];
-    self.lastVisualPosition = XVimMakePosition(NSNotFound, NSNotFound);
-    self.lastVisualSelectionBegin = XVimMakePosition(NSNotFound, NSNotFound);
-    self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
-    self.isRepeating = NO;
-    self.isExecuting = NO;
-    _logFile = nil;
-    _exCommandHistory = [[XVimHistoryHandler alloc] init];
-    
-    for (int i = 0; i < XVIM_MODE_COUNT; ++i) {
-        _keymaps[i] = [[XVimKeymap alloc] init];
+        _searchHistory = [[XVimHistoryHandler alloc] init];
+        _searcher = [[XVimSearch alloc] init];
+        _lastCharacterSearchMotion = nil;
+        _marks = [[XVimMarks alloc] init];
+        _testRunner= [[XVimTester alloc] init];
+        
+        self.excmd = [[[XVimExCommand alloc] init] autorelease];
+        self.lastPlaybackRegister = nil;
+        self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
+        self.lastOperationCommands = [[[XVimMutableString alloc] init] autorelease];
+        self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
+        self.isRepeating = NO;
+        self.isExecuting = NO;
+        _logFile = nil;
+        _exCommandHistory = [[XVimHistoryHandler alloc] init];
+        
+        for (int i = 0; i < XVIM_MODE_COUNT; ++i) {
+            _keymaps[i] = [[XVimKeymap alloc] init];
+        }
+        
+        [_options addObserver:self forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
     }
-    
-    [_options addObserver:self forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
+    return self;
 }
 
 -(void)dealloc{
@@ -233,26 +242,34 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
     if( [keyPath isEqualToString:@"debug"]) {
         if( [[XVim instance] options].debug ){
-            NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
-            NSString *logPath = [homeDir stringByAppendingString: @"/.xvimlog"]; 
+            NSString *logPath = [@"~/.xvimlog" stringByExpandingTildeInPath];
             [[Logger defaultLogger] setLogFile:logPath];
         }else{
             [[Logger defaultLogger] setLogFile:nil];
         }
     } else if( [keyPath isEqualToString:@"document"] ){
-        NSString *documentPath = [[[object document] fileURL] path];
-        self.document = documentPath;
-        
-        if (documentPath != nil) {
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:documentPath forKey:XVimDocumentPathKey];
-            [[NSNotificationCenter defaultCenter] postNotificationName:XVimDocumentChangedNotification object:nil userInfo:userInfo];
+        NSDocument *document = [object document];
+
+        if (![document respondsToSelector:@selector(textStorage)]) {
+            return;
+        }
+
+        NSTextStorage *textStorage = [[object document] textStorage];
+        XVimBuffer *buffer = document.xvim_buffer;
+
+        if (!buffer && [document.fileURL isFileURL]) {
+            self.document = document.fileURL.path;
+            buffer = [XVimBuffer makeBufferForDocument:document textStorage:textStorage];
+        }
+        if (buffer) {
+            NSDictionary *userInfo = @{ XVimBufferKey: buffer };
+            [[NSNotificationCenter defaultCenter] postNotificationName:XVimBufferChangedNotification object:nil userInfo:userInfo];
         }
     }
 }
     
 - (void)parseRcFile {
-    NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
-    NSString *keymapPath = [homeDir stringByAppendingString: @"/.xvimrc"]; 
+    NSString *keymapPath = [@"~/.xvimrc" stringByExpandingTildeInPath];
     NSString *keymapData = [[[NSString alloc] initWithContentsOfFile:keymapPath
                                                            encoding:NSUTF8StringEncoding
 															  error:NULL] autorelease];
@@ -336,14 +353,17 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [self.testRunner runTest];
 }
 
-- (void)toggleXVim:(id)sender{
-    if( [(NSCell*)sender state] == NSOnState ){
-        [DVTSourceTextViewHook unhook];
-        [(NSCell*)sender setState:NSOffState];
-    }else{
-        [DVTSourceTextViewHook hook];
-        [(NSCell*)sender setState:NSOnState];
+- (void)toggleXVim:(NSCell *)sender{
+    if ([sender state] == NSOnState) {
+        _disabled = YES;
+        [sender setState:NSOffState];
+    } else {
+        _disabled = NO;
+        [sender setState:NSOnState];
     }
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:XVimEnabledStatusChangedNotification
+                                                        object:nil userInfo:nil];
 }
 
 @end

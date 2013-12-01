@@ -8,16 +8,15 @@
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "XVimKeymapProvider.h"
-#import "XVimMotionOption.h"
 
 @interface XVimTextObjectEvaluator() {
+    BOOL   _inner;
+    MOTION _textobject;
+    BOOL _bigword;
 }
 @end
 
 @implementation XVimTextObjectEvaluator
-@synthesize inner = _inner;
-@synthesize textobject = _textobject;
-@synthesize bigword = _bigword;
 
 - (id)initWithWindow:window inner:(BOOL)inner{
 	if (self = [super initWithWindow:window]) {
@@ -31,11 +30,28 @@
     [super dealloc];
 }
 
+- (XVimMotion *)motion {
+    XVimMotionOptions opt = _inner ? MOPT_TEXTOBJECT_INNER : MOPT_NONE;
+    opt |= _bigword ? MOPT_BIGWORD : MOPT_NONE;
+    return XVIM_MAKE_MOTION(_textobject, CHARACTERWISE_INCLUSIVE, opt, [self numericArg]);
+}
+
 - (XVimEvaluator*)defaultNextEvaluator{
     return nil;
 }
 
-- (float)insertionPointHeightRatio{
+- (NSString *)modeString
+{
+    return self.parent.modeString;
+}
+
+- (void)didEndHandler
+{
+    [self.parent.argumentString setString:@""];
+    [super didEndHandler];
+}
+
+- (CGFloat)insertionPointHeightRatio{
     return 0.5;
 }
 
@@ -48,33 +64,33 @@
 }
 
 - (XVimEvaluator*)b{
-    self.textobject = TEXTOBJECT_PARENTHESES;
+    _textobject = TEXTOBJECT_PARENTHESES;
     return nil;
 }
 
 - (XVimEvaluator*)B{
-    self.textobject = TEXTOBJECT_BRACES;
+    _textobject = TEXTOBJECT_BRACES;
     return nil;
 }
 
 -(XVimEvaluator*)p{
-    self.textobject = TEXTOBJECT_PARAGRAPH;
+    _textobject = TEXTOBJECT_PARAGRAPH;
     return nil;
 }
 
 - (XVimEvaluator*)w{
-    self.textobject = TEXTOBJECT_WORD;
+    _textobject = TEXTOBJECT_WORD;
     return nil;
 }
 
 - (XVimEvaluator*)W{
-    self.textobject = TEXTOBJECT_WORD;
-    self.bigword = YES;
+    _textobject = TEXTOBJECT_WORD;
+    _bigword = YES;
     return nil;
 }
 
 - (XVimEvaluator*)LSQUAREBRACKET{
-    self.textobject = TEXTOBJECT_SQUAREBRACKETS;
+    _textobject = TEXTOBJECT_SQUAREBRACKETS;
     return nil;
 }
 
@@ -91,7 +107,7 @@
 }
 
 - (XVimEvaluator*)LESSTHAN{
-    self.textobject = TEXTOBJECT_ANGLEBRACKETS;
+    _textobject = TEXTOBJECT_ANGLEBRACKETS;
     return nil;
 }
 
@@ -108,17 +124,17 @@
 }
 
 - (XVimEvaluator*)SQUOTE{
-    self.textobject = TEXTOBJECT_SQUOTE;
+    _textobject = TEXTOBJECT_SQUOTE;
     return nil;
 }
 
 - (XVimEvaluator*)DQUOTE{
-    self.textobject = TEXTOBJECT_DQUOTE;
+    _textobject = TEXTOBJECT_DQUOTE;
     return nil;
 }
 
 - (XVimEvaluator*)BACKQUOTE{
-    self.textobject = TEXTOBJECT_BACKQUOTE;
+    _textobject = TEXTOBJECT_BACKQUOTE;
     return nil;
 }
 

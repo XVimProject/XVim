@@ -33,7 +33,7 @@ XVimMotionEvaluator
 */
 
 #import "XVimRegister.h"
-#import "NSTextView+VimOperation.h"
+#import "XVimView.h"
 
 @class XVimCommandLineEvaluator;
 @class XVimMotionEvaluator;
@@ -47,15 +47,16 @@ XVimMotionEvaluator
 @interface XVimEvaluator : NSObject <XVimTextViewDelegateProtocol>
 @property(strong) XVimWindow* window;
 @property(strong) XVimEvaluator* parent;
-@property NSUInteger numericArg;
+@property(nonatomic) NSUInteger numericArg;
 @property BOOL numericMode;
 @property(strong) NSMutableString* argumentString;
-@property(strong) NSString* yankRegister;
+@property(nonatomic, strong) NSString* yankRegister;
 @property SEL onChildCompleteHandler;
 
 - (id)initWithWindow:(XVimWindow*)window;
 
 + (XVimEvaluator*)invalidEvaluator;
++ (XVimEvaluator*)popEvaluator;
 + (XVimEvaluator*)noOperationEvaluator;
     
 /**
@@ -103,7 +104,9 @@ XVimMotionEvaluator
  *
  * YOU MUST CALL [super becameHandler] when you override this.
  **/
-- (void)becameHandler;
+- (void)becameHandler NS_REQUIRES_SUPER;
+
+- (void)cancelHandler NS_REQUIRES_SUPER;
 
 /**
  * This is called when an evaluator has been finished its task and evicted from stack evaluatorhandler.
@@ -112,11 +115,11 @@ XVimMotionEvaluator
  *
  * YOU MUST CALL [super didEndHandler] when you override this.
  **/
-- (void)didEndHandler;
+- (void)didEndHandler NS_REQUIRES_SUPER;
 - (XVimEvaluator*)defaultNextEvaluator;
-- (float)insertionPointHeightRatio;
-- (float)insertionPointWidthRatio;
-- (float)insertionPointAlphaRatio;
+- (CGFloat)insertionPointHeightRatio;
+- (CGFloat)insertionPointWidthRatio;
+- (CGFloat)insertionPointAlphaRatio;
 
 - (NSString*)modeString;
 - (XVIM_MODE)mode;
@@ -124,7 +127,7 @@ XVimMotionEvaluator
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider;
 
-- (NSTextView*)sourceView;
+- (XVimView *)currentView;
 
 - (void)resetCompletionHandler;
 

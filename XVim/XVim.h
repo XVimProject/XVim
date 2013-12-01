@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 #import "XVimDefs.h"
 #import "XVimKeymapProvider.h"
-#import "XVimTextViewProtocol.h"
 #import "XVimKeyStroke.h"
 
 @class XVimKeymap;
@@ -27,12 +26,15 @@
 @class XVimTester;
 
 
-extern NSString * const XVimDocumentChangedNotification;
-extern NSString * const XVimDocumentPathKey;
+extern NSString * const XVimBufferChangedNotification;
+extern NSString * const XVimEnabledStatusChangedNotification;
+extern NSString * const XVimBufferKey;
 
 @interface XVim : NSObject<XVimKeymapProvider>
 
 + (XVim*)instance;
+@property (nonatomic, readonly) BOOL disabled;
+
 @property (strong) XVimOptions* options;
 @property (strong) XVimSearch* searcher;
 @property (strong) XVimMotion* lastCharacterSearchMotion;
@@ -43,9 +45,6 @@ extern NSString * const XVimDocumentPathKey;
 @property (readonly) XVimHistoryHandler* exCommandHistory;
 @property (readonly) XVimHistoryHandler* searchHistory;
 @property (readonly) XVimMutableString *lastOperationCommands;
-@property  XVIM_VISUAL_MODE lastVisualMode;
-@property  XVimPosition lastVisualPosition;
-@property  XVimPosition lastVisualSelectionBegin;
 @property (nonatomic) BOOL isRepeating; // For dot(.) command repeat
 
 @property (copy) NSString* lastPlaybackRegister;

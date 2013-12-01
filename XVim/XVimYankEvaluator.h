@@ -7,7 +7,6 @@
 //
 
 #import "XVimOperatorEvaluator.h"
-#import "XVimTextViewProtocol.h"
 
 @interface XVimYankEvaluator : XVimOperatorEvaluator
 - (XVimEvaluator*)y;

@@ -7,8 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "XVimMotionType.h"
-#import "XVimMotionOption.h"
+#import "XVimDefs.h"
 
 typedef struct {
     BOOL reachedEndOfLine;
@@ -17,6 +16,14 @@ typedef struct {
     NSUInteger lastEndOfLine;
     NSUInteger lastEndOfWord;
 }XVimMotionInfo;
+
+typedef enum _MOTION_TYPE{
+    DEFAULT_MOTION_TYPE,
+    CHARACTERWISE_INCLUSIVE,
+    CHARACTERWISE_EXCLUSIVE,
+    LINEWISE,
+    BLOCKWISE
+} MOTION_TYPE;
 
 #define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
 
@@ -31,6 +38,7 @@ typedef enum _MOTION{
     MOTION_LINE_FORWARD,            // k
     MOTION_LINE_BACKWARD,           // j
     MOTION_END_OF_LINE,             // $
+    MOTION_COLUMN_OF_LINE,          // |
     MOTION_BEGINNING_OF_LINE,       // 0
     MOTION_SENTENCE_FORWARD,
     MOTION_SENTENCE_BACKWARD,
@@ -71,15 +79,16 @@ typedef enum _MOTION{
 @interface XVimMotion : NSObject
 @property MOTION motion;
 @property MOTION_TYPE type;
-@property MOTION_OPTION option;
+@property XVimMotionOptions option;
 @property NSUInteger count;
+@property (readonly) NSInteger  scount;
 @property NSUInteger line;
 @property NSUInteger column;
 @property NSUInteger position;
 @property unichar character;
-@property(strong) NSString* regex;
+@property (strong) NSString* regex;
 @property XVimMotionInfo* info;
 
-- (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;
+- (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(XVimMotionOptions)option count:(NSUInteger)count;
 - (BOOL) isTextObject;
 @end 
