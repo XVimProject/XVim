@@ -21,7 +21,7 @@
 - (id)initWithWindow:(XVimWindow *)window withRegister:(NSString*)reg{
     if( self = [super initWithWindow:window] ){
         self.evaluatorStack = [[[NSMutableArray alloc] init] autorelease];
-        [self.evaluatorStack addObject:[[XVimNormalEvaluator alloc] initWithWindow:window]];
+        [self.evaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:window] autorelease]];
         self.reg = reg;
     }
     return self;
@@ -29,15 +29,12 @@
 
 - (void)dealloc{
     self.evaluatorStack = nil;
+    self.reg = nil;
     [super dealloc];
 }
 
 - (void)becameHandler{
     [[[XVim instance] registerManager] startRecording:self.reg];
-}
-
-- (void)didEndHandler{
-    
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{

@@ -76,7 +76,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         // It will be called after XVimInsertEvaluator finish handling key input.
         return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
     }else{
-        [[self sourceView] xvim_delete:motion];
+        [[self sourceView] xvim_delete:motion andYank:YES];
     }
     return nil;
 }

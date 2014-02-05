@@ -59,8 +59,8 @@
 @property(readonly) NSUInteger selectionBegin;
 @property(readonly) XVimPosition selectionBeginPosition;
 @property(readonly) NSUInteger numberOfSelectedLines;
-@property(readonly) NSUInteger numberOfSelectedColumns;
 @property(readonly) XVIM_VISUAL_MODE selectionMode;
+@property(readonly) BOOL selectionToEOL;
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSURL* documentURL;
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
@@ -78,7 +78,8 @@
 - (void)xvim_adjustCursorPosition;
 - (void)xvim_moveToPosition:(XVimPosition)pos;
 - (void)xvim_move:(XVimMotion*)motion;
-- (void)xvim_delete:(XVimMotion*)motion;
+- (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;
+- (void)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank;
 - (void)xvim_change:(XVimMotion*)motion;
 - (void)xvim_yank:(XVimMotion*)motion;
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
@@ -86,8 +87,7 @@
 - (void)xvim_makeLowerCase:(XVimMotion*)motion;
 - (void)xvim_makeUpperCase:(XVimMotion*)motion;
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count;
-- (void)xvim_joinAtLineNumber:(NSUInteger)line;
-- (void)xvim_join:(NSUInteger)count;
+- (void)xvim_join:(NSUInteger)count addSpace:(BOOL)addSpace;
 - (void)xvim_filter:(XVimMotion*)motion;
 - (void)xvim_shiftRight:(XVimMotion*)motion;
 - (void)xvim_shiftLeft:(XVimMotion*)motion;
@@ -100,12 +100,11 @@
 - (void)xvim_insertNewlineAboveCurrentLineWithIndent;
 - (void)xvim_insertNewlineAboveAndInsertWithIndent;
 - (void)xvim_insertNewlineBelowAndInsertWithIndent;
-- (void)xvim_append;
-- (void)xvim_insert;
-- (void)xvim_appendAtEndOfLine;
-- (void)xvim_insertBeforeFirstNonblank;
+- (void)xvim_insert:(XVimInsertionPoint)mode blockColumn:(NSUInteger *)column blockLines:(XVimRange *)lines;
 - (void)xvim_overwriteCharacter:(unichar)c;
 - (BOOL)xvim_incrementNumber:(int64_t)offset;
+- (void)xvim_blockInsertFixupWithText:(NSString *)text mode:(XVimInsertionPoint)mode
+                                count:(NSUInteger)count column:(NSUInteger)column lines:(XVimRange)lines;
 
 /**
  * Sort specified lines.

@@ -56,6 +56,7 @@ XVimMotionEvaluator
 - (id)initWithWindow:(XVimWindow*)window;
 
 + (XVimEvaluator*)invalidEvaluator;
++ (XVimEvaluator*)popEvaluator;
 + (XVimEvaluator*)noOperationEvaluator;
     
 /**
@@ -112,7 +113,7 @@ XVimMotionEvaluator
  *
  * YOU MUST CALL [super didEndHandler] when you override this.
  **/
-- (void)didEndHandler;
+- (void)didEndHandler NS_REQUIRES_SUPER;
 - (XVimEvaluator*)defaultNextEvaluator;
 - (float)insertionPointHeightRatio;
 - (float)insertionPointWidthRatio;

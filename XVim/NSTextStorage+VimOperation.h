@@ -94,6 +94,9 @@ typedef enum {
 
 @interface NSTextStorage (VimOperation)
 
+- (NSUInteger)tabWidth;
+- (NSUInteger)indentWidth;
+
 - (NSString*)xvim_string;
 
 #pragma mark Properties
@@ -178,6 +181,7 @@ typedef enum {
  *       If the character at "index" is non blank this returns "index" itself
  **/ 
 - (NSUInteger)nextNonblankInLine:(NSUInteger)index; // May return NSNotFound
+- (NSUInteger)nextNonblankInLine:(NSUInteger)index allowEOL:(BOOL)allowEOL; // May return NSNotFound
 
 /**
  * Returns next digit character position after the position "index" in a current line.
@@ -307,7 +311,6 @@ typedef enum {
  *       We should adapt Xcode's way.
  **/
 - (NSRange)characterRangeForLineRange:(NSRange)arg1;
-
 
 #pragma mark Vim operation related methods
 
