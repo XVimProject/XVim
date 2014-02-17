@@ -34,6 +34,7 @@
          @"hlsearch",@"hls",
          @"number", @"nu",
          @"vimregex", @"vr",
+         @"relativenumber", @"rn",
          nil];
         
         // Default values
@@ -50,6 +51,7 @@
         _hlsearch = NO;
         _number = NO;
         _vimregex = NO;
+        _relativenumber = YES;
     }
     return self;
 }

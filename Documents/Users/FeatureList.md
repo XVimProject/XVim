@@ -176,6 +176,7 @@ The dot command ('.') is supported.
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
   clipboard | ":set clipboard=unnamed" to share system clipboard with unnamed register
   [no]vimregex | Tells XVim to use Vim's regular expression. Currently support \<,\> for word boundary, \c,\C for specifying case (in)sensitiveness.
+  [no]relativenumber |
 
 
 ## guioptions
