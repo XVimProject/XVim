@@ -47,10 +47,10 @@ XVimMotionEvaluator
 @interface XVimEvaluator : NSObject <XVimTextViewDelegateProtocol>
 @property(strong) XVimWindow* window;
 @property(strong) XVimEvaluator* parent;
-@property NSUInteger numericArg;
+@property(nonatomic) NSUInteger numericArg;
 @property BOOL numericMode;
 @property(strong) NSMutableString* argumentString;
-@property(strong) NSString* yankRegister;
+@property(nonatomic,strong) NSString* yankRegister;
 @property SEL onChildCompleteHandler;
 
 - (id)initWithWindow:(XVimWindow*)window;
