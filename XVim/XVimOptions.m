@@ -17,6 +17,8 @@
 
 @implementation XVimOptions
 
+@synthesize number = _number;
+
 - (id)init{
     if( self = [super init] ){
         // Abbreviation mapping
@@ -84,6 +86,10 @@
     }
 }
 
+- (BOOL)number
+{
+    return _number;
+}
 
 - (void)setNumber:(BOOL)n{
     _number = n;
