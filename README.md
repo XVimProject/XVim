@@ -6,7 +6,7 @@
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
-  For Xcode 5.1 : See [#551](https://github.com/JugglerShu/XVim/issues/551) and follow the steps.
+  For Xcode 5.1 : Use the latest develop branch.
 
   [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
   
