@@ -81,6 +81,8 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
   C-w s    | Add new assistant editor. Assistant editors are laid out holizontally.
   C-w v    | Add new assistant editor. Assistant editors are laid out vertically.
 C-w h,j,k,l| Move focus between editors
+  C-w w    | Jump to the next editor
+  C-w W    | Jump to the previous editor
 
 The behaviour of window manipulations is slitely different from Vim's one. This is becuase that Xcode doesn't have a concept of multiple equivalent text views in a window.
 Instead, Xcode has a concept of a main editor and assistant editors. A main editor always stays in a window and you can add/remove multiple assistant editors.
@@ -146,12 +148,13 @@ The dot command ('.') is supported.
 
  Command   | Note
 -----------|-----
-  :run     | Invoke Xcode's 'run' command
-  :make    | Invoke Xcode's 'build' command
-  :xhelp   | Show quick help for current insertion point
-  :xccmd   | Invoke arbitrary command in Xcode's actions in its menu. Takes one argument as its action to invoke. Actions [here](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/MenuActionList.txt) are available.
-  :nissue  | Invoke "jump to next issue". ":ni" does the samse.
-  :pissue  | Invoke "jump to previous issue". ":pi" does the same.
+  :run          | Invoke Xcode's 'run' command
+  :make         | Invoke Xcode's 'build' command
+  :xhelp        | Show quick help for current insertion point
+  :xccmd        | (Use :xcmenucmd instead. It is simpler. ) Invoke arbitrary command in Xcode's actions in its menu. Takes one argument as its action to invoke. Actions [here](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/MenuActionList.txt) are available.
+  :xcmenucmd    | Invoke arbitrary command in menu. (EXAMPLE: :xcmenucmd Run)
+  :nissue       | Invoke "jump to next issue". ":ni" does the same.
+  :pissue       | Invoke "jump to previous issue". ":pi" does the same.
   :ncounterpart | Invoke "jump to next counterpart". ":nc" does the same.
   :pcounterpart | Invoke "jump to previous counterpart". ":pc" does the same.
 

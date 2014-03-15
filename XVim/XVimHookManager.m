@@ -12,6 +12,7 @@
 #import "IDESourceCodeEditorHook.h"
 #import "IDEEditorHook.h"
 #import "IDEWorkspaceWindowHook.h"
+#import "DVTSourceTextScrollViewHook.h"
 
 @implementation XVimHookManager
 
@@ -19,6 +20,7 @@
     [IDEEditorAreaHook hook];
     [IDEWorkspaceWindowHook hook];
 	[DVTSourceTextViewHook hook];
+   	[DVTSourceTextScrollViewHook hook]; 
 	[IDESourceCodeEditorHook hook];
     [IDEEditorHook hook];
 }

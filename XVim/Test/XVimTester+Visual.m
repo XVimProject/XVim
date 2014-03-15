@@ -17,6 +17,19 @@
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
     
+    static NSString* text3 = @"    aaa\n"
+                             @"    bbb\n";
+    
+    static NSString* Vyp_result = @"    aaa\n"
+                                  @"    bbb\n"
+                                  @"    aaa\n"
+                                  @"    bbb\n";
+    
+    static NSString* VyP_result = @"    aaa\n"
+                                  @"    aaa\n"
+                                  @"    bbb\n"
+                                  @"    bbb\n";
+    
     static NSString* v_d_result = @"d e-e fff\n"
                                   @"ggg hhh i_i\n"
                                   @"    jjj kkk";
@@ -105,6 +118,9 @@
             XVimMakeTestCase(text2, 0,  0, @"vllyjv6lp", p_result, 14, 0), // yank and paste with visual
             XVimMakeTestCase(text2, 0,  0, @"vllyjv6lP", p_result, 14, 0), // yank and paste with visual
             XVimMakeTestCase(text1, 0,  0, @"llvllYp", Y_result, 12, 0), // yank and paste with visual
+            
+            XVimMakeTestCase(text3, 0,  0, @"Vjyjp", Vyp_result, 16, 0), // yank and paste with visual line
+            XVimMakeTestCase(text3, 0,  0, @"VjyjP", VyP_result, 8, 0), // yank and paste with visual line
             
             // Change
             XVimMakeTestCase(text1, 0,  0, @"vlllcxxx<ESC>", v_c_result, 2, 0), // change in visual

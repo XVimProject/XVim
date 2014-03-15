@@ -200,14 +200,6 @@ static XVimEvaluator* _noOperationEvaluator = nil;
     }
 }
 
-- (BOOL)numericMode{
-    if( nil == self.parent ){
-        return _numericMode;
-    }else{
-        return [self.parent numericMode];
-    }
-}
-
 - (void)textView:(NSTextView*)view didYank:(NSString*)yankedText withType:(TEXT_TYPE)type{
     [[[XVim instance] registerManager] yank:yankedText withType:type onRegister:self.yankRegister];
     return;
