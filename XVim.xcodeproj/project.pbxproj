@@ -168,6 +168,9 @@
 		C3E8F115154267BA007410ED /* XVimMarkSetEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F114154267BA007410ED /* XVimMarkSetEvaluator.m */; };
 		C3E8F11815427AE6007410ED /* XVimArgumentEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = C3E8F11715427AE6007410ED /* XVimArgumentEvaluator.m */; };
 		C3FA1A1D1532648700059BF6 /* XVimWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = C3FA1A1C1532648700059BF6 /* XVimWindow.m */; };
+		E905EE3918B045FE0052D3C1 /* DVTTextSidebarViewHook.m in Sources */ = {isa = PBXBuildFile; fileRef = E905EE3818B045FE0052D3C1 /* DVTTextSidebarViewHook.m */; };
+		E905EE3A18B0461E0052D3C1 /* DVTTextSidebarViewHook.h in Sources */ = {isa = PBXBuildFile; fileRef = E905EE3718B045FE0052D3C1 /* DVTTextSidebarViewHook.h */; };
+		E905EE3B18B0461E0052D3C1 /* DVTTextSidebarViewHook.m in Sources */ = {isa = PBXBuildFile; fileRef = E905EE3818B045FE0052D3C1 /* DVTTextSidebarViewHook.m */; };
 		F100DC2E150BB6BC002C703C /* XVimRegisterEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */; };
 		F15805C71530B4000031175A /* XVimWindowEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = F15805C61530B4000031175A /* XVimWindowEvaluator.m */; };
 		F17D013B150861DC00A8111B /* XVimRegister.m in Sources */ = {isa = PBXBuildFile; fileRef = F17D013A150861DC00A8111B /* XVimRegister.m */; };
@@ -362,6 +365,8 @@
 		C3E8F11715427AE6007410ED /* XVimArgumentEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimArgumentEvaluator.m; path = XVim/XVimArgumentEvaluator.m; sourceTree = SOURCE_ROOT; };
 		C3FA1A1B1532648700059BF6 /* XVimWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimWindow.h; path = XVim/XVimWindow.h; sourceTree = SOURCE_ROOT; };
 		C3FA1A1C1532648700059BF6 /* XVimWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimWindow.m; path = XVim/XVimWindow.m; sourceTree = SOURCE_ROOT; };
+		E905EE3718B045FE0052D3C1 /* DVTTextSidebarViewHook.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTTextSidebarViewHook.h; path = XVim/DVTTextSidebarViewHook.h; sourceTree = SOURCE_ROOT; };
+		E905EE3818B045FE0052D3C1 /* DVTTextSidebarViewHook.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = DVTTextSidebarViewHook.m; path = XVim/DVTTextSidebarViewHook.m; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
 		F100DC2D150BB6BC002C703C /* XVimRegisterEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimRegisterEvaluator.m; path = XVim/XVimRegisterEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F15805C51530B4000031175A /* XVimWindowEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimWindowEvaluator.h; path = XVim/XVimWindowEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -725,6 +730,8 @@
 		C345DDB8154CCF79009F232E /* Event Dispatchers */ = {
 			isa = PBXGroup;
 			children = (
+				E905EE3718B045FE0052D3C1 /* DVTTextSidebarViewHook.h */,
+				E905EE3818B045FE0052D3C1 /* DVTTextSidebarViewHook.m */,
 				C38A5B3F15272B0500E1448D /* DVTSourceTextViewHook.h */,
 				C38A5B4015272B0500E1448D /* DVTSourceTextViewHook.m */,
 				A2F26219182CEC3600AD3DC4 /* DVTSourceTextScrollViewHook.h */,
@@ -841,6 +848,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E905EE3A18B0461E0052D3C1 /* DVTTextSidebarViewHook.h in Sources */,
+				E905EE3B18B0461E0052D3C1 /* DVTTextSidebarViewHook.m in Sources */,
 				A28F422817EEDBC200A3F7AE /* Logger.m in Sources */,
 				A28F422917EEDBC200A3F7AE /* XVim.m in Sources */,
 				A28F422A17EEDBC200A3F7AE /* XVimCommandField.m in Sources */,
@@ -922,6 +931,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E905EE3918B045FE0052D3C1 /* DVTTextSidebarViewHook.m in Sources */,
 				A24782BF14D6F56E003B6433 /* Logger.m in Sources */,
 				A24782C114D6F56E003B6433 /* XVim.m in Sources */,
 				A24782C214D6F56E003B6433 /* XVimCommandField.m in Sources */,
