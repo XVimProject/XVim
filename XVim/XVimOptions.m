@@ -53,7 +53,7 @@
         _hlsearch = NO;
         _number = NO;
         _vimregex = NO;
-        _relativenumber = YES;
+        _relativenumber = NO;
     }
     return self;
 }
