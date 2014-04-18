@@ -28,7 +28,7 @@
 /*
  * File: /Developer/Applications/Xcode.app/Contents/PlugIns/IDESourceEditor.ideplugin/Contents/MacOS/IDESourceEditor
  * UUID: B1776C9F-426F-3F26-91A8-4DD2E5F24F78
- * Arch: Intel x86-64 (x86_64)
+ * Arch: Intel x86-64 (x86_64com)
  *       Current version: 1175.0.0, Compatibility version: 1.0.0
  *       Minimum Mac OS X version: 10.7.0
  *

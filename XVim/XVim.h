@@ -80,6 +80,7 @@ extern NSString * const XVimDocumentPathKey;
  * repeat regisgter
  **/
 - (void)appendOperationKeyStroke:(XVimString*)stroke;
+- (void)appendInsertKeyStroke:(XVimString *)stroke;
 - (void)fixOperationCommands;
 - (void)cancelOperationCommands;
 - (void)startRepeat;
@@ -95,4 +96,6 @@ extern NSString * const XVimDocumentPathKey;
 
 - (void)ringBell;
 
+- (void)replaceToCompletingText:(NSString *)insertText;
+- (void)saveCompletingText:(NSString *)text;
 @end

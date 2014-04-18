@@ -37,4 +37,6 @@
 - (void)didChangeText_;
 - (void)viewDidMoveToSuperview_;
 - (void)observeValueForKeyPath_:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context;
+
+- (void)didInsertCompletionTextAtRange_:(struct _NSRange)arg1;
 @end

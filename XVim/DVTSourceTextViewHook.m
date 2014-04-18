@@ -41,6 +41,7 @@
 + (void)unhook:(NSString*)method{
     NSString* cls = @"DVTSourceTextView";
     [Hooker unhookClass:cls method:method];
+    
 }
 
 + (void)hook{
@@ -57,6 +58,8 @@
     [self hook:@"viewDidMoveToSuperview"];
     [self hook:@"shouldChangeTextInRange:replacementString"];
     [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
+    
+    [self hook:@"didInsertCompletionTextAtRange:"];
 }
 
 + (void)unhook{
@@ -78,6 +81,8 @@
     // We do not unhook this too. Since "addObserver" is called in initWithCoder we should keep this hook
     // (Calling observerValueForKeyPath in NSObject results in throwing exception)
     //[self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
+    
+    [self unhook:@"didInsertCompletionTextAtRange:"];
 }
 
 #ifdef __XCODE5__
@@ -185,7 +190,6 @@
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
-    return;
 }
 
 - (void)drawRect:(NSRect)dirtyRect{
@@ -275,6 +279,17 @@
         [view setNeedsUpdateFoundRanges:YES];
         [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];
     }
+}
+
+
+- (void)didInsertCompletionTextAtRange:(struct _NSRange)arg1 {
+    DVTSourceTextView *base = (DVTSourceTextView *)self;
+    [base didInsertCompletionTextAtRange_:arg1];
+    
+    NSString *completionText = [[base string]
+                          substringWithRange:arg1];
+//    //NSLog(@"completion text:%@",completionText);
+    [[XVim instance] saveCompletingText:completionText];
 }
 
 @end

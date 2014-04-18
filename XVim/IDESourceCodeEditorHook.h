@@ -8,10 +8,12 @@
 
 #import <Foundation/Foundation.h>
 #import "IDESourceEditor.h"
+#import "DVTKit.h"
 @interface IDESourceCodeEditorHook : NSObject
 + (void)hook;
 @end
 
 @interface IDESourceCodeEditor(Hook)
 - (id)initWithNibName_:nibName bundle:nibBundle document:nibDocument;
+
 @end

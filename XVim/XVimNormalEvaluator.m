@@ -132,6 +132,7 @@
 
 // This is not motion but scroll. That's the reason the implementation is here.
 - (XVimEvaluator*)C_f{
+    NSLog(@"%@",[NSThread callStackSymbols]);
     [[self sourceView] xvim_scrollPageForward:[self numericArg]];
     return nil;
 }
@@ -445,6 +446,7 @@
 - (XVimEvaluator*)DOT{
     [[XVim instance] startRepeat];
     XVimString *repeatRegister = [[XVim instance] lastOperationCommands];
+    NSLog(@"normal evaluator dot cmd %@", repeatRegister);
     TRACE_LOG(@"Repeat:%@", repeatRegister);
     
     NSMutableArray* stack = [[[NSMutableArray alloc] init] autorelease];

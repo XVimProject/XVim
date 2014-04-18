@@ -19,7 +19,7 @@
 + (void) hook
 {
     Class delegate = NSClassFromString(@"IDESourceCodeEditor");
-	[Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) 
+	[Hooker hookMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)
 			   ofClass:delegate 
 			withMethod:class_getInstanceMethod([self class], @selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)) 
    keepingOriginalWith:@selector(textView_:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
@@ -29,4 +29,6 @@
 {
     return newSelectedCharRanges;
 }
+
 @end
+

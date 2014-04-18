@@ -22,10 +22,10 @@
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
 @property (nonatomic) BOOL movementKeyPressed;
-@property (nonatomic, strong) NSString *lastInsertedText;
 @property (nonatomic, readonly, strong) NSArray *cancelKeys;
 @property (nonatomic, readonly, strong) NSArray *movementKeys;
 @property (nonatomic) BOOL enoughBufferForReplace;
+@property (nonatomic, strong) NSString *lastInsertedText;
 @end
 
 @implementation XVimInsertEvaluator{
@@ -115,6 +115,7 @@
 	return [keymapProvider keymapForMode:XVIM_MODE_INSERT];
 }
 
+// text from start location to cursor.
 - (NSString*)getInsertedText{
     NSTextView* view = [self sourceView];
     NSUInteger startLoc = self.startRange.location;
@@ -182,13 +183,11 @@
     // Store off any needed text
     XVim *xvim = [XVim instance];
     xvim.lastVisualMode = self.sourceView.selectionMode;
-    [xvim fixOperationCommands];
     if( _oneCharMode ){
     }else if (!self.movementKeyPressed){
         //[self recordTextIntoRegister:xvim.recordingRegister];
         //[self recordTextIntoRegister:xvim.repeatRegister];
     }else if(self.lastInsertedText.length > 0){
-        //[xvim.repeatRegister appendText:self.lastInsertedText];
     }
     [sourceView xvim_hideCompletions];
 	
@@ -208,6 +207,8 @@
         [[XVim instance].marks setMark:mark forName:@"."];
     }
     
+    //[[XVim instance] replaceToCompletingText:nil];
+    [[XVim instance] fixOperationCommands];
 }
 
 - (BOOL)windowShouldReceive:(SEL)keySelector {

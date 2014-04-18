@@ -124,6 +124,9 @@ static const char* KEY_WINDOW = "xvimwindow";
         // We must pass the event to the current input method
         // If it is obserbed we do not do anything anymore and handle insertText: or doCommandBySelector:
         
+        if ([self _currentEvaluator].mode == XVIM_MODE_INSERT) {
+            [[XVim instance] appendInsertKeyStroke:[event toXVimString]];
+        }
         // Keep the key input temporary buffer
         self.tmpBuffer = event;
         

@@ -52,6 +52,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 @property (strong,nonatomic) XVimRegisterManager* registerManager;
 @property (strong,nonatomic) XVimMutableString* lastOperationCommands;
 @property (strong,nonatomic) XVimMutableString* tempRepeatRegister;
+@property (strong,nonatomic) XVimMutableString* tempInsertStroke;
+@property (strong,nonatomic) NSString* completingText;
 - (void)parseRcFile;
 @end
 
@@ -179,6 +181,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     self.lastVisualPosition = XVimMakePosition(NSNotFound, NSNotFound);
     self.lastVisualSelectionBegin = XVimMakePosition(NSNotFound, NSNotFound);
     self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
+    self.tempInsertStroke = [[[XVimMutableString alloc] init] autorelease];
     self.isRepeating = NO;
     self.isExecuting = NO;
     _logFile = nil;
@@ -198,6 +201,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     self.lastPlaybackRegister = nil;
     self.lastOperationCommands = nil;
     self.tempRepeatRegister = nil;
+    self.tempInsertStroke = nil;
     [_options release];
     [_searcher release];
     [_lastCharacterSearchMotion release];
@@ -278,15 +282,25 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [self.tempRepeatRegister appendString:stroke];
 }
 
+- (void)appendInsertKeyStroke:(XVimString *)stroke {
+    NSLog(@"append key:%@",stroke);
+    [self.tempInsertStroke appendString:stroke];
+}
+
 - (void)fixOperationCommands{
     if( !self.isRepeating ){
+        NSLog(@"fix repeat register:%@",self.tempRepeatRegister);
         [self.lastOperationCommands setString:self.tempRepeatRegister];
         [self.tempRepeatRegister setString:@""];
+        [self.tempInsertStroke setString:@""];
+    } else {
+        NSLog(@"no repeating");
     }
 }
 
 - (void)cancelOperationCommands{
     [self.tempRepeatRegister setString:@""];
+    [self.tempInsertStroke setString:@""];
 }
 
 - (void)startRepeat{
@@ -316,6 +330,42 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         [DVTSourceTextViewHook hook];
         [(NSCell*)sender setState:NSOnState];
     }
+}
+
+- (void)replaceToCompletingText:(NSString *)insertText {
+    //NSLog(@"completingtext:%@",self.completingText);
+    NSLog(@"last repeat register:%@",self.tempRepeatRegister);
+    //NSLog(@"repeat count:%ld",self.tempRepeatRegister.length);
+    NSLog(@"user input:%@",self.tempInsertStroke);
+    //NSLog(@"input count:%ld",self.tempInsertStroke.length);
+    NSRange range = [self.tempRepeatRegister rangeOfString:self.tempInsertStroke];
+    NSLog(@"range:%@",[NSValue valueWithRange:range]);
+    
+    // TODO: think all the situations
+    // fix range 's location
+//    for (NSUInteger loc = range.location; loc < self.tempRepeatRegister.length; loc++) {
+//        char c = [self.tempRepeatRegister characterAtIndex:loc];
+//        if((c>'A' && c<'Z') || (c>'a'&&c<'z')) {
+//        if ( c != ' ' && c != '(' && c != ')') {
+//            range.length -= (loc - range.location);
+//            range.location = loc;
+//            break;
+//        }
+//    }
+    
+    if (range.location != NSNotFound) {
+        [self.tempRepeatRegister replaceCharactersInRange:range withString:self.completingText];
+        NSLog(@"new repeat register:%@",self.tempRepeatRegister);
+        [self.tempInsertStroke setString:@""];
+    } else {
+        NSLog(@"replace completing text not found");
+    }
+}
+
+
+- (void)saveCompletingText:(NSString *)text {
+    self.completingText = text;
+    [self replaceToCompletingText:nil];
 }
 
 @end
