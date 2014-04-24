@@ -27,6 +27,7 @@
 #import "NSString+VimHelper.h"
 #import "NSTextStorage+VimOperation.h"
 #import "Logger.h"
+#import "NSTextView+VimOperation.h"
 
 #ifdef __USE_DVTKIT__
 #import "DVTKit.h"
@@ -2101,5 +2102,13 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
 }
 
 
+- (void)xvim_undoCursorPos:(NSNumber*)num{
+    // The follwing way to obtain NSTextView from NSTextStorage is adopted by AppKit too.
+    // See NSUndoTextOperation findTextViewForTextStorage method
+    NSTextView* view = [(NSLayoutManager*)[self.layoutManagers firstObject] firstTextView];
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION,DEFAULT_MOTION_TYPE , MOTION_OPTION_NONE, 1);
+    m.position = num.unsignedIntegerValue;
+    [view xvim_move:m];
+}
 
 @end

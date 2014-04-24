@@ -420,4 +420,6 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
  **/
 - (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index;
 
+#pragma mark undo
+- (void)xvim_undoCursorPos:(NSNumber*)num;
 @end

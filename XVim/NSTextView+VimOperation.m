@@ -2154,17 +2154,13 @@
 }
 
 - (void)xvim_registerPositionForUndo:(NSUInteger)pos{
-    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:pos]];
+    [[self undoManager] registerUndoWithTarget:self.textStorage selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:pos]];
 }
 
 - (void)xvim_registerInsertionPointForUndo{
     [self xvim_registerPositionForUndo:self.selectedRange.location];
 }
 
-- (void)xvim_undoCursorPos:(NSNumber*)num{
-    [self xvim_moveCursor:[num unsignedIntegerValue] preserveColumn:NO];
-    [self xvim_syncState];
-}
 /* May be used later
 - (void)hideCompletions {
 	[[[self xview] completionController] hideCompletions];
