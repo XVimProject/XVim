@@ -232,12 +232,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator *)o{
-    [self.sourceView xvim_selectSwapEndsToOtherCorner:NO];
+    [self.sourceView xvim_selectSwapEndsOnSameLine:NO];
     return self;
 }
 
 - (XVimEvaluator *)O{
-    [self.sourceView xvim_selectSwapEndsToOtherCorner:YES];
+    [self.sourceView xvim_selectSwapEndsOnSameLine:YES];
     return self;
 }
 
