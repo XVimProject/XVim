@@ -204,11 +204,11 @@
 
 #pragma mark Searching Positions
 
-- (NSUInteger)nextNonblankInLine:(NSUInteger)index{
+- (NSUInteger)nextNonblankInLine:(NSUInteger)index allowEOL:(BOOL)allowEOL{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     while (index < [[self xvim_string] length]) {
         if( [self isNewline:index] ){
-            return NSNotFound; // Characters left in a line is whitespaces
+            return allowEOL ? index : NSNotFound; // Characters left in a line is whitespaces
         }
         if ( !isWhitespace([[self xvim_string] characterAtIndex:index])){
             break;
@@ -220,6 +220,9 @@
         return NSNotFound;
     }
     return index;
+}
+- (NSUInteger)nextNonblankInLine:(NSUInteger)index{
+    return [self nextNonblankInLine:index allowEOL:NO];
 }
 
 - (NSUInteger)nextDigitInLine:(NSUInteger)index{

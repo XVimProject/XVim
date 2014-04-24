@@ -91,8 +91,9 @@
             // XVimMakeTestCase(text2, 0,  0, @"vjD", V_d_result, 0, 0), // not supported yet
             
             // Shift and repeat
-            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 0, 0), // #311
-            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,32, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 8, 0), // #311
+            XVimMakeTestCase(text2, 0,  0, @"vj>..u", rshift_result0 , 8, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,36, 0),
             
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljjd", C_v_d_result, 0, 0),
             XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),

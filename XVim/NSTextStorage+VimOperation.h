@@ -178,6 +178,7 @@ typedef enum {
  *       If the character at "index" is non blank this returns "index" itself
  **/ 
 - (NSUInteger)nextNonblankInLine:(NSUInteger)index; // May return NSNotFound
+- (NSUInteger)nextNonblankInLine:(NSUInteger)index allowEOL:(BOOL)allowEOL; // May return NSNotFound
 
 /**
  * Returns next digit character position after the position "index" in a current line.
