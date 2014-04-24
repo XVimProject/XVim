@@ -1077,8 +1077,10 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
     [self xvim_moveCursor:tail preserveColumn:NO];
 }
 
-- (void)xvim_join:(NSUInteger)count{
+- (void)xvim_join:(NSUInteger)count addSpace:(BOOL)addSpace{
     NSUInteger line;
+
+    [self xvim_registerInsertionPointForUndo];
 
     if (self.selectionMode == XVIM_VISUAL_NONE) {
         line = self.insertionLine;
@@ -1089,12 +1091,25 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
         count = MAX(1, lines.end - lines.begin);
     }
 
-    for (NSUInteger i = 0; i < count; i++) {
-        [self xvim_joinAtLineNumber:line];
+    if (addSpace) {
+        for (NSUInteger i = 0; i < count; i++) {
+            [self xvim_joinAtLineNumber:line];
+        }
+    } else {
+        NSTextStorage *ts = self.textStorage;
+        NSUInteger pos = [ts positionAtLineNumber:line];
+
+        for (NSUInteger i = 0; i < count; i++) {
+            NSUInteger tail = [ts endOfLine:pos];
+
+            if (tail != NSNotFound && ![ts isEOF:tail]) {
+                [self insertText:@"" replacementRange:NSMakeRange(tail, 1)];
+                [self xvim_moveCursor:tail preserveColumn:NO];
+            }
+        }
     }
-    
+
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
-    return;
 }
 
 - (void)xvim_filter:(XVimMotion*)motion{

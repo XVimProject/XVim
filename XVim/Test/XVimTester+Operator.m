@@ -271,6 +271,26 @@
     static NSString* J_result3 = @"aaa bbb ccc\n"
                                  @"ddd eee fff";
     
+    static NSString* gJ_result0 = @"aaabbb \n"
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* gJ_result1 = @"aaa\n"
+                                 @"bbb ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* gJ_result2 = @"aaabbb ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* gJ_result3 = @"aaabbb ccc\n"
+                                 @"dddeeefff";
+    
     static NSString* rshift_result0 = @"aaa\n"
                                       @"    bbb\n"
                                       @"ccc\n"
@@ -481,6 +501,13 @@
             XVimMakeTestCase(text3, 1, 0, @"3J"    , J_result2, 8, 0), // Numeric arg
             XVimMakeTestCase(text3, 1, 0, @"3Jj."  , J_result3,19, 0), // Repeat
             XVimMakeTestCase(text3, 5, 0, @"J`."  ,  J_result1,12, 0), // . Mark
+            
+            // gJ
+            XVimMakeTestCase(text3, 1, 0, @"gJ"     , gJ_result0, 3, 0), // join 2 lines
+            XVimMakeTestCase(text3, 5, 0, @"gJ"     , gJ_result1, 8, 0), // join 2 lines trailing a space
+            XVimMakeTestCase(text3, 1, 0, @"3gJ"    , gJ_result2, 7, 0), // Numeric arg
+            XVimMakeTestCase(text3, 1, 0, @"3gJj."  , gJ_result3,17, 0), // Repeat
+            XVimMakeTestCase(text3, 5, 0, @"gJ`."  ,  gJ_result1,12, 0), // . Mark
             
             // > (Shift)
             // the following test case assumes that Xcode indent in the preference is 4 spaces
