@@ -38,6 +38,13 @@ typedef struct _XVimPosition{
     NSUInteger column;
 } XVimPosition;
 
+typedef struct _XVimSelection {
+    NSUInteger top;
+    NSUInteger left;
+    NSUInteger bottom;
+    NSUInteger right;
+} XVimSelection;
+
 NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
     XVimRange r;
     r.begin = begin;

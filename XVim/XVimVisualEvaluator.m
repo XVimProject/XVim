@@ -38,6 +38,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 @property XVimPosition initialFromPos;
 @property XVimPosition initialToPos;
+@property BOOL initialToEOL;
 @end
 
 @implementation XVimVisualEvaluator 
@@ -45,6 +46,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     if( self = [self initWithWindow:window mode:[XVim instance].lastVisualMode] ){
         self.initialFromPos = [XVim instance].lastVisualSelectionBegin;
         self.initialToPos = [XVim instance].lastVisualPosition;
+        self.initialToEOL = [XVim instance].lastVisualSelectionToEOL;
     }
     return self;
 }
@@ -116,6 +118,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     }else{
         [self.sourceView xvim_changeSelectionMode:_visual_mode];
     }
+    if (self.initialToEOL) {
+        [self performSelector:@selector(DOLLAR)];
+    }
 }
 
 - (void)didEndHandler{
@@ -135,7 +140,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     [XVim instance].lastVisualMode = self.sourceView.selectionMode;
     [XVim instance].lastVisualPosition = self.sourceView.insertionPosition;
     [XVim instance].lastVisualSelectionBegin = self.sourceView.selectionBeginPosition;
-    
+    [XVim instance].lastVisualSelectionToEOL = self.sourceView.selectionToEOL;
+
     XVimEvaluator *nextEvaluator = [super eval:keyStroke];
     
     if( [XVimEvaluator invalidEvaluator] == nextEvaluator ){
