@@ -230,7 +230,17 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     self.onChildCompleteHandler = nil;
     return self;
 }
-    
+
+- (XVimEvaluator *)o{
+    [self.sourceView xvim_selectSwapEndsToOtherCorner:NO];
+    return self;
+}
+
+- (XVimEvaluator *)O{
+    [self.sourceView xvim_selectSwapEndsToOtherCorner:YES];
+    return self;
+}
+
 - (XVimEvaluator*)p{
     NSTextView* view = [self sourceView];
     XVimRegister* reg = [[[XVim instance] registerManager] registerByName:self.yankRegister];

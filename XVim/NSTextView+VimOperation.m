@@ -123,22 +123,50 @@
 }
 
 - (XVimSelection)_xvim_selectedBlock{
-    XVimSelection result;
+    XVimSelection result = { };
 
     if (self.selectionMode == XVIM_VISUAL_NONE) {
         result.top = result.bottom = result.left = result.right = NSNotFound;
         return result;
     }
 
-    NSUInteger l1 = [self.textStorage lineNumber:self.insertionPoint];
-    NSUInteger l2 = [self.textStorage lineNumber:self.selectionBegin];
-    NSUInteger c1 = [self.textStorage columnNumber:self.insertionPoint];
-    NSUInteger c2 = [self.textStorage columnNumber:self.selectionBegin];
+    NSTextStorage *ts = self.textStorage;
+    NSUInteger l1, c11, c12;
+    NSUInteger l2, c21, c22;
+    NSUInteger tabWidth = ts.tabWidth;
+    NSUInteger pos;
 
-    result.top    = MIN(l1, l2);
-    result.bottom = MAX(l1, l2);
-    result.left   = MIN(c1, c2);
-    result.right  = self.selectionToEOL ? NSIntegerMax : MAX(c1, c2);
+    pos = self.selectionBegin;
+    l1  = [ts lineNumber:pos];
+    c11 = [ts columnNumber:pos];
+    if (!tabWidth || [ts isEOF:pos] || [self.xvim_string characterAtIndex:pos] != '\t') {
+        c12 = c11;
+    } else {
+        c12 = c11 + tabWidth - (c11 % tabWidth) - 1;
+    }
+
+    pos = self.insertionPoint;
+    l2  = [ts lineNumber:pos];
+    c21 = [ts columnNumber:pos];
+    if (!tabWidth || [ts isEOF:pos] || [self.xvim_string characterAtIndex:pos] != '\t') {
+        c22 = c21;
+    } else {
+        c22 = c21 + tabWidth - (c21 % tabWidth) - 1;
+    }
+
+    if (l1 <= l2) {
+        result.corner |= _XVIM_VISUAL_BOTTOM;
+    }
+    if (c11 <= c22) {
+        result.corner |= _XVIM_VISUAL_RIGHT;
+    }
+    result.top     = MIN(l1, l2);
+    result.bottom  = MAX(l1, l2);
+    result.left    = MIN(c11, c21);
+    result.right   = MAX(c12, c22);
+    if (self.selectionToEOL) {
+        result.right = NSIntegerMax;
+    }
     return result;
 }
 
@@ -592,6 +620,50 @@ NS_INLINE void _addNSpaces(NSMutableString *s, NSUInteger count)
                 [self xvim_moveCursor:r.end preserveColumn:NO];
                 break;
         }
+    }
+    [self xvim_syncState];
+}
+
+- (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine{
+    if (self.selectionMode == XVIM_VISUAL_BLOCK) {
+        XVimPosition start, end;
+        XVimSelection sel;
+        NSUInteger pos;
+
+        self.selectionToEOL = NO;
+        sel = [self _xvim_selectedBlock];
+        if (onSameLine) {
+            sel.corner ^= _XVIM_VISUAL_RIGHT;
+        } else {
+            sel.corner ^= _XVIM_VISUAL_RIGHT | _XVIM_VISUAL_BOTTOM;
+        }
+
+        if (sel.corner & _XVIM_VISUAL_BOTTOM) {
+            start.line = sel.top;
+            end.line   = sel.bottom;
+        } else {
+            end.line   = sel.top;
+            start.line = sel.bottom;
+        }
+
+        if (sel.corner & _XVIM_VISUAL_RIGHT) {
+            start.column = sel.left;
+            end.column   = sel.right;
+        } else {
+            end.column   = sel.left;
+            start.column = sel.right;
+        }
+
+        pos = [self.textStorage positionAtLineNumber:start.line column:start.column];
+        self.selectionBegin = pos;
+        pos = [self.textStorage positionAtLineNumber:end.line column:end.column];
+        [self xvim_moveCursor:pos preserveColumn:NO];
+    } else if (self.selectionMode != XVIM_VISUAL_NONE) {
+        NSUInteger begin = self.selectionBegin;
+
+        self.selectionBegin = self.insertionPoint;
+        [self xvim_moveCursor:begin preserveColumn:NO];
+        [self setNeedsDisplay:YES];
     }
     [self xvim_syncState];
 }
