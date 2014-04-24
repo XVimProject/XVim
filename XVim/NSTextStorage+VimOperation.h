@@ -94,6 +94,9 @@ typedef enum {
 
 @interface NSTextStorage (VimOperation)
 
+- (NSUInteger)tabWidth;
+- (NSUInteger)indentWidth;
+
 - (NSString*)xvim_string;
 
 #pragma mark Properties

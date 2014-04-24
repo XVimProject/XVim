@@ -395,30 +395,44 @@
         //There no such line in the text.
         return NSNotFound;
     }
-    NSUInteger eol = [self endOfLine:firstIdx];
-    return eol-firstIdx;
+    return [self columnNumber:[self endOfLine:firstIdx]];
 }
 
 // Note: This method may return position on the newline character.
 //       For example, blankline have only newlin character and it is column number at "0"
 - (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound{
-    NSUInteger end = [self endOfLine:pos];
+    NSUInteger col = [self columnNumber:pos];
+    NSUInteger tabWidth = self.tabWidth;
+    NSUInteger maxPos = self.xvim_string.length;
 
 	// Primitive search until the column number matches
     // If tab is included in the line the values "columnNumber" returns does not continuous.
     // So "¥t¥t¥tabc" may rerturn 0,4,8,9,10,11 as a column numbers for each index.
-	while (pos <= end) {
-		if ([self columnNumber:pos] == column) { return pos; }
-        if ([self columnNumber:pos] > column){ pos--; return pos; }
-		++pos;
-	}
-    
-    // No matching column is found
-    if( notfound ){
-        return NSNotFound;
-    }else{
-        return --pos;
+    if (col <= column) {
+        while (pos < maxPos) {
+            if (col == column) {
+                return pos;
+            }
+
+            unichar c = [self.xvim_string characterAtIndex:pos];
+            if (c == '\n') {
+                break;
+            }
+
+            if (c == '\t') {
+                col += tabWidth;
+                if (tabWidth) col -= col % tabWidth;
+            } else {
+                col++;
+            }
+            if (col > column) {
+                return pos;
+            }
+            pos++;
+        }
     }
+
+    return notfound ? NSNotFound : pos;
 }
 
 - (NSUInteger)lineNumber:(NSUInteger)index{
@@ -434,22 +448,31 @@
 
 - (NSUInteger)columnNumber:(NSUInteger)index {
     ASSERT_VALID_RANGE_WITH_EOF(index);
-#ifdef __USE_DVTKIT__
-#ifdef __XCODE5__
-    if( [self.class isSubclassOfClass:DVTTextStorage.class]){
-        DVTTextStorage* storage = (DVTTextStorage*)self;
-        NSUInteger column = (NSUInteger)[storage columnForPositionConvertingTabs:index];
-        return column;
+    NSUInteger col = 0, tabWidth = self.tabWidth;
+
+    for (NSUInteger pos = [self beginningOfLine:index]; pos < index; pos++) {
+        if ([self.xvim_string characterAtIndex:pos] == '\t') {
+            col += tabWidth;
+            if (tabWidth) col -= col % tabWidth;
+        } else {
+            col++;
+        }
     }
-#else
-    if( [self.class isSubclassOfClass:DVTFoldingTextStorage.class]){
-        DVTFoldingTextStorage* storage = (DVTFoldingTextStorage*)self;
-        NSUInteger column = (NSUInteger)[storage columnForPositionConvertingTabs:[storage realLocationForFoldedLocation:index]];
-        return column;
-    }
-#endif
-#endif
-    return index - [self beginningOfLine:index];
+    return col;
+}
+
+- (NSUInteger)indentWidth {
+    // If "self" is a DVTSourceTextStorage
+    // The "indentWidth" in DVTSourceTextStorage is called and
+    // control flow does not reach here. (Its by design)
+    return 8;
+}
+
+- (NSUInteger)tabWidth {
+    // If "self" is a DVTSourceTextStorage
+    // The "tabWidth" in DVTSourceTextStorage is called and
+    // control flow does not reach here. (Its by design)
+    return 8;
 }
 
 - (NSRange)characterRangeForLineRange:(NSRange)arg1{
@@ -634,59 +657,28 @@
 
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if( [[self xvim_string] length] == 0 ){
-        return 0;
-    }
-    
-    NSUInteger pos = index;
-    for(NSUInteger i = 0; i < count; i++ ){
-        pos = [self prevNewline:pos];
-        if( NSNotFound == pos ){
-            pos = 0;
-            break;
-        }
-    }
 
-    NSUInteger head = [self firstOfLine:pos];
-    if( NSNotFound == head ){
-        return pos;
+    NSUInteger lno = [self lineNumber:index];
+
+    if (lno < count) {
+        index = [self positionAtLineNumber:1];
+    } else {
+        index = [self positionAtLineNumber:lno - count];
     }
-	
-	return [self nextPositionFrom:head matchingColumn:column returnNotFound:NO];
+    return [self nextPositionFrom:index matchingColumn:column returnNotFound:NO];
 }
 
 - (NSUInteger)nextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     
-    if (count == 0){
-        return index;
-    }
-    
-    // Search and count newlines.
-    if( [self isBlankline:index] ){
-        count--; // Current position must be counted as newline in this case
-    }
+    NSUInteger lno = [self lineNumber:index] + count;
 
-    // Move position along with newlines
-    NSUInteger pos = index;
-    for(NSUInteger i = 0; i < count; i++ ){
-        NSUInteger next = [self nextNewline:pos];
-        if( NSNotFound == next){
-            break;
-        }
-        pos = next;
+    if (lno < self.numberOfLines) {
+        index = [self positionAtLineNumber:lno];
+    } else {
+        index = [self beginningOfLine:self.xvim_string.length];
     }
-    
-    // If "pos" is not on a newline here it means no newline is found and "pos == index".
-    
-    if( [self isNewline:pos] ){
-        // This is the case any newline was found.
-        // pos is on a newline. The next line is the target line.
-        // There is at least 1 more range available.
-        pos++;
-		return [self nextPositionFrom:pos matchingColumn:column returnNotFound:NO];
-    }
-    return pos; 
+    return [self nextPositionFrom:index matchingColumn:column returnNotFound:NO];
 }
 
 /** 
