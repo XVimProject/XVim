@@ -62,16 +62,16 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
             }else{
                 NSUInteger start = [window.sourceView selectedRange].location;
                 NSUInteger end = [window.sourceView selectedRange].location + [window.sourceView selectedRange].length - 1; 
-                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
-                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+                self.initialFromPos = XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:start], [window.sourceView.textStorage xvim_columnOfIndex:start]);
+                self.initialToPos =  XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:end], [window.sourceView.textStorage xvim_columnOfIndex:end]);
             }
         }else{
             // Treat it as block selection
             _visual_mode = XVIM_VISUAL_BLOCK;
             NSUInteger start = [[[window.sourceView selectedRanges] objectAtIndex:0] rangeValue].location;
             NSUInteger end = [[[window.sourceView selectedRanges] lastObject] rangeValue].location + [[[window.sourceView selectedRanges] lastObject] rangeValue].length - 1; 
-            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage lineNumber:start], [window.sourceView.textStorage columnNumber:start]);
-            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage lineNumber:end], [window.sourceView.textStorage columnNumber:end]);
+            self.initialFromPos = XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:start], [window.sourceView.textStorage xvim_columnOfIndex:start]);
+            self.initialToPos =  XVimMakePosition([window.sourceView.textStorage xvim_lineNumberAtIndex:end], [window.sourceView.textStorage xvim_columnOfIndex:end]);
         }
 	}
     return self;
@@ -124,12 +124,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (void)didEndHandler{
-    if( !_waitForArgument ){
-        [super didEndHandler];
+    if (!_waitForArgument) {
         [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_NONE];
         // TODO:
         //[[[XVim instance] repeatRegister] setVisualMode:_mode withRange:_operationRange];
     }
+    [super didEndHandler];
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
@@ -159,11 +159,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)A{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        return self;
-    }
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_APPEND] autorelease];
-    return self;
 }
 
 - (XVimEvaluator*)i{
@@ -194,10 +190,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator *)C{
     if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        return self;
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+        return [self c];
     }
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BLOCK_KILL_EOL] autorelease];
-    return [self I];
 }
 
 - (XVimEvaluator*)C_b{
@@ -220,6 +216,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)D{
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+        return [self d];
+    }
+
     // FIXME: doesn't work ask expected in any visual mode
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
@@ -241,12 +242,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
         [self.argumentString setString:@""];
         return self;
     }
-    return childEvaluator;
+    return nil;
 }
 
 - (XVimEvaluator*)I{
     if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        return self;
+        return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_BEFORE_FIRST_NONBLANK] autorelease];
     }
     return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:XVIM_INSERT_DEFAULT] autorelease];
 }
@@ -306,7 +307,10 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator *)S{
-    [self.window errorMessage:@"{Visual}r{char} not implemented yet" ringBell:NO];
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    }
+    [self.window errorMessage:@"{Visual}S not implemented yet" ringBell:NO];
     return self;
 }
 
@@ -357,16 +361,22 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)X{
-    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
-        return [self d];
-    } else {
-        return [self D];
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
     }
+    return [self d];
 }
 
 - (XVimEvaluator*)y{
     [[self sourceView] xvim_yank:nil];
     return nil;
+}
+
+- (XVimEvaluator*)Y{
+    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+        [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
+    }
+    return [self y];
 }
 
 - (XVimEvaluator*)DQUOTE{
@@ -388,12 +398,6 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     }
     _waitForArgument = NO;
     return self;
-}
-
-- (XVimEvaluator*)Y{
-    [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_LINE];
-    [[self sourceView] xvim_yank:nil];
-    return nil;
 }
 
 /*

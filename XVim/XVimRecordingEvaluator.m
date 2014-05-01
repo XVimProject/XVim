@@ -34,6 +34,7 @@
 }
 
 - (void)becameHandler{
+    [super becameHandler];
     [[[XVim instance] registerManager] startRecording:self.reg];
 }
 

@@ -23,24 +23,21 @@
 @class IDEEditorArea;
 @class IDEWorkspaceWindow;
 @class XVimEvaluatorContext;
+@class IDEEditorArea;
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
+@property(readonly) NSTextView *sourceView; // This represents currently focused sourceView
+@property(readonly) XVimCommandLine *commandLine;
 
-@property(readonly) NSTextView* sourceView; // This represents currently focused sourceView
-
-- (XVimCommandLine*)commandLine;
+- (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea;
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)stack;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
-- (BOOL)handleXVimString:(XVimString*)strokes;
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;
 - (void)clearErrorMessage;
-
-+ (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea*)editorArea;
-+ (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea;
 
 - (void)setForcusBackToSourceView;
 

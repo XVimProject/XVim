@@ -575,53 +575,53 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 }
 
 - (NSString*)description{
-    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
-    if( 0 != self.modifier){
-        unichar m = XVIM_MAKE_MODIFIER(self.modifier);
-        [str appendFormat:@"0x%02x 0x%02x ", ((unsigned char*)(&m))[1], ((unsigned char*)(&m))[0]];
+    NSMutableString *str = [[NSMutableString alloc] init];
+
+    if (0 != self.modifier) {
+        [str appendFormat:@"mod{0x%02x 0x%02x} ", KS_MODIFIER, self.modifier];
     }
+
     unichar c = self.character;
-    if( isPrintable(c)){
-        [str appendFormat:@"%C", c];
+    if (isPrintable(c)) {
+        [str appendFormat:@"code{%C} ", c];
     }else{
-        [str appendFormat:@"0x%02x 0x%02x", ((unsigned char*)(&c))[1], ((unsigned char*)(&c))[0]];
+        [str appendFormat:@"code{0u%04x} ", c];
     }
     [str appendString:[self keyNotation]];
-    return str;
+
+    return [str autorelease];
 }
 
 - (NSString*)keyNotation{
+	NSMutableString *keyStr = [[NSMutableString alloc] init];
 	unichar charcode = self.character;
+
+    if (self.modifier || !isPrintable(charcode)) {
+        [keyStr appendString:@"<"];
+    }
 	
-	NSMutableString* keyStr = [[[NSMutableString alloc] init] autorelease];
-	if( self.modifier & XVIM_MOD_SHIFT){
+	if (self.modifier & XVIM_MOD_SHIFT) {
 		[keyStr appendString:@"S-"];
 	}
-	if( self.modifier & XVIM_MOD_CTRL){
+	if (self.modifier & XVIM_MOD_CTRL) {
 		[keyStr appendString:@"C-"];
 	}
-	if( self.modifier & XVIM_MOD_ALT){
+	if (self.modifier & XVIM_MOD_ALT) {
 		[keyStr appendString:@"M-"];
 	}
-	if( self.modifier & XVIM_MOD_CMD){
+	if (self.modifier & XVIM_MOD_CMD) {
 		[keyStr appendString:@"D-"];
 	}
-	if( self.modifier & XVIM_MOD_FUNC){
+	if (self.modifier & XVIM_MOD_FUNC) {
 		[keyStr appendString:@"F-"];
 	}
+
+    [keyStr appendString:keyFromUnichar(charcode)];
 	
-    if( keyStr.length == 0 ){
-        if (isPrintable(charcode)) {
-            // Something like 'a' 'b'...
-            return [NSString stringWithFormat:@"%@%@", keyStr, keyFromUnichar(charcode)];
-        }else{
-            // Something like <CR>, <SPACE>...
-            return [NSString stringWithFormat:@"<%@%@>", keyStr, keyFromUnichar(charcode)];
-        }
-    }else{
-        // Something like <C-o>, <C-SPACE>...
-        return [NSString stringWithFormat:@"<%@%@>", keyStr, keyFromUnichar(charcode)];
+    if (self.modifier || !isPrintable(charcode)) {
+        [keyStr appendString:@">"];
     }
+    return [keyStr autorelease];
 }
 
 - (NSString*) toSelectorString {

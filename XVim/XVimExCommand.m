@@ -600,20 +600,20 @@
     {
         case '.':
             parsing++;
-            addr = [view.textStorage lineNumber:begin];
+            addr = [view.textStorage xvim_lineNumberAtIndex:begin];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
-            addr = [view.textStorage numberOfLines];
+            addr = [view.textStorage xvim_numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
             if( '<' == mark ){
-                addr = [view.textStorage lineNumber:begin];
+                addr = [view.textStorage xvim_lineNumberAtIndex:begin];
                 parsing+=2;
             }else if( '>' == mark ){
-                addr = [view.textStorage lineNumber:end];
+                addr = [view.textStorage xvim_lineNumberAtIndex:end];
                 parsing+=2;
             }else{
                 // Other marks or invalid character. XVim does not support this.
@@ -738,7 +738,7 @@
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [view.textStorage numberOfLines];
+                exarg.lineEnd = [view.textStorage xvim_numberOfLines];
                 parsing++;
             }
         }else{
@@ -758,7 +758,7 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        exarg.lineBegin = [view.textStorage lineNumber:view.insertionPoint];
+        exarg.lineBegin = [view.textStorage xvim_lineNumberAtIndex:view.insertionPoint];
         exarg.lineEnd =  exarg.lineBegin;
     }
     
@@ -818,11 +818,11 @@
         NSTextStorage* storage = srcView.textStorage;
 		
         // Jump to location
-        NSUInteger pos = [storage positionAtLineNumber:exarg.lineBegin column:0];
+        NSUInteger pos = [storage xvim_indexOfLineNumber:exarg.lineBegin column:0];
         if( NSNotFound == pos ){
-            pos = [srcView.textStorage positionAtLineNumber:[srcView.textStorage numberOfLines] column:0];
+            pos = [srcView.textStorage xvim_indexOfLineNumber:[srcView.textStorage xvim_numberOfLines] column:0];
         }
-        NSUInteger pos_wo_space = [srcView.textStorage nextNonblankInLine:pos];
+        NSUInteger pos_wo_space = [srcView.textStorage xvim_nextNonblankInLineAtIndex:pos allowEOL:NO];
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }

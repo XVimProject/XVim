@@ -21,80 +21,107 @@
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
 
-
-@interface XVimWindow() {
-    NSMutableArray* _evaluatorStack;
-	XVimKeymapContext* _keymapContext;
-	BOOL _handlingMouseEvent;
-	NSString *_staticString;
+@interface XVimWindow () {
+    NSMutableArray     *_evaluatorStack;
+	XVimKeymapContext  *_keymapContext;
+	BOOL                _handlingMouseEvent;
+	NSString           *_staticString;
+    IDEEditorArea      *_editorArea;
+    NSTextInputContext *_inputContext;
 }
-@property(strong) IDEEditorArea* editorArea;
-@property(strong,nonatomic) NSTextInputContext* inputContext;
-@property(strong,nonatomic) NSEvent* tmpBuffer;
-- (id)initWithIDEEditorArea:(IDEEditorArea*)editorArea;
-- (void)_initEvaluatorStack:(NSMutableArray*)stack;
+
+@property (strong, atomic) NSEvent       *tmpBuffer;
+@property (readonly)       XVimEvaluator *currentEvaluator;
+
+- (void)_resetEvaluatorStack:(NSMutableArray *)stack activateNormalHandler:(BOOL)activate;
+
 @end
 
 @implementation XVimWindow
-@synthesize editorArea = _editorArea;
-static const char* KEY_WINDOW = "xvimwindow";
+@synthesize commandLine = _commandLine;
+@synthesize tmpBuffer = _tmpBuffer;
 
-+ (XVimWindow*)windowOfIDEEditorArea:(IDEEditorArea *)editorArea {
-	return (XVimWindow*)objc_getAssociatedObject(editorArea, KEY_WINDOW);
-}
-
-+ (void)createWindowForIDEEditorArea:(IDEEditorArea*)editorArea{
-    XVimWindow* w = [[[XVimWindow alloc] initWithIDEEditorArea:editorArea] autorelease];
-	objc_setAssociatedObject(editorArea, KEY_WINDOW, w, OBJC_ASSOCIATION_RETAIN);
-}
-
-- (NSTextView*)sourceView{
-    int mode = [[self editorArea] editorMode];
-    IDEEditor* editor = [[[self editorArea] lastActiveEditorContext] editor];
-    if( [[[[[[self editorArea] workspaceTabController] windowController] window] firstResponder] isKindOfClass:[DVTSourceTextView class]]){
-        return (NSTextView*)[[[[[self editorArea] workspaceTabController] windowController] window] firstResponder];
-    }
-    else if( mode ==  2 && [editor isKindOfClass:[IDEComparisonEditor class]]){
-         return [[[((IDEComparisonEditor*)[[[self editorArea] lastActiveEditorContext] editor])  keyEditor] mainScrollView] documentView];
-    }else{
-        return [[[[[self editorArea] lastActiveEditorContext] editor] mainScrollView] documentView];
-    }
-}
-
-- (id)initWithIDEEditorArea:(IDEEditorArea *)editorArea{
+- (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea
+{
     if (self = [super init]){
 		_staticString = [@"" retain];
 		_keymapContext = [[XVimKeymapContext alloc] init];
-        self.editorArea = editorArea;
+        _editorArea = [editorArea retain];
         _evaluatorStack = [[NSMutableArray alloc] init];
-        self.inputContext = [[[NSTextInputContext alloc] initWithClient:self] autorelease];
-        self.tmpBuffer = nil;
-        [self _initEvaluatorStack:_evaluatorStack];
-        
+        _inputContext = [[NSTextInputContext alloc] initWithClient:self];
+        [self _resetEvaluatorStack:_evaluatorStack activateNormalHandler:YES];
+        _commandLine = [[XVimCommandLine alloc] init];
+
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:)
+                                                     name:XVimDocumentChangedNotification object:nil];
 	}
     return self;
 }
 
-- (void)dealloc{
+- (NSTextView *)sourceView
+{
+    IDEEditor *editor = _editorArea.lastActiveEditorContext.editor;
+    id obj;
+
+    obj = _editorArea.workspaceTabController.windowController.window.firstResponder;
+    if ([obj isKindOfClass:[DVTSourceTextView class]]){
+        return obj;
+    }
+
+    if (_editorArea.editorMode == 2 && [editor isKindOfClass:[IDEComparisonEditor class]]) {
+        obj = [[(IDEComparisonEditor *)editor keyEditor] mainScrollView].documentView;
+        return obj;
+    }
+
+    return editor.mainScrollView.documentView;
+}
+
+- (void)dealloc
+{
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_keymapContext release];
     [_staticString release];
-    self.editorArea = nil;
-    self.inputContext = nil;
+    [_editorArea release];
+    [_inputContext release];
     self.tmpBuffer = nil;
     [_evaluatorStack release];
+    [_commandLine release];
     [super dealloc];
 }
 
-- (void)_initEvaluatorStack:(NSMutableArray*)stack{
+- (void)dumpEvaluatorStack:(NSMutableArray*)stack
+{
+    for (NSUInteger i = 0; i < stack.count; i++) {
+        XVimEvaluator *e = [stack objectAtIndex:i];
+
+        DEBUG_LOG(@"Evaluator%d:%@   argStr:%@   yankReg:%@", i, NSStringFromClass([e class]), e.argumentString, e.yankRegister);
+    }
+}
+
+#pragma mark - Handling keystrokes and evaluation stack
+
+- (XVimEvaluator*)currentEvaluator
+{
+    return [_evaluatorStack lastObject];
+}
+
+- (void)_resetEvaluatorStack:(NSMutableArray *)stack activateNormalHandler:(BOOL)activate
+{
     // Initialize evlauator stack
     [stack removeAllObjects];
     XVimEvaluator* firstEvaluator = [[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease];
     [stack addObject:firstEvaluator];
-    [firstEvaluator becameHandler];
+    if (activate) {
+        [firstEvaluator becameHandler];
+    }
 }
 
-- (XVimEvaluator*)_currentEvaluator{
-    return [_evaluatorStack lastObject];
+- (void)_documentChangedNotification:(NSNotification *)notification
+{
+    DEBUG_LOG("Document changed, reset evaluator stack");
+    [self.currentEvaluator cancelHandler];
+    [_evaluatorStack removeAllObjects];
+    [self syncEvaluatorStack];
 }
 
 /**
@@ -119,35 +146,38 @@ static const char* KEY_WINDOW = "xvimwindow";
  *    - If insertText: or doCommandBySelector: is called it just passes saved key event(XVimString) to XVimInsertEvaluator or XVimCommandLineEvaluator.
  *    - If they are not called it means that the key input is handled by the input method.
  **/
-- (BOOL)handleKeyEvent:(NSEvent*)event{
-    if( [self _currentEvaluator].mode == XVIM_MODE_INSERT || [self _currentEvaluator].mode == XVIM_MODE_CMDLINE ){
+- (BOOL)handleKeyEvent:(NSEvent *)event
+{
+    if (self.currentEvaluator.mode == XVIM_MODE_INSERT || self.currentEvaluator.mode == XVIM_MODE_CMDLINE) {
         // We must pass the event to the current input method
         // If it is obserbed we do not do anything anymore and handle insertText: or doCommandBySelector:
-        
+
         // Keep the key input temporary buffer
         self.tmpBuffer = event;
-        
+
         // The apple document says that we can not call 'activate' method directly
         // but if we do not call this the input is not handled by the input context we own.
         // So we call this every time key input comes.
-        [self.inputContext activate];
-        
+        [_inputContext activate];
+
         // Pass it to the input context.
         // This is necesarry for languages like Japanese or Chinese.
-        if( [self.inputContext handleEvent:event] ){
+        if ([_inputContext handleEvent:event]) {
             return YES;
         }
     }
-    return [self handleXVimString: [event toXVimString]];
+    return [self handleXVimString:[event toXVimString]];
 }
 
-- (BOOL)handleOneXVimString:(XVimString*)oneChar{
-    XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
-    XVimString* mapped = [keymap mapKeys:oneChar withContext:_keymapContext forceFix:NO];
-    DEBUG_LOG(@"%@", mapped);
-    
-    [NSObject cancelPreviousPerformRequestsWithTarget:self];
+- (BOOL)handleOneXVimString:(XVimString *)oneChar
+{
+    XVimKeymap *keymap = [self.currentEvaluator selectKeymapWithProvider:[XVim instance]];
+    XVimString *mapped = [keymap mapKeys:oneChar withContext:_keymapContext forceFix:NO];
+
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(handleTimeout) object:nil];
     if (mapped) {
+        DEBUG_LOG(@"%@", mapped);
+
         for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped) ) {
             [self handleKeyStroke:keyStroke onStack:_evaluatorStack];
         }
@@ -159,22 +189,14 @@ static const char* KEY_WINDOW = "xvimwindow";
             [self performSelector:@selector(handleTimeout) withObject:nil afterDelay:delay];
         }
     }
-    
-    // FIXME:
-    // temporarily toString method is removed.
-    // Must be fixed. This makes argument string empty if there are absorbed keys in key mappings.
-    NSString* argString = @""; //[_keymapContext toString];
-    //if ([argString length] == 0) {
-        argString = [[self _currentEvaluator] argumentDisplayString];
-    //}
-    
-    [self.commandLine setArgumentString:argString];
-    [self.commandLine setNeedsDisplay:YES];
-    
+
+    [_commandLine setArgumentString:[self.currentEvaluator argumentDisplayString]];
+    [_commandLine setNeedsDisplay:YES];
     return YES;
 }
 
-- (BOOL)handleXVimString:(XVimString*)strokes{
+- (BOOL)handleXVimString:(XVimString*)strokes
+{
     BOOL last = NO;
     for( XVimKeyStroke* stroke in XVimKeyStrokesFromXVimString(strokes) ){
         last = [self handleOneXVimString:[stroke xvimString]];
@@ -182,45 +204,38 @@ static const char* KEY_WINDOW = "xvimwindow";
     return last;
 }
 
-- (void)handleTimeout {
-    XVimKeymap* keymap = [[self _currentEvaluator] selectKeymapWithProvider:[XVim instance]];
-    XVimString* mapped = [keymap mapKeys:@"" withContext:_keymapContext forceFix:YES];
+- (void)handleTimeout
+{
+    XVimKeymap *keymap = [self.currentEvaluator selectKeymapWithProvider:[XVim instance]];
+    XVimString *mapped = [keymap mapKeys:@"" withContext:_keymapContext forceFix:YES];
     for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped)) {
         [self handleKeyStroke:keyStroke onStack:_evaluatorStack];
     }
     [_keymapContext clear];
 }
 
-- (void)dumpEvaluatorStack:(NSMutableArray*)stack{
-    XVimEvaluator* e;
-    for( NSUInteger i = 0 ; i < stack.count ; i ++ ){
-        e = [stack objectAtIndex:i];
-        DEBUG_LOG(@"Evaluator%d:%@   argStr:%@   yankReg:%@", i, NSStringFromClass([e class]), e.argumentString, e.yankRegister);
-    }
-}
-
-- (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)evaluatorStack{
-    
+- (void)handleKeyStroke:(XVimKeyStroke *)keyStroke onStack:(NSMutableArray *)evaluatorStack
+{
     if( nil == evaluatorStack ){
         // Use default evaluator stack
         evaluatorStack = _evaluatorStack;
     }
     if( evaluatorStack.count == 0 ){
-        [self _initEvaluatorStack:evaluatorStack];
+        [self _resetEvaluatorStack:evaluatorStack activateNormalHandler:YES];
     }
     [self dumpEvaluatorStack:evaluatorStack];
-    
+
     [self clearErrorMessage];
-    
+
     // Record the event
     XVim *xvim = [XVim instance];
     [xvim appendOperationKeyStroke:[keyStroke xvimString]];
-    
+
     // Evaluate key stroke
 	XVimEvaluator* currentEvaluator = [evaluatorStack lastObject];
     currentEvaluator.window = self;
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
-    
+
     // Manipulate evaluator stack
     while(YES){
         if( nil == nextEvaluator || nextEvaluator == [XVimEvaluator popEvaluator]){
@@ -231,7 +246,7 @@ static const char* KEY_WINDOW = "xvimwindow";
             if( [evaluatorStack count] == 0 ){
                 // Current Evaluator is the root evaluator of the stack
                 [xvim cancelOperationCommands];
-                [self _initEvaluatorStack:evaluatorStack];
+                [self _resetEvaluatorStack:evaluatorStack activateNormalHandler:YES];
                 break;
             }
             else{
@@ -248,7 +263,7 @@ static const char* KEY_WINDOW = "xvimwindow";
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
             [xvim cancelOperationCommands];
             [[XVim instance] ringBell];
-            [self _initEvaluatorStack:evaluatorStack];
+            [self _resetEvaluatorStack:evaluatorStack activateNormalHandler:YES];
             break;
         }else if( nextEvaluator == [XVimEvaluator noOperationEvaluator] ){
             // Do nothing
@@ -266,122 +281,97 @@ static const char* KEY_WINDOW = "xvimwindow";
             break;
         }
     }
-    
+
     currentEvaluator = [evaluatorStack lastObject];
-    [self.commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
-    [self.commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
+    [_commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
+    [_commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
 }
 
-- (void)handleTextInsertion:(NSString*)text {
-	[[self sourceView] insertText:text];
+- (void)syncEvaluatorStack
+{
+    BOOL needsVisual = (self.sourceView.selectedRange.length != 0);
+
+    if (!needsVisual && [self.currentEvaluator isKindOfClass:[XVimInsertEvaluator class]]) {
+        return;
+    }
+
+    [self.currentEvaluator cancelHandler];
+    [self _resetEvaluatorStack:_evaluatorStack activateNormalHandler:!needsVisual];
+    [[XVim instance] cancelOperationCommands];
+
+    if (needsVisual) {
+        // FIXME:JAS this doesn't work if v is remaped (yeah I know it's silly but...)
+        [self handleOneXVimString:@"v"];
+    } else {
+        [self.sourceView xvim_adjustCursorPosition];
+    }
+    [_commandLine setModeString:[self.currentEvaluator.modeString stringByAppendingString:_staticString]];
 }
 
-- (NSRange)restrictSelectedRange:(NSRange)range {
-	if (_handlingMouseEvent) {
-		//range = [[self _currentEvaluator] restrictSelectedRange:range];
-	}
-	return range;
-}
+#pragma mark - Visual gimmicks
 
-- (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color {
-	float heightRatio = [[self _currentEvaluator] insertionPointHeightRatio];
-    float widthRatio = [[self _currentEvaluator] insertionPointWidthRatio];
-    float alphaRatio = [[self _currentEvaluator] insertionPointAlphaRatio];
-    
+- (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color
+{
+    XVimEvaluator *current = self.currentEvaluator;
+	float heightRatio = [current insertionPointHeightRatio];
+    float widthRatio = [current insertionPointWidthRatio];
+    float alphaRatio = [current insertionPointAlphaRatio];
+
 	NSTextView *sourceView = [self sourceView];
-	color = [color colorWithAlphaComponent:alphaRatio];
     NSUInteger glyphIndex = [sourceView insertionPoint];
 	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
-	
-	[color set];
-	rect.size.width =rect.size.height/2;
-	if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
-		rect.size.width=glyphRect.size.width;
-	
+
+	[[color colorWithAlphaComponent:alphaRatio] set];
+	rect.size.width = rect.size.height/2;
+	if (glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width)  {
+		rect.size.width = glyphRect.size.width;
+    }
+
 	rect.origin.y += (1 - heightRatio) * rect.size.height;
 	rect.size.height *= heightRatio;
     rect.size.width *= widthRatio;
-	
-	NSRectFillUsingOperation( rect, NSCompositeSourceOver);
-    
+
+	NSRectFillUsingOperation(rect, NSCompositeSourceOver);
     return rect;
 }
 
-- (void)syncEvaluatorStack{
-    if( [[self _currentEvaluator] isKindOfClass:[XVimInsertEvaluator class]] ){
-        return;
-    }
-    
-    if( self.sourceView.selectedRange.length == 0 ){
-        // If it is visual mode reset to normal
-        [[self _currentEvaluator] didEndHandler];
-        [self _initEvaluatorStack:_evaluatorStack];
-        [self.sourceView xvim_adjustCursorPosition];
-    }else{
-        // Manually initialize stack evaluator.
-        // This is because Normal evaluator initialize selection length to 0.
-        // We want to keep current selection length and handle it by a VisualEvaluator
-        [[self _currentEvaluator] didEndHandler];
-        [_evaluatorStack removeAllObjects];
-        [_evaluatorStack addObject:[[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease]];
-        [self handleOneXVimString:@"v"];
-    }
-    [self.commandLine setModeString:[[[_evaluatorStack lastObject] modeString] stringByAppendingString:_staticString]];
-}
-
-- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell {
-	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:message Timer:YES RedColorSetting:YES];
+- (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell
+{
+    [_commandLine errorMessage:message Timer:YES RedColorSetting:YES];
     if (ringBell) {
         [[XVim instance] ringBell];
     }
     return;
 }
 
-- (void)statusMessage:(NSString*)message {
-    XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:message Timer:NO RedColorSetting:NO];
+- (void)statusMessage:(NSString*)message
+{
+    [_commandLine errorMessage:message Timer:NO RedColorSetting:NO];
 }
 
-- (void)clearErrorMessage {
-	XVimCommandLine *commandLine = self.commandLine;
-    [commandLine errorMessage:@"" Timer:NO RedColorSetting:YES];
+- (void)clearErrorMessage
+{
+    [_commandLine errorMessage:@"" Timer:NO RedColorSetting:YES];
 }
 
-- (void)setForcusBackToSourceView{
-    [[self.sourceView  window] makeFirstResponder:self.sourceView];
+- (IDEWorkspaceWindow *)currentWorkspaceWindow
+{
+    return (IDEWorkspaceWindow *)[self.sourceView window];
 }
 
-- (IDEWorkspaceWindow*)currentWorkspaceWindow{
-    IDEWorkspaceWindow* window = (IDEWorkspaceWindow*)[self.sourceView window];
-    return window;
+- (void)setForcusBackToSourceView
+{
+    [[self currentWorkspaceWindow] makeFirstResponder:self.sourceView];
 }
 
-- (XVimCommandLine*)commandLine{
-    return [_editorArea commandLine];
-}
+#pragma mark - NSTextInputClient Protocol
 
-- (NSUInteger)insertionPoint {
-    return [self.sourceView insertionPoint];
-}
-
-static char s_associate_key = 0;
-
-+ (XVimWindow*)associateOf:(id)object {
-	return (XVimWindow*)objc_getAssociatedObject(object, &s_associate_key);
-}
-
-- (void)associateWith:(id)object {
-	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
-}
-
-
-// NSTextInputClient Protocol
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange{
-    @try{
+    @try {
         self.tmpBuffer = nil;
         [self handleXVimString:aString];
-    }@catch (NSException* exception) {
+    }
+    @catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
