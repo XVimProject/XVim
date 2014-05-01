@@ -282,9 +282,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [self.tempRepeatRegister appendString:stroke];
 }
 
+// djl: not need
 - (void)appendInsertKeyStroke:(XVimString *)stroke {
-    NSLog(@"append key:%@",stroke);
-    [self.tempInsertStroke appendString:stroke];
+//    NSLog(@"append key:%@",stroke);
+//    [self.tempInsertStroke appendString:stroke];
 }
 
 - (void)fixOperationCommands{
@@ -333,30 +334,32 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 
 - (void)replaceToCompletingText:(NSString *)insertText {
-    //NSLog(@"completingtext:%@",self.completingText);
+    NSLog(@"completingtext:%@",self.completingText);
     NSLog(@"last repeat register:%@",self.tempRepeatRegister);
-    //NSLog(@"repeat count:%ld",self.tempRepeatRegister.length);
-    NSLog(@"user input:%@",self.tempInsertStroke);
-    //NSLog(@"input count:%ld",self.tempInsertStroke.length);
-    NSRange range = [self.tempRepeatRegister rangeOfString:self.tempInsertStroke];
-    NSLog(@"range:%@",[NSValue valueWithRange:range]);
+    //NSLog(@"repeat count:%ld",self.tempRepeatRegister.length); // enter key is the last strok!
     
-    // TODO: think all the situations
-    // fix range 's location
-//    for (NSUInteger loc = range.location; loc < self.tempRepeatRegister.length; loc++) {
-//        char c = [self.tempRepeatRegister characterAtIndex:loc];
-//        if((c>'A' && c<'Z') || (c>'a'&&c<'z')) {
-//        if ( c != ' ' && c != '(' && c != ')') {
-//            range.length -= (loc - range.location);
-//            range.location = loc;
-//            break;
-//        }
-//    }
+    NSString *ct = self.completingText;
+    NSString *tr = self.tempRepeatRegister;
+    NSUInteger loc = 0;
+    // start from 1, prefix&sufix will not be empty string at beginning
+    for (NSUInteger i = 1; i < ct.length; i++) {
+        NSString *prefix = [ct substringToIndex:i];
+        NSString *suffix = [tr substringWithRange:NSMakeRange(tr.length-i-1, i)];
+        NSLog(@"prefix:%@  sufix:%@",prefix,suffix);
+        if ([suffix isEqualToString:@""]) {
+            break; // end till suffix is empty
+        }
+        if (NSOrderedSame == [prefix caseInsensitiveCompare:suffix]) {
+            loc = i;
+        }
+    }
+    //NSLog(@"loc:%ld",loc);
+    NSRange range = NSMakeRange(tr.length-loc-1, loc+1);
+    NSLog(@"range:%@",[NSValue valueWithRange:range]);
     
     if (range.location != NSNotFound) {
         [self.tempRepeatRegister replaceCharactersInRange:range withString:self.completingText];
         NSLog(@"new repeat register:%@",self.tempRepeatRegister);
-        [self.tempInsertStroke setString:@""];
     } else {
         NSLog(@"replace completing text not found");
     }
