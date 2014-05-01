@@ -9,6 +9,26 @@
 #ifndef XVim_XVimDefs_h
 #define XVim_XVimDefs_h
 
+#import <Foundation/Foundation.h>
+
+#ifndef NS_REQUIRES_SUPER
+#if __has_attribute(objc_requires_super)
+#define NS_REQUIRES_SUPER __attribute__((objc_requires_super))
+#else
+#define NS_REQUIRES_SUPER
+#endif
+#endif
+
+typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
+    XVIM_INSERT_DEFAULT,
+    XVIM_INSERT_SPACES,
+    XVIM_INSERT_APPEND,
+    XVIM_INSERT_BEFORE_FIRST_NONBLANK,
+    XVIM_INSERT_APPEND_EOL,
+    XVIM_INSERT_BLOCK_KILL,
+    XVIM_INSERT_BLOCK_KILL_EOL,
+};
+
 typedef enum {
     XVIM_MODE_NONE,
     XVIM_MODE_NORMAL,
@@ -54,6 +74,8 @@ typedef struct _XVimSelection {
     NSUInteger         bottom;
     NSUInteger         right;
 } XVimSelection;
+
+#define XVimSelectionEOL  (NSIntegerMax - 1)
 
 NS_INLINE XVimRange XVimMakeRange(NSUInteger begin, NSUInteger end) {
     XVimRange r;

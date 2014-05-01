@@ -45,6 +45,9 @@
             XVimMakeTestCase(text1, 4, 0, @"vll<D-x>ibbb<ESC>", text1, 6,0 ),  // Issue #429
             XVimMakeTestCase(text1, 4, 0, @"vll<D-c>", text1, 4,3 ),  // Issue #429 related (Cmd-c should not change selected range)
             XVimMakeTestCase(text0, 4, 0, @"vll<D-c><ESC>0vll<D-v>0", issue_429_result, 0, 0 ),  // Issue #429 related (Cmd-v should overwrite the selection and exit from visual)
+
+            // ^W should not yank
+            XVimMakeTestCase(@"abc\n", 2, 0, @"cl<C-w><ESC>p", @"c\n", 0, 0),
             
             nil];
     

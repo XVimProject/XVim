@@ -30,4 +30,5 @@
     [self.window.sourceView xvim_join:motion.count addSpace:_addSpace];
     return nil;
 }
+
 @end

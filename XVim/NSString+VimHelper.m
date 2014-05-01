@@ -32,6 +32,18 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     return isDigit(ch) || isAlpha(ch)  || ch >= 192;
 }
 
+static NSString *precomputed[9] = {
+    @"",
+    @" ",
+    @"  ",
+    @"   ",
+    @"    ",
+    @"     ",
+    @"      ",
+    @"       ",
+    @"        ",
+};
+
 @implementation NSString (VimHelper)
 - (BOOL) isDigit:(NSUInteger)index{
     return isDigit([self characterAtIndex:index]);
@@ -96,6 +108,31 @@ BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one i
     }
     
     return tmp;
+}
+
++ (NSString *)stringMadeOfSpaces:(NSUInteger)count
+{
+    if (count <= 8) {
+        return precomputed[count];
+    }
+    return [NSMutableString mutableStringMadeOfSpaces:count];
+}
+
+@end
+
+@implementation NSMutableString (VimHelper)
+
++ (NSMutableString *)mutableStringMadeOfSpaces:(NSUInteger)count
+{
+    NSMutableString *s = [[NSMutableString alloc] initWithCapacity:count];
+
+    for (; count >= 8; count -= 8) {
+        [s appendString:precomputed[8]];
+    }
+    if (count) {
+        [s appendString:precomputed[count]];
+    }
+    return [s autorelease];
 }
 
 @end

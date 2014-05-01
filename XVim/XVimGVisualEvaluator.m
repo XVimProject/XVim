@@ -13,6 +13,20 @@
 
 @implementation XVimGVisualEvaluator
 
+- (XVimEvaluator *)defaultNextEvaluator {
+    return [XVimEvaluator popEvaluator];
+}
+
+- (NSString *)modeString {
+    return self.parent.modeString;
+}
+
+- (void)didEndHandler
+{
+    [self.parent.argumentString setString:@""];
+    [super didEndHandler];
+}
+
 - (XVimEvaluator *)f{
     [self.window errorMessage:@"{visual}gf unimplemented" ringBell:NO];
     return [XVimEvaluator popEvaluator];
@@ -40,13 +54,13 @@
 - (XVimEvaluator*)u{
 	NSTextView *view = [self sourceView];
     [view xvim_makeLowerCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
-	return nil;
+	return [XVimEvaluator invalidEvaluator];
 }
 
 - (XVimEvaluator*)U{
 	NSTextView *view = [self sourceView];
     [view xvim_makeUpperCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
-	return nil;
+	return [XVimEvaluator invalidEvaluator];
 }
 
 - (XVimEvaluator *)w{
@@ -62,7 +76,7 @@
 - (XVimEvaluator*)TILDE{
 	NSTextView *view = [self sourceView];
     [view xvim_swapCase:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
-	return nil;
+	return [XVimEvaluator invalidEvaluator];
 }
 
 @end
