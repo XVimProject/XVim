@@ -56,6 +56,7 @@ XVimMotionEvaluator
 - (id)initWithWindow:(XVimWindow*)window;
 
 + (XVimEvaluator*)invalidEvaluator;
++ (XVimEvaluator*)popEvaluator;
 + (XVimEvaluator*)noOperationEvaluator;
     
 /**

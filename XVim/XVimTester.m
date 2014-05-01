@@ -82,7 +82,7 @@
 
 - (id)init{
     if( self = [super init] ){
-        self.testCases = [[NSMutableArray alloc] init];
+        self.testCases = [NSMutableArray array];
         showPassing = false;
     }
     return self;
@@ -202,6 +202,7 @@
     [self updateResultsString];
     
     [results makeKeyAndOrderFront:results];
+    [resultsView release];
 }
 
 -(void) updateResultsString{

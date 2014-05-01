@@ -22,38 +22,32 @@
 #import "XVimCommandLineEvaluator.h"
 #import "NSString+VimHelper.h"
 
-static XVimEvaluator* _invalidEvaluator = nil;
-static XVimEvaluator* _noOperationEvaluator = nil;
+static XVimEvaluator *_invalidEvaluator = nil;
+static XVimEvaluator *_noOperationEvaluator = nil;
+static XVimEvaluator *_popEvaluator = nil;
 
 @implementation XVimEvaluator
 
 @synthesize yankRegister = _yankRegister;
 @synthesize numericArg = _numericArg;
 
++ (void)initialize
+{
+    _invalidEvaluator = [[XVimEvaluator alloc] init];
+    _noOperationEvaluator = [[XVimEvaluator alloc] init];
+    _popEvaluator = [[XVimEvaluator alloc] init];
+}
+
 + (XVimEvaluator*)invalidEvaluator{
-   	if(_invalidEvaluator){
-        return _invalidEvaluator;
-    }
-    
-	@synchronized([XVimEvaluator class]){
-		if(!_invalidEvaluator) {
-			_invalidEvaluator = [[XVimEvaluator alloc] init];
-		}
-	}
     return _invalidEvaluator;
 }
 
 + (XVimEvaluator*)noOperationEvaluator{
-   	if(_noOperationEvaluator){
-        return _noOperationEvaluator;
-    }
-    
-	@synchronized([XVimEvaluator class]){
-		if(!_noOperationEvaluator) {
-			_noOperationEvaluator = [[XVimEvaluator alloc] init];
-		}
-	}
     return _noOperationEvaluator;
+}
+
++ (XVimEvaluator *)popEvaluator{
+    return _popEvaluator;
 }
 
 - (id)init {

@@ -152,14 +152,19 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)a{
+    // FIXME: doesn't work properly, especially in block mode
     self.onChildCompleteHandler = @selector(onComplete_ai:);
     [self.argumentString appendString:@"a"];
 	return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
 }
 
-// TODO: There used to be "b:" and "B:" methods here. Take a look how they have been.
+- (XVimEvaluator*)A{
+    [self.window errorMessage:@"{Visual}A not implemented yet" ringBell:NO];
+    return self;
+}
 
 - (XVimEvaluator*)i{
+    // FIXME: doesn't work properly, especially not in block mode
     self.onChildCompleteHandler = @selector(onComplete_ai:);
     [self.argumentString appendString:@"i"];
     return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
@@ -179,8 +184,17 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)c{
+    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
+        [self.window errorMessage:@"{Visual Block}c not implemented yet" ringBell:NO];
+        return self;
+    }
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
+}
+
+- (XVimEvaluator *)C{
+    [self.window errorMessage:@"{Visual}C not implemented yet" ringBell:NO];
+    return self;
 }
 
 - (XVimEvaluator*)C_b{
@@ -198,7 +212,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
 }
 
+- (XVimEvaluator *)DEL{
+    return [self d];
+}
+
 - (XVimEvaluator*)D{
+    // FIXME: doesn't work ask expected in any visual mode
     XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
 }
@@ -210,7 +229,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)g{
     [self.argumentString appendString:@"g"];
-	return [[[XVimGVisualEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[[XVimGVisualEvaluator alloc] initWithWindow:self.window] autorelease];
+}
+
+- (XVimEvaluator*)I{
+    [self.window errorMessage:@"{Visual}I not implemented yet" ringBell:NO];
+    return self;
 }
 
 - (XVimEvaluator*)J{
@@ -226,7 +250,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)m_completed:(XVimEvaluator*)childEvaluator{
-    // Vim does not escape from Visual mode after makr is set by m command
+    // Vim does not escape from Visual mode after mark is set by m command
     self.onChildCompleteHandler = nil;
     return self;
 }
@@ -253,9 +277,23 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     return [self p];
 }
 
+- (XVimEvaluator *)r{
+    [self.window errorMessage:@"{Visual}r{char} not implemented yet" ringBell:NO];
+    return self;
+}
+
+- (XVimEvaluator *)R{
+    return [self S];
+}
+
 - (XVimEvaluator*)s{
 	// As far as I can tell this is equivalent to change
 	return [self c];
+}
+
+- (XVimEvaluator *)S{
+    [self.window errorMessage:@"{Visual}r{char} not implemented yet" ringBell:NO];
+    return self;
 }
 
 - (XVimEvaluator*)u{
@@ -305,7 +343,11 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)X{
-    return [self D];
+    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
+        return [self d];
+    } else {
+        return [self D];
+    }
 }
 
 - (XVimEvaluator*)y{
@@ -380,6 +422,11 @@ TODO: This block is from commit 42498.
     return [self ESC];
 }
 
+- (XVimEvaluator*)C_RSQUAREBRACKET{
+    [self.window errorMessage:@"{Visual}CTRL-] not implemented yet" ringBell:NO];
+    return self;
+}
+
 - (XVimEvaluator*)COLON{
 	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:@":'<,'>"
@@ -398,12 +445,25 @@ TODO: This block is from commit 42498.
 	return eval;
 }
 
+- (XVimEvaluator *)EXCLAMATION{
+    [self.window errorMessage:@"{Visual}!{filter} not implemented yet" ringBell:NO];
+    return self;
+}
+
 - (XVimEvaluator*)GREATERTHAN{
+    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
+        [self.window errorMessage:@"{Visual Block}> not implemented yet" ringBell:NO];
+        return self;
+    }
     XVimShiftEvaluator* eval = [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:NO] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)LESSTHAN{
+    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
+        [self.window errorMessage:@"{Visual Block}< not implemented yet" ringBell:NO];
+        return self;
+    }
     XVimShiftEvaluator* eval = [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:YES] autorelease];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
