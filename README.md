@@ -25,7 +25,7 @@
     - XVim for Xcode5 must be built with Xcode5
  - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
- - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
+ - Restart Xcode. (Make sure that the Xcode process is terminated entirely)
 
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
