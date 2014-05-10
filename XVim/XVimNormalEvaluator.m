@@ -166,6 +166,8 @@
         XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
         return [self jumpToMark:mark firstOfLine:NO];
     }else{
+        // djl
+        NSLog(@"gd cmd -> ");
         if( childEvaluator.motion != nil ){
             return [self _motionFixed:childEvaluator.motion];
         }

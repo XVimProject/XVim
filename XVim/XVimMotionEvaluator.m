@@ -188,12 +188,14 @@
  */
 
 - (XVimEvaluator*)g{
+//    NSLog(@"%@",[NSThread callStackSymbols]);
     [self.argumentString appendString:@"g"];
     self.onChildCompleteHandler = @selector(onComplete_g:);
     return [[[XVimGMotionEvaluator alloc] initWithWindow:self.window] autorelease];
 }
 
 - (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
+//    NSLog(@"%@",[NSThread callStackSymbols]);
     if( [childEvaluator.key.toSelectorString isEqualToString:@"SEMICOLON"] ){
         XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
         return [self jumpToMark:mark firstOfLine:NO];
