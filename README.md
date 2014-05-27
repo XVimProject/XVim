@@ -1,15 +1,13 @@
-<div align="right">
 <a href="https://github.com/JugglerShu/XVim/blob/master/README_jp.md">[日本語版]</a>
-</div>
 
 # XVim
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
-  For Xcode 5.1 : Use the latest develop branch.
+  For Xcode4 Users : Use for_xcode4 tag
+
 
   [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
-  
   This group is for XVim developers and testers(reporters).
   If you are interested in helping XVim project join the group.
   Just testing new release and reporting problem is great help for us. Join the group casually.
