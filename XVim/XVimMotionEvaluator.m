@@ -365,19 +365,19 @@
         [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
     }
     
-    NSUInteger to = [self.sourceView.textStorage positionAtLineNumber:mark.line column:mark.column];
+    NSUInteger to = [self.sourceView.textStorage xvim_indexOfLineNumber:mark.line column:mark.column];
     if( NSNotFound == to ){
         return [XVimEvaluator invalidEvaluator];
     }
     
     if( fol ){
-        to = [self.sourceView.textStorage firstNonblankInLine:to]; // This never returns NSNotFound
+        to = [self.sourceView.textStorage xvim_firstNonblankInLineAtIndex:to allowEOL:YES]; // This never returns NSNotFound
     }
 	
     // set the position before the jump
     XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
-    cur_mark.line = [self.sourceView.textStorage lineNumber:cur_pos];
-    cur_mark.column = [self.sourceView.textStorage columnNumber:cur_pos];
+    cur_mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:cur_pos];
+    cur_mark.column = [self.sourceView.textStorage xvim_columnOfIndex:cur_pos];
     cur_mark.document = [self.sourceView documentURL].path;
     if( nil != mark.document ){
         [[XVim instance].marks setMark:cur_mark forName:@"'"];
@@ -442,7 +442,7 @@
     NSRange r = [view selectedRange];
     NSUInteger repeat = self.numericArg;
     NSUInteger linesUpCursorloc = [view.textStorage nextLine:r.location column:0 count:(repeat - 1) option:MOTION_OPTION_NONE];
-    NSUInteger head = [view.textStorage firstOfLineWithoutSpaces:linesUpCursorloc];
+    NSUInteger head = [view.textStorage xvim_firstNonblankInLineAtIndex:linesUpCursorloc allowEOL:NO];
     if( NSNotFound == head && linesUpCursorloc != NSNotFound){
         head = linesUpCursorloc;
     }else if(NSNotFound == head){
@@ -469,9 +469,9 @@
 }
 
 /*
- * Delete (DEL) acts like 'h' in vi. moves cursor backward
+ * BackSpace (BS) acts like 'h' in vi. moves cursor backward
  */
-- (XVimEvaluator*)DEL{
+- (XVimEvaluator*)BS{
     return [self h];
 }
 

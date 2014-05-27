@@ -82,6 +82,10 @@
             // omap
             // vmap
             
+            
+            // mapping should not affect arguments
+            XVimMakeTestCase(text2, 0, 0, @":nmap b c<CR>fb", text2, 4, 0), // Issue #510
+            
     nil];
 }
 

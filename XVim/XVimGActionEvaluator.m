@@ -6,6 +6,7 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
+#import "XVimJoinEvaluator.h"
 #import "XVimGActionEvaluator.h"
 #import "XVimTildeEvaluator.h"
 #import "XVimLowercaseEvaluator.h"
@@ -41,8 +42,10 @@
 
 - (XVimEvaluator*)i{
     XVimMark* mark = [[XVim instance].marks markForName:@"^" forDocument:self.sourceView.documentURL.path];
+    XVimInsertionPoint mode = XVIM_INSERT_DEFAULT;
+
 	if ( mark.line != NSNotFound) {
-        NSUInteger newPos = [self.sourceView.textStorage positionAtLineNumber:mark.line column:mark.column];
+        NSUInteger newPos = [self.sourceView.textStorage xvim_indexOfLineNumber:mark.line column:mark.column];
         if( NSNotFound != newPos ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
             m.position = newPos;
@@ -56,10 +59,15 @@
                 [[XVim instance].marks setMark:cur_mark forName:@"'"];
             }
             [self.sourceView xvim_move:m];
-            [self.sourceView xvim_append];
+            mode = XVIM_INSERT_APPEND;
         }
     }
-	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:mode] autorelease];
+}
+
+- (XVimEvaluator*)J{
+    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
+    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)u{

@@ -9,5 +9,5 @@
 #import "XVimOperatorEvaluator.h"
 
 @interface XVimJoinEvaluator : XVimOperatorEvaluator
-
+- (instancetype)initWithWindow:(XVimWindow *)window addSpace:(BOOL)addsSpace;
 @end

@@ -353,3 +353,84 @@ IDEWorkspaceWindowController  -------------------------------->  IDEWorkspaceWin
      
 
 (*3) lastActiveEditorContext is a IDEEditorContext object which has had focus most recently.
+
+
+
+
+
+### Undo and Redoing ###
+One problem I had in Xcode 5.1 is in undoing.
+To simulate Vim's undoing we have to keep its original cursor position when operating on a text.
+NSTextView, NSUndoManager and NSTextStorage system does not keep its cursor position when registering undo operation. This means we can not simulate
+Vim's undoing only with these classes.
+
+In Xcode4 I did something like following when operating text. This keeps current cursor position to undo.
+
+    [[self undoManager] registerUndoWithTarget:self selector:@selector(xvim_undoCursorPos:) object:[NSNumber numberWithUnsignedInteger:pos]];
+
+In the above, "self" is DVTSourceTextView.
+
+Unfortunately when swiching files in Xcode5 it internally creates new DVTSourceTextView and the registered text view is no longer available.
+This leads crash when you undoing with the unabailable DVTSourceTextView.
+This can be reproducet in following operations.
+  - Open a document in Xcode
+    (Let say the DVTSourceTextView used here is TextView1)
+  - Operate something on the document
+  - Switch to another document by selecting one in navgator view.
+    (Now the new DVTSourceTextView  (TextView2) is used to show the document )
+  - Switch back to the previous document.
+    (Unfortunatelly at this point Xcode creates another new DVTSourceTextView (TextView3) to show the previous document)
+  - Undo the operation
+    This leads crash because the registerd text view is TextView1 and it is no longer available.
+    
+The root problem here is that we register DVTSourceTextView as the undo target. On the other hand NSTextView uses NSTextStorage as the undo target.
+
+So what we do is extending NSTextStorage to keep its original position.
+
+Usual undo registration sequence of NSTextView is following
+ - operate on a text
+    - creates "NSUndoTyping" object
+    - obtain undo manager by NSTextView -undoManager method
+    - obtain NSTextStorage by NSTextView -textStorage method
+    - register undo with the NSUndoTyping object and the NSTextStorage as the target.
+      (The selecter is internal method "_undoRedoTextOperation" in NSTextStorage)
+ 
+ When undo in NSTextView following occurs (probably)
+ 
+ - call NSUndoManger's -undo method
+    - call registered NSTextStoage's "_undoRedoTextOperation" with NSUndoTyping object
+    
+ 
+### IDESourceCodeEditor and DVTSourceTextView ###
+IDESourceCodeEditor controls DVTSourceTextView
+To obtain IDESourceCodeEditor from DVTSourceTextView you can use delegate property.
+(It may not be set so we should test if it is nil)
+
+
+### IDESourceCodeEditor and Views and Documents(Xcode5) ###
+DVTSourceTextView
+ |-undoManager   ------------------------------------------------------------------------
+ |-delegate  ------------> IDESourceCodeEditor
+ |-textStorage                                                                          | 
+    |                                                                                   |
+    v                                                                                   |                  
+DVTTextStorage.delegate ---------> IDESourceCodeDocument                                v
+                                               |--- undoManager ----------------> DVTUndoManager
+               
+
+### How NSTextView updates insertionpoint when undoing ###
+When you modify text in NSTextView, it modifies NSTextStorage.
+NSTextStorage then add an NSUndoTextOperation object to NSUndoManager by calling registerUndoWithTarget:selector:object: method.
+This method takes target and object. 
+The target is NSTextStorage and the object is the NSUndoTextOperation object.
+
+NSUndoTextOperation holds information about undoing (the range of affected text).
+
+When undoing, NSUndoManager calls NSTextStorage's internal method _undoRedoTextOperation method (with an argument of NSUndoTextOperation object)
+Then NSUndoManager invokes undoRedo: method in NSUndoTextOperation object (it must takes the NSTextStorage object as its argument).
+
+The important thing to notice here is NSUndoTextOperation does not know NSTextView object related to the NSTextStorage.
+undoRedo: method should modify NSTextStorage object and updates text in it but can not make any change about current insertion point.
+
+Actually what AppKit does is just obtaining NSTextView object related to NSTextStorage by calling 
+ [[[NSTextStorage layoutMangaers] firstObject] firstTextView]

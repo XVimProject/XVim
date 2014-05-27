@@ -9,7 +9,7 @@
 
 #import "XVimMotion.h"
 #import "XVimDefs.h"
-#import <Cocoa/Cocoa.h>
+#import "XVimTextStoring.h"
 
 typedef enum {
     XVimSortOptionReversed              = 1,
@@ -22,26 +22,6 @@ typedef enum {
  VimOperation category on NSTextStorage
  Adds Vim-like functionality to NSTextStorage.
  **/
-
-#pragma mark Macros
-#ifdef DEBUG
-// The methods here often take index as current interest position and index can be at EOF
-// The following macros asserts the range of index.
-// WITH_EOF permits the index at EOF position.
-// WITHOUT_EOF doesn't permit the index at EOF position.
-#define ASSERT_VALID_RANGE_WITH_EOF(x) NSAssert( x <= [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string.   TextLength:%lu   SpecifiedIndex:%lu", [[self string] length], x)
-#define ASSERT_VALID_RANGE_WITHOUT_EOF(x) NSAssert( x < [[self string] length] || [[self string] length] == 0, @"index can not exceed the length of string - 1 TextLength:%lu   SpecifiedIndex:%lu", [[self string] length], x)
-
-// Some methods assume that "index" is at valid cursor position in Normal mode.
-// See isValidCursorPosition's description the condition of the valid cursor position.
-#define ASSERT_VALID_CURSOR_POS(x) NSAssert( [self isValidCursorPosition:x], @"index can not be invalid cursor position" )
-#else
-#define ASSERT_VALID_RANGE_WITH_EOF(x)
-#define ASSERT_VALID_RANGE_WITHOUT_EOF(x)
-#define ASSERT_VALID_CURSOR_POS(x)
-#endif
-
-#define charat(x) [[self string] characterAtIndex:(x)]
 
 
 #pragma mark Term Definitions
@@ -92,34 +72,15 @@ typedef enum {
  * Column number starts from 0.
  **/
 
-@interface NSTextStorage (VimOperation)
-
-- (NSString*)xvim_string;
-
-#pragma mark Properties
-// Returns position of eof
-- (NSUInteger)endOfFile;
-
-// Returns number of lines in the text
-- (NSUInteger)numberOfLines;
-
+@interface NSTextStorage (VimOperation) <XVimTextStoring>
 
 #pragma mark Definitions
 
 // Determine if the position specified with "index" is EOF.
 - (BOOL) isEOF:(NSUInteger)index;
 
-//Determine if the text is empty.
-- (BOOL) isEmpty;
-
-// Determine if the posiion is last character of the text
-- (BOOL) isLastCharacter:(NSUInteger)index;
-    
 // Determine if the position specified with "index" is LOL.
 - (BOOL) isLOL:(NSUInteger)index;
-
-// Determine if the position specified with "index" is FOL.
-//- (BOOL) isFOL:(NSUInteger)index;  // Not implemented
 
 // Determine if the position specified with "index" is EOL.
 - (BOOL) isEOL:(NSUInteger)index;
@@ -136,9 +97,6 @@ typedef enum {
 // Determine if the position is on the last line in the document
 - (BOOL) isLastLine:(NSUInteger)index;
 
-// Determine if the position is on the first line in the document
-- (BOOL) isFirstLine:(NSUInteger)index; // Not implemented
-
 // Determine if the position is non blank character
 // EOF is a blank character
 - (BOOL) isNonblank:(NSUInteger)index;
@@ -154,152 +112,12 @@ typedef enum {
 - (BOOL) isBlankline:(NSUInteger)index;
 
 /**
- * Determine if the position specified with "index" is an empty line.
- * Empty line is one of following
- *   - Blankline
- *   - Only whitespace followed by Newline or EOF.
- **/
-- (BOOL) isEmptyline:(NSUInteger)index;
-
-/**
  * Determine if the position specified with "index" is valid cursor position in normal mode.
  * Valid position is followings
  *   - Non newline characters.
  *   - Blankline( including EOF after newline )
  **/
 - (BOOL) isValidCursorPosition:(NSUInteger)index;
-
-
-#pragma mark Searching Positions
-/**
- * Returns next non-blank character position after the position "index" in a current line.
- * If no non-blank character is found or the line is a blank line this returns NSNotFound.
- * NOTE: This searches non blank characters from "index" and NOT "index+1"
- *       If the character at "index" is non blank this returns "index" itself
- **/ 
-- (NSUInteger)nextNonblankInLine:(NSUInteger)index; // May return NSNotFound
-
-/**
- * Returns position of the first newline character when searching forwards from "index+1"
- * Searching starts from position "index"+1. The position index is not included to search newline.
- * Returns NSNotFound if no newline character is found.
- **/
-- (NSUInteger)nextNewline:(NSUInteger)index;
-
-/**
- * Returns position of the first newline character when searching backwards from "index-1"
- * Searching starts from position "index"-1. The position index is not included to search newline.
- * Returns NSNotFound if no newline characer is found.
- **/
-- (NSUInteger)prevNewline:(NSUInteger)index;
-
-/**
- * Returns position of the first of line of the current line specified by index.
- * first of line is one of following which is found first when searching backwords from "index".
- *    - Character just after newline
- *    - Character at the head of document
- * If the size of document is 0 it does not have any first of line.
- * Blankline does NOT have first of line. So EOF is NEVER head of line.
- * Searching starts from position "index". So the "index" could be a first of line and may be returned.
- **/
-- (NSUInteger)firstOfLine:(NSUInteger)index; // May return NSNotFound
-
-/**
- * Returns position of the last character of line when the cursor is at "index"
- * End of line is one of following which is found first when searching forwords from "index".
- *    - Character just before newline if its not newlin
- *    - Character just before EOF if its not newline 
- * Blankline does not have last of line.
- * Searching starts from position "index". So the "index" could be an end of line.
- **/
-- (NSUInteger)lastOfLine:(NSUInteger)index; // May return NSNotFound
-
-/**
- * Returns position of first character of the line specified by index.
- * Note that first character in the line is different from first of line.
- * First character may be newline when its blankline.
- * First character may be EOF if the EOF is blankline
- * In short words, its just after a newline or begining of document.
- * Search starts from "index" and this may return index itself.
- * This never returns NSNotFound
- **/
-- (NSUInteger)beginningOfLine:(NSUInteger)index;
-
-/**
- * Returns position of the end of current line. 
- * end of line is one of followings
- *    - Newline character at the end of a line.
- *    - EOF of the last line of the document.
- * Blankline also has tail of line.
- **/
-- (NSUInteger)endOfLine:(NSUInteger)index; // Never returns NSNotFound
-
-/**
- * Returns position of the first non-whitespace character in the line specified by index.
- * If there is no first of line it returns NSNotFound
- **/
-- (NSUInteger)firstOfLineWithoutSpaces:(NSUInteger)index; // May return NSNotFound
-
-/**
- * Returns position of the first non-blank character at the line specified by index
- * If its blank line it retuns position of newline character
- * If its a line with only white spaces it returns end of line.
- * This NEVER returns NSNotFound.
- * Note that this is differnet from firstOfLineWithoutSpaces
- **/
-- (NSUInteger)firstNonblankInLine:(NSUInteger)index; // Never returns NSNotFound
-
- /**
- * Returns position at line number "num" and column number 0
- * Line number starts from 1.
- * NSNotFound is retured if the specifiled line number exceeds the maxmam line number in the document.
- **/
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num;
-
-/**
- * Returns position at line number "num" and column number "column"
- * Line number starts from 1.
- * If the line number specified exceeds the maximum lines in the document it returns NSNotFound.
- * If the specified column exeeds the column number in the line it returns position of tail of the line(newline or eof)
- **/
-- (NSUInteger)positionAtLineNumber:(NSUInteger)num column:(NSUInteger)column;
-
-/**
- * Returns maximum column number at the line
- * Column number starts from 0.
- * If the specified line does not exist in the current document it returns NSNotFound
- **/
-- (NSUInteger)maxColumnAtLineNumber:(NSUInteger)num;
-
-/**
- * Returns index of the position where the specified column is matched when searching from "pos" in the line.
- * If the specified column is not found ( which means it finds end of line before finding matching column) 
- * it returns NSNotFound if "notfound" is YES  or  it returns the position of the end of line if "notfound" is NO.
- **/
-- (NSUInteger)nextPositionFrom:(NSUInteger)pos matchingColumn:(NSUInteger)column returnNotFound:(BOOL)notfound;
-
-/**
- * Returns line number of specified index.
- * Line number starts from 1
- * This never returns NSNotFound.
- **/
-- (NSUInteger)lineNumber:(NSUInteger)index;
-
-/**
- * Returns column number.
- * Column number starts from 0.
- * This never returns NSNotFound.
- **/
-- (NSUInteger)columnNumber:(NSUInteger)index;
-
-/**
- * Return characgter range for line range.
- * NOTE: Linenumber starts from 0 not 1 for this method.
- * TODO: Xcode uses linenuber starts from 0 and XVim uses 1
- *       We should adapt Xcode's way.
- **/
-- (NSRange)characterRangeForLineRange:(NSRange)arg1;
-
 
 #pragma mark Vim operation related methods
 
@@ -392,24 +210,12 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
 
 #pragma mark Conversions
 /**
- * Convert index to XVimPosition.
- * "index" can be 0 to EOF.
- * Otherwise it returns XVimPosition with {NSNotFound, NSNotFound}
- **/
-- (XVimPosition)XVimPositionFromIndex:(NSUInteger)index;
-
-/**
- * Convert XVimPosition to index.
- * If line or column specified by "pos" does not exist
- * it returns NSNotFound.
- **/
-- (NSUInteger)IndexFromXVimPosition:(XVimPosition)pos;
-
-/**
  * Returns nearest valid cursor position for normal mode.
  * This is usually convert cursor position on newline to previous character since
  * a cursor can not be on a newline charaster if its not blankline
  **/
 - (NSUInteger)convertToValidCursorPositionForNormalMode:(NSUInteger)index;
 
+#pragma mark undo
+- (void)xvim_undoCursorPos:(NSNumber*)num;
 @end
