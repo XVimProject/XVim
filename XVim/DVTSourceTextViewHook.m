@@ -73,8 +73,8 @@
     // [self unhook:@"dealloc"]; 
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
     [self unhook:@"selectAll:"];
-    [self unhook:@"cut:"]; 
-    [self unhook:@"copy:"]; 
+    //[self unhook:@"cut:"]; 
+    //[self unhook:@"copy:"]; 
     [self unhook:@"paste:"];  
     [self unhook:@"delete:"];  
     [self unhook:@"keyDown:"];
