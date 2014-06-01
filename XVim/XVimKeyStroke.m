@@ -345,7 +345,13 @@ static NSString* keyFromUnichar(unichar c){
     if( nil == s_unicharToKey){
         initUnicharToKey();
     }
-    return [s_unicharToKey objectForKey:[NSNumber numberWithUnsignedInteger:c]];
+    NSString* ret = [s_unicharToKey objectForKey:[NSNumber numberWithUnsignedInteger:c]];
+    if( nil == ret ){
+        // We can not convert unichar to known key expression
+        // Try to convert unichar directly to NSString
+        return [NSString stringWithFormat:@"%C", c];
+    }
+    return ret;
 }
 
 BOOL isPrintable(unichar c){
