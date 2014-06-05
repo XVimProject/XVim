@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "A28F422617EEDBC200A3F7AE"
                BuildableName = "XVim.xcplugin"
-               BlueprintName = "XVim for Xcode5"
+               BlueprintName = "XVim for Xcode5 and 6"
                ReferencedContainer = "container:XVim.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
