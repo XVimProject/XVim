@@ -32,7 +32,7 @@
 	<key>XC4Compatible</key>
 	<true/>
 	<key>XCGCReady</key>
-	<true/>
+	<false/>
 	<key>XCPluginHasUI</key>
 	<false/>
 </dict>
