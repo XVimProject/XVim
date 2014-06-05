@@ -841,8 +841,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A2B4BAB714D59F6600D817B0 /* XVim for Xcode4 */,
 				A28F422617EEDBC200A3F7AE /* XVim for Xcode5 */,
+				A2B4BAB714D59F6600D817B0 /* XVim for Xcode4 */,
 			);
 		};
 /* End PBXProject section */

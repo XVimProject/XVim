@@ -15,12 +15,13 @@
 ## Support Xcode Versions
   - Xcode4.6
   - Xcode5
+  - Xcode6 beta
 
 ## INSTALL
  - Download source code(See also "Branches and Releases" section) and open XVim.xcodeproj with Xcode.
  - Select an appropriate Scheme for your Xcode version
-    - XVim for Xcode4 must be built with Xcode4.6
-    - XVim for Xcode5 must be built with Xcode5
+    - "XVim for Xcode4" must be built with Xcode4.6
+    - "XVim for Xcode5 and 6" must be built with Xcode5 or 6
  - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
  - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
