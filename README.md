@@ -25,7 +25,7 @@
     - "XVim for Xcode5 and 6" must be built with Xcode5 or 6
  - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
- - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
+ - Restart Xcode. (Make it sure that Xcode process is terminated entirely)
  - Create a `.xvimrc` file in the root of your home directory (optional)
 
 ## Branches and Releases
