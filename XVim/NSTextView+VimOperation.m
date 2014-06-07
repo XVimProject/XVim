@@ -600,6 +600,9 @@
  **/
 - (void)xvim_adjustCursorPosition{
     // If the current cursor position is not valid for normal mode move it.
+    if( nil == self.textStorage ){
+        return;
+    }
     if( ![self.textStorage isValidCursorPosition:[self selectedRange].location] ){
         NSRange currentRange = [self selectedRange];
         [self xvim_selectPreviousPlaceholder];
