@@ -1014,6 +1014,12 @@
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
+- (void)nohlsearch:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
+    [view setNeedsUpdateFoundRanges:YES];
+    [view xvim_clearHighlightText];
+}
+
 - (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
 }
