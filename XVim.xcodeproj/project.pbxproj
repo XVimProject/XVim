@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		6E2B332D1836E42F00EFE4E2 /* XVimBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B332B1836E42F00EFE4E2 /* XVimBuffer.m */; };
 		6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */; };
+		A204814F19702F3E0064BE66 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */; };
 		A212A53D1940A330002FB2CF /* XVim.xcplugin in Copy Files */ = {isa = PBXBuildFile; fileRef = A2E7E45217EF0219008F045A /* XVim.xcplugin */; };
 		A2243B7017F03BFC00DD92A1 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A2E7E45517EFF677008F045A /* Info.plist */; };
 		A28F422817EEDBC200A3F7AE /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B314D6F56E003B6433 /* Logger.m */; };
@@ -117,6 +118,8 @@
 		6E2B33321836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DVTTextStorage+XVimTextStoring.h"; path = "XVim/DVTTextStorage+XVimTextStoring.h"; sourceTree = SOURCE_ROOT; };
 		6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "DVTTextStorage+XVimTextStoring.m"; path = "XVim/DVTTextStorage+XVimTextStoring.m"; sourceTree = SOURCE_ROOT; };
 		6EAFF976183777A6003EADAE /* XVimStringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimStringBuffer.h; path = XVim/XVimStringBuffer.h; sourceTree = SOURCE_ROOT; };
+		A204814D19702F3E0064BE66 /* NSObject+XVimAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+XVimAdditions.h"; path = "XVim/NSObject+XVimAdditions.h"; sourceTree = "<group>"; };
+		A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+XVimAdditions.m"; path = "XVim/NSObject+XVimAdditions.m"; sourceTree = "<group>"; };
 		A2126B7316FB30B0000BE21C /* XVimMark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMark.h; path = XVim/XVimMark.h; sourceTree = SOURCE_ROOT; };
 		A2126B7416FB30B0000BE21C /* XVimMark.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMark.m; path = XVim/XVimMark.m; sourceTree = SOURCE_ROOT; };
 		A2126B7616FB4806000BE21C /* XVimMarks.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMarks.h; path = XVim/XVimMarks.h; sourceTree = SOURCE_ROOT; };
@@ -477,6 +480,8 @@
 				A2C1BB5216CEAC7F0066F420 /* Utils.m */,
 				A2702B0916FEA313005ADD76 /* NSObject+ExtraData.h */,
 				A2702B0A16FEA313005ADD76 /* NSObject+ExtraData.m */,
+				A204814D19702F3E0064BE66 /* NSObject+XVimAdditions.h */,
+				A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */,
 			);
 			name = Support;
 			sourceTree = "<group>";
@@ -748,6 +753,7 @@
 				A28F423517EEDBC200A3F7AE /* XVimMotionEvaluator.m in Sources */,
 				A28F423617EEDBC200A3F7AE /* XVimZEvaluator.m in Sources */,
 				A28F423717EEDBC200A3F7AE /* XVimEqualEvaluator.m in Sources */,
+				A204814F19702F3E0064BE66 /* NSObject+XVimAdditions.m in Sources */,
 				A28F423817EEDBC200A3F7AE /* XVimRegister.m in Sources */,
 				A28F423917EEDBC200A3F7AE /* XVimRegisterEvaluator.m in Sources */,
 				A28F423A17EEDBC200A3F7AE /* XVimOperatorEvaluator.m in Sources */,
