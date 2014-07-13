@@ -65,8 +65,14 @@
 	[super becameHandler];
 }
 
+- (void)cancelHandler {
+    [self relinquishFocusToWindow];
+    [super cancelHandler];
+}
+
 - (void)didEndHandler{
     [self relinquishFocusToWindow];
+    [super didEndHandler];
 }
 
 - (void)appendString:(NSString*)str{

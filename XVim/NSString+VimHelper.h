@@ -7,23 +7,24 @@
 //
 
 #import <Foundation/Foundation.h>
+
 BOOL isDigit(unichar ch);
+BOOL isOctDigit(unichar ch);
+BOOL isHexDigit(unichar ch);
 BOOL isAlpha(unichar ch);
 BOOL isDelimeter(unichar ch);
 BOOL isWhitespace(unichar ch);
-BOOL isNonAscii(unichar ch);
 BOOL isNewline(unichar ch);
 BOOL isNonblank(unichar ch);
 BOOL isKeyword(unichar ch);
 
 @interface NSString (VimHelper)
 - (BOOL) isDigit:(NSUInteger)index;
+- (BOOL) isOctDigit:(NSUInteger)index;
+- (BOOL) isHexDigit:(NSUInteger)index;
 - (BOOL) isAlpha:(NSUInteger)index;
 - (BOOL) isDelimeter:(NSUInteger)index;
-- (BOOL) isWhitespace:(NSUInteger)index;
-- (BOOL) isNonAscii:(NSUInteger)index;
 - (BOOL) isNewline:(NSUInteger)index;
-- (BOOL) isNonblank:(NSUInteger)index;
 - (BOOL) isKeyword:(NSUInteger)index;
 
 /**
@@ -33,4 +34,10 @@ BOOL isKeyword(unichar ch);
  * This means that if nothing is specified in the Vim regex, "options" stays unchanged.
  **/
 - (NSString*)convertToICURegex:(NSRegularExpressionOptions*)options;
+
++ (NSString *)stringMadeOfSpaces:(NSUInteger)count;
+@end
+
+@interface NSMutableString (VimHelper)
++ (NSMutableString *)mutableStringMadeOfSpaces:(NSUInteger)count;
 @end

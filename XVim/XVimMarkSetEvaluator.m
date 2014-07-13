@@ -29,8 +29,8 @@
     
     XVimMark* mark = [[[XVimMark alloc] init] autorelease];
 	NSRange r = [self.sourceView selectedRange];
-    mark.line = [self.sourceView.textStorage lineNumber:r.location];
-    mark.column = [self.sourceView.textStorage columnNumber:r.location];
+    mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:r.location];
+    mark.column = [self.sourceView.textStorage xvim_columnOfIndex:r.location];
     mark.document = [[self.sourceView documentURL] path];
     if( nil != mark.document ){
         [[XVim instance].marks setMark:mark forName:keyStr];

@@ -7,13 +7,8 @@
 //
 
 #import "IDEEditorAreaHook.h"
-#import "IDEKit.h"
 #import "Hooker.h"
-#import "Logger.h"
-#import "XVimCommandLine.h"
-#import "XVimWindow.h"
 #import "DVTKit.h"
-#import "XVim.h"
 #import "IDEEditorArea+XVim.h"
 
 @implementation IDEEditorAreaHook
@@ -28,26 +23,27 @@
  * IDEEdiatorArea exists in every Xcode tabs so if you have 4 tabs in a Xcode window there are 4 command line and XVimWindow views we insert.
  **/
 
-+(void)hook{
++(void)hook
+{
     Class c = NSClassFromString(@"IDEEditorArea");
     
     [Hooker hookMethod:@selector(viewDidInstall) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(viewDidInstall) ) keepingOriginalWith:@selector(viewDidInstall_)];
     [Hooker hookMethod:@selector(primitiveInvalidate) ofClass:c withMethod:class_getInstanceMethod([self class], @selector(primitiveInvalidate)) keepingOriginalWith:@selector(primitiveInvalidate_)];
 }
 
-- (void)viewDidInstall{
-    IDEEditorArea* base = (IDEEditorArea*)self;
-    [base viewDidInstall_];
+- (void)viewDidInstall
+{
+    IDEEditorArea *base = (IDEEditorArea *)self;
 
-    // Setup Command Line
-    [XVimWindow createWindowForIDEEditorArea:base];
-    [base setupCommandLine];
+    [base viewDidInstall_];
+    [base setupXVim];
 }
 
 - (void)primitiveInvalidate
 {
-    IDEEditorArea* base = (IDEEditorArea*)self;
-    [base teardownCommandLine];
+    IDEEditorArea *base = (IDEEditorArea*)self;
+
+    [base teardownXVim];
     [base primitiveInvalidate_];
 }
 

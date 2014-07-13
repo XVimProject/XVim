@@ -253,7 +253,7 @@ static struct key_map key_maps[] = {
     {@"|",124, @"BAR"}, // Default notation
     {@"}",125, @"RBRACE"},
     {@"~",126, @"TILDE"},
-    {@"DEL",127, @"DEL"},
+    {@"BS",127, @"BS"},
     {@"UP",63232, @"Up"},
     {@"DOWN", 63233, @"Down"},
     {@"LEFT", 63234, @"Left"},
@@ -270,7 +270,7 @@ static struct key_map key_maps[] = {
     {@"F10", 63245, @"F10"},
     {@"F11", 63246, @"F11"},
     {@"F12", 63247, @"F12"},
-    {@"FORWARD_DELETE", 63272, @"ForwardDelete"},
+    {@"DEL", 63272, @"DEL"},
     {@"HOME", 63273, @"Home"},
     {@"END", 63275, @"End"},
     {@"PAGEUP", 63276, @"Pageup"},
@@ -345,7 +345,13 @@ static NSString* keyFromUnichar(unichar c){
     if( nil == s_unicharToKey){
         initUnicharToKey();
     }
-    return [s_unicharToKey objectForKey:[NSNumber numberWithUnsignedInteger:c]];
+    NSString* ret = [s_unicharToKey objectForKey:[NSNumber numberWithUnsignedInteger:c]];
+    if( nil == ret ){
+        // We can not convert unichar to known key expression
+        // Try to convert unichar directly to NSString
+        return [NSString stringWithFormat:@"%C", c];
+    }
+    return ret;
 }
 
 BOOL isPrintable(unichar c){
@@ -575,53 +581,53 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 }
 
 - (NSString*)description{
-    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
-    if( 0 != self.modifier){
-        unichar m = XVIM_MAKE_MODIFIER(self.modifier);
-        [str appendFormat:@"0x%02x 0x%02x ", ((unsigned char*)(&m))[1], ((unsigned char*)(&m))[0]];
+    NSMutableString *str = [[NSMutableString alloc] init];
+
+    if (0 != self.modifier) {
+        [str appendFormat:@"mod{0x%02x 0x%02x} ", KS_MODIFIER, self.modifier];
     }
+
     unichar c = self.character;
-    if( isPrintable(c)){
-        [str appendFormat:@"%C", c];
+    if (isPrintable(c)) {
+        [str appendFormat:@"code{%C} ", c];
     }else{
-        [str appendFormat:@"0x%02x 0x%02x", ((unsigned char*)(&c))[1], ((unsigned char*)(&c))[0]];
+        [str appendFormat:@"code{0u%04x} ", c];
     }
     [str appendString:[self keyNotation]];
-    return str;
+
+    return [str autorelease];
 }
 
 - (NSString*)keyNotation{
+	NSMutableString *keyStr = [[NSMutableString alloc] init];
 	unichar charcode = self.character;
+
+    if (self.modifier || !isPrintable(charcode)) {
+        [keyStr appendString:@"<"];
+    }
 	
-	NSMutableString* keyStr = [[[NSMutableString alloc] init] autorelease];
-	if( self.modifier & XVIM_MOD_SHIFT){
+	if (self.modifier & XVIM_MOD_SHIFT) {
 		[keyStr appendString:@"S-"];
 	}
-	if( self.modifier & XVIM_MOD_CTRL){
+	if (self.modifier & XVIM_MOD_CTRL) {
 		[keyStr appendString:@"C-"];
 	}
-	if( self.modifier & XVIM_MOD_ALT){
+	if (self.modifier & XVIM_MOD_ALT) {
 		[keyStr appendString:@"M-"];
 	}
-	if( self.modifier & XVIM_MOD_CMD){
+	if (self.modifier & XVIM_MOD_CMD) {
 		[keyStr appendString:@"D-"];
 	}
-	if( self.modifier & XVIM_MOD_FUNC){
+	if (self.modifier & XVIM_MOD_FUNC) {
 		[keyStr appendString:@"F-"];
 	}
+
+    [keyStr appendString:keyFromUnichar(charcode)];
 	
-    if( keyStr.length == 0 ){
-        if (isPrintable(charcode)) {
-            // Something like 'a' 'b'...
-            return [NSString stringWithFormat:@"%@%@", keyStr, keyFromUnichar(charcode)];
-        }else{
-            // Something like <CR>, <SPACE>...
-            return [NSString stringWithFormat:@"<%@%@>", keyStr, keyFromUnichar(charcode)];
-        }
-    }else{
-        // Something like <C-o>, <C-SPACE>...
-        return [NSString stringWithFormat:@"<%@%@>", keyStr, keyFromUnichar(charcode)];
+    if (self.modifier || !isPrintable(charcode)) {
+        [keyStr appendString:@">"];
     }
+    return [keyStr autorelease];
 }
 
 - (NSString*) toSelectorString {

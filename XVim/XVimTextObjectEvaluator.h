@@ -12,9 +12,6 @@
 @class XVimOperatorAction;
 
 @interface XVimTextObjectEvaluator : XVimEvaluator
-@property BOOL inner;
-@property MOTION textobject;
-@property BOOL bigword;
-
 - (id)initWithWindow:(XVimWindow *)window inner:(BOOL)inner;
+- (XVimMotion *)motion;
 @end

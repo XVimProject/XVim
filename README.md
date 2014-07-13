@@ -1,15 +1,12 @@
-<div align="right">
 <a href="https://github.com/JugglerShu/XVim/blob/master/README_jp.md">[日本語版]</a>
-</div>
 
 # XVim
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
-  For Xcode 5.1 : Use the latest develop branch.
+
 
   [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
-  
   This group is for XVim developers and testers(reporters).
   If you are interested in helping XVim project join the group.
   Just testing new release and reporting problem is great help for us. Join the group casually.
@@ -17,15 +14,19 @@
 ## Support Xcode Versions
   - Xcode4.6
   - Xcode5
+  - Xcode6 beta
 
 ## INSTALL
+ For Xcode4 Users : Before building checkout `for_xcode4` tag.
+
  - Download source code(See also "Branches and Releases" section) and open XVim.xcodeproj with Xcode.
  - Select an appropriate Scheme for your Xcode version
-    - XVim for Xcode4 must be built with Xcode4.6
-    - XVim for Xcode5 must be built with Xcode5
+    - "XVim for Xcode4" must be built with Xcode4.6
+    - "XVim for Xcode5 and 6" must be built with Xcode5 or 6
  - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
- - Restart Xcode. (Make it sure that Xcode proccess is terminated entirely)
+ - Restart Xcode. (Make it sure that Xcode process is terminated entirely)
+ - Create a `.xvimrc` file in the root of your home directory (optional)
 
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
