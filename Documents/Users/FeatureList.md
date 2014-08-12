@@ -19,7 +19,7 @@ File-local and Global marks are supported.
 The '^' mark (last insertion point) and '.' mark (last change point) are also supported.
 gi (insert mode at last insertion point) is supported.
 
-Known issue: When deleteing a line before a mark the mark position should go up along with the line marked but currently XVim does not follow the line. It stays at the absolution position as it was marked.
+Known issue: When deleting a line before a mark the mark position should go up along with the line marked but currently XVim does not follow the line. It stays at the absolution position as it was marked.
 
 ## Scroll
 
@@ -33,13 +33,13 @@ If you want to open the file under the cursor you can use 'gd' instead of 'gf' i
 ## Insert
 a, A, i, I, o, O
 
-You can use Ctrl-o to enter to temparary normal mode during insert mode.
+You can use Ctrl-o to enter to temporary normal mode during insert mode.
 
-Ctrl-w,Ctrl-y,Ctrl-e commands in insert mode are suppported. If you want to use Ctrl-e as "move to end of line" in insert mode (which is default Xcode behaviour),
+Ctrl-w,Ctrl-y,Ctrl-e commands in insert mode are supported. If you want to use Ctrl-e as "move to end of line" in insert mode (which is default Xcode behaviour),
 you can specify following line in .xvimrc.
 
      inoremap <C-e> <C-o>$
-      
+
 
 ## Yank, put and change
 
@@ -78,11 +78,13 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
 -----------|---------------------------
   C-w n    | Add new assistant (Use layout of the last)
   C-w q    | Delete one assistant editor
-  C-w s    | Add new assistant editor. Assistant editors are laid out holizontally.
+  C-w s    | Add new assistant editor. Assistant editors are laid out horizontally.
   C-w v    | Add new assistant editor. Assistant editors are laid out vertically.
 C-w h,j,k,l| Move focus between editors
+  C-w w    | Jump to the next editor
+  C-w W    | Jump to the previous editor
 
-The behaviour of window manipulations is slitely different from Vim's one. This is becuase that Xcode doesn't have a concept of multiple equivalent text views in a window.
+The behaviour of window manipulations is slightly different from Vim's one. This is because that Xcode doesn't have a concept of multiple equivalent text views in a window.
 Instead, Xcode has a concept of a main editor and assistant editors. A main editor always stays in a window and you can add/remove multiple assistant editors.
 You can NOT split a main editor but just can add assistant editors.
 All the manipulations XVim does is add/split assistant editors.
@@ -98,12 +100,12 @@ Substitution does not work as Vim does. When you input command following
 
     :%s/xxxx/yyyy/
 
-XVim does replace the first occurence of xxxx IN THE FILE (not each line ).
-If you want to replace all the occurence of xxxx with yyyy in the file you can specify
+XVim does replace the first occurrence of xxxx IN THE FILE (not each line ).
+If you want to replace all the occurrence of xxxx with yyyy in the file you can specify
 
     :%s/xxxx/yyyy/g
-    
-Currently replacing first occurence of xxxx with yyyy each line is not available
+
+Currently replacing first occurrence of xxxx with yyyy each line is not available
 
 ## Insert mode commands
 
@@ -130,8 +132,8 @@ The dot command ('.') is supported.
 
  Command   | Note
 -----------|-----
-  :w[rite] | 
-  :wq      | 
+  :w[rite] |
+  :wq      |
   :q[uit]  |
   :register| Show contents of registers
   :s[ubstitute]|
@@ -146,12 +148,13 @@ The dot command ('.') is supported.
 
  Command   | Note
 -----------|-----
-  :run     | Invoke Xcode's 'run' command
-  :make    | Invoke Xcode's 'build' command
-  :xhelp   | Show quick help for current insertion point
-  :xccmd   | Invoke arbitrary command in Xcode's actions in its menu. Takes one argument as its action to invoke. Actions [here](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/MenuActionList.txt) are available.
-  :nissue  | Invoke "jump to next issue". ":ni" does the samse.
-  :pissue  | Invoke "jump to previous issue". ":pi" does the same.
+  :run          | Invoke Xcode's 'run' command
+  :make         | Invoke Xcode's 'build' command
+  :xhelp        | Show quick help for current insertion point
+  :xccmd        | (Use :xcmenucmd instead. It is simpler. ) Invoke arbitrary command in Xcode's actions in its menu. Takes one argument as its action to invoke. Actions [here](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/MenuActionList.txt) are available.
+  :xcmenucmd    | Invoke arbitrary command in menu. (EXAMPLE: :xcmenucmd Run)
+  :nissue       | Invoke "jump to next issue". ":ni" does the same.
+  :pissue       | Invoke "jump to previous issue". ":pi" does the same.
   :ncounterpart | Invoke "jump to next counterpart". ":nc" does the same.
   :pcounterpart | Invoke "jump to previous counterpart". ":pc" does the same.
 
@@ -173,6 +176,7 @@ The dot command ('.') is supported.
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
   clipboard | ":set clipboard=unnamed" to share system clipboard with unnamed register
   [no]vimregex | Tells XVim to use Vim's regular expression. Currently support \<,\> for word boundary, \c,\C for specifying case (in)sensitiveness.
+  [no]relativenumber |
 
 
 ## guioptions
@@ -193,7 +197,7 @@ A map command can change one or more keystrokes into one or more key strokes.
 
 Note: The default timeout value for multi-key mapping completion is 1 seconds (1000 milliseconds). You can change it using 'timeoutlen' option.
 
-Examples: 
+Examples:
 
     nmap n e
     imap ' <Esc>
@@ -203,7 +207,7 @@ Examples:
 
 ## .xvimrc
 
-At startup XVim looks for ~/.xvimrc. Each line in this file is executed 
+At startup XVim looks for ~/.xvimrc. Each line in this file is executed
 as an ex command. This allows you to configure mappings and options.
 
 Example:
@@ -232,6 +236,6 @@ See IDEKit.h file in XVim source code and find the class.
 It has a lot of  actions (selectors) which takes one argument. These are the methods
 we can call directly through the ex command.
 Some does work well but some does not. Try using it to find out if it works as you like.
-If you once find some usuful feature in it you can map it to key input via :map command.
+If you once find some useful feature in it you can map it to key input via :map command.
 
 (Note that the argument for :xctabctrl always ends with ":" as shown above)

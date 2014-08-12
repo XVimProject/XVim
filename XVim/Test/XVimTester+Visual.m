@@ -17,6 +17,32 @@
                              @"ggg hhh i_i\n"  // 24 28 32
                              @"    jjj kkk";   // 36 40 44
     
+    static NSString* text3 = @"    aaa\n"
+                             @"    bbb\n";
+    
+    static NSString* text4 = @"aaa\n"   // 0  (index of each WORD)
+                             @"bbb \n"  // 4  (space after b is intentional for J oepration test)
+                             @"ccc\n"   // 8 
+                             @"ddd\n"   // 12
+                             @"eee\n"   // 16
+                             @"fff";    // 20
+
+    static NSString* C_v_o_result = @"a;a ccc\n"
+                                    @"ddd fff\n"
+                                    @"ggg i_i\n"
+                                    @"    kkk";
+
+    static NSString* Vyp_result = @"    aaa\n"
+                                  @"    bbb\n"
+                                  @"    aaa\n"
+                                  @"    bbb\n";
+
+
+    static NSString* VyP_result = @"    aaa\n"
+                                  @"    aaa\n"
+                                  @"    bbb\n"
+                                  @"    bbb\n";
+    
     static NSString* v_d_result = @"d e-e fff\n"
                                   @"ggg hhh i_i\n"
                                   @"    jjj kkk";
@@ -71,6 +97,22 @@
     
     static NSString* v_c_result = @"xxxbbb ccc\n";
     
+    static NSString* v_J_result0 = @"aaa bbb ccc\n"
+                                   @"ddd\n"
+                                   @"eee\n"
+                                   @"fff";
+    
+    static NSString* v_J_result1 = @"aaa bbb ccc\n"
+                                   @"ddd eee fff";
+    
+    static NSString* v_gJ_result0 = @"aaabbb ccc\n"
+                                    @"ddd\n"
+                                    @"eee\n"
+                                    @"fff";
+    
+    static NSString* v_gJ_result1 = @"aaabbb ccc\n"
+                                    @"dddeeefff";
+    
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text2, 0,  0, @"vljd", v_d_result, 0, 0),
             XVimMakeTestCase(text2, 0,  0, @"Vjd", V_d_result, 0, 0),
@@ -78,8 +120,9 @@
             // XVimMakeTestCase(text2, 0,  0, @"vjD", V_d_result, 0, 0), // not supported yet
             
             // Shift and repeat
-            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 0, 0), // #311
-            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,32, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 8, 0), // #311
+            XVimMakeTestCase(text2, 0,  0, @"vj>..u", rshift_result0 , 8, 0),
+            XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,36, 0),
             
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljjd", C_v_d_result, 0, 0),
             XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),
@@ -106,9 +149,22 @@
             XVimMakeTestCase(text2, 0,  0, @"vllyjv6lP", p_result, 14, 0), // yank and paste with visual
             XVimMakeTestCase(text1, 0,  0, @"llvllYp", Y_result, 12, 0), // yank and paste with visual
             
+            XVimMakeTestCase(text3, 0,  0, @"Vjyjp", Vyp_result, 16, 0), // yank and paste with visual line
+            XVimMakeTestCase(text3, 0,  0, @"VjyjP", VyP_result, 8, 0), // yank and paste with visual line
+            
+            // Cusror position after put (Issue #506)
+            XVimMakeTestCase(text1, 0, 0, @"vllypu", text1, 0, 0),  
+            
             // Change
             XVimMakeTestCase(text1, 0,  0, @"vlllcxxx<ESC>", v_c_result, 2, 0), // change in visual
-            
+
+            // Toggle insertion point with o/O
+            XVimMakeTestCase(@"abc\n", 1,  0, @"vlohd", @"\n", 0, 0),
+            XVimMakeTestCase(@"abc\n", 1,  0, @"vlOhd", @"\n", 0, 0),
+
+            XVimMakeTestCase(text2, 17,  0, @"<C-v>jjllokhd", C_v_o_result, 4, 0),
+            XVimMakeTestCase(text2, 41,  0, @"<C-v>llkkOkhd", C_v_o_result, 4, 0),
+
             // Toggle between v,C-v,V
             XVimMakeTestCase(text2, 0,  0, @"vllVjd", V_d_result, 0, 0), // change in visual
             XVimMakeTestCase(text2, 0,  0, @"Vjlvd", v_d_result, 0, 0), // change in visual
@@ -119,6 +175,16 @@
             XVimMakeTestCase(text2, 5,  0, @"vaw", text2, 4, 4),
             // Visual Line goes Visual Character with text object 
             XVimMakeTestCase(text2, 5,  0, @"Vjiw", text2, 5, 14), // Must extend one text object
+            
+            // J in visual
+            XVimMakeTestCase(text4, 1, 0, @"<C-v>jjJ"   , v_J_result0, 8, 0), // join 2 lines
+            // XVimMakeTestCase(text4, 1, 0, @"<C-v>jjJj." , v_J_result1,19, 0), // Repeat (not supported yet)
+            XVimMakeTestCase(text4, 1, 0, @"<C-v>jjJ`." , v_J_result0,12, 0), // . Mark
+            
+            // gJ in visual
+            XVimMakeTestCase(text4, 1, 0, @"<C-v>jjgJ"   , v_gJ_result0, 7, 0), // join 2 lines
+            // XVimMakeTestCase(text4, 1, 0, @"<C-v>jjgJj." , v_gJ_result1,17, 0), // Repeat (not supported yet)
+            XVimMakeTestCase(text4, 1, 0, @"<C-v>jjgJ`." , v_gJ_result0,11, 0), // . Mark
             
             nil];
 }

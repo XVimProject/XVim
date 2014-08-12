@@ -39,16 +39,23 @@
                              @"        eee\n"   // 48
                              @"        fff";    // 60
     
-    /*
-    static NSString* text4 = @"{\n"   // 0  (index of each WORD)
-                             @"aaa\n" // 2
-                             @"bbb\n" // 6
-                             @"ccc\n" // 14 
-                             @"ddd\n" // 18
-                             @"eee\n" // 22
-                             @"fff\n" // 26
-                             @"}";    // 30
-     */
+    static NSString* text6 = @"aaa\n"   // 0  (index of each WORD)
+                             @"bbb\n"   // 4 
+                             @"ccc\n"   // 8 
+                             @"ddd\n"   // 12
+                             @"eee\n"   // 16
+                             @"fff\n"   // 20
+                             @"bbb\n"   // 24 
+                             @"ccc\n"   // 28 
+                             @"ddd\n"   // 32
+                             @"eee\n"   // 36
+                             @"fff\n"   // 40
+                             @"bbb\n"   // 44 
+                             @"ccc\n"   // 48 
+                             @"ddd\n"   // 52
+                             @"eee\n"   // 56
+                             @"fff\n";  // 60
+    static NSString* text7 = @"a bbb ccc";
     
     static NSString* a_result  = @"aAa bbXXXb ccc\n";
     static NSString* a_result2 = @"aAa bbXXXXXXXXXb ccc\n";
@@ -69,6 +76,8 @@
     static NSString* cw_result5 = @"XXX\n"
                                   @"bbb\n"
                                   @"ccc";
+    static NSString* cw_result6 = @"AAA bbb ccc";
+    static NSString* cw_result7 = @"AAA BBB ccc";
     
     static NSString* C_result1 = @"aAa baaa\n";
     static NSString* C_result2 = @"aaaa\n"
@@ -171,6 +180,45 @@
                                  @"bbb\n"
                                  @"ccc";
     
+    static NSString* y_result4 = @"aaa\n"
+                                 @"bbb\n" // --- 
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n" // pasted
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n"
+                                 @"ddd\n" // ----
+                                 @"bbb\n" // ---- 
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n" // yanked 
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff\n"
+                                 @"bbb\n"
+                                 @"ccc\n"
+                                 @"ddd\n"  // ---
+                                 @"eee\n"
+                                 @"fff\n";
+    
+    static NSString* p_result1 = @"aAa bbb ccc\n"
+                                 @"\n"
+                                 @"aAa bbb ccc"; //13
+    static NSString* p_result2 = @"aAa bbb ccc\n"
+                                 @"aAa bbb ccc\n"; //12
+    
+    static NSString* yp_result1= @"aAa AaAabbb ccc\n";
+    static NSString* yp_result2= @"aAa AAaabbb ccc\n";
+    
     static NSString* oO_text = @"int abc(){\n"  // 0 4
     @"}\n";          // 11
     
@@ -196,9 +244,11 @@
                                  @"baabb\n"
                                  @"ccc";
     
+    /*
     static NSString* C_e_result= @"aaa\n"
                                  @"bccbb\n"
                                  @"ccc";
+     */
     
     
     static NSString* J_result0 = @"aaa bbb \n"
@@ -220,6 +270,26 @@
     
     static NSString* J_result3 = @"aaa bbb ccc\n"
                                  @"ddd eee fff";
+    
+    static NSString* gJ_result0 = @"aaabbb \n"
+                                 @"ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* gJ_result1 = @"aaa\n"
+                                 @"bbb ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* gJ_result2 = @"aaabbb ccc\n"
+                                 @"ddd\n"
+                                 @"eee\n"
+                                 @"fff";
+    
+    static NSString* gJ_result3 = @"aaabbb ccc\n"
+                                 @"dddeeefff";
     
     static NSString* rshift_result0 = @"aaa\n"
                                       @"    bbb\n"
@@ -283,7 +353,7 @@
             XVimMakeTestCase(text0, 5,  0, @"AXXX<ESC>.."  , A_result2, 19, 0), // Repeat
             XVimMakeTestCase(text1, 0,  0, @"AXXX<ESC>jj`^", A_result3,  5, 0), // ^ Mark
             XVimMakeTestCase(text1, 0,  0, @"AXXX<ESC>jj`.", A_result3,  5, 0), // . Mark
-            
+
             // c
             XVimMakeTestCase(text0, 5,  0, @"cwaaa<ESC>"    , cw_result1,  7, 0),
             XVimMakeTestCase(text0, 9,  0, @"cwaaa<ESC>"    , cw_result2, 11, 0),
@@ -291,6 +361,8 @@
             XVimMakeTestCase(text0, 5,  0, @"2cwXXX<ESC>.." , cw_result4, 11, 0), // Repeat
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`^", cw_result5,  2, 0), // ^ Mark
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`.", cw_result5,  2, 0), // . Mark
+            XVimMakeTestCase(text7, 0,  0, @"cwAAA<ESC>"     , cw_result6,  2, 0),
+            XVimMakeTestCase(text7, 0,  0, @"2cwAAA BBB<ESC>", cw_result7,  6, 0),
             
             // C
             XVimMakeTestCase(text0, 5,  0, @"Caaa<ESC>"     , C_result1,  7, 0),
@@ -368,15 +440,25 @@
             XVimMakeTestCase(text0, 0,  0, @"ywP", y_result1,  3, 0),
             XVimMakeTestCase(text2, 8,  0, @"ywP", y_result2, 10, 0), // Yank to end of file
             
+            // y + numericArg(>10) + motion  (Issue #489)
+            XVimMakeTestCase(text6, 4,  0, @"y12jP", y_result4,  4, 0),
+            
+            
             // yy
             XVimMakeTestCase(text1, 1,  0, @"yyp", y_result3,  4, 0),
             // y_ does the same as yy
             XVimMakeTestCase(text1, 1,  0, @"y_p", y_result3,  4, 0),
             
             // p, P
-            // TODO: Currently the insertion position after put(P) is not correct.(Must pass followings)
-            //XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
-            //XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
+            XVimMakeTestCase(text0, 1,  0, @"vlyllp.", yp_result1, 7, 0), // Repeat Issue #508
+            XVimMakeTestCase(text0, 1,  0, @"vlywP.", yp_result2, 6, 0), // Repeat Issue #508
+            
+            // p at EOF
+            XVimMakeTestCase(text0, 1,  0, @"yyjp", p_result1, 13, 0),
+            XVimMakeTestCase(text0, 1,  0, @"yyjP", p_result2, 12, 0),
+            
             
             // r
             XVimMakeTestCase(text0, 5,  0, @"rX",     r_result1, 5, 0),
@@ -420,19 +502,26 @@
             XVimMakeTestCase(text3, 1, 0, @"3Jj."  , J_result3,19, 0), // Repeat
             XVimMakeTestCase(text3, 5, 0, @"J`."  ,  J_result1,12, 0), // . Mark
             
+            // gJ
+            XVimMakeTestCase(text3, 1, 0, @"gJ"     , gJ_result0, 3, 0), // join 2 lines
+            XVimMakeTestCase(text3, 5, 0, @"gJ"     , gJ_result1, 8, 0), // join 2 lines trailing a space
+            XVimMakeTestCase(text3, 1, 0, @"3gJ"    , gJ_result2, 7, 0), // Numeric arg
+            XVimMakeTestCase(text3, 1, 0, @"3gJj."  , gJ_result3,17, 0), // Repeat
+            XVimMakeTestCase(text3, 5, 0, @"gJ`."  ,  gJ_result1,12, 0), // . Mark
+            
             // > (Shift)
             // the following test case assumes that Xcode indent in the preference is 4 spaces
-            XVimMakeTestCase(text4, 5, 0, @">>"     , rshift_result0, 5, 0), 
-            XVimMakeTestCase(text4, 5, 0, @"3>>"    , rshift_result1, 5, 0),
-            XVimMakeTestCase(text4, 1, 0, @"2>>jjj.", rshift_result2,21, 0),
+            XVimMakeTestCase(text4, 5, 0, @">>"     , rshift_result0, 8, 0),
+            XVimMakeTestCase(text4, 5, 0, @"3>>"    , rshift_result1, 8, 0),
+            XVimMakeTestCase(text4, 1, 0, @"2>>jjj.", rshift_result2,24, 0),
             XVimMakeTestCase(text4, 5, 0, @">>jj`." , rshift_result0, 4, 0),
             XVimMakeTestCase(text4, 5, 0, @">>jj'." , rshift_result0, 8, 0),
             
             // < (Shift)
             // the following test case assumes that Xcode indent in the preference is 4 spaces
-            XVimMakeTestCase(text5,13, 0, @"<<"     , lshift_result0,13, 0), 
-            XVimMakeTestCase(text5,13, 0, @"3<<"    , lshift_result1,13, 0),
-            XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,29, 0),
+            XVimMakeTestCase(text5,13, 0, @"<<"     , lshift_result0,16, 0),
+            XVimMakeTestCase(text5,13, 0, @"3<<"    , lshift_result1,16, 0),
+            XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,32, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj`." , lshift_result0,12, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj'." , lshift_result0,16, 0),
             
@@ -464,8 +553,23 @@
             // Insert and Ctrl-y
             XVimMakeTestCase(text1, 4, 0, @"a<C-y><C-y><ESC>", C_y_result, 6, 0),
             
+            // C_a
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>",    @" 11JK",  2, 0),
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>.",   @" 12JK",  2, 0),
+            XVimMakeTestCase(@" 10JK",  0, 0, @"<C-a>.uu", @" 10JK",  0, 0),
+            XVimMakeTestCase(@"10JK",   0, 0, @"<C-a>",    @"11JK",   1, 0),
+            XVimMakeTestCase(@"10JK",   2, 0, @"<C-a>",    @"10JK",   2, 0),
+            XVimMakeTestCase(@"017JK",  0, 0, @"<C-a>",    @"020JK",  2, 0),
+            XVimMakeTestCase(@"0x19JK", 0, 0, @"<C-a>",    @"0x1aJK", 3, 0),
+            XVimMakeTestCase(@" 10JK\n01234",  0, 0, @"<C-a>j", @" 11JK\n01234",  8, 0),
+            XVimMakeTestCase(@"0x0 123",    0, 0, @"<C-x><C-a>", @"0x0000000000000000 123", 17, 0),
+
             // Insert and Ctrl-e
-            XVimMakeTestCase(text1, 4, 0, @"a<C-e><C-e><ESC>", C_e_result, 6, 0),
+            //   The following test case sometimes fails. I do not know when it occurs but occasionally it happens.
+            //   It looks that <C-e> conflicts to the Xcode native key map(end of line) and not processed
+            //   as Vim's command (insert character below the cursor)
+            //   It is weird that it sometimes passes without any preference changing.
+            // XVimMakeTestCase(text1, 4, 0, @"a<C-e><C-e><ESC>", C_e_result, 6, 0),
             nil];
     
 }

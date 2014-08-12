@@ -468,13 +468,13 @@
     self.lastReplacementString = replacement;
     
     // Find the position to start searching
-    NSUInteger replace_start_location = [window.sourceView.textStorage positionAtLineNumber:from column:0];
+    NSUInteger replace_start_location = [window.sourceView.textStorage xvim_indexOfLineNumber:from column:0];
     if( NSNotFound == replace_start_location){
         return;
     }
     
     // Find the position to end the searching
-    NSUInteger endOfReplacement = [window.sourceView.textStorage positionAtLineNumber:to+1 column:0]; // Next line of the end of range.
+    NSUInteger endOfReplacement = [window.sourceView.textStorage xvim_indexOfLineNumber:to+1 column:0]; // Next line of the end of range.
     if( NSNotFound == endOfReplacement ){
         endOfReplacement = [[[window sourceView] string] length];
     }

@@ -56,6 +56,7 @@ XVimMotionEvaluator
 - (id)initWithWindow:(XVimWindow*)window;
 
 + (XVimEvaluator*)invalidEvaluator;
++ (XVimEvaluator*)popEvaluator;
 + (XVimEvaluator*)noOperationEvaluator;
     
 /**
@@ -103,7 +104,9 @@ XVimMotionEvaluator
  *
  * YOU MUST CALL [super becameHandler] when you override this.
  **/
-- (void)becameHandler;
+- (void)becameHandler NS_REQUIRES_SUPER;
+
+- (void)cancelHandler NS_REQUIRES_SUPER;
 
 /**
  * This is called when an evaluator has been finished its task and evicted from stack evaluatorhandler.
@@ -112,7 +115,7 @@ XVimMotionEvaluator
  *
  * YOU MUST CALL [super didEndHandler] when you override this.
  **/
-- (void)didEndHandler;
+- (void)didEndHandler NS_REQUIRES_SUPER;
 - (XVimEvaluator*)defaultNextEvaluator;
 - (float)insertionPointHeightRatio;
 - (float)insertionPointWidthRatio;

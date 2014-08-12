@@ -17,6 +17,8 @@
 
 @implementation XVimOptions
 
+@synthesize number = _number;
+
 - (id)init{
     if( self = [super init] ){
         // Abbreviation mapping
@@ -34,6 +36,7 @@
          @"hlsearch",@"hls",
          @"number", @"nu",
          @"vimregex", @"vr",
+         @"relativenumber", @"rn",
          nil];
         
         // Default values
@@ -50,6 +53,7 @@
         _hlsearch = NO;
         _number = NO;
         _vimregex = NO;
+        _relativenumber = NO;
     }
     return self;
 }
@@ -84,6 +88,10 @@
     }
 }
 
+- (BOOL)number
+{
+    return _number;
+}
 
 - (void)setNumber:(BOOL)n{
     _number = n;

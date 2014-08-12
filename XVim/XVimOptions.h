@@ -23,6 +23,7 @@
 @property (copy) NSString *timeoutlen;
 @property int laststatus;
 @property BOOL vimregex; // XVim Original
+@property BOOL relativenumber;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

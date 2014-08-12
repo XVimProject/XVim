@@ -9,17 +9,21 @@
 #import "XVimHookManager.h"
 #import "IDEEditorAreaHook.h"
 #import "DVTSourceTextViewHook.h"
+#import "DVTTextSidebarViewHook.h"
 #import "IDESourceCodeEditorHook.h"
 #import "IDEEditorHook.h"
 #import "IDEWorkspaceWindowHook.h"
+#import "DVTSourceTextScrollViewHook.h"
 
 @implementation XVimHookManager
 
 + (void)hookWhenPluginLoaded{
     [IDEEditorAreaHook hook];
     [IDEWorkspaceWindowHook hook];
-	[DVTSourceTextViewHook hook];
-	[IDESourceCodeEditorHook hook];
+    [DVTSourceTextViewHook hook];
+    [DVTTextSidebarViewHook hook];
+    [DVTSourceTextScrollViewHook hook];
+    [IDESourceCodeEditorHook hook];
     [IDEEditorHook hook];
 }
 

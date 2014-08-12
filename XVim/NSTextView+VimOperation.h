@@ -59,8 +59,8 @@
 @property(readonly) NSUInteger selectionBegin;
 @property(readonly) XVimPosition selectionBeginPosition;
 @property(readonly) NSUInteger numberOfSelectedLines;
-@property(readonly) NSUInteger numberOfSelectedColumns;
 @property(readonly) XVIM_VISUAL_MODE selectionMode;
+@property(readonly) BOOL selectionToEOL;
 @property(readonly) CURSOR_MODE cursorMode;
 @property(readonly) NSURL* documentURL;
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
@@ -78,7 +78,8 @@
 - (void)xvim_adjustCursorPosition;
 - (void)xvim_moveToPosition:(XVimPosition)pos;
 - (void)xvim_move:(XVimMotion*)motion;
-- (void)xvim_delete:(XVimMotion*)motion;
+- (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;
+- (void)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank;
 - (void)xvim_change:(XVimMotion*)motion;
 - (void)xvim_yank:(XVimMotion*)motion;
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
@@ -86,23 +87,24 @@
 - (void)xvim_makeLowerCase:(XVimMotion*)motion;
 - (void)xvim_makeUpperCase:(XVimMotion*)motion;
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count;
-- (void)xvim_joinAtLineNumber:(NSUInteger)line;
-- (void)xvim_join:(NSUInteger)count;
+- (void)xvim_join:(NSUInteger)count addSpace:(BOOL)addSpace;
 - (void)xvim_filter:(XVimMotion*)motion;
 - (void)xvim_shiftRight:(XVimMotion*)motion;
 - (void)xvim_shiftLeft:(XVimMotion*)motion;
 - (void)xvim_insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
 - (void)xvim_insertNewlineBelowLine:(NSUInteger)line;
-- (void)xvim_insertNewlineBelow;
+- (void)xvim_insertNewlineBelowCurrentLine;
+- (void)xvim_insertNewlineBelowCurrentLineWithIndent;
 - (void)xvim_insertNewlineAboveLine:(NSUInteger)line;
-- (void)xvim_insertNewlineAbove;
-- (void)xvim_insertNewlineAboveAndInsert;
-- (void)xvim_insertNewlineBelowAndInsert;
-- (void)xvim_append;
-- (void)xvim_insert;
-- (void)xvim_appendAtEndOfLine;
-- (void)xvim_insertBeforeFirstNonblank;
+- (void)xvim_insertNewlineAboveCurrentLine;
+- (void)xvim_insertNewlineAboveCurrentLineWithIndent;
+- (void)xvim_insertNewlineAboveAndInsertWithIndent;
+- (void)xvim_insertNewlineBelowAndInsertWithIndent;
+- (void)xvim_insert:(XVimInsertionPoint)mode blockColumn:(NSUInteger *)column blockLines:(XVimRange *)lines;
 - (void)xvim_overwriteCharacter:(unichar)c;
+- (BOOL)xvim_incrementNumber:(int64_t)offset;
+- (void)xvim_blockInsertFixupWithText:(NSString *)text mode:(XVimInsertionPoint)mode
+                                count:(NSUInteger)count column:(NSUInteger)column lines:(XVimRange)lines;
 
 /**
  * Sort specified lines.
@@ -147,8 +149,8 @@
 - (void)xvim_highlightNextSearchCandidateBackward:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt;
 - (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt;
 - (void)xvim_clearHighlightText;
-- (void)xvim_highlightFoundRanges;
 - (NSRange)xvim_currentWord:(MOTION_OPTION)opt;
+- (NSRange)xvim_currentNumber;
     
 #pragma mark Searching positions
 // TODO: Thses method should be internal. Create abstracted interface to achieve the operation uses these methods.
@@ -173,88 +175,5 @@
 - (NSUInteger)xvim_numberOfLinesInVisibleRect;
 
 - (void)xvim_syncStateFromView; // update our instance variables with self's properties
-
-#pragma mark Helper methods
-
-
-
-
-
-
-
-
-
-
-
-    
-
-///////////////////////////////////////////
-// NOT CATEGORIZED YET
-///////////////////////////////////////////
-
-
-
-#pragma mark Operations on string
-
-/**
- * Delete one character at the position specified by "pos"
- * If pos does not exist it does nothing.
- **/
-- (void)xvim_deleteCharacter:(XVimPosition)pos;
-
-/**
- * Delete a line specified by lineNumber.
- * If the line is ended by EOF it deletes preceeding newline character too.
- * For example when we have a text below
- *      1:  This is sample text lineNumber1
- *      2:  This is 2nd line
- *      3:  The last line does not have newline at the end[EOF]
- * and "deleteLine:3" will delete the newline at end of the line number 2.
- *
- * If the specified lineNumber exceeds the maximam line number it does nothing.
- **/
-- (void)xvim_deleteLine:(NSUInteger)lineNumber;
-
-/**
- * Delete range of lines specified by arguments.
- * "line1" can be greater than "line2"
- * If the range exceeds the maximam line number it deletes up to the end of file.
- **/
-- (void)xvim_deleteLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2;
-
-/**
- * Delete characters until next newline character from specified position.
- * This does not delete newline character a the end of line.
- * If the specified position is newline character or EOF it does nothing.
- * If the specified position does not exist it does nothing.
- **/
-- (void)xvim_deleteRestOfLine:(XVimPosition)pos;
-
-/**
- * Delete characters in a block specified by pos1 and pos2.
- * "pos1" and "pos2" specify the points on diagonal of the block.
- * "pos1" and "pos2" can be any position in a text.
- * If the block exceeds the line/column of the text it deletes the characters
- * in the block.
- * This never deletes newline characters.
- **/
-- (void)xvim_deleteBlockFrom:(XVimPosition)pos1 to:(XVimPosition)pos2;
-
-/**
- * Join the line specified and the line bewlow it.
- * This does not do additional process like inserting spaces between them 
- * or deleting leading spaces in the second line.
- * Use vimJoinAtLine: to do Vim's join.
- * This method can be used for 'gJ' command
- **/
-- (void)xvim_joinAtLine:(NSUInteger)lineNumber;
-
-/**
- * Does Vim's join on the specified line.
- * See ":help J" in Vim how it works.
- **/
-- (void)xvim_vimJoinAtLine:(NSUInteger)lineNumber;
-
-
 
 @end

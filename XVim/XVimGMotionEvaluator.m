@@ -18,6 +18,11 @@
 
 @implementation XVimGMotionEvaluator
 
+- (XVimEvaluator*)eval:(XVimKeyStroke *)keyStroke{
+    self.key = keyStroke;
+    return [super eval:keyStroke];
+}
+
 - (XVimEvaluator*)g{
     self.motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, MOTION_OPTION_NONE, 1);
     self.motion.line = self.numericArg;
@@ -51,6 +56,12 @@
 
 - (XVimEvaluator*)NUMBER{
 	return [self searchCurrentWord:NO];
+}
+
+- (XVimEvaluator*)SEMICOLON{
+    // SEMICOLON is handled by parent evaluator (not really good design though)
+    self.motion = nil;
+    return nil;
 }
 
 @end

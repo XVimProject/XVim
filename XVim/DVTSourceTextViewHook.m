@@ -48,6 +48,11 @@
     [self hook:@"initWithFrame:textContainer:"];
     [self hook:@"dealloc"];
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
+    [self hook:@"selectAll:"];
+    // [self hook:@"cut:"];  // Cut calls delete: after all. Do not need to hook
+    // [self hook:@"copy:"];  // Does not change any state. Do not need to hook
+    [self hook:@"paste:"];  
+    [self hook:@"delete:"];  
     [self hook:@"keyDown:"];
     [self hook:@"mouseDown:"];
     [self hook:@"drawRect:"];
@@ -67,6 +72,11 @@
     // [self unhook:@"initWithFrame:textContainer:"];
     // [self unhook:@"dealloc"]; 
     [self unhook:@"setSelectedRanges:affinity:stillSelecting"];
+    [self unhook:@"selectAll:"];
+    //[self unhook:@"cut:"]; 
+    //[self unhook:@"copy:"]; 
+    [self unhook:@"paste:"];  
+    [self unhook:@"delete:"];  
     [self unhook:@"keyDown:"];
     [self unhook:@"mouseDown:"];
     [self unhook:@"drawRect:"];
@@ -95,6 +105,12 @@
 
 - (id)initWithCoder:(NSCoder*)coder{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
+    id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
+    if( nil != obj ){
+        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+    }
     return (DVTSourceTextViewHook*)[base initWithCoder_:coder];
 }
 #else
@@ -120,9 +136,15 @@
 #pragma GCC diagnostic ignored "-Wall"
 - (void)dealloc{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
-    [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
-    [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
-    [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    @try{
+        [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
+        [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
+        [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+    }
+    @catch (NSException* exception){
+        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+        [Logger logStackTrace:exception];
+    }
     [base dealloc_];
     return;
 }
@@ -133,18 +155,37 @@
     [(NSTextView*)self xvim_syncStateFromView];
 }
 
+- (void)selectAll:(id)sender{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    [base selectAll_:sender];
+    [window syncEvaluatorStack];  
+}
+
+- (void)paste:(id)sender{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    [base paste_:sender];
+    [window syncEvaluatorStack];  
+    
+}
+
+- (void)delete:(id)sender{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    [base delete_:sender];
+    [window syncEvaluatorStack];  
+}
+
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
+        TRACE_LOG(@"Event:%@, XVimNotation:%@", theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
         if( nil == window ){
             [base keyDown_:theEvent];
             return;
         }
-        
-        unichar charcode __unused = [theEvent unmodifiedKeyCode];
-        DEBUG_LOG(@"Obj:%p keyDown : keyCode:%d firstCharacter:%d characters:%@ charsIgnoreMod:%@ cASCII:%d", self,[theEvent keyCode], [[theEvent characters] characterAtIndex:0], [theEvent characters], [theEvent charactersIgnoringModifiers], charcode);
         
         if( [window handleKeyEvent:theEvent] ){
             [base updateInsertionPointStateAndRestartTimer:YES];
@@ -170,8 +211,12 @@
         // it never calls mouseUp: event. After mouseUp event is handled internally it returns the control.
         // So the code here is executed AFTER mouseUp event is handled.
         // At this point NSTextView changes its selectedRange so we usually have to sync XVim state.
+        
+        // TODO: To make it simple we should forward mouse events
+        //       to handleKeyStroke as a special key stroke
+        //       and the key stroke should be handled by the current evaluator.
         XVimWindow* window = [base xvimWindow];
-        [window mouseDown:theEvent];
+        [window syncEvaluatorStack];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -179,18 +224,20 @@
     return;
 }
 
+
 - (void)drawRect:(NSRect)dirtyRect{
     @try{
         NSTextView* view = (NSTextView*)self;
+        
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
             if( nil != lastSearch.regex ){
                 [view xvim_updateFoundRanges:lastSearch.regex withOption:lastSearch.option];
-                [view xvim_highlightFoundRanges];
             }
         }else{
             [view xvim_clearHighlightText];
         }
+       
         
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base drawRect_:dirtyRect];
@@ -251,24 +298,8 @@
         [base viewDidMoveToSuperview_];
         
         // Hide scroll bars according to options
-        XVimOptions *options = [[XVim instance] options];
-        NSString *guioptions = options.guioptions;
         NSScrollView * scrollView = [base enclosingScrollView];
         [scrollView setPostsBoundsChangedNotifications:YES];
-        if ([guioptions rangeOfString:@"r"].location == NSNotFound) {
-            [scrollView addObserver:self
-                         forKeyPath:@"hasVerticalScroller"
-                            options:NSKeyValueObservingOptionNew
-                            context:nil];
-            [scrollView setHasVerticalScroller:NO];
-        }
-        if ([guioptions rangeOfString:@"b"].location == NSNotFound) {
-            [scrollView addObserver:self
-                         forKeyPath:@"hasHorizontalScroller"
-                            options:NSKeyValueObservingOptionNew
-                            context:nil];
-            [scrollView setHasHorizontalScroller:NO];
-        }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -276,17 +307,7 @@
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
-	if ([keyPath isEqualToString:@"hasVerticalScroller"]) {
-		NSScrollView *scrollView = object;
-		if ([scrollView hasVerticalScroller]) {
-			[scrollView setHasVerticalScroller:NO];
-		}
-	}else  if ([keyPath isEqualToString:@"hasHorizontalScroller"]) {
-		NSScrollView *scrollView = object;
-		if ([scrollView hasHorizontalScroller]) {
-			[scrollView setHasHorizontalScroller:NO];
-		}
-	}else if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
+	if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
         NSTextView* view = (NSTextView*)self;
         [view setNeedsUpdateFoundRanges:YES];
         [view setNeedsDisplayInRect:[view visibleRect] avoidAdditionalLayout:YES];

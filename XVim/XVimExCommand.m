@@ -546,6 +546,7 @@
                        CMD(@"wsverb", @"wsverb:inWindow:"),
                        CMD(@"wviminfo", @"viminfo:inWindow:"),
                        CMD(@"xccmd" , @"xccmd:inWindow:"),
+                       CMD(@"xcmenucmd" , @"xcmenucmd:inWindow:"),   // XVim original
                        CMD(@"xctabctrl", @"xctabctrl:inWindow:"),
                        CMD(@"xhelp", @"xhelp:inWindow:"), // Quick Help (XVim Original)
                        CMD(@"xit", @"exit:inWindow:"),
@@ -599,20 +600,20 @@
     {
         case '.':
             parsing++;
-            addr = [view.textStorage lineNumber:begin];
+            addr = [view.textStorage xvim_lineNumberAtIndex:begin];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
-            addr = [view.textStorage numberOfLines];
+            addr = [view.textStorage xvim_numberOfLines];
             break;
         case '\'':
             // XVim does support only '< '> marks for visual mode
             mark = parsing[1];
             if( '<' == mark ){
-                addr = [view.textStorage lineNumber:begin];
+                addr = [view.textStorage xvim_lineNumberAtIndex:begin];
                 parsing+=2;
             }else if( '>' == mark ){
-                addr = [view.textStorage lineNumber:end];
+                addr = [view.textStorage xvim_lineNumberAtIndex:end];
                 parsing+=2;
             }else{
                 // Other marks or invalid character. XVim does not support this.
@@ -737,7 +738,7 @@
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
-                exarg.lineEnd = [view.textStorage numberOfLines];
+                exarg.lineEnd = [view.textStorage xvim_numberOfLines];
                 parsing++;
             }
         }else{
@@ -757,7 +758,7 @@
     
     if( exarg.lineBegin == NSNotFound ){
         // No range expression found. Use current line as range
-        exarg.lineBegin = [view.textStorage lineNumber:view.insertionPoint];
+        exarg.lineBegin = [view.textStorage xvim_lineNumberAtIndex:view.insertionPoint];
         exarg.lineEnd =  exarg.lineBegin;
     }
     
@@ -807,7 +808,9 @@
         ERROR_LOG(@"command string empty");
         return;
     }
-          
+    
+    cmd = [cmd stringByReplacingOccurrencesOfString:@"\r" withString:@""];
+    
     // Actual parsing is done in following method.
     XVimExArg* exarg = [self parseCommand:cmd inWindow:window];
     if( exarg.cmd == nil ) {
@@ -815,11 +818,11 @@
         NSTextStorage* storage = srcView.textStorage;
 		
         // Jump to location
-        NSUInteger pos = [storage positionAtLineNumber:exarg.lineBegin column:0];
+        NSUInteger pos = [storage xvim_indexOfLineNumber:exarg.lineBegin column:0];
         if( NSNotFound == pos ){
-            pos = [srcView.textStorage positionAtLineNumber:[srcView.textStorage numberOfLines] column:0];
+            pos = [srcView.textStorage xvim_indexOfLineNumber:[srcView.textStorage xvim_numberOfLines] column:0];
         }
-        NSUInteger pos_wo_space = [srcView.textStorage nextNonblankInLine:pos];
+        NSUInteger pos_wo_space = [srcView.textStorage xvim_nextNonblankInLineAtIndex:pos allowEOL:NO];
         if( NSNotFound == pos_wo_space ){
             pos_wo_space = pos;
         }
@@ -1011,6 +1014,12 @@
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
+- (void)nohlsearch:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    NSTextView* view = [window sourceView];
+    [view setNeedsUpdateFoundRanges:YES];
+    [view xvim_clearHighlightText];
+}
+
 - (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
 }
@@ -1153,20 +1162,27 @@
     [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
 }
 
+// When I use tab cmds, the focus of text edit lost, against my will.
+// Some cmds need keeping focus. Some need resign focus. I tried but failed.
+// I hope to do the most work without mouse.
 - (void)tabnext:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView]; // add by dengjinlong
     [NSApp sendAction:@selector(selectNextTab:) to:nil from:self];
 }
 
 - (void)tabprevious:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(selectPreviousTab:) to:nil from:self];
 }
 
 - (void)tabclose:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(closeCurrentTab:) to:nil from:self];
 }
 
 - (void)test:(XVimExArg*)args inWindow:(XVimWindow*)window{
-    [[[[XVimTester alloc] initWithTestCategory:args.arg] autorelease] runTest];
+    [[XVim instance].testRunner selectCategories:@[args.arg]];
+    [[XVim instance].testRunner runTest];
 }
 
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1220,7 +1236,53 @@
     [window setForcusBackToSourceView];
     NSMenuItem* item = [self findMenuItemIn:nil forAction:[[args arg] stringByAppendingString:@":"]];
     if( nil != item ){
-        [NSApp sendAction:item.action to:item.target from:self];
+        //Sending some actions(followings) without "from:" crashes Xcode.
+        //Title:Show File Template Library    Action:showLibraryWithChoiceFromSender:
+        //Title:Show Code Snippet Library    Action:showLibraryWithChoiceFromSender:
+        //Title:Show Object Library    Action:showLibraryWithChoiceFromSender:
+        //Title:Show Media Library    Action:showLibraryWithChoiceFromSender:
+        [NSApp sendAction:item.action to:item.target from:item];
+    }
+}
+
+- (NSMenuItem*)findMenuItemIn:(NSMenu*)menu forTitle:(NSString*)titleName{
+    if( nil == menu ){
+        menu = [NSApp mainMenu];
+    }
+    for(NSMenuItem* mi in [menu itemArray] ){
+        if( [mi.title localizedCaseInsensitiveCompare:titleName] == NSOrderedSame ){
+            return mi;
+        }
+        if( nil != [mi submenu] ){
+            NSMenuItem* found = [self findMenuItemIn:[mi submenu] forTitle:titleName];
+            if( nil != found ){
+                return found;
+            }
+        }
+    }
+    return nil;
+}
+
+// add by dengjinlong
+// I upload my .xvim to https://github.com/dengcqw/XVim-config-file FYI
+- (void)xcmenucmd:(XVimExArg*)args inWindow:(XVimWindow*)window{
+// I comment below, to resign focus, but failed. I also simulate mouse click.
+// simulate mouse click - [NSMenu performActionForItemAtIndex:]
+// It is better to open Utilities, and focus its text field.
+// [window setForcusBackToSourceView];
+    NSMenuItem* item = [self findMenuItemIn:nil forTitle:args.arg];
+   if( nil == item || item.action == @selector(submenuAction:)){
+       return;
+   }
+    
+    // Below if-else achieves the same goal. I'm not sure the better one.
+    IDEWorkspaceTabController* ctrl = XVimLastActiveWorkspaceTabController();
+    if( [ctrl respondsToSelector:item.action] ){
+        NSLog(@"IDEWorkspaceTabController perform action");
+        [ctrl performSelector:item.action withObject:item];
+    } else {
+        [NSApp sendAction:item.action to:item.target from:item];
+        NSLog(@"menu perform action");
     }
 }
 

@@ -6,20 +6,20 @@
 //
 //
 
-#define __XCODE5__
-
 #import "XVimUtil.h"
 #import "DVTFoundation.h"
-#import "DVTKit.H"
+#import "DVTKit.h"
 #import "IDEKit.h"
 
 
 IDEWorkspaceWindowController* XVimLastActiveWindowController(){
-#ifdef __XCODE5__
+#if XVIM_XCODE_VERSION == 5
     // TODO: Must update IDEKit.h for Xcodr5
     return [IDEWorkspaceWindow performSelector:@selector(lastActiveWorkspaceWindowController)];
-#else
+#elif XVIM_XCODE_VERSION == 4
     return [[IDEWorkspaceWindow lastActiveWorkspaceWindow] windowController];
+#else
+    return nil;
 #endif
     
 }
