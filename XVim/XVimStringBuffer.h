@@ -59,7 +59,7 @@ NS_INLINE void xvim_sb_init(xvim_string_buffer_t *sb, NSString *s, NSUInteger in
 
     NSCAssert(index >= sb->s_min && index <= sb->s_max, @"bad caller");
 
-    if (forRange.length < _xvim_sb_size() || index - _xvim_sb_size() / 2 < sb->s_min) {
+    if (forRange.length < _xvim_sb_size() || index < (_xvim_sb_size()/2) || index - (_xvim_sb_size()/2) < (NSInteger)sb->s_min) {
         sb->s_index = sb->s_min;
     } else if (index + _xvim_sb_size() >= sb->s_max) {
         sb->s_index = sb->s_max - _xvim_sb_size() + 1;

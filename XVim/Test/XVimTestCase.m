@@ -45,9 +45,9 @@
     test.expectedRange = er;
     test.message = @"";
     if( nil != desc ){
-        test.description = desc;
+        test.desc = desc;
     }else{
-        test.description = in;
+        test.desc = in;
     }
     
     return test;
