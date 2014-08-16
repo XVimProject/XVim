@@ -29,7 +29,7 @@
 @property(strong) NSString* input;
 @property(strong) NSString* expectedText;
 @property         NSRange   expectedRange;
-@property(strong) NSString* description;
+@property(strong) NSString* desc; // description is declared in NSObject and readonly.
 @property(strong) NSString* message;
 @property         BOOL      success;
 

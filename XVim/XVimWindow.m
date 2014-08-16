@@ -22,7 +22,8 @@
 #import "XVimInsertEvaluator.h"
 
 @interface XVimWindow () {
-    NSMutableArray     *_evaluatorStack;
+    NSMutableArray     *_defaultEvaluatorStack;
+    NSMutableArray     *_currentEvaluatorStack;
 	XVimKeymapContext  *_keymapContext;
 	BOOL                _handlingMouseEvent;
 	NSString           *_staticString;
@@ -47,9 +48,10 @@
 		_staticString = [@"" retain];
 		_keymapContext = [[XVimKeymapContext alloc] init];
         _editorArea = [editorArea retain];
-        _evaluatorStack = [[NSMutableArray alloc] init];
+        _defaultEvaluatorStack = [[NSMutableArray alloc] init];
+        _currentEvaluatorStack = _defaultEvaluatorStack;
         _inputContext = [[NSTextInputContext alloc] initWithClient:self];
-        [self _resetEvaluatorStack:_evaluatorStack activateNormalHandler:YES];
+        [self _resetEvaluatorStack:_defaultEvaluatorStack activateNormalHandler:YES];
         _commandLine = [[XVimCommandLine alloc] init];
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:)
@@ -84,7 +86,7 @@
     [_editorArea release];
     [_inputContext release];
     self.tmpBuffer = nil;
-    [_evaluatorStack release];
+    [_defaultEvaluatorStack release];
     [_commandLine release];
     [super dealloc];
 }
@@ -102,7 +104,7 @@
 
 - (XVimEvaluator*)currentEvaluator
 {
-    return [_evaluatorStack lastObject];
+    return [_currentEvaluatorStack lastObject];
 }
 
 - (void)_resetEvaluatorStack:(NSMutableArray *)stack activateNormalHandler:(BOOL)activate
@@ -120,7 +122,7 @@
 {
     DEBUG_LOG("Document changed, reset evaluator stack");
     [self.currentEvaluator cancelHandler];
-    [_evaluatorStack removeAllObjects];
+    [_currentEvaluatorStack removeAllObjects];
     [self syncEvaluatorStack];
 }
 
@@ -179,7 +181,7 @@
         DEBUG_LOG(@"%@", mapped);
 
         for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped) ) {
-            [self handleKeyStroke:keyStroke onStack:_evaluatorStack];
+            [self handleKeyStroke:keyStroke onStack:_currentEvaluatorStack];
         }
         [_keymapContext clear];
     } else {
@@ -209,21 +211,19 @@
     XVimKeymap *keymap = [self.currentEvaluator selectKeymapWithProvider:[XVim instance]];
     XVimString *mapped = [keymap mapKeys:@"" withContext:_keymapContext forceFix:YES];
     for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped)) {
-        [self handleKeyStroke:keyStroke onStack:_evaluatorStack];
+        [self handleKeyStroke:keyStroke onStack:_currentEvaluatorStack];
     }
     [_keymapContext clear];
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke *)keyStroke onStack:(NSMutableArray *)evaluatorStack
 {
-    if( nil == evaluatorStack ){
-        // Use default evaluator stack
-        evaluatorStack = _evaluatorStack;
+    _currentEvaluatorStack = nil == evaluatorStack ? _defaultEvaluatorStack : evaluatorStack;
+    
+    if( _currentEvaluatorStack.count == 0 ){
+        [self _resetEvaluatorStack:_currentEvaluatorStack activateNormalHandler:YES];
     }
-    if( evaluatorStack.count == 0 ){
-        [self _resetEvaluatorStack:evaluatorStack activateNormalHandler:YES];
-    }
-    [self dumpEvaluatorStack:evaluatorStack];
+    [self dumpEvaluatorStack:_currentEvaluatorStack];
 
     [self clearErrorMessage];
 
@@ -232,7 +232,7 @@
     [xvim appendOperationKeyStroke:[keyStroke xvimString]];
 
     // Evaluate key stroke
-	XVimEvaluator* currentEvaluator = [evaluatorStack lastObject];
+	XVimEvaluator* currentEvaluator = [_currentEvaluatorStack lastObject];
     currentEvaluator.window = self;
 	XVimEvaluator* nextEvaluator = [currentEvaluator eval:keyStroke];
 
@@ -240,18 +240,18 @@
     while(YES){
         if( nil == nextEvaluator || nextEvaluator == [XVimEvaluator popEvaluator]){
             // current evaluator finished its task
-            XVimEvaluator* completeEvaluator = [[[evaluatorStack lastObject] retain] autorelease]; // We have to retain here not to be dealloced in didEndHandler method.
-            [evaluatorStack removeLastObject]; // remove current evaluator from the stack
+            XVimEvaluator* completeEvaluator = [[[_currentEvaluatorStack lastObject] retain] autorelease]; // We have to retain here not to be dealloced in didEndHandler method.
+            [_currentEvaluatorStack removeLastObject]; // remove current evaluator from the stack
             [completeEvaluator didEndHandler];
-            if( [evaluatorStack count] == 0 ){
+            if( [_currentEvaluatorStack count] == 0 ){
                 // Current Evaluator is the root evaluator of the stack
                 [xvim cancelOperationCommands];
-                [self _resetEvaluatorStack:evaluatorStack activateNormalHandler:YES];
+                [self _resetEvaluatorStack:_currentEvaluatorStack activateNormalHandler:YES];
                 break;
             }
             else{
                 // Pass current evaluator to the evaluator below the current evaluator
-                currentEvaluator = [evaluatorStack lastObject];
+                currentEvaluator = [_currentEvaluatorStack lastObject];
                 [currentEvaluator becameHandler];
                 if (nextEvaluator) {
                     break;
@@ -263,14 +263,14 @@
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
             [xvim cancelOperationCommands];
             [[XVim instance] ringBell];
-            [self _resetEvaluatorStack:evaluatorStack activateNormalHandler:YES];
+            [self _resetEvaluatorStack:_currentEvaluatorStack activateNormalHandler:YES];
             break;
         }else if( nextEvaluator == [XVimEvaluator noOperationEvaluator] ){
             // Do nothing
             // This is only used by XVimNormalEvaluator AT handler.
             break;
         }else if( currentEvaluator != nextEvaluator ){
-            [evaluatorStack addObject:nextEvaluator];
+            [_currentEvaluatorStack addObject:nextEvaluator];
             nextEvaluator.parent = currentEvaluator;
             //[currentEvaluator didEndHandler];
             [nextEvaluator becameHandler];
@@ -282,9 +282,11 @@
         }
     }
 
-    currentEvaluator = [evaluatorStack lastObject];
+    currentEvaluator = [_currentEvaluatorStack lastObject];
     [_commandLine setModeString:[[currentEvaluator modeString] stringByAppendingString:_staticString]];
     [_commandLine setArgumentString:[currentEvaluator argumentDisplayString]];
+    
+    _currentEvaluatorStack = _defaultEvaluatorStack;
 }
 
 - (void)syncEvaluatorStack
@@ -296,7 +298,7 @@
     }
 
     [self.currentEvaluator cancelHandler];
-    [self _resetEvaluatorStack:_evaluatorStack activateNormalHandler:!needsVisual];
+    [self _resetEvaluatorStack:_currentEvaluatorStack activateNormalHandler:!needsVisual];
     [[XVim instance] cancelOperationCommands];
 
     if (needsVisual) {
