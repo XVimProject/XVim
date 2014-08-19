@@ -3,6 +3,9 @@
 # XVim
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
+Master:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=master)](https://travis-ci.org/JugglerShu/XVim) <br />
+Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develop)](https://travis-ci.org/JugglerShu/XVim)
+
 #### Announcement
 
   - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted)
