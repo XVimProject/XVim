@@ -8,7 +8,7 @@ Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develo
 
 #### Announcement
 
-  - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted)
+  - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
   - [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
   
 
