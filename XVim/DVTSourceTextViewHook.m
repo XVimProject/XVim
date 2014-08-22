@@ -92,7 +92,7 @@
 
 #ifdef __XCODE5__
 - (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
-    TRACE_LOG(@"ENTER");
+    TRACE_LOG(@"[%p]ENTER", self);
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     id obj =  (DVTSourceTextViewHook*)[base initWithFrame_:rect textContainer:container];
     if( nil != obj ){
@@ -179,7 +179,7 @@
 
 -  (void)keyDown:(NSEvent *)theEvent{
     @try{
-        TRACE_LOG(@"Event:%@, XVimNotation:%@", theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
+        TRACE_LOG(@"[%p]Event:%@, XVimNotation:%@", self, theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
         if( nil == window ){

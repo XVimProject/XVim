@@ -57,6 +57,7 @@
 @interface NSTextView(VimOperationPrivate)
 @property BOOL xvim_lockSyncStateFromView;
 - (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
+- (void)xvim_syncStateWithScroll:(BOOL)scroll;
 - (void)xvim_syncState; // update self's properties with our variables
 - (NSArray*)xvim_selectedRanges;
 - (void)xvim_setSelectedRange:(NSRange)range;
@@ -571,7 +572,7 @@
         self.selectionBegin = NSNotFound;
     }
     self.selectionMode = mode;
-    [self xvim_syncState];
+    [self xvim_syncStateWithScroll:NO];
     return;
 }
 
@@ -1992,6 +1993,7 @@
 #pragma mark helper methods
 
 - (void)xvim_syncStateFromView{
+    TRACE_LOG(@"[%p]ENTER", self);
     // TODO: handle block selection (if selectedRanges have multiple ranges )
     if( self.xvim_lockSyncStateFromView ){
         return;
@@ -2027,7 +2029,7 @@
     // This method only update the internal state(like self.insertionPoint)
     
     if( pos > [self xvim_string].length){
-        ERROR_LOG(@"Position specified exceeds the length of the text");
+        ERROR_LOG(@"[%p]Position specified exceeds the length of the text", self);
         pos = [self xvim_string].length;
     }
     
@@ -2041,10 +2043,11 @@
         self.preservedColumn = [self.textStorage xvim_columnOfIndex:self.insertionPoint];
     }
     
-    DEBUG_LOG(@"New Insertion Point:%d     Preserved Column:%d", self.insertionPoint, self.preservedColumn);
+    DEBUG_LOG(@"[%p]New Insertion Point:%d   Preserved Column:%d", self, self.insertionPoint, self.preservedColumn);
 }
 
 - (void)_adjustCursorPosition{
+    TRACE_LOG(@"[%p]ENTER", self);
     if( ![self.textStorage isValidCursorPosition:self.insertionPoint] ){
         NSRange placeholder = [(DVTSourceTextView*)self rangeOfPlaceholderFromCharacterIndex:self.insertionPoint forward:NO wrap:NO limit:0];
         if( placeholder.location != NSNotFound && self.insertionPoint == (placeholder.location + placeholder.length)){
@@ -2058,14 +2061,8 @@
     
 }
 
-/**
- * Applies internal state to underlying view (self).
- * This update self's property and applies the visual effect on it.
- * All the state need to express Vim is held by this class and
- * we use self to express it visually.
- **/
-- (void)xvim_syncState{
-    DEBUG_LOG(@"IP:%d", self.insertionPoint);
+- (void)xvim_syncStateWithScroll:(BOOL)scroll{
+    DEBUG_LOG(@"[%p]IP:%d", self, self.insertionPoint);
     self.xvim_lockSyncStateFromView = YES;
     // Reset current selection
     if( self.cursorMode == CURSOR_MODE_COMMAND ){
@@ -2080,8 +2077,22 @@
     [self setSelectedRanges:[self xvim_selectedRanges] affinity:NSSelectionAffinityDownstream stillSelecting:NO];
     [(DVTFoldingTextStorage*)self.textStorage decreaseUsingFoldedRanges];
 #endif
-    [self xvim_scrollTo:self.insertionPoint];
+    if(scroll){
+        [self xvim_scrollTo:self.insertionPoint];
+    }
     self.xvim_lockSyncStateFromView = NO;
+    
+    
+}
+
+/**
+ * Applies internal state to underlying view (self).
+ * This update self's property and applies the visual effect on it.
+ * All the state need to express Vim is held by this class and
+ * we use self to express it visually.
+ **/
+- (void)xvim_syncState{
+    [self xvim_syncStateWithScroll:YES];
 }
 
 - (void)dumpState{

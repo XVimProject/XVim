@@ -111,9 +111,10 @@
 }
 
 - (void)setArgumentString:(NSString*)string{
-    [_argument setString:string];
+    if(nil != string){
+        [_argument setString:string];
+    }
 }
-
 /**
  * (BOOL)aRedColorSetting
  *      YES: red color background
