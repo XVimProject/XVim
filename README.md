@@ -3,13 +3,14 @@
 # XVim
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
+Master:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=master)](https://travis-ci.org/JugglerShu/XVim) <br />
+Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develop)](https://travis-ci.org/JugglerShu/XVim)
+
 #### Announcement
 
-
-  [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
-  This group is for XVim developers and testers(reporters).
-  If you are interested in helping XVim project join the group.
-  Just testing new release and reporting problem is great help for us. Join the group casually.
+  - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
+  - [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
+  
 
 ## Support Xcode Versions
   - Xcode4.6
@@ -62,6 +63,11 @@
   [How to get XVim debug log](http://www.youtube.com/watch?v=50Bhu8setlc&feature=youtu.be)
 
   We appreciate if you write test case for the bug. Read "Write test" section in Documents/Developsers/PullRequest.md how to write test case. You do not need to update any source code but just write 7 items explained there in an issue you create.
+
+## Bountysource
+  XVim supports Bountysource. If you want to solve your issue sooner make bounty on your issue is one option. A contributer should work on it preferentially (not guaranteed though). To make bounty visit following link and go to "Issue" tab. Select your issue and make bounty on it. 
+  
+  https://www.bountysource.com/teams/xvim
 
 ## Bug issue handling 
 
