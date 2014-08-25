@@ -28,6 +28,30 @@
  - Restart Xcode. (Make it sure that Xcode process is terminated entirely)
  - Create a `.xvimrc` file in the root of your home directory (optional)
 
+### Using Rake
+  Rake is a build tool base on ruby. This will wrap `xcodebuild` and install the plugin to appropriate directory. 
+  
+#### Prerequisite
+  Install ruby, either with RVM or rbenv. And then install rake.
+  
+  ```bash
+  $ gem install rake
+  ```
+
+#### Running
+  Run Rake Without parameters
+  
+  ```bash
+  $ rake
+  ```
+  And follow the prompt
+
+#### Uninstalling
+  ```bash
+  $ rake uninstall
+  ``` 
+
+
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
  Here is an explanation about each release and branch.
