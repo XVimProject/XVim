@@ -59,7 +59,7 @@ task :xcode56, [:reqs]  do |t, args|
   else
     print "ERROR: Wrong Xcode version."
     if getXcodeVersion == 4
-      puts "You have Xcode 5. install `rake xcode4` instead"
+      puts "You have Xcode 4. install `rake xcode4` instead"
     end
   end
 end
