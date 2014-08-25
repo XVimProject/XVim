@@ -3,7 +3,6 @@ require 'fileutils'
 
 $plugin_filename ="#{ENV['HOME']}/Library/Application Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin"
 
-
 def isDebug?(reqs)
   return (reqs and reqs.contain? "debug")
 end
@@ -16,28 +15,52 @@ def getConfiguration(reqs)
   end
 end
 
+def getXcodeVersion
+  return Integer(`xcodebuild -version`.split(' ')[1].split('.')[0])
+end
+
+
 def isInstalled?()
  return File.exists? $plugin_filename
 end
 
 task :xcode4, [:reqs]  do |t, args|
-  if isInstalled?
-    puts "XVim already installed, Use `rake uninstall` to uninstall XVim"
+  if getXcodeVersion == 4
+    if isInstalled?
+      puts "XVim already installed, Use `rake uninstall` to uninstall XVim"
+    else
+      reqs = args[:reqs]
+      conf = getConfiguration(reqs)
+      puts "Checking Out XCode4 Branch"
+      FileUtils.mkdir(".for_xcode4")
+      sh "git archive for_xcode4 | tar -x -C .for_xcode4"
+      puts "Building..."
+      sh "cd .for_xcode4 && xcodebuild -scheme 'XVim for Xcode4' -configuration '#{conf}' && cd .."
+      FileUtils.rm_r ".for_xcode4"
+    end
   else
-    reqs = args[:reqs]
-    conf = getConfiguration(reqs)
-    sh "xcodebuild -scheme 'XVim for Xcode4' -configuration '#{conf}'"
+    print "ERROR: Wrong Xcode version."
+    if getXcodeVersion > 5
+      puts "You have Xcode5 or better, install `rake xcode56` instead"
+    end
   end
 end
 
 task :xcode56, [:reqs]  do |t, args|
-  if isInstalled?
-    puts "XVim already installed, Use `rake uninstall` to uninstall XVim"
+  if getXcodeVersion == 5 or getXcodeVersion == 6
+    if isInstalled?
+      puts "XVim already installed, Use `rake uninstall` to uninstall XVim"
+    else
+      reqs = args[:reqs]
+      conf = getConfiguration(reqs)
+      puts "Building and Installing XVim for Xcode 5 and 6"
+      sh "xcodebuild -scheme 'XVim for Xcode5 and 6' -configuration '#{conf}'"
+    end
   else
-    reqs = args[:reqs]
-    conf = getConfiguration(reqs)
-    puts "Building and Installing XVim for Xcode 5 and 6"
-    sh "xcodebuild -scheme 'XVim for Xcode5 and 6' -configuration '#{conf}'"
+    print "ERROR: Wrong Xcode version."
+    if getXcodeVersion == 4
+      puts "You have Xcode 5. install `rake xcode4` instead"
+    end
   end
 end
 
