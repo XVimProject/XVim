@@ -150,7 +150,18 @@
  **/
 - (BOOL)handleKeyEvent:(NSEvent *)event
 {
-    if (self.currentEvaluator.mode == XVIM_MODE_INSERT || self.currentEvaluator.mode == XVIM_MODE_CMDLINE) {
+    // useinputsourcealways option forces to use input source to input on any mode.
+    // This is for French or other keyborads.
+    // The reason why we do not want to set this option always on is because
+    // under some language (like Japanese) we do not want to let the input source obsorb a key event.
+    // Under such language input source waits next input to fix the character to input.
+    // Because in normal mode we never send Japanese character to Vim and so thats just nothing but trouble.
+    // On the other hand, Franch language uses input source to send character like "}". So they need the help of input source
+    // to send command to Vim.
+    
+    if( [[[[XVim instance] options] getOption:@"useinputsourcealways" ] boolValue] ||
+        self.currentEvaluator.mode == XVIM_MODE_INSERT ||
+        self.currentEvaluator.mode == XVIM_MODE_CMDLINE) {
         // We must pass the event to the current input method
         // If it is obserbed we do not do anything anymore and handle insertText: or doCommandBySelector:
 
@@ -166,6 +177,8 @@
         // This is necesarry for languages like Japanese or Chinese.
         if ([_inputContext handleEvent:event]) {
             return YES;
+        }else{
+            return [self handleXVimString:[event toXVimString]];
         }
     }
     return [self handleXVimString:[event toXVimString]];

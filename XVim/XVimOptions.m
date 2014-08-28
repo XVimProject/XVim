@@ -37,6 +37,7 @@
          @"number", @"nu",
          @"vimregex", @"vr",
          @"relativenumber", @"rn",
+         @"useinputsourcealways", @"uais",
          nil];
         
         // Default values
@@ -54,6 +55,7 @@
         _number = NO;
         _vimregex = NO;
         _relativenumber = NO;
+        _useinputsourcealways = NO;
     }
     return self;
 }
