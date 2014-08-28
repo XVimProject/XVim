@@ -24,7 +24,7 @@
 @property int laststatus;
 @property BOOL vimregex; // XVim Original
 @property BOOL relativenumber;
-@property BOOL useinputsourcealways;
+@property BOOL alwaysuseinputsource; //XVim original
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

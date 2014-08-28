@@ -159,7 +159,7 @@
     // On the other hand, Franch language uses input source to send character like "}". So they need the help of input source
     // to send command to Vim.
     
-    if( [[[[XVim instance] options] getOption:@"useinputsourcealways" ] boolValue] ||
+    if( [[[[XVim instance] options] getOption:@"alwaysuseinputsource" ] boolValue] ||
         self.currentEvaluator.mode == XVIM_MODE_INSERT ||
         self.currentEvaluator.mode == XVIM_MODE_CMDLINE) {
         // We must pass the event to the current input method
