@@ -60,6 +60,10 @@
     [super dealloc];
 }
 
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
+	return [keymapProvider keymapForMode:XVIM_MODE_CMDLINE];
+}
+
 - (void)becameHandler{
 	[self takeFocusFromWindow];
 	[super becameHandler];
@@ -128,11 +132,6 @@
             
 	return next;
 }
-
-- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
-	return [keymapProvider keymapForMode:XVIM_MODE_CMDLINE];
-}
-
 
 - (XVimEvaluator*)defaultNextEvaluatorInWindow:(XVimWindow*)window{
 	return nil;

@@ -124,13 +124,13 @@
                        CMD(@"clist", @"qf_list:inWindow:"),
                        CMD(@"clast", @"cc:inWindow:"),
                        CMD(@"close", @"close:inWindow:"),
-                       CMD(@"cmap", @"map:inWindow:"),
-                       CMD(@"cmapclear", @"mapclear:inWindow:"),
+                       CMD(@"cmap", @"cmap:inWindow:"),
+                       CMD(@"cmapclear", @"cmapclear:inWindow:"),
                        CMD(@"cmenu", @"menu:inWindow:"),
                        CMD(@"cnext", @"cnext:inWindow:"),
                        CMD(@"cnewer", @"qf_age:inWindow:"),
                        CMD(@"cnfile", @"cnext:inWindow:"),
-                       CMD(@"cnoremap", @"map:inWindow:"),
+                       CMD(@"cnoremap", @"cnoremap:inWindow:"),
                        CMD(@"cnoreabbrev", @"abbreviate:inWindow:"),
                        CMD(@"cnoremenu", @"menu:inWindow:"),
                        CMD(@"copy", @"copymove:inWindow:"),
@@ -149,7 +149,7 @@
                        CMD(@"crewind", @"cc:inWindow:"),
                        CMD(@"cscope", @"cscope:inWindow:"),
                        CMD(@"cstag", @"cstag:inWindow:"),
-                       CMD(@"cunmap", @"unmap:inWindow:"),
+                       CMD(@"cunmap", @"cunmap:inWindow:"),
                        CMD(@"cunabbrev", @"abbreviate:inWindow:"),
                        CMD(@"cunmenu", @"menu:inWindow:"),
                        CMD(@"cwindow", @"cwindow:inWindow:"),
@@ -851,6 +851,22 @@
 
 - (void)commit:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(commitCommand:) to:nil from:self];
+}
+
+- (void)cmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:XVIM_MODE_CMDLINE withArgs:args remap:YES];
+}
+
+- (void)cnoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+	[self mapMode:XVIM_MODE_CMDLINE withArgs:args remap:NO];
+}
+
+- (void)cunmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self unmapMode:XVIM_MODE_CMDLINE withArgs:args];
+}
+
+- (void)cmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self mapClearMode:XVIM_MODE_CMDLINE];
 }
 
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
