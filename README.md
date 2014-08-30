@@ -1,10 +1,7 @@
-<a href="https://github.com/JugglerShu/XVim/blob/master/README_jp.md">[日本語版]</a>
+<a href="https://github.com/JugglerShu/XVim/blob/master/README_jp.md">[日本語版]</a> 
 
-# XVim
+# XVim [![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=master)](https://travis-ci.org/JugglerShu/XVim)
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
-
-Master:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=master)](https://travis-ci.org/JugglerShu/XVim) <br />
-Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develop)](https://travis-ci.org/JugglerShu/XVim)
 
 #### Announcement
 
@@ -18,6 +15,9 @@ Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develo
   - Xcode6 beta
 
 ## INSTALL
+ Two options. Build manually or use Rake.
+
+### Build manually
  For Xcode4 Users : Before building checkout `for_xcode4` tag.
 
  - Download source code(See also "Branches and Releases" section) and open XVim.xcodeproj with Xcode.
@@ -119,6 +119,9 @@ Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develo
 
 ## Donations
   If you think the plugin is useful, please donate.
+  There are two options you can take. Donate for Japan Earthquake and Tsunami Relief or back the project via [BountySource](https://www.bountysource.com/teams/xvim). There is no rule that you cannot take both :) .
+  
+### Japan Earthquake and Tsunami Relief
   Since I do not intend make money from this project, I am directing donations
   to the people suffering from the damage of the 2011 Tohoku earthquake and tsunami in Japan.
 
@@ -131,6 +134,9 @@ Develop:[![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=develo
   [Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-messages-to-XVim ).
   I(we) would really appreciate it, and it will really motivate me(us)!
 
+### BountySource
+  If you like to help and enhance the project directly consider backing this project via [BountySource](https://www.bountysource.com/teams/xvim). You can back the team (which means you support the entire project) or you can make bounty on a specific issue. (If you have any bugs to be fixed or features to be implemented not in issues yet you can make one.)
+  
 ## Contributors
   See contributors page in github repository.
   https://github.com/JugglerShu/XVim/contributors
