@@ -25,6 +25,7 @@
 @property BOOL vimregex; // XVim Original
 @property BOOL relativenumber;
 @property BOOL alwaysuseinputsource; //XVim original
+@property BOOL blinkcursor;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

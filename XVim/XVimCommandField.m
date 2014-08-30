@@ -9,6 +9,8 @@
 #import "XVimCommandField.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
+#import "XVimOptions.h"
+#import "XVim.h"
 #import "Logger.h"
 
 @interface XVimCommandField() {
@@ -29,21 +31,28 @@
 }
 
 // Drawing Caret
+- (void)_drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color{
+    color = [color colorWithAlphaComponent:0.5];
+    NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
+    NSUInteger glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
+    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
+    
+    [color set];
+    rect.size.width =rect.size.height/2;
+    if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
+        rect.size.width=glyphRect.size.width;
+    
+    [self drawRect:[self visibleRect]];
+    NSRectFillUsingOperation( rect, NSCompositeSourceOver);
+}
+
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
-    if(flag) {
-        color = [color colorWithAlphaComponent:0.5];
-        NSPoint aPoint=NSMakePoint( rect.origin.x,rect.origin.y+rect.size.height/2);
-        NSUInteger glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
-        NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
-        
-        [color set];
-        rect.size.width =rect.size.height/2;
-        if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
-            rect.size.width=glyphRect.size.width;
-        
-        NSRectFillUsingOperation( rect, NSCompositeSourceOver);
-    } else {
-        [self setNeedsDisplayInRect:self.visibleRect avoidAdditionalLayout:NO];
+    if( [[[XVim instance] options] blinkcursor] ){
+        if(!flag) {
+            // Clear caret
+            [self drawRect:[self visibleRect]];
+        }
+        [super drawInsertionPointInRect:rect color:color turnedOn:flag];
     }
 }
 

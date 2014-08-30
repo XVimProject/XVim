@@ -335,6 +335,7 @@
 	NSTextView *sourceView = [self sourceView];
     NSUInteger glyphIndex = [sourceView insertionPoint];
 	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
+    DEBUG_LOG(@"glyphRect:%f %f %f %f", glyphRect.origin.x, glyphRect.origin.y, glyphRect.size.height , glyphRect.size.width);
 
 	[[color colorWithAlphaComponent:alphaRatio] set];
 	rect.size.width = rect.size.height/2;
