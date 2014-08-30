@@ -10,48 +10,24 @@
   
 
 ## Support Xcode Versions
-  - Xcode4.6
   - Xcode5
   - Xcode6 beta
 
 ## INSTALL
- Two options. Build manually or use Rake.
+  Download source code or clone the repo. Then,
+  ```bash
+  $ make
+  ```
+  Create `.xvimrc` as you need and restart your Xcode. 
 
-### Build manually
- For Xcode4 Users : Before building checkout `for_xcode4` tag.
-
+### Manual build and install
  - Download source code(See also "Branches and Releases" section) and open XVim.xcodeproj with Xcode.
  - Select an appropriate Scheme for your Xcode version
-    - "XVim for Xcode4" must be built with Xcode4.6
     - "XVim for Xcode5 and 6" must be built with Xcode5 or 6
  - Select "Edit Scheme" and set "Build Configuration" as "Release"
  - Build it. It automatically installs the plugin into the correct directory.
  - Restart Xcode. (Make it sure that Xcode process is terminated entirely)
  - Create a `.xvimrc` file in the root of your home directory (optional)
-
-### Using Rake
-  Rake is a build tool base on ruby. This will wrap `xcodebuild` and install the plugin to appropriate directory. 
-  
-#### Prerequisite
-  Install ruby, either with RVM or rbenv. And then install rake.
-  
-  ```bash
-  $ gem install rake
-  ```
-
-#### Running
-  Run Rake Without parameters
-  
-  ```bash
-  $ rake
-  ```
-  And follow the prompt
-
-#### Uninstalling
-  ```bash
-  $ rake uninstall
-  ``` 
-
 
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
@@ -65,8 +41,12 @@
  Any pull requests should be made to 'develop' branch.
 
 ## Uninstall
-  Delete the following directory:
+  ```bash
+  $ make uninstall
+  ```
 
+### Manual uninstall 
+Delete the following directory:
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
 ## Feature list
