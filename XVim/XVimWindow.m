@@ -193,10 +193,10 @@
     if (mapped) {
         DEBUG_LOG(@"%@", mapped);
 
+        [_keymapContext clear];
         for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped) ) {
             [self handleKeyStroke:keyStroke onStack:_currentEvaluatorStack];
         }
-        [_keymapContext clear];
     } else {
         XVimOptions *options = [[XVim instance] options];
         NSTimeInterval delay = [options.timeoutlen integerValue] / 1000.0;
