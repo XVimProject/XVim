@@ -353,7 +353,8 @@
 
 - (BOOL)shouldAutoCompleteAtLocation:(unsigned long long)location{
     if( [self.currentEvaluator isKindOfClass:[XVimInsertEvaluator class]] ){
-        return YES;
+        DVTSourceTextView *base = (DVTSourceTextView*)self.sourceView;
+        return [base shouldAutoCompleteAtLocation_:location];
     }else{
         return NO;
     }
