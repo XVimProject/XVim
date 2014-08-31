@@ -18,6 +18,7 @@
 #import "XVimMarks.h"
 #import "XVimNormalEvaluator.h"
 #import "NSTextView+VimOperation.h"
+#import "DVTKit.h"
 
 @interface XVimInsertEvaluator()
 @property (nonatomic) NSRange startRange;
@@ -143,7 +144,6 @@
     }else{
         textRange = NSMakeRange(endLoc , startLoc - endLoc);
     }
-    
     NSString *text = [[view string] substringWithRange:textRange];
     return text;
     
@@ -263,6 +263,40 @@
     return nextEvaluator;
 }
 
+- (XVimEvaluator*)C_c{
+    return [self ESC];
+}
+
+- (XVimEvaluator*)C_e{
+    [self C_yC_eHelper:NO];
+    return self;
+}
+
+// Experimental
+- (XVimEvaluator*)C_n{
+    DVTSourceTextView* view = (DVTSourceTextView*)self.window.sourceView;
+    DVTTextCompletionController* c = [view completionController];
+    DVTTextCompletionSession *currentSession = c.currentSession;
+    if( nil == currentSession){
+        [view complete:self];
+    }else{
+        [currentSession selectNextCompletionAlpha];
+    }
+    return self;
+}
+
+- (XVimEvaluator*)C_p{
+    DVTSourceTextView* view = (DVTSourceTextView*)self.window.sourceView;
+    DVTTextCompletionController* c = [view completionController];
+    DVTTextCompletionSession *currentSession = c.currentSession;
+    if( nil == currentSession){
+        [view complete:self];
+    }else{
+        [currentSession selectPreviousCompletionAlpha];
+    }
+    return self;
+}
+
 - (XVimEvaluator*)C_o{
     self.onChildCompleteHandler = @selector(onC_oComplete:);
     return [[[XVimNormalEvaluator alloc] initWithWindow:self.window] autorelease];
@@ -273,15 +307,22 @@
     return self;
 }
 
+- (XVimEvaluator*)C_w{
+    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    [[self sourceView] xvim_delete:m andYank:NO];
+    return self;
+}
+
+- (XVimEvaluator*)C_y{
+    [self C_yC_eHelper:YES];
+    return self;
+}
+
 - (XVimEvaluator*)ESC{
     return nil;
 }
 
 - (XVimEvaluator*)C_LSQUAREBRACKET{
-    return [self ESC];
-}
-
-- (XVimEvaluator*)C_c{
     return [self ESC];
 }
 
@@ -301,22 +342,6 @@
         NSString *charToInsert = [NSString stringWithFormat:@"%c", u];
         [[self sourceView] insertText:charToInsert];
     }
-}
-
-- (XVimEvaluator*)C_y{
-    [self C_yC_eHelper:YES];
-    return self;
-}
-
-- (XVimEvaluator*)C_e{
-    [self C_yC_eHelper:NO];
-    return self;
-}
-
-- (XVimEvaluator*)C_w{
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_WORD_BACKWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    [[self sourceView] xvim_delete:m andYank:NO];
-    return self;
 }
 
 @end
