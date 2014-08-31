@@ -155,6 +155,7 @@
 - (void)setSelectedRanges:(NSArray *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
     [(DVTSourceTextView*)self setSelectedRanges_:ranges affinity:affinity stillSelecting:flag];
     [(NSTextView*)self xvim_syncStateFromView];
+    [(NSTextView*)self setNeedsDisplay:YES];
 }
 
 - (void)selectAll:(id)sender{
