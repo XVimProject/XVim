@@ -178,6 +178,7 @@ The dot command ('.') is supported.
   [no]vimregex | Tells XVim to use Vim's regular expression. Currently support \<,\> for word boundary, \c,\C for specifying case (in)sensitiveness.
   [no]relativenumber |
   [no]alwaysuseinputsource | With this option all the input is first sent to input source of the system. If you are using France or Portgeses keyboard consider turning this on. (See issue https://github.com/JugglerShu/XVim/issues/598)
+  [no]blinkcursor |
 
 
 ## guioptions
