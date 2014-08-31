@@ -34,6 +34,7 @@
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke onStack:(NSMutableArray*)stack;
 - (BOOL)handleKeyEvent:(NSEvent*)event;
 - (NSRect)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
+- (BOOL)shouldAutoCompleteAtLocation:(unsigned long long)location;
 
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell;
 - (void)statusMessage:(NSString*)message;

@@ -64,6 +64,7 @@
     [self hook:@"viewDidMoveToSuperview"];
     [self hook:@"shouldChangeTextInRange:replacementString"];
     [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
+    [self hook:@"shouldAutoCompleteAtLocation:"];
 }
 
 + (void)unhook{
@@ -90,6 +91,7 @@
     // We do not unhook this too. Since "addObserver" is called in initWithCoder we should keep this hook
     // (Calling observerValueForKeyPath in NSObject results in throwing exception)
     //[self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
+    [self unhook:@"shouldAutoCompleteAtLocation:"];
 }
 
 #ifdef __XCODE5__
@@ -298,6 +300,12 @@
     DVTSourceTextView *base = (DVTSourceTextView*)self;
     [base setNeedsUpdateFoundRanges:YES];
     [base didChangeText_];
+}
+
+- (BOOL)shouldAutoCompleteAtLocation:(unsigned long long)location{
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    return [window shouldAutoCompleteAtLocation:(unsigned long long)location];
 }
 
 - (void)viewDidMoveToSuperview {

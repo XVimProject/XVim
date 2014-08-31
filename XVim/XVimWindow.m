@@ -351,6 +351,14 @@
     return rect;
 }
 
+- (BOOL)shouldAutoCompleteAtLocation:(unsigned long long)location{
+    if( [self.currentEvaluator isKindOfClass:[XVimInsertEvaluator class]] ){
+        return YES;
+    }else{
+        return NO;
+    }
+}
+
 - (void)errorMessage:(NSString *)message ringBell:(BOOL)ringBell
 {
     [_commandLine errorMessage:message Timer:YES RedColorSetting:YES];
