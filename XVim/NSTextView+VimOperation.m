@@ -611,8 +611,10 @@
         if( currentRange.location != prevPlaceHolder.location && currentRange.location == (prevPlaceHolder.location + prevPlaceHolder.length) ){
             //The condition here means that just before current insertion point is a placeholder.
             //So we select the the place holder and its already selected by "selectedPreviousPlaceholder" above
-        }else{
-            [self setSelectedRange:NSMakeRange(currentRange.location-1, 0)];
+        } else{
+            if ([[self string] length] > currentRange.location) {
+                [self setSelectedRange:NSMakeRange(currentRange.location-1, 0)];
+            }
         }
     }
     return;
