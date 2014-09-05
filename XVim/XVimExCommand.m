@@ -1201,6 +1201,12 @@
     [[XVim instance].testRunner runTest];
 }
 
+
+- (void)undo:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window.sourceView.undoManager undo];
+    return ;
+}
+
 - (void)vmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
         [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_VISUAL];
