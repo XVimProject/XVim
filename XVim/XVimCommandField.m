@@ -37,12 +37,12 @@
     NSUInteger glyphIndex = [[self layoutManager] glyphIndexForPoint:aPoint inTextContainer:[self textContainer]];
     NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
     
-    [color set];
     rect.size.width =rect.size.height/2;
     if(glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width) 
         rect.size.width=glyphRect.size.width;
     
     [self drawRect:[self visibleRect]];
+    [color set];
     NSRectFillUsingOperation( rect, NSCompositeSourceOver);
 }
 
