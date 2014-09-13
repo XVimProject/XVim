@@ -77,8 +77,8 @@
 - (NSRange)xvim_indexRangeForLines:(NSRange)range
 {
     NSString  *string = self.xvim_string;
-    NSUInteger length = self.length, start;
-    NSUInteger lineNum = 0, end = 0, contentsEnd;
+    NSUInteger length = self.length, start = 0;
+    NSUInteger lineNum = 0, end = 0, contentsEnd = 0;
 
     NSAssert(range.location > 0, @"line number starts at 1");
 

@@ -39,7 +39,6 @@
 #import "XVimJoinEvaluator.h"
 
 @interface XVimNormalEvaluator() {
-	__weak XVimRegister *_playbackRegister;
 }
 @end
 

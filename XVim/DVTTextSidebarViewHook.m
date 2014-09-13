@@ -99,7 +99,7 @@ static CGFloat kTextSideBarLineNumberRightPadding = 5.0;
     NSDictionary *attributes = @{NSForegroundColorAttributeName: [textSidebarView lineNumberTextColor],
                                  NSFontAttributeName: [textSidebarView lineNumberFont],
                                  NSParagraphStyleAttributeName: [NSParagraphStyle dvt_paragraphStyleWithAlignment:NSRightTextAlignment]};
-    NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:relativeLineNumberString attributes:attributes];
+    NSAttributedString *attributedString = [[[NSAttributedString alloc] initWithString:relativeLineNumberString attributes:attributes] autorelease];
     
     firstLineRect.size.width -= kTextSideBarLineNumberRightPadding;
     [attributedString drawInRect:firstLineRect];

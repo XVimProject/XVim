@@ -31,6 +31,21 @@
     }
 }
 
+- (void)setMark:(XVimMark *)mark
+{
+    if( mark == nil ){
+        _line = NSNotFound;
+        _column = NSNotFound;
+        [_document release];
+        _document = nil;
+    } else {
+        _line = mark.line;
+        _column = mark.column;
+        [_document release];
+        _document = [mark.document copy];
+    }
+}
+
 - (id)init{
     return [self initWithMark:nil];
 }
