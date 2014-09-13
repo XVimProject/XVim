@@ -40,4 +40,5 @@
 - (void)didChangeText_;
 - (void)viewDidMoveToSuperview_;
 - (void)observeValueForKeyPath_:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context;
+- (BOOL)shouldAutoCompleteAtLocation_:(unsigned long long)arg1;
 @end

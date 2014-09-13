@@ -20,6 +20,7 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
+#import "DVTSourceTextViewHook.h"
 
 @interface XVimWindow () {
     NSMutableArray     *_defaultEvaluatorStack;
@@ -32,7 +33,6 @@
 }
 
 @property (strong, atomic) NSEvent       *tmpBuffer;
-@property (readonly)       XVimEvaluator *currentEvaluator;
 
 - (void)_resetEvaluatorStack:(NSMutableArray *)stack activateNormalHandler:(BOOL)activate;
 

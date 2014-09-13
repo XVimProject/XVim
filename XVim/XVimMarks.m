@@ -164,7 +164,7 @@ static NSString* FILE_MARKS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         [_localMarksDictionary setObject:[XVimMarks createEmptyLocalMarkDictionary] forKey:mark.document];
     }
     NSDictionary* marks = [_localMarksDictionary objectForKey:mark.document];
-    [[marks objectForKey:[NSString stringWithFormat:@"%C", c]] initWithMark:mark];
+    [[marks objectForKey:[NSString stringWithFormat:@"%C", c]] setMark:mark];
     return;
 }
 
@@ -184,7 +184,7 @@ static NSString* FILE_MARKS = @"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     }
     
     // Never replace object in dictionary (just change the value of the mark)
-    [[_fileMarks objectForKey:[NSString stringWithFormat:@"%C", c]] initWithMark:mark];
+    [[_fileMarks objectForKey:[NSString stringWithFormat:@"%C", c]] setMark:mark];
     return;
 }
 @end
