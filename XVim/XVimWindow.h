@@ -28,6 +28,7 @@
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
 @property(readonly) NSTextView *sourceView; // This represents currently focused sourceView
 @property(readonly) XVimCommandLine *commandLine;
+@property (readonly)       XVimEvaluator *currentEvaluator;
 
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea;
 
