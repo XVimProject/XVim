@@ -21,13 +21,17 @@
                                    input:(NSString*)in
                             expectedText:(NSString*)et
                            expectedRange:(NSRange)er
+                                    file:(NSString *)file
+                                    line:(NSUInteger)line
 {
     return [self testCaseWithInitialText:it
                              initialRange:ir
                                     input:in
                              expectedText:et
                             expectedRange:er
-                              description:in];
+                              description:in
+                                     file:file
+                                     line:line];
 }
 
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
@@ -36,6 +40,9 @@
                             expectedText:(NSString*)et
                            expectedRange:(NSRange)er
                             description:(NSString *)desc
+                                    file:(NSString *)file
+                                    line:(NSUInteger)line
+
 {
     XVimTestCase* test = [[XVimTestCase alloc] init];
     test.initialText = it;
@@ -49,6 +56,8 @@
     }else{
         test.desc = in;
     }
+    test.file = file;
+    test.line = line;
     
     return test;
 }
@@ -62,7 +71,7 @@
 
 - (BOOL)assert{
     if( ![self.expectedText isEqualToString:[XVimLastActiveSourceView() string]] ){
-        self.message = [NSString stringWithFormat:@"Result text is different from expected text.\n\nResult Text:\n%@\n\nExpected Text:\n%@\n", [XVimLastActiveSourceView() string], self.expectedText];
+        self.message = [NSString stringWithFormat:@"Result text is different from expected text.\n\nResult Text:\n%@\n\nExpected Text:\n%@ [%@:%ld]\n", [XVimLastActiveSourceView() string], self.expectedText,self.file, self.line];
         return NO;
     }
     
@@ -70,7 +79,7 @@
     if( self.expectedRange.location != resultRange.location ||
         self.expectedRange.length   != resultRange.length
        ){
-        self.message = [NSString stringWithFormat:@"Result range(%lu,%lu) is different from expected range(%lu,%lu)", resultRange.location, resultRange.length, self.expectedRange.location, (unsigned long)self.expectedRange.length];
+        self.message = [NSString stringWithFormat:@"Result range(%lu,%lu) is different from expected range(%lu,%lu) [%@:%ld]", resultRange.location, resultRange.length, self.expectedRange.location, (unsigned long)self.expectedRange.length, self.file, self.line];
         return NO;
     }
     return YES;
