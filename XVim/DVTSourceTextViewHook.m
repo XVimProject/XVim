@@ -31,6 +31,7 @@
 #import "NSTextView+VimOperation.h"
 
 #import "XVimInsertEvaluator.h"
+#import "NSTextView+VimOperation.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -229,10 +230,14 @@
     return;
 }
 
-
-- (void)drawRect:(NSRect)dirtyRect{
+NSRect s_lastCaret;
+- (void)drawRect:(NSRect)dirtyRect{ 
+    TRACE_LOG(@"drawRect");
     @try{
         NSTextView* view = (NSTextView*)self;
+        
+        NSGraphicsContext* context = [NSGraphicsContext currentContext];
+        [context saveGraphicsState];
         
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
@@ -242,10 +247,10 @@
         }else{
             [view xvim_clearHighlightText];
         }
-       
         
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base drawRect_:dirtyRect];
+        
         if( base.selectionMode != XVIM_VISUAL_NONE ){
             // NSTextView does not draw insertion point when selecting text. We have to draw insertion point by ourselves.
             NSUInteger glyphIndex = [base insertionPoint];
@@ -253,6 +258,23 @@
             [[[base insertionPointColor] colorWithAlphaComponent:0.5] set];
             NSRectFillUsingOperation( glyphRect, NSCompositeSourceOver);
         }
+        
+        // Caret Drawing
+        XVimWindow* window = [base xvimWindow];
+        if( [base _isLayerBacked] && ![[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
+            // Erase Cursor 
+            [[NSBezierPath bezierPathWithRect:s_lastCaret] setClip];
+            [base drawRect_:s_lastCaret];
+            if( ![[[XVim instance] options] blinkcursor] ){
+                // Only when not blinkcursor, draw caret
+                NSUInteger glyphIndex = [base insertionPoint];
+                NSRect glyphRect = [base xvim_boundingRectForGlyphIndex:glyphIndex];
+                //glyphRect.origin.x -= 1.0f;
+                [self _drawInsertionPointInRect:glyphRect color:[base insertionPointColor]];
+            }
+        }
+        
+        [context restoreGraphicsState];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -262,39 +284,55 @@
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
+    TRACE_LOG(@"%f %f %f %f", aRect.origin.x, aRect.origin.y, aRect.size.width, aRect.size.height);
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
-        TRACE_LOG(@"_drawInsertionPointInRect");
-        [base drawRect:[base visibleRect]];
         if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
             // Use original behavior when insert mode.
-            [base _drawInsertionPointInRect_:aRect color:aColor];
-        }else{
-            [window drawInsertionPointInRect:aRect color:aColor];
+            return [base _drawInsertionPointInRect_:aRect color:aColor];
         }
+        
+        NSUInteger glyphIndex = [base insertionPoint];
+        NSRect glyphRect = [base xvim_boundingRectForGlyphIndex:glyphIndex];
+        s_lastCaret = glyphRect;
+        s_lastCaret.origin.x -= 10.0;   // This makes the last caret rect a little wider than actual drawn caret
+        s_lastCaret.size.width += 20.0; // This is because if we do not do this, when erasing the caret the edge of the caret are not erased
+                                        // I do not know why this hapens but maybe some drawing problem. I couldN't identify the root cause
+                                        // So I'm doing lazy workaround here.
+        [[NSBezierPath bezierPathWithRect:s_lastCaret] setClip];
+        [window drawInsertionPointInRect:glyphRect color:aColor];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
 }
-
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor *)color turnedOn:(BOOL)flag{
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
-            // Use original behavior when insert mode.
-            [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
-        }else{
-            if( [[[XVim instance] options] blinkcursor] ){
-                if(!flag){
-                    // Clear caret
-                    [base drawRect:[base visibleRect]];    
-                }
-                // Call original(This eventually calls _drawInsertionPointInRect:color: if flag is YES)
-                [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
+        // Use original behavior when insert mode.
+        return [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+    }
+    
+    if( ![base _isLayerBacked]){
+        if( [[[XVim instance] options] blinkcursor] ){
+            [self drawRect:s_lastCaret];
+            if( flag ) {
+                [self _drawInsertionPointInRect:rect color:color];
             }
+        }else{
+            [self drawRect:s_lastCaret];
+            [self _drawInsertionPointInRect:rect color:color];
         }
+    }
+    else{
+        if( [[[XVim instance] options] blinkcursor] ){
+            [self drawRect:s_lastCaret];
+            [self _drawInsertionPointInRect:rect color:color];
+        }
+    }
+    return;
 }
 - (void)didChangeText{
     DVTSourceTextView *base = (DVTSourceTextView*)self;

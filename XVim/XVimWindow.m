@@ -332,16 +332,7 @@
     float widthRatio = [current insertionPointWidthRatio];
     float alphaRatio = [current insertionPointAlphaRatio];
 
-	NSTextView *sourceView = [self sourceView];
-    NSUInteger glyphIndex = [sourceView insertionPoint];
-	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
-    DEBUG_LOG(@"glyphRect:%f %f %f %f", glyphRect.origin.x, glyphRect.origin.y, glyphRect.size.height , glyphRect.size.width);
-
 	[[color colorWithAlphaComponent:alphaRatio] set];
-	rect.size.width = rect.size.height/2;
-	if (glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width)  {
-		rect.size.width = glyphRect.size.width;
-    }
 
 	rect.origin.y += (1 - heightRatio) * rect.size.height;
 	rect.size.height *= heightRatio;
