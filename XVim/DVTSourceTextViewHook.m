@@ -263,7 +263,7 @@ NSRect s_lastCaret;
         XVimWindow* window = [base xvimWindow];
         if( [base _isLayerBacked] && ![[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
             // Erase Cursor 
-            [[NSBezierPath bezierPathWithRect:s_lastCaret] setClip];
+            [[NSBezierPath bezierPathWithRect:[base visibleRect]] setClip];
             [base drawRect_:s_lastCaret];
             if( ![[[XVim instance] options] blinkcursor] ){
                 // Only when not blinkcursor, draw caret
@@ -300,7 +300,7 @@ NSRect s_lastCaret;
         s_lastCaret.size.width += 20.0; // This is because if we do not do this, when erasing the caret the edge of the caret are not erased
                                         // I do not know why this hapens but maybe some drawing problem. I couldN't identify the root cause
                                         // So I'm doing lazy workaround here.
-        [[NSBezierPath bezierPathWithRect:s_lastCaret] setClip];
+        [[NSBezierPath bezierPathWithRect:[base visibleRect]] setClip];
         [window drawInsertionPointInRect:glyphRect color:aColor];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
