@@ -55,8 +55,8 @@
 
 @interface XVimExArg : NSObject{
 }
-@property (retain) NSString* arg;
-@property (retain) NSString* cmd;
+@property (strong) NSString* arg;
+@property (strong) NSString* cmd;
 @property BOOL forceit;
 @property NSUInteger lineBegin; // line1
 @property NSUInteger lineEnd; // line2
@@ -67,8 +67,8 @@
 @interface XVimExCmdname : NSObject{
 
 }
-@property (readonly) NSString* cmdName;
-@property (readonly) NSString* methodName;
+@property (weak, readonly) NSString* cmdName;
+@property (weak, readonly) NSString* methodName;
 @end
 
 

@@ -11,6 +11,7 @@
 #import "XVimOptions.h"
 #import "Hooker.h"
 #import "DVTSourceTextScrollViewHook.h"
+#import "NSObject+ExtraData.h"
 
 
 @implementation DVTSourceTextScrollViewHook
@@ -26,9 +27,8 @@
 }
 
 + (void)hook{
-    [self hook:@"initWithFrame:"];
-    [self hook:@"dealloc"];
-    [self hook:@"hasVerticalScroller"]; 
+    [self hook:@"viewWillMoveToWindow:"];
+    [self hook:@"hasVerticalScroller"];
     [self hook:@"hasHorizontalScroller"]; 
     [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
@@ -43,33 +43,28 @@
     // [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
 }
 
-- (id)initWithFrame:(NSRect)rect{
-    DVTSourceTextScrollView* base = (DVTSourceTextScrollView*)self;
-    id obj = [base initWithFrame_:rect];
-    if( nil != obj ){
-        TRACE_LOG(@"%p initWithFrame", obj);
-        [XVim.instance.options addObserver:obj forKeyPath:@"guioptions" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-    }
-    return (DVTSourceTextScrollViewHook*)obj;
-}
+static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW";
 
-// This pragma is for suppressing warning that the dealloc method does not call [super dealloc]. ([base dealloc_] calls [super dealloc] so we do not need it)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-- (void)dealloc{
-    DVTSourceTextScrollView *base = (DVTSourceTextScrollView*)self;
-    @try{
-        TRACE_LOG(@"%p dealloc", base);
-        [XVim.instance.options removeObserver:self forKeyPath:@"guioptions"];
+
+-(void)viewWillMoveToWindow:(NSWindow*)window
+{
+    if ( ![self boolForName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW] ) {
+        [XVim.instance.options addObserver:self forKeyPath:@"guioptions" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+        __unsafe_unretained DVTSourceTextScrollView* weakSelf = (DVTSourceTextScrollView*)self;
+        [ self xvim_performOnDealloc:^{
+            DVTSourceTextScrollView *base = weakSelf;
+            @try{
+                [XVim.instance.options removeObserver:base forKeyPath:@"guioptions"];
+            }
+            @catch (NSException* exception){
+                ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+                [Logger logStackTrace:exception];
+            }
+        }];
+        [ self setBool:YES forName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW];
     }
-    @catch (NSException* exception){
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    [base dealloc_];
-    return;
+    [ (DVTSourceTextScrollView*)self viewWillMoveToWindow_:window ];
 }
-#pragma GCC diagnostic pop
 
 - (BOOL)hasVerticalScroller{
     if( [XVim.instance.options.guioptions rangeOfString:@"r"].location == NSNotFound) {

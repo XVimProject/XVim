@@ -12,7 +12,7 @@
 @class XVimKeymapNode;
 
 @interface XVimKeymapContext : NSObject
-@property (nonatomic, retain) XVimMutableString* inputKeys;  // All the keys input so far
+@property (nonatomic, strong) XVimMutableString* inputKeys;  // All the keys input so far
 
 // substring of inputKeys which can be maps to keys (maximum match).
 // This is used when for example "ab" maps to "l" and "abcd" maps to "j".
@@ -20,9 +20,9 @@
 // And inputKeys = "abc"
 // When there is no input for "timeoutlen" it should be treated as "l" + "c" and
 // anc "c" must be also taken as mappable key input. (if "c" maps to "l" "abc" results in "ll")
-@property (nonatomic, retain) XVimMutableString* lastMappedKeys;
-@property (nonatomic, retain) XVimKeymapNode* lastMappedNode;
-@property (nonatomic, retain) XVimKeymapNode* node;
+@property (nonatomic, strong) XVimMutableString* lastMappedKeys;
+@property (nonatomic, strong) XVimKeymapNode* lastMappedNode;
+@property (nonatomic, strong) XVimKeymapNode* node;
 
 - (void)clear;
 

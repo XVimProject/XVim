@@ -14,6 +14,8 @@
 
 // Utilities
 - (void)setBool:(BOOL)b forName:(NSString*)name;
+- (BOOL)boolForName:(NSString*)name;
 - (void)setUnsignedInteger:(NSUInteger)b forName:(NSString*)name;
 - (void)setInteger:(NSInteger)b forName:(NSString *)name;
+- (void)xvim_performOnDealloc:(void(^)(void))deallocBlock;
 @end

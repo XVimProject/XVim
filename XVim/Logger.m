@@ -38,7 +38,7 @@ static Logger* s_defaultLogger = nil;
 
 - (void) forwardInvocationForLogger:(NSInvocation*) invocation{
     NSString* selector = NSStringFromSelector([invocation selector]);
-    NSString* forward = [[[NSString alloc] initWithFormat:@"LOGGER_HIDDEN_%@", NSStringFromSelector([invocation selector]) ] autorelease];
+    NSString* forward = [[NSString alloc] initWithFormat:@"LOGGER_HIDDEN_%@", NSStringFromSelector([invocation selector]) ];
     if( [[invocation target] respondsToSelector:NSSelectorFromString(forward)] ){
         [Logger logWithLevel:LogTrace format:@"ENTER METHOD - %@ %@", NSStringFromClass([self class]), selector];
         [invocation setSelector:NSSelectorFromString(forward)];
@@ -65,7 +65,7 @@ static Logger* s_defaultLogger = nil;
     IMP no_imp = class_getMethodImplementation([Logger class], @selector(there_is_not_such_method)); // Find imple for not implemented
     for( unsigned int i = 0 ; i < num ; i++ ){
         SEL selector = method_getName(m[i]);
-        NSString* new_selector = [[[NSString alloc] initWithFormat:@"LOGGER_HIDDEN_%@", NSStringFromSelector(selector)] autorelease];
+        NSString* new_selector = [[NSString alloc] initWithFormat:@"LOGGER_HIDDEN_%@", NSStringFromSelector(selector)];
         class_addMethod(c, NSSelectorFromString(new_selector), method_getImplementation(m[i]), method_getTypeEncoding(m[i]));
         method_setImplementation(m[i], no_imp);
     }
@@ -97,12 +97,12 @@ static Logger* s_defaultLogger = nil;
     va_copy(args2, args);
     
     // Write to stderr
-    NSString *s = [[[NSString alloc] initWithFormat:fmt arguments:args] autorelease];
+    NSString *s = [[NSString alloc] initWithFormat:fmt arguments:args];
     printf("%s\n", [[s stringByReplacingOccurrencesOfString:@"%%" withString:@"%%%%"] UTF8String]);
     
     // Write to file
     if( nil != _logFile) {
-        NSString* msg = [[[NSString alloc] initWithFormat:fmt arguments:args2] autorelease];
+        NSString* msg = [[NSString alloc] initWithFormat:fmt arguments:args2];
         [_logFile writeData:[msg dataUsingEncoding:NSUTF8StringEncoding]];
         [_logFile writeData:[@"\n" dataUsingEncoding:NSUTF8StringEncoding]];
     }
@@ -143,7 +143,6 @@ static Logger* s_defaultLogger = nil;
 
 - (void) setLogFile:(NSString *)path{
     [_logFile closeFile];
-    [_logFile release];
     _logFile = nil;
     
     if( nil != path){
@@ -151,7 +150,7 @@ static Logger* s_defaultLogger = nil;
         if( ![fm fileExistsAtPath:path] ){
             [fm createFileAtPath:path contents:nil attributes:nil];
         }
-        _logFile = [[NSFileHandle fileHandleForWritingAtPath:path] retain]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
+        _logFile = [NSFileHandle fileHandleForWritingAtPath:path]; // Do we need to retain this? I want to use this handle as long as Xvim is alive.
         [_logFile seekToEndOfFile];
     }
     
@@ -183,10 +182,10 @@ static Logger* s_defaultLogger = nil;
     Class * classes = NULL;
     
     numClasses = objc_getClassList(NULL, 0);
-    NSMutableString* text = [[[NSMutableString alloc] init ] autorelease];
+    NSMutableString* text = [[NSMutableString alloc] init ];
     if (numClasses > 0 )
     {
-        classes = malloc(sizeof(Class) * (NSUInteger)numClasses);
+        classes = (Class*)malloc(sizeof(Class) * (NSUInteger)numClasses);
         numClasses = objc_getClassList(classes, numClasses);
         // Enumerate Classes
         for( int i = 0 ; i < numClasses ; i++ ){
@@ -238,7 +237,7 @@ static Logger* s_defaultLogger = nil;
 }
 
 + (void)traceView:(NSView*)view depth:(NSUInteger)depth{
-    NSMutableString* str = [[[NSMutableString alloc] init] autorelease];
+    NSMutableString* str = [[NSMutableString alloc] init];
     for( NSUInteger i = 0 ; i < depth; i++ ){
         [str appendString:@"   "];
     }
@@ -252,7 +251,7 @@ static Logger* s_defaultLogger = nil;
 
 
 + (void)traceMenu:(NSMenu*)menu :(int)depth{
-    NSMutableString* tabs = [[[NSMutableString alloc] init] autorelease];
+    NSMutableString* tabs = [[NSMutableString alloc] init];
     for( int i = 0 ; i < depth; i++ ){
         [tabs appendString:@"\t"];
     }

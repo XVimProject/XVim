@@ -19,4 +19,4 @@
 @end
 
 
-#define XVimMakeMark(line, col, doc) [[[XVimMark alloc] initWithLine:line column:col document:doc] autorelease]
+#define XVimMakeMark(line, col, doc) [[XVimMark alloc] initWithLine:line column:col document:doc]

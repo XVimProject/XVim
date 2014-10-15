@@ -22,10 +22,6 @@
     return nil;
 }
 
-- (void)dealloc{
-    self.keyStroke = nil;
-    [super dealloc];
-}
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
     return [keymapProvider keymapForMode:XVIM_MODE_NONE];

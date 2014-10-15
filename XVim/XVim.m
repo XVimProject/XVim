@@ -69,11 +69,11 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // I have tried to add the item into "Editor" but did not work.
     // It looks that the initialization of "Editor" menu is done later...
     NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
-    NSMenuItem* item = [[[NSMenuItem alloc] init] autorelease];
-    NSMenu* m = [[[NSMenu alloc] initWithTitle:@"XVim"] autorelease];
+    NSMenuItem* item = [[NSMenuItem alloc] init];
+    NSMenu* m = [[NSMenu alloc] initWithTitle:@"XVim"];
     [item setSubmenu:m];
     
-    NSMenuItem* subitem = [[[NSMenuItem alloc] init] autorelease];
+    NSMenuItem* subitem = [[NSMenuItem alloc] init];
     subitem.title = @"Enable";
     [subitem setEnabled:YES];
     [subitem setState:NSOnState];
@@ -85,20 +85,20 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // Test cases
     if( [XVim instance].options.debug ){
         // Add category sub menu
-        NSMenuItem* subm = [[[NSMenuItem alloc] init] autorelease];
+        NSMenuItem* subm = [[NSMenuItem alloc] init];
         subm.title = @"Test categories";
         
         // Create category menu
-        NSMenu* cat_menu = [[[NSMenu alloc] init] autorelease];
+        NSMenu* cat_menu = [[NSMenu alloc] init];
         // Menu for run all test
-        NSMenuItem* subitem = [[[NSMenuItem alloc] init] autorelease];
+        NSMenuItem* subitem = [[NSMenuItem alloc] init];
         subitem.title = @"All";
         subitem.target = [XVim instance];
         subitem.action = @selector(runTest:);
         [cat_menu addItem:subitem];
         [cat_menu addItem:[NSMenuItem separatorItem]];
         for( NSString* c in [[XVim instance].testRunner categories]){
-            subitem = [[[NSMenuItem alloc] init] autorelease];
+            subitem = [[NSMenuItem alloc] init];
             subitem.title = c;
             subitem.target = [XVim instance];
             subitem.action = @selector(runTest:);
@@ -178,7 +178,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 - (id)init {
 	if (self = [super init]) {
-		self.options = [[[XVimOptions alloc] init] autorelease];
+		self.options = [[XVimOptions alloc] init];
 	}
 	return self;
 }
@@ -190,13 +190,13 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     _marks = [[XVimMarks alloc] init];
     _testRunner= [[XVimTester alloc] init];
     
-    self.excmd = [[[XVimExCommand alloc] init] autorelease];
+    self.excmd = [[XVimExCommand alloc] init];
     self.lastPlaybackRegister = nil;
-    self.registerManager = [[[XVimRegisterManager alloc] init] autorelease];
-    self.lastOperationCommands = [[[XVimMutableString alloc] init] autorelease];
+    self.registerManager = [[XVimRegisterManager alloc] init];
+    self.lastOperationCommands = [[XVimMutableString alloc] init];
     self.lastVisualPosition = XVimMakePosition(NSNotFound, NSNotFound);
     self.lastVisualSelectionBegin = XVimMakePosition(NSNotFound, NSNotFound);
-    self.tempRepeatRegister = [[[XVimMutableString alloc] init] autorelease];
+    self.tempRepeatRegister = [[XVimMutableString alloc] init];
     self.isRepeating = NO;
     self.isExecuting = NO;
     _logFile = nil;
@@ -209,25 +209,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [_options addObserver:self forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
 }
 
--(void)dealloc{
-    self.excmd = nil;
-    self.registerManager = nil;
-    self.lastOperationCommands = nil;
-    self.lastPlaybackRegister = nil;
-    self.lastOperationCommands = nil;
-    self.tempRepeatRegister = nil;
-    [_options release];
-    [_searcher release];
-    [_lastCharacterSearchMotion release];
-    [_excmd release];
-    [_logFile release];
-    [_marks release];
-    [_testRunner release];
-    //[_info release];
-    self.options = nil;
-    
-	[super dealloc];
-}
 
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context{
@@ -253,9 +234,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 - (void)parseRcFile {
     NSString *homeDir = NSHomeDirectoryForUser(NSUserName());
     NSString *keymapPath = [homeDir stringByAppendingString: @"/.xvimrc"]; 
-    NSString *keymapData = [[[NSString alloc] initWithContentsOfFile:keymapPath
+    NSString *keymapData = [[NSString alloc] initWithContentsOfFile:keymapPath
                                                            encoding:NSUTF8StringEncoding
-															  error:NULL] autorelease];
+															  error:NULL];
 	for (NSString *string in [keymapData componentsSeparatedByString:@"\n"])
 	{
 		[self.excmd executeCommand:[@":" stringByAppendingString:string] inWindow:nil];
@@ -270,12 +251,11 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // IDEConsoleArea has IDEConsoleTextView as its view but we do not have public method to access it.
     // It has the view as instance variable named "_consoleView"
     // So use obj-c runtime method to get instance varialbe by its name.
-    IDEConsoleTextView* pView;
-    object_getInstanceVariable(console , "_consoleView" , (void**)&pView);
+    IDEConsoleTextView* pView = [console valueForKey:@"_consoleView"];
     
     va_list argumentList;
     va_start(argumentList, fmt);
-    NSString* string = [[[NSString alloc] initWithFormat:fmt arguments:argumentList] autorelease];
+    NSString* string = [[NSString alloc] initWithFormat:fmt arguments:argumentList];
     pView.logMode = 1; // I do not know well about this value. But we have to set this to write text into the console.
     [pView insertText:string];
     [pView insertNewline:self];
@@ -329,7 +309,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     if( [m.title isEqualToString:@"All"] ){
         [self.testRunner selectCategories:self.testRunner.categories];
     }else{
-        NSMutableArray* arr = [[[NSMutableArray alloc] init] autorelease];
+        NSMutableArray* arr = [[NSMutableArray alloc] init];
         [arr addObject:m.title];
         [self.testRunner selectCategories:arr];
     }

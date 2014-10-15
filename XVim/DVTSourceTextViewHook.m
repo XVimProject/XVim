@@ -47,9 +47,7 @@
 }
 
 + (void)hook{
-    [self hook:@"initWithCoder:"];
-    [self hook:@"initWithFrame:textContainer:"];
-    [self hook:@"dealloc"];
+
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
     [self hook:@"selectAll:"];
     // [self hook:@"cut:"];  // Cut calls delete: after all. Do not need to hook
@@ -96,28 +94,7 @@
 }
 
 #ifdef __XCODE5__
-- (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
-    TRACE_LOG(@"[%p]ENTER", self);
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    id obj =  (DVTSourceTextViewHook*)[base initWithFrame_:rect textContainer:container];
-    if( nil != obj ){
-        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-    }
-    return obj;
-}
 
-- (id)initWithCoder:(NSCoder*)coder{
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
-    if( nil != obj ){
-        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-    }
-    return (DVTSourceTextViewHook*)[base initWithCoder_:coder];
-}
 #else
 - (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
     TRACE_LOG(@"ENTER");
@@ -136,24 +113,6 @@
 }
 #endif
 
-// This pragma is for suppressing warning that the dealloc method does not call [super dealloc]. ([base dealloc_] calls [super dealloc] so we do not need it)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-- (void)dealloc{
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    @try{
-        [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
-        [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
-        [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
-    }
-    @catch (NSException* exception){
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    [base dealloc_];
-    return;
-}
-#pragma GCC diagnostic pop
 
 - (void)setSelectedRanges:(NSArray *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
     [(DVTSourceTextView*)self setSelectedRanges_:ranges affinity:affinity stillSelecting:flag];
@@ -261,7 +220,7 @@ NSRect s_lastCaret;
         
         // Caret Drawing
         XVimWindow* window = [base xvimWindow];
-        if( [base _isLayerBacked] && ![[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
+        if( [base performSelector:@selector(_isLayerBacked)] && ![[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
             // Erase Cursor 
             [[NSBezierPath bezierPathWithRect:[base visibleRect]] setClip];
             [base drawRect_:s_lastCaret];
@@ -315,7 +274,7 @@ NSRect s_lastCaret;
         return [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
     }
     
-    if( ![base _isLayerBacked]){
+    if( ![base performSelector:@selector(_isLayerBacked)] ){
         if( [[[XVim instance] options] blinkcursor] ){
             [self drawRect:s_lastCaret];
             if( flag ) {
@@ -345,9 +304,30 @@ NSRect s_lastCaret;
     XVimWindow* window = [base xvimWindow];
     return [window shouldAutoCompleteAtLocation:(unsigned long long)location];
 }
+static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW";
 
 - (void)viewDidMoveToSuperview {
     @try{
+        if ( ![ self boolForName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW ] ) {
+            [XVim.instance.options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            [XVim.instance.options addObserver:self forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            [XVim.instance.searcher addObserver:self forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            __unsafe_unretained DVTSourceTextView* weakSelf = (DVTSourceTextView*)self;
+            [ self xvim_performOnDealloc:^{
+                DVTSourceTextView *base = (DVTSourceTextView*)weakSelf;
+                @try{
+                    [XVim.instance.options removeObserver:base forKeyPath:@"hlsearch"];
+                    [XVim.instance.options removeObserver:base forKeyPath:@"ignorecase"];
+                    [XVim.instance.searcher removeObserver:base forKeyPath:@"lastSearchString"];
+                }
+                @catch (NSException* exception){
+                    ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+                    [Logger logStackTrace:exception];
+                }
+            }];
+            [ self setBool:YES forName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW ];
+        }
+        
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base viewDidMoveToSuperview_];
         

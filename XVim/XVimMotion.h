@@ -18,7 +18,7 @@ typedef struct {
     NSUInteger lastEndOfWord;
 }XVimMotionInfo;
 
-#define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT] autorelease]
+#define XVIM_MAKE_MOTION(MOTION,TYPE,OPTION,COUNT) [[XVimMotion alloc] initWithMotion:MOTION type:TYPE option:OPTION count:COUNT]
 
 typedef enum _MOTION{
     MOTION_NONE,                    

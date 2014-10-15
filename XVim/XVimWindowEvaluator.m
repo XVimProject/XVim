@@ -116,7 +116,7 @@
 
 - (NSArray*)allEditorArea:(XVimWindow*)window{
     IDEWorkspaceTabController* tabCtrl = [self tabController:window];
-    NSMutableArray* otherViews = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray* otherViews = [[NSMutableArray alloc] init];
     for( IDEViewController* c in [tabCtrl _keyboardFocusAreas] ){
         if( [[[c class] description] isEqualToString:@"IDEEditorContext"] ){
             [otherViews addObject:c];

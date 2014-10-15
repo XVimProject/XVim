@@ -119,7 +119,7 @@ static NSString *precomputed[9] = {
     if (count) {
         [s appendString:precomputed[count]];
     }
-    return [s autorelease];
+    return s;
 }
 
 @end

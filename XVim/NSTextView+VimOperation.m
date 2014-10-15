@@ -336,7 +336,6 @@
 
     self.lastYankedText = ybuf;
     TRACE_LOG(@"YANKED STRING : %@", ybuf);
-    [ybuf release];
 }
 
 - (void)_xvim_killSelection:(XVimSelection)sel
@@ -509,7 +508,7 @@
 - (NSMutableArray*)foundRanges{
     id ranges = [self dataForName:@"foundRanges"];
     if( nil == ranges ){
-        ranges = [[[NSMutableArray alloc] init] autorelease];
+        ranges = [[NSMutableArray alloc] init];
         [self setData:ranges forName:@"foundRanges"];
     }
     return ranges;
@@ -1496,7 +1495,6 @@
         [self insertText:text replacementRange:NSMakeRange(pos, 0)];
     }
 
-    [buf release];
 }
 
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options{
@@ -1513,7 +1511,7 @@
     NSRange characterRange = [self.textStorage xvim_indexRangeForLines:NSMakeRange(line1, line2 - line1 + 1)];
     NSString *str = [[self xvim_string] substringWithRange:characterRange];
     
-    NSMutableArray *lines = [[[str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy] autorelease];
+    NSMutableArray *lines = [[str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
     if ([[lines lastObject] length] == 0) {
         [lines removeLastObject];
     }
@@ -2006,11 +2004,11 @@
             [placeholders addObject:[NSValue valueWithRange:retval]];
         }
         if ([self.textStorage isLOL:curPos] || [self.textStorage isEOF:curPos]) {
-            return [placeholders autorelease];
+            return placeholders;
         }
     }
     
-    return [placeholders autorelease];
+    return placeholders;
 }
 
 
@@ -2154,7 +2152,7 @@
         return [NSArray arrayWithObject:[NSValue valueWithRange:[self _xvim_selectedRange]]];
     }
 
-    NSMutableArray *rangeArray = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray *rangeArray = [[NSMutableArray alloc] init];
     NSTextStorage  *ts = self.textStorage;
     XVimSelection sel = [self _xvim_selectedBlock];
 
@@ -2513,7 +2511,6 @@
 	}
 	
     [self insertText:substring replacementRange:range];
-    [substring release];
 }
 
 - (void)xvim_registerPositionForUndo:(NSUInteger)pos{

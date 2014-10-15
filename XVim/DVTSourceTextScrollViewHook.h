@@ -15,8 +15,7 @@
 @end
 
 @interface DVTSourceTextScrollView(Hook)
-- (id)initWithFrame_:(NSRect)rect;
-- (void)dealloc_;
+- (void)viewWillMoveToWindow_:(NSWindow*)window;
 - (BOOL)hasHorizontalScroller_;
 - (BOOL)hasVerticalScroller_;
 @end

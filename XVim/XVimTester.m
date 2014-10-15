@@ -88,16 +88,9 @@
     return self;
 }
 
-- (void)dealloc{
-    [results release];
-    [tableView release];
-    [resultsString release];
-    self.testCases = nil;
-    [super dealloc];
-}
 
 - (NSArray*)categories{
-    NSMutableArray* arr = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray* arr = [[NSMutableArray alloc] init];
     unsigned int count = 0;
     Method* m = 0;
     m = class_copyMethodList([XVimTester class],  &count);
@@ -115,7 +108,11 @@
     for( NSString* c in categories){
         SEL sel = NSSelectorFromString([c stringByAppendingString:@"_testcases"]);
         if( [self respondsToSelector:sel]){
-            [self.testCases addObjectsFromArray:[self performSelector:sel]];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+            NSArray* ary = [self performSelector:sel];
+#pragma clang diagnostic pop
+            [self.testCases addObjectsFromArray:ary];
         }
     }
 }
@@ -125,7 +122,7 @@
     NSArray* testArray = self.testCases;
     
     // Alert Dialog to confirm current text will be deleted.
-    NSAlert* alert = [[[NSAlert alloc] init] autorelease];
+    NSAlert* alert = [[NSAlert alloc] init];
     [alert setMessageText:@"Running test deletes text in current source text view. Proceed?"];
     [alert addButtonWithTitle:@"OK"];
     [alert addButtonWithTitle:@"Cancel"];
@@ -143,16 +140,16 @@
     }
     
     // Setup Talbe view to show result
-    tableView = [[[NSTableView alloc] init] autorelease];
+    tableView = [[NSTableView alloc] init];
     [tableView setDataSource:self];
     [tableView setDelegate:self];
    
     // Create Columns
-    NSTableColumn* column1 = [[[NSTableColumn alloc] initWithIdentifier:@"Description" ] autorelease];
+    NSTableColumn* column1 = [[NSTableColumn alloc] initWithIdentifier:@"Description" ];
     [column1.headerCell setStringValue:@"Description"];
-    NSTableColumn* column2 = [[[NSTableColumn alloc] initWithIdentifier:@"Pass/Fail" ] autorelease];
+    NSTableColumn* column2 = [[NSTableColumn alloc] initWithIdentifier:@"Pass/Fail" ];
     [column2.headerCell setStringValue:@"Pass/Fail"];
-    NSTableColumn* column3 = [[[NSTableColumn alloc] initWithIdentifier:@"Message" ] autorelease];
+    NSTableColumn* column3 = [[NSTableColumn alloc] initWithIdentifier:@"Message" ];
     [column3.headerCell setStringValue:@"Message"];
     [column3 setWidth:500.0];
     
@@ -164,10 +161,10 @@
     
     //setup a window to show the tableview, scrollview, and results toggling button.
     NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-    results = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false] retain];
+    results = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false];
     
     // Setup the table view into scroll view
-    NSScrollView* scroll = [[[NSScrollView alloc] initWithFrame:NSMakeRect(0, 40, 700, 445)] autorelease];
+    NSScrollView* scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 40, 700, 445)];
     [scroll setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [scroll setDocumentView:tableView];
     [scroll setHasVerticalScroller:YES];
@@ -202,7 +199,6 @@
     [self updateResultsString];
     
     [results makeKeyAndOrderFront:results];
-    [resultsView release];
 }
 
 -(void) updateResultsString{
@@ -279,9 +275,9 @@
 }
 
 - (float)heightForString:(NSString*)myString withFont:(NSFont*)myFont withWidth:(float)myWidth{
-    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithString:myString] autorelease];
-    NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithContainerSize:NSMakeSize(myWidth, FLT_MAX)] autorelease];
-    NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithString:myString];
+    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:NSMakeSize(myWidth, FLT_MAX)];
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
     [layoutManager addTextContainer:textContainer];
     [textStorage addLayoutManager:layoutManager];
     [textStorage addAttribute:NSFontAttributeName value:myFont

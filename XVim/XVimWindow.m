@@ -45,9 +45,9 @@
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea
 {
     if (self = [super init]){
-		_staticString = [@"" retain];
+		_staticString = @"";
 		_keymapContext = [[XVimKeymapContext alloc] init];
-        _editorArea = [editorArea retain];
+        _editorArea = editorArea ;
         _defaultEvaluatorStack = [[NSMutableArray alloc] init];
         _currentEvaluatorStack = _defaultEvaluatorStack;
         _inputContext = [[NSTextInputContext alloc] initWithClient:self];
@@ -81,14 +81,6 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_keymapContext release];
-    [_staticString release];
-    [_editorArea release];
-    [_inputContext release];
-    self.tmpBuffer = nil;
-    [_defaultEvaluatorStack release];
-    [_commandLine release];
-    [super dealloc];
 }
 
 - (void)dumpEvaluatorStack:(NSMutableArray*)stack
@@ -111,7 +103,7 @@
 {
     // Initialize evlauator stack
     [stack removeAllObjects];
-    XVimEvaluator* firstEvaluator = [[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease];
+    XVimEvaluator* firstEvaluator = [[XVimNormalEvaluator alloc] initWithWindow:self];
     [stack addObject:firstEvaluator];
     if (activate) {
         [firstEvaluator becameHandler];
@@ -120,10 +112,12 @@
 
 - (void)_documentChangedNotification:(NSNotification *)notification
 {
-    DEBUG_LOG("Document changed, reset evaluator stack");
-    [self.currentEvaluator cancelHandler];
+    // Take strong reference to self, because the last remaining strong reference may be
+    // in one of the evaluators we are about to dealloc with 'removeAllObjects'
+    XVimWindow *this = self;
+    [this.currentEvaluator cancelHandler];
     [_currentEvaluatorStack removeAllObjects];
-    [self syncEvaluatorStack];
+    [this syncEvaluatorStack];
 }
 
 /**
@@ -253,7 +247,7 @@
     while(YES){
         if( nil == nextEvaluator || nextEvaluator == [XVimEvaluator popEvaluator]){
             // current evaluator finished its task
-            XVimEvaluator* completeEvaluator = [[[_currentEvaluatorStack lastObject] retain] autorelease]; // We have to retain here not to be dealloced in didEndHandler method.
+            XVimEvaluator* completeEvaluator = [_currentEvaluatorStack lastObject]; // We have to retain here not to be dealloced in didEndHandler method.
             [_currentEvaluatorStack removeLastObject]; // remove current evaluator from the stack
             [completeEvaluator didEndHandler];
             if( [_currentEvaluatorStack count] == 0 ){
@@ -270,7 +264,10 @@
                     break;
                 }
                 SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
+#pragma clang diagnostic pop
                 [currentEvaluator resetCompletionHandler];
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){

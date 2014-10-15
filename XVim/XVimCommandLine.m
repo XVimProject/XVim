@@ -81,12 +81,6 @@
 }
 
 - (void)dealloc{
-    [_command release];
-    [_static release];
-    [_error release];
-    [_argument release];
-    [_errorTimer release];
-    [super dealloc];
 }
 
 - (NSInteger)tag
@@ -133,11 +127,8 @@
 		[_error setHidden:NO];
 		[_errorTimer invalidate];
         if( aTimer ){
-            if (_errorTimer != nil) {
-                [_errorTimer release];
-            }
             
-            _errorTimer = [[NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO] retain];
+            _errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
             [[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
         }
 	}else{
