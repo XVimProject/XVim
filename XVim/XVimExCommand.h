@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimTaskRunner.h"
 
 // This file corresponds Vim's ex_cmds.h
 // Wondering if we can reuse ex_*.* files in Vim...
@@ -58,6 +59,7 @@
 @property (strong) NSString* arg;
 @property (strong) NSString* cmd;
 @property BOOL forceit;
+@property BOOL noRangeSpecified;
 @property NSUInteger lineBegin; // line1
 @property NSUInteger lineEnd; // line2
 @property NSUInteger addr_count;

@@ -17,6 +17,8 @@ static const NSInteger XVimCommandLineTag = 1337;
 - (void)setModeString:(NSString*)string;
 - (void)setArgumentString:(NSString*)string;
 - (void)errorMessage:(NSString*)string Timer:(BOOL)aTimer RedColorSetting:(BOOL)aRedColorSetting;
+- (void)quickFixWithString:(NSString*)string completionHandler:(void(^)(void))completionHandler;
+- (NSUInteger)quickFixColWidth;
 - (void)didFrameChanged:(NSNotification*)notification;
 
 - (XVimCommandField*)commandField;
