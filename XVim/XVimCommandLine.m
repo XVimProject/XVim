@@ -14,7 +14,7 @@
 #import <objc/runtime.h>
 
 #define COMMAND_FIELD_HEIGHT 18.0
-
+#define MAX_COMMAND_TEXT_SIZE 14.0
 
 @interface XVimCommandLine() {
 @private
@@ -56,7 +56,13 @@
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_command setEditable:NO];
-        [_command setFont:[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]]];
+        
+        NSFont *commandFont =[NSFont fontWithName:@"Courier" size:[NSFont systemFontSize]];
+        if (commandFont.pointSize > MAX_COMMAND_TEXT_SIZE) {
+            commandFont = [NSFont fontWithName:[commandFont fontName] size:MAX_COMMAND_TEXT_SIZE];
+        }
+        
+        [_command setFont:commandFont];
         [_command setTextColor:[NSColor textColor]];
         [_command setBackgroundColor:[NSColor textBackgroundColor]];
         [_command setHidden:YES];

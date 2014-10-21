@@ -16,6 +16,7 @@
 #import "XVimOptions.h"
 
 #define STATUS_LINE_HEIGHT 18 
+#define MAX_STATUS_LINE_FONT_SIZE 14 
 
 @interface XVimStatusLine ()
 
@@ -62,6 +63,10 @@
     DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
 	NSFont *sourceFont = [theme sourcePlainTextFont];
 	
+        if (sourceFont.pointSize > MAX_STATUS_LINE_FONT_SIZE) {
+            sourceFont = [NSFont fontWithName:[sourceFont fontName] size:MAX_STATUS_LINE_FONT_SIZE];
+        }
+        
 	// Calculate inset
 	CGFloat horizontalInset = 0;
 	CGFloat verticalInset = MAX((STATUS_LINE_HEIGHT - [sourceFont pointSize]) / 2, 0);
