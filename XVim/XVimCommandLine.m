@@ -164,7 +164,10 @@
 	
     DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
 	NSFont *sourceFont = [theme sourcePlainTextFont];
-	
+
+        if (sourceFont.pointSize > MAX_COMMAND_TEXT_SIZE) {
+            sourceFont = [NSFont fontWithName:[sourceFont fontName] size:MAX_COMMAND_TEXT_SIZE];
+        }
 	// Calculate inset
 	CGFloat horizontalInset = 0;
 	CGFloat verticalInset = MAX((COMMAND_FIELD_HEIGHT - [sourceFont pointSize]) / 2, 0);
