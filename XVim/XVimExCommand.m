@@ -10,6 +10,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
+#import "IDEWorkspaceTabController+XVim.h"
 #import "NSTextView+VimOperation.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
@@ -1172,6 +1173,10 @@
     [view xvim_sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
 }
 
+- (void)splitview:(XVimExArg *)args inWindow:(XVimWindow *)window{
+    [XVimLastActiveWorkspaceTabController() xvim_addEditorHorizontally];
+}
+
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	XVimSearch *searcher = [[XVim instance] searcher];
     [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
@@ -1228,6 +1233,10 @@
 
 - (void)vmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [self mapClearMode:XVIM_MODE_VISUAL];
+}
+
+- (void)vsplitview:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [XVimLastActiveWorkspaceTabController() xvim_addEditorVertically];
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w
