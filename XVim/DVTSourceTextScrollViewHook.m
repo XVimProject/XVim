@@ -83,20 +83,20 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
-	if([keyPath isEqualToString:@"guioptions"]){
-        NSScrollView* view = (NSScrollView*)self;
-        // Just updating the scrollers state.
-        if( [XVim.instance.options.guioptions rangeOfString:@"r"].location == NSNotFound) {
-            [view setHasVerticalScroller:NO];
-        }else{
-            [view setHasVerticalScroller:YES];
+        if([keyPath isEqualToString:@"guioptions"]){
+                NSScrollView* view = (NSScrollView*)self;
+                // Just updating the scrollers state.
+                if( [XVim.instance.options.guioptions rangeOfString:@"r"].location == NSNotFound) {
+                        view.verticalScroller.alphaValue=0;
+                }else{
+                        view.verticalScroller.alphaValue=1;
+                }
+                if( [XVim.instance.options.guioptions rangeOfString:@"b"].location == NSNotFound) {
+                        view.horizontalScroller.alphaValue=0;
+                }else{
+                        view.horizontalScroller.alphaValue=1;
+                }
         }
-        if( [XVim.instance.options.guioptions rangeOfString:@"b"].location == NSNotFound) {
-            [view setHasHorizontalScroller:NO];
-        }else{
-            [view setHasHorizontalScroller:YES];
-        }
-    }
 }
 
 @end
