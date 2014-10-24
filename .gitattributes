@@ -1,2 +1,3 @@
 *.m     diff=objc
 *.h     diff=objc
+*.svg    binary

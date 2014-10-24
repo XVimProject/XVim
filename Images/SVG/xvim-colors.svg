@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">
+<g id="Layer_1">
+	<rect y="-3" fill-rule="evenodd" clip-rule="evenodd" fill="#F9F9F9" width="512" height="515"/>
+	<linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="380.6308" y1="375.3692" x2="280.0301" y2="274.7685">
+		<stop  offset="3.279776e-03" style="stop-color:#FF3FB5"/>
+		<stop  offset="0.3245" style="stop-color:#DB42B9"/>
+		<stop  offset="1" style="stop-color:#9347C1"/>
+	</linearGradient>
+	<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#SVGID_3_)" d="M387.2,359.9c0,0-33-33.4-96.4-97.6
+		c-3.8,3.7-19,18.7-22.8,22.5c63.4,64.2,96.4,97.6,96.4,97.6c6.3,6.2,16.1,6.8,22.3,0.6C393,376.7,393.4,366.1,387.2,359.9z"/>
+	<linearGradient id="SVGID_7_" gradientUnits="userSpaceOnUse" x1="202.6644" y1="176.2457" x2="145.1558" y2="229.0597">
+		<stop  offset="0" style="stop-color:#9347C1"/>
+		<stop  offset="0.5839" style="stop-color:#4B72E4"/>
+		<stop  offset="1" style="stop-color:#1593FF"/>
+	</linearGradient>
+	<path fill="url(#SVGID_7_)" d="M163,183.2c0-0.9,0-1.8,0-2.7c23,24.4,47.6,48.7,71.2,73.3c7.5-7.2,22.1-22.1,22.1-22.1
+		s-37.8-39.5-56.7-59.2c-9-9.4-18-18.8-27-28.2c-5.8-6.1-12.3-16.2-21-17.8c-9.9-1.8-18.4,4.2-20.3,14.3
+		c-0.5,3.2-0.7,62.3-0.7,119.3H163C163,234,163,208.4,163,183.2z"/>
+	<linearGradient id="SVGID_11_" gradientUnits="userSpaceOnUse" x1="181.8835" y1="284.9708" x2="344.1711" y2="116.9967">
+		<stop  offset="0" style="stop-color:#1593FF"/>
+		<stop  offset="0.2178" style="stop-color:#0EABD3"/>
+		<stop  offset="0.4567" style="stop-color:#08C2AA"/>
+		<stop  offset="0.6742" style="stop-color:#04D28D"/>
+		<stop  offset="0.8607" style="stop-color:#01DC7A"/>
+		<stop  offset="0.9944" style="stop-color:#00E074"/>
+	</linearGradient>
+	<path fill="url(#SVGID_11_)" d="M384.9,130.8c-6.3-6.1-16.1-5.9-22.3,0.3c0,0-168.7,172.9-199.7,206.7c0-24.7,0-77.2,0-78.8h-32.5
+		c0,9.5,0,91.7,0,98.3c0,11.5-2.4,29.9,11.8,34.2c9,2.4,14.7-1.8,20.2-7.6c40.1-41.1,222.8-230.7,222.8-230.7
+		C391.5,147,391.3,136.9,384.9,130.8z"/>
+</g>
+<g id="nyt_x5F_exporter_x5F_info" display="none">
+</g>
+</svg>
