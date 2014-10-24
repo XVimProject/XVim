@@ -1,10 +1,11 @@
-<a href="https://github.com/JugglerShu/XVim/blob/master/README_jp.md">[日本語版]</a> 
+<a href="https://github.com/XVimProject/XVim/blob/master/README_jp.md">[日本語版]</a> 
 
-# XVim [![Build Status](https://travis-ci.org/JugglerShu/XVim.svg?branch=master)](https://travis-ci.org/JugglerShu/XVim)
+# XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim)
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
 
+  - XVim repository has moved to XVimProject organization. There are not so many thing you have to do with this but if you cloned the repo and working local it is recommendded to change the remote URL as sited [here](https://help.github.com/articles/transferring-a-repository/) (This is not must. Github nicely forward old URL to new one.)
   - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
   - [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
   
@@ -50,7 +51,7 @@ Delete the following directory:
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
 ## Feature list
-  See separate [FeatureList.md](https://github.com/JugglerShu/XVim/blob/master/Documents/Users/FeatureList.md)
+  See separate [FeatureList.md](https://github.com/XVimProject/XVim/blob/master/Documents/Users/FeatureList.md)
 
 ## Bug reports
   Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs, but it's really hard work.
@@ -95,7 +96,7 @@ Delete the following directory:
  - [How to debug XVim](http://www.youtube.com/watch?v=AbC6f86VW9A)
  - [How to write a test case](http://www.youtube.com/watch?v=kn-kkRTtRcE)
 
-  Any pull requests are very much appreciated. Before you make a pull request see [Make a Pull Request](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/PullRequest.md)
+  Any pull requests are very much appreciated. Before you make a pull request see [Make a Pull Request](https://github.com/XVimProject/XVim/blob/master/Documents/Developers/PullRequest.md)
 
 ## Donations
   If you think the plugin is useful, please donate.
@@ -119,7 +120,7 @@ Delete the following directory:
   
 ## Contributors
   See contributors page in github repository.
-  https://github.com/JugglerShu/XVim/contributors
+  https://github.com/XVimProject/XVim/contributors
 
 ## License
   MIT License
