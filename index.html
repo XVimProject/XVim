@@ -1,76 +1,143 @@
 <!DOCTYPE html>
 <html>
+
   <head>
     <meta charset='utf-8'>
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <title>Xvim by JugglerShu</title>
+    <meta name="description" content="Xvim : Xcode plugin for Vim keybindings">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Xvim</title>
   </head>
 
   <body>
-    <div id="container">
-      <div class="inner">
 
-        <header>
-          <h1>Xvim</h1>
-          <h2>Xcode plugin for Vim keybindings</h2>
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/XVimProject/XVim">View on GitHub</a>
+
+          <h1 id="project_title">Xvim</h1>
+          <h2 id="project_tagline">Xcode plugin for Vim keybindings</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/XVimProject/XVim/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/XVimProject/XVim/tarball/master">Download this project as a tar.gz file</a>
+            </section>
         </header>
+    </div>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/JugglerShu/XVim/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/JugglerShu/XVim/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/JugglerShu/XVim" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><img src="http://imgur.com/NnsLWbO.png" alt="Logo"></p>
 
-        <hr>
+<p>XVim is an open-source Xcode Plug-in that adds <a href="http://en.wikipedia.org/wiki/Vim_(text_editor)">Vim</a> keybindings to Xcode.</p>
 
-        <section id="main_content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+<h4>
+<a name="demo-of-vims-auto-indentation-with-visual-mode-in-xcode" class="anchor" href="#demo-of-vims-auto-indentation-with-visual-mode-in-xcode"><span class="octicon octicon-link"></span></a>Demo of Vim's auto indentation with visual mode in Xcode</h4>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
+<p><img src="http://imgur.com/xAS5yik.png" alt="demo1"></p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p><a href="http://imgur.com/UezSflH.png">Find &amp; Replace demo</a></p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>Installing XVim is really straight forward:</p>
+
+<ul>
+<li>
+<p>Checkout XVim</p>
+
+<p><code>git clone git@github.com:XVimProject/XVim.git</code></p>
+</li>
+<li>Run <code>make</code> from XVim's directory.</li>
+</ul>
+
+<h2>
+<a name="tips" class="anchor" href="#tips"><span class="octicon octicon-link"></span></a>Tips</h2>
+
+<h3>
+<a name="xvimrc" class="anchor" href="#xvimrc"><span class="octicon octicon-link"></span></a><code>.xvimrc</code>
+</h3>
+
+<p>Xvim can use a <code>.xvimrc</code> file, which should be located in your <code>~/</code> directory. A simple sample file looks simmilar to a <code>.vimrc</code>.</p>
+
+<pre><code>i kk &lt;Esc&gt;
+set incsearch
+
+" Case-insensitive searching.
+set ignorecase
+
+" But case-sensitive if expression contains a capital letter.
+set smartcase
+
+" Default to global substitutions on lines
+set gdefault
+
+" Use the system pasteboard
+set pasteboard
 </code></pre>
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
-
 <h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<a name="xccmd" class="anchor" href="#xccmd"><span class="octicon octicon-link"></span></a><code>:xccmd</code>
+</h3>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
+<p>XVim can access Xcode's commands by using the <code>:xccmd</code> command. You can then set your preffered commands in your <code>.xvimrc</code> file.</p>
 
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+<pre><code>" Map &lt;space&gt;b to toggle a breakpoint at the current line
+nmap &lt;space&gt;b :xccmd toggleBreakpointAtCurrentLine&lt;CR&gt;
 
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+" Use &lt;space&gt;cm to toggle comments for the selection
+nmap &lt;space&gt;cm :xccmd commentAndUncommentCurrentLines&lt;CR&gt;
+</code></pre>
 
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<h2>
+<a name="faq" class="anchor" href="#faq"><span class="octicon octicon-link"></span></a>FAQ</h2>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<h5>
+<a name="1-why-xvim-may-not-work-on-a-newly-released-xcode-version" class="anchor" href="#1-why-xvim-may-not-work-on-a-newly-released-xcode-version"><span class="octicon octicon-link"></span></a>1. Why XVim may not work on a newly released Xcode version?</h5>
 
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<p>Xcode releases have different UUIDs, to make <strong>any</strong> Xcode plug-in work, the UUID that the plug-in is using must be updated to match Xcode's. Usually this takes us less than a day, but you can also <a href="http://stackoverflow.com/questions/19110899/xcode-plugins-stopped-working">do it yourself</a>.</p>
 
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
-        </section>
+<h5>
+<a name="2-why-my-key-mapping-doesnt-work" class="anchor" href="#2-why-my-key-mapping-doesnt-work"><span class="octicon octicon-link"></span></a>2. Why my key mapping doesn't work?</h5>
 
-        <footer>
-          Xvim is maintained by <a href="https://github.com/JugglerShu">JugglerShu</a><br>
-          This page was generated by <a href="http://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
+<p>Maybe your key mapping is clashing with an Xcode key mapping (or even with other plug-in mapping), try to disable them to see if that fixes the issue.</p>
 
-        
-      </div>
+<h5>
+<a name="3-my-favorite-vim-feature-isnt-working-why" class="anchor" href="#3-my-favorite-vim-feature-isnt-working-why"><span class="octicon octicon-link"></span></a>3. My favorite Vim feature isn't working... Why?</h5>
+
+<p>Check out XVim's <a href="https://github.com/XVimProject/XVim/blob/master/Documents/Users/FeatureList.md">feature list</a>. If you don't find your feature listed there create an <a href="https://github.com/XVimProject/XVim/issues/">issue</a> so that we can work on it.</p>
+
+<h2>
+<a name="helping-out" class="anchor" href="#helping-out"><span class="octicon octicon-link"></span></a>Helping out</h2>
+
+<p>There are several ways to help out with XVim's development.</p>
+
+<ul>
+<li>Open up an <a href="https://github.com/XVimProject/XVim/issues">issue</a> in Github if you find bugs, experience issues or have questions.</li>
+<li>XVim does also support <a href="https://www.bountysource.com/teams/xvim">Bounty Source</a> in case you want your issue solved faster or just want to donate to the project.</li>
+</ul>
+
+<h2>
+<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h2>
+
+<p>XVim was created by <a href="https://github.com/JugglerShu" class="user-mention">@JugglerShu</a> on 2012, he is the main project maintainer, he's not very picky with Pull Requests, but try to make them concise. <a href="https://github.com/Goles" class="user-mention">@Goles</a> maintains the website, so if you find anything to be missing just give him a shout.</p>
+      </section>
     </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Xvim maintained by <a href="https://github.com/XVimProject">XVimProject</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
   </body>
 </html>
