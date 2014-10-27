@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "XVimMacros.h"
 
 /** @brief structure used for fast search in an NSString
  *
@@ -38,7 +39,7 @@ NS_INLINE NSUInteger _xvim_sb_size(void)
 
 NS_INLINE void _xvim_sb_load(xvim_string_buffer_t *sb)
 {
-    NSUInteger len = MIN(sb->s_max - sb->s_index, _xvim_sb_size());
+    NSUInteger len = MIN(UNSIGNED_DECREMENT(sb->s_max,sb->s_index), _xvim_sb_size());
 
     sb->b_len = len;
     NSCAssert(sb->b_len <= _xvim_sb_size(), @"b_len is bogus");
@@ -59,14 +60,14 @@ NS_INLINE void xvim_sb_init(xvim_string_buffer_t *sb, NSString *s, NSUInteger in
 
     NSCAssert(index >= sb->s_min && index <= sb->s_max, @"bad caller");
 
-    if (forRange.length < _xvim_sb_size() || index < (_xvim_sb_size()/2) || index - (_xvim_sb_size()/2) < (NSInteger)sb->s_min) {
+    if (forRange.length < _xvim_sb_size() || index < (_xvim_sb_size()/2) || UNSIGNED_DECREMENT(index, _xvim_sb_size() / 2) < sb->s_min) {
         sb->s_index = sb->s_min;
     } else if (index + _xvim_sb_size() >= sb->s_max) {
-        sb->s_index = sb->s_max - _xvim_sb_size() + 1;
+        sb->s_index = UNSIGNED_DECREMENT(sb->s_max+1, _xvim_sb_size() );
     } else {
-        sb->s_index = index - _xvim_sb_size() / 2;
+        sb->s_index = UNSIGNED_DECREMENT(index, _xvim_sb_size() / 2);
     }
-    sb->b_index = index - sb->s_index;
+    sb->b_index = UNSIGNED_DECREMENT(index, sb->s_index);
     _xvim_sb_load(sb);
 }
 
@@ -132,7 +133,7 @@ NS_INLINE BOOL xvim_sb_prev(xvim_string_buffer_t *sb)
         return YES;
     }
 
-    NSUInteger diff = MIN(sb->s_index - sb->s_min, _xvim_sb_size() / 2);
+    NSUInteger diff = MIN(UNSIGNED_DECREMENT(sb->s_index,sb->s_min), _xvim_sb_size() / 2);
     if (diff > 0) {
         sb->s_index -= diff;
         sb->b_index  = diff;

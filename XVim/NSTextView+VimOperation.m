@@ -23,6 +23,7 @@
 #import "NSTextView+VimOperation.h"
 #import "NSTextStorage+VimOperation.h"
 #import "Logger.h"
+#import "XVimMacros.h"
 
 #define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             self.selectionMode,            \
@@ -612,7 +613,7 @@
             //So we select the the place holder and its already selected by "selectedPreviousPlaceholder" above
         } else{
             if ([[self string] length] > currentRange.location) {
-                [self setSelectedRange:NSMakeRange(currentRange.location-1, 0)];
+                [self setSelectedRange:NSMakeRange(UNSIGNED_DECREMENT(currentRange.location,1), 0)];
             }
         }
     }
@@ -1148,7 +1149,7 @@
         XVimRange lines = [self _xvim_selectedLines];
 
         line = lines.begin;
-        count = MAX(1, lines.end - lines.begin);
+        count = MAX((NSUInteger)1, UNSIGNED_DECREMENT(lines.end, lines.begin));
     }
 
     if (addSpace) {

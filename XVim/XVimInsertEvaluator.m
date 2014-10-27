@@ -173,7 +173,7 @@
 
     if( !_insertedEventsAbort && !_oneCharMode ){
         NSString *text = [self insertedText];
-        for( int i = 0 ; i < [self numericArg]-1; i++ ){
+        for( NSUInteger i = 0 ; i < [self numericArg]-1; i++ ){
             [sourceView insertText:text];
         }
 
