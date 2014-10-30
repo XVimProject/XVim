@@ -177,7 +177,7 @@ The dot command ('.') is supported.
   clipboard | ":set clipboard=unnamed" to share system clipboard with unnamed register
   [no]vimregex | Tells XVim to use Vim's regular expression. Currently support \<,\> for word boundary, \c,\C for specifying case (in)sensitiveness.
   [no]relativenumber |
-  [no]alwaysuseinputsource | With this option all the input is first sent to input source of the system. If you are using France or Portgeses keyboard consider turning this on. (See issue https://github.com/JugglerShu/XVim/issues/598)
+  [no]alwaysuseinputsource | With this option all the input is first sent to input source of the system. If you are using France, Portugese or Swedish keyboard consider turning this on. When enabling this, also consider running `defaults write com.apple.dt.Xcode ApplePressAndHoldEnabled -bool false` to disable the press and hold character menu in recent OS X releases.  (See issue https://github.com/JugglerShu/XVim/issues/598).
   [no]blinkcursor |
 
 
