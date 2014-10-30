@@ -774,7 +774,11 @@
             [self _xvim_yankRange:r withType:motion.type];
         }
         [self insertText:@"" replacementRange:r];
-        if (motion.type == LINEWISE) {
+        if( motion.motion == TEXTOBJECT_SQUOTE ||
+            motion.motion == TEXTOBJECT_DQUOTE ||
+            motion.motion == TEXTOBJECT_BACKQUOTE ){
+            newPos = r.location;
+        } else if (motion.type == LINEWISE) {
             newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:self.insertionPoint allowEOL:YES];
         }
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
