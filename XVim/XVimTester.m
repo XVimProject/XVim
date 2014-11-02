@@ -121,20 +121,24 @@
     // Create Test Cases
     NSArray* testArray = self.testCases;
     
-    // Alert Dialog to confirm current text will be deleted.
-    NSAlert* alert = [[NSAlert alloc] init];
-    [alert setMessageText:@"Running test deletes text in current source text view. Proceed?"];
-    [alert addButtonWithTitle:@"OK"];
-    [alert addButtonWithTitle:@"Cancel"];
-    NSInteger b = [alert runModal];
-    
-    if( b != NSAlertFirstButtonReturn ){
-        return;
+    NSFileManager* fm = [[NSFileManager alloc] init];
+    NSString* filename = @"/tmp/xvimtest.tmp";
+    BOOL isDirectory;
+    if( ![fm fileExistsAtPath:filename isDirectory:&isDirectory] ){
+        [fm createFileAtPath:filename contents:nil attributes:nil];
     }
+    
+    IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+    NSError* error;
+    NSURL* doc = [NSURL fileURLWithPath:filename];
+    [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
     
 	// Close NSWindow to make test run properly
 	[results close];
 	results = nil;
+    
+dispatch_async(dispatch_get_main_queue(), ^{
+    
     // Move forcus to source view
     [[XVimLastActiveWindowController() window] makeFirstResponder:XVimLastActiveSourceView()];
     // Run test for all the cases
@@ -204,6 +208,8 @@
     [self updateResultsString];
     
     [results makeKeyAndOrderFront:results];
+});
+    
 }
 
 -(void) updateResultsString{
