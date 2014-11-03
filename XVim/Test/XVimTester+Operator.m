@@ -38,6 +38,9 @@
                              @"        ddd\n"   // 36 
                              @"        eee\n"   // 48
                              @"        fff";    // 60
+	
+	static NSString* text5_2 = @"\t\taaa\n"
+							   @"\t\tbbb\n";
     
     static NSString* text6 = @"aaa\n"   // 0  (index of each WORD)
                              @"bbb\n"   // 4 
@@ -332,6 +335,9 @@
                                       @"    ddd\n"       // 28
                                       @"    eee\n"       // 38
                                       @"        fff";    // 46
+	
+	static NSString* lshift_result5_2 = @"\taaa\n"
+										@"\tbbb\n";
     
     return [NSArray arrayWithObjects:
             // All changes/insertions must be repeated by dot(.)
@@ -524,6 +530,8 @@
             XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,32, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj`." , lshift_result0,12, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj'." , lshift_result0,16, 0),
+			
+			XVimMakeTestCase(text5_2, 0, 0, @"Vj<<"	, lshift_result5_2, 1, 0),
             
             // = (filter)
             

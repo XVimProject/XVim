@@ -85,52 +85,40 @@
     }
 }
 
+// @param column   head column of selected area (zero origin)
+// @param count    moving count of a space
 - (void)_xvim_removeSpacesAtLine:(NSUInteger)line column:(NSUInteger)column count:(NSUInteger)count
 {
     NSTextStorage *ts = self.textStorage;
-    NSUInteger tabWidth = ts.xvim_tabWidth;
-    NSUInteger pos = [ts xvim_indexOfLineNumber:line column:column];
-    NSUInteger end = pos;
-    NSUInteger width = 0;
+    const NSUInteger tabWidth = ts.xvim_tabWidth;
+    NSUInteger head_pos = [ts xvim_indexOfLineNumber:line column:column];
     NSString *s = self.xvim_string;
 
-    if ([ts isEOL:pos]) {
+    if ([ts isEOL:head_pos]) {
         return;
     }
 
-    if ([s characterAtIndex:pos] == '\t') {
-        NSUInteger col = [ts xvim_columnOfIndex:pos];
-
-        if (col < column) {
-            [self _xvim_insertSpaces:tabWidth - (col % tabWidth) replacementRange:NSMakeRange(pos, 1)];
-            pos += column - col;
-        }
-    }
-
-    while (width < count) {
-        unichar c = [s characterAtIndex:end];
-
-        if (c == ' ') {
-            end++;
-            width++;
-        } else if (c == '\t') {
-            NSUInteger col = column + width;
-            NSUInteger tw  = tabWidth - (col % tabWidth);
-
-            if (width + tw > count) {
-                [self _xvim_insertSpaces:tw replacementRange:NSMakeRange(end, 1)];
-                end  += count - width;
-                width = count;
-            } else {
-                end   += tw;
-                width += tw;
-            }
-        } else {
-            break;
-        }
-    }
-
-    [self insertText:@"" replacementRange:NSMakeRange(pos, end - pos)];
+	NSInteger remain = (NSInteger)count;
+	NSUInteger pos = head_pos;
+	NSUInteger temp_width = 0;
+	for( ;remain > 0; ++pos ){
+		const unichar c = [s characterAtIndex:pos];
+		if( c == '\t' ){
+			remain -= tabWidth;
+			// reset
+			temp_width = 0;
+		} else if( c == ' ' ){
+			++temp_width;
+			if( temp_width >= tabWidth ){
+				remain -= tabWidth;	
+				// reset
+				temp_width = 0;
+			}
+		} else {
+			break;
+		}
+	}
+    [self insertText:@"" replacementRange:NSMakeRange(head_pos, pos - head_pos)];
 }
 
 - (XVimRange)_xvim_selectedLines{
