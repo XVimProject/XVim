@@ -40,6 +40,9 @@
                              @"bbb ccc ccc\n"
                              @"bbb ccc ddd\n";
     
+    static NSString* text7 = @"aaa bbb ccc\n"
+                             @"bbb ccc ccc\n\n";
+    
     static NSString* replace1_result =   @"eeeee bbb ccc\n"
                                          @"bbb ccc ccc\n"
                                          @"bbb ccc ddd\n";
@@ -68,6 +71,9 @@
                                          @"bbb ccc cccfffff\n"
                                          @"bbb ccc ddd\n";
     
+    static NSString* replace8_result =   @"aaa bbb cccfffff\n"
+                                         @"bbb ccc cccfffff\n\n";
+    
     return [NSArray arrayWithObjects:
             //
             // replace(:s)
@@ -85,6 +91,8 @@
             XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff<CR>", replace6_result, 15, 0),
             // $, two
             XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff/g<CR>", replace7_result, 15, 0),
+            // $, two
+            XVimMakeTestCase(text7, 0,  0, @"Vj:s/$/fffff/g<CR>", replace8_result, 15, 0),
             
             // Search (/,?)
             XVimMakeTestCase(text1, 0,  0, @"/bbb<CR>", text1, 4, 0),

@@ -505,7 +505,7 @@
             }
         }
 		replace_start_location = found.location + [replacement length] + newline_range.length;
-		endOfReplacement += ([replacement length] - found.length + newline_range.length);
+		endOfReplacement += ([replacement length] - found.length);
         
         if( !global || endOfReplacement <= replace_start_location ) break;
     }
