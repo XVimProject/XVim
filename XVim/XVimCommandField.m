@@ -67,6 +67,10 @@
 }
 
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window{
+    if( keyStroke.modifier == 0 && isPrintable(keyStroke.character)){
+        [self insertText:keyStroke.xvimString];
+        return;
+    }
 	NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
 	[super keyDown:event];
 }

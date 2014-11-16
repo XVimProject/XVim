@@ -78,6 +78,14 @@
     return editor.mainScrollView.documentView;
 }
 
+- (NSTextView *)inputView
+{
+    if( self.currentEvaluator.mode == XVIM_MODE_CMDLINE ){
+        return self.commandLine.commandField;
+    }
+    return self.sourceView;
+}
+
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
@@ -415,39 +423,39 @@
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange{
-    return [self.sourceView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+    return [self.inputView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
 }
 
 - (void)unmarkText{
-    return [self.sourceView unmarkText];
+    return [self.inputView unmarkText];
 }
 
 - (NSRange)selectedRange{
-    return [self.sourceView selectedRange];
+    return [self.inputView selectedRange];
 }
 
 - (NSRange)markedRange{
-    return [self.sourceView markedRange];
+    return [self.inputView markedRange];
 }
 
 - (BOOL)hasMarkedText{
-    return [self.sourceView hasMarkedText];
+    return [self.inputView hasMarkedText];
 }
 
 - (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
-    return [self.sourceView attributedSubstringForProposedRange:aRange actualRange:actualRange];
+    return [self.inputView attributedSubstringForProposedRange:aRange actualRange:actualRange];
 }
 
 - (NSArray*)validAttributesForMarkedText{
-    return [self.sourceView validAttributesForMarkedText];
+    return [self.inputView validAttributesForMarkedText];
 }
 
 - (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
-    return [self.sourceView firstRectForCharacterRange:aRange actualRange:actualRange];
+    return [self.inputView firstRectForCharacterRange:aRange actualRange:actualRange];
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)aPoint{
-    return [self.sourceView characterIndexForPoint:aPoint];
+    return [self.inputView characterIndexForPoint:aPoint];
 }
 @end
 
