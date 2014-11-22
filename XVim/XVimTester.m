@@ -132,6 +132,9 @@
         return;
     }
     
+	// Close NSWindow to make test run properly
+	[results close];
+	results = nil;
     // Move forcus to source view
     [[XVimLastActiveWindowController() window] makeFirstResponder:XVimLastActiveSourceView()];
     // Run test for all the cases
@@ -162,6 +165,8 @@
     //setup a window to show the tableview, scrollview, and results toggling button.
     NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
     results = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false];
+	// Prevent from crashing on ARC
+	[results setReleasedWhenClosed:NO];
     
     // Setup the table view into scroll view
     NSScrollView* scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 40, 700, 445)];

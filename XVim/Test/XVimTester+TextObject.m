@@ -62,6 +62,7 @@
         // "
         XVimMakeTestCase(text_object1, 5, 0, @"di\"", text_object_i_result1 , 4, 0),
         XVimMakeTestCase(text_object1, 5, 0, @"da\"", text_object_a_result1 , 3, 0),
+        XVimMakeTestCase(text_object1, 0, 0, @"di\"", text_object_i_result1 , 4, 0),
         
         // {}, B
         XVimMakeTestCase(text_object2, 5, 0, @"di{", text_object_i_result2 , 4, 0),
@@ -80,6 +81,7 @@
         // '
         XVimMakeTestCase(text_object4, 5, 0, @"di'", text_object_i_result4 , 4, 0),
         XVimMakeTestCase(text_object4, 5, 0, @"da'", text_object_a_result4 , 3, 0),
+        XVimMakeTestCase(text_object4, 0, 0, @"di'", text_object_i_result4 , 4, 0),
         
         // <>
         XVimMakeTestCase(text_object5, 5, 0, @"di<", text_object_i_result5 , 4, 0),
@@ -90,6 +92,7 @@
         // `
         XVimMakeTestCase(text_object6, 5, 0, @"di`", text_object_i_result6 , 4, 0),
         XVimMakeTestCase(text_object6, 5, 0, @"da`", text_object_a_result6 , 3, 0),
+        XVimMakeTestCase(text_object6, 0, 0, @"di`", text_object_i_result6 , 4, 0),
         
         // w
         XVimMakeTestCase(text_object7, 5, 0, @"diw", text_object_i_result7 , 4, 0),
