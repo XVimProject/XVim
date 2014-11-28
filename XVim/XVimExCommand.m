@@ -29,8 +29,11 @@
 #import "XVimTester.h"
 
 @implementation XVimExArg
-@synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
+@synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
+
+// Maximum time in seconds for a 'bang' command to run before being killed as taking too long
+static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 @implementation XVimExCmdname
 @synthesize cmdName,methodName;
@@ -743,7 +746,11 @@
         }
         
         if( exarg.lineBegin == NSNotFound ){ // If its first range 
+            exarg.noRangeSpecified = YES;
             exarg.lineBegin = exarg.lineEnd;
+        }
+        else {
+            exarg.noRangeSpecified = NO;
         }
         
         if( *parsing != ',' ){
@@ -763,7 +770,11 @@
     // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    while( isAlpha(*parsing) || *parsing == '!' ){
+    if (*parsing == '!') {
+        parsing++; count++;
+    }
+    else
+    while( isAlpha(*parsing) ){
         parsing++;
         count++;
     }
@@ -1325,6 +1336,173 @@
 
 - (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
+}
+
+
+-(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    NSUInteger firstFilteredLine = args.lineBegin;
+    NSString* selectedText = nil;
+    NSUInteger inputStartLocation = 0;
+    NSUInteger inputEndLocation;
+
+    if (!args.noRangeSpecified && args.lineBegin != NSNotFound && args.lineEnd != NSNotFound)
+    {
+        // Find the position to start searching
+        inputStartLocation = [window.sourceView.textStorage xvim_indexOfLineNumber:args.lineBegin column:0];
+        if( NSNotFound == inputStartLocation){ return; }
+        
+        // Find the position to end the searching
+        inputEndLocation = [window.sourceView.textStorage xvim_indexOfLineNumber:args.lineEnd+1 column:0]; // Next line of the end of range.
+        if( NSNotFound == inputEndLocation ){ inputEndLocation = [[[window sourceView] string] length]; }
+        selectedText = [[window.sourceView.textStorage string] substringWithRange:NSMakeRange(inputStartLocation,inputEndLocation-inputStartLocation)];
+        [window.sourceView setSelectedRange:NSMakeRange(inputStartLocation, inputEndLocation-inputStartLocation) ];
+    }
+
+    NSURL* documentURL = [ window.sourceView documentURL ];
+    NSString* runDir   = @"/";
+
+    if ([documentURL isFileURL])
+    {
+        NSString* documentPath = [documentURL path];
+        runDir = [[documentURL URLByDeletingLastPathComponent] path];
+        NSDictionary* contextForExCmd = [ NSDictionary dictionaryWithObjectsAndKeys :
+                                          [ self _altFilename:documentPath ], @"#"
+                                          , documentPath ?             documentPath : @"", @"%"
+                                          , nil];
+        [ self _expandSpecialExTokens:args contextDict:contextForExCmd];
+    }
+
+    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg
+                                              withInput:selectedText
+                                            withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS
+                                           runDirectory:runDir
+                                               colWidth:window.commandLine.quickFixColWidth];
+    if (scriptReturn != nil)
+    {
+        if (args.noRangeSpecified)
+        {
+            // No text range was specified -- open quickfix window to display the result
+            [ window showQuickfixWithString:scriptReturn completionHandler:^{
+                [window.currentWorkspaceWindow makeFirstResponder:window.sourceView];
+            } ];
+        }
+        else
+        {
+            // A text range was specified -- replace the range with the output of the command
+            [ window.sourceView insertText:scriptReturn ];
+
+            if (firstFilteredLine != NSNotFound)
+            {
+                [window.sourceView setSelectedRange:NSMakeRange(inputStartLocation, 1)];
+            }
+        }
+    }
+}
+
+// Really rubbish way of getting the alt filename
+-(NSString*)_altFilename:(NSString *)filename
+{
+    if (!filename)
+    {
+        return @"";
+    }
+    NSString* extension = [ filename pathExtension ];
+    if (!extension || [extension length]==0)
+    {
+        return @"";
+    }
+    if ([extension isEqualToString:@"m"] || [extension isEqualToString:@"mm"] || [extension isEqualToString:@"c"] )
+    {
+        return [[filename stringByDeletingPathExtension] stringByAppendingPathExtension:@"h" ];
+    }
+    else if ([extension isEqualToString:@"h"])
+    {
+        return [[filename stringByDeletingPathExtension] stringByAppendingPathExtension:@"m" ];
+    }
+    return @"";
+    
+}
+
+
+// Expands special ex command 'tokens', as described in cmdline-special of the vim docs
+// :., :~, :s and :gs are not supported yet
+-(void)_expandSpecialExTokens:(XVimExArg *)arg contextDict:(NSDictionary *)ctx
+{
+    if (!arg.arg || [arg.arg length]==0) {
+        return;
+    }
+    NSError*error=nil;
+    NSRegularExpression* regex = [ NSRegularExpression regularExpressionWithPattern:@"(%|#)(:p|:~|:h|:r|:t|:e|:\\.)*"
+                                                                            options:0
+                                                                              error:&error];
+    NSMutableString* resultStr = [ NSMutableString string ];
+    __block NSRange remainderRange = NSMakeRange(0, [arg.arg length]);
+    [ regex enumerateMatchesInString:arg.arg
+                             options:NSMatchingReportCompletion
+                               range:remainderRange
+                          usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+	 {
+		 if ( result == nil)
+		 {
+			 [ resultStr appendString:[ arg.arg substringWithRange:remainderRange ]];
+		 }
+		 else
+		 {
+			 // % or #
+			 NSRange lastMatchedRange =[ result rangeAtIndex:1 ];
+			 NSString* matchedToken = [arg.arg substringWithRange:lastMatchedRange ];
+			 NSString* substituteValue = [ ctx objectForKey:matchedToken ];
+			 if (!substituteValue)
+			 {
+				 substituteValue = matchedToken;
+			 }
+			 NSUInteger matchIdx = 2;
+			 //DEBUG_LOG(@"Number of matched ranges = %d", [result numberOfRanges] );
+			 while (matchIdx < [ result numberOfRanges]) {
+				 NSRange nextMatchedRange = [ result rangeAtIndex:matchIdx ];
+				 if (nextMatchedRange.location != NSNotFound)
+				 {
+					 NSUInteger matchedPos = lastMatchedRange.location + lastMatchedRange.length ;
+					 // This is the REAL matched range...to my eyes, NSRegularExpression has a bug
+					 NSRange matchedRange = NSMakeRange(matchedPos, nextMatchedRange.location+nextMatchedRange.length-matchedPos);
+					 NSString* matchedToken = [arg.arg substringWithRange:matchedRange];
+					 //DEBUG_LOG(@"Modifiers at range %@ = %@", NSStringFromRange(matchedRange), matchedToken );
+					 for (NSUInteger modIdx = 1; modIdx < [matchedToken length]; modIdx++,modIdx++) {
+						 char modifier = (char)[matchedToken characterAtIndex:modIdx ];
+						 switch (modifier) {
+							 case 'p': // return full 'path' (expand tilde, etc.)
+								 substituteValue = [ substituteValue stringByStandardizingPath ];
+								 break;
+							 case 'h': // return 'head' of path (chop off last component)
+								 substituteValue = [ substituteValue stringByDeletingLastPathComponent ];
+								 break;
+							 case 'r': // 'root' of filename (remove extension)
+								 substituteValue = [ substituteValue stringByDeletingPathExtension ];
+								 break;
+							 case 't': // 'tail' of filename (last path component)
+								 substituteValue = [ substituteValue lastPathComponent ];
+								 break;
+							 case 'e': // 'extension' of filename
+								 substituteValue = [ substituteValue pathExtension ];
+								 break;
+							 default:
+								 break;
+						 }
+					 }
+					 lastMatchedRange = matchedRange;
+				 }
+				 matchIdx++;
+			 }
+			 NSUInteger matchStart = [ result range ].location;
+			 NSUInteger matchLen = [ result range ].length;
+			 NSRange firstHalfRange = NSMakeRange(remainderRange.location, matchStart-remainderRange.location);
+			 [ resultStr appendFormat:@"%@%@", [arg.arg substringWithRange:firstHalfRange],substituteValue];
+			 remainderRange.location = matchStart + matchLen ;
+			 remainderRange.length = [arg.arg length] - remainderRange.location ;
+		 }
+    }];
+    arg.arg = resultStr;
 }
 
 @end

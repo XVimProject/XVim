@@ -201,7 +201,7 @@ static Logger* s_defaultLogger = nil;
             [text appendString:@"\n"];
             unsigned int num;
             Method* m = class_copyMethodList(classes[i], &num);
-            for( int j = 0 ; j < num; j++ ){
+            for( NSUInteger j = 0 ; j < num; j++ ){
                 NSString* methodName = NSStringFromSelector(method_getName(m[j]));
                 [text appendFormat:@"<li>%@</li>\n",methodName];
                 //[Logger logWithLevel:l format:@"    %@",NSStringFromSelector(method_getName(m[j]))];

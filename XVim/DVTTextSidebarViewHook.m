@@ -66,7 +66,7 @@ static CGFloat kTextSideBarLineNumberRightPadding = 5.0;
     DVTTextSidebarView *base = (DVTTextSidebarView *)self;
     
     if (XVim.instance.options.relativenumber) {
-        for (int i = 0 ; i < arg3 ; ++i) {
+        for (NSUInteger i = 0 ; i < arg3 ; ++i) {
             unsigned long long lineNumber = arg2[i];
             [DVTTextSidebarViewHook _drawRelativeNumberForLineNumber:lineNumber
                                                        inTextSidebar:base];
@@ -93,7 +93,7 @@ static CGFloat kTextSideBarLineNumberRightPadding = 5.0;
     DVTSourceTextView *sourceTextView = [DVTTextSidebarViewHook sourceTextViewForTextSideBarView:textSidebarView];
     long long currentLineNumber = [sourceTextView _currentLineNumber];
     long long relativeLineNumber = llabs(((long long)lineNumber - currentLineNumber));
-    if (XVim.instance.options.number && relativeLineNumber == 0) relativeLineNumber = lineNumber;
+    if (XVim.instance.options.number && relativeLineNumber == 0) relativeLineNumber = (long long)lineNumber;
     NSString *relativeLineNumberString = [@(relativeLineNumber) stringValue];
     
     NSDictionary *attributes = @{NSForegroundColorAttributeName: [textSidebarView lineNumberTextColor],

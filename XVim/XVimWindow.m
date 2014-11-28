@@ -377,6 +377,20 @@
     [[self currentWorkspaceWindow] makeFirstResponder:self.sourceView];
 }
 
+
+- (void)showQuickfixWithString:(NSString *)message completionHandler:(void(^)(void))completionHandler
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine quickFixWithString:message completionHandler:completionHandler];
+    return;
+}
+
+- (void)closeQuickfix
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine quickFixWithString:nil completionHandler:nil];
+}
+
 #pragma mark - NSTextInputClient Protocol
 
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange{

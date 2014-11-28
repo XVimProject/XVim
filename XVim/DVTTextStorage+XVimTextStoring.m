@@ -62,7 +62,7 @@
 - (NSUInteger)xvim_lineNumberAtIndex:(NSUInteger)index
 {
     ASSERT_VALID_RANGE_WITH_EOF(index);
-    if (index >= self.length) {
+    if (index >= [self length]) {
         return self.numberOfLines;
     }
     return [self lineRangeForCharacterRange:NSMakeRange(index, 0)].location + 1;

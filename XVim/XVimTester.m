@@ -307,7 +307,9 @@
             msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)row]).message;
         }else{
             NSInteger index = [self getIndexOfNthFailingTestcase:row];
-            msg = ((XVimTestCase*)[self.testCases objectAtIndex:index]).message;
+			if( index >= 0 ){
+                msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)index]).message;
+			}
         }
         if( nil == msg || [msg isEqualToString:@""] ){
             msg = @" ";

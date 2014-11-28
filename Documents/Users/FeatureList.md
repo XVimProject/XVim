@@ -143,6 +143,19 @@ The dot command ('.') is supported.
   :vmap    | Maps visual mode
   :imap    | Maps insert mode
   :omap    | Maps operator pending mode
+  :!       | Execute command with external process
+
+## Filename modifier for bang
+
+ Modifier  |
+-----------| ----
+  %        | current file name
+  #        | alternate file name
+  :p       | full path
+  :h       | head of path
+  :r       | root of filename
+  :t       | tail of filename
+  :e       | extension of filename
 
 ## XVim original commands
 
