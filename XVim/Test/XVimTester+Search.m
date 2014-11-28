@@ -36,7 +36,64 @@
                              @"ggg BBB i_i\n"  // 24 28 32
                              @"    jjj bbb";   // 36 40 44
     
+    static NSString* text6 = @"aaa bbb ccc\n"
+                             @"bbb ccc ccc\n"
+                             @"bbb ccc ddd\n";
+    
+    static NSString* text7 = @"aaa bbb ccc\n"
+                             @"bbb ccc ccc\n\n";
+    
+    static NSString* replace1_result =   @"eeeee bbb ccc\n"
+                                         @"bbb ccc ccc\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace2_result =   @"aaa eeeee ccc\n"
+                                         @"bbb ccc ccc\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace3_result =   @"aaa eeeee ccc\n"
+                                         @"eeeee ccc ccc\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace4_result =   @"eeeeeaaa bbb ccc\n"
+                                         @"bbb ccc ccc\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace5_result =   @"eeeeeaaa bbb ccc\n"
+                                         @"eeeeebbb ccc ccc\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace6_result =   @"aaa bbb cccfffff\n"
+                                         @"bbb ccc ccc\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace7_result =   @"aaa bbb cccfffff\n"
+                                         @"bbb ccc cccfffff\n"
+                                         @"bbb ccc ddd\n";
+    
+    static NSString* replace8_result =   @"aaa bbb cccfffff\n"
+                                         @"bbb ccc cccfffff\n\n";
+    
     return [NSArray arrayWithObjects:
+            //
+            // replace(:s)
+            //
+            XVimMakeTestCase(text6, 0,  0, @":%s/aaa/eeeee<CR>", replace1_result, 5, 0),
+            // only first one
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/bbb/eeeee<CR>", replace2_result, 9, 0),
+            // two
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/bbb/eeeee/g<CR>", replace3_result, 9, 0),
+            // ^, only first one
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/^/eeeee<CR>", replace4_result, 5, 0),
+            // ^, two
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/^/eeeee/g<CR>", replace5_result, 22, 0),
+            // $, only first one
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff<CR>", replace6_result, 15, 0),
+            // $, two
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff/g<CR>", replace7_result, 15, 0),
+            // $, two
+            XVimMakeTestCase(text7, 0,  0, @"Vj:s/$/fffff/g<CR>", replace8_result, 15, 0),
+            
             // Search (/,?)
             XVimMakeTestCase(text1, 0,  0, @"/bbb<CR>", text1, 4, 0),
             XVimMakeTestCase(text1, 8,  0, @"?bbb<CR>", text1, 4, 0),
