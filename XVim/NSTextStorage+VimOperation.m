@@ -28,14 +28,15 @@
 
 #pragma mark Settings
 
+// TODO: These values should be taken from IDEFileTextSetting.
 - (NSUInteger)xvim_indentWidth
 {
-    return 8;
+    return 4;
 }
 
 - (NSUInteger)xvim_tabWidth
 {
-    return 8;
+    return 4;
 }
 
 #pragma mark Converting between Indexes and Line Numbers
