@@ -2234,13 +2234,13 @@
             end = [self.textStorage prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
             break;
         case MOTION_TILL_NEXT_CHARACTER:
-            end = [self.textStorage nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self.textStorage nextCharacterInLine:begin count:motion.count character:motion.character option:motion.option];
             if(end != NSNotFound){
                 end--;
             }
             break;
         case MOTION_TILL_PREV_CHARACTER:
-            end = [self.textStorage prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self.textStorage prevCharacterInLine:begin count:motion.count character:motion.character option:motion.option];
             if(end != NSNotFound){
                 end++;
             }

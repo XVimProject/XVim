@@ -1079,19 +1079,27 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     }
     NSUInteger p = index+1;
     NSUInteger end = [self xvim_endOfLine:p];
+    NSUInteger iter_count = count;
     if( NSNotFound == end ){
         return NSNotFound;
     }
     
+    NSUInteger foundIndex = NSNotFound;
     for( ; p <= end; p++ ){
         if( [[self xvim_string] characterAtIndex:p] == character ){
-            count--;
-            if( 0 == count ){
-                return p;
+            iter_count--;
+            if( 0 == iter_count ){
+                foundIndex = p;
+                break ;
             }
         }
     }
-    return NSNotFound;
+    
+    if ( foundIndex == (index + 1) && (opt & MOTION_OPTION_T_REPEAT)) {
+        return [self nextCharacterInLine:++index count:count character:character option:MOTION_OPTION_NONE];
+    }
+    
+    return foundIndex;
 }
 
 - (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
@@ -1099,22 +1107,33 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     if( 0 == index ){
         return NSNotFound;
     }
+    
     NSUInteger p = index-1;
     NSUInteger head = [self xvim_firstOfLine:p];
+    NSUInteger iter_count = count;
     if( NSNotFound == head ){
         return NSNotFound;
     }
     
+    NSUInteger foundIndex = NSNotFound;
     for( ; p >= head ; p-- ){
         if( [[self xvim_string] characterAtIndex:p] == character ){
-            count--;
-            if( 0 == count ){
-                return p;
+            iter_count--;
+            if( 0 == iter_count ){
+                foundIndex = p;
+                break ;
             }
         }
     }
-    return NSNotFound;
+    
+    if (foundIndex  == (index - 1) && (opt & MOTION_OPTION_T_REPEAT)) {
+        return [self prevCharacterInLine:--index count:count character:character option:MOTION_OPTION_NONE];
+    }
+    
+    return foundIndex;
 }
+
+
 
 - (NSRange)searchRegexForward:(NSString*)pattern from:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
