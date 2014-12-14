@@ -255,7 +255,7 @@
     }
     
     if( [aTableColumn.identifier isEqualToString:@"Description"] ){
-        return [resultRow description];
+        return [resultRow desc];
     }else if( [aTableColumn.identifier isEqualToString:@"Pass/Fail"] ){
         return (resultRow.success) ? @"Pass" : @"Fail";
     }else if( [aTableColumn.identifier isEqualToString:@"Message"] ){

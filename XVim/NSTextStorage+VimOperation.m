@@ -1077,29 +1077,28 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     if( [self isEOF:index] ){
         return NSNotFound;
     }
-    NSUInteger p = index+1;
+    
+    NSUInteger p = index+1; // Search from next character
+    if( (opt & MOTION_OPTION_SKIP_ADJACENT_CHAR) && 1 == count && ![self isEOF:p] && [[self xvim_string] characterAtIndex:p] == character) {
+        // Need to skip the character when it is found adjacent position.
+        p++;
+    }
+    
     NSUInteger end = [self xvim_endOfLine:p];
-    NSUInteger iter_count = count;
     if( NSNotFound == end ){
         return NSNotFound;
     }
     
-    NSUInteger foundIndex = NSNotFound;
     for( ; p <= end; p++ ){
         if( [[self xvim_string] characterAtIndex:p] == character ){
-            iter_count--;
-            if( 0 == iter_count ){
-                foundIndex = p;
-                break ;
+            count--;
+            if( 0 == count ){
+                return p;
             }
         }
     }
     
-    if ( foundIndex == (index + 1) && (opt & MOTION_OPTION_T_REPEAT)) {
-        return [self nextCharacterInLine:++index count:count character:character option:MOTION_OPTION_NONE];
-    }
-    
-    return foundIndex;
+    return NSNotFound;
 }
 
 - (NSUInteger)prevCharacterInLine:(NSUInteger)index count:(NSUInteger)count character:(unichar)character option:(MOTION_OPTION)opt{
@@ -1108,29 +1107,26 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         return NSNotFound;
     }
     
-    NSUInteger p = index-1;
+    NSUInteger p = index-1;// Search from next character
+    if( (opt & MOTION_OPTION_SKIP_ADJACENT_CHAR) && 1 == count && 0 != p && [[self xvim_string] characterAtIndex:p] == character) {
+        // Need to skip the character when it is found adjacent position.
+        p--;
+    }
     NSUInteger head = [self xvim_firstOfLine:p];
-    NSUInteger iter_count = count;
     if( NSNotFound == head ){
         return NSNotFound;
     }
     
-    NSUInteger foundIndex = NSNotFound;
-    for( ; p >= head ; p-- ){
+    for( ; p != 0 && p >= head ; p-- ){
         if( [[self xvim_string] characterAtIndex:p] == character ){
-            iter_count--;
-            if( 0 == iter_count ){
-                foundIndex = p;
-                break ;
+            count--;
+            if( 0 == count){
+                return p;
             }
         }
     }
     
-    if (foundIndex  == (index - 1) && (opt & MOTION_OPTION_T_REPEAT)) {
-        return [self prevCharacterInLine:--index count:count character:character option:MOTION_OPTION_NONE];
-    }
-    
-    return foundIndex;
+    return NSNotFound;
 }
 
 

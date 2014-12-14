@@ -521,9 +521,8 @@
     if( nil == m ){
         return [XVimEvaluator invalidEvaluator];
     }
-    
     MOTION new_motion = MOTION_PREV_CHARACTER;
-    MOTION_OPTION additional_option = 0;
+    MOTION_OPTION new_option = m.option;
     switch( m.motion ){
         case MOTION_NEXT_CHARACTER:
             new_motion = MOTION_PREV_CHARACTER;
@@ -531,22 +530,19 @@
         case MOTION_PREV_CHARACTER:
             new_motion = MOTION_NEXT_CHARACTER;
             break;
-        case MOTION_TILL_NEXT_CHARACTER: {
+        case MOTION_TILL_NEXT_CHARACTER:
             new_motion = MOTION_TILL_PREV_CHARACTER;
-            additional_option = MOTION_OPTION_T_REPEAT;
-        }
+            new_option |= MOTION_OPTION_SKIP_ADJACENT_CHAR;
             break;
-        case MOTION_TILL_PREV_CHARACTER: {
+        case MOTION_TILL_PREV_CHARACTER:
             new_motion = MOTION_TILL_NEXT_CHARACTER;
-            additional_option = MOTION_OPTION_T_REPEAT;
-        }
+            new_option |= MOTION_OPTION_SKIP_ADJACENT_CHAR;
             break;
         default:
             NSAssert(NO, @"Should not reach here");
             break;
-    }
-    
-    XVimMotion* n = XVIM_MAKE_MOTION(new_motion, m.type, m.option | additional_option, [self numericArg]);
+    }    
+    XVimMotion* n = XVIM_MAKE_MOTION(new_motion, m.type, new_option, [self numericArg]);
     n.character = m.character;
     return [self _motionFixed:n];
 }
@@ -557,13 +553,7 @@
         return [XVimEvaluator invalidEvaluator];
     }
     
-    MOTION_OPTION additional_option = 0;
-    if (m.motion == MOTION_TILL_NEXT_CHARACTER
-        || m.motion == MOTION_TILL_PREV_CHARACTER) {
-        additional_option = MOTION_OPTION_T_REPEAT;
-    }
-    
-    XVimMotion* n = XVIM_MAKE_MOTION(m.motion, m.type, m.option | additional_option, [self numericArg]);
+    XVimMotion* n = XVIM_MAKE_MOTION(m.motion, m.type, m.option | MOTION_OPTION_SKIP_ADJACENT_CHAR, [self numericArg]);
     n.character = m.character;
     return [self _motionFixed:n];
 }
