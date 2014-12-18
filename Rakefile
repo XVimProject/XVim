@@ -54,4 +54,9 @@ task :uninstall do
   end
 end
 
+task :pluginuuid do
+  plugin_uuid = `defaults read /Applications/Xcode.app/Contents/Info DVTPlugInCompatibilityUUID`
+  puts "UUID:#{plugin_uuid}"
+end
+
 task :default => [:xcode56]
