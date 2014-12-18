@@ -97,7 +97,10 @@
     for( unsigned int i = 0 ; i < count; i++ ){
         SEL sel = method_getName(m[i]);
         if( [NSStringFromSelector(sel) hasSuffix:@"_testcases"] ){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
             [arr addObject:[[NSStringFromSelector(sel) componentsSeparatedByString:@"_"] objectAtIndex:0]];
+#pragma clang diagnostic pop
         }
     }
     return arr;
