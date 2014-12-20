@@ -326,6 +326,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"ncounterpart", @"ncounterpart:inWindow:"),    // XVim Original
                        CMD(@"new", @"splitview:inWindow:"),
                        CMD(@"nissue", @"nissue:inWindow:"),    // XVim Original
+                       CMD(@"njump", @"njump:inWindow:"),      // XVim Original
                        CMD(@"nmap", @"nmap:inWindow:"),
                        CMD(@"nmapclear", @"nmapclear:inWindow:"),
                        CMD(@"nmenu", @"menu:inWindow:"),
@@ -358,6 +359,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"perldo", @"perldo:inWindow:"),
                        CMD(@"pedit", @"pedit:inWindow:"),
                        CMD(@"pissue", @"pissue:inWindow:"),    // XVim Original
+                       CMD(@"pjump", @"pjump:inWindow:"),      // XVim Original
                        CMD(@"pop", @"tag:inWindow:"),
                        CMD(@"popup", @"popup:inWindow:"),
                        CMD(@"ppop", @"ptag:inWindow:"),
@@ -1051,6 +1053,10 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
 }
 
+- (void)njump:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
+}
+
 - (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
         [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_NORMAL];
@@ -1106,6 +1112,10 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 - (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
+}
+
+- (void)pjump:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
 }
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :q
@@ -1503,6 +1513,13 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 		 }
     }];
     arg.arg = resultStr;
+}
+
+- (void)jumps:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    XVim* xvim = [XVim instance];
+    NSString* str = [xvim.marks dumpJumpList];
+    [xvim writeToConsole:str];
 }
 
 @end

@@ -49,15 +49,8 @@
         if( NSNotFound != newPos ){
             XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 0);
             m.position = newPos;
-            
-            // set the position before the jump
-            XVimMark* cur_mark = [[XVimMark alloc] init];
-            cur_mark.line = [self.sourceView insertionLine];
-            cur_mark.column = [self.sourceView insertionColumn];
-            cur_mark.document = [self.sourceView documentURL].path;
-            if( nil != mark.document){
-                [[XVim instance].marks setMark:cur_mark forName:@"'"];
-            }
+			
+            [self.window preMotion:m];
             [self.sourceView xvim_move:m];
             mode = XVIM_INSERT_APPEND;
         }
