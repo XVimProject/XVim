@@ -8,12 +8,16 @@
 #import "XVimReplaceEvaluator.h"
 #import "XVimWindow.h"
 
-@interface XVimInsertEvaluator()
-
-@property (nonatomic) BOOL oneCharMode;
+@interface XVimInsertEvaluator ()
 
 - (NSString*)insertedText;
 - (BOOL)windowShouldReceive:(SEL)keySelector;
+
+@end
+
+@interface XVimReplaceEvaluator ()
+
+@property (nonatomic, assign) BOOL oneCharMode;
 
 @end
 
@@ -34,7 +38,7 @@
 - (id)initWithWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode mode:(XVimInsertionPoint)mode{
     self = [super initWithWindow:window mode:mode];
     if (self) {
-        self.oneCharMode = oneCharMode;
+        _oneCharMode = oneCharMode;
     }
     return self;
 }
