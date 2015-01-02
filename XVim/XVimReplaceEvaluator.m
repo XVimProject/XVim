@@ -17,9 +17,7 @@
 
 @end
 
-@implementation XVimReplaceEvaluator{
-    BOOL _oneCharMode;
-}
+@implementation XVimReplaceEvaluator
 
 - (float)insertionPointHeightRatio{
     return 0.25;
@@ -36,7 +34,7 @@
 - (id)initWithWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode mode:(XVimInsertionPoint)mode{
     self = [super initWithWindow:window mode:mode];
     if (self) {
-        _oneCharMode = oneCharMode;
+        self.oneCharMode = oneCharMode;
     }
     return self;
 }
