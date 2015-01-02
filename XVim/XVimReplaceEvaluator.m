@@ -56,6 +56,22 @@
     }
 }
 
+- (void)didEndHandler {
+    [super didEndHandler];
+
+    NSUndoManager *undoManager = [[self sourceView] undoManager];
+    [undoManager endUndoGrouping];
+    [undoManager setGroupsByEvent:YES];
+}
+
+- (void)becameHandler {
+    [super becameHandler];
+
+    NSUndoManager *undoManager = [[self sourceView] undoManager];
+    [undoManager setGroupsByEvent:NO];
+    [undoManager beginUndoGrouping];
+}
+
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     SEL keySelector = [keyStroke selectorForInstance:self];
     XVimEvaluator *nextEvaluator = keySelector ? [self performSelector:keySelector] : self;
