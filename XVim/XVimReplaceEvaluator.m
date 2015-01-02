@@ -48,10 +48,6 @@
 }
 
 - (void)repeatBlockText{
-    if (self.oneCharMode) {
-        return;
-    }
-
     NSString *text = [self insertedText];
     NSTextView *sourceView = [self sourceView];
     
