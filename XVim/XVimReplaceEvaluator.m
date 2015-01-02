@@ -42,11 +42,11 @@
 }
 
 - (NSString*)modeString{
-    return oneCharMode ? @"" :  @"-- REPLACE --";
+    return self.oneCharMode ? @"" :  @"-- REPLACE --";
 }
 
 - (void)repeatBlockText{
-    if (oneCharMode) {
+    if (self.oneCharMode) {
         return;
     }
 
@@ -63,14 +63,14 @@
     XVimEvaluator *nextEvaluator = keySelector ? [self performSelector:keySelector] : self;
 
     if (nextEvaluator == self && nil == keySelector){
-        if (oneCharMode || [self windowShouldReceive:keySelector]) {
+        if (self.oneCharMode || [self windowShouldReceive:keySelector]) {
             // Here we pass the key input to original text view.
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
-            if (oneCharMode || (keyStroke.modifier == 0 && isPrintable(keyStroke.character))) {
+            if (self.oneCharMode || (keyStroke.modifier == 0 && isPrintable(keyStroke.character))) {
                 if (![self.sourceView xvim_replaceCharacters:keyStroke.character count:1]) {
                     nextEvaluator = [XVimEvaluator invalidEvaluator];
-                } else if (oneCharMode) {
+                } else if (self.oneCharMode) {
                     nextEvaluator = nil;
                 }
             } else {
