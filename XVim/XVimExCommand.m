@@ -1045,7 +1045,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     // We must make forcus back to editor first then invoke the command.
     // This is because I do not know how to move focus on newly visible text editor by invoking this command.
     // Without this focus manipulation the focus after the command does not goes to the text editor
-    //[window setForcusBackToSourceView];
+    [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
