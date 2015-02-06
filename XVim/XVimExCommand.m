@@ -1042,8 +1042,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 - (void)marks:(XVimExArg*)args inWindow:(XVimWindow*)window{ // This is currently impelemented for debugging purpose
     NSString* local = [[XVim instance].marks dumpMarksForDocument:window.sourceView.documentURL.path];
     NSString* file = [[XVim instance].marks dumpFileMarks];
-    [[XVim instance] writeToConsole:@"----LOCAL MARKS----\n%@", local];
-    [[XVim instance] writeToConsole:@"----FILE MARKS----\n%@", file];
+    [[XVim instance] writeToConsole:@"Mark Line Column File\n%@%@", local, file];
 }
 
 - (void)ncounterpart:(XVimExArg*)args inWindow:(XVimWindow*)window{
