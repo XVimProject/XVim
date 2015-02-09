@@ -1949,36 +1949,36 @@
 }
 
 - (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
-    NSRect glyphRect;
-    if( [self.textStorage isEOF:glyphIndex] ){
-        // When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
-        NSUInteger count;
-        NSRect* array = [[self layoutManager] rectArrayForCharacterRange:NSMakeRange(glyphIndex, 0) withinSelectedCharacterRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
-        for( NSUInteger i = 0 ; i < count; i++ ){
-            glyphRect = array[i];
-        }
-    }else{
-        NSUInteger count;
-        NSRect* array = [[self layoutManager] rectArrayForGlyphRange:NSMakeRange(glyphIndex, 1) withinSelectedGlyphRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
-        // NSRect* array = [[self layoutManager] rectArrayForCharacterRange:NSMakeRange(glyphIndex, 1) withinSelectedCharacterRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
-        for( NSUInteger i = 0 ; i < count; i++ ){
-            glyphRect = array[i];
-        }
-    }
-    
-    if([self.textStorage isEOF:glyphIndex]){
-        DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
-        NSFont *font = [theme sourcePlainTextFont];
-        NSDictionary* attr = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName, nil];
-        NSSize size = [@" " sizeWithAttributes:attr];
-        glyphRect.size.width = size.width;
-    }
-    else if( isNewline([self.textStorage.string characterAtIndex:glyphIndex]) ){
-        NSDictionary* attr = [self.textStorage attributesAtIndex:glyphIndex effectiveRange:nil];
-        NSSize size = [@" " sizeWithAttributes:attr];
-        glyphRect.size.width = size.width;
-    }
-    return glyphRect;
+	NSRect glyphRect;
+	if( [self.textStorage isEOF:glyphIndex] ){
+		// When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
+		NSUInteger count;
+		NSRect* array = [[self layoutManager] rectArrayForCharacterRange:NSMakeRange(glyphIndex, 0) withinSelectedCharacterRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
+		for( NSUInteger i = 0 ; i < count; i++ ){
+			glyphRect = array[i];
+		}
+	}else{
+		NSUInteger count;
+		NSRect* array = [[self layoutManager] rectArrayForGlyphRange:NSMakeRange(glyphIndex, 1) withinSelectedGlyphRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
+		// NSRect* array = [[self layoutManager] rectArrayForCharacterRange:NSMakeRange(glyphIndex, 1) withinSelectedCharacterRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
+		for( NSUInteger i = 0 ; i < count; i++ ){
+			glyphRect = array[i];
+		}
+	}
+	
+	if([self.textStorage isEOF:glyphIndex]){
+		DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+		NSFont *font = [theme sourcePlainTextFont];
+		NSDictionary* attr = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName, nil];
+		NSSize size = [@" " sizeWithAttributes:attr];
+		glyphRect.size.width = size.width;
+	}
+	else if( isNewline([self.textStorage.string characterAtIndex:glyphIndex]) ){
+		NSDictionary* attr = [self.textStorage attributesAtIndex:glyphIndex effectiveRange:nil];
+		NSSize size = [@" " sizeWithAttributes:attr];
+		glyphRect.size.width = size.width;
+	}
+	return NSIntegralRectWithOptions(glyphRect, NSAlignAllEdgesNearest);
 }
 
 /**

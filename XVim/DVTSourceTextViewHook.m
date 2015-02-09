@@ -255,10 +255,6 @@ NSRect s_lastCaret;
         NSUInteger glyphIndex = [base insertionPoint];
         NSRect glyphRect = [base xvim_boundingRectForGlyphIndex:glyphIndex];
         s_lastCaret = glyphRect;
-        s_lastCaret.origin.x -= 10.0;   // This makes the last caret rect a little wider than actual drawn caret
-        s_lastCaret.size.width += 20.0; // This is because if we do not do this, when erasing the caret the edge of the caret are not erased
-                                        // I do not know why this hapens but maybe some drawing problem. I couldN't identify the root cause
-                                        // So I'm doing lazy workaround here.
         [[NSBezierPath bezierPathWithRect:[base visibleRect]] setClip];
         [window drawInsertionPointInRect:glyphRect color:aColor];
     }@catch (NSException* exception) {
