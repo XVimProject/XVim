@@ -62,7 +62,7 @@
             mode = XVIM_INSERT_APPEND;
         }
     }
-	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window oneCharMode:NO mode:mode] autorelease];
+	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:mode] autorelease];
 }
 
 - (XVimEvaluator*)J{
