@@ -203,7 +203,8 @@ Option | Effect
 r | Show vertical scrollbar
 b | Show horizontal scrollbar
 
-These changes only take effect on startup, meaning this option is only effective if used from within your .xvimrc.
+These changes take effect after you resizing the view.
+So if you cannot see the GUI changes, please resize the view.
 
 ## Key mapping
 
