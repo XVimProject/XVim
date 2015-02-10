@@ -380,7 +380,7 @@
  **/
 
 - (NSUInteger)insertionPoint{
-    id ret = [self dataForName:@"insertionPoint"];
+    NSNumber* ret = [self dataForName:@"insertionPoint"];
     return nil == ret ? 0 : [ret unsignedIntegerValue];
 }
 
