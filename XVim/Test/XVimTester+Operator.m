@@ -223,11 +223,15 @@
     static NSString* yp_result2= @"aAa AAaabbb ccc\n";
     
     static NSString* oO_text = @"int abc(){\n"  // 0 4
-    @"}\n";          // 11
+                               @"}\n";          // 11
     
     static NSString* oO_result = @"int abc(){\n" // This result may differ from editor setting. This is for 4 spaces for indent.
-    @"    \n"      // 11
-    @"}\n";
+                                 @"    \n"      // 11
+                                 @"}\n";
+    
+    static NSString* oO_result2 = @"int abc(){\n" 
+                                  @"}\n"
+                                  @"\n";
     
     static NSString* guw_result = @"aaa bbb ccc\n";
     static NSString* gUw_result = @"AAA bbb ccc\n";
@@ -549,6 +553,7 @@
             // o, O
             XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result, 14, 0),
             XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result, 14, 0),
+            XVimMakeTestCase(oO_text, 13, 0, @"O<ESC>", oO_result2, 13, 0), // Issue #675
             
             // Insert and Ctrl-o
             XVimMakeTestCase(text0,  0, 0, @"iabc<C-o>dwdef<ESC>", C_o_result, 5, 0),
