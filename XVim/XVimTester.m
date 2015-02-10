@@ -125,7 +125,9 @@
     NSArray* testArray = self.testCases;
     
     NSFileManager* fm = [[NSFileManager alloc] init];
-    NSString* filename = @"/tmp/xvimtest.tmp";
+    NSString* filename = @"/tmp/xvimtest.cpp"; // The tmp file extension must be .cpp , .m or other source file extension.
+                                               // This is because some test case depend on source code format feature.
+                                               // If it is .txt or .tmp source code format is not invoked and some test cases fails.
     BOOL isDirectory;
     if( ![fm fileExistsAtPath:filename isDirectory:&isDirectory] ){
         [fm createFileAtPath:filename contents:nil attributes:nil];
