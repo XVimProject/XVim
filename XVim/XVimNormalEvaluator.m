@@ -357,9 +357,10 @@
 }
 
 - (XVimEvaluator*)Y{
-    [self.argumentString appendString:@"Y"];
-    XVimYankEvaluator* yank = [[XVimYankEvaluator alloc] initWithWindow:self.window];
-    return [yank y];
+    XVimYankEvaluator *evaluator = [[XVimYankEvaluator alloc] initWithWindow:self.window];
+    evaluator.numericArg = self.numericArg;
+    [evaluator performSelector:@selector(y)];
+    return nil;
 }
 
 - (XVimEvaluator*)y{

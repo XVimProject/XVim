@@ -135,7 +135,7 @@ The dot command ('.') is supported.
   :w[rite] |
   :wq      |
   :q[uit]  |
-  :register| Show contents of registers
+  :reg[isters]| Show contents of registers
   :s[ubstitute]|
   :set     | See Options for supported variables
   :map     | Show all the current mapping. When with arguments maps globally across XVim, in all modes

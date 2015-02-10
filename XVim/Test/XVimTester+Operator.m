@@ -213,6 +213,12 @@
                                  @"eee\n"
                                  @"fff\n";
     
+    static NSString* y_result5 = @"aaa\n"
+                                 @"bbb\n"
+                                 @"aaa\n"
+                                 @"bbb\n"
+                                 @"ccc";
+    
     static NSString* p_result1 = @"aAa bbb ccc\n"
                                  @"\n"
                                  @"aAa bbb ccc"; //13
@@ -458,6 +464,10 @@
             XVimMakeTestCase(text1, 1,  0, @"yyp", y_result3,  4, 0),
             // y_ does the same as yy
             XVimMakeTestCase(text1, 1,  0, @"y_p", y_result3,  4, 0),
+            
+            // 2yy,2Y
+            XVimMakeTestCase(text1, 1,  0, @"2yyP", y_result5, 0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"2YP" , y_result5, 0, 0),
             
             // p, P
             XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
