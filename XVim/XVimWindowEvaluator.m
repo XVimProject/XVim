@@ -18,7 +18,7 @@
 
 
 - (XVimEvaluator*)c{
-    [XVimLastActiveWorkspaceTabController() xvim_removeAssistantEditor];
+        [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
     return nil;
 }
 
@@ -38,7 +38,7 @@
 }
 
 - (XVimEvaluator*)q{
-    [XVimLastActiveWorkspaceTabController() xvim_removeAssistantEditor];
+    [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
     return nil;
 }
 

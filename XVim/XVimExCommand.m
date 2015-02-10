@@ -532,7 +532,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"vnoremap", @"vnoremap:inWindow:"),
                        CMD(@"vnew", @"splitview:inWindow:"),
                        CMD(@"vnoremenu", @"menu:inWindow:"),
-                       CMD(@"vsplit", @"splitview:inWindow:"),
+                       CMD(@"vsplit", @"vsplitview:inWindow:"),
                        CMD(@"vunmap", @"vunmap:inWindow:"),
                        CMD(@"vunmenu", @"menu:inWindow:"),
                        CMD(@"write", @"write:inWindow:"),
@@ -880,6 +880,11 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     [self mapClearMode:XVIM_MODE_CMDLINE];
 }
 
+- (void)cquit:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
+    [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
+}
+
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSMutableArray* params = [NSMutableArray arrayWithArray:[args.arg componentsSeparatedByString:@" "]];
     if( [params count] == 0 ){
@@ -1086,6 +1091,11 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:YES];
 }
 
+- (void)only:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
+    [XVimLastActiveWorkspaceTabController() xvim_closeOtherEditors];
+}
+
 - (void)onoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:NO];
 }
@@ -1112,7 +1122,8 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 }
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :q
-    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
+    [window setForcusBackToSourceView];
+    [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
 }
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window{

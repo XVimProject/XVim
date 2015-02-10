@@ -19,4 +19,5 @@
 - (void)xvim_moveFocusRight;
 - (void)xvim_removeAssistantEditor;
 - (void)xvim_closeOtherEditors;
+- (void)xvim_closeCurrentEditor;
 @end
