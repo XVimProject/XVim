@@ -49,6 +49,7 @@
 
     if (class_addMethod(self, origSel, method_getImplementation(newMethod), method_getTypeEncoding(newMethod))) {
         class_replaceMethod(self, origSel, method_getImplementation(newMethod), method_getTypeEncoding(newMethod));
+        class_replaceMethod(self, newSel, method_getImplementation(origMethod), method_getTypeEncoding(origMethod));
     } else {
         method_exchangeImplementations(newMethod, origMethod);
     }

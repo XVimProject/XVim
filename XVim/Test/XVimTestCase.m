@@ -10,10 +10,10 @@
 #import "XVimTestCase.h"
 #import "IDEKit.h"
 #import "XVimUtil.h"
-#import "DVTSourceTextView+XVim.h"
 #import "XVimWindow.h"
 #import "XVimKeyStroke.h"
 #import "NSTextView+VimOperation.h"
+#import "DVTSourceTextView+XVim.h"
 
 @implementation XVimTestCase
 + (XVimTestCase*)testCaseWithInitialText:(NSString*)it
@@ -64,7 +64,7 @@
 
 
 - (void)setUp{
-    [[[XVimLastActiveSourceView() xvimWindow] sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+    [[[XVimLastActiveSourceView() xvim_window] sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     [XVimLastActiveSourceView() setString:self.initialText];
     [XVimLastActiveSourceView() setSelectedRange:self.initialRange];
 }

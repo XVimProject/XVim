@@ -20,7 +20,7 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
-#import "DVTSourceTextViewHook.h"
+#import "DVTSourceTextView+XVim.h"
 
 @interface XVimWindow () {
     NSMutableArray     *_defaultEvaluatorStack;
@@ -350,7 +350,7 @@
 - (BOOL)shouldAutoCompleteAtLocation:(unsigned long long)location{
     if( [self.currentEvaluator isKindOfClass:[XVimInsertEvaluator class]] ){
         DVTSourceTextView *base = (DVTSourceTextView*)self.sourceView;
-        return [base shouldAutoCompleteAtLocation_:location];
+        return [base xvim_shouldAutoCompleteAtLocation:location];
     }else{
         return NO;
     }

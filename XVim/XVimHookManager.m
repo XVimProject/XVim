@@ -8,7 +8,6 @@
 
 #import "Logger.h"
 #import "XVimHookManager.h"
-#import "DVTSourceTextViewHook.h"
 #import "DVTTextSidebarViewHook.h"
 #import "IDESourceCodeEditorHook.h"
 #import "IDEEditorHook.h"
@@ -17,6 +16,7 @@
 #import "DVTSourceTextScrollViewHook.h"
 #import "NSEvent+VimHelper.h"
 #import "NSObject+XVimAdditions.h"
+#import "DVTSourceTextView+XVim.h"
 
 @implementation IDEWorkspaceWindow (XVim)
 
@@ -47,7 +47,7 @@
 {
     [IDEWorkspaceWindow xvim_initialize];
     [IDEEditorArea xvim_initialize];
-    [DVTSourceTextViewHook hook];
+    [DVTSourceTextView xvim_initialize];
     [DVTTextSidebarViewHook hook];
     [DVTSourceTextScrollViewHook hook];
     [IDESourceCodeEditorHook hook];

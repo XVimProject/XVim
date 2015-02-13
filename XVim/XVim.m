@@ -32,13 +32,13 @@
 #import "XVimHistoryHandler.h"
 #import "XVimHookManager.h"
 #import "XVimCommandLine.h"
-#import "DVTSourceTextViewHook.h"
 #import "XVimMarks.h"
 #import "XVimMotion.h"
 #import "XVimTester.h"
 #import "XVimUtil.h"
 #import "IDEKit.h"
 #import "objc/runtime.h"
+#import "DVTSourceTextView+XVim.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -318,10 +318,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 - (void)toggleXVim:(id)sender{
     if( [(NSCell*)sender state] == NSOnState ){
-        [DVTSourceTextViewHook unhook];
+        [DVTSourceTextView xvim_finalize];
         [(NSCell*)sender setState:NSOffState];
     }else{
-        [DVTSourceTextViewHook hook];
+        [DVTSourceTextView xvim_initialize];
         [(NSCell*)sender setState:NSOnState];
     }
 }
