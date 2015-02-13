@@ -9,16 +9,15 @@
 #import <Cocoa/Cocoa.h>
 #import "DVTKit.h"
 
-@interface DVTTextSidebarViewHook : NSObject
-+ (void)hook;
-+ (void)unhook;
-@end
+@interface DVTTextSidebarView (XVim)
++ (void)xvim_initialize;
 
-@interface DVTTextSidebarView (Hook)
-- (void)_drawLineNumbersInSidebarRect_:(struct CGRect)arg1
+- (void)xvim__drawLineNumbersInSidebarRect:(struct CGRect)arg1 // doulbe under score (__) is intentional.
                          foldedIndexes:(unsigned long long *)arg2
                                  count:(unsigned long long)arg3
                          linesToInvert:(id)arg4
                         linesToReplace:(id)arg5
                       getParaRectBlock:(id)arg6;
+
+
 @end
