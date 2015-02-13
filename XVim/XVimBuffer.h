@@ -10,6 +10,6 @@
 
 @interface XVimBuffer : NSObject
 
-@property (nonatomic, readonly) XVimTextStorage *textStorage;
+@property (weak, nonatomic, readonly) XVimTextStorage *textStorage;
 
 @end

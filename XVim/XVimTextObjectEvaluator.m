@@ -27,9 +27,6 @@
 	return self;
 }
 
-- (void)dealloc{
-    [super dealloc];
-}
 
 - (XVimMotion *)motion {
     MOTION_OPTION opt = _inner ? TEXTOBJECT_INNER : MOTION_OPTION_NONE;

@@ -51,7 +51,7 @@
     NSString *text = [self insertedText];
     NSTextView *sourceView = [self sourceView];
     
-    for (int i = 0 ; i < [self numericArg]-1; i++) {
+    for (NSUInteger i = 0 ; i < [self numericArg]-1; i++) {
         [sourceView insertText:text replacementRange:NSMakeRange(self.sourceView.insertionPoint, text.length)];
     }
 }
@@ -74,7 +74,10 @@
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
     SEL keySelector = [keyStroke selectorForInstance:self];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
     XVimEvaluator *nextEvaluator = keySelector ? [self performSelector:keySelector] : self;
+#pragma clang diagnostic pop
 
     if (nextEvaluator == self && nil == keySelector){
         if (self.oneCharMode || [self windowShouldReceive:keySelector]) {

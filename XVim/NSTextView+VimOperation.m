@@ -23,6 +23,7 @@
 #import "NSTextView+VimOperation.h"
 #import "NSTextStorage+VimOperation.h"
 #import "Logger.h"
+#import "XVimMacros.h"
 
 #define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             self.selectionMode,            \
@@ -85,52 +86,40 @@
     }
 }
 
+// @param column   head column of selected area (zero origin)
+// @param count    moving count of a space
 - (void)_xvim_removeSpacesAtLine:(NSUInteger)line column:(NSUInteger)column count:(NSUInteger)count
 {
     NSTextStorage *ts = self.textStorage;
-    NSUInteger tabWidth = ts.xvim_tabWidth;
-    NSUInteger pos = [ts xvim_indexOfLineNumber:line column:column];
-    NSUInteger end = pos;
-    NSUInteger width = 0;
+    const NSUInteger tabWidth = ts.xvim_tabWidth;
+    NSUInteger head_pos = [ts xvim_indexOfLineNumber:line column:column];
     NSString *s = self.xvim_string;
 
-    if ([ts isEOL:pos]) {
+    if ([ts isEOL:head_pos]) {
         return;
     }
 
-    if ([s characterAtIndex:pos] == '\t') {
-        NSUInteger col = [ts xvim_columnOfIndex:pos];
-
-        if (col < column) {
-            [self _xvim_insertSpaces:tabWidth - (col % tabWidth) replacementRange:NSMakeRange(pos, 1)];
-            pos += column - col;
-        }
-    }
-
-    while (width < count) {
-        unichar c = [s characterAtIndex:end];
-
-        if (c == ' ') {
-            end++;
-            width++;
-        } else if (c == '\t') {
-            NSUInteger col = column + width;
-            NSUInteger tw  = tabWidth - (col % tabWidth);
-
-            if (width + tw > count) {
-                [self _xvim_insertSpaces:tw replacementRange:NSMakeRange(end, 1)];
-                end  += count - width;
-                width = count;
-            } else {
-                end   += tw;
-                width += tw;
-            }
-        } else {
-            break;
-        }
-    }
-
-    [self insertText:@"" replacementRange:NSMakeRange(pos, end - pos)];
+	NSInteger remain = (NSInteger)count;
+	NSUInteger pos = head_pos;
+	NSUInteger temp_width = 0;
+	for( ;remain > 0; ++pos ){
+		const unichar c = [s characterAtIndex:pos];
+		if( c == '\t' ){
+			remain -= tabWidth;
+			// reset
+			temp_width = 0;
+		} else if( c == ' ' ){
+			++temp_width;
+			if( temp_width >= tabWidth ){
+				remain -= tabWidth;	
+				// reset
+				temp_width = 0;
+			}
+		} else {
+			break;
+		}
+	}
+    [self insertText:@"" replacementRange:NSMakeRange(head_pos, pos - head_pos)];
 }
 
 - (XVimRange)_xvim_selectedLines{
@@ -336,7 +325,6 @@
 
     self.lastYankedText = ybuf;
     TRACE_LOG(@"YANKED STRING : %@", ybuf);
-    [ybuf release];
 }
 
 - (void)_xvim_killSelection:(XVimSelection)sel
@@ -392,7 +380,7 @@
  **/
 
 - (NSUInteger)insertionPoint{
-    id ret = [self dataForName:@"insertionPoint"];
+    NSNumber* ret = [self dataForName:@"insertionPoint"];
     return nil == ret ? 0 : [ret unsignedIntegerValue];
 }
 
@@ -509,7 +497,7 @@
 - (NSMutableArray*)foundRanges{
     id ranges = [self dataForName:@"foundRanges"];
     if( nil == ranges ){
-        ranges = [[[NSMutableArray alloc] init] autorelease];
+        ranges = [[NSMutableArray alloc] init];
         [self setData:ranges forName:@"foundRanges"];
     }
     return ranges;
@@ -613,7 +601,7 @@
             //So we select the the place holder and its already selected by "selectedPreviousPlaceholder" above
         } else{
             if ([[self string] length] > currentRange.location) {
-                [self setSelectedRange:NSMakeRange(currentRange.location-1, 0)];
+                [self setSelectedRange:NSMakeRange(UNSIGNED_DECREMENT(currentRange.location,1), 0)];
             }
         }
     }
@@ -775,7 +763,11 @@
             [self _xvim_yankRange:r withType:motion.type];
         }
         [self insertText:@"" replacementRange:r];
-        if (motion.type == LINEWISE) {
+        if( motion.motion == TEXTOBJECT_SQUOTE ||
+            motion.motion == TEXTOBJECT_DQUOTE ||
+            motion.motion == TEXTOBJECT_BACKQUOTE ){
+            newPos = r.location;
+        } else if (motion.type == LINEWISE) {
             newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:self.insertionPoint allowEOL:YES];
         }
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
@@ -1149,7 +1141,7 @@
         XVimRange lines = [self _xvim_selectedLines];
 
         line = lines.begin;
-        count = MAX(1, lines.end - lines.begin);
+        count = MAX((NSUInteger)1, UNSIGNED_DECREMENT(lines.end, lines.begin));
     }
 
     if (addSpace) {
@@ -1496,7 +1488,6 @@
         [self insertText:text replacementRange:NSMakeRange(pos, 0)];
     }
 
-    [buf release];
 }
 
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options{
@@ -1513,7 +1504,7 @@
     NSRange characterRange = [self.textStorage xvim_indexRangeForLines:NSMakeRange(line1, line2 - line1 + 1)];
     NSString *str = [[self xvim_string] substringWithRange:characterRange];
     
-    NSMutableArray *lines = [[[str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy] autorelease];
+    NSMutableArray *lines = [[str componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]] mutableCopy];
     if ([[lines lastObject] length] == 0) {
         [lines removeLastObject];
     }
@@ -1958,14 +1949,36 @@
 }
 
 - (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
-    NSRect glyphRect;
-    if( [self.textStorage isEOF:glyphIndex] ){
-        // When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
-        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 0)  inTextContainer:[self textContainer]];
-    }else{
-        glyphRect = [[self layoutManager] boundingRectForGlyphRange:NSMakeRange(glyphIndex, 1)  inTextContainer:[self textContainer]];
-    }
-    return glyphRect;
+	NSRect glyphRect;
+	if( [self.textStorage isEOF:glyphIndex] ){
+		// When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
+		NSUInteger count;
+		NSRect* array = [[self layoutManager] rectArrayForCharacterRange:NSMakeRange(glyphIndex, 0) withinSelectedCharacterRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
+		for( NSUInteger i = 0 ; i < count; i++ ){
+			glyphRect = array[i];
+		}
+	}else{
+		NSUInteger count;
+		NSRect* array = [[self layoutManager] rectArrayForGlyphRange:NSMakeRange(glyphIndex, 1) withinSelectedGlyphRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
+		// NSRect* array = [[self layoutManager] rectArrayForCharacterRange:NSMakeRange(glyphIndex, 1) withinSelectedCharacterRange:NSMakeRange(NSNotFound,0) inTextContainer:self.textContainer rectCount:&count];
+		for( NSUInteger i = 0 ; i < count; i++ ){
+			glyphRect = array[i];
+		}
+	}
+	
+	if([self.textStorage isEOF:glyphIndex]){
+		DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+		NSFont *font = [theme sourcePlainTextFont];
+		NSDictionary* attr = [NSDictionary dictionaryWithObjectsAndKeys:font,NSFontAttributeName, nil];
+		NSSize size = [@" " sizeWithAttributes:attr];
+		glyphRect.size.width = size.width;
+	}
+	else if( isNewline([self.textStorage.string characterAtIndex:glyphIndex]) ){
+		NSDictionary* attr = [self.textStorage attributesAtIndex:glyphIndex effectiveRange:nil];
+		NSSize size = [@" " sizeWithAttributes:attr];
+		glyphRect.size.width = size.width;
+	}
+	return NSIntegralRectWithOptions(glyphRect, NSAlignAllEdgesNearest);
 }
 
 /**
@@ -1984,11 +1997,11 @@
             [placeholders addObject:[NSValue valueWithRange:retval]];
         }
         if ([self.textStorage isLOL:curPos] || [self.textStorage isEOF:curPos]) {
-            return [placeholders autorelease];
+            return placeholders;
         }
     }
     
-    return [placeholders autorelease];
+    return placeholders;
 }
 
 
@@ -2132,7 +2145,7 @@
         return [NSArray arrayWithObject:[NSValue valueWithRange:[self _xvim_selectedRange]]];
     }
 
-    NSMutableArray *rangeArray = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray *rangeArray = [[NSMutableArray alloc] init];
     NSTextStorage  *ts = self.textStorage;
     XVimSelection sel = [self _xvim_selectedBlock];
 
@@ -2221,13 +2234,13 @@
             end = [self.textStorage prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
             break;
         case MOTION_TILL_NEXT_CHARACTER:
-            end = [self.textStorage nextCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self.textStorage nextCharacterInLine:begin count:motion.count character:motion.character option:motion.option];
             if(end != NSNotFound){
                 end--;
             }
             break;
         case MOTION_TILL_PREV_CHARACTER:
-            end = [self.textStorage prevCharacterInLine:begin count:motion.count character:motion.character option:MOTION_OPTION_NONE];
+            end = [self.textStorage prevCharacterInLine:begin count:motion.count character:motion.character option:motion.option];
             if(end != NSNotFound){
                 end++;
             }
@@ -2491,7 +2504,6 @@
 	}
 	
     [self insertText:substring replacementRange:range];
-    [substring release];
 }
 
 - (void)xvim_registerPositionForUndo:(NSUInteger)pos{

@@ -45,7 +45,7 @@ static const char *KEY_WINDOW = "xvimwindow";
     NSView *layoutView;
 
     // The view contains editors and border view
-    object_getInstanceVariable(self, "_editorAreaAutoLayoutView", (void**)&layoutView);
+    layoutView = [ self valueForKey:@"_editorAreaAutoLayoutView"];
     return layoutView;
 }
 
@@ -54,7 +54,7 @@ static const char *KEY_WINDOW = "xvimwindow";
     DVTBorderedView *border;
 
     // The view contains editors and border view
-    object_getInstanceVariable(self, "_debuggerBarBorderedView", (void**)&border);
+    border = [ self valueForKey:@"_debuggerBarBorderedView"];
     return border;
 }
 
@@ -81,7 +81,6 @@ static const char *KEY_WINDOW = "xvimwindow";
     }
 
     objc_setAssociatedObject(self, KEY_WINDOW, xvim, OBJC_ASSOCIATION_RETAIN);
-    [xvim release];
 }
 
 - (void)xvim_primitiveInvalidate

@@ -20,6 +20,7 @@
 #import "NSTextView+VimOperation.h"
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
+#import "DVTSourceTextViewHook.h"
 
 @interface XVimWindow () {
     NSMutableArray     *_defaultEvaluatorStack;
@@ -32,7 +33,6 @@
 }
 
 @property (strong, atomic) NSEvent       *tmpBuffer;
-@property (readonly)       XVimEvaluator *currentEvaluator;
 
 - (void)_resetEvaluatorStack:(NSMutableArray *)stack activateNormalHandler:(BOOL)activate;
 
@@ -45,9 +45,9 @@
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea
 {
     if (self = [super init]){
-		_staticString = [@"" retain];
+		_staticString = @"";
 		_keymapContext = [[XVimKeymapContext alloc] init];
-        _editorArea = [editorArea retain];
+        _editorArea = editorArea ;
         _defaultEvaluatorStack = [[NSMutableArray alloc] init];
         _currentEvaluatorStack = _defaultEvaluatorStack;
         _inputContext = [[NSTextInputContext alloc] initWithClient:self];
@@ -78,17 +78,17 @@
     return editor.mainScrollView.documentView;
 }
 
+- (NSTextView *)inputView
+{
+    if( self.currentEvaluator.mode == XVIM_MODE_CMDLINE ){
+        return self.commandLine.commandField;
+    }
+    return self.sourceView;
+}
+
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [_keymapContext release];
-    [_staticString release];
-    [_editorArea release];
-    [_inputContext release];
-    self.tmpBuffer = nil;
-    [_defaultEvaluatorStack release];
-    [_commandLine release];
-    [super dealloc];
 }
 
 - (void)dumpEvaluatorStack:(NSMutableArray*)stack
@@ -111,7 +111,7 @@
 {
     // Initialize evlauator stack
     [stack removeAllObjects];
-    XVimEvaluator* firstEvaluator = [[[XVimNormalEvaluator alloc] initWithWindow:self] autorelease];
+    XVimEvaluator* firstEvaluator = [[XVimNormalEvaluator alloc] initWithWindow:self];
     [stack addObject:firstEvaluator];
     if (activate) {
         [firstEvaluator becameHandler];
@@ -120,10 +120,12 @@
 
 - (void)_documentChangedNotification:(NSNotification *)notification
 {
-    DEBUG_LOG("Document changed, reset evaluator stack");
-    [self.currentEvaluator cancelHandler];
+    // Take strong reference to self, because the last remaining strong reference may be
+    // in one of the evaluators we are about to dealloc with 'removeAllObjects'
+    XVimWindow *this = self;
+    [this.currentEvaluator cancelHandler];
     [_currentEvaluatorStack removeAllObjects];
-    [self syncEvaluatorStack];
+    [this syncEvaluatorStack];
 }
 
 /**
@@ -253,7 +255,7 @@
     while(YES){
         if( nil == nextEvaluator || nextEvaluator == [XVimEvaluator popEvaluator]){
             // current evaluator finished its task
-            XVimEvaluator* completeEvaluator = [[[_currentEvaluatorStack lastObject] retain] autorelease]; // We have to retain here not to be dealloced in didEndHandler method.
+            XVimEvaluator* completeEvaluator = [_currentEvaluatorStack lastObject]; // We have to retain here not to be dealloced in didEndHandler method.
             [_currentEvaluatorStack removeLastObject]; // remove current evaluator from the stack
             [completeEvaluator didEndHandler];
             if( [_currentEvaluatorStack count] == 0 ){
@@ -270,7 +272,10 @@
                     break;
                 }
                 SEL onCompleteHandler = currentEvaluator.onChildCompleteHandler;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 nextEvaluator = [currentEvaluator performSelector:onCompleteHandler withObject:completeEvaluator];
+#pragma clang diagnostic pop
                 [currentEvaluator resetCompletionHandler];
             }
         }else if( nextEvaluator == [XVimEvaluator invalidEvaluator]){
@@ -332,16 +337,7 @@
     float widthRatio = [current insertionPointWidthRatio];
     float alphaRatio = [current insertionPointAlphaRatio];
 
-	NSTextView *sourceView = [self sourceView];
-    NSUInteger glyphIndex = [sourceView insertionPoint];
-	NSRect glyphRect = [sourceView xvim_boundingRectForGlyphIndex:glyphIndex];
-    DEBUG_LOG(@"glyphRect:%f %f %f %f", glyphRect.origin.x, glyphRect.origin.y, glyphRect.size.height , glyphRect.size.width);
-
 	[[color colorWithAlphaComponent:alphaRatio] set];
-	rect.size.width = rect.size.height/2;
-	if (glyphRect.size.width > 0 && glyphRect.size.width < rect.size.width)  {
-		rect.size.width = glyphRect.size.width;
-    }
 
 	rect.origin.y += (1 - heightRatio) * rect.size.height;
 	rect.size.height *= heightRatio;
@@ -389,6 +385,20 @@
     [[self currentWorkspaceWindow] makeFirstResponder:self.sourceView];
 }
 
+
+- (void)showQuickfixWithString:(NSString *)message completionHandler:(void(^)(void))completionHandler
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine quickFixWithString:message completionHandler:completionHandler];
+    return;
+}
+
+- (void)closeQuickfix
+{
+	XVimCommandLine *commandLine = self.commandLine;
+    [commandLine quickFixWithString:nil completionHandler:nil];
+}
+
 #pragma mark - NSTextInputClient Protocol
 
 - (void)insertText:(id)aString replacementRange:(NSRange)replacementRange{
@@ -413,39 +423,39 @@
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange{
-    return [self.sourceView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+    return [self.inputView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
 }
 
 - (void)unmarkText{
-    return [self.sourceView unmarkText];
+    return [self.inputView unmarkText];
 }
 
 - (NSRange)selectedRange{
-    return [self.sourceView selectedRange];
+    return [self.inputView selectedRange];
 }
 
 - (NSRange)markedRange{
-    return [self.sourceView markedRange];
+    return [self.inputView markedRange];
 }
 
 - (BOOL)hasMarkedText{
-    return [self.sourceView hasMarkedText];
+    return [self.inputView hasMarkedText];
 }
 
 - (NSAttributedString *)attributedSubstringForProposedRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
-    return [self.sourceView attributedSubstringForProposedRange:aRange actualRange:actualRange];
+    return [self.inputView attributedSubstringForProposedRange:aRange actualRange:actualRange];
 }
 
 - (NSArray*)validAttributesForMarkedText{
-    return [self.sourceView validAttributesForMarkedText];
+    return [self.inputView validAttributesForMarkedText];
 }
 
 - (NSRect)firstRectForCharacterRange:(NSRange)aRange actualRange:(NSRangePointer)actualRange{
-    return [self.sourceView firstRectForCharacterRange:aRange actualRange:actualRange];
+    return [self.inputView firstRectForCharacterRange:aRange actualRange:actualRange];
 }
 
 - (NSUInteger)characterIndexForPoint:(NSPoint)aPoint{
-    return [self.sourceView characterIndexForPoint:aPoint];
+    return [self.inputView characterIndexForPoint:aPoint];
 }
 @end
 

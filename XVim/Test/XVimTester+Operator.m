@@ -38,6 +38,9 @@
                              @"        ddd\n"   // 36 
                              @"        eee\n"   // 48
                              @"        fff";    // 60
+	
+	static NSString* text5_2 = @"\t\taaa\n"
+							   @"\t\tbbb\n";
     
     static NSString* text6 = @"aaa\n"   // 0  (index of each WORD)
                              @"bbb\n"   // 4 
@@ -220,6 +223,12 @@
                                  @"eee\n"
                                  @"fff\n";
     
+    static NSString* y_result5 = @"aaa\n"
+                                 @"bbb\n"
+                                 @"aaa\n"
+                                 @"bbb\n"
+                                 @"ccc";
+    
     static NSString* p_result1 = @"aAa bbb ccc\n"
                                  @"\n"
                                  @"aAa bbb ccc"; //13
@@ -230,11 +239,15 @@
     static NSString* yp_result2= @"aAa AAaabbb ccc\n";
     
     static NSString* oO_text = @"int abc(){\n"  // 0 4
-    @"}\n";          // 11
+                               @"}\n";          // 11
     
     static NSString* oO_result = @"int abc(){\n" // This result may differ from editor setting. This is for 4 spaces for indent.
-    @"    \n"      // 11
-    @"}\n";
+                                 @"    \n"      // 11
+                                 @"}\n";
+    
+    static NSString* oO_result2 = @"int abc(){\n" 
+                                  @"}\n"
+                                  @"\n";
     
     static NSString* guw_result = @"aaa bbb ccc\n";
     static NSString* gUw_result = @"AAA bbb ccc\n";
@@ -342,6 +355,9 @@
                                       @"    ddd\n"       // 28
                                       @"    eee\n"       // 38
                                       @"        fff";    // 46
+	
+	static NSString* lshift_result5_2 = @"\taaa\n"
+										@"\tbbb\n";
     
     return [NSArray arrayWithObjects:
             // All changes/insertions must be repeated by dot(.)
@@ -459,6 +475,10 @@
             // y_ does the same as yy
             XVimMakeTestCase(text1, 1,  0, @"y_p", y_result3,  4, 0),
             
+            // 2yy,2Y
+            XVimMakeTestCase(text1, 1,  0, @"2yyP", y_result5, 0, 0),
+            XVimMakeTestCase(text1, 1,  0, @"2YP" , y_result5, 0, 0),
+            
             // p, P
             XVimMakeTestCase(text1, 1,  0, @"yyP", y_result3,  0, 0),
             XVimMakeTestCase(text1, 1,  0, @"y_P", y_result3,  0, 0),
@@ -541,6 +561,8 @@
             XVimMakeTestCase(text5, 1, 0, @"2<<jjj.", lshift_result2,32, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj`." , lshift_result0,12, 0),
             XVimMakeTestCase(text5,13, 0, @"<<jj'." , lshift_result0,16, 0),
+			
+			XVimMakeTestCase(text5_2, 0, 0, @"Vj<<"	, lshift_result5_2, 1, 0),
             
             // = (filter)
             
@@ -558,6 +580,7 @@
             // o, O
             XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result, 14, 0),
             XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result, 14, 0),
+            XVimMakeTestCase(oO_text, 13, 0, @"O<ESC>", oO_result2, 13, 0), // Issue #675
             
             // Insert and Ctrl-o
             XVimMakeTestCase(text0,  0, 0, @"iabc<C-o>dwdef<ESC>", C_o_result, 5, 0),

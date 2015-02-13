@@ -26,8 +26,10 @@
 @class IDEEditorArea;
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
-@property(readonly) NSTextView *sourceView; // This represents currently focused sourceView
+@property(weak, readonly) NSTextView *sourceView; // This represents currently focused sourceView
+@property(weak, readonly) NSTextView *inputView;
 @property(readonly) XVimCommandLine *commandLine;
+@property (weak, readonly)       XVimEvaluator *currentEvaluator;
 
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea;
 
@@ -45,5 +47,7 @@
 - (IDEWorkspaceWindow*)currentWorkspaceWindow;
 
 - (void)syncEvaluatorStack;
+- (void)showQuickfixWithString:(NSString *)message completionHandler:(void(^)(void))completionHandler;
+- (void)closeQuickfix;
 
 @end

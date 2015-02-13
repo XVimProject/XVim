@@ -8,9 +8,11 @@
 
 #import "XVimCommandLine.h"
 #import "XVimCommandField.h"
+#import "XVimQuickFixView.h"
 #import "Logger.h"
 #import "XVimWindow.h"
 #import "DVTKit.h"
+#import "NSAttributedString+Geometrics.h"
 #import <objc/runtime.h>
 
 #define COMMAND_FIELD_HEIGHT 18.0
@@ -22,6 +24,10 @@
     NSInsetTextView* _static;
     NSInsetTextView* _error;
     NSInsetTextView* _argument;
+
+    XVimQuickFixView* _quickFixScrollView;
+    id _quickFixObservation;
+    NSResponder __weak* previousFirstResponder;
     NSTimer* _errorTimer;
 }
 - (void)layoutCmdline:(NSView*)view;
@@ -53,6 +59,12 @@
         _error.autoresizingMask = NSViewWidthSizable;
         [self addSubview:_error];
 
+        // Quickfix View
+        _quickFixScrollView = [[XVimQuickFixView alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
+        [_quickFixScrollView setHidden:YES];
+        [self addSubview:_quickFixScrollView];
+
+        
         // Command View
         _command = [[XVimCommandField alloc] initWithFrame:NSMakeRect(0, 0, 100, COMMAND_FIELD_HEIGHT)];
         [_command setEditable:NO];
@@ -86,13 +98,9 @@
     return self;
 }
 
-- (void)dealloc{
-    [_command release];
-    [_static release];
-    [_error release];
-    [_argument release];
-    [_errorTimer release];
-    [super dealloc];
+-(void)dealloc
+{
+    [[ NSNotificationCenter defaultCenter ] removeObserver:_quickFixObservation];
 }
 
 - (NSInteger)tag
@@ -139,17 +147,47 @@
 		[_error setHidden:NO];
 		[_errorTimer invalidate];
         if( aTimer ){
-            if (_errorTimer != nil) {
-                [_errorTimer release];
-            }
             
-            _errorTimer = [[NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO] retain];
+            _errorTimer = [NSTimer timerWithTimeInterval:3.0 target:self selector:@selector(errorMsgExpired) userInfo:nil repeats:NO];
             [[NSRunLoop currentRunLoop] addTimer:_errorTimer forMode:NSDefaultRunLoopMode];
         }
 	}else{
 		[_errorTimer invalidate];
 		[_error setHidden:YES];
 	}
+}
+
+static NSString* QuickFixPrompt = @"\nPress a key to continue...";
+
+-(void)quickFixWithString:(NSString*)string completionHandler:(void(^)(void))completionHandler
+{
+	if( string && [string length] != 0 ){
+        // Set up observation to close the quickfix window when a key is pressed, or it loses focus
+        __weak XVimCommandLine* this = self;
+        void (^completionHandlerCopy)(void) = [completionHandler copy];
+        _quickFixObservation = [ [ NSNotificationCenter defaultCenter ] addObserverForName:XVimNotificationQuickFixDidComplete
+                                                             object:_quickFixScrollView
+                                                              queue:nil
+                                                         usingBlock:^(NSNotification *note) {
+                                                             [this quickFixWithString:nil completionHandler:completionHandlerCopy ];
+                                                         }];
+        [ _quickFixScrollView setString:string withPrompt:QuickFixPrompt];
+		[ _quickFixScrollView setHidden:NO ];
+        [ self layoutCmdline:[self superview]];
+        [[_quickFixScrollView window] performSelector:@selector(makeFirstResponder:) withObject:_quickFixScrollView.textView afterDelay:0 ];
+        [_quickFixScrollView.textView performSelector:@selector(scrollToEndOfDocument:) withObject:self afterDelay:0 ];
+	}else{
+        [[ NSNotificationCenter defaultCenter ] removeObserver:_quickFixObservation];
+        _quickFixObservation = nil;
+		[_quickFixScrollView setHidden:YES];
+        [ self layoutCmdline:[self superview]];
+        if (completionHandler) { completionHandler(); }
+	}
+}
+
+-(NSUInteger)quickFixColWidth
+{
+    return _quickFixScrollView.colWidth;
 }
 
 - (XVimCommandField*)commandField
@@ -173,6 +211,8 @@
 	CGFloat verticalInset = MAX((COMMAND_FIELD_HEIGHT - [sourceFont pointSize]) / 2, 0);
 	CGSize inset = CGSizeMake(horizontalInset, verticalInset);
     
+    CGFloat tallestSubviewHeight = COMMAND_FIELD_HEIGHT ;
+    
     // Set colors
 	[_static setTextColor:[theme sourcePlainTextColor]];
     [_static setBackgroundColor:[theme sourceTextBackgroundColor]];
@@ -190,6 +230,18 @@
     // Layout command area
     [_error setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_error setFrameOrigin:NSMakePoint(0, 0)];
+    [_quickFixScrollView setFrameOrigin:NSMakePoint(0, 0)];
+    if ( [_quickFixScrollView isHidden])
+    {
+        [_quickFixScrollView setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT ) ];
+    }
+    else
+    {
+        NSSize idealQuickfixSize = [ [_quickFixScrollView.textView string] sizeForWidth:frame.size.width height:(frame.size.height*0.5) font:[theme consoleExecutableOutputTextFont]];
+        idealQuickfixSize.width = frame.size.width ;
+        [_quickFixScrollView setFrameSize:idealQuickfixSize ];
+        tallestSubviewHeight = idealQuickfixSize.height ;
+    }
     [_static setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
     [_static setFrameOrigin:NSMakePoint(0, 0)];
     [_command setFrameSize:NSMakeSize(frame.size.width, COMMAND_FIELD_HEIGHT)];
@@ -207,11 +259,11 @@
         }
     }
     if( nsview != nil && border != nil && [border isHidden] ){
-        self.frame = NSMakeRect(0, 0, parent.frame.size.width, +COMMAND_FIELD_HEIGHT);
-        nsview.frame = NSMakeRect(0, COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-COMMAND_FIELD_HEIGHT);
+        self.frame = NSMakeRect(0, 0, parent.frame.size.width, +tallestSubviewHeight);
+        nsview.frame = NSMakeRect(0, tallestSubviewHeight, parent.frame.size.width, parent.frame.size.height-tallestSubviewHeight);
     }else{
-        self.frame = NSMakeRect(0, border.frame.size.height, parent.frame.size.width, COMMAND_FIELD_HEIGHT);
-        nsview.frame = NSMakeRect(0, border.frame.size.height+COMMAND_FIELD_HEIGHT, parent.frame.size.width, parent.frame.size.height-border.frame.size.height-COMMAND_FIELD_HEIGHT);
+        self.frame = NSMakeRect(0, border.frame.size.height, parent.frame.size.width, tallestSubviewHeight);
+        nsview.frame = NSMakeRect(0, border.frame.size.height+tallestSubviewHeight, parent.frame.size.width, parent.frame.size.height-border.frame.size.height-tallestSubviewHeight);
     }
 	
 	[_static setInset:inset];

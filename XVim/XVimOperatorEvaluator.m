@@ -35,9 +35,6 @@
 	return self;
 }
 
-- (void)dealloc {
-    [super dealloc];
-}
 
 - (float)insertionPointHeightRatio{
     return 0.5;
@@ -53,14 +50,14 @@
 
 - (XVimEvaluator*)a{
     [self.argumentString appendString:@"a"];
-	return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
+	return [[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO];
 }
 
 // TODO: There used to be "b:" and "B:" methods here. Take a look how they have been.
 
 - (XVimEvaluator*)i{
     [self.argumentString appendString:@"i"];
-    return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
+    return [[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES];
 }
 
 - (XVimEvaluator*)_motionFixed:(XVimMotion *)motion{

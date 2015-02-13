@@ -50,21 +50,20 @@
     self = [super initWithWindow:window];
     if (self) {
         _forcedMotionType = DEFAULT_MOTION_TYPE;
-        _motion = [XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1) retain];
+        _motion = XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 1);
     }
     return self;
 }
 
-- (void)dealloc{
-    [_motion release];
-    [super dealloc];
-}
 
 // This is helper method commonly used by many key event handlers.
 // You do not need to use this if this is not proper to express the motion.
 - (XVimEvaluator*)commonMotion:(SEL)motion Type:(MOTION_TYPE)type{
     NSTextView* view = [self sourceView];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 	NSUInteger motionTo = (NSUInteger)[view performSelector:motion withObject:[NSNumber numberWithUnsignedInteger:[self numericArg]]];
+#pragma clang diagnostic pop
     XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, type, MOTION_OPTION_NONE, [self numericArg]);
     m.position = motionTo;
     return [self _motionFixed:m];
@@ -168,7 +167,7 @@
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
     self.motion.motion = MOTION_NEXT_CHARACTER;
     self.motion.type = CHARACTERWISE_INCLUSIVE;
-    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)F{
@@ -176,7 +175,7 @@
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
     self.motion.motion = MOTION_PREV_CHARACTER;
     self.motion.type = CHARACTERWISE_EXCLUSIVE;
-    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 /*
@@ -190,7 +189,7 @@
 - (XVimEvaluator*)g{
     [self.argumentString appendString:@"g"];
     self.onChildCompleteHandler = @selector(onComplete_g:);
-    return [[[XVimGMotionEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimGMotionEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
@@ -273,7 +272,7 @@
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
     self.motion.motion = MOTION_TILL_NEXT_CHARACTER;
     self.motion.type = CHARACTERWISE_INCLUSIVE;
-    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)T{
@@ -281,7 +280,7 @@
     self.onChildCompleteHandler = @selector(onComplete_fFtT:);
     self.motion.motion = MOTION_TILL_PREV_CHARACTER;
     self.motion.type = CHARACTERWISE_EXCLUSIVE;
-    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)v{
@@ -313,7 +312,7 @@
 
 - (XVimEvaluator*)z{
     [self.argumentString appendString:@"z"];
-    return [[[XVimZEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimZEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)NUM0{
@@ -375,7 +374,7 @@
     }
 	
     // set the position before the jump
-    XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
+    XVimMark* cur_mark = [[XVimMark alloc] init];
     cur_mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:cur_pos];
     cur_mark.column = [self.sourceView.textStorage xvim_columnOfIndex:cur_pos];
     cur_mark.document = [self.sourceView documentURL].path;
@@ -396,7 +395,7 @@
 - (XVimEvaluator*)SQUOTE{
     [self.argumentString appendString:@"'"];
     self.onChildCompleteHandler = @selector(onComplete_SQUOTE:);
-    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)onComplete_SQUOTE:(XVimArgumentEvaluator*)childEvaluator{
@@ -411,7 +410,7 @@
 - (XVimEvaluator*)BACKQUOTE{
     [self.argumentString appendString:@"`"];
     self.onChildCompleteHandler = @selector(onComplete_BACKQUOTE:);
-    return [[[XVimArgumentEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimArgumentEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)onComplete_BACKQUOTE:(XVimArgumentEvaluator*)childEvaluator{
@@ -522,8 +521,8 @@
     if( nil == m ){
         return [XVimEvaluator invalidEvaluator];
     }
-    
     MOTION new_motion = MOTION_PREV_CHARACTER;
+    MOTION_OPTION new_option = m.option;
     switch( m.motion ){
         case MOTION_NEXT_CHARACTER:
             new_motion = MOTION_PREV_CHARACTER;
@@ -533,15 +532,17 @@
             break;
         case MOTION_TILL_NEXT_CHARACTER:
             new_motion = MOTION_TILL_PREV_CHARACTER;
+            new_option |= MOTION_OPTION_SKIP_ADJACENT_CHAR;
             break;
         case MOTION_TILL_PREV_CHARACTER:
             new_motion = MOTION_TILL_NEXT_CHARACTER;
+            new_option |= MOTION_OPTION_SKIP_ADJACENT_CHAR;
             break;
         default:
             NSAssert(NO, @"Should not reach here");
             break;
-    }
-    XVimMotion* n = XVIM_MAKE_MOTION(new_motion, m.type, m.option, [self numericArg]);
+    }    
+    XVimMotion* n = XVIM_MAKE_MOTION(new_motion, m.type, new_option, [self numericArg]);
     n.character = m.character;
     return [self _motionFixed:n];
 }
@@ -551,7 +552,8 @@
     if( nil == m ){
         return [XVimEvaluator invalidEvaluator];
     }
-    XVimMotion* n = XVIM_MAKE_MOTION(m.motion, m.type, m.option, [self numericArg]);
+    
+    XVimMotion* n = XVIM_MAKE_MOTION(m.motion, m.type, m.option | MOTION_OPTION_SKIP_ADJACENT_CHAR, [self numericArg]);
     n.character = m.character;
     return [self _motionFixed:n];
 }

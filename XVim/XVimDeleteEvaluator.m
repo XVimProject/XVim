@@ -74,7 +74,7 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
         [self resetNumericArg];
         // Do not call [[XVim instance] fixRepeatCommand] here.
         // It will be called after XVimInsertEvaluator finish handling key input.
-        return [[[XVimInsertEvaluator alloc] initWithWindow:self.window] autorelease];
+        return [[XVimInsertEvaluator alloc] initWithWindow:self.window];
     }else{
         [[self sourceView] xvim_delete:motion andYank:YES];
     }

@@ -36,7 +36,7 @@ typedef enum LogLevel_t{
 @interface Logger : NSObject
 
 @property LogLevel level;
-@property(retain) NSString* name;
+@property(strong) NSString* name;
 
 + (void) logWithLevel:(LogLevel)level format:(NSString*)format, ...;
 + (void) registerTracing:(NSString*)name;

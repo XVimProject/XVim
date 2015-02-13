@@ -413,7 +413,10 @@
     }
     
     // search text beyond the search_base
-    found = [regex rangeOfFirstMatchInString:[srcView string] options:0 range:NSMakeRange(from, [[srcView string] length] - from)];
+    // Since self.lastSearchCmd may include ^ or $, NSMatchingWithoutAnchoringBounds option needs to set.
+    found = [regex rangeOfFirstMatchInString:[srcView string]
+                                     options:NSMatchingWithoutAnchoringBounds
+                                       range:NSMakeRange(from, [[srcView string] length] - from)];
     
     if( found.location >= to) {
         return NSMakeRange(NSNotFound, 0);
@@ -485,14 +488,27 @@
     // Replace all the occurrences
     int numReplacements = 0;
     NSRange found;
-    do {
+    while( true ) {
         found = [self replaceForwardFrom:replace_start_location to:endOfReplacement inWindow:window];
-        if (found.location != NSNotFound) {
-            numReplacements++;
+        if (found.location == NSNotFound){
+            break;
         }
-		replace_start_location = found.location + [replacement length];
-		endOfReplacement = endOfReplacement + [replacement length] - found.length;
-    } while(found.location != NSNotFound && global && replace_start_location < endOfReplacement);
+        numReplacements++;
+        
+        NSRange newline_range = NSMakeRange(NSNotFound, 0);
+        if( [replaced rangeOfString:@"$"].length > 0 ){
+            // include $
+            // assume not to include two or more $
+            if( found.location < (endOfReplacement + replacement.length) ){
+                NSRange search_range = NSMakeRange(found.location, (endOfReplacement + replacement.length)-found.location);
+                newline_range = [[[window sourceView] string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:search_range];
+            }
+        }
+		replace_start_location = found.location + [replacement length] + newline_range.length;
+		endOfReplacement += ([replacement length] - found.length);
+        
+        if( !global || endOfReplacement <= replace_start_location ) break;
+    }
     [window errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
 
 }

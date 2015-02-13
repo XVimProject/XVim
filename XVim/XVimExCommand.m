@@ -10,6 +10,7 @@
 #import "XVimWindow.h"
 #import "XVim.h"
 #import "XVimSearch.h"
+#import "IDEWorkspaceTabController+XVim.h"
 #import "NSTextView+VimOperation.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
@@ -28,16 +29,19 @@
 #import "XVimTester.h"
 
 @implementation XVimExArg
-@synthesize arg,cmd,forceit,lineBegin,lineEnd,addr_count;
+@synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
 @end
+
+// Maximum time in seconds for a 'bang' command to run before being killed as taking too long
+static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 @implementation XVimExCmdname
 @synthesize cmdName,methodName;
 
 -(id)initWithCmd:(NSString*)cmd method:(NSString*)method{
     if( self = [super init] ){
-        cmdName = [cmd retain];
-        methodName = [method retain];
+        cmdName = cmd;
+        methodName = method;
     }
     return self;
 }
@@ -528,7 +532,7 @@
                        CMD(@"vnoremap", @"vnoremap:inWindow:"),
                        CMD(@"vnew", @"splitview:inWindow:"),
                        CMD(@"vnoremenu", @"menu:inWindow:"),
-                       CMD(@"vsplit", @"splitview:inWindow:"),
+                       CMD(@"vsplit", @"vsplitview:inWindow:"),
                        CMD(@"vunmap", @"vunmap:inWindow:"),
                        CMD(@"vunmenu", @"menu:inWindow:"),
                        CMD(@"write", @"write:inWindow:"),
@@ -577,10 +581,6 @@
     return self;
 }
 
-- (void)dealloc{
-    [_excommands release];
-    [super dealloc];
-}
 
 // This method correnspons parsing part of get_address in ex_cmds.c
 - (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
@@ -711,7 +711,7 @@
 
 - (XVimExArg*)parseCommand:(NSString*)cmd inWindow:(XVimWindow*)window
 {
-    XVimExArg* exarg = [[[XVimExArg alloc] init] autorelease]; 
+    XVimExArg* exarg = [[XVimExArg alloc] init]; 
     NSUInteger len = [cmd length];
     
     // Create unichar array to parse. Its easier
@@ -746,7 +746,11 @@
         }
         
         if( exarg.lineBegin == NSNotFound ){ // If its first range 
+            exarg.noRangeSpecified = YES;
             exarg.lineBegin = exarg.lineEnd;
+        }
+        else {
+            exarg.noRangeSpecified = NO;
         }
         
         if( *parsing != ',' ){
@@ -766,7 +770,11 @@
     // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    while( isAlpha(*parsing) || *parsing == '!' ){
+    if (*parsing == '!') {
+        parsing++; count++;
+    }
+    else
+    while( isAlpha(*parsing) ){
         parsing++;
         count++;
     }
@@ -836,7 +844,10 @@
         if( [cmdname.cmdName hasPrefix:[exarg cmd]] ){
             SEL method = NSSelectorFromString(cmdname.methodName);
             if( [self respondsToSelector:method] ){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 [self performSelector:method withObject:exarg withObject:window];
+#pragma clang diagnostic pop
                 break;
             }
         }
@@ -869,16 +880,24 @@
     [self mapClearMode:XVIM_MODE_CMDLINE];
 }
 
+- (void)cquit:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
+    [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
+}
+
 - (void)debug:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSMutableArray* params = [NSMutableArray arrayWithArray:[args.arg componentsSeparatedByString:@" "]];
     if( [params count] == 0 ){
         return;
     }
-    XVimDebug* debug = [[[XVimDebug alloc] init] autorelease];
+    XVimDebug* debug = [[XVimDebug alloc] init];
     NSString* selector = [NSString stringWithFormat:@"%@:withWindow:",[params objectAtIndex:0]];
     [params removeObjectAtIndex:0];
     if( [debug respondsToSelector:NSSelectorFromString(selector)] ){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [debug performSelector:NSSelectorFromString(selector) withObject:params withObject:window];
+#pragma clang diagnostic pop
     }
 }
 
@@ -1026,7 +1045,7 @@
     // We must make forcus back to editor first then invoke the command.
     // This is because I do not know how to move focus on newly visible text editor by invoking this command.
     // Without this focus manipulation the focus after the command does not goes to the text editor
-    //[window setForcusBackToSourceView];
+    [window setForcusBackToSourceView];
     [NSApp sendAction:@selector(jumpToNextCounterpart:) to:nil from:self];
 }
 
@@ -1072,6 +1091,11 @@
 	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:YES];
 }
 
+- (void)only:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [window setForcusBackToSourceView];
+    [XVimLastActiveWorkspaceTabController() xvim_closeOtherEditors];
+}
+
 - (void)onoremap:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	[self mapMode:XVIM_MODE_OPERATOR_PENDING withArgs:args remap:NO];
 }
@@ -1098,7 +1122,8 @@
 }
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :q
-    [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
+    [window setForcusBackToSourceView];
+    [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
 }
 
 - (void)reg:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1173,6 +1198,10 @@
     [view xvim_sortLinesFrom:args.lineBegin to:args.lineEnd withOptions:options];
 }
 
+- (void)splitview:(XVimExArg *)args inWindow:(XVimWindow *)window{
+    [XVimLastActiveWorkspaceTabController() xvim_addEditorHorizontally];
+}
+
 - (void)sub:(XVimExArg*)args inWindow:(XVimWindow*)window{
 	XVimSearch *searcher = [[XVim instance] searcher];
     [searcher substitute:args.arg from:args.lineBegin to:args.lineEnd inWindow:window];
@@ -1229,6 +1258,10 @@
 
 - (void)vmapclear:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [self mapClearMode:XVIM_MODE_VISUAL];
+}
+
+- (void)vsplitview:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [XVimLastActiveWorkspaceTabController() xvim_addEditorVertically];
 }
 
 - (void)write:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :w
@@ -1301,7 +1334,10 @@
     IDEWorkspaceTabController* ctrl = XVimLastActiveWorkspaceTabController();
     if( [ctrl respondsToSelector:item.action] ){
         NSLog(@"IDEWorkspaceTabController perform action");
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [ctrl performSelector:item.action withObject:item];
+#pragma clang diagnostic pop
     } else {
         [NSApp sendAction:item.action to:item.target from:item];
         NSLog(@"menu perform action");
@@ -1311,12 +1347,182 @@
 - (void)xctabctrl:(XVimExArg*)args inWindow:(XVimWindow*)window{
     IDEWorkspaceTabController* ctrl = XVimLastActiveWorkspaceTabController();
     if( [ctrl respondsToSelector:NSSelectorFromString(args.arg)] ){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
         [ctrl performSelector:NSSelectorFromString(args.arg) withObject:self];
+#pragma clang diagnostic pop
     }
 }
 
 - (void)xhelp:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(showQuickHelp:) to:nil from:self];
+}
+
+
+-(void)bang:(XVimExArg*)args inWindow:(XVimWindow*)window
+{
+    NSUInteger firstFilteredLine = args.lineBegin;
+    NSString* selectedText = nil;
+    NSUInteger inputStartLocation = 0;
+    NSUInteger inputEndLocation;
+
+    if (!args.noRangeSpecified && args.lineBegin != NSNotFound && args.lineEnd != NSNotFound)
+    {
+        // Find the position to start searching
+        inputStartLocation = [window.sourceView.textStorage xvim_indexOfLineNumber:args.lineBegin column:0];
+        if( NSNotFound == inputStartLocation){ return; }
+        
+        // Find the position to end the searching
+        inputEndLocation = [window.sourceView.textStorage xvim_indexOfLineNumber:args.lineEnd+1 column:0]; // Next line of the end of range.
+        if( NSNotFound == inputEndLocation ){ inputEndLocation = [[[window sourceView] string] length]; }
+        selectedText = [[window.sourceView.textStorage string] substringWithRange:NSMakeRange(inputStartLocation,inputEndLocation-inputStartLocation)];
+        [window.sourceView setSelectedRange:NSMakeRange(inputStartLocation, inputEndLocation-inputStartLocation) ];
+    }
+
+    NSURL* documentURL = [ window.sourceView documentURL ];
+    NSString* runDir   = @"/";
+
+    if ([documentURL isFileURL])
+    {
+        NSString* documentPath = [documentURL path];
+        runDir = [[documentURL URLByDeletingLastPathComponent] path];
+        NSDictionary* contextForExCmd = [ NSDictionary dictionaryWithObjectsAndKeys :
+                                          [ self _altFilename:documentPath ], @"#"
+                                          , documentPath ?             documentPath : @"", @"%"
+                                          , nil];
+        [ self _expandSpecialExTokens:args contextDict:contextForExCmd];
+    }
+
+    NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg
+                                              withInput:selectedText
+                                            withTimeout:EXTERNAL_COMMAND_TIMEOUT_SECS
+                                           runDirectory:runDir
+                                               colWidth:window.commandLine.quickFixColWidth];
+    if (scriptReturn != nil)
+    {
+        if (args.noRangeSpecified)
+        {
+            // No text range was specified -- open quickfix window to display the result
+            [ window showQuickfixWithString:scriptReturn completionHandler:^{
+                [window.currentWorkspaceWindow makeFirstResponder:window.sourceView];
+            } ];
+        }
+        else
+        {
+            // A text range was specified -- replace the range with the output of the command
+            [ window.sourceView insertText:scriptReturn ];
+
+            if (firstFilteredLine != NSNotFound)
+            {
+                [window.sourceView setSelectedRange:NSMakeRange(inputStartLocation, 1)];
+            }
+        }
+    }
+}
+
+// Really rubbish way of getting the alt filename
+-(NSString*)_altFilename:(NSString *)filename
+{
+    if (!filename)
+    {
+        return @"";
+    }
+    NSString* extension = [ filename pathExtension ];
+    if (!extension || [extension length]==0)
+    {
+        return @"";
+    }
+    if ([extension isEqualToString:@"m"] || [extension isEqualToString:@"mm"] || [extension isEqualToString:@"c"] )
+    {
+        return [[filename stringByDeletingPathExtension] stringByAppendingPathExtension:@"h" ];
+    }
+    else if ([extension isEqualToString:@"h"])
+    {
+        return [[filename stringByDeletingPathExtension] stringByAppendingPathExtension:@"m" ];
+    }
+    return @"";
+    
+}
+
+
+// Expands special ex command 'tokens', as described in cmdline-special of the vim docs
+// :., :~, :s and :gs are not supported yet
+-(void)_expandSpecialExTokens:(XVimExArg *)arg contextDict:(NSDictionary *)ctx
+{
+    if (!arg.arg || [arg.arg length]==0) {
+        return;
+    }
+    NSError*error=nil;
+    NSRegularExpression* regex = [ NSRegularExpression regularExpressionWithPattern:@"(%|#)(:p|:~|:h|:r|:t|:e|:\\.)*"
+                                                                            options:0
+                                                                              error:&error];
+    NSMutableString* resultStr = [ NSMutableString string ];
+    __block NSRange remainderRange = NSMakeRange(0, [arg.arg length]);
+    [ regex enumerateMatchesInString:arg.arg
+                             options:NSMatchingReportCompletion
+                               range:remainderRange
+                          usingBlock:^(NSTextCheckingResult *result, NSMatchingFlags flags, BOOL *stop)
+	 {
+		 if ( result == nil)
+		 {
+			 [ resultStr appendString:[ arg.arg substringWithRange:remainderRange ]];
+		 }
+		 else
+		 {
+			 // % or #
+			 NSRange lastMatchedRange =[ result rangeAtIndex:1 ];
+			 NSString* matchedToken = [arg.arg substringWithRange:lastMatchedRange ];
+			 NSString* substituteValue = [ ctx objectForKey:matchedToken ];
+			 if (!substituteValue)
+			 {
+				 substituteValue = matchedToken;
+			 }
+			 NSUInteger matchIdx = 2;
+			 //DEBUG_LOG(@"Number of matched ranges = %d", [result numberOfRanges] );
+			 while (matchIdx < [ result numberOfRanges]) {
+				 NSRange nextMatchedRange = [ result rangeAtIndex:matchIdx ];
+				 if (nextMatchedRange.location != NSNotFound)
+				 {
+					 NSUInteger matchedPos = lastMatchedRange.location + lastMatchedRange.length ;
+					 // This is the REAL matched range...to my eyes, NSRegularExpression has a bug
+					 NSRange matchedRange = NSMakeRange(matchedPos, nextMatchedRange.location+nextMatchedRange.length-matchedPos);
+					 NSString* matchedToken = [arg.arg substringWithRange:matchedRange];
+					 //DEBUG_LOG(@"Modifiers at range %@ = %@", NSStringFromRange(matchedRange), matchedToken );
+					 for (NSUInteger modIdx = 1; modIdx < [matchedToken length]; modIdx++,modIdx++) {
+						 char modifier = (char)[matchedToken characterAtIndex:modIdx ];
+						 switch (modifier) {
+							 case 'p': // return full 'path' (expand tilde, etc.)
+								 substituteValue = [ substituteValue stringByStandardizingPath ];
+								 break;
+							 case 'h': // return 'head' of path (chop off last component)
+								 substituteValue = [ substituteValue stringByDeletingLastPathComponent ];
+								 break;
+							 case 'r': // 'root' of filename (remove extension)
+								 substituteValue = [ substituteValue stringByDeletingPathExtension ];
+								 break;
+							 case 't': // 'tail' of filename (last path component)
+								 substituteValue = [ substituteValue lastPathComponent ];
+								 break;
+							 case 'e': // 'extension' of filename
+								 substituteValue = [ substituteValue pathExtension ];
+								 break;
+							 default:
+								 break;
+						 }
+					 }
+					 lastMatchedRange = matchedRange;
+				 }
+				 matchIdx++;
+			 }
+			 NSUInteger matchStart = [ result range ].location;
+			 NSUInteger matchLen = [ result range ].length;
+			 NSRange firstHalfRange = NSMakeRange(remainderRange.location, matchStart-remainderRange.location);
+			 [ resultStr appendFormat:@"%@%@", [arg.arg substringWithRange:firstHalfRange],substituteValue];
+			 remainderRange.location = matchStart + matchLen ;
+			 remainderRange.length = [arg.arg length] - remainderRange.location ;
+		 }
+    }];
+    arg.arg = resultStr;
 }
 
 @end

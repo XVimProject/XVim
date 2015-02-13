@@ -88,23 +88,19 @@
     return self;
 }
 
-- (void)dealloc{
-    [results release];
-    [tableView release];
-    [resultsString release];
-    self.testCases = nil;
-    [super dealloc];
-}
 
 - (NSArray*)categories{
-    NSMutableArray* arr = [[[NSMutableArray alloc] init] autorelease];
+    NSMutableArray* arr = [[NSMutableArray alloc] init];
     unsigned int count = 0;
     Method* m = 0;
     m = class_copyMethodList([XVimTester class],  &count);
     for( unsigned int i = 0 ; i < count; i++ ){
         SEL sel = method_getName(m[i]);
         if( [NSStringFromSelector(sel) hasSuffix:@"_testcases"] ){
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
             [arr addObject:[[NSStringFromSelector(sel) componentsSeparatedByString:@"_"] objectAtIndex:0]];
+#pragma clang diagnostic pop
         }
     }
     return arr;
@@ -115,7 +111,11 @@
     for( NSString* c in categories){
         SEL sel = NSSelectorFromString([c stringByAppendingString:@"_testcases"]);
         if( [self respondsToSelector:sel]){
-            [self.testCases addObjectsFromArray:[self performSelector:sel]];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+            NSArray* ary = [self performSelector:sel];
+#pragma clang diagnostic pop
+            [self.testCases addObjectsFromArray:ary];
         }
     }
 }
@@ -124,16 +124,25 @@
     // Create Test Cases
     NSArray* testArray = self.testCases;
     
-    // Alert Dialog to confirm current text will be deleted.
-    NSAlert* alert = [[[NSAlert alloc] init] autorelease];
-    [alert setMessageText:@"Running test deletes text in current source text view. Proceed?"];
-    [alert addButtonWithTitle:@"OK"];
-    [alert addButtonWithTitle:@"Cancel"];
-    NSInteger b = [alert runModal];
-    
-    if( b != NSAlertFirstButtonReturn ){
-        return;
+    NSFileManager* fm = [[NSFileManager alloc] init];
+    NSString* filename = @"/tmp/xvimtest.cpp"; // The tmp file extension must be .cpp , .m or other source file extension.
+                                               // This is because some test case depend on source code format feature.
+                                               // If it is .txt or .tmp source code format is not invoked and some test cases fails.
+    BOOL isDirectory;
+    if( ![fm fileExistsAtPath:filename isDirectory:&isDirectory] ){
+        [fm createFileAtPath:filename contents:nil attributes:nil];
     }
+    
+    IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+    NSError* error;
+    NSURL* doc = [NSURL fileURLWithPath:filename];
+    [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
+    
+	// Close NSWindow to make test run properly
+	[results close];
+	results = nil;
+    
+dispatch_async(dispatch_get_main_queue(), ^{
     
     // Move forcus to source view
     [[XVimLastActiveWindowController() window] makeFirstResponder:XVimLastActiveSourceView()];
@@ -143,16 +152,16 @@
     }
     
     // Setup Talbe view to show result
-    tableView = [[[NSTableView alloc] init] autorelease];
+    tableView = [[NSTableView alloc] init];
     [tableView setDataSource:self];
     [tableView setDelegate:self];
    
     // Create Columns
-    NSTableColumn* column1 = [[[NSTableColumn alloc] initWithIdentifier:@"Description" ] autorelease];
+    NSTableColumn* column1 = [[NSTableColumn alloc] initWithIdentifier:@"Description" ];
     [column1.headerCell setStringValue:@"Description"];
-    NSTableColumn* column2 = [[[NSTableColumn alloc] initWithIdentifier:@"Pass/Fail" ] autorelease];
+    NSTableColumn* column2 = [[NSTableColumn alloc] initWithIdentifier:@"Pass/Fail" ];
     [column2.headerCell setStringValue:@"Pass/Fail"];
-    NSTableColumn* column3 = [[[NSTableColumn alloc] initWithIdentifier:@"Message" ] autorelease];
+    NSTableColumn* column3 = [[NSTableColumn alloc] initWithIdentifier:@"Message" ];
     [column3.headerCell setStringValue:@"Message"];
     [column3 setWidth:500.0];
     
@@ -164,10 +173,12 @@
     
     //setup a window to show the tableview, scrollview, and results toggling button.
     NSUInteger mask = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask | NSResizableWindowMask;
-    results = [[[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false] retain];
+    results = [[NSWindow alloc] initWithContentRect:NSMakeRect(0, 0, 700, 500) styleMask:mask backing:NSBackingStoreBuffered defer:false];
+	// Prevent from crashing on ARC
+	[results setReleasedWhenClosed:NO];
     
     // Setup the table view into scroll view
-    NSScrollView* scroll = [[[NSScrollView alloc] initWithFrame:NSMakeRect(0, 40, 700, 445)] autorelease];
+    NSScrollView* scroll = [[NSScrollView alloc] initWithFrame:NSMakeRect(0, 40, 700, 445)];
     [scroll setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
     [scroll setDocumentView:tableView];
     [scroll setHasVerticalScroller:YES];
@@ -202,7 +213,8 @@
     [self updateResultsString];
     
     [results makeKeyAndOrderFront:results];
-    [resultsView release];
+});
+    
 }
 
 -(void) updateResultsString{
@@ -254,7 +266,7 @@
     }
     
     if( [aTableColumn.identifier isEqualToString:@"Description"] ){
-        return [resultRow description];
+        return [resultRow desc];
     }else if( [aTableColumn.identifier isEqualToString:@"Pass/Fail"] ){
         return (resultRow.success) ? @"Pass" : @"Fail";
     }else if( [aTableColumn.identifier isEqualToString:@"Message"] ){
@@ -279,9 +291,9 @@
 }
 
 - (float)heightForString:(NSString*)myString withFont:(NSFont*)myFont withWidth:(float)myWidth{
-    NSTextStorage *textStorage = [[[NSTextStorage alloc] initWithString:myString] autorelease];
-    NSTextContainer *textContainer = [[[NSTextContainer alloc] initWithContainerSize:NSMakeSize(myWidth, FLT_MAX)] autorelease];
-    NSLayoutManager *layoutManager = [[[NSLayoutManager alloc] init] autorelease];
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithString:myString];
+    NSTextContainer *textContainer = [[NSTextContainer alloc] initWithContainerSize:NSMakeSize(myWidth, FLT_MAX)];
+    NSLayoutManager *layoutManager = [[NSLayoutManager alloc] init];
     [layoutManager addTextContainer:textContainer];
     [textStorage addLayoutManager:layoutManager];
     [textStorage addAttribute:NSFontAttributeName value:myFont
@@ -306,7 +318,9 @@
             msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)row]).message;
         }else{
             NSInteger index = [self getIndexOfNthFailingTestcase:row];
-            msg = ((XVimTestCase*)[self.testCases objectAtIndex:index]).message;
+			if( index >= 0 ){
+                msg = ((XVimTestCase*)[self.testCases objectAtIndex:(NSUInteger)index]).message;
+			}
         }
         if( nil == msg || [msg isEqualToString:@""] ){
             msg = @" ";

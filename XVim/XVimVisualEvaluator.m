@@ -155,18 +155,18 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     // FIXME: doesn't work properly, especially in block mode
     self.onChildCompleteHandler = @selector(onComplete_ai:);
     [self.argumentString appendString:@"a"];
-	return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO] autorelease];
+	return [[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:NO];
 }
 
 - (XVimEvaluator*)A{
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_APPEND] autorelease];
+    return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_APPEND];
 }
 
 - (XVimEvaluator*)i{
     // FIXME: doesn't work properly, especially not in block mode
     self.onChildCompleteHandler = @selector(onComplete_ai:);
     [self.argumentString appendString:@"i"];
-    return [[[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES] autorelease];
+    return [[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES];
 }
 
 
@@ -182,9 +182,9 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)c{
     if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
-        return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BLOCK_KILL] autorelease];
+        return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BLOCK_KILL];
     }
-    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES] autorelease];
+    XVimDeleteEvaluator* eval = [[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1)];
 }
 
@@ -193,7 +193,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
         [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
         return [self c];
     }
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BLOCK_KILL_EOL] autorelease];
+    return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BLOCK_KILL_EOL];
 }
 
 - (XVimEvaluator*)C_b{
@@ -207,7 +207,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)d{
-    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimDeleteEvaluator* eval = [[XVimDeleteEvaluator alloc] initWithWindow:self.window];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, 0)];
 }
 
@@ -222,7 +222,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     }
 
     // FIXME: doesn't work ask expected in any visual mode
-    XVimDeleteEvaluator* eval = [[[XVimDeleteEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimDeleteEvaluator* eval = [[XVimDeleteEvaluator alloc] initWithWindow:self.window];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
 }
 
@@ -234,7 +234,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 - (XVimEvaluator*)g{
     [self.argumentString appendString:@"g"];
     self.onChildCompleteHandler = @selector(g_completed:);
-    return [[[XVimGVisualEvaluator alloc] initWithWindow:self.window] autorelease];
+    return [[XVimGVisualEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator *)g_completed:(XVimEvaluator *)childEvaluator{
@@ -247,13 +247,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 
 - (XVimEvaluator*)I{
     if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
-        return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BEFORE_FIRST_NONBLANK] autorelease];
+        return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BEFORE_FIRST_NONBLANK];
     }
-    return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_DEFAULT] autorelease];
+    return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_DEFAULT];
 }
 
 - (XVimEvaluator*)J{
-    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:YES] autorelease];
+    XVimJoinEvaluator* eval = [[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:YES];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
@@ -261,7 +261,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     // 'm{letter}' sets a local mark.
     [self.argumentString appendString:@"m"];
     self.onChildCompleteHandler = @selector(m_completed:);
-	return [[[XVimMarkSetEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[XVimMarkSetEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)m_completed:(XVimEvaluator*)childEvaluator{
@@ -315,12 +315,12 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)u{
-    XVimLowercaseEvaluator* eval = [[[XVimLowercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimLowercaseEvaluator* eval = [[XVimLowercaseEvaluator alloc] initWithWindow:self.window];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)U{
-    XVimUppercaseEvaluator* eval = [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimUppercaseEvaluator* eval = [[XVimUppercaseEvaluator alloc] initWithWindow:self.window];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
@@ -383,7 +383,7 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
     [self.argumentString appendString:@"\""];
     self.onChildCompleteHandler = @selector(onComplete_DQUOTE:);
     _waitForArgument = YES;
-    return  [[[XVimRegisterEvaluator alloc] initWithWindow:self.window] autorelease];
+    return  [[XVimRegisterEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)onComplete_DQUOTE:(XVimRegisterEvaluator*)childEvaluator{
@@ -423,7 +423,7 @@ TODO: This block is from commit 42498.
 */
 
 - (XVimEvaluator*)EQUAL{
-    XVimEqualEvaluator* eval = [[[XVimEqualEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimEqualEvaluator* eval = [[XVimEqualEvaluator alloc] initWithWindow:self.window];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 }
 
@@ -469,12 +469,12 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)GREATERTHAN{
-    XVimShiftEvaluator* eval = [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:NO] autorelease];
+    XVimShiftEvaluator* eval = [[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:NO];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)LESSTHAN{
-    XVimShiftEvaluator* eval = [[[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:YES] autorelease];
+    XVimShiftEvaluator* eval = [[XVimShiftEvaluator alloc] initWithWindow:self.window unshift:YES];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
@@ -551,7 +551,7 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)TILDE{
-    XVimTildeEvaluator* eval = [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
+    XVimTildeEvaluator* eval = [[XVimTildeEvaluator alloc] initWithWindow:self.window];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, [self numericArg])];
 }
 

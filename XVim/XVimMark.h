@@ -15,7 +15,8 @@
 
 - (id)initWithLine:(NSUInteger)line column:(NSUInteger)col document:(NSString*)doc;
 - (id)initWithMark:(XVimMark*)mark;
+- (void)setMark:(XVimMark*)mark;
 @end
 
 
-#define XVimMakeMark(line, col, doc) [[[XVimMark alloc] initWithLine:line column:col document:doc] autorelease]
+#define XVimMakeMark(line, col, doc) [[XVimMark alloc] initWithLine:line column:col document:doc]

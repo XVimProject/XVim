@@ -17,7 +17,6 @@
     if( self = [super init] ){
         _line = line;
         _column = col;
-        [_document release];
         _document = [doc copy];
     }
     return self;
@@ -31,12 +30,21 @@
     }
 }
 
+- (void)setMark:(XVimMark *)mark
+{
+    if( mark == nil ){
+        _line = NSNotFound;
+        _column = NSNotFound;
+        _document = nil;
+    } else {
+        _line = mark.line;
+        _column = mark.column;
+        _document = [mark.document copy];
+    }
+}
+
 - (id)init{
     return [self initWithMark:nil];
 }
 
-- (void)dealloc{
-    self.document = nil;
-    [super dealloc];
-}
 @end

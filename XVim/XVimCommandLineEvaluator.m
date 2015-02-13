@@ -36,8 +36,8 @@
 		  onKeyPress:(OnKeyPressHandler)keyPressHandler
 {
     if (self = [super initWithWindow:window]){
-		_firstLetter = [firstLetter retain];
-		_history = [history retain];
+		_firstLetter = firstLetter;
+		_history = history;
 		_onComplete = [completeHandler copy];
 		_onKeyPress = [keyPressHandler copy];
 		_historyNo = 0;
@@ -50,15 +50,6 @@
 	return self;
 }
 
-- (void)dealloc{
-    [_firstLetter release];
-    [_history release];
-    [_onComplete release];
-    [_onKeyPress release];
-    [_evalutionResult release];
-    self.lastTextView = nil;
-    [super dealloc];
-}
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
 	return [keymapProvider keymapForMode:XVIM_MODE_CMDLINE];
@@ -113,7 +104,10 @@
 
 	XVimCommandField *commandField = self.window.commandLine.commandField;
 	if ([keyStroke instanceResponds:self]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 		next = [self performSelector:[keyStroke selector]];
+#pragma clang diagnostic pop
 	}
 	else{
 		[commandField handleKeyStroke:keyStroke inWindow:self.window];

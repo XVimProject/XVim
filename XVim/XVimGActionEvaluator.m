@@ -51,7 +51,7 @@
             m.position = newPos;
             
             // set the position before the jump
-            XVimMark* cur_mark = [[[XVimMark alloc] init] autorelease];
+            XVimMark* cur_mark = [[XVimMark alloc] init];
             cur_mark.line = [self.sourceView insertionLine];
             cur_mark.column = [self.sourceView insertionColumn];
             cur_mark.document = [self.sourceView documentURL].path;
@@ -62,32 +62,32 @@
             mode = XVIM_INSERT_APPEND;
         }
     }
-	return [[[XVimInsertEvaluator alloc] initWithWindow:self.window mode:mode] autorelease];
+	return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:mode];
 }
 
 - (XVimEvaluator*)J{
-    XVimJoinEvaluator* eval = [[[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO] autorelease];
+    XVimJoinEvaluator* eval = [[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
 }
 
 - (XVimEvaluator*)u{
     [self.argumentString appendString:@"u"];
-	return [[[XVimLowercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[XVimLowercaseEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)U{
     [self.argumentString appendString:@"U"];
-	return [[[XVimUppercaseEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[XVimUppercaseEvaluator alloc] initWithWindow:self.window];
 }
 
 - (XVimEvaluator*)v{
     // Select previous visual selection
-    return [[[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window] autorelease];
+    return [[XVimVisualEvaluator alloc] initWithLastVisualStateWithWindow:self.window];
 }
 
 - (XVimEvaluator*)TILDE{
     [self.argumentString appendString:@"~"];
-	return [[[XVimTildeEvaluator alloc] initWithWindow:self.window] autorelease];
+	return [[XVimTildeEvaluator alloc] initWithWindow:self.window];
 }
 
 @end

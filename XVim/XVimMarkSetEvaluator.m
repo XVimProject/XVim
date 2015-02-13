@@ -27,7 +27,7 @@
         return [XVimEvaluator invalidEvaluator];
     }
     
-    XVimMark* mark = [[[XVimMark alloc] init] autorelease];
+    XVimMark* mark = [[XVimMark alloc] init];
 	NSRange r = [self.sourceView selectedRange];
     mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:r.location];
     mark.column = [self.sourceView.textStorage xvim_columnOfIndex:r.location];

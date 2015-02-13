@@ -31,6 +31,7 @@
 #import "NSTextView+VimOperation.h"
 
 #import "XVimInsertEvaluator.h"
+#import "NSTextView+VimOperation.h"
 
 @implementation DVTSourceTextViewHook
 
@@ -46,9 +47,7 @@
 }
 
 + (void)hook{
-    [self hook:@"initWithCoder:"];
-    [self hook:@"initWithFrame:textContainer:"];
-    [self hook:@"dealloc"];
+
     [self hook:@"setSelectedRanges:affinity:stillSelecting:"];
     [self hook:@"selectAll:"];
     // [self hook:@"cut:"];  // Cut calls delete: after all. Do not need to hook
@@ -95,28 +94,7 @@
 }
 
 #ifdef __XCODE5__
-- (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
-    TRACE_LOG(@"[%p]ENTER", self);
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    id obj =  (DVTSourceTextViewHook*)[base initWithFrame_:rect textContainer:container];
-    if( nil != obj ){
-        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-    }
-    return obj;
-}
 
-- (id)initWithCoder:(NSCoder*)coder{
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    id obj =  (DVTSourceTextViewHook*)[base initWithCoder_:coder];
-    if( nil != obj ){
-        [XVim.instance.options addObserver:obj forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.options addObserver:obj forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-        [XVim.instance.searcher addObserver:obj forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
-    }
-    return (DVTSourceTextViewHook*)[base initWithCoder_:coder];
-}
 #else
 - (id)initWithFrame:(NSRect)rect textContainer:(NSTextContainer *)container{
     TRACE_LOG(@"ENTER");
@@ -135,24 +113,6 @@
 }
 #endif
 
-// This pragma is for suppressing warning that the dealloc method does not call [super dealloc]. ([base dealloc_] calls [super dealloc] so we do not need it)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-- (void)dealloc{
-    DVTSourceTextView *base = (DVTSourceTextView*)self;
-    @try{
-        [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
-        [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"]; 
-        [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
-    }
-    @catch (NSException* exception){
-        ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
-        [Logger logStackTrace:exception];
-    }
-    [base dealloc_];
-    return;
-}
-#pragma GCC diagnostic pop
 
 - (void)setSelectedRanges:(NSArray *)ranges affinity:(NSSelectionAffinity)affinity stillSelecting:(BOOL)flag{
     [(DVTSourceTextView*)self setSelectedRanges_:ranges affinity:affinity stillSelecting:flag];
@@ -229,10 +189,14 @@
     return;
 }
 
-
-- (void)drawRect:(NSRect)dirtyRect{
+NSRect s_lastCaret;
+- (void)drawRect:(NSRect)dirtyRect{ 
+    TRACE_LOG(@"drawRect");
     @try{
         NSTextView* view = (NSTextView*)self;
+        
+        NSGraphicsContext* context = [NSGraphicsContext currentContext];
+        [context saveGraphicsState];
         
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
@@ -242,10 +206,10 @@
         }else{
             [view xvim_clearHighlightText];
         }
-       
         
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base drawRect_:dirtyRect];
+        
         if( base.selectionMode != XVIM_VISUAL_NONE ){
             // NSTextView does not draw insertion point when selecting text. We have to draw insertion point by ourselves.
             NSUInteger glyphIndex = [base insertionPoint];
@@ -253,6 +217,23 @@
             [[[base insertionPointColor] colorWithAlphaComponent:0.5] set];
             NSRectFillUsingOperation( glyphRect, NSCompositeSourceOver);
         }
+        
+        // Caret Drawing
+        XVimWindow* window = [base xvimWindow];
+        if( [base performSelector:@selector(_isLayerBacked)] && ![[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
+            // Erase Cursor 
+            [[NSBezierPath bezierPathWithRect:[base visibleRect]] setClip];
+            [base drawRect_:s_lastCaret];
+            if( ![[[XVim instance] options] blinkcursor] ){
+                // Only when not blinkcursor, draw caret
+                NSUInteger glyphIndex = [base insertionPoint];
+                NSRect glyphRect = [base xvim_boundingRectForGlyphIndex:glyphIndex];
+                //glyphRect.origin.x -= 1.0f;
+                [self _drawInsertionPointInRect:glyphRect color:[base insertionPointColor]];
+            }
+        }
+        
+        [context restoreGraphicsState];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -262,39 +243,51 @@
 
 // Drawing Caret
 - (void)_drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
+    TRACE_LOG(@"%f %f %f %f", aRect.origin.x, aRect.origin.y, aRect.size.width, aRect.size.height);
     @try{
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         XVimWindow* window = [base xvimWindow];
-        TRACE_LOG(@"_drawInsertionPointInRect");
-        [base drawRect:[base visibleRect]];
         if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
             // Use original behavior when insert mode.
-            [base _drawInsertionPointInRect_:aRect color:aColor];
-        }else{
-            [window drawInsertionPointInRect:aRect color:aColor];
+            return [base _drawInsertionPointInRect_:aRect color:aColor];
         }
+        
+        NSUInteger glyphIndex = [base insertionPoint];
+        NSRect glyphRect = [base xvim_boundingRectForGlyphIndex:glyphIndex];
+        s_lastCaret = glyphRect;
+        [[NSBezierPath bezierPathWithRect:[base visibleRect]] setClip];
+        [window drawInsertionPointInRect:glyphRect color:aColor];
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
 }
-
 - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor *)color turnedOn:(BOOL)flag{
-        DVTSourceTextView *base = (DVTSourceTextView*)self;
-        XVimWindow* window = [base xvimWindow];
-        if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
-            // Use original behavior when insert mode.
-            [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
-        }else{
-            if( [[[XVim instance] options] blinkcursor] ){
-                if(!flag){
-                    // Clear caret
-                    [base drawRect:[base visibleRect]];    
-                }
-                // Call original(This eventually calls _drawInsertionPointInRect:color: if flag is YES)
-                [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+    DVTSourceTextView *base = (DVTSourceTextView*)self;
+    XVimWindow* window = [base xvimWindow];
+    if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
+        // Use original behavior when insert mode.
+        return [base drawInsertionPointInRect_:rect color:color turnedOn:flag];
+    }
+    
+    if( ![base performSelector:@selector(_isLayerBacked)] ){
+        if( [[[XVim instance] options] blinkcursor] ){
+            [self drawRect:s_lastCaret];
+            if( flag ) {
+                [self _drawInsertionPointInRect:rect color:color];
             }
+        }else{
+            [self drawRect:s_lastCaret];
+            [self _drawInsertionPointInRect:rect color:color];
         }
+    }
+    else{
+        if( [[[XVim instance] options] blinkcursor] ){
+            [self drawRect:s_lastCaret];
+            [self _drawInsertionPointInRect:rect color:color];
+        }
+    }
+    return;
 }
 - (void)didChangeText{
     DVTSourceTextView *base = (DVTSourceTextView*)self;
@@ -307,9 +300,30 @@
     XVimWindow* window = [base xvimWindow];
     return [window shouldAutoCompleteAtLocation:(unsigned long long)location];
 }
+static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW";
 
 - (void)viewDidMoveToSuperview {
     @try{
+        if ( ![ self boolForName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW ] ) {
+            [XVim.instance.options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            [XVim.instance.options addObserver:self forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            [XVim.instance.searcher addObserver:self forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            __unsafe_unretained DVTSourceTextView* weakSelf = (DVTSourceTextView*)self;
+            [ self xvim_performOnDealloc:^{
+                DVTSourceTextView *base = (DVTSourceTextView*)weakSelf;
+                @try{
+                    [XVim.instance.options removeObserver:base forKeyPath:@"hlsearch"];
+                    [XVim.instance.options removeObserver:base forKeyPath:@"ignorecase"];
+                    [XVim.instance.searcher removeObserver:base forKeyPath:@"lastSearchString"];
+                }
+                @catch (NSException* exception){
+                    ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
+                    [Logger logStackTrace:exception];
+                }
+            }];
+            [ self setBool:YES forName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW ];
+        }
+        
         DVTSourceTextView *base = (DVTSourceTextView*)self;
         [base viewDidMoveToSuperview_];
         

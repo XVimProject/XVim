@@ -140,6 +140,15 @@
             XVimMakeTestCase(text2, 8, 0, @"3Fb2,", text2, 6, 0),
             
             // , ; (comma semicolon) for t T
+            XVimMakeTestCase(text2, 0, 0,  @"2tb;", text2, 5, 0),
+            XVimMakeTestCase(text2, 0, 0,  @"tb2;", text2, 4, 0),
+            XVimMakeTestCase(text2, 0, 0,  @"2t ,", text2, 4, 0),
+            XVimMakeTestCase(@"01a345aaaa", 0, 0, @"5ta2,", @"01a345aaaa", 7, 0),
+            
+            XVimMakeTestCase(text2, 8, 0, @"2Tb;", text2, 5, 0),
+            XVimMakeTestCase(text2, 8, 0, @"Tb2;", text2, 6, 0),
+            XVimMakeTestCase(text2, 8, 0, @"2T ,", text2, 6, 0),
+            XVimMakeTestCase(@"01a345aaaa", 9, 0, @"4Ta3,", @"01a345aaaa", 7, 0),
             
         nil];
 }
