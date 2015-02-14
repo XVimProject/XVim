@@ -73,19 +73,27 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-    SEL keySelector = [keyStroke selectorForInstance:self];
+    XVimEvaluator *nextEvaluator = self;
+
+    SEL keySelector = keyStroke.selector;
+    if ([self respondsToSelector:keySelector]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-    XVimEvaluator *nextEvaluator = keySelector ? [self performSelector:keySelector] : self;
+        nextEvaluator = [self performSelector:keySelector];
 #pragma clang diagnostic pop
+    } else {
+        keySelector = nil;
+    }
 
-    if (nextEvaluator == self && nil == keySelector){
+    if (nextEvaluator == self && nil == keySelector) {
         if (self.oneCharMode || [self windowShouldReceive:keySelector]) {
             // Here we pass the key input to original text view.
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
-            if (self.oneCharMode || (keyStroke.modifier == 0 && isPrintable(keyStroke.character))) {
-                if (![self.sourceView xvim_replaceCharacters:keyStroke.character count:1]) {
+            if (self.oneCharMode || keyStroke.isPrintable) {
+                if (!keyStroke.isPrintable) {
+                    nextEvaluator = [XVimEvaluator invalidEvaluator];
+                } else if (![self.sourceView xvim_replaceCharacters:keyStroke.character count:1]) {
                     nextEvaluator = [XVimEvaluator invalidEvaluator];
                 } else if (self.oneCharMode) {
                     nextEvaluator = nil;

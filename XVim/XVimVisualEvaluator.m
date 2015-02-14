@@ -193,7 +193,8 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
         [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
         return [self c];
     }
-    return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BLOCK_KILL_EOL];
+    [self performSelector:@selector(DOLLAR)];
+    return [[XVimInsertEvaluator alloc] initWithWindow:self.window mode:XVIM_INSERT_BLOCK_KILL];
 }
 
 - (XVimEvaluator*)C_b{
@@ -216,14 +217,13 @@ static NSString* MODE_STRINGS[] = {@"", @"-- VISUAL --", @"-- VISUAL LINE --", @
 }
 
 - (XVimEvaluator*)D{
-    if (self.sourceView.selectionMode != XVIM_VISUAL_BLOCK) {
+    if (self.sourceView.selectionMode == XVIM_VISUAL_BLOCK) {
+        [self performSelector:@selector(DOLLAR)];
+    } else {
         [self.sourceView xvim_changeSelectionMode:XVIM_VISUAL_LINE];
-        return [self d];
     }
 
-    // FIXME: doesn't work ask expected in any visual mode
-    XVimDeleteEvaluator* eval = [[XVimDeleteEvaluator alloc] initWithWindow:self.window];
-    return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, LINEWISE, MOTION_OPTION_NONE, 0)];
+    return [self d];
 }
 
 - (XVimEvaluator*)C_f{

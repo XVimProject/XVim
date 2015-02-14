@@ -22,8 +22,7 @@
 }
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-    NSString* keyStr = [keyStroke toSelectorString];
-	if ([keyStr length] != 1) {
+    if (keyStroke.modifier) {
         return [XVimEvaluator invalidEvaluator];
     }
     
@@ -33,7 +32,7 @@
     mark.column = [self.sourceView.textStorage xvim_columnOfIndex:r.location];
     mark.document = [[self.sourceView documentURL] path];
     if( nil != mark.document ){
-        [[XVim instance].marks setMark:mark forName:keyStr];
+        [[XVim instance].marks setMark:mark forName:keyStroke.xvimString];
     }
     return nil;
 }

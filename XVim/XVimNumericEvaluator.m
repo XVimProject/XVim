@@ -8,39 +8,25 @@
 
 #import "XVimNumericEvaluator.h"
 #import "XVimKeyStroke.h"
+#import "NSString+VimHelper.h"
 
 @implementation XVimNumericEvaluator
 
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-    NSString* keyStr = [keyStroke toSelectorString];
-	
     
     if (keyStroke.isNumeric) {
-        if (self.numericMode) {
-            NSString* numStr = [keyStr substringFromIndex:3];
-            NSUInteger n = (NSUInteger)[numStr integerValue]; 
-			NSUInteger newHead = self.numericArg;
-            // prevent integer overflow
-            if(newHead <= floor((NSUIntegerMax - n) / 10)){
-                newHead*=10; 
-                newHead+=n;
-                self.numericArg = newHead;
-                [self.argumentString appendString:numStr];
+        unichar     buf[4] = { 'N', 'U', 'M', keyStroke.character };
+        NSUInteger  digit  = buf[3] - '0';
+
+        if (self.numericMode || digit) {
+            NSUInteger n = self.numericMode ?  self.numericArg : 0;
+
+            self.numericMode = YES;
+            if (n <= NSUIntegerMax / 10) {
+                self.numericArg = 10 * n + digit;
+                CFStringAppendCharacters((__bridge CFMutableStringRef)self.argumentString, buf, 4);
             }
             return self;
-        }
-        else{
-            if( [keyStr isEqualToString:@"NUM0"] ){
-                // Nothing to do
-                // Maybe handled by XVimNormalEvaluator
-            }else{
-                NSString* numStr = [keyStr substringFromIndex:3];
-                NSUInteger n = (NSUInteger)[numStr integerValue]; 
-				self.numericArg = n;
-				[self.argumentString appendString:numStr];
-                self.numericMode = YES;
-                return self;
-            }
         }
     }
     

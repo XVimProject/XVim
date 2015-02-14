@@ -103,10 +103,11 @@
 	XVimEvaluator* next = self;
 
 	XVimCommandField *commandField = self.window.commandLine.commandField;
-	if ([keyStroke instanceResponds:self]) {
+    SEL sel = keyStroke.selector;
+    if ([self respondsToSelector:sel]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-		next = [self performSelector:[keyStroke selector]];
+		next = [self performSelector:sel];
 #pragma clang diagnostic pop
 	}
 	else{
