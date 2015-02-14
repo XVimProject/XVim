@@ -1057,6 +1057,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 - (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToNextIssue:) to:nil from:self];
+    [window setForcusBackToSourceView];
 }
 
 - (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
@@ -1119,6 +1120,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 - (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
+    [window setForcusBackToSourceView];
 }
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :q
