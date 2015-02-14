@@ -10,43 +10,31 @@
 #import "XVim.h"
 #import "XVimOptions.h"
 #import "Hooker.h"
-#import "DVTSourceTextScrollViewHook.h"
+#import "DVTSourceTextScrollView+XVim.h"
 #import "NSObject+ExtraData.h"
+#import "NSObject+XVimAdditions.h"
 
 
-@implementation DVTSourceTextScrollViewHook
-+ (void)hook:(NSString*)method{
-    NSString* cls = @"DVTSourceTextScrollView";
-    NSString* thisCls = NSStringFromClass([self class]);
-    [Hooker hookClass:cls method:method byClass:thisCls method:method];
+@implementation DVTSourceTextScrollView(XVim)
++ (void)xvim_initialize{
+    [self xvim_swizzleInstanceMethod:@selector(viewWillMoveToWindow:) with:@selector(xvim_viewWillMoveToWindow:)];
+    [self xvim_swizzleInstanceMethod:@selector(hasVerticalScroller) with:@selector(xvim_hasVerticalScroller)];
+    [self xvim_swizzleInstanceMethod:@selector(hasHorizontalScroller) with:@selector(xvim_hasHorizontalScroller)];
+    [self xvim_swizzleInstanceMethod:@selector(observeValueForKeyPath:ofObject:change:context:) with:@selector(xvim_observeValueForKeyPath:ofObject:change:context:)];
 }
 
-+ (void)unhook:(NSString*)method{
-    NSString* cls = @"DVTSourceTextScrollView";
-    [Hooker unhookClass:cls method:method];
-}
-
-+ (void)hook{
-    [self hook:@"viewWillMoveToWindow:"];
-    [self hook:@"hasVerticalScroller"];
-    [self hook:@"hasHorizontalScroller"]; 
-    [self hook:@"observeValueForKeyPath:ofObject:change:context:"];
-}
-
-+ (void)unhook{
-    // Never unhook comment outed methods because this class observes XVimOption value on init and remove observe on dealloc.
-    // Unhooking between init and dealloc leads inconsistent state (and crash)
-    // [self unhook:@"initWithFrame:"];
-    // [self unhook:@"dealloc"];
-    [self unhook:@"hasVerticalScroller"]; 
-    [self unhook:@"hasHorizontalScroller"]; 
-    // [self unhook:@"observeValueForKeyPath:ofObject:change:context:"];
++ (void)xvim_finalize{
+    [self xvim_swizzleInstanceMethod:@selector(viewWillMoveToWindow:) with:@selector(xvim_viewWillMoveToWindow:)];
+    [self xvim_swizzleInstanceMethod:@selector(hasVerticalScroller) with:@selector(xvim_hasVerticalScroller)];
+    [self xvim_swizzleInstanceMethod:@selector(hasHorizontalScroller) with:@selector(xvim_hasHorizontalScroller)];
+    // TODO: To unhook observe... method, we have to removeObserver from XVimOptions.
+    //       We already have PerformOnDealloc object associated to this obj, we just call it then call this unhook method.
+    //[self xvim_swizzleInstanceMethod:@selector(observeValueForKeyPath:ofObject:change:context:) with:@selector(xvim_observeValueForKeyPath:ofObject:change:context:)];
 }
 
 static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW";
 
-
--(void)viewWillMoveToWindow:(NSWindow*)window
+-(void)xvim_viewWillMoveToWindow:(NSWindow*)window
 {
     if ( ![self boolForName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW] ) {
         [XVim.instance.options addObserver:self forKeyPath:@"guioptions" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
@@ -63,10 +51,10 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
         }];
         [ self setBool:YES forName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW];
     }
-    [ (DVTSourceTextScrollView*)self viewWillMoveToWindow_:window ];
+    [self xvim_viewWillMoveToWindow:window ];
 }
 
-- (BOOL)hasVerticalScroller{
+- (BOOL)xvim_hasVerticalScroller{
     if( [XVim.instance.options.guioptions rangeOfString:@"r"].location == NSNotFound) {
         return NO;
     }else{
@@ -74,7 +62,7 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
     }
 }
 
-- (BOOL)hasHorizontalScroller{
+- (BOOL)xvim_hasHorizontalScroller{
     if( [XVim.instance.options.guioptions rangeOfString:@"b"].location == NSNotFound) {
         return NO;
     }else{
@@ -82,9 +70,8 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
     }
 }
 
-- (void)observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
+- (void)xvim_observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
     if([keyPath isEqualToString:@"guioptions"]){
-        NSScrollView* view = (NSScrollView*)self;
         // Just updating the scrollers state.
         // Current problem we have is that when invoking "set guioptions=rb"
         // the alphaValue(=0) is not reflected to the view immideately.
@@ -92,14 +79,14 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
         // I tried like [view needsDisplay:YES] or [view.verticalScroller needsDisplay:YES] and etc.
         // but any method call doesn't work...
         if( [XVim.instance.options.guioptions rangeOfString:@"r"].location == NSNotFound) {
-            view.verticalScroller.alphaValue=0;
+            self.verticalScroller.alphaValue=0;
         }else{
-            view.verticalScroller.alphaValue=1;
+            self.verticalScroller.alphaValue=1;
         }
         if( [XVim.instance.options.guioptions rangeOfString:@"b"].location == NSNotFound) {
-            view.horizontalScroller.alphaValue=0;
+            self.horizontalScroller.alphaValue=0;
         }else{
-            view.horizontalScroller.alphaValue=1;
+            self.horizontalScroller.alphaValue=1;
         }
     }
 }
