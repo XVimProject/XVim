@@ -1343,9 +1343,6 @@
 
         if (lines) *lines = XVimMakeRange(sel.top, sel.bottom);
         switch (mode) {
-            case XVIM_INSERT_BLOCK_KILL_EOL:
-                sel.right = XVimSelectionEOL;
-                /* fallthrough */
             case XVIM_INSERT_BLOCK_KILL:
                 [self _xvim_yankSelection:sel];
                 [self _xvim_killSelection:sel];

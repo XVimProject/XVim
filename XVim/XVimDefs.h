@@ -26,7 +26,6 @@ typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
     XVIM_INSERT_BEFORE_FIRST_NONBLANK,
     XVIM_INSERT_APPEND_EOL,
     XVIM_INSERT_BLOCK_KILL,
-    XVIM_INSERT_BLOCK_KILL_EOL,
 };
 
 typedef enum {
