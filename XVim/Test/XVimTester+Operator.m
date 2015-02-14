@@ -143,6 +143,16 @@
                                  @"bbb\n"
                                  @"ccc";
     
+    static NSString* R_result1 = @"aXX bbb ccc\n";
+    static NSString* R_result2 = @"aXXXXXX ccc\n";
+    static NSString* R_result3 = @"XYXYXYb ccc\n";
+    static NSString* R_result4 = @"aXa\n"
+                                 @"bbb\n"
+                                 @"ccc"; 
+    static NSString* R_result5 = @"aXa\n"
+                                 @"bbb\n"
+                                 @"ccc";
+    
     static NSString* s_result1 = @"aaaaa bbb ccc\n";
     static NSString* s_result2 = @"aaa bbb ccc\n";
     static NSString* s_result3 = @"aaaa\n"
@@ -486,6 +496,13 @@
             XVimMakeTestCase(text0, 5,  0, @"rXl.l.", r_result3, 7, 0), // Repeat
             XVimMakeTestCase(text1, 1,  0, @"rXjj`^", r_result4, 2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"rXjj`.", r_result5, 1, 0), // . Mark
+            
+            // R
+            XVimMakeTestCase(text0, 1,  0, @"RXX<ESC>",     R_result1, 2, 0),
+            XVimMakeTestCase(text0, 1,  0, @"3RXX<ESC>",    R_result2, 6, 0), // Numeric arg
+            XVimMakeTestCase(text0, 0,  0, @"RXY<ESC>l.l.", R_result3, 5, 0), // Repeat
+            XVimMakeTestCase(text1, 1,  0, @"RX<ESC>jj`^",  R_result4, 2, 0), // ^ Mark
+            XVimMakeTestCase(text1, 1,  0, @"RX<ESC>jj`.",  R_result5, 1, 0), // . Mark
             
             // s
             XVimMakeTestCase(text0, 1, 0, @"saaa<ESC>"   , s_result1,  3, 0),

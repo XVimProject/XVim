@@ -32,7 +32,6 @@
 @implementation XVimInsertEvaluator{
     BOOL _insertedEventsAbort;
     NSMutableArray* _insertedEvents;
-    BOOL _oneCharMode;
     NSUInteger _blockEditColumn;
     XVimRange _blockLines;
     XVimInsertionPoint _mode;
@@ -47,17 +46,16 @@
 
 
 - (id)initWithWindow:(XVimWindow *)window{
-    return [self initWithWindow:window oneCharMode:NO mode:XVIM_INSERT_DEFAULT];
+    return [self initWithWindow:window mode:XVIM_INSERT_DEFAULT];
 }
 
-- (id)initWithWindow:(XVimWindow*)window oneCharMode:(BOOL)oneCharMode mode:(XVimInsertionPoint)mode{
+- (id)initWithWindow:(XVimWindow*)window mode:(XVimInsertionPoint)mode{
     self = [super initWithWindow:window];
     if (self) {
         _mode = mode;
         _blockEditColumn = NSNotFound;
         _blockLines = XVimMakeRange(NSNotFound, NSNotFound);
         _lastInsertedText = @"";
-        _oneCharMode = oneCharMode;
         _movementKeyPressed = NO;
         _insertedEventsAbort = NO;
         _enoughBufferForReplace = YES;
@@ -88,27 +86,6 @@
     [super becameHandler];
     [self.sourceView xvim_insert:_mode blockColumn:&_blockEditColumn blockLines:&_blockLines];
     self.startRange = [[self sourceView] selectedRange];
-}
-
-- (float)insertionPointHeightRatio{
-    if(_oneCharMode){
-        return 0.25;
-    }
-    return 1.0;
-}
-
-- (float)insertionPointWidthRatio{
-    if(_oneCharMode){
-        return 1.0;
-    }
-    return 0.15;
-}
-
-- (float)insertionPointAlphaRatio{
-    if(_oneCharMode){
-        return 0.5;
-    }
-    return 1.0;
 }
 
 - (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider{
@@ -167,29 +144,32 @@
     self.startRange = [[self sourceView] selectedRange];
 }
 
+- (void)repeatBlockText {
+    NSString *text = [self insertedText];
+    for( NSUInteger i = 0 ; i < [self numericArg]-1; i++ ){
+        [self.sourceView insertText:text];
+    }
+
+    if (_blockEditColumn != NSNotFound) {
+        XVimRange range = XVimMakeRange(_blockLines.begin + 1, _blockLines.end);
+        [self.sourceView xvim_blockInsertFixupWithText:text mode:_mode count:self.numericArg
+                                                column:_blockEditColumn lines:range];
+    }
+}
+
 - (void)didEndHandler{
     [super didEndHandler];
 	NSTextView *sourceView = [self sourceView];
 
-    if( !_insertedEventsAbort && !_oneCharMode ){
-        NSString *text = [self insertedText];
-        for( NSUInteger i = 0 ; i < [self numericArg]-1; i++ ){
-            [sourceView insertText:text];
-        }
-
-        if (_blockEditColumn != NSNotFound) {
-            XVimRange range = XVimMakeRange(_blockLines.begin + 1, _blockLines.end);
-            [sourceView xvim_blockInsertFixupWithText:text mode:_mode count:self.numericArg
-                                               column:_blockEditColumn lines:range];
-        }
+    if( !_insertedEventsAbort ){
+        [self repeatBlockText];
     }
 
     // Store off any needed text
     XVim *xvim = [XVim instance];
     xvim.lastVisualMode = self.sourceView.selectionMode;
     [xvim fixOperationCommands];
-    if( _oneCharMode ){
-    }else if (!self.movementKeyPressed){
+    if (!self.movementKeyPressed){
         //[self recordTextIntoRegister:xvim.recordingRegister];
         //[self recordTextIntoRegister:xvim.repeatRegister];
     }else if(self.lastInsertedText.length > 0){
@@ -239,13 +219,7 @@
     
     if (nextEvaluator == self && nil == keySelector){
         NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
-        if (_oneCharMode) {
-            if( ![self.sourceView xvim_replaceCharacters:keyStroke.character count:[self numericArg]] ){
-                nextEvaluator = [XVimEvaluator invalidEvaluator];
-            }else{
-                nextEvaluator = nil;
-            }
-        } else if ([self windowShouldReceive:keySelector]) {
+        if ([self windowShouldReceive:keySelector]) {
             // Here we pass the key input to original text view.
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
