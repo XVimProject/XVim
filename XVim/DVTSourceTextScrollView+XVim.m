@@ -9,7 +9,6 @@
 #import "Logger.h"
 #import "XVim.h"
 #import "XVimOptions.h"
-#import "Hooker.h"
 #import "DVTSourceTextScrollView+XVim.h"
 #import "NSObject+ExtraData.h"
 #import "NSObject+XVimAdditions.h"

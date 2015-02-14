@@ -13,7 +13,6 @@
 #import <AppKit/NSText.h>
 
 #import "DVTKit.h"
-#import "Hooker.h"
 #import "Logger.h"
 #import "DVTKit.h"
 #import "XVim.h"

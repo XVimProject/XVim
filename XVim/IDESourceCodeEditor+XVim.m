@@ -9,7 +9,6 @@
 #import "IDESourceCodeEditor+XVim.h"
 #import "IDEKit.h"
 #import "XVimWindow.h"
-#import "Hooker.h"
 #import "Logger.h"
 #import "XVimStatusLine.h"
 #import "XVim.h"

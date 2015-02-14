@@ -10,7 +10,6 @@
 #import "DVTKit.h"
 #import "XVimEvaluator.h"
 #import "XVimWindow.h"
-#import "Hooker.h"
 #import "Logger.h"
 #import "DVTKit.h"
 #import "XVimStatusLine.h"

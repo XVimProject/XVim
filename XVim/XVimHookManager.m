@@ -10,7 +10,7 @@
 #import "XVimHookManager.h"
 #import "DVTTextSidebarView+XVim.h"
 #import "IDESourceEditor.h"
-#import "IDEEditorHook.h"
+#import "IDEEditor+XVim.h"
 #import "IDESourceCodeEditor+XVim.h"
 #import "IDEEditorArea+XVim.h"
 #import "DVTSourceTextScrollView+XVim.h"
@@ -51,7 +51,7 @@
     [DVTTextSidebarView xvim_initialize];
     [DVTSourceTextScrollView xvim_initialize];
     [IDESourceCodeEditor xvim_initialize];
-    [IDEEditorHook hook];
+    [IDEEditor xvim_initialize];
 }
 
 @end
