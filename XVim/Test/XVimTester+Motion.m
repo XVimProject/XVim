@@ -30,18 +30,24 @@
                              @"g[g }hh i_i\n"  // 24 28 32
                              @"    jj] kkk";   // 36 40 44
     
+    static NSString* text5 = @"aaa:<#bbb ccc ddd#> eee"; // 0 3 4 20
+    
     return [NSArray arrayWithObjects:
             // b, B
             XVimMakeTestCase(text2,  6, 0,  @"b", text2,  4, 0),
             XVimMakeTestCase(text2, 14, 0, @"3b", text2,  4, 0),
             XVimMakeTestCase(text2,  4, 0,  @"B", text2,  0, 0),
             XVimMakeTestCase(text2, 27, 0, @"3B", text2, 16, 0),
+            XVimMakeTestCase(text5, 20, 0,  @"b", text5,  4, 0), // Placeholder
+            XVimMakeTestCase(text5, 20, 0, @"3b", text5,  0, 0), // Placeholder
             
             // e, E
             XVimMakeTestCase(text2, 16, 0,  @"e", text2, 17, 0),
             XVimMakeTestCase(text2, 17, 0, @"3e", text2, 26, 0),
             XVimMakeTestCase(text2, 16, 0,  @"E", text2, 18, 0),
             XVimMakeTestCase(text2, 16, 0, @"3E", text2, 26, 0),
+            XVimMakeTestCase(text5,  3, 0,  @"e", text5,  4, 0), // Placeholder
+            XVimMakeTestCase(text5,  3, 0, @"2e", text5, 22, 0), // Placeholder
             
             // f, F
             XVimMakeTestCase(text2,  0, 0,  @"fc", text2,  8, 0),
@@ -67,6 +73,10 @@
             XVimMakeTestCase(text1, 1, 0,   @"h", text1, 0, 0),
             XVimMakeTestCase(text1, 0, 0,   @"<Space>", text1, 1, 0),
             XVimMakeTestCase(text1, 0, 0, @"10<Space>", text1, 2, 0),
+            XVimMakeTestCase(text5, 3, 0,   @"l", text5,  4, 0), // Placeholder
+            XVimMakeTestCase(text5, 4, 0,   @"l", text5, 19, 0), // Placeholder
+            XVimMakeTestCase(text5, 19, 0,  @"h", text5,  4, 0), // Placeholder
+            XVimMakeTestCase(text5, 4, 0,   @"h", text5,  3, 0), // Placeholder
             
             // t, T
             XVimMakeTestCase(text2,  0, 0,  @"tc", text2,  7, 0),
@@ -80,6 +90,8 @@
             XVimMakeTestCase(text2, 0, 0, @"4w", text2,  8, 0),
             XVimMakeTestCase(text2, 0, 0,  @"W", text2,  4, 0),
             XVimMakeTestCase(text2, 0, 0, @"4W", text2, 16, 0),
+            XVimMakeTestCase(text5, 3, 0,  @"w", text5,  4, 0), // Placeholder
+            XVimMakeTestCase(text5, 4, 0,  @"w", text5, 20, 0), // Placeholder 
             
             // 0, $, ^
             XVimMakeTestCase(text2, 10, 0,   @"0", text2,  0, 0),

@@ -2176,18 +2176,23 @@
             // Do nothing
             break;
         case MOTION_FORWARD:
+            motion.option |= MOPT_PLACEHOLDER;
             end = [self.textStorage next:begin count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_BACKWARD:
+            motion.option |= MOPT_PLACEHOLDER;
             end = [self.textStorage prev:begin count:motion.count option:motion.option ];
             break;
         case MOTION_WORD_FORWARD:
+            motion.option |= MOPT_PLACEHOLDER;
             end = [self.textStorage wordsForward:begin count:motion.count option:motion.option info:motion.info];
             break;
         case MOTION_WORD_BACKWARD:
+            motion.option |= MOPT_PLACEHOLDER;
             end = [self.textStorage wordsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_FORWARD:
+            motion.option |= MOPT_PLACEHOLDER;
             end = [self.textStorage endOfWordsForward:begin count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_BACKWARD:

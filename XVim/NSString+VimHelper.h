@@ -16,6 +16,7 @@ BOOL isDelimeter(unichar ch);
 BOOL isWhitespace(unichar ch);
 BOOL isNewline(unichar ch);
 BOOL isNonblank(unichar ch);
+BOOL isWhiteSpaceOrNewline(unichar ch);
 BOOL isKeyword(unichar ch);
 
 @interface NSString (VimHelper)

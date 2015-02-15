@@ -94,6 +94,10 @@ typedef enum {
 // Determine if the position specified with "index" is white space.
 - (BOOL) isWhitespace:(NSUInteger)index;
 
+- (BOOL) isWhitespaceOrNewline:(NSUInteger)index;
+
+- (BOOL) isKeyword:(NSUInteger)index;
+
 // Determine if the position is on the last line in the document
 - (BOOL) isLastLine:(NSUInteger)index;
 
