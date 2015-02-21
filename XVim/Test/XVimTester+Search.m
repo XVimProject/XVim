@@ -47,23 +47,23 @@
                                          @"bbb ccc ccc\n"
                                          @"bbb ccc ddd\n";
     
-    static NSString* replace2_result =   @"aaa eeeee ccc\n"
-                                         @"bbb ccc ccc\n"
+    static NSString* replace2_result =   @"aaa bbb eeeee\n"
+                                         @"bbb eeeee ccc\n"
                                          @"bbb ccc ddd\n";
     
-    static NSString* replace3_result =   @"aaa eeeee ccc\n"
-                                         @"eeeee ccc ccc\n"
+    static NSString* replace3_result =   @"aaa bbb eeeee\n"
+                                         @"bbb eeeee eeeee\n"
                                          @"bbb ccc ddd\n";
     
-    static NSString* replace4_result =   @"eeeeeaaa bbb ccc\n"
-                                         @"bbb ccc ccc\n"
+    static NSString* replace4_result =   @"aaa bbb ccc\n"
+                                         @"bbb eeeee eeeee\n"
                                          @"bbb ccc ddd\n";
     
     static NSString* replace5_result =   @"eeeeeaaa bbb ccc\n"
                                          @"eeeeebbb ccc ccc\n"
                                          @"bbb ccc ddd\n";
     
-    static NSString* replace6_result =   @"aaa bbb cccfffff\n"
+    static NSString* replace6_result =   @"aaa bbb eeeee\n"
                                          @"bbb ccc ccc\n"
                                          @"bbb ccc ddd\n";
     
@@ -73,27 +73,59 @@
     
     static NSString* replace8_result =   @"aaa bbb cccfffff\n"
                                          @"bbb ccc cccfffff\n\n";
-    
+
+    static NSString* replace9_result =   @"aaa bbb eeeee\n"
+                                         @"bbb eeeee ccc\n"
+                                         @"bbb ccc ddd\n";
+
+    static NSString* replace10_result =  @"aaa bbb eeeee\n"
+                                         @"bbb eeeee eeeee\n"
+                                         @"bbb eeeee ddd\n";
     return [NSArray arrayWithObjects:
             //
             // replace(:s)
             //
             XVimMakeTestCase(text6, 0,  0, @":%s/aaa/eeeee<CR>", replace1_result, 5, 0),
-            // only first one
-            XVimMakeTestCase(text6, 0,  0, @"Vj:s/bbb/eeeee<CR>", replace2_result, 9, 0),
-            // two
-            XVimMakeTestCase(text6, 0,  0, @"Vj:s/bbb/eeeee/g<CR>", replace3_result, 9, 0),
+            // only first one on each line
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee<CR>", replace2_result, 23, 0),
+            // all occurences on each line
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/g<CR>", replace3_result, 28, 0),
             // ^, only first one
-            XVimMakeTestCase(text6, 0,  0, @"Vj:s/^/eeeee<CR>", replace4_result, 5, 0),
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/^/eeeee<CR>", replace5_result, 22, 0),
             // ^, two
             XVimMakeTestCase(text6, 0,  0, @"Vj:s/^/eeeee/g<CR>", replace5_result, 22, 0),
-            // $, only first one
-            XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff<CR>", replace6_result, 15, 0),
+            // $, two, no g flag
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff<CR>", replace7_result, 32, 0),
+            // $, two, g flag
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff/g<CR>", replace7_result, 32, 0),
             // $, two
-            XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff/g<CR>", replace7_result, 15, 0),
-            // $, two
-            XVimMakeTestCase(text7, 0,  0, @"Vj:s/$/fffff/g<CR>", replace8_result, 15, 0),
-            
+            XVimMakeTestCase(text7, 0,  0, @"Vj:s/$/fffff/g<CR>", replace8_result, 32, 0),
+
+            // c, quit
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>q", text6, 8, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>q", text6, 8, 0),
+            // c, replace one, quit
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>yq", replace6_result, 18, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>yq", replace6_result, 18, 0),
+            // c, skip all
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>nnn", text6, 20, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>nnnn", text6, 28, 0),
+            // c, skip one replace two
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>nyy", replace4_result, 26, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>nyyn", replace4_result, 32, 0),
+            // c, replace one and quit
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>yq", replace6_result, 18, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>yq", replace6_result, 18, 0),
+            // c, last
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>l", replace6_result, 12, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>l", replace6_result, 12, 0),
+            // c, replace one, last
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>yl", replace9_result, 23, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>yl", replace9_result, 23, 0),
+            // c, replace all
+            XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>yyy", replace3_result, 28, 0),
+            XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>yyyy", replace10_result, 39, 0),
+
             // Search (/,?)
             XVimMakeTestCase(text1, 0,  0, @"/bbb<CR>", text1, 4, 0),
             XVimMakeTestCase(text1, 8,  0, @"?bbb<CR>", text1, 4, 0),
