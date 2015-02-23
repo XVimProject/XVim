@@ -386,48 +386,70 @@
     return found;
 }
 
-- (NSRange)replaceForwardFrom:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
+- (void)findForwardFrom:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
 {
     // We don't use [NSString rangeOfString] for searching, because it does not obey ^ or $ search anchoring
     // We use NSRegularExpression which does (if you tell it to)
-    
-    NSRange found = {NSNotFound, 0};
-    
-#ifdef __MAC_10_7    
-    
+
+    self.lastFoundRange = NSMakeRange(NSNotFound, 0);
+
+#ifdef __MAC_10_7
+
     NSTextView* srcView = [window sourceView];
-    
+
     NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
-	if ([self isCaseInsensitive])
-	{
-		r_opts |= NSRegularExpressionCaseInsensitive;
-	}
-    
+    if ([self isCaseInsensitive])
+    {
+        r_opts |= NSRegularExpressionCaseInsensitive;
+    }
+
     NSError *error = NULL;
     TRACE_LOG(@"%@", self.lastReplacementString);
     NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchCmd options:r_opts error:&error];
-    
+
     if (error != nil) {
         [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchDisplayString] ringBell:TRUE];
-        return NSMakeRange(NSNotFound,0);
+        self.lastFoundRange = NSMakeRange(NSNotFound,0);
+        return;
     }
-    
+
     // search text beyond the search_base
     // Since self.lastSearchCmd may include ^ or $, NSMatchingWithoutAnchoringBounds option needs to set.
-    found = [regex rangeOfFirstMatchInString:[srcView string]
+    self.lastFoundRange = [regex rangeOfFirstMatchInString:[srcView string]
                                      options:NSMatchingWithoutAnchoringBounds
                                        range:NSMakeRange(from, [[srcView string] length] - from)];
+
+    if( self.lastFoundRange.location >= to) {
+        self.lastFoundRange = NSMakeRange(NSNotFound,0);
+        return;
+    }
+
+    if (self.confirmEach) {
+        [srcView scrollRectToVisible:[srcView xvim_boundingRectForGlyphIndex:self.lastFoundRange.location]];
+        [srcView xvim_moveCursor:self.lastFoundRange.location preserveColumn:NO];
+        [srcView showFindIndicatorForRange:self.lastFoundRange];
+    }
+#endif
+}
+
+- (NSRange)replaceForwardFrom:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
+{
+#ifdef __MAC_10_7
     
-    if( found.location >= to) {
+    NSTextView* srcView = [window sourceView];
+
+    [self findForwardFrom:from to:to inWindow:window];
+    
+    if( self.lastFoundRange.location >= to) {
         return NSMakeRange(NSNotFound, 0);
     }
-    if( found.location != NSNotFound){
+    if( self.lastFoundRange.location != NSNotFound){
         // Replace the text
         // The following method is undoable
-        [srcView insertText:self.lastReplacementString replacementRange:found];
+        [srcView insertText:self.lastReplacementString replacementRange:self.lastFoundRange];
     }
 #endif    
-    return found;
+    return self.lastFoundRange;
 }
 
 - (void)substitute:(NSString*)ex_command from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window
@@ -469,49 +491,101 @@
     self.lastSearchCmd = replaced;
     self.lastSearchDisplayString = replaced;
     self.lastReplacementString = replacement;
+    self.isGlobal = global;
+    self.confirmEach = confirmation;
+    self.replaceStartLocation = from;
+    self.replaceEndLine = to;
+    self.numReplacements = 0;
     
     // Find the position to start searching
-    NSUInteger replace_start_location = [window.sourceView.textStorage xvim_indexOfLineNumber:from column:0];
-    if( NSNotFound == replace_start_location){
+    self.replaceStartLocation = [window.sourceView.textStorage xvim_indexOfLineNumber:from column:0];
+    if( NSNotFound == self.replaceStartLocation){
         return;
     }
     
     // Find the position to end the searching
-    NSUInteger endOfReplacement = [window.sourceView.textStorage xvim_indexOfLineNumber:to+1 column:0]; // Next line of the end of range.
-    if( NSNotFound == endOfReplacement ){
-        endOfReplacement = [[[window sourceView] string] length];
+    self.replaceEndLocation = [window.sourceView.textStorage xvim_indexOfLineNumber:to+1 column:0]; // Next line of the end of range.
+    if( NSNotFound == self.replaceEndLocation ){
+        self.replaceEndLocation = [[[window sourceView] string] length];
     }
-    // This is lazy implementation.
-    // When text is substituted the end location may be smaller or greater than original end position.
-    // I'll implement correct version later.
-    
-    // Replace all the occurrences
-    int numReplacements = 0;
-    NSRange found;
-    while( true ) {
-        found = [self replaceForwardFrom:replace_start_location to:endOfReplacement inWindow:window];
-        if (found.location == NSNotFound){
-            break;
-        }
-        numReplacements++;
-        
-        NSRange newline_range = NSMakeRange(NSNotFound, 0);
-        if( [replaced rangeOfString:@"$"].length > 0 ){
-            // include $
-            // assume not to include two or more $
-            if( found.location < (endOfReplacement + replacement.length) ){
-                NSRange search_range = NSMakeRange(found.location, (endOfReplacement + replacement.length)-found.location);
-                newline_range = [[[window sourceView] string] rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet] options:0 range:search_range];
-            }
-        }
-		replace_start_location = found.location + [replacement length] + newline_range.length;
-		endOfReplacement += ([replacement length] - found.length);
-        
-        if( !global || endOfReplacement <= replace_start_location ) break;
-    }
-    [window errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %d",numReplacements] ringBell:TRUE];
 
+    [self findForwardFrom:self.replaceStartLocation to:self.replaceEndLocation inWindow:window];
+
+    if (self.confirmEach) {
+        return;
+    }
+
+    while (self.lastFoundRange.location != NSNotFound) {
+        [self replaceCurrentInWindow:window findNext:YES];
+    }
 }
 
+- (void)updateStartLocationInWindow:(XVimWindow*)window
+{
+    // global option on; consider all matches on each line
+    if (self.isGlobal) {
+        self.replaceStartLocation = self.lastFoundRange.location + self.lastReplacementString.length;
 
+        // If search string contained a $, move to the next line
+        if ([self.lastSearchCmd rangeOfString:@"$"].length > 0) {
+            self.replaceStartLocation = [window.sourceView.textStorage xvim_endOfLine:self.lastFoundRange.location] + 1;
+        }
+    }
+    // global option off; only one match per line
+    else {
+        self.replaceStartLocation = [window.sourceView.textStorage xvim_endOfLine:self.lastFoundRange.location] + 1;
+    }
+}
+
+- (void) updateEndLocationInWindow:(XVimWindow*)window
+{
+    self.replaceEndLocation += ([self.lastReplacementString length] - self.lastFoundRange.length);
+}
+
+- (void)replaceCurrentInWindow:(XVimWindow*)window findNext:(BOOL)findNext
+{
+    NSTextView* srcView = [window sourceView];
+
+    [srcView insertText:self.lastReplacementString replacementRange:self.lastFoundRange];
+    [srcView xvim_moveCursor:self.lastFoundRange.location + self.lastReplacementString.length preserveColumn:NO];
+    self.numReplacements++;
+
+    if (findNext) {
+        [self updateStartLocationInWindow:window];
+        [self updateEndLocationInWindow:window];
+        [self findForwardFrom:self.replaceStartLocation to:self.replaceEndLocation inWindow:window];
+    }
+    else {
+        self.lastFoundRange = NSMakeRange(NSNotFound, 0);
+    }
+    [self showStatusIfDoneInWindow:window];
+}
+
+- (void)skipCurrentInWindow:(XVimWindow*)window
+{
+    self.replaceStartLocation = self.lastFoundRange.location + self.lastFoundRange.length;
+    [self findForwardFrom:self.replaceStartLocation to:self.replaceEndLocation inWindow:window];
+    [self showStatusIfDoneInWindow:window];
+}
+
+- (void)replaceCurrentToEndInWindow:(XVimWindow*)window
+{
+    NSTextView* srcView = [window sourceView];
+
+    do {
+        [srcView insertText:self.lastReplacementString replacementRange:self.lastFoundRange];
+        self.numReplacements++;
+
+        [self updateEndLocationInWindow:window];
+        [self findForwardFrom:self.replaceStartLocation to:self.replaceEndLocation inWindow:window];
+    } while (self.lastFoundRange.location != NSNotFound);
+    [self showStatusIfDoneInWindow:window];
+}
+
+- (void)showStatusIfDoneInWindow:(XVimWindow*)window
+{
+    if (self.lastFoundRange.location == NSNotFound) {
+        [window errorMessage:[NSString stringWithFormat: @"Number of occurrences replaced %ld",(long)self.numReplacements] ringBell:TRUE];
+    }
+}
 @end

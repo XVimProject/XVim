@@ -29,6 +29,15 @@ typedef enum {
 @property (strong) NSString* lastReplacementString;
 @property BOOL matchStart;
 @property BOOL matchEnd;
+@property BOOL isGlobal;
+@property BOOL confirmEach;
+@property NSUInteger replaceCurrentLine;
+@property NSUInteger replaceStartLine;
+@property NSUInteger replaceEndLine;
+@property NSRange lastFoundRange;
+@property NSUInteger replaceStartLocation;
+@property NSUInteger replaceEndLocation;
+@property NSInteger numReplacements;
 
 - (BOOL)isCaseInsensitive;
 // - (NSRange)executeSearch:(NSString*)searchCmd display:(NSString*)displayString from:(NSUInteger)from inWindow:(XVimWindow*)window;
@@ -40,7 +49,9 @@ typedef enum {
 // If range.location == NSNotFound, an error is added to the command line
 // Returns whether range.location is valid
 // - (BOOL)selectSearchResult:(NSRange)r inWindow:(XVimWindow*)window;
-
+- (void)replaceCurrentInWindow:(XVimWindow*)window findNext:(BOOL)findNext;
+- (void)skipCurrentInWindow:(XVimWindow*)window;
+- (void)replaceCurrentToEndInWindow:(XVimWindow*)window;
 - (XVimMotion*)motionForRepeatSearch;
 - (XVimMotion*)motionForSearch:(NSString*)string forward:(BOOL)forward;
 - (void)substitute:(NSString*)searchCmd from:(NSUInteger)from to:(NSUInteger)to inWindow:(XVimWindow*)window;

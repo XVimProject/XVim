@@ -96,17 +96,6 @@ The layout is forced to change with Ctrl-w,s or Ctrl-w,v .
 
 Regex search is supported using the [ICU regex](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSRegularExpression_Class/Reference/Reference.html) format.
 
-Substitution does not work as Vim does. When you input command following
-
-    :%s/xxxx/yyyy/
-
-XVim does replace the first occurrence of xxxx IN THE FILE (not each line ).
-If you want to replace all the occurrence of xxxx with yyyy in the file you can specify
-
-    :%s/xxxx/yyyy/g
-
-Currently replacing first occurrence of xxxx with yyyy each line is not available
-
 ## Insert mode commands
 
 C-y, C-e
