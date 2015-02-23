@@ -20,55 +20,56 @@
     return self;
 }
 
-- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke {
-
+- (XVimEvaluator*)a{
     XVimSearch *searcher = [[XVim instance] searcher];
 
-    if (keyStroke.modifier == 0) {
-        switch (keyStroke.character) {
-            case 'y':
-                [searcher replaceCurrentInWindow:self.window findNext:YES];
+    [searcher replaceCurrentToEndInWindow:self.window];
 
-                if (searcher.lastFoundRange.location == NSNotFound) {
-                    return nil;
-                }
-                break;
-            case 'n':
-                [searcher skipCurrentInWindow:self.window];
-                if (searcher.lastFoundRange.location == NSNotFound) {
-                    return nil;
-                }
-                break;
-            case 'a':
-                [searcher replaceCurrentToEndInWindow:self.window];
-                break;
-            case 'l':
-                [searcher replaceCurrentInWindow:self.window findNext:NO];
-                return nil;
-                break;
+    return nil;
+}
 
-            case 'q':
-                return nil;
-                break;
-            default:
-                break;
-        }
+- (XVimEvaluator*)C_e{
+    if (self.window.sourceView.currentLineNumber > (long long)[self.window.sourceView xvim_lineNumberFromTop:1]) {
+        [self.window.sourceView xvim_scrollLineForward:1];
     }
-    else if (keyStroke.modifier & 4) {
-        switch (keyStroke.character) {
-            case 'e':
-                if (self.window.sourceView.currentLineNumber > (long long)[self.window.sourceView xvim_lineNumberFromTop:1]) {
-                    [self.window.sourceView xvim_scrollLineForward:1];
-                }
-                break;
-            case 'y':
-                if (self.window.sourceView.currentLineNumber < (long long)[self.window.sourceView xvim_lineNumberFromBottom:1]) {
-                    [self.window.sourceView xvim_scrollLineBackward:1];
-                }
-                break;
-            default:
-                break;
-        }
+    return self;
+}
+
+- (XVimEvaluator*)l{
+    XVimSearch *searcher = [[XVim instance] searcher];
+
+    [searcher replaceCurrentInWindow:self.window findNext:NO];
+    return nil;
+}
+
+- (XVimEvaluator*)n{
+    XVimSearch *searcher = [[XVim instance] searcher];
+
+    [searcher skipCurrentInWindow:self.window];
+    if (searcher.lastFoundRange.location == NSNotFound) {
+        return nil;
+    }
+    return self;
+}
+
+- (XVimEvaluator*)q{
+    return nil;
+}
+
+- (XVimEvaluator*)y{
+    XVimSearch *searcher = [[XVim instance] searcher];
+
+    [searcher replaceCurrentInWindow:self.window findNext:YES];
+
+    if (searcher.lastFoundRange.location == NSNotFound) {
+        return nil;
+    }
+    return self;
+}
+
+- (XVimEvaluator*)C_y{
+    if (self.window.sourceView.currentLineNumber < (long long)[self.window.sourceView xvim_lineNumberFromBottom:1]) {
+        [self.window.sourceView xvim_scrollLineBackward:1];
     }
     return self;
 }
