@@ -74,6 +74,9 @@
     return self;
 }
 
+- (XVimEvaluator*)defaultNextEvaluator{
+    return self;
+}
 - (NSString*)modeString{
     return self.replaceModeString;
 }
