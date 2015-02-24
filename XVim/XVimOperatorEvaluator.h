@@ -16,6 +16,7 @@
 @class XVimOperatorAction;
 
 @interface XVimOperatorEvaluator : XVimMotionEvaluator
+@property BOOL textObject;
 - (id)initWithWindow:(XVimWindow *)window;
 - (XVimEvaluator*)executeOperationWithMotion:(XVimMotion*)motion;
 /*

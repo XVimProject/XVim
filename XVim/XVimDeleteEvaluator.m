@@ -68,6 +68,13 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     
 -(XVimEvaluator*)motionFixed:(XVimMotion*)motion{
     if (_insertModeAtCompletion == TRUE) {
+        
+        if (self.textObject) {
+            NSTextView *srcView = self.window.sourceView;
+            if ([srcView xvim_getMotionRange:srcView.insertionPoint Motion:motion].end == NSNotFound) {
+                return nil;
+            }
+        }
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
         [[self sourceView] xvim_change:motion];

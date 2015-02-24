@@ -57,6 +57,7 @@
 
 - (XVimEvaluator*)i{
     [self.argumentString appendString:@"i"];
+    self.textObject = YES;
     return [[XVimTextObjectEvaluator alloc] initWithWindow:self.window inner:YES];
 }
 
