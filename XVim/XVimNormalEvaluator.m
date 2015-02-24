@@ -170,7 +170,7 @@
 - (XVimEvaluator*)onComplete_g:(XVimGActionEvaluator*)childEvaluator{
     if (childEvaluator.key.selector == @selector(SEMICOLON)) {
         XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
-        return [self jumpToMark:mark firstOfLine:NO];
+        return [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:NO NeedUpdateMark:YES];
     }else{
         if( childEvaluator.motion != nil ){
             return [self _motionFixed:childEvaluator.motion];
@@ -214,12 +214,19 @@
 }
 
 - (XVimEvaluator*)C_o{
-    [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
+    BOOL needUpdateMark;
+    XVimMark* mark = [[XVim instance].marks decrementJumpMark:&needUpdateMark];
+    if( mark != nil ){
+        [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:YES NeedUpdateMark:needUpdateMark];
+    }
     return nil;
 }
 
 - (XVimEvaluator*)C_i{
-    [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
+    XVimMark* mark = [[XVim instance].marks incrementJumpMark];
+    if( mark != nil ){
+        [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:YES NeedUpdateMark:NO];
+    }
     return nil;
 }
 
@@ -519,6 +526,7 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
+    [self.window preMotion:motion];
     [[self sourceView] xvim_move:motion];
     return nil;
 }
