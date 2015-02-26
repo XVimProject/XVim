@@ -51,6 +51,7 @@
     test.expectedText = et;
     test.expectedRange = er;
     test.message = @"";
+    test.exception = NO;
     if( nil != desc ){
         test.desc = desc;
     }else{
@@ -70,6 +71,10 @@
 }
 
 - (BOOL)assert{
+    if( self.exception ){
+    	self.message = @"Exception raiesed.";
+    	return NO;
+    }
     if( ![self.expectedText isEqualToString:[XVimLastActiveSourceView() string]] ){
         self.message = [NSString stringWithFormat:@"Result text is different from expected text.\n\nResult Text:\n%@\n\nExpected Text:\n%@ [%@:%ld]\n", [XVimLastActiveSourceView() string], self.expectedText,self.file, self.line];
         return NO;
@@ -90,8 +95,12 @@
     NSGraphicsContext* context = [[XVimLastActiveWindowController() window] graphicsContext];
     NSArray* strokes = XVimKeyStrokesFromKeyNotation(notation);
     for( XVimKeyStroke* stroke in strokes ){
-        NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
-        [[IDEApplication sharedApplication] sendEvent:event];
+	@try{
+	    NSEvent* event = [stroke toEventwithWindowNumber:num context:context];
+	    [[IDEApplication sharedApplication] sendEvent:event];
+	}@catch(NSException* ex){
+	    self.exception = YES;
+	}
         
         // Tells NSUndoManager to end grouping (Little hacky)
         // This is because the loop here emulates NSApplication's run loop.

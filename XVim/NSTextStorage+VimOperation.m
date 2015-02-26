@@ -1144,7 +1144,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         return NSNotFound;
     }
     
-    for( ; p <= end; p++ ){
+    for( ; p < end; p++ ){
         if( [[self xvim_string] characterAtIndex:p] == character ){
             count--;
             if( 0 == count ){

@@ -388,6 +388,8 @@
             // c
             XVimMakeTestCase(text0, 5,  0, @"cwaaa<ESC>"    , cw_result1,  7, 0),
             XVimMakeTestCase(text0, 9,  0, @"cwaaa<ESC>"    , cw_result2, 11, 0),
+    	    XVimMakeTestCase(text0, 0,  0, @"cfwlll<ESC>"   , text0,      3, 0),  // change when motion failed.
+    	    XVimMakeTestCase(text2, 0,  0, @"cfwlll<ESC>"   , text2,      3, 0),  // change when motion failed when no newline at the end. This had raised exceptio by a bug.
             XVimMakeTestCase(text1, 1,  0, @"2cwaa<ESC>"    , cw_result3,  2, 0), // Numeric arg
             XVimMakeTestCase(text0, 5,  0, @"2cwXXX<ESC>.." , cw_result4, 11, 0), // Repeat
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`^", cw_result5,  2, 0), // ^ Mark

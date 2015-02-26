@@ -70,7 +70,9 @@ insertModeAtCompletion:(BOOL)insertModeAtCompletion{
     if (_insertModeAtCompletion == TRUE) {
         // Do not repeat the insert, that is how vim works so for
         // example 'c3wWord<ESC>' results in Word not WordWordWord
-        [[self sourceView] xvim_change:motion];
+        if( ![[self sourceView] xvim_change:motion] ){
+            return nil;
+        }
         [self resetNumericArg];
         // Do not call [[XVim instance] fixRepeatCommand] here.
         // It will be called after XVimInsertEvaluator finish handling key input.

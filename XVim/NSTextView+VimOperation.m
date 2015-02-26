@@ -709,12 +709,12 @@
     [self xvim_syncState];
 }
 
-- (void)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank
+- (BOOL)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank
 {
     NSAssert( !(self.selectionMode == XVIM_VISUAL_NONE && motion == nil),
              @"motion must be specified if current selection mode is not visual");
     if (self.insertionPoint == 0 && [[self xvim_string] length] == 0) {
-        return ;
+	return NO;
     }
     NSUInteger newPos = NSNotFound;
     
@@ -725,7 +725,7 @@
         NSRange r;
         XVimRange motionRange = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
         if( motionRange.end == NSNotFound ){
-            return;
+	    return NO;
         }
         // We have to treat some special cases
         // When a cursor get end of line with "l" motion, make the motion type to inclusive.
@@ -801,9 +801,10 @@
     if (newPos != NSNotFound) {
         [self xvim_moveCursor:newPos preserveColumn:NO];
     }
+    return YES;
 }
 
-- (void)xvim_change:(XVimMotion*)motion{
+- (BOOL)xvim_change:(XVimMotion*)motion{
     // We do not need to call this since this method uses xvim_delete to operate on text
     //[self xvim_registerInsertionPointForUndo]; 
     
@@ -820,8 +821,16 @@
         motion.type = CHARACTERWISE_INCLUSIVE;
         motion.option |= MOTION_OPTION_CHANGE_WORD;
     }
+    // We have to set cursor mode insert before calling delete
+    // because delete adjust cursor position when the cursor is end of line. (e.g. C command).
+    // This behaves that insertion position after delete is one character before the last char of the line.
     self.cursorMode = CURSOR_MODE_INSERT;
-    [self xvim_delete:motion andYank:YES];
+    if( ![self xvim_delete:motion andYank:YES] ){
+	// And if the delele failed we set the cursor mode back to command.
+	// The cursor mode should be kept in Evaluators so we should make some delegation to it.
+	self.cursorMode = CURSOR_MODE_COMMAND;
+	return NO;
+    }
     if( motion.info->deleteLastLine){
         [self xvim_insertNewlineAboveLine:[self.textStorage xvim_lineNumberAtIndex:self.insertionPoint]];
     }
@@ -832,6 +841,7 @@
     }
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     [self xvim_syncState];
+    return YES;
 }
 
 - (void)xvim_yank:(XVimMotion*)motion{
