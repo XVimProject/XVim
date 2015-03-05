@@ -1082,19 +1082,19 @@
 }
 
 - (BOOL)xvim_replaceCharacters:(unichar)c count:(NSUInteger)count{
-    NSUInteger end = [self.textStorage xvim_endOfLine:self.insertionPoint];
+    NSUInteger eol = [self.textStorage xvim_endOfLine:self.insertionPoint];
     // Note : endOfLine may return one less than self.insertionPoint if self.insertionPoint is on newline
-    if( NSNotFound == end ){
+    if( NSNotFound == eol ){
         return NO;
     }
-    NSUInteger num = end - self.insertionPoint + 1;
-    if( num < count ){
-        return NO;
-    }
-    
-    end = self.insertionPoint+count;
-    for( NSUInteger pos = self.insertionPoint; pos < end; pos++){
-        [self insertText:[NSString stringWithFormat:@"%c",c] replacementRange:NSMakeRange(pos, 1)];
+    NSUInteger end = self.insertionPoint + count;
+    for( NSUInteger pos = self.insertionPoint; pos < end; ++pos){
+        NSString* text = [NSString stringWithFormat:@"%C",c];
+        if( pos < eol ){
+            [self insertText:text replacementRange:NSMakeRange(pos, 1)];
+        } else {
+            [self insertText:text];
+        }
     }
     return YES;
 }
