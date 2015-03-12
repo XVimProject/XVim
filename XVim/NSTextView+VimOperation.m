@@ -2300,9 +2300,17 @@
             break;
         case MOTION_SEARCH_FORWARD:
             end = [self.textStorage searchRegexForward:motion.regex from:self.insertionPoint count:motion.count option:motion.option].location;
+			if( end == NSNotFound && !(motion.option&SEARCH_WRAP) ){
+                NSRange range = [self xvim_currentWord:MOTION_OPTION_NONE];
+                end = range.location;
+			}
             break;
         case MOTION_SEARCH_BACKWARD:
             end = [self.textStorage searchRegexBackward:motion.regex from:self.insertionPoint count:motion.count option:motion.option].location;
+			if( end == NSNotFound && !(motion.option&SEARCH_WRAP) ){
+				NSRange range = [self xvim_currentWord:MOTION_OPTION_NONE];
+                end = range.location;
+			}
             break;
         case TEXTOBJECT_WORD:
             range = [self.textStorage currentWord:begin count:motion.count  option:motion.option];
@@ -2355,6 +2363,7 @@
             }
             break;
         case MOTION_POSITION:
+        case MOTION_POSITION_JUMP:
             end = motion.position;
             break;
     }

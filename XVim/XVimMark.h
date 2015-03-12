@@ -16,6 +16,8 @@
 - (id)initWithLine:(NSUInteger)line column:(NSUInteger)col document:(NSString*)doc;
 - (id)initWithMark:(XVimMark*)mark;
 - (void)setMark:(XVimMark*)mark;
++ (id)markWithLine:(NSUInteger)line column:(NSUInteger)col document:(NSString*)doc;
++ (id)markWithMark:(XVimMark*)mark;
 @end
 
 
