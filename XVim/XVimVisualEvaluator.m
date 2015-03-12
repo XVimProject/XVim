@@ -570,6 +570,7 @@ TODO: This block is from commit 42498.
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     if(!XVim.instance.isRepeating){
+        [self.window preMotion:motion];
         [[self sourceView] xvim_move:motion];
         [self resetNumericArg];
     }

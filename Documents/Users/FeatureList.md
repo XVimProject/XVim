@@ -28,6 +28,9 @@ C-d, C-f, C-e, C-u, C-b, C-y, zz, zb, zt
 ## Jumps
 C-o, C-i, gd
 
+C-i is defined as 'Editor-Structure-Re Indent' in default Xcode key bindings.
+If you want to use C-i as jump, you need to clear ^I in Xcode settings 'Xcode-Preference-Key bindings'.
+
 If you want to open the file under the cursor you can use 'gd' instead of 'gf' in XVim environment.
 
 ## Insert
@@ -133,6 +136,7 @@ The dot command ('.') is supported.
   :imap    | Maps insert mode
   :omap    | Maps operator pending mode
   :!       | Execute command with external process
+  :jumps   | Show jump list. The current position is represented as '>'.
 
 ## Filename modifier for bang
 
@@ -159,6 +163,8 @@ The dot command ('.') is supported.
   :pissue       | Invoke "jump to previous issue". ":pi" does the same.
   :ncounterpart | Invoke "jump to next counterpart". ":nc" does the same.
   :pcounterpart | Invoke "jump to previous counterpart". ":pc" does the same.
+  :njump        | Invoke "go forward". ":nj" does the same.
+  :pjump        | Invoke "go back". ":pj" does the same.
 
 ## Options
 

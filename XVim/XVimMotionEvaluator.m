@@ -195,7 +195,7 @@
 - (XVimEvaluator*)onComplete_g:(XVimGMotionEvaluator*)childEvaluator{
     if( childEvaluator.key.selector == @selector(SEMICOLON) ){
         XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
-        return [self jumpToMark:mark firstOfLine:NO];
+        return [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:NO NeedUpdateMark:YES];
     }else{
         return [self _motionFixed:childEvaluator.motion];
     }
@@ -325,18 +325,18 @@
     if( r.location == NSNotFound ){
         return nil;
     }
-    // This is not for matching the searching word itself
-    // Vim also does this behavior( when matched string is not found )
-    XVimMotion* m = XVIM_MAKE_MOTION(MOTION_POSITION, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
-    m.position = r.location;
-    [self.sourceView xvim_move:m];
     
     NSString* word = [self.sourceView.string substringWithRange:r];
     NSString* searchWord = [NSRegularExpression escapedPatternForString:word];
     searchWord = [NSString stringWithFormat:@"%@%@%@", @"\\b", searchWord, @"\\b"];
     [eval appendString:searchWord];
     [eval execute];
-    return [self _motionFixed:eval.evalutionResult];
+    XVimMotion* motion = eval.evalutionResult;
+    if( !forward ){
+        ++motion.count;
+    }
+    [self _motionFixed:motion];
+    return nil;
 }
 
 - (XVimEvaluator*)ASTERISK{
@@ -349,15 +349,20 @@
 
 // This is internal method used by SQUOTE, BACKQUOTE
 // TODO: rename firstOfLine -> firstNonblankOfLine
-- (XVimEvaluator*)jumpToMark:(XVimMark*)mark firstOfLine:(BOOL)fol{
-    NSUInteger cur_pos = self.sourceView.insertionPoint;
+- (XVimEvaluator*)jumpToMark:(XVimMark*)mark
+                 firstOfLine:(BOOL)fol
+           KeepJumpMarkIndex:(BOOL)keepJumpMarkIndex
+              NeedUpdateMark:(BOOL)needUpdateMark
+{
 	MOTION_TYPE motionType = fol?LINEWISE:CHARACTERWISE_EXCLUSIVE;
     
     if( mark.line == NSNotFound ){
         return [XVimEvaluator invalidEvaluator];
     }
     
+	BOOL jumpToAnotherFile = NO;
     if( ![mark.document isEqualToString:self.sourceView.documentURL.path]){
+		jumpToAnotherFile = YES;
         IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
         NSError* error;
         NSURL* doc = [NSURL fileURLWithPath:mark.document];
@@ -372,18 +377,14 @@
     if( fol ){
         to = [self.sourceView.textStorage xvim_firstNonblankInLineAtIndex:to allowEOL:YES]; // This never returns NSNotFound
     }
-	
-    // set the position before the jump
-    XVimMark* cur_mark = [[XVimMark alloc] init];
-    cur_mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:cur_pos];
-    cur_mark.column = [self.sourceView.textStorage xvim_columnOfIndex:cur_pos];
-    cur_mark.document = [self.sourceView documentURL].path;
-    if( nil != mark.document ){
-        [[XVim instance].marks setMark:cur_mark forName:@"'"];
-    }
-    
-    XVimMotion* m =XVIM_MAKE_MOTION(MOTION_POSITION, motionType, MOTION_OPTION_NONE, self.numericArg);
+
+    XVimMotion* m = XVIM_MAKE_MOTION(needUpdateMark?MOTION_POSITION_JUMP:MOTION_POSITION, motionType, MOTION_OPTION_NONE, self.numericArg);
     m.position = to;
+	if( needUpdateMark ){
+		m.jumpToAnotherFile = jumpToAnotherFile;
+	}
+    m.keepJumpMarkIndex = keepJumpMarkIndex;
+	
     return [self _motionFixed:m];
 }
 
@@ -404,7 +405,7 @@
     //NSString* key = [childEvaluator.keyStroke toString];
     NSString* key = [NSString stringWithFormat:@"%c", childEvaluator.keyStroke.character];
     XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
-    return [self jumpToMark:mark firstOfLine:YES];
+    return [self jumpToMark:mark firstOfLine:YES KeepJumpMarkIndex:NO NeedUpdateMark:YES];
 }
 
 - (XVimEvaluator*)BACKQUOTE{
@@ -419,7 +420,7 @@
     // NSString* key = [childEvaluator.keyStroke toString];
     NSString* key = [NSString stringWithFormat:@"%c", childEvaluator.keyStroke.character];
     XVimMark* mark = [[XVim instance].marks markForName:key forDocument:[self.sourceView documentURL].path];
-    return [self jumpToMark:mark firstOfLine:NO];
+    return [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:NO NeedUpdateMark:YES];
 }
 
 // CARET ( "^") moves the cursor to the start of the currentline (past leading whitespace)

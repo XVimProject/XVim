@@ -89,4 +89,9 @@
 - (NSString*)dumpMarksForDocument:(NSString*)document;
 - (NSString*)dumpFileMarks;
 
+- (NSArray*)jumplist;
+- (NSString*)dumpJumpList;
+- (void)addToJumpListWithMark:(XVimMark*)mark KeepJumpMarkIndex:(BOOL)keepJumpMarkIndex;
+- (XVimMark*)incrementJumpMark;
+- (XVimMark*)decrementJumpMark:(BOOL*)pNeedUpdateMark;
 @end
