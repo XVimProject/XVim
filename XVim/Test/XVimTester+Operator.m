@@ -517,7 +517,7 @@
             XVimMakeTestCase(text0, 0,  0, @"RXY<ESC>l.l.", R_result3, 5, 0), // Repeat
             XVimMakeTestCase(text1, 1,  0, @"RX<ESC>jj`^",  R_result4, 2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"RX<ESC>jj`.",  R_result5, 1, 0), // . Mark
-            XVimMakeTestCase(text1, 1,  0, @"RXYZA<ESC>",   R_result6, 5, 0), // EOL
+            XVimMakeTestCase(text1, 1,  0, @"RXYZA<ESC>",   R_result6, 4, 0), // EOL
             
             // s
             XVimMakeTestCase(text0, 1, 0, @"saaa<ESC>"   , s_result1,  3, 0),
