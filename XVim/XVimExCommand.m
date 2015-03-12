@@ -18,6 +18,7 @@
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
 #import "XVimTester.h"
+#import "XVimEval.h"
 #import "IDEKit.h"
 #import "XVimDebug.h"
 #import "XVimRegister.h"
@@ -1538,6 +1539,30 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 		 }
     }];
     arg.arg = resultStr;
+}
+
+- (void)echo:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    [window statusMessage:args.arg];
+}
+
+- (void)execute:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    //DEBUG_LOG( @"arg[%@] cmd[%@]", args.arg, args.cmd );
+    XVimEval* eval = [[XVimEval alloc] init];
+    XVimEvalArg* evalarg = [[XVimEvalArg alloc] init];
+    evalarg.invar = args.arg;
+    [eval evaluateWhole:evalarg inWindow:window];
+    
+    NSString* cmd = (NSString*)evalarg.rvar;
+    if( cmd.length > 2 ){
+        if( [cmd characterAtIndex:0] == '"' &&
+           [cmd characterAtIndex:cmd.length-1] == '"' ){
+            NSString* nextcmd = [NSString stringWithFormat:@":%@",
+                                [cmd substringWithRange:NSMakeRange(1, cmd.length-2)]];
+            [self executeCommand:nextcmd inWindow:window];
+        }
+    }
 }
 
 - (void)jumps:(XVimExArg *)args inWindow:(XVimWindow *)window
