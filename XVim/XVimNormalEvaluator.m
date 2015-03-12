@@ -21,6 +21,7 @@
 #import "XVimWindowEvaluator.h"
 #import "XVimGActionEvaluator.h"
 #import "XVimMarkSetEvaluator.h"
+#import "XVimReplacePromptEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
@@ -453,13 +454,23 @@
 }
 
 - (XVimEvaluator*)COLON{
-	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
+	__block XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:@":"
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command, id* result)
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
-                               [excmd executeCommand:command inWindow:self.window];
+                               NSString *commandExecuted = [excmd executeCommand:command inWindow:self.window];
+
+                               if ([commandExecuted isEqualToString:@"substitute"]) {
+                                  	XVimSearch *searcher = [[XVim instance] searcher];
+                                   if (searcher.confirmEach && searcher.lastFoundRange.location != NSNotFound) {
+                                       [eval didEndHandler];
+                                       //[[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+                                       return [[XVimReplacePromptEvaluator alloc] initWithWindow:self.window
+                                                                               replacementString:searcher.lastReplacementString];
+                                   }
+                               }
                                return nil;
                            }
                                                                  onKeyPress:nil];
