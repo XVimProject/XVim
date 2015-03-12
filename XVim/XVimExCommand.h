@@ -77,5 +77,5 @@
 @interface XVimExCommand : NSObject{
     NSArray* _excommands;
 }
-- (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window;
+- (NSString*)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window;
 @end

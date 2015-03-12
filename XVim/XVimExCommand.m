@@ -808,13 +808,13 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 }
 
 // This method corresponds to do_one_cmd in ex_docmd.c in Vim
-- (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
+- (NSString*)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
 {
     // cmd INCLUDE ":" character
     
     if( [cmd length] == 0 ){
         ERROR_LOG(@"command string empty");
-        return;
+        return nil;
     }
     
     cmd = [cmd stringByReplacingOccurrencesOfString:@"\r" withString:@""];
@@ -836,14 +836,17 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
         [srcView xvim_scrollTo:[window.sourceView insertionPoint]];
-        return;
+        return nil;
     }
-    
+
+    NSString *commandExecuted = nil;
+
     // switch on command name
     for( XVimExCmdname* cmdname in _excommands ){
         if( [cmdname.cmdName hasPrefix:[exarg cmd]] ){
             SEL method = NSSelectorFromString(cmdname.methodName);
             if( [self respondsToSelector:method] ){
+                commandExecuted = cmdname.cmdName;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 [self performSelector:method withObject:exarg withObject:window];
@@ -853,7 +856,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         }
     }
     
-    return;
+    return commandExecuted;
 }
 
 //////////////////////////////////////////////////////////

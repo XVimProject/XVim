@@ -76,6 +76,7 @@
 
 #pragma mark Operations (Has effect to internal state)
 - (void)xvim_adjustCursorPosition;
+- (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (void)xvim_moveToPosition:(XVimPosition)pos;
 - (void)xvim_move:(XVimMotion*)motion;
 - (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;
@@ -174,6 +175,9 @@
  *       I thinks this is not bad assumption but there may be a situation the assumption does not work.
  **/
 - (NSUInteger)xvim_numberOfLinesInVisibleRect;
+
+- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
+- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count;
 
 - (void)xvim_syncStateFromView; // update our instance variables with self's properties
 
