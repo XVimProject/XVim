@@ -80,6 +80,7 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
  Input     | Operation
 -----------|---------------------------
   C-w n    | Add new assistant (Use layout of the last)
+  C-w o    | Delete all assistant editors.
   C-w q    | Delete one assistant editor
   C-w s    | Add new assistant editor. Assistant editors are laid out horizontally.
   C-w v    | Add new assistant editor. Assistant editors are laid out vertically.
@@ -137,6 +138,8 @@ The dot command ('.') is supported.
   :omap    | Maps operator pending mode
   :!       | Execute command with external process
   :jumps   | Show jump list. The current position is represented as '>'.
+  :sp[lit] | Add new assistant editor. Assistant editors are laid out horizontally.
+  :vsp[lit]| Add new assistant editor. Assistant editors are laid out vertically.
 
 ## Filename modifier for bang
 
