@@ -145,6 +145,42 @@ The dot command ('.') is supported.
   :omap    | Maps operator pending mode
   :!       | Execute command with external process
 
+## Ex ranges
+
+ Range     | Note
+-----------|-----
+  :X,Y     | Multiple line range
+  :X-N,Y   | Multiple line range
+  :X+N,Y   | Multiple line range
+  :X       | Single line range
+  :X-N     | Single line range
+  :X+N     | Single line range
+  :-N      | Single line range, shortened version of X-N where X is '.'
+  :+N      | Single line range, shortened version of X+N where X is '.'
+
+In the above table, N can only be a digit, but X and Y can be a digit, a mark reference (EXAMPLE 'a), '.', or '$'.
+
+## Ex range commands
+
+ Command   | Note
+-----------|-----
+  y[ank]   | Yank lines in range
+  d[elete] | Delete lines in range
+  copy     | Copy lines in range to new location
+  t        | Synonym for copy
+  m[ove]   | Move lines in range to new location
+  sort     | Sort lines in range
+  s[ubstitute]      | Documented in "Search and Replace" above.  '&' and '~' can be used as synonyms for 's'.
+  !        | Execute command with external process
+
+Examples:
+
+    :1,.y
+    :4,5m$
+    :'a,'bd
+    :5t10
+
+
 ## Filename modifier for bang
 
  Modifier  |
