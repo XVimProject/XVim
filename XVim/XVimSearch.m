@@ -397,7 +397,7 @@
 
     NSTextView* srcView = [window sourceView];
 
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
     if ([self isCaseInsensitive])
     {
         r_opts |= NSRegularExpressionCaseInsensitive;
