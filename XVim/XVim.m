@@ -189,7 +189,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     _lastCharacterSearchMotion = nil;
     _marks = [[XVimMarks alloc] init];
     _testRunner= [[XVimTester alloc] init];
-
     self.excmd = [[XVimExCommand alloc] init];
     self.lastPlaybackRegister = nil;
     self.registerManager = [[XVimRegisterManager alloc] init];
@@ -207,7 +206,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     }
     
     [_options addObserver:self forKeyPath:@"debug" options:NSKeyValueObservingOptionNew context:nil];
-    self.options.debug = YES;
 }
 
 
