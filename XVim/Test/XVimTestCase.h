@@ -36,6 +36,7 @@
 @property(strong) NSString* desc; // description is declared in NSObject and readonly.
 @property(strong) NSString* message;
 @property         BOOL      success;
+@property         BOOL      exception;
 @property         NSString* file;
 @property         NSUInteger line;
 

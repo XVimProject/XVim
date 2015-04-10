@@ -24,6 +24,7 @@
 @class IDEWorkspaceWindow;
 @class XVimEvaluatorContext;
 @class IDEEditorArea;
+@class XVimMark;
 
 @interface XVimWindow : NSObject <NSTextInputClient, NSTextFieldDelegate>
 @property(weak, readonly) NSTextView *sourceView; // This represents currently focused sourceView
@@ -50,4 +51,6 @@
 - (void)showQuickfixWithString:(NSString *)message completionHandler:(void(^)(void))completionHandler;
 - (void)closeQuickfix;
 
+- (XVimMark*)currentPositionMark;
+- (void)preMotion:(XVimMotion*)motion;
 @end

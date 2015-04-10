@@ -21,6 +21,7 @@
 #import "XVimWindowEvaluator.h"
 #import "XVimGActionEvaluator.h"
 #import "XVimMarkSetEvaluator.h"
+#import "XVimReplacePromptEvaluator.h"
 #import "XVimKeyStroke.h"
 #import "XVimWindow.h"
 #import "XVim.h"
@@ -170,7 +171,7 @@
 - (XVimEvaluator*)onComplete_g:(XVimGActionEvaluator*)childEvaluator{
     if (childEvaluator.key.selector == @selector(SEMICOLON)) {
         XVimMark* mark = [[XVim instance].marks markForName:@"." forDocument:[self.sourceView documentURL].path];
-        return [self jumpToMark:mark firstOfLine:NO];
+        return [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:NO NeedUpdateMark:YES];
     }else{
         if( childEvaluator.motion != nil ){
             return [self _motionFixed:childEvaluator.motion];
@@ -214,12 +215,19 @@
 }
 
 - (XVimEvaluator*)C_o{
-    [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
+    BOOL needUpdateMark;
+    XVimMark* mark = [[XVim instance].marks decrementJumpMark:&needUpdateMark];
+    if( mark != nil ){
+        [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:YES NeedUpdateMark:needUpdateMark];
+    }
     return nil;
 }
 
 - (XVimEvaluator*)C_i{
-    [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
+    XVimMark* mark = [[XVim instance].marks incrementJumpMark];
+    if( mark != nil ){
+        [self jumpToMark:mark firstOfLine:NO KeepJumpMarkIndex:YES NeedUpdateMark:NO];
+    }
     return nil;
 }
 
@@ -453,13 +461,23 @@
 }
 
 - (XVimEvaluator*)COLON{
-	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
+	__block XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:@":"
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command, id* result)
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
-                               [excmd executeCommand:command inWindow:self.window];
+                               NSString *commandExecuted = [excmd executeCommand:command inWindow:self.window];
+
+                               if ([commandExecuted isEqualToString:@"substitute"]) {
+                                  	XVimSearch *searcher = [[XVim instance] searcher];
+                                   if (searcher.confirmEach && searcher.lastFoundRange.location != NSNotFound) {
+                                       [eval didEndHandler];
+                                       //[[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+                                       return [[XVimReplacePromptEvaluator alloc] initWithWindow:self.window
+                                                                               replacementString:searcher.lastReplacementString];
+                                   }
+                               }
                                return nil;
                            }
                                                                  onKeyPress:nil];
@@ -519,6 +537,7 @@
 }
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
+    [self.window preMotion:motion];
     [[self sourceView] xvim_move:motion];
     return nil;
 }

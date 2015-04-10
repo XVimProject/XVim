@@ -118,6 +118,10 @@
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
+	// For debugging purpose we rethrow the exception
+	if( [XVim instance].options.debug ){
+	    @throw exception;
+	}
     }
     return;
 }

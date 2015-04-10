@@ -28,6 +28,9 @@ C-d, C-f, C-e, C-u, C-b, C-y, zz, zb, zt
 ## Jumps
 C-o, C-i, gd
 
+C-i is defined as 'Editor-Structure-Re Indent' in default Xcode key bindings.
+If you want to use C-i as jump, you need to clear ^I in Xcode settings 'Xcode-Preference-Key bindings'.
+
 If you want to open the file under the cursor you can use 'gd' instead of 'gf' in XVim environment.
 
 ## Insert
@@ -77,6 +80,7 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
  Input     | Operation
 -----------|---------------------------
   C-w n    | Add new assistant (Use layout of the last)
+  C-w o    | Delete all assistant editors.
   C-w q    | Delete one assistant editor
   C-w s    | Add new assistant editor. Assistant editors are laid out horizontally.
   C-w v    | Add new assistant editor. Assistant editors are laid out vertically.
@@ -95,17 +99,6 @@ The layout is forced to change with Ctrl-w,s or Ctrl-w,v .
 /, ?, #, \*, g*, g#, :s, n, N
 
 Regex search is supported using the [ICU regex](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSRegularExpression_Class/Reference/Reference.html) format.
-
-Substitution does not work as Vim does. When you input command following
-
-    :%s/xxxx/yyyy/
-
-XVim does replace the first occurrence of xxxx IN THE FILE (not each line ).
-If you want to replace all the occurrence of xxxx with yyyy in the file you can specify
-
-    :%s/xxxx/yyyy/g
-
-Currently replacing first occurrence of xxxx with yyyy each line is not available
 
 ## Insert mode commands
 
@@ -144,6 +137,9 @@ The dot command ('.') is supported.
   :imap    | Maps insert mode
   :omap    | Maps operator pending mode
   :!       | Execute command with external process
+  :jumps   | Show jump list. The current position is represented as '>'.
+  :sp[lit] | Add new assistant editor. Assistant editors are laid out horizontally.
+  :vsp[lit]| Add new assistant editor. Assistant editors are laid out vertically.
 
 ## Filename modifier for bang
 
@@ -170,6 +166,8 @@ The dot command ('.') is supported.
   :pissue       | Invoke "jump to previous issue". ":pi" does the same.
   :ncounterpart | Invoke "jump to next counterpart". ":nc" does the same.
   :pcounterpart | Invoke "jump to previous counterpart". ":pc" does the same.
+  :njump        | Invoke "go forward". ":nj" does the same.
+  :pjump        | Invoke "go back". ":pj" does the same.
 
 ## Options
 

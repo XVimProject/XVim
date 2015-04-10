@@ -18,6 +18,7 @@
 #import "XVimKeymap.h"
 #import "XVimOptions.h"
 #import "XVimTester.h"
+#import "XVimEval.h"
 #import "IDEKit.h"
 #import "XVimDebug.h"
 #import "XVimRegister.h"
@@ -326,6 +327,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"ncounterpart", @"ncounterpart:inWindow:"),    // XVim Original
                        CMD(@"new", @"splitview:inWindow:"),
                        CMD(@"nissue", @"nissue:inWindow:"),    // XVim Original
+                       CMD(@"njump", @"njump:inWindow:"),      // XVim Original
                        CMD(@"nmap", @"nmap:inWindow:"),
                        CMD(@"nmapclear", @"nmapclear:inWindow:"),
                        CMD(@"nmenu", @"menu:inWindow:"),
@@ -358,6 +360,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"perldo", @"perldo:inWindow:"),
                        CMD(@"pedit", @"pedit:inWindow:"),
                        CMD(@"pissue", @"pissue:inWindow:"),    // XVim Original
+                       CMD(@"pjump", @"pjump:inWindow:"),      // XVim Original
                        CMD(@"pop", @"tag:inWindow:"),
                        CMD(@"popup", @"popup:inWindow:"),
                        CMD(@"ppop", @"ptag:inWindow:"),
@@ -808,13 +811,13 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 }
 
 // This method corresponds to do_one_cmd in ex_docmd.c in Vim
-- (void)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
+- (NSString*)executeCommand:(NSString*)cmd inWindow:(XVimWindow*)window
 {
     // cmd INCLUDE ":" character
     
     if( [cmd length] == 0 ){
         ERROR_LOG(@"command string empty");
-        return;
+        return nil;
     }
     
     cmd = [cmd stringByReplacingOccurrencesOfString:@"\r" withString:@""];
@@ -836,14 +839,17 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         }
         [srcView setSelectedRange:NSMakeRange(pos_wo_space,0)];
         [srcView xvim_scrollTo:[window.sourceView insertionPoint]];
-        return;
+        return nil;
     }
-    
+
+    NSString *commandExecuted = nil;
+
     // switch on command name
     for( XVimExCmdname* cmdname in _excommands ){
         if( [cmdname.cmdName hasPrefix:[exarg cmd]] ){
             SEL method = NSSelectorFromString(cmdname.methodName);
             if( [self respondsToSelector:method] ){
+                commandExecuted = cmdname.cmdName;
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
                 [self performSelector:method withObject:exarg withObject:window];
@@ -853,7 +859,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         }
     }
     
-    return;
+    return commandExecuted;
 }
 
 //////////////////////////////////////////////////////////
@@ -1060,6 +1066,10 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     [window setForcusBackToSourceView];
 }
 
+- (void)njump:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(goForwardInHistoryByCommand:) to:nil from:self];
+}
+
 - (void)nmap:(XVimExArg*)args inWindow:(XVimWindow*)window{
     if( args.arg.length == 0 ){
         [self writeMapsToConsoleWithFirstLetter:@"v" forMapMode:XVIM_MODE_NORMAL];
@@ -1121,6 +1131,10 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 - (void)pissue:(XVimExArg*)args inWindow:(XVimWindow*)window{
     [NSApp sendAction:@selector(jumpToPreviousIssue:) to:nil from:self];
     [window setForcusBackToSourceView];
+}
+
+- (void)pjump:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
 }
 
 - (void)quit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :q
@@ -1525,6 +1539,37 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 		 }
     }];
     arg.arg = resultStr;
+}
+
+- (void)echo:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    [window statusMessage:args.arg];
+}
+
+- (void)execute:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    //DEBUG_LOG( @"arg[%@] cmd[%@]", args.arg, args.cmd );
+    XVimEval* eval = [[XVimEval alloc] init];
+    XVimEvalArg* evalarg = [[XVimEvalArg alloc] init];
+    evalarg.invar = args.arg;
+    [eval evaluateWhole:evalarg inWindow:window];
+    
+    NSString* cmd = (NSString*)evalarg.rvar;
+    if( cmd.length > 2 ){
+        if( [cmd characterAtIndex:0] == '"' &&
+           [cmd characterAtIndex:cmd.length-1] == '"' ){
+            NSString* nextcmd = [NSString stringWithFormat:@":%@",
+                                [cmd substringWithRange:NSMakeRange(1, cmd.length-2)]];
+            [self executeCommand:nextcmd inWindow:window];
+        }
+    }
+}
+
+- (void)jumps:(XVimExArg *)args inWindow:(XVimWindow *)window
+{
+    XVim* xvim = [XVim instance];
+    NSString* str = [xvim.marks dumpJumpList];
+    [xvim writeToConsole:str];
 }
 
 @end

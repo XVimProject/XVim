@@ -76,11 +76,12 @@
 
 #pragma mark Operations (Has effect to internal state)
 - (void)xvim_adjustCursorPosition;
+- (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (void)xvim_moveToPosition:(XVimPosition)pos;
 - (void)xvim_move:(XVimMotion*)motion;
 - (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;
-- (void)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank;
-- (void)xvim_change:(XVimMotion*)motion;
+- (BOOL)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank;
+- (BOOL)xvim_change:(XVimMotion*)motion;
 - (void)xvim_yank:(XVimMotion*)motion;
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
 - (void)xvim_swapCase:(XVimMotion*)motion;
@@ -120,6 +121,7 @@
 - (void)xvim_selectNextPlaceholder;
 - (void)xvim_selectPreviousPlaceholder;
 - (void)xvim_hideCompletions;
+- (XVimRange)xvim_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion;
 
 #pragma mark Scroll
 - (NSUInteger)xvim_lineUp:(NSUInteger)index count:(NSUInteger)count;
@@ -173,6 +175,9 @@
  *       I thinks this is not bad assumption but there may be a situation the assumption does not work.
  **/
 - (NSUInteger)xvim_numberOfLinesInVisibleRect;
+
+- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
+- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count;
 
 - (void)xvim_syncStateFromView; // update our instance variables with self's properties
 

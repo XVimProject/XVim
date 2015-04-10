@@ -27,6 +27,9 @@ BOOL isDelimeter(unichar ch) {
 BOOL isNonblank(unichar ch) {
     return (!isWhitespace(ch)) && (!isNewline(ch));
 }
+BOOL isWhiteSpaceOrNewline(unichar ch) {
+    return isWhitespace(ch) || isNewline(ch);
+}
 BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined for 1 byte char
     return isDigit(ch) || isAlpha(ch)  || ch >= 192;
 }

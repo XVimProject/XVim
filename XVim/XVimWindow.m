@@ -21,6 +21,8 @@
 #import "XVimCommandLineEvaluator.h"
 #import "XVimInsertEvaluator.h"
 #import "DVTSourceTextView+XVim.h"
+#import "XVimMark.h"
+#import "XVimMarks.h"
 
 @interface XVimWindow () {
     NSMutableArray     *_defaultEvaluatorStack;
@@ -457,5 +459,36 @@
 - (NSUInteger)characterIndexForPoint:(NSPoint)aPoint{
     return [self.inputView characterIndexForPoint:aPoint];
 }
+
+- (XVimMark*)currentPositionMark
+{
+    XVimMark* mark = [[XVimMark alloc] init];
+    NSRange r = [self.sourceView selectedRange];
+    mark.document = [[self.sourceView documentURL] path];
+    if( nil == mark.document ){
+        return nil;
+    }
+    mark.line = [self.sourceView.textStorage xvim_lineNumberAtIndex:r.location];
+    mark.column = [self.sourceView.textStorage xvim_columnOfIndex:r.location];
+    return mark;
+}
+
+- (void)preMotion:(XVimMotion*)motion
+{
+    if( ![motion isJumpMotion] ) return;
+
+    XVim* xvim = [XVim instance];
+	XVimMark* mark = [self currentPositionMark];
+	if( motion.jumpToAnotherFile ){
+		// do nothing for jumping to another file
+	} else {
+		// update single quote mark
+		[xvim.marks setMark:mark forName:@"'"];
+	}
+
+    [xvim.marks addToJumpListWithMark:mark 
+					KeepJumpMarkIndex:motion.keepJumpMarkIndex];
+}
+
 @end
 

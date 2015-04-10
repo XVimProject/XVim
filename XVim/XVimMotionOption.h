@@ -17,5 +17,6 @@ typedef enum{
     SEARCH_WRAP= 0x40,
     SEARCH_CASEINSENSITIVE = 0x80,
     MOTION_OPTION_CHANGE_WORD = 0x100, // for 'cw','cW'
-    MOTION_OPTION_SKIP_ADJACENT_CHAR = 0x200 // for repeating t motion
+    MOTION_OPTION_SKIP_ADJACENT_CHAR = 0x200, // for repeating t motion
+    MOPT_PLACEHOLDER = 0x400,
 } MOTION_OPTION;

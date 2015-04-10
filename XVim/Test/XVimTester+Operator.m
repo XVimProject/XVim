@@ -59,6 +59,7 @@
                              @"eee\n"   // 56
                              @"fff\n";  // 60
     static NSString* text7 = @"a bbb ccc";
+    static NSString* text8 = @"aaa:<#(bbb ccc ddd)#> eee";
     
     static NSString* a_result  = @"aAa bbXXXb ccc\n";
     static NSString* a_result2 = @"aAa bbXXXXXXXXXb ccc\n";
@@ -81,6 +82,7 @@
                                   @"ccc";
     static NSString* cw_result6 = @"AAA bbb ccc";
     static NSString* cw_result7 = @"AAA BBB ccc";
+    static NSString* cw_result8 = @"aaa:AAA eee";
     
     static NSString* C_result1 = @"aAa baaa\n";
     static NSString* C_result2 = @"aaaa\n"
@@ -113,6 +115,9 @@
                                   @"ccc";
     static NSString* dw_result3 = @"aAa bbb ";
     static NSString* dw_result4 = @"aAa bbb c";
+    static NSString* dw_result5 = @"aaa:eee";
+
+    static NSString* dl_result1 = @"aaa: eee";
     
     static NSString* D_result1 = @"a\n"
                                  @"bbb\n"
@@ -150,6 +155,9 @@
                                  @"bbb\n"
                                  @"ccc"; 
     static NSString* R_result5 = @"aXa\n"
+                                 @"bbb\n"
+                                 @"ccc";
+    static NSString* R_result6 = @"aXYZA\n"
                                  @"bbb\n"
                                  @"ccc";
     
@@ -383,12 +391,15 @@
             // c
             XVimMakeTestCase(text0, 5,  0, @"cwaaa<ESC>"    , cw_result1,  7, 0),
             XVimMakeTestCase(text0, 9,  0, @"cwaaa<ESC>"    , cw_result2, 11, 0),
+    	    XVimMakeTestCase(text0, 0,  0, @"cfwlll<ESC>"   , text0,      3, 0),  // change when motion failed.
+    	    XVimMakeTestCase(text2, 0,  0, @"cfwlll<ESC>"   , text2,      3, 0),  // change when motion failed when no newline at the end. This had raised exceptio by a bug.
             XVimMakeTestCase(text1, 1,  0, @"2cwaa<ESC>"    , cw_result3,  2, 0), // Numeric arg
             XVimMakeTestCase(text0, 5,  0, @"2cwXXX<ESC>.." , cw_result4, 11, 0), // Repeat
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`^", cw_result5,  2, 0), // ^ Mark
             XVimMakeTestCase(text1, 0,  0, @"cwXXX<ESC>jj`.", cw_result5,  2, 0), // . Mark
             XVimMakeTestCase(text7, 0,  0, @"cwAAA<ESC>"     , cw_result6,  2, 0),
             XVimMakeTestCase(text7, 0,  0, @"2cwAAA BBB<ESC>", cw_result7,  6, 0),
+            XVimMakeTestCase(text8, 4,  0, @"cwAAA<ESC>"     , cw_result8,  6, 0), // Placeholder
             
             // C
             XVimMakeTestCase(text0, 5,  0, @"Caaa<ESC>"     , C_result1,  7, 0),
@@ -427,6 +438,9 @@
             // dvw at the end of file should not delete last character( a little strange behaviour in vim)
             XVimMakeTestCase(text2, 8, 0, @"dvw", dw_result4, 8, 0),
             // TODO: dvw at the end of line should not delete last character( a little strange behaviour in vim)
+            XVimMakeTestCase(text8, 4, 0, @"dw"    , dw_result5, 4, 0),
+            // dl equal x
+            XVimMakeTestCase(text8, 4, 0, @"dl"    , dl_result1, 4, 0), // Placeholder 
             
             // D
             XVimMakeTestCase(text1, 1, 0, @"D"     , D_result1, 0, 0),
@@ -503,6 +517,7 @@
             XVimMakeTestCase(text0, 0,  0, @"RXY<ESC>l.l.", R_result3, 5, 0), // Repeat
             XVimMakeTestCase(text1, 1,  0, @"RX<ESC>jj`^",  R_result4, 2, 0), // ^ Mark
             XVimMakeTestCase(text1, 1,  0, @"RX<ESC>jj`.",  R_result5, 1, 0), // . Mark
+            XVimMakeTestCase(text1, 1,  0, @"RXYZA<ESC>",   R_result6, 4, 0), // EOL
             
             // s
             XVimMakeTestCase(text0, 1, 0, @"saaa<ESC>"   , s_result1,  3, 0),

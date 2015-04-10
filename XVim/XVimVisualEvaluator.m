@@ -25,6 +25,7 @@
 #import "XVimShiftEvaluator.h"
 #import "XVimLowercaseEvaluator.h"
 #import "XVimUppercaseEvaluator.h"
+#import "XVimReplacePromptEvaluator.h"
 #import "XVimTildeEvaluator.h"
 #import "XVimJoinEvaluator.h"
 #import "NSTextView+VimOperation.h"
@@ -446,16 +447,28 @@ TODO: This block is from commit 42498.
 }
 
 - (XVimEvaluator*)COLON{
-	XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
+	__block XVimEvaluator *eval = [[XVimCommandLineEvaluator alloc] initWithWindow:self.window
                                                                 firstLetter:@":'<,'>"
                                                                     history:[[XVim instance] exCommandHistory]
                                                                  completion:^ XVimEvaluator* (NSString* command, id* result)
                            {
                                XVimExCommand *excmd = [[XVim instance] excmd];
-                               [excmd executeCommand:command inWindow:self.window];
+                               NSString *commandExecuted = [excmd executeCommand:command inWindow:self.window];
                                
 							   //NSTextView *sourceView = [window sourceView];
                                [[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+
+                               if ([commandExecuted isEqualToString:@"substitute"]) {
+                                  	XVimSearch *searcher = [[XVim instance] searcher];
+                                   if (searcher.confirmEach && searcher.lastFoundRange.location != NSNotFound) {
+                                       [eval didEndHandler];
+                                       //[[self sourceView] xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+                                       return [[XVimReplacePromptEvaluator alloc] initWithWindow:self.window
+                                                                               replacementString:searcher.lastReplacementString];
+
+                                   }
+                                   }
+                                   
                                return nil;
                            }
                                                                  onKeyPress:nil];
@@ -557,6 +570,7 @@ TODO: This block is from commit 42498.
 
 - (XVimEvaluator*)motionFixed:(XVimMotion *)motion{
     if(!XVim.instance.isRepeating){
+        [self.window preMotion:motion];
         [[self sourceView] xvim_move:motion];
         [self resetNumericArg];
     }

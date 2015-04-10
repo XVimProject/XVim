@@ -347,6 +347,14 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return NO;
 }
 
+- (BOOL) isLastCharacter:(NSUInteger)index{
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    if( [[self xvim_string] length] == 0 ){
+        return NO;
+    }
+    return [[self xvim_string] length]-1 == index;
+}
+
 - (BOOL) isNewline:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( index == [[self xvim_string] length] ){
@@ -361,6 +369,14 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         return NO; // EOF is not whitespace
     }
     return isWhitespace([[self xvim_string] characterAtIndex:index]);
+}
+
+- (BOOL) isWhitespaceOrNewline:(NSUInteger)index{
+    return isWhiteSpaceOrNewline([[self xvim_string] characterAtIndex:index]);
+}
+
+- (BOOL) isKeyword:(NSUInteger)index{
+    return isKeyword([[self xvim_string] characterAtIndex:index]);
 }
 
 - (BOOL) isLastLine:(NSUInteger)index{
@@ -464,43 +480,35 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     if( 0 == index){
         return 0;
     }
-    
-    NSString* string = [self xvim_string];
-    NSUInteger pos = index;
-    for (NSUInteger i = 0; i < count && pos != 0 ; i++)
-    {
-        //Try move to prev position and check if its valid position.
-        NSUInteger prev = pos-1; //This is the position where we are trying to move to.
-        // If the position is new line and its not wrapable we stop moving
-        if( opt == LEFT_RIGHT_NOWRAP && isNewline([[self xvim_string] characterAtIndex:prev]) ){
-            break; // not update the position
+    NSUInteger pos;
+    NSUInteger index_count = 0;
+    for( pos = index; pos > 0; ){
+        if( index_count >= count ){
+            break;
+        }
+
+        if( (opt & LEFT_RIGHT_NOWRAP) && [self isNewline:pos-1] ){
+            break;
         }
         
-        // If its wrapable, skip newline except its blankline
-        if (isNewline([string characterAtIndex:prev])) {
-            if(![self isBlankline:prev]) {
-                // skip the newline letter at the end of line
-                prev--;
+        if( [self isNewline:pos-1] ){
+            // skip the newline letter at the end of line
+            --pos;
+            ++index_count;
+        } else {
+            NSRange rph = [self rangePlaceHolder:pos option:opt];
+            if( rph.location != NSNotFound ){
+                pos = rph.location;
             }
-        }
-        
-        if(charat(prev) == '>' && prev){
-            //possible autocomplete glyph that we should skip.
-            if(charat(prev - 1) == '#'){
-                NSUInteger findstart = prev;
-                while (--findstart ) {
-                    if(charat(findstart) == '#'){
-                        if(charat(findstart - 1) == '<'){
-                            prev = findstart - 1;
-                            break;
-                        }
-                    }
-                }
+
+            --pos;
+            ++index_count;
+
+            rph = [self rangePlaceHolder:pos option:opt];
+            if( rph.location != NSNotFound ){
+                pos = rph.location;
             }
-        }
-        
-        // Now the position can be move to the prev
-        pos = prev;
+        } 
     }
     return pos;
 }
@@ -511,38 +519,92 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     if( index == [[self xvim_string] length] )
         return [[self xvim_string] length];
     
-    NSString* string = [self xvim_string];
     NSUInteger pos = index;
     // If the currenct cursor position is on a newline (blank line) and not wrappable never move the cursor
-    if( opt == LEFT_RIGHT_NOWRAP && [self isBlankline:pos]){
+    if( (opt&LEFT_RIGHT_NOWRAP) && [self isBlankline:pos]){
         return pos;
     }
     
-    for (NSUInteger i = 0; i < count && pos < self.length; i++) {
-        NSUInteger next = pos + 1;
-        // If the next position is the end of docuement and current position is not a newline
-        // Never move a cursor to the end of document.
-        if( [self isEOF:next] && !isNewline([string characterAtIndex:pos]) ){
+    NSUInteger index_count = 0;
+    for( ;pos < [[self xvim_string] length]; ){
+        if( [self isEOF:pos+1] ||
+            ((opt&LEFT_RIGHT_NOWRAP) && [self isNewline:pos+1]) )
+        {
             info->reachedEndOfLine = YES;
             break;
         }
+
+        ++index_count;
+        NSRange rph = [self rangePlaceHolder:pos option:opt];
+        if( rph.location != NSNotFound ){
+            pos = NSMaxRange(rph);
+        } else {
+            ++pos;
+        }
         
-        if( opt == LEFT_RIGHT_NOWRAP && isNewline([[self xvim_string] characterAtIndex:next]) ){
+        if( [self isEOF:pos] ||
+            ((opt&LEFT_RIGHT_NOWRAP) && [self isNewline:pos]) ){
+            --pos;
             info->reachedEndOfLine = YES;
             break;
         }
-        
-        // If the next position is newline and not a blankline skip it
-        if (isNewline([string characterAtIndex:next])) {
-            if(![self isBlankline:next]) {
-                // skip the newline letter at the end of line
-                next++;
-            }
+        if( index_count >= count ){
+            break;
         }
-        pos = next;
     }
     return pos;
 }
+
+#pragma mark placeholder methods
+- (NSRange)rangePlaceHolder:(NSUInteger)index option:(MOTION_OPTION)opt
+{
+    if( opt&MOPT_PLACEHOLDER ){
+        return [self rangePlaceholder:index];
+    } else {
+        return NSMakeRange(NSNotFound, 0);
+    }
+}
+
+- (NSRange)rangePlaceholder:(NSUInteger)index
+{
+    NSString* str = [self xvim_string];
+    NSRange range = NSMakeRange(NSNotFound, 0);
+    NSUInteger begin = [self firstOfLine:index];
+    for( NSUInteger pos = begin; pos + 1 < [[self xvim_string] length]; ++pos ){
+        if( [self isEOF:pos] ) break;
+        if( [self isNewline:pos+1] ) break;
+        unichar uc1 = [str characterAtIndex:pos];
+        unichar uc2 = [str characterAtIndex:pos+1];
+        if( uc1 == '<' && uc2 == '#' ){
+            if( index < pos ){
+                range = NSMakeRange(NSNotFound, 0);
+                break;
+            } else {
+                range.location = pos;
+                range.length = 0;
+            }
+        } else if( uc1 == '#' && uc2 == '>' ){
+            if( range.location == NSNotFound ){
+                // parse error
+                break;
+            }
+            range.length = pos + 1 - range.location + 1;
+            if( NSLocationInRange(index, range) ){
+                break;
+            }
+            range = NSMakeRange(NSNotFound, 0);
+        }
+    }
+    return range;
+}
+
+- (NSUInteger)firstOfLine:(NSUInteger)index{
+    
+    NSRange range = [self xvim_indexRangeForLineAtIndex:index newLineLength:NULL];
+    return range.location;
+}
+
+#pragma mark -
 
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
@@ -586,104 +648,122 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
  next line. 
 **/
 
+/**
+ [A] newline -> newline
+ [D] word    -> newline
+ [G] blank   -> newline
+ [B] newline -> word
+ [E] word    -> WORD
+ [H] blank   -> word
+ */
 - (NSUInteger)wordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert(nil != info, @"Specify info");
     
     NSUInteger pos = index;
-    info->isFirstWordInLine = NO;
     info->lastEndOfLine = NSNotFound;
-    info->lastEndOfWord = NSNotFound;
     
     if( [self isEOF:index] ){
         return index;
     }
     
-    NSString* str = [self xvim_string];
-    unichar lastChar= [str characterAtIndex:index];
     BOOL wordInLineFound = NO;
-    for(NSUInteger i = index+1 ; i <= [[self xvim_string] length]; i++ ){
-        // Each time we encounter new word decrement "counter".
-        // Remember blankline is a word
-        unichar curChar; 
-        
-        if( ![self isEOF:i] ){
-            curChar = [str characterAtIndex:i];
-        }else {
-            //EOF found so return this position.
-            if( isNonblank(lastChar)){
-                info->lastEndOfLine = i-1;
-                info->lastEndOfWord = i-1;
+    NSUInteger curTwoNewLine = NSNotFound;
+    NSUInteger lastTwoNewLine = NSNotFound;
+    NSUInteger twonewline_count = 0;
+    NSUInteger word_count = 0;
+    for( pos = index+1 ; pos <= [[self xvim_string] length]; ++pos ){
+        NSRange rph = [self rangePlaceHolder:pos option:opt];
+        if( [self isEOF:pos] ){
+            if( [self isNonblank:pos-1] ){
+                info->lastEndOfLine = pos-1;
+                info->lastEndOfWord = pos-1;
             }
             info->reachedEndOfLine = YES;
-            return i-1;
-        } 
-        
-        //Check relation between last and current character to determine the word boundary
-        if(isNewline(lastChar)){
-            if(isNewline(curChar)){
+            pos--;
+            break;
+        }
+        if( [self isNewline:pos] ){
+            // current new line 
+            if( [self isNewline:pos-1] ){
                 //two newlines in a row (means blank line)
                 //blank line is a word so count it.
-                --count;
-                info->lastEndOfWord = i-1;
-                info->lastEndOfLine = i-1;
-                info->isFirstWordInLine = YES;
-                wordInLineFound = YES;
-            }else if(isNonblank(curChar)){
-                // A word found
-                --count;
-                info->isFirstWordInLine = YES;
-                wordInLineFound = YES;
-            }else {
-                // Nothing
-            }
-        }else if(isNonblank(lastChar)){
-            if(isNewline(curChar)){
-                //from word to newline
-                info->lastEndOfLine = i-1;
-                info->lastEndOfWord = i-1;
-                wordInLineFound = NO;
-            }else if(isNonblank(curChar)){
-                if(isKeyword(lastChar) != isKeyword(curChar) && opt != BIGWORD){
-                    --count;
-                    info->lastEndOfLine = i-1;
-                    info->lastEndOfWord = i-1;
-                    info->isFirstWordInLine = NO;
-                    wordInLineFound = YES;
+                ++twonewline_count;
+                lastTwoNewLine = curTwoNewLine;
+                curTwoNewLine = pos-1;
+                if( lastTwoNewLine != NSNotFound ){
+                    info->lastEndOfLine = lastTwoNewLine;
                 }
-            }else{
-                // non-blank to blank
-                info->lastEndOfWord = i-1;
-            }
-        }else { //on a blank character that is not a newline
-            if(isNewline(curChar)){
-                //blank to newline boundary
-                info->lastEndOfLine = i-1;
+                // [A]
                 info->isFirstWordInLine = YES;
+                wordInLineFound = YES;
+            } else {
+                // last word or blank
+                // preserve the point
+                info->lastEndOfLine = pos-1;
+                // [D,G]
                 wordInLineFound = NO;
-            }else if(isNonblank(curChar)){
-                // blank to non-blank. A word found.
-                --count;
-                if( !wordInLineFound){
+                if( ![self isNonblank:pos-1] ){
+                    info->isFirstWordInLine = YES;
+                }
+            }
+        }
+        else if( rph.location != NSNotFound ){
+            // from anything to placeholder
+            if( rph.location == pos ){
+                // - begin of placeholder (ex. from anything to '<#')
+                ++word_count;
+            } else {
+                if( pos < NSMaxRange(rph) ){
+                    pos = NSMaxRange(rph)-1;
+                }
+            }
+            // enough to treat as [E]
+            info->isFirstWordInLine = NO;
+            wordInLineFound = YES;
+        }
+        else if( [self isNonblank:pos] &&
+            ( [self rangePlaceholder:pos-1].location != NSNotFound && rph.location == NSNotFound ))
+        {
+            // - from placeholder to non-placeholder (ex. from '#>' to '[')
+            // enough to treat as [E]
+            ++word_count;
+            info->isFirstWordInLine = NO;
+            wordInLineFound = YES;
+        }
+        else if( [self isNonblank:pos] ){
+            // a word
+            if( [self isNewline:pos-1] ){
+                // - from newline to word
+                // [B]
+                ++word_count;
+                info->isFirstWordInLine = YES;
+                wordInLineFound = YES;
+            }else if([self isWhitespaceOrNewline:pos-1]){
+                // - from blank to word
+                // [H]
+                ++word_count;
+                if( !wordInLineFound ){
                     info->isFirstWordInLine = YES;
                     wordInLineFound = YES;
                 }else{
                     info->isFirstWordInLine = NO;
                 }
-            }else{
-                //Two blanks in a row...
-                //nothing to do here.
+            } else if( !(opt & BIGWORD) && [self isKeyword:pos-1] != [self isKeyword:pos] ){
+                // - another keyword (ex. from '>' to 'a' or from 'a' to '<')
+                // [E]
+                ++word_count;
+                info->isFirstWordInLine = NO;
+                wordInLineFound = YES;
             }
         }
         
-        lastChar = curChar;
-        if( isNewline(curChar) && opt == LEFT_RIGHT_NOWRAP ){
-            pos = i-1;
+        if( [self isNewline:pos] && (opt & LEFT_RIGHT_NOWRAP) ){
+            pos--;
             break;
         }
         
-        if( 0 == count ){
-            pos = i;
+        if( count <= twonewline_count + word_count ){
             break;
         }
     }
@@ -694,70 +774,42 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     ASSERT_VALID_RANGE_WITH_EOF(index);
     if( 1 >= index )
         return 0;
-    NSUInteger indexBoundary = NSNotFound;
-    NSUInteger pos = index-1;
-    unichar lastChar = [[self xvim_string] characterAtIndex:pos];
-    // FIXME: This must consider the placeholders
-    //        The reason currently commented out is that this method is in NSTextStorage
-    //        but the placeholder related codes are in DVTSourceTextView
-    //        There should be some method to obtain placeholder range in DVTSourceTextStorage
-    // NSArray* placeholdersInLine = [self placeholdersInLine:pos];
     
-    for(NSUInteger i = pos-1 ; ; i-- ){
-        // Each time we encounter head of a word decrement "counter".
-        // Remember blankline is a word
-        /*
-        indexBoundary = NSNotFound;
-        for (NSUInteger currentPlaceholders = 0; currentPlaceholders < [placeholdersInLine count]; currentPlaceholders++) {
-            NSValue* currentRange;
-            NSUInteger lowIndex, highIndex;
-            
-            //get the range returned from the placeholderinline function
-            currentRange = (NSValue*)[placeholdersInLine objectAtIndex:currentPlaceholders];
-            lowIndex = [currentRange rangeValue].location;
-            highIndex = [currentRange rangeValue].location + [currentRange rangeValue].length;
-            
-            // check if we are in the placeholder boundary and if we are we should break and count it as a word.
-            if(i >= lowIndex && i <= highIndex){
-                indexBoundary = lowIndex;
-                break;
-            }
+    NSUInteger word_count = 0;
+    NSUInteger pos = index-1;
+    for( ; ; --pos ){
+        if( pos == 0 ){
+            break;
         }
-         */
-        unichar curChar = [[self xvim_string] characterAtIndex:i];
-        
-        // this branch handles the case that we found a placeholder.
-        // must update the pointer into the string and update the current character found to be at the current index.
-        if(indexBoundary != NSNotFound){
-            count--;
-            i = indexBoundary;
-            if (count == 0) {
-                pos = i;
-                break;
-            }
-            curChar = [[self xvim_string] characterAtIndex:i];
-        }
+        NSRange rph = [self rangePlaceHolder:pos option:opt];
         // new word starts between followings.( keyword is determined by 'iskeyword' in Vim )
         //    - Whitespace(including newline) and Non-Blank
         //    - keyword and non-keyword(without whitespace)  (only when !BIGWORD)
         //    - non-keyword(without whitespace) and keyword  (only when !BIGWORD)
         //    - newline and newline(blankline) 
-        else if(
-           ((isWhitespace(curChar) || isNewline(curChar)) && isNonblank(lastChar))   ||
-           ( opt != BIGWORD && isKeyword(curChar) && !isKeyword(lastChar) && !isWhitespace(lastChar) && !isNewline(lastChar))   ||
-           ( opt != BIGWORD && !isKeyword(curChar) && !isWhitespace(curChar) && !isNewline(lastChar) && isKeyword(lastChar) )  ||
-           ( isNewline(curChar) && [self isBlankline:i+1] )
-           ){
-            count--; 
+        if( ([self isNewline:pos-1] && [self isBlankline:pos]) ||
+           (([self isWhitespaceOrNewline:pos-1] && [self isNonblank:pos]) ) ||
+            (!(opt & BIGWORD) && [self isKeyword:pos-1] != [self isKeyword:pos] && ![self isWhitespaceOrNewline:pos])
+        )
+        {
+            word_count++;
+        } else if( [self isNonblank:pos-1] && [self rangePlaceholder:pos-1].location != NSNotFound ){
+            word_count++;
+            pos = [self rangePlaceholder:pos-1].location;
+        } else if( rph.location != NSNotFound ){
+            word_count++;
         }
         
-        lastChar = curChar;
-        if( 0 == i ){
-            pos = 0;
+        if( pos == 0 ){
             break;
         }
-        if( 0 == count || (isNewline(curChar) && opt == LEFT_RIGHT_NOWRAP) ){
-            pos = i+1;
+        if([self isNewline:pos-1] && (opt & LEFT_RIGHT_NOWRAP) ){
+            break;
+        }
+        if( rph.location != NSNotFound && rph.location < pos ){
+            pos = rph.location;
+        }
+        if( word_count == count ){
             break;
         }
     }
@@ -774,50 +826,53 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 - (NSUInteger)endOfWordsForward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     NSAssert( 0 != count , @"count must be greater than 0");
-
-    NSUInteger length = self.length;
-
-    if (index >= length - 1) {
+    if( [self isEOF:index] || [self isLastCharacter:index]){
         return index;
     }
-
-    NSUInteger p;
-    if( opt & MOTION_OPTION_CHANGE_WORD ){
-        p = index;
-    } else {
-        p = index+1; // We start searching end of word from next character
-    }
+    NSUInteger pos = index;
+    NSUInteger word_count = 0;
     NSString *string = [self xvim_string];
-    while (p < length - 1) {
-        unichar curChar = [string characterAtIndex:p];
-        unichar nextChar = [string characterAtIndex:p+1];
-        // Find the border of words.
-        // Vim defines "Blank Line as a word" but 'e' does not stop on blank line.
-        // Thats why we are not seeing blank line as a border of a word here (commented out the condition currently)
-        // We may add some option to specify if we count a blank line as a word here.
-        if( opt & BIGWORD ){
-            if( /*[self isBlankline:p]                               || */// blank line
-               (isNonblank(curChar) && !isNonblank(nextChar))             // non blank to blank
-               ){
-                count--;
-            }
-        }else{
-            if( /*[self isBlankline:p]                               || */// blank line
-               (isNonblank(curChar) && !isNonblank(nextChar))       ||   // non blank to blank
-               (isKeyword(curChar) && !isKeyword(nextChar))         ||   // keyword to non keyword
-               (isNonblank(curChar) && !isKeyword(curChar) && isKeyword(nextChar))              // non keyword-non blank to keyword
-               ){
-                count--;
-            }
-        }
-        
-        if( 0 == count){
+    for( ; ; ++pos ){
+        if( [self isLastCharacter:pos] ){
             break;
         }
-        p++;
+        NSRange rph = [self rangePlaceHolder:pos option:opt];
+        if( rph.location != NSNotFound ){
+            // placeholder
+            if( (opt&MOTION_OPTION_CHANGE_WORD) || pos != index ){
+                word_count++;
+            }
+            pos = NSMaxRange(rph) - 1;
+            if( [self isLastCharacter:pos] ){
+                break;
+            }
+        } else if( [self isNewline:pos] && [self isNewline:pos+1] ){
+            // two NewLine
+            if( opt&MOTION_OPTION_CHANGE_WORD ){
+                word_count++;
+            }
+        } else if( (opt&MOTION_OPTION_CHANGE_WORD) && isWhitespace([string characterAtIndex:index]) ){
+            // begins with space in case of 'cw'
+            if( [self isWhitespace:pos] && ![self isWhitespace:pos+1] ){
+                word_count++;
+            }
+        } else if( ![self isWhitespaceOrNewline:pos] ){
+            if( (![self isWhitespaceOrNewline:pos+1] &&
+                 !(opt & BIGWORD) &&
+                 [self isKeyword:pos] != [self isKeyword:pos+1] ) ||
+                [self isWhitespaceOrNewline:pos+1] ||
+               [self rangePlaceHolder:pos+1 option:opt].location != NSNotFound
+               ){
+                if( (opt&MOTION_OPTION_CHANGE_WORD) || pos != index ){
+                    word_count++;
+                }
+            }
+        }
+        if( word_count == count ){
+            break;
+        }
     }
-    
-    return p;
+    return pos;
 }
 
 /**
@@ -1089,7 +1144,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         return NSNotFound;
     }
     
-    for( ; p <= end; p++ ){
+    for( ; p < end; p++ ){
         if( [[self xvim_string] characterAtIndex:p] == character ){
             count--;
             if( 0 == count ){
