@@ -1,4 +1,4 @@
-<a href="https://github.com/XVimProject/XVim/blob/master/README_jp.md">[日本語版]</a> 
+[\[日本語版\]](README_jp.md)
 
 # XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim)
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
@@ -51,7 +51,7 @@ Delete the following directory:
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
 ## Feature list
-  See separate [FeatureList.md](https://github.com/XVimProject/XVim/blob/master/Documents/Users/FeatureList.md)
+  See separate [FeatureList.md](Documents/Users/FeatureList.md)
 
 ## Bug reports
   Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs, but it's really hard work.
@@ -96,7 +96,7 @@ Delete the following directory:
  - [How to debug XVim](http://www.youtube.com/watch?v=AbC6f86VW9A)
  - [How to write a test case](http://www.youtube.com/watch?v=kn-kkRTtRcE)
 
-  Any pull requests are very much appreciated. Before you make a pull request see [Make a Pull Request](https://github.com/XVimProject/XVim/blob/master/Documents/Developers/PullRequest.md)
+  Any pull requests are very much appreciated. Before you make a pull request see [Make a Pull Request](Documents/Developers/PullRequest.md)
 
 ## Donations
   If you think the plugin is useful, please donate.

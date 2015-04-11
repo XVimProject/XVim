@@ -38,7 +38,7 @@
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
 
 ## 機能一覧
-  別ファイルを参照ください。[FeatureList.md](https://github.com/JugglerShu/XVim/blob/master/Documents/Users/FeatureList.md)
+  別ファイルを参照ください。[FeatureList.md](Documents/Users/FeatureList.md)
 
 ## バグ報告
   残念ながらXVim影響でXcodeがクラッシュしてしまうことがあります。すべてのバグを取り除こうとしていますが、非常に難しいのが現状です。
@@ -81,7 +81,7 @@
  - [How to debug XVim](http://www.youtube.com/watch?v=AbC6f86VW9A)
  - [How to write a test case](http://www.youtube.com/watch?v=kn-kkRTtRcE)
 
-  Pull Requestしていただけると非常にありがたいです。Pull Requstを行う前に、[Make a Pull Request](https://github.com/JugglerShu/XVim/blob/master/Documents/Developers/PullRequest.md)
+  Pull Requestしていただけると非常にありがたいです。Pull Requstを行う前に、[Make a Pull Request](Documents/Developers/PullRequest.md)
 をご一読ください。
 
 ## 寄付
