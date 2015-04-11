@@ -42,7 +42,10 @@
     
     static NSString* text7 = @"aaa bbb ccc\n"
                              @"bbb ccc ccc\n\n";
-    
+
+    static NSString* text8 = @"aaa bbb ccc\n"
+                             @"aaa.bbb.ccc\n\n";
+
     static NSString* replace1_result =   @"eeeee bbb ccc\n"
                                          @"bbb ccc ccc\n"
                                          @"bbb ccc ddd\n";
@@ -81,6 +84,10 @@
     static NSString* replace10_result =  @"aaa bbb eeeee\n"
                                          @"bbb eeeee eeeee\n"
                                          @"bbb eeeee ddd\n";
+
+    static NSString* replace11_result =  @"aaa ddd ccc\n"
+                                         @"aaa.ddd.ccc\n\n";
+    
     return [NSArray arrayWithObjects:
             //
             // replace(:s)
@@ -126,6 +133,11 @@
             XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>yyy", replace3_result, 28, 0),
             XVimMakeTestCase(text6, 0,  0, @":%s/ccc/eeeee/gc<CR>yyyy", replace10_result, 39, 0),
 
+            XVimMakeTestCase(text7, 0,  0, @"Vj:s/$/fffff/g<CR>", replace8_result, 15, 0),
+
+            // word boundaries, added to cover https://github.com/XVimProject/XVim/issues/732
+            XVimMakeTestCase(text8, 0,  0, @":set vimregex<CR>:%s/\\bbbb\\b/ddd/g<CR>", replace11_result, 19, 0),
+            
             // Search (/,?)
             XVimMakeTestCase(text1, 0,  0, @"/bbb<CR>", text1, 4, 0),
             XVimMakeTestCase(text1, 8,  0, @"?bbb<CR>", text1, 4, 0),
@@ -186,7 +198,9 @@
             // * or # should only word boundary - should work also when vimregex is on
             XVimMakeTestCase(text3, 5,  0, @":set vimregex<CR>*" , text3, 44, 0),
             XVimMakeTestCase(text3,45,  0, @":set vimregex<CR>#" , text3,  4, 0),
-            
+
+            // search followed by implicit replace. added to cover https://github.com/XVimProject/XVim/issues/730
+            XVimMakeTestCase(text8, 0,  0, @":set vimregex<CR>/bbb<CR>:%s//ddd/g<CR>", replace11_result, 19, 0),
             nil];
 }
 @end

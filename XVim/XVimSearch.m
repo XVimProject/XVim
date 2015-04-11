@@ -397,7 +397,7 @@
 
     NSTextView* srcView = [window sourceView];
 
-    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines|NSRegularExpressionUseUnicodeWordBoundaries;
+    NSRegularExpressionOptions r_opts = NSRegularExpressionAnchorsMatchLines;
     if ([self isCaseInsensitive])
     {
         r_opts |= NSRegularExpressionCaseInsensitive;
@@ -405,8 +405,10 @@
 
     NSError *error = NULL;
     TRACE_LOG(@"%@", self.lastReplacementString);
-    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:self.lastSearchCmd options:r_opts error:&error];
-
+    // Taking pattern from search command. If not available, take the pattern from the last search string.
+    NSString *pattern = self.lastSearchCmd.length ? self.lastSearchCmd : self.lastSearchString;
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:r_opts error:&error];
+    
     if (error != nil) {
         [window errorMessage:[NSString stringWithFormat: @"Cannot compile regular expression '%@'",self.lastSearchDisplayString] ringBell:TRUE];
         self.lastFoundRange = NSMakeRange(NSNotFound,0);
