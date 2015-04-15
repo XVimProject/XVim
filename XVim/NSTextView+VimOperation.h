@@ -81,8 +81,11 @@
 - (void)xvim_move:(XVimMotion*)motion;
 - (void)xvim_selectSwapEndsOnSameLine:(BOOL)onSameLine;
 - (BOOL)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank;
+- (BOOL)xvim_delete:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint andYank:(BOOL)yank;
 - (BOOL)xvim_change:(XVimMotion*)motion;
 - (void)xvim_yank:(XVimMotion*)motion;
+- (void)xvim_yank:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint;
+- (void)xvim_copymove:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint withInsertionPoint:(NSUInteger)insertionPoint after:(BOOL)after onlyCopy:(BOOL)onlyCopy;
 - (void)xvim_put:(NSString*)text withType:(TEXT_TYPE)type afterCursor:(bool)after count:(NSUInteger)count;
 - (void)xvim_swapCase:(XVimMotion*)motion;
 - (void)xvim_makeLowerCase:(XVimMotion*)motion;
@@ -91,7 +94,9 @@
 - (void)xvim_join:(NSUInteger)count addSpace:(BOOL)addSpace;
 - (void)xvim_filter:(XVimMotion*)motion;
 - (void)xvim_shiftRight:(XVimMotion*)motion;
+- (void)xvim_shiftRight:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint count:(NSUInteger)count;
 - (void)xvim_shiftLeft:(XVimMotion*)motion;
+- (void)xvim_shiftLeft:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint count:(NSUInteger)count;
 - (void)xvim_insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column;
 - (void)xvim_insertNewlineBelowLine:(NSUInteger)line;
 - (void)xvim_insertNewlineBelowCurrentLine;
