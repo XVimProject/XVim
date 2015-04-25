@@ -611,7 +611,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 
     NSUInteger lno = [self xvim_lineNumberAtIndex:index];
 
-    lno = lno < count ? 1 : lno - count;
+    lno = lno > count ? lno - count : 1;
     return [self xvim_indexOfLineNumber:lno column:column];
 }
 
