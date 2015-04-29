@@ -65,12 +65,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 
 + (void) addXVimMenu{
-    // Add XVim menu
-    // I have tried to add the item into "Editor" but did not work.
-    // It looks that the initialization of "Editor" menu is done later...
     NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
     NSMenuItem* item = [[NSMenuItem alloc] init];
-    NSMenu* m = [[NSMenu alloc] initWithTitle:@"XVim"];
+    item.title = @"XVim";
+    NSMenu* m = [[NSMenu alloc] init];
     [item setSubmenu:m];
     
     NSMenuItem* subitem = [[NSMenuItem alloc] init];
@@ -108,12 +106,14 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         [m addItem:subm];
         [subm setSubmenu:cat_menu];
     }
-    
-    // Add XVim menu next to Editor menu
-    NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
-    [menu insertItem:item atIndex:editorIndex];
-    return;
-    
+
+    // Add XVim menu into Edit menu. Adding to Eidtor menu would be ideal, but editor menu
+    // doesn't seems ready by the time we get here.
+    NSMenu *editMenu = [menu itemWithTitle:@"Edit"].submenu;
+    if (editMenu) {
+      [editMenu addItem:[NSMenuItem separatorItem]];
+      [editMenu addItem:item];
+    }
 }
 
 + (void) load{
