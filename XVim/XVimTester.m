@@ -103,6 +103,9 @@
 #pragma clang diagnostic pop
         }
     }
+    // category names need to be sorted alphabetically
+    NSArray* sorted = [arr sortedArrayUsingSelector:@selector(compare:)];
+    return sorted;
     return arr;
 }
 
