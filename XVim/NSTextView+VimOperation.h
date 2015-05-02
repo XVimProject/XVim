@@ -66,6 +66,7 @@
 @property(strong) id<XVimTextViewDelegateProtocol> xvimDelegate;
 @property BOOL needsUpdateFoundRanges;
 @property(readonly) NSArray* foundRanges;
+@property BOOL foundRangesHidden;
 @property(readonly) long long currentLineNumber;
 
 - (NSString*)xvim_string;

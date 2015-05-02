@@ -1056,6 +1056,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 - (void)nohlsearch:(XVimExArg*)args inWindow:(XVimWindow*)window{
     NSTextView* view = [window sourceView];
+    [view setFoundRangesHidden:YES];
     [view setNeedsUpdateFoundRanges:YES];
     [view xvim_clearHighlightText];
 }
