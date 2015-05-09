@@ -198,6 +198,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     self.tempRepeatRegister = [[XVimMutableString alloc] init];
     self.isRepeating = NO;
     self.isExecuting = NO;
+    self.foundRangesHidden = NO;
     _logFile = nil;
     _exCommandHistory = [[XVimHistoryHandler alloc] init];
     

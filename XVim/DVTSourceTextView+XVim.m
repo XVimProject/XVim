@@ -157,8 +157,10 @@ NSRect s_lastCaret;
         
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
-            if( nil != lastSearch.regex ){
+            if( nil != lastSearch.regex && !XVim.instance.foundRangesHidden ){
                 [self xvim_updateFoundRanges:lastSearch.regex withOption:lastSearch.option];
+            } else {
+                [self xvim_clearHighlightText];
             }
         }else{
             [self xvim_clearHighlightText];
