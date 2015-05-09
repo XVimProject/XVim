@@ -49,7 +49,6 @@
 @property CURSOR_MODE cursorode;
 @property(strong) NSURL* documentURL;
 @property(readonly) NSMutableArray* foundRanges;
-@property(readwrite) BOOL foundRangesHidden;
 
 // Internal properties
 @property(strong) NSString* lastYankedText;
@@ -502,16 +501,6 @@
         [self setData:ranges forName:@"foundRanges"];
     }
     return ranges;
-}
-
-- (BOOL)foundRangesHidden{
-    id ret = [self dataForName:@"foundRangesHidden"];
-    return ret == nil ? NO : [ret boolValue];
-}
-
-- (void)setFoundRangesHidden:(BOOL)foundRangesHidden
-{
-    [self setBool:foundRangesHidden forName:@"foundRangesHidden"];
 }
 
 #pragma mark Internal properties
@@ -1839,11 +1828,6 @@
 - (void)xvim_updateFoundRanges:(NSString*)pattern withOption:(MOTION_OPTION)opt{
     NSAssert( nil != pattern, @"pattern munst not be nil");
     if( !self.needsUpdateFoundRanges ){
-        return;
-    }
-    
-    if( self.foundRangesHidden ){
-        [self xvim_clearHighlightText];
         return;
     }
     

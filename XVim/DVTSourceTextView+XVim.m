@@ -288,7 +288,6 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
 
 - (void)xvim_observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
 	if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
-        [self setFoundRangesHidden:NO];
         [self setNeedsUpdateFoundRanges:YES];
         [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:YES];
     }
