@@ -8,6 +8,12 @@
 
 #import "IDEKit.h"
 
+typedef NS_ENUM(NSInteger,EditorMode) {
+    STANDARD,
+    GENIUS,
+    VERSION
+};
+
 @interface IDEWorkspaceTabController (XVim)
 - (void)xvim_jumpFocus:(NSInteger)count relative:(BOOL)relative;
 - (void)xvim_addEditor;
