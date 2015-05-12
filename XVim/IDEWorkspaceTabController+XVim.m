@@ -139,6 +139,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         count = MIN(ABS(count), numEditors) - 1; // -1 to convert it to array index
         [allEditors[(NSUInteger)(count%numEditors)] takeFocus];
     }
+    // redraw caret
+    [current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_addEditor{
@@ -185,7 +187,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
-    
+    // redraw caret
+    [current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_moveFocusUp{
@@ -211,7 +214,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
-    
+    // redraw caret
+    [current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_moveFocusLeft{
@@ -236,6 +240,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
+    // redraw caret
+	[current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_moveFocusRight{
@@ -259,6 +265,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
+    // redraw caret
+	[current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_closeOtherEditors{
