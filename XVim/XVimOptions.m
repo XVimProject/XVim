@@ -77,6 +77,12 @@
 }
 
 - (void)setOption:(NSString*)name value:(id)value{
+    BOOL toggle = NO;
+    NSRange range = [name rangeOfString:@"!"];
+    if (range.location == name.length - 1 && name.length > 1) {
+        toggle = YES;
+        name = [name substringToIndex:name.length - 1];
+    }
     NSString* propName = name;
     if( [_option_maps objectForKey:name] ){
         // If the name is abbriviation use full name
@@ -84,6 +90,16 @@
     }
     
     if( [self respondsToSelector:NSSelectorFromString(propName)] ){
+        
+        if (toggle) {
+            id oldValue = [self valueForKey:propName];
+            
+            if (strcmp([oldValue objCType], @encode(BOOL)) == 0) {
+                [self setValue:@(![oldValue boolValue]) forKey:propName];
+                return;
+            }
+        }
+        
         [self setValue:value forKey:propName];
     }
 }
