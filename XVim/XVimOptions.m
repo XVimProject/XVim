@@ -79,7 +79,7 @@
 - (void)setOption:(NSString*)name value:(id)value{
     BOOL toggle = NO;
     NSRange range = [name rangeOfString:@"!"];
-    if (range.location == name.length - 1 && name.length > 1) {
+    if( range.location == name.length - 1 && name.length > 1 ){
         toggle = YES;
         name = [name substringToIndex:name.length - 1];
     }
@@ -90,16 +90,14 @@
     }
     
     if( [self respondsToSelector:NSSelectorFromString(propName)] ){
-        
-        if (toggle) {
+        if( toggle ){
             id oldValue = [self valueForKey:propName];
-            
-            if (strcmp([oldValue objCType], @encode(BOOL)) == 0) {
+            // Check if the old value was a BOOL
+            if( strcmp([oldValue objCType], @encode(BOOL)) == 0 ){
                 [self setValue:@(![oldValue boolValue]) forKey:propName];
                 return;
             }
         }
-        
         [self setValue:value forKey:propName];
     }
 }
