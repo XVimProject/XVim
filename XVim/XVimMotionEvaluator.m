@@ -242,6 +242,10 @@
 
 
 - (XVimEvaluator*)nN_impl:(BOOL)opposite{
+    XVim.instance.foundRangesHidden = NO;
+    NSTextView* view = [self.window sourceView];
+    view.needsUpdateFoundRanges = YES;
+
     XVimMotion* m = [XVim.instance.searcher motionForRepeatSearch];
     if( opposite ){
         m.motion = (m.motion == MOTION_SEARCH_FORWARD) ? MOTION_SEARCH_BACKWARD : MOTION_SEARCH_FORWARD;

@@ -229,6 +229,9 @@ static XVimEvaluator *_popEvaluator = nil;
                  if( command.length == 0 ){
                      return nil;
                  }
+                 XVim.instance.foundRangesHidden = NO;
+                 NSTextView* view = [self.window sourceView];
+                 view.needsUpdateFoundRanges = YES;
                  
                  BOOL forward = [command characterAtIndex:0] == '/';
                  if( command.length == 1 ){
