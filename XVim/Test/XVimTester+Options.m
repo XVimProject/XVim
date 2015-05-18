@@ -26,6 +26,8 @@
             XVimMakeTestCase(text1, 0, 0, @":set ignorecase!<CR>", text1, 0, 0),
             // search should fail again
             XVimMakeTestCase(text1, 0, 0, @"/bbb<CR>", text1, 0, 0),
+            // make sure string inverting doesn't crash Xcode
+            XVimMakeTestCase(text1, 0, 0, @":set guioptions! rb", text1, 0, 0),
             nil];
 }
 
