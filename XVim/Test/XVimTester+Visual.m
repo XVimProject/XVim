@@ -138,7 +138,7 @@
             XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),
             XVimMakeTestCase(text2, 0,  0, @"vlljgU", vgU_result , 0, 0), // vgU
             XVimMakeTestCase(text2, 14,  0, @"vggU",  vgU_result , 0, 0), // vggU (same result with gU)
-            XVimMakeTestCase(text2, 12,  0, @"vGU",  vGU_result, 0, 0),  // vGU
+            XVimMakeTestCase(text2, 12,  0, @"vGU",  vGU_result, 12, 0),  // vGU
             XVimMakeTestCase(text2, 0,  0, @"vlljU",  vgU_result , 0, 0), // vU (same result with gU)
             XVimMakeTestCase(text2, 12,  0, @"VggU", VgU_result, 0, 0),  // VggU
             XVimMakeTestCase(text2, 0,  0, @"VlljgU", VgU_result, 0, 0),  // VgU

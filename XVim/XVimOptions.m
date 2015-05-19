@@ -39,6 +39,7 @@
          @"relativenumber", @"rn",
          @"alwaysuseinputsource", @"auis",
          @"blinkcursor", @"bc",
+         @"startofline", @"sol",
          nil];
         
         // Default values
@@ -58,6 +59,7 @@
         _relativenumber = NO;
         _alwaysuseinputsource = NO;
         _blinkcursor = NO;
+        _startofline = YES;
     }
     return self;
 }
