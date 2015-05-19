@@ -41,6 +41,13 @@
     return [XVimEvaluator popEvaluator];
 }
 
+- (XVimEvaluator *)g{
+    XVimMotion *motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+    motion.line = self.numericArg;
+    [[self sourceView] xvim_move:motion];
+    return [XVimEvaluator popEvaluator];
+}
+
 - (XVimEvaluator*)J{
     XVimJoinEvaluator* eval = [[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
