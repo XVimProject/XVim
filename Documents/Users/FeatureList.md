@@ -79,6 +79,7 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
 
  Input     | Operation
 -----------|---------------------------
+  C-w c    | Close current editor.
   C-w n    | Add new assistant (Use layout of the last)
   C-w o    | Delete all assistant editors.
   C-w q    | Delete one assistant editor
@@ -87,6 +88,21 @@ Inserting with visual block is not supported currently (Ctrl-v + Shift-I does no
 C-w h,j,k,l| Move focus between editors
   C-w w    | Jump to the next editor
   C-w W    | Jump to the previous editor
+
+  Alias    | Operation
+-----------|---------------------------
+  C-w C-c  | Same as "C-w c"
+  C-w C-n  | Same as "C-w n"
+  C-w C-o  | Same as "C-w o"
+  C-w C-q  | Same as "C-w q"
+  C-w C-s  | Same as "C-w s"
+  C-w C-v  | Same as "C-w v"
+  C-w C-h  | Same as "C-w h"
+  C-w C-j  | Same as "C-w j"
+  C-w C-k  | Same as "C-w k"
+  C-w C-l  | Same as "C-w l"
+  C-w C-w  | Same as "C-w w"
+  C-w C-W  | Same as "C-w W"
 
 The behaviour of window manipulations is slightly different from Vim's one. This is because that Xcode doesn't have a concept of multiple equivalent text views in a window.
 Instead, Xcode has a concept of a main editor and assistant editors. A main editor always stays in a window and you can add/remove multiple assistant editors.
