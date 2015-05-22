@@ -1772,7 +1772,7 @@ NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, B
   
 	if ([string characterAtIndex:idx] == other)
 	{
-        /* cursor on ')' or '}', move cursor just after it */
+        /* cursor on ')' or '}', move cursor just before it */
 		--idx;
 		if (idx < 0) {
 			return NSMakeRange(NSNotFound, 0);

@@ -35,7 +35,7 @@
                             self.insertionColumn,          \
                             self.preservedColumn )
 
-// These property declarations for for accessing them as readwrite from inside this category
+// These property declarations are for accessing them as readwrite from inside this category
 @interface NSTextView ()
 @property NSUInteger insertionPoint;
 @property XVimPosition insertionPosition;
@@ -626,7 +626,7 @@
         }
         
         if( self.insertionPoint < self.selectionBegin ){
-            // When insertionPoint < selectionBegin it only changes insertion point to begining of the text object
+            // When insertionPoint < selectionBegin it only changes insertion point to beginning of the text object
             [self xvim_moveCursor:r.begin preserveColumn:NO];
         }else{
             // Text object expands one text object ( the text object under insertion point + 1 )
@@ -2377,7 +2377,7 @@
         }
     }
     XVimRange r = XVimMakeRange(begin, end);
-    TRACE_LOG(@"range location:%u  length:%u", r.begin, r.end);
+    TRACE_LOG(@"range location:%u  length:%u", r.begin, r.end - r.begin + 1);
     return r;
 }
 
