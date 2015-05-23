@@ -66,10 +66,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 + (void) addXVimMenu{
     // Add XVim menu
-    // I have tried to add the item into "Editor" but did not work.
-    // It looks that the initialization of "Editor" menu is done later...
     NSMenu* menu = [[NSApplication sharedApplication] mainMenu];
     NSMenuItem* item = [[NSMenuItem alloc] init];
+    item.title = @"XVim";
     NSMenu* m = [[NSMenu alloc] initWithTitle:@"XVim"];
     [item setSubmenu:m];
     
@@ -109,9 +108,17 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         [subm setSubmenu:cat_menu];
     }
     
-    // Add XVim menu next to Editor menu
-    NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
-    [menu insertItem:item atIndex:editorIndex];
+
+    NSMenuItem* editorMenuItem = [menu itemWithTitle:@"Editor"];
+    if (editorMenuItem) {
+        // Add XVim menu next to Editor menu
+        [[editorMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+        [[editorMenuItem submenu] addItem:item];
+    } else {
+        // if editor menu is not available
+        NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
+        [menu insertItem:item atIndex:editorIndex];
+    }
     return;
     
 }
@@ -139,7 +146,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
     [[XVim instance] parseRcFile];
     
-    [self addXVimMenu];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self addXVimMenu];
+    });
     
     // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
     // [[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
