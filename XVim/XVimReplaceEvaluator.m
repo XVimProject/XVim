@@ -90,8 +90,8 @@
             // Here we pass the key input to original text view.
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
-            if (self.oneCharMode || keyStroke.isPrintable) {
-                if (!keyStroke.isPrintable) {
+            if (self.oneCharMode || keyStroke.isPrintable || keyStroke.isWhitespace) {
+                if (!keyStroke.isPrintable && !keyStroke.isWhitespace) {
                     nextEvaluator = [XVimEvaluator invalidEvaluator];
                 } else if (![self.sourceView xvim_replaceCharacters:keyStroke.character count:1]) {
                     nextEvaluator = [XVimEvaluator invalidEvaluator];

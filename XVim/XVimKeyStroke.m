@@ -322,6 +322,13 @@ NS_INLINE BOOL isPrintable(unichar c)
     return !isNSFunctionKey(c) && iswprint_l(c, s_locale);
 }
 
+NS_INLINE BOOL isWhitespace(unichar c)
+{
+    init_maps();
+
+    return !isNSFunctionKey(c) && iswspace_l(c, s_locale);
+}
+
 NS_INLINE BOOL isValidKey(NSString *key)
 {
     init_maps();
@@ -617,6 +624,11 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
 - (BOOL)isPrintable
 {
     return !_modifier && isPrintable(_character);
+}
+
+- (BOOL)isWhitespace
+{
+    return !_modifier && isWhitespace(_character);
 }
 
 - (NSString*)keyNotation{
