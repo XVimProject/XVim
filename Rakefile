@@ -55,8 +55,11 @@ task :uninstall do
 end
 
 task :pluginuuid do
-  plugin_uuid = `defaults read /Applications/Xcode.app/Contents/Info DVTPlugInCompatibilityUUID`
-  puts "UUID:#{plugin_uuid}"
+  Dir["/Applications/Xcode*.app"].each do |obj|
+      filename = obj + "/Contents/Info"
+      plugin_uuid = `defaults read "#{filename}" DVTPlugInCompatibilityUUID`
+      puts "#{filename} UUID:#{plugin_uuid}"
+  end
 end
 
 task :default => [:xcode56]
