@@ -12,9 +12,9 @@
 // This is a top level interface for it and you should not declare something used internally to calculate the position or motion.
 // They should go into internal category "VimOperationPrivate" in NSTextView+VimOperation.m.
 // The operations declared here must be complete its tasks including edit on characters, positioning a cursor or scrolling.
-// If possible methods here should be called WITHOUT spcifing any position or line number as an argument
+// If possible methods here should be called WITHOUT specifing any position or line number as an argument
 // because all the operation should be done on current state of the text view.
-// But in Vim some operation (in Ex command especiall) takes line number or range as an argument so
+// But in Vim some operations (in Ex command especially) take a line number or range as an argument so
 // to complete such task you need to decleare some method which takes line number or range as an agument.
 // Usually declare one method for one vim operation.
 //
@@ -38,9 +38,9 @@
 // If you need some helper method used internally, declare it in VimOperationPrivate category in .m file
 //
 //
-// Naming conventoin
+// Naming convention
 //
-// All the method in this caregory must have a prefix "xvim_"
+// All the methods in this category must have the prefix "xvim_"
 // This is to avoid a conflict with method names in NSTextView.
 
 #import "XVimTextViewProtocol.h"
