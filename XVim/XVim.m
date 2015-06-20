@@ -39,6 +39,7 @@
 #import "IDEKit.h"
 #import "objc/runtime.h"
 #import "DVTSourceTextView+XVim.h"
+#import "XVimStatusLine.h"
 
 NSString * const XVimDocumentChangedNotification = @"XVimDocumentChangedNotification";
 NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
@@ -240,9 +241,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     } else if( [keyPath isEqualToString:@"document"] ){
         NSString *documentPath = [[[object document] fileURL] path];
         self.document = documentPath;
+        IDEEditor* editor = (__bridge IDEEditor*)context;
         
         if (documentPath != nil) {
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:documentPath forKey:XVimDocumentPathKey];
+            NSDictionary *userInfo = @{XVimDocumentPathKey:documentPath, XVimStatusLineIDEEditorKey:editor};
             [[NSNotificationCenter defaultCenter] postNotificationName:XVimDocumentChangedNotification object:nil userInfo:userInfo];
         }
     }

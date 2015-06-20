@@ -18,6 +18,8 @@
 #define STATUS_LINE_HEIGHT 18 
 #define MAX_STATUS_LINE_FONT_SIZE 14 
 
+NSString* const XVimStatusLineIDEEditorKey = @"IDEEditor";
+
 @interface XVimStatusLine ()
 
 - (void)_documentChangedNotification:(NSNotification *)notification;
@@ -105,9 +107,11 @@
 
 - (void)_documentChangedNotification:(NSNotification *)notification
 {
-    NSString *documentPath = [[notification userInfo] objectForKey:XVimDocumentPathKey];
-    if (documentPath != nil) {
-      [_status setString:documentPath];
+    NSDictionary* dic = [notification userInfo];
+    NSString *documentPath = dic[XVimDocumentPathKey];
+    IDEEditor* editor = dic[XVimStatusLineIDEEditorKey];
+    if (documentPath != nil && editor != nil && editor == self.editor ) {
+        [_status setString:documentPath];
     }
 }
 
