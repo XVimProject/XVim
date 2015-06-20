@@ -101,7 +101,7 @@
 
 -  (void)xvim_keyDown:(NSEvent *)theEvent{
     @try{
-        TRACE_LOG(@"[%p]Event:%@, XVimNotation:%@", self, theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
+        //TRACE_LOG(@"[%p]Event:%@, XVimNotation:%@", self, theEvent.description, XVimKeyNotationFromXVimString([theEvent toXVimString]));
         XVimWindow* window = [self xvim_window];
         if( nil == window ){
             [self xvim_keyDown:theEvent];
@@ -128,7 +128,7 @@
 
 -  (void)xvim_mouseDown:(NSEvent *)theEvent{
     @try{
-        TRACE_LOG(@"Event:%@", theEvent.description);
+        //TRACE_LOG(@"Event:%@", theEvent.description);
         [self xvim_mouseDown:theEvent];
         // When mouse down, NSTextView ( self in this case) takes the control of event loop internally
         // and the method call above does not return immidiately and block until mouse up. mouseDragged: method is called from inside it but

@@ -95,11 +95,13 @@
 
 - (void)dumpEvaluatorStack:(NSMutableArray*)stack
 {
+    /*
     for (NSUInteger i = 0; i < stack.count; i++) {
         XVimEvaluator *e = [stack objectAtIndex:i];
 
         DEBUG_LOG(@"Evaluator%d:%@   argStr:%@   yankReg:%@", i, NSStringFromClass([e class]), e.argumentString, e.yankRegister);
     }
+     */
 }
 
 #pragma mark - Handling keystrokes and evaluation stack
@@ -195,7 +197,7 @@
 
     [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(handleTimeout) object:nil];
     if (mapped) {
-        DEBUG_LOG(@"%@", mapped);
+        //DEBUG_LOG(@"%@", mapped);
 
         [_keymapContext clear];
         for (XVimKeyStroke *keyStroke in XVimKeyStrokesFromXVimString(mapped) ) {

@@ -412,7 +412,7 @@
 }
 
 - (void)setPreservedColumn:(NSUInteger)preservedColumn{
-    TRACE_LOG(@"%d" , preservedColumn);
+    //TRACE_LOG(@"%d" , preservedColumn);
     [self setUnsignedInteger:preservedColumn forName:@"preservedColumn"];
 }
 
@@ -2185,13 +2185,13 @@
 #pragma mark helper methods
 
 - (void)xvim_syncStateFromView{
-    TRACE_LOG(@"[%p]ENTER", self);
+    //TRACE_LOG(@"[%p]ENTER", self);
     // TODO: handle block selection (if selectedRanges have multiple ranges )
     if( self.xvim_lockSyncStateFromView ){
         return;
     }
     NSRange r = [self selectedRange];
-    DEBUG_LOG(@"Selected Range(TotalLen:%d): Loc:%d Len:%d", self.string.length, r.location, r.length);
+    //DEBUG_LOG(@"Selected Range(TotalLen:%d): Loc:%d Len:%d", self.string.length, r.location, r.length);
     self.selectionMode = XVIM_VISUAL_NONE;
     [self xvim_moveCursor:r.location preserveColumn:NO];
     self.selectionBegin = self.insertionPoint;
@@ -2221,7 +2221,7 @@
     // This method only update the internal state(like self.insertionPoint)
     
     if( pos > [self xvim_string].length){
-        ERROR_LOG(@"[%p]Position specified exceeds the length of the text", self);
+        //ERROR_LOG(@"[%p]Position specified exceeds the length of the text", self);
         pos = [self xvim_string].length;
     }
     
@@ -2235,11 +2235,11 @@
         self.preservedColumn = [self.textStorage xvim_columnOfIndex:self.insertionPoint];
     }
     
-    DEBUG_LOG(@"[%p]New Insertion Point:%d   Preserved Column:%d", self, self.insertionPoint, self.preservedColumn);
+    //DEBUG_LOG(@"[%p]New Insertion Point:%d   Preserved Column:%d", self, self.insertionPoint, self.preservedColumn);
 }
 
 - (void)_adjustCursorPosition{
-    TRACE_LOG(@"[%p]ENTER", self);
+    //TRACE_LOG(@"[%p]ENTER", self);
     if( ![self.textStorage isValidCursorPosition:self.insertionPoint] ){
         NSRange placeholder = [(DVTSourceTextView*)self rangeOfPlaceholderFromCharacterIndex:self.insertionPoint forward:NO wrap:NO limit:0];
         if( placeholder.location != NSNotFound && self.insertionPoint == (placeholder.location + placeholder.length)){
@@ -2254,7 +2254,7 @@
 }
 
 - (void)xvim_syncStateWithScroll:(BOOL)scroll{
-    DEBUG_LOG(@"[%p]IP:%d", self, self.insertionPoint);
+    //DEBUG_LOG(@"[%p]IP:%d", self, self.insertionPoint);
     self.xvim_lockSyncStateFromView = YES;
     // Reset current selection
     if( self.cursorMode == CURSOR_MODE_COMMAND ){
@@ -2288,7 +2288,7 @@
 }
 
 - (void)dumpState{
-    LOG_STATE();
+    //LOG_STATE();
 }
 
 // xvim_setSelectedRange is an internal method
@@ -2560,7 +2560,7 @@
         }
     }
     XVimRange r = XVimMakeRange(begin, end);
-    TRACE_LOG(@"range location:%u  length:%u", r.begin, r.end - r.begin + 1);
+    //TRACE_LOG(@"range location:%u  length:%u", r.begin, r.end);
     return r;
 }
 
