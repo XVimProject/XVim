@@ -28,6 +28,7 @@
 #import "XVimKeymap.h"
 #import "XVimUtil.h"
 #import "XVimTester.h"
+#import "NSURL+XVimXcodeModule.h"
 
 @implementation XVimExArg
 @synthesize arg,cmd,forceit,noRangeSpecified,lineBegin,lineEnd,addr_count;
@@ -1495,6 +1496,21 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                                           , documentPath ?             documentPath : @"", @"%"
                                           , nil];
         [ self _expandSpecialExTokens:args contextDict:contextForExCmd];
+    }
+    else if( [documentURL isXcodeModuleSchemeURL] ){
+        // Xcode convert Objective-C Framework header to swift format.
+        // We use converted text as is.
+        NSFileManager* fm = [NSFileManager defaultManager];
+        NSString* swiftpath = [NSHomeDirectory() stringByAppendingPathComponent:@".xvimtmp.swift"];
+        NSString* str = window.sourceView.string;
+        if( str.length > 0 ){
+            NSData* data = [NSData dataWithBytes:(void*)str.UTF8String length:str.length];
+            [fm createFileAtPath:swiftpath contents:data attributes:nil];
+            
+            NSDictionary* contextForExCmd = @{@"#": @"",
+                                              @"%": swiftpath ? swiftpath: @""};
+            [self _expandSpecialExTokens:args contextDict:contextForExCmd];
+        }
     }
 
     NSString* scriptReturn = [ XVimTaskRunner runScript:args.arg
