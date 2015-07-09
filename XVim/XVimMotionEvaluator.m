@@ -101,7 +101,7 @@
 	}else if (_forcedMotionType == LINEWISE){
         motion.type = LINEWISE;
     }else if (_forcedMotionType == BLOCKWISE){
-        // TODO: Implemente BLOCKWISE operation
+        // TODO: Implement BLOCKWISE operation
         // Currently BLOCKWISE is not supporeted by operations implemented in NSTextView.m
         motion.type = LINEWISE;
     }else{

@@ -81,7 +81,7 @@ extern NSString * const XVimDocumentPathKey;
  * When repeating you must call startRepeat first and 
  * call endRepeat after you finish repeating.
  * When in repeating the key input never recorded into 
- * repeat regisgter
+ * repeat register
  **/
 - (void)appendOperationKeyStroke:(XVimString*)stroke;
 - (void)fixOperationCommands;

@@ -136,14 +136,14 @@ typedef enum {
  * @param opt currntly nothing is supported
  * @return The position to move to. If the current index is on the first line it returns 0
  *
- * "column" may be greater then number of characters in the current line.
+ * "column" may be greater than number of characters in the current line.
  * Assume that you have following text.
  *     abcd
  *     ef
  *     12345678
  * When a cursor at character "4" goes up cursor will go at "f".
- * When a cursor goes up agein it should got at d. (This is default Vim motion)
- * To keep the column position you have to specifi the "column" argument.
+ * When a cursor goes up again it should got at d. (This is default Vim motion)
+ * To keep the column position you have to specify the "column" argument.
  *
  **/
 - (NSUInteger)prevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt;

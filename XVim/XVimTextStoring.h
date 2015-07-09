@@ -63,7 +63,7 @@
  *
  ******************************************************************************
  *
- * Implementation notes for developpers
+ * Implementation notes for developers
  *
  * XVim provides a default implementation of this protocol
  * on an NSTextStorage Category.

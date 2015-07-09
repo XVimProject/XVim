@@ -3,7 +3,7 @@
 
 # Problem when yank and put block text #
    When yank and put with block selection it makes inserting some spaces to pad a line.
-For example, assume we have following text,
+For example, assume we have following text:
 -----------------------
 aaaaaaa
 
@@ -14,10 +14,10 @@ makes ["a", "", "b"] as a selection. When yank this and put at 3rd "a" will resu
 in 2nd line to put ""(empty string). 
 The problem is that when Xcode's preference "Automatically trim trailing whitespaces" will delete the 
 spaces after putting the yanked text.
-It looks that it does not big problem but when you want to "undo" the put operation you have to type 
+It seems that it is not a big problem but when you want to "undo" the put operation you have to type
 "u" twice because the actions taken when we put are "Insert ["a", "", "b"] into each line" and "trim 
 trailing whitespace" and first "u" command only undo the "trim..." action.
-I tried to group them up into one action to undo with one "u" commnad but could not.
+I tried to group them up into one action to undo with one "u" command but could not.
 
 
 ### How to control documents (Open, Close) ###
@@ -29,14 +29,14 @@ You can use IDEDocumentController. Its like...
 
 
 ### Debugger area / Console Area ###
-To access console area (debugger area) you can use 
+To access the console area (debugger area), you can use
     IDEDefaultDebugArea* debuggerArea = [(IDEDefaultDebugArea*)[XVimLastActiveEditorArea() activeDebuggerArea];
-IDEDefaultDebuggerArea is a NSViewContoroller and has "varibles view" and  "console view" as you can see in bottom of Xcode window.
+IDEDefaultDebuggerArea is an NSViewContoroller and has "varibles view" and "console view" as you can see in bottom of Xcode window.
 
-To access "condole view" you can use
+To access "console view" you can use
     IDEConsoleArea *console = [debuggerArea consoleArea];
-This is also NSViewController.
-If you want to access its view you have to get the view but it does provides public property to access it.
+This is also an NSViewController.
+If you want to access its view you have to get the view but it does provide public property to access it.
 So we have to specify the instance varible name to get the view as below.
     IDEConsoleTextView* pView;
     object_getInstanceVariable(console , "_consoleView" , (void**)&pView);
@@ -45,10 +45,10 @@ Now "pView" is IDEConsoleTextView (subclass of NSView)
 To insert text into the console view you can do like
     pView.logMode = 1;
     [pView insertText:@"some text"]
-I do not know what is logMode but you have to specify it to insert text (otherwise you can not insert text).
+I do not know what logMode is, but you have to enable it to insert text (otherwise you can not insert text).
 
 IDEConsoleArea has filterMode property. This property indicates the filter you can specify in console area.
-You can see "All Output","Deubbger Output","Target Output" pulldown selection button on top of the console area.
+You can see "All Output", "Debugger Output", "Target Output" pulldown selection button on top of the console area.
 The values corresponds like
   0 - All Output
   1 - Debugger Output
@@ -64,16 +64,16 @@ DVTFoldingTextStorage is handling string in a DVTSourceTextView with folding sta
 For example, we often have a placeholder in the text view (the highlighted words when you type some method)
 Internally it is just a text like "< # placholder #>" and it is showl as just "placeholder" with blue highlighted.
 (I put space between < and # above because Xcode automatically holds it if it is not there)
-In this case ,DVTFoldingTextStorage will give a string "placeholder" to its text view.
+In this case, DVTFoldingTextStorage will give a string "placeholder" to its text view.
 And DVTFoldingTextStorage has a property "realTextStorage"(DVTTextStorage) which holds internal text notation including < # part.
 So the length of the text is different between internal text notation and text acutually shown in the view.
-We have to handle these correctly when we calc the position in a text. We usually can use just a
-DVTFoldingTextStorage's methods but sometimes we need to know acutal length in internal text.
+We have to handle these correctly when we calc the position in a text. We usually can just use a
+DVTFoldingTextStorage's methods but sometimes we need to know actual length in internal text.
 
 
 
 ### Exception occurs when you edit DVTFoldingTextStorage when the view is showing complition list
-When I tried to implement "hlsearch" I had to update text view (text storage) whenever they type (insert/delete) text because they puroduce
+When I tried to implement "hlsearch" I had to update text view (text storage) whenever they type (insert/delete) text because they produce
 some text which match/unmatch the currently search string.
 Highlighting a text is done via editing text storage object in a text view (DVTFoldingTextStorage in this case).
 So I update the storage whenever they type something. But it causes exceptions in DVTFoldinTextStorage.
@@ -85,11 +85,11 @@ Currently I use NSTextViewDidChangeNotification to know when to update highlight
 Colors or some features on Xcode is configured via "Preferences" menu.
 Preferences are mainly managed by NSUserDefaults.
 But if you change NSUserDefaults directly it is not applied to Xcode views.
-(I think the views are listening "Preference" controller and not the NSUserDefaults itself)
+(I think the views are listening to "Preference" controller and not the NSUserDefaults itself)
 
 What I found so far is that for text preferences you can use DVTTextPreferences class. (It took 5 hours to find this...)
 It has a class method which returns global singleton DVTTextPreferences object. When you set its property
-it is properly affected to views.
+it properly affects views.
 It is like...
 
       [DVTTextPreferences preferences].showLineNumbers = YES;
@@ -98,7 +98,7 @@ It is like...
 ### Thick insertion point(caret) drawing in NSTextView
 In NSTextView you can find a method "drawInsertionPointInRect:color:turnedOn:" which obviously draws insertion point.
 So it looks that overriding (or hooking) the method and just changing the "rect" is enough to achieve our goal.
-Unforunately it does not work correctly.
+Unfortunately it does not work correctly.
 
 I here explain how the insertion point on a NSTextView is drawn.
 
@@ -107,8 +107,8 @@ so if the flag is ON you must draw insertion point and clear the insertion point
 This makes a caret blinking.
 
 It is easy to draw insertion point but clearing insertion point is not so simple.
-Assume that you have a caret at the left side of a character and the caret and the caracter is overlapping.
-(Usual caret is only 1 or 2 pixel so it is not big problem but we will draw thick caret as Vim does)
+Assume that you have a caret at the left side of a character and the caret and the character is overlapping.
+(Xcode's usual caret is only 1 or 2 pixels, so it is not big problem, but we will draw the thick caret as Vim does)
 When clearing a caret you have to redraw the character under the caret. To do so what you have to do is 
    - Clear the area (rect) of the caret with background color
    - Draw the (part of)character which resides in the rect
@@ -120,7 +120,7 @@ drawInsertionInRect:... method is
 
 This is perhaps what default implementation of the NSTextView is doing
 
-so the pseudo code for the method is as following.
+so the pseudo code for the method is as following:
 
  - (void)drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color turnedOn:(BOOL)flag{
     if( flag ){
@@ -144,10 +144,10 @@ so the pseudo code for the method is as following.
 
  And one more thing we have to know about drawing insertion point.
  _drawInsertionPointInRect:color: method is also called from setSelectedRange method.
- When you move a cursor, It immideately change the position of the caret. To achive this,
+ When you move a cursor, it immediately changes the position of the caret. To achieve this,
  _drawInsertionPointInRect:color: is called.
  
- So everything in mind insertion point drawing methods should be like folloiwng.
+ So everything in mind insertion point drawing methods should be like following.
 
  - (void)_drawInsertionPointInRect:(NSRange*)rect color:(NSColor*)color{
      // Some code...
@@ -182,7 +182,7 @@ so the pseudo code for the method is as following.
     // And then
     [self _drawInsertionPointInRect:rect color:_insertionPointColor];
 
-    // acutal setSelectedRagen is just a stub for setSelectedRange:affinity:stillSelecting:
+    // actual setSelectedRange is just a stub for setSelectedRange:affinity:stillSelecting:
  }
  
  - (void)insertionTimerExpired{
@@ -194,9 +194,9 @@ so the pseudo code for the method is as following.
 
 
  Now let us think how to make thick insertion point. Following actually works as we expect.
-  - Hook drawInseritonPointInRect:colro:flag
-  - Resize the rect argument to fit into the caracter at insertion point. (make it thick)
-  - Call original darwInsertionPointInRect...
+  - Hook drawInseritonPointInRect:color:flag
+  - Resize the rect argument to fit into the character at insertion point. (make it thick)
+  - Call original drawInsertionPointInRect...
 
  But we have a problems.
  _drawInsertionPointRect uses NSRectFill to draw insertion point which completely override the color of the text with the caret color.
@@ -223,7 +223,7 @@ so the pseudo code for the method is as following.
 
  So what we have to do is update _insertionPointRect varibles in NSTextView when we override _drawInsertionPointRect:... method.
  
- This is what XVim is currently doing. (See acutual implementation in XVimSourceTextViewHook.m)
+ This is what XVim is currently doing. (See actual implementation in XVimSourceTextViewHook.m)
 
 
 
@@ -239,8 +239,8 @@ In didChangeText XVim mark that we have to update found location by searching a 
 In drawRect XVim update found locations if didChangeText marked that we need to update found locations.
 And then according to the locations drawRect sets text attribute for the ranges of found locations. And then draw the rect.
 
-The reason why we never do searching in didChangeText but just mark that update is needed is that
-we can not update found locatiosn when a text view is initialized.
+The reason why we never do searching in didChangeText but just mark that an update is needed is that
+we cannot update found locations when a text view is initialized.
 We have to update found locations for a new content when new DVTSourceView and its content is updated.
 When Xcode changes text content to newly selected file (wehen you click a file in navigation pane) Xcode create new DVTSourceTextView and its text storage objects.
 We can know hen DVTSourceTextView is created by hooking initWithCoder method.
@@ -370,22 +370,22 @@ In Xcode4 I did something like following when operating text. This keeps current
 
 In the above, "self" is DVTSourceTextView.
 
-Unfortunately when swiching files in Xcode5 it internally creates new DVTSourceTextView and the registered text view is no longer available.
-This leads crash when you undoing with the unabailable DVTSourceTextView.
-This can be reproducet in following operations.
+Unfortunately when switching files in Xcode5 it internally creates a new DVTSourceTextView and the registered text view is no longer available.
+This leads to a crash when you try to undo with the unavailable DVTSourceTextView.
+This can be reproduced with the following operations:
   - Open a document in Xcode
     (Let say the DVTSourceTextView used here is TextView1)
   - Operate something on the document
-  - Switch to another document by selecting one in navgator view.
-    (Now the new DVTSourceTextView  (TextView2) is used to show the document )
+  - Switch to another document by selecting one in navigator view.
+    (Now the new DVTSourceTextView  (TextView2) is used to show the document)
   - Switch back to the previous document.
-    (Unfortunatelly at this point Xcode creates another new DVTSourceTextView (TextView3) to show the previous document)
+    (Unfortunately at this point Xcode creates another new DVTSourceTextView (TextView3) to show the previous document)
   - Undo the operation
-    This leads crash because the registerd text view is TextView1 and it is no longer available.
+    This leads to a crash because the registered text view is TextView1 and it is no longer available.
     
 The root problem here is that we register DVTSourceTextView as the undo target. On the other hand NSTextView uses NSTextStorage as the undo target.
 
-So what we do is extending NSTextStorage to keep its original position.
+So what we do is extend NSTextStorage to keep its original position.
 
 Usual undo registration sequence of NSTextView is following
  - operate on a text
@@ -395,8 +395,8 @@ Usual undo registration sequence of NSTextView is following
     - register undo with the NSUndoTyping object and the NSTextStorage as the target.
       (The selecter is internal method "_undoRedoTextOperation" in NSTextStorage)
  
- When undo in NSTextView following occurs (probably)
- 
+ When undo in NSTextView the following occurs (probably):
+
  - call NSUndoManger's -undo method
     - call registered NSTextStoage's "_undoRedoTextOperation" with NSUndoTyping object
     
