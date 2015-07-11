@@ -425,7 +425,11 @@
 }
 
 - (void)setMarkedText:(id)aString selectedRange:(NSRange)selectedRange replacementRange:(NSRange)replacementRange{
-    return [self.inputView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+    if(self.currentEvaluator.mode == XVIM_MODE_INSERT || self.currentEvaluator.mode == XVIM_MODE_CMDLINE) {
+        return [self.inputView setMarkedText:aString selectedRange:selectedRange replacementRange:replacementRange];
+    }else{
+        // Prohibit marked text # Issue 746 (Must be use with alwaysuseinputsource)
+    }
 }
 
 - (void)unmarkText{
