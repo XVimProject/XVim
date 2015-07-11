@@ -82,6 +82,9 @@
     [_status setFrame:NSMakeRect(0, 0, parentRect.size.width, STATUS_LINE_HEIGHT)];
 	[_status setFont:sourceFont];
 	[_status setInset:inset];
+    [_status setBackgroundColor:[theme sourceTextBackgroundColor]];
+    [_status setTextColor:[theme sourcePlainTextColor]];
+
     // This is heuristic way...
     if( [NSStringFromClass([container class]) isEqualToString:@"IDEComparisonEditorAutoLayoutView"] ){
         // Nothing ( Maybe AutoLayout view does the job "automatically")
@@ -104,7 +107,7 @@
 {
     NSString *documentPath = [[notification userInfo] objectForKey:XVimDocumentPathKey];
     if (documentPath != nil) {
-        [_status setString:documentPath];
+      [_status setString:documentPath];
     }
 }
 
