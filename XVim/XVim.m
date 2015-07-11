@@ -116,7 +116,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         [[editorMenuItem submenu] addItem:item];
     } else {
         // if editor menu is not available
-        NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
+        NSInteger editorIndex = [menu indexOfItemWithTitle:@"Edit"];
         [menu insertItem:item atIndex:editorIndex];
     }
     return;
@@ -146,7 +146,10 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
     [[XVim instance] parseRcFile];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
+    // This is dirty hack, but we have to add our XVim menu after Xcode menu initialization.
+    // I think there should be better way.
+    dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, 3 * NSEC_PER_SEC);
+    dispatch_after(delay, dispatch_get_main_queue(), ^{
         [self addXVimMenu];
     });
     
