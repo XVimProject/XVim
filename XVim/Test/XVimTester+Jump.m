@@ -55,11 +55,14 @@
              XVimMakeTestCase(text1, 7,  0, @"makk'a<C-o>"  , text1,  1, 0), // 'a
              
              // In original vim if 'startofline' not set, keep the same column. default value is on.
-             // In XVim 'startofline' is not supported and default value is off.
+             XVimMakeTestCase(text1, 0, 0, @":set nostartofline<CR>", text1, 0, 0),
              XVimMakeTestCase(text1, 1,  0, @"2G3G``"       , text1,  4, 0), // ``    XVim behaviour
-             //XVimMakeTestCase(text1, 1,  0, @"2G3G``"       , text1,  3, 0), // ``   original vim behaviour
              XVimMakeTestCase(text1, 1,  0, @"2G3G````"     , text1,  7, 0), // ````  XVim behaviour
-             //XVimMakeTestCase(text1, 1,  0, @"2G3G````"     , text1,  6, 0), // ```` original vim behaviour
+
+             XVimMakeTestCase(text1, 0, 0, @":set startofline<CR>", text1, 0, 0),
+             XVimMakeTestCase(text1, 1,  0, @"2G3G``"       , text1,  3, 0), // ``   original vim behaviour
+             XVimMakeTestCase(text1, 1,  0, @"2G3G````"     , text1,  6, 0), // ```` original vim behaviour
+
              XVimMakeTestCase(text1, 1,  0, @"2G3G''"       , text1,  3, 0), // ''
              XVimMakeTestCase(text1, 1,  0, @"2G3G''''"     , text1,  6, 0), // ''
              

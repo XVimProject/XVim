@@ -57,12 +57,12 @@
             XVimMakeTestCase(text2, 24, 0, @"4fi", text2, 24, 0), // error case
             
             // g, G
-            XVimMakeTestCase(text2, 44, 0,  @"gg", text2,  8, 0),
-            XVimMakeTestCase(text2, 44, 0, @"3gg", text2, 32, 0),
-            XVimMakeTestCase(text2,  8, 0, @"9gg", text2, 44, 0),
+            XVimMakeTestCase(text2, 44, 0,  @"gg", text2,  0, 0),
+            XVimMakeTestCase(text2, 44, 0, @"3gg", text2, 24, 0),
+            XVimMakeTestCase(text2,  8, 0, @"9gg", text2, 40, 0),
             XVimMakeTestCase(text2,  4, 0,   @"G", text2, 40, 0),
-            XVimMakeTestCase(text2, 44, 0,  @"3G", text2, 32, 0),
-            XVimMakeTestCase(text2,  8, 0,  @"9G", text2, 44, 0),
+            XVimMakeTestCase(text2, 44, 0,  @"3G", text2, 24, 0),
+            XVimMakeTestCase(text2,  8, 0,  @"9G", text2, 40, 0),
             
             // h,j,k,l, <space>
             XVimMakeTestCase(text1, 0, 0,   @"l", text1, 1, 0),

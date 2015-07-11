@@ -24,6 +24,7 @@
 #import "NSTextStorage+VimOperation.h"
 #import "Logger.h"
 #import "XVimMacros.h"
+#import "XVimOptions.h"
 
 #define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             self.selectionMode,            \
@@ -647,6 +648,11 @@
                 // TODO: Preserve column option can be included in motion object
                 if (self.selectionMode == XVIM_VISUAL_BLOCK && self.selectionToEOL) {
                     r.end = [self.textStorage xvim_endOfLine:r.end];
+                } else if (XVim.instance.options.startofline) {
+                    // only jump to nonblank line for last line or line number
+                    if (motion.motion == MOTION_LASTLINE || motion.motion == MOTION_LINENUMBER) {
+                        r.end = [self.textStorage xvim_firstNonblankInLineAtIndex:r.end allowEOL:NO];
+                    }
                 }
                 [self xvim_moveCursor:r.end preserveColumn:YES];
                 break;

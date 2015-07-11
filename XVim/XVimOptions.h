@@ -26,6 +26,7 @@
 @property BOOL relativenumber;
 @property BOOL alwaysuseinputsource; //XVim original
 @property BOOL blinkcursor;
+@property BOOL startofline;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;
