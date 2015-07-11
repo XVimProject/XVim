@@ -138,7 +138,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"cnoremap", @"cnoremap:inWindow:"),
                        CMD(@"cnoreabbrev", @"abbreviate:inWindow:"),
                        CMD(@"cnoremenu", @"menu:inWindow:"),
-                       CMD(@"copy", @"copymove:inWindow:"),
+                       CMD(@"copy", @"copy:inWindow:"),
                        CMD(@"colder", @"qf_age:inWindow:"),
                        CMD(@"colorscheme", @"colorscheme:inWindow:"),
                        CMD(@"command", @"command:inWindow:"),
@@ -158,7 +158,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"cunabbrev", @"abbreviate:inWindow:"),
                        CMD(@"cunmenu", @"menu:inWindow:"),
                        CMD(@"cwindow", @"cwindow:inWindow:"),
-                       CMD(@"delete", @"operators:inWindow:"),
+                       CMD(@"delete", @"delete:inWindow:"),
                        CMD(@"delmarks", @"delmarks:inWindow:"),
                        CMD(@"debug", @"debug:inWindow:"),  // This currently works as XVim debug command
                        CMD(@"debuggreedy", @"debuggreedy:inWindow:"),
@@ -304,7 +304,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"lvimgrepadd", @"vimgrep:inWindow:"),
                        CMD(@"lwindow", @"cwindow:inWindow:"),
                        CMD(@"ls", @"	buflist_list:inWindow:"),
-                       CMD(@"move", @"copymove:inWindow:"),
+                       CMD(@"move", @"move:inWindow:"),
                        CMD(@"mark", @"mark:inWindow:"),
                        CMD(@"make", @"make:inWindow:"),
                        CMD(@"map", @"map:inWindow:"),
@@ -473,7 +473,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"swapname", @"swapname:inWindow:"),
                        CMD(@"syntax", @"syntax:inWindow:"),
                        CMD(@"syncbind", @"syncbind:inWindow:"),
-                       CMD(@"t", @"copymove:inWindow:"),
+                       CMD(@"t", @"copy:inWindow:"),
                        CMD(@"tNext", @"tag:inWindow:"),
                        CMD(@"tag", @"tag:inWindow:"),
                        CMD(@"tags", @"tags:inWindow:"),
@@ -565,15 +565,15 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"xnoremenu", @"menu:inWindow:"),
                        CMD(@"xunmap", @"xunmap:inWindow:"),
                        CMD(@"xunmenu", @"menu:inWindow:"),
-                       CMD(@"yank", @"operators:inWindow:"),
+                       CMD(@"yank", @"yank:inWindow:"),
                        CMD(@"z", @"z:inWindow:"),
                        CMD(@"!", @"bang:inWindow:"),
                        CMD(@"#", @"print:inWindow:"),
                        CMD(@"&", @"sub:inWindow:"),
                        CMD(@"*", @"at:inWindow:"),
-                       CMD(@"<", @"operators:inWindow:"),
+                       CMD(@"<", @"shift:inWindow:"),
                        CMD(@"=", @"equal:inWindow:"),
-                       CMD(@">", @"operators:inWindow:"),
+                       CMD(@">", @"shift:inWindow:"),
                        CMD(@"@", @"at:inWindow:"),
                        CMD(@"Next", @"previous:inWindow:"),
                        CMD(@"Print", @"print:inWindow:"),
@@ -586,7 +586,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 
 
 // This method correnspons parsing part of get_address in ex_cmds.c
-- (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft inWindow:(XVimWindow*)window
+- (NSUInteger)getAddress:(unichar*)parsing :(unichar**)cmdLeft allowZero:(BOOL)allowZero inWindow:(XVimWindow*)window
 {
     NSTextView* view = [window sourceView];
     //DVTFoldingTextStorage* storage = [view textStorage];
@@ -603,7 +603,8 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     {
         case '.':
             parsing++;
-            addr = [view.textStorage xvim_lineNumberAtIndex:begin];
+            //This should be the cursor position, which is insertionPoint
+            addr = [view.textStorage xvim_lineNumberAtIndex:view.insertionPoint];
             break;
         case '$':			    /* '$' - last line */
             parsing++;
@@ -619,7 +620,11 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                 addr = [view.textStorage xvim_lineNumberAtIndex:end];
                 parsing+=2;
             }else{
-                // Other marks or invalid character. XVim does not support this.
+                XVimMark* m = [[XVim instance].marks markForName:[NSString stringWithFormat:@"%c", mark] forDocument:window.sourceView.documentURL.path];
+                if(m!=nil) {
+                    addr = m.line;
+                    parsing+=2;
+                }
             }
             break;
         case '/':
@@ -634,10 +639,17 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                 parsing++;
                 count++;
             }
-            addr = (unsigned int)[[NSString stringWithCharacters:tmp length:count] intValue];
-            if( 0 == addr ){
+    
+            // Use a conversion that returns nil, so we can tell the difference between a bad integer and 0
+            NSNumberFormatter* f = [[NSNumberFormatter alloc] init];
+            NSNumber *n = [f numberFromString:[NSString stringWithCharacters:tmp length:count]];
+            if(n==nil) {
                 addr = NSNotFound;
+            } else {
+                addr = [n unsignedIntegerValue];
             }
+            if(addr == 0 && !allowZero) // Either we change this into a 1, or we leave it as 0 if requested
+                addr = 1;
     }
     
     // Parse additional modifier for addr ( ex. $-10 means 10 line above from end of file. Parse '-10' part here )
@@ -655,7 +667,8 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
             break;
         
         if (addr == NSNotFound){
-            //addr = [view lineNumber:begin]; // This should be current cursor posotion
+            //This should be the cursor position, which is insertionPoint
+            addr = [view.textStorage xvim_lineNumberAtIndex:view.insertionPoint];
         }
         
         // Determine if its + or -
@@ -690,6 +703,17 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     return addr;
 }
 
+// Get a unichar array suitable for the parsing process
+- (unichar*)_getUnicharArray:(NSString*)cmd
+{
+    NSUInteger len = [cmd length];
+    NSMutableData* dataCmd = [NSMutableData dataWithLength:(len+1)*sizeof(unichar)];
+    unichar* pCmd = (unichar*)[dataCmd bytes];
+    [cmd getCharacters:pCmd range:NSMakeRange(0,len)];
+    pCmd[len] = 0; // NULL terminate
+    return pCmd;
+}
+
 // This method correnspons parsing part of do_one_cmd in ex_docmd.c in Vim
 // What Vim does in this function is followings
 /*
@@ -718,12 +742,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     NSUInteger len = [cmd length];
     
     // Create unichar array to parse. Its easier
-    NSMutableData* dataCmd = [NSMutableData dataWithLength:(len+1)*sizeof(unichar)];
-    unichar* pCmd = (unichar*)[dataCmd bytes];
-    [cmd getCharacters:pCmd range:NSMakeRange(0,len)];
-    pCmd[len] = 0; // NULL terminate
-     
-    unichar* parsing = pCmd;
+    unichar* parsing = [self _getUnicharArray:cmd];
     
     // 1. skip comment lines and leading space ( XVim does not handling commnet lines )
     for( NSUInteger i = 0; i < len && ( isWhitespace(*parsing) || *parsing == ':' ); i++,parsing++ );
@@ -737,7 +756,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 	
     NSTextView* view = [window sourceView];
     for(;;){
-        NSUInteger addr = [self getAddress:parsing :&parsing inWindow:window];
+        NSUInteger addr = [self getAddress:parsing :&parsing allowZero:NO inWindow:window];
         if( NSNotFound == addr ){
             if( *parsing == '%' ){ // XVim only supports %
                 exarg.lineBegin = 1;
@@ -768,12 +787,19 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         exarg.lineBegin = [view.textStorage xvim_lineNumberAtIndex:view.insertionPoint];
         exarg.lineEnd =  exarg.lineBegin;
     }
-    
+	
+    // Swap the range, if necessary
+    if((exarg.lineBegin != NSNotFound && exarg.lineEnd != NSNotFound) && (exarg.lineBegin>exarg.lineEnd)){
+        NSUInteger tmp = exarg.lineBegin;
+        exarg.lineBegin = exarg.lineEnd;
+        exarg.lineEnd = tmp;
+    }
+
     // 4. parse command
     // In window command and its argument must be separeted by space
     unichar* tmp = parsing;
     NSUInteger count = 0;
-    if (*parsing == '!') {
+    if (*parsing == '!' || *parsing== '<' || *parsing == '>') {
         parsing++; count++;
     }
     else
@@ -1059,6 +1085,68 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     XVim.instance.foundRangesHidden = YES;
     [view setNeedsUpdateFoundRanges:YES];
     [view xvim_clearHighlightText];
+}
+
+- (void)yank:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if (args.lineBegin == NSNotFound && args.lineEnd == NSNotFound)
+        return;
+    NSTextView* view = [window sourceView];
+    [view xvim_yank:XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, args.lineEnd!=NSNotFound ? args.lineEnd-args.lineBegin : 1) withMotionPoint:[view.textStorage xvim_indexOfLineNumber:args.lineBegin]];
+}
+
+- (void)delete:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    if (args.lineBegin == NSNotFound && args.lineEnd == NSNotFound)
+        return;
+    NSTextView* view = [window sourceView];
+    [view xvim_delete:XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, args.lineEnd!=NSNotFound ? args.lineEnd-args.lineBegin : 1) withMotionPoint:[view.textStorage xvim_indexOfLineNumber:args.lineBegin] andYank:YES];
+}
+
+- (void)copy:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self copymove:args onlyCopy:YES inWindow:window];
+}
+
+- (void)move:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    [self copymove:args onlyCopy:NO inWindow:window];
+}
+
+- (void)copymove:(XVimExArg*)args onlyCopy:(bool)onlyCopy inWindow:(XVimWindow*)window{
+    // If we don't have a valid copy area, or a valid paste address, return
+    if ((args.lineBegin == NSNotFound && args.lineEnd == NSNotFound) || args.arg==nil){
+        return;
+    }
+    unichar* parsing = [self _getUnicharArray:args.arg];
+    NSUInteger addr = [self getAddress:parsing :&parsing allowZero:YES inWindow:window];
+    // If there are trailing characters in the address, or the address is NotFound, return
+    if(*parsing!=0 || addr==NSNotFound){
+        return;
+    }
+    // You cannot move a range into itself.
+    if(!onlyCopy && (addr == args.lineBegin || (args.lineEnd!=NSNotFound && addr>args.lineBegin && addr<=args.lineEnd))){
+	    return;
+    }
+    NSTextView* view = [window sourceView];
+    // An address of 0 means paste BEFORE the first line
+    [view xvim_copymove:XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, args.lineEnd!=NSNotFound ? args.lineEnd-args.lineBegin : 1) withMotionPoint:[view.textStorage xvim_indexOfLineNumber:args.lineBegin] withInsertionPoint:[view.textStorage xvim_indexOfLineNumber:addr==0 ? 1 : addr] after:addr!=0 onlyCopy:onlyCopy];
+}
+
+- (void)shift:(XVimExArg*)args inWindow:(XVimWindow*)window{
+    // If we don't have a valid shift area, return
+    if (args.lineBegin == NSNotFound && args.lineEnd == NSNotFound){
+        return;
+    }
+    //if we dont use the same character as the command for the entire length of the arg, then its a mistake, return
+    if (args.arg!=nil && ![[@"" stringByPaddingToLength:args.arg.length withString:[args.cmd substringFromIndex:0] startingAtIndex:0] isEqualToString:args.arg]) {
+        return;
+    }
+    NSTextView* view = [window sourceView];
+    XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, LINEWISE, MOTION_OPTION_NONE, args.lineEnd!=NSNotFound ? args.lineEnd-args.lineBegin : 1);
+    NSUInteger motionPoint = [view.textStorage xvim_indexOfLineNumber:args.lineBegin];
+    NSUInteger count = 1+(args.arg!=nil ? args.arg.length : 0);
+    if([args.cmd characterAtIndex:0]=='>'){
+        [view xvim_shiftRight:motion withMotionPoint:motionPoint count:count];
+    } else {
+        [view xvim_shiftLeft:motion withMotionPoint:motionPoint count:count];
+    }
 }
 
 - (void)nissue:(XVimExArg*)args inWindow:(XVimWindow*)window{

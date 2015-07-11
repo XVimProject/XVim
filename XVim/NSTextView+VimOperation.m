@@ -709,12 +709,29 @@
     [self xvim_syncState];
 }
 
+- (NSRange)_xvim_getDeleteRange:(XVimMotion*)motion withRange:(XVimRange)to{
+    NSRange r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
+    if( motion.type == LINEWISE && [self.textStorage isLastLine:to.end]){
+        if( r.location != 0 ){
+            motion.info->deleteLastLine = YES;
+            r.location--;
+            r.length++;
+        }
+    }
+    return r;
+}
+
 - (BOOL)xvim_delete:(XVimMotion*)motion andYank:(BOOL)yank
+{
+    return [self xvim_delete:motion withMotionPoint:self.insertionPoint andYank:yank];
+}
+
+- (BOOL)xvim_delete:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint andYank:(BOOL)yank
 {
     NSAssert( !(self.selectionMode == XVIM_VISUAL_NONE && motion == nil),
              @"motion must be specified if current selection mode is not visual");
-    if (self.insertionPoint == 0 && [[self xvim_string] length] == 0) {
-	return NO;
+    if (motionPoint == 0 && [[self xvim_string] length] == 0) {
+        return NO;
     }
     NSUInteger newPos = NSNotFound;
     
@@ -722,8 +739,7 @@
     
     motion.info->deleteLastLine = NO;
     if (self.selectionMode == XVIM_VISUAL_NONE) {
-        NSRange r;
-        XVimRange motionRange = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
+        XVimRange motionRange = [self xvim_getMotionRange:motionPoint Motion:motion];
         if( motionRange.end == NSNotFound ){
 	    return NO;
         }
@@ -751,14 +767,7 @@
                 }
             }
         }
-        r = [self xvim_getOperationRangeFrom:motionRange.begin To:motionRange.end Type:motion.type];
-        if( motion.type == LINEWISE && [self.textStorage isLastLine:motionRange.end]){
-            if( r.location != 0 ){
-                motion.info->deleteLastLine = YES;
-                r.location--;
-                r.length++;
-            }
-        }
+        NSRange r = [self _xvim_getDeleteRange:motion withRange:motionRange];
         if (yank) {
             [self _xvim_yankRange:r withType:motion.type];
         }
@@ -768,7 +777,7 @@
             motion.motion == TEXTOBJECT_BACKQUOTE ){
             newPos = r.location;
         } else if (motion.type == LINEWISE) {
-            newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:self.insertionPoint allowEOL:YES];
+            newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:motionPoint allowEOL:YES];
         }
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
         BOOL toFirstNonBlank = (self.selectionMode == XVIM_VISUAL_LINE);
@@ -844,13 +853,29 @@
     return YES;
 }
 
+- (NSRange)_xvim_getYankRange:(XVimMotion*)motion withRange:(XVimRange)to{
+    NSRange r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
+    BOOL eof = [self.textStorage isEOF:to.end];
+    BOOL blank = [self.textStorage isBlankline:to.end];
+    if( motion.type == LINEWISE && blank && eof){
+        if( r.location != 0 ){
+            r.location--;
+            r.length++;
+        }
+    }
+    return r;
+}
+
 - (void)xvim_yank:(XVimMotion*)motion{
+    [self xvim_yank:motion withMotionPoint:self.insertionPoint];
+}
+
+- (void)xvim_yank:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint{
     NSAssert( !(self.selectionMode == XVIM_VISUAL_NONE && motion == nil), @"motion must be specified if current selection mode is not visual");
     NSUInteger newPos = NSNotFound;
 
     if( self.selectionMode == XVIM_VISUAL_NONE ){
-        NSRange r;
-        XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
+        XVimRange to = [self xvim_getMotionRange:motionPoint Motion:motion];
         if( NSNotFound == to.end ){
             return;
         }
@@ -872,15 +897,7 @@
                 }
             }
         }
-        r = [self xvim_getOperationRangeFrom:to.begin To:to.end Type:motion.type];
-        BOOL eof = [self.textStorage isEOF:to.end];
-        BOOL blank = [self.textStorage isBlankline:to.end];
-        if( motion.type == LINEWISE && blank && eof){
-            if( r.location != 0 ){
-                r.location--;
-                r.length++;
-            }
-        }
+        NSRange r = [self _xvim_getYankRange:motion withRange:to];
         [self _xvim_yankRange:r withType:motion.type];
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
         NSRange range = [self _xvim_selectedRange];
@@ -898,6 +915,64 @@
     if (newPos != NSNotFound) {
         [self xvim_moveCursor:newPos preserveColumn:NO];
     }
+    [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
+}
+
+- (void)xvim_copymove:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint withInsertionPoint:(NSUInteger)insertionPoint after:(BOOL)after onlyCopy:(BOOL)onlyCopy{
+    [self xvim_registerInsertionPointForUndo];
+
+    // Handle the copy
+    XVimRange to = [self xvim_getMotionRange:motionPoint Motion:motion];
+    if( NSNotFound == to.end ){
+        return;
+    }
+    NSUInteger motionPointLine = [self.textStorage xvim_lineNumberAtIndex:motionPoint];
+    NSRange r = [self _xvim_getYankRange:motion withRange:to];
+    NSString* s = [self.xvim_string substringWithRange:r];
+
+    // Handle the paste
+    NSUInteger targetPos = insertionPoint;
+    NSUInteger targetLine = [self.textStorage xvim_lineNumberAtIndex:insertionPoint];
+    NSUInteger cursorOffset = 1;
+    // If we are pasting after any line but a blank last one, add a new line to paste into.
+    // then, the cursor will moved to this new line automatically, and we change targetPos to that
+    BOOL eof = [self.textStorage isEOF:targetPos];
+    BOOL blank = [self.textStorage isBlankline:targetPos];
+    if(after && !(eof && blank)){
+        [self xvim_insertNewlineBelowLine:targetLine];
+        targetPos = self.insertionPoint;
+        s = [s substringToIndex:s.length-1]; // Remove the last newline in the copied text, since we just added one above
+        cursorOffset = 0;
+    }
+    [self insertText:s replacementRange:NSMakeRange(targetPos,0)];
+
+    // Move the cursor to last line of what we pasted.
+    NSUInteger cursorPos = [self.textStorage xvim_firstNonblankInLineAtIndex:(targetPos+s.length-cursorOffset) allowEOL:YES];
+    [self xvim_moveCursor: cursorPos preserveColumn:NO];
+
+    // Delete the copied text if required
+    if(!onlyCopy){
+        NSUInteger cursorLine = self.insertionLine;
+        NSUInteger lineAdjustment = (cursorLine-targetLine)+(after ? 0 : 1);
+
+        // Adjust the starting line of the text to delete, if required
+        if(motionPointLine>targetLine){
+            motionPointLine += lineAdjustment;
+        }
+        // Delete the copied text
+        XVimRange to = [self xvim_getMotionRange:[self.textStorage xvim_indexOfLineNumber:motionPointLine] Motion:motion];
+        [self insertText:@"" replacementRange:[self _xvim_getDeleteRange:motion withRange:to]];
+    
+        // Adjust the line of the last line of what we pasted, if required
+        if(cursorLine>motionPointLine){ // cursorLine needs to be adjusted
+            cursorLine -= lineAdjustment+(eof && blank ? 1 : 0); // If we targeted the last blank line, increase the line adjustment to account for it
+        }
+        // Redo the move of the cursor to last line of what we pasted.
+        cursorPos = [self.textStorage xvim_firstNonblankInLineAtIndex:[self.textStorage xvim_indexOfLineNumber:cursorLine] allowEOL:YES];
+        [self xvim_moveCursor: cursorPos preserveColumn:NO];
+    }
+
+    [self xvim_syncState];
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
 }
 
@@ -1202,7 +1277,12 @@
 
 - (void)_xvim_shift:(XVimMotion*)motion right:(BOOL)right
 {
-    if (self.insertionPoint == 0 && [[self xvim_string] length] == 0) {
+    [self _xvim_shift:motion right:right withMotionPoint:self.insertionPoint count:1];
+}
+
+- (void)_xvim_shift:(XVimMotion*)motion right:(BOOL)right withMotionPoint:(NSUInteger)motionPoint count:(NSUInteger) count
+{
+    if (motionPoint == 0 && [[self xvim_string] length] == 0) {
         return ;
     }
 
@@ -1214,11 +1294,12 @@
     NSUndoManager *undoManager = self.undoManager;
 
     if (self.selectionMode == XVIM_VISUAL_NONE) {
-        XVimRange to = [self xvim_getMotionRange:self.insertionPoint Motion:motion];
+        XVimRange to = [self xvim_getMotionRange:motionPoint Motion:motion];
         if (to.end == NSNotFound) {
             return;
         }
         lines = XVimMakeRange([ts xvim_lineNumberAtIndex:to.begin], [ts xvim_lineNumberAtIndex:to.end]);
+        shiftWidth *= count;
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
         lines = [self _xvim_selectedLines];
         shiftWidth *= motion.count;
@@ -1265,8 +1346,16 @@
     [self _xvim_shift:motion right:YES];
 }
 
+- (void)xvim_shiftRight:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint count:(NSUInteger)count{
+    [self _xvim_shift:motion right:YES withMotionPoint:motionPoint count:count];
+}
+
 - (void)xvim_shiftLeft:(XVimMotion*)motion{
     [self _xvim_shift:motion right:NO];
+}
+
+- (void)xvim_shiftLeft:(XVimMotion*)motion withMotionPoint:(NSUInteger)motionPoint count:(NSUInteger)count{
+    [self _xvim_shift:motion right:NO withMotionPoint:motionPoint count:count];
 }
 
 - (void)xvim_insertText:(NSString*)str line:(NSUInteger)line column:(NSUInteger)column{
