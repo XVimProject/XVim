@@ -248,6 +248,10 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 - (NSUInteger)xvim_firstOfLine:(NSUInteger)index
 {
     NSUInteger pos = [self xvim_startOfLine:index];
+    NSUInteger len = self.length;
+    if( len == 0 ){
+        return NSNotFound;
+    }
 
     if (pos == index && isNewline([self.xvim_string characterAtIndex:(pos - 1)])) {
         return NSNotFound;
