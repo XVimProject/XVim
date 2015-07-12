@@ -1,5 +1,6 @@
 require 'rake'
 require 'fileutils'
+require 'plist'
 
 $plugin_filename ="#{ENV['HOME']}/Library/Application Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin"
 
@@ -60,6 +61,22 @@ task :pluginuuid do
       plugin_uuid = `defaults read "#{filename}" DVTPlugInCompatibilityUUID`
       puts "#{filename} UUID:#{plugin_uuid}"
   end
+end
+
+task :updatepluginuuid do
+  plistfile = 'XVim/Info.plist'
+
+  doc = Plist::parse_xml(plistfile)
+  uuids = doc["DVTPlugInCompatibilityUUIDs"]
+  Dir["/Applications/Xcode*.app"].each do |obj|
+    filename = obj + "/Contents/Info"
+    plugin_uuid = `defaults read "#{filename}" DVTPlugInCompatibilityUUID`
+    plugin_uuid.chomp!
+    if ! uuids.include?(plugin_uuid)
+      uuids.push(plugin_uuid)
+    end
+  end
+  File.write(plistfile, doc.to_plist)
 end
 
 task :default => [:xcode56]
