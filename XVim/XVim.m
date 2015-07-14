@@ -146,9 +146,9 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     //used in .ximvrc) so we must be sure to call it _AFTER_ +instance has completed
     [[XVim instance] parseRcFile];
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [self addXVimMenu];
-    });
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        [self addXVimMenu];
+//    });
     
     // This is for reverse engineering purpose. Comment this in and log all the notifications named "IDE" or "DVT"
     // [[NSNotificationCenter defaultCenter] addObserver:[XVim class] selector:@selector(receiveNotification:) name:nil object:nil];
@@ -188,8 +188,20 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 - (id)init {
 	if (self = [super init]) {
 		self.options = [[XVimOptions alloc] init];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(applicationDidFinishLaunching_) name:NSApplicationDidFinishLaunchingNotification object:nil];
 	}
 	return self;
+}
+
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+- (void)applicationDidFinishLaunching_ {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [XVim addXVimMenu];
+    });
 }
 
 - (void)init2{
