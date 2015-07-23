@@ -1498,17 +1498,25 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         [ self _expandSpecialExTokens:args contextDict:contextForExCmd];
     }
     else if( [documentURL isXcodeModuleSchemeURL] ){
-        // Xcode convert Objective-C Framework header to swift format.
+        // Xcode convert Objective-C Framework header to swift format except
+        // the swift module file that includes Array and etc.
+        NSMutableDictionary* contextForExCmd = [NSMutableDictionary dictionary];
         // We use converted text as is.
+        // The converted swift file name is set to current file name symbol '%'.
         NSFileManager* fm = [NSFileManager defaultManager];
         NSString* swiftpath = [NSHomeDirectory() stringByAppendingPathComponent:@".xvimtmp.swift"];
         NSString* str = window.sourceView.string;
         if( str.length > 0 ){
             NSData* data = [NSData dataWithBytes:(void*)str.UTF8String length:str.length];
             [fm createFileAtPath:swiftpath contents:data attributes:nil];
-            
-            NSDictionary* contextForExCmd = @{@"#": @"",
-                                              @"%": swiftpath ? swiftpath: @""};
+            contextForExCmd[@"%"] = swiftpath ? swiftpath: @"";
+        }
+        // The Objective-C Framework header file is set to alternate file name symbol '#'.
+        NSString* objc_header = documentURL.xcode_source_header;
+        if( objc_header.length > 0 ){
+            contextForExCmd[@"#"] = objc_header ? objc_header: @"";
+        }
+        if( contextForExCmd.count > 0 ){
             [self _expandSpecialExTokens:args contextDict:contextForExCmd];
         }
     }

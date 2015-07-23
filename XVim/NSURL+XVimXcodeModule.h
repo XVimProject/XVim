@@ -10,4 +10,8 @@
 
 @interface NSURL (XVimXcodeModule)
 - (BOOL)isXcodeModuleSchemeURL;
+- (NSString*)xcode_language;
+- (NSString*)xcode_source_header;
+- (NSString*)xcode_swift_sdk;
+- (NSString*)xcode_swift_target;
 @end
