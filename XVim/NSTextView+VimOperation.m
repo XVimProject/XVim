@@ -1327,7 +1327,12 @@
     }
 
     if (right) {
-        NSString *s = [NSString stringMadeOfSpaces:shiftWidth];
+        NSString *s;
+        if ([XVim instance].options.expandtab) {
+            s = [NSString stringMadeOfSpaces:shiftWidth];
+        } else {
+            s = @"\t";
+        }
         [self xvim_blockInsertFixupWithText:s mode:XVIM_INSERT_SPACES count:1 column:column lines:lines];
     } else {
         for (NSUInteger line = lines.begin; line <= lines.end; line++) {
