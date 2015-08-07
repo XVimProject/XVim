@@ -27,6 +27,7 @@
 @property BOOL alwaysuseinputsource; //XVim original
 @property BOOL blinkcursor;
 @property BOOL startofline;
+@property BOOL expandtab;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;

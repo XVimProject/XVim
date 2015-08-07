@@ -40,6 +40,7 @@
          @"alwaysuseinputsource", @"auis",
          @"blinkcursor", @"bc",
          @"startofline", @"sol",
+         @"expandtab", @"et",
          nil];
         
         // Default values
@@ -60,6 +61,7 @@
         _alwaysuseinputsource = NO;
         _blinkcursor = NO;
         _startofline = YES;
+        _expandtab = YES;
     }
     return self;
 }
