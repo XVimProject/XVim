@@ -218,6 +218,7 @@ Examples:
   [no]smartcase |
   [no]number |
   [no]hlsearch |
+  [no]expandtab | Only affects shift operations (e.g. `>>`, `v>`). When set to off, set tab width and insert mode behavior of tab key in XCode preferences (Text Editing -> Indentation). Defaults to on.
   guioptions | See below
   timeoutlen | The time in milliseconds that is waited for mapped key sequence to complete (default 1000)
   laststatus | 0 or 1 : status line is hidden, 2 : status line is displayed  (default 2)
