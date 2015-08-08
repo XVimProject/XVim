@@ -335,13 +335,34 @@
                                       @"    ddd\n"
                                       @"eee\n"
                                       @"fff";
-    
+
     static NSString* rshift_result2 = @"    aaa\n"
                                       @"    bbb\n"
                                       @"ccc\n"
                                       @"    ddd\n"
                                       @"    eee\n"
                                       @"fff";
+
+    static NSString* rshift_result0_1 = @"aaa\n"
+                                        @"\tbbb\n"
+                                        @"ccc\n"
+                                        @"ddd\n"
+                                        @"eee\n"
+                                        @"fff";
+
+    static NSString* rshift_result1_1 = @"aaa\n"
+                                        @"\tbbb\n"
+                                        @"\tccc\n"
+                                        @"\tddd\n"
+                                        @"eee\n"
+                                        @"fff";
+
+    static NSString* rshift_result2_1 = @"\taaa\n"
+                                        @"\tbbb\n"
+                                        @"ccc\n"
+                                        @"\tddd\n"
+                                        @"\teee\n"
+                                        @"fff";
     
     static NSString* lshift_result0 = @"        aaa\n"   // 0
                                       @"    bbb\n"       // 12 
@@ -568,6 +589,13 @@
             XVimMakeTestCase(text4, 1, 0, @"2>>jjj.", rshift_result2,24, 0),
             XVimMakeTestCase(text4, 5, 0, @">>jj`." , rshift_result0, 4, 0),
             XVimMakeTestCase(text4, 5, 0, @">>jj'." , rshift_result0, 8, 0),
+
+            // should create tabs with noexpandtab
+            XVimMakeTestCase(text4, 5, 0, @":set noexpandtab<CR>>>:set et<CR>"     , rshift_result0_1, 5, 0),
+            XVimMakeTestCase(text4, 5, 0, @":set noexpandtab<CR>3>>:set et<CR>"    , rshift_result1_1, 5, 0),
+            XVimMakeTestCase(text4, 1, 0, @":set noexpandtab<CR>2>>jjj.:set et<CR>", rshift_result2_1,15, 0),
+            XVimMakeTestCase(text4, 5, 0, @":set noexpandtab<CR>>>jj`.:set et<CR>" , rshift_result0_1, 4, 0),
+            XVimMakeTestCase(text4, 5, 0, @":set noexpandtab<CR>>>jj'.:set et<CR>" , rshift_result0_1, 5, 0),
             
             // < (Shift)
             // the following test case assumes that Xcode indent in the preference is 4 spaces
