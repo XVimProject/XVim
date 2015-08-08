@@ -48,6 +48,7 @@
 			status = [[XVimStatusLine alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
 			[container addSubview:status];
 			[status associateWith:container];
+            status.editor = self;
         
 			// Layout
 			[[NSNotificationCenter defaultCenter] addObserver:status selector:@selector(didContainerFrameChanged:) name:NSViewFrameDidChangeNotification object:container];
@@ -55,7 +56,7 @@
 			[container performSelector:@selector(invalidateLayout)];
             
             // For % register and to notify contents of editor is changed
-            [self addObserver:[XVim instance] forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:nil];
+            [self addObserver:[XVim instance] forKeyPath:@"document" options:NSKeyValueObservingOptionInitial | NSKeyValueObservingOptionNew context:(__bridge void*)self];
             objc_setAssociatedObject(self, DID_REGISTER_OBSERVER_KEY, [NSNumber numberWithBool:YES], OBJC_ASSOCIATION_RETAIN);
 		}
     }
