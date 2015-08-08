@@ -9,6 +9,9 @@
 #import "Logger.h"
 #import "IDEWorkspaceTabController+XVim.h"
 #import "Utils.h"
+#import "IDEEditorArea+XVim.h"
+#import "XVimWindow.h"
+#import "NSTextView+VimOperation.h"
 
 IDEEditorOpenSpecifier* xvim_openSpecifierForContext(IDEEditorContext* context);
 /**
@@ -37,12 +40,6 @@ IDEEditorOpenSpecifier* xvim_openSpecifierForContext(IDEEditorContext* context);
  * You can get the all the areas in an IDEWTC by _keyboardFocusAreas method.
  * It returns array of IDEViewController derived classes such as IDENavigationArea, IDEEditorContext, IDEDefaultDebugArea.
  **/
-
-typedef NS_ENUM(NSInteger,EditorMode) {
-    STANDARD,
-    GENIUS,
-    VERSION
-};
 
 typedef NS_ENUM(NSInteger,GeniusLayoutMode) {
         NOT_GENIUS = -1,
@@ -139,6 +136,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         count = MIN(ABS(count), numEditors) - 1; // -1 to convert it to array index
         [allEditors[(NSUInteger)(count%numEditors)] takeFocus];
     }
+    // redraw caret
+    [current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_addEditor{
@@ -185,7 +184,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
-    
+    // redraw caret
+    [current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_moveFocusUp{
@@ -211,10 +211,28 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
-    
+    // redraw caret
+    [current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_moveFocusLeft{
+    IDEEditorArea *editorArea = [self editorArea];
+    if( [editorArea editorMode] == VERSION ){
+        // This implementation is not correct for precise moveFocusLeft behavior but it is useful.
+
+        // preserve current line number.
+        NSUInteger line_number = (NSUInteger)editorArea.xvim_window.sourceView.currentLineNumber;
+        // change window focus.
+        IDEEditorVersionsMode *mode = (IDEEditorVersionsMode*)[editorArea editorModeViewController];
+        IDEComparisonEditorSubmode* submode = mode.comparisonEditorSubmode;
+        [submode.primaryEditor takeFocus];
+        // set current line number
+        XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, LEFT_RIGHT_NOWRAP, 1);
+        motion.line = line_number;
+        [editorArea.xvim_window.sourceView xvim_move:motion];
+
+        return;
+    }
     IDEWorkspaceTabController* tabCtrl = self;
     IDEViewController* current = [tabCtrl _currentFirstResponderArea];
     NSArray* allEditors = [self xvim_allEditorArea];
@@ -236,9 +254,29 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
+    // redraw caret
+	[current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_moveFocusRight{
+    IDEEditorArea *editorArea = [self editorArea];
+    if( [editorArea editorMode] == VERSION ){
+        // This implementation is not correct for precise moveFocusRight behavior but it is useful.
+        // The behavior in comparison view is like diff mode on the original vim.
+        
+        // preserve current line number.
+        NSUInteger line_number = (NSUInteger)editorArea.xvim_window.sourceView.currentLineNumber;
+        // change window focus.
+        IDEEditorVersionsMode *mode = (IDEEditorVersionsMode*)[editorArea editorModeViewController];
+        IDEComparisonEditorSubmode* submode = mode.comparisonEditorSubmode;
+        [submode.secondaryEditor takeFocus];
+        // set current line number
+        XVimMotion* motion = XVIM_MAKE_MOTION(MOTION_LINENUMBER, LINEWISE, LEFT_RIGHT_NOWRAP, 1);
+        motion.line = line_number;
+        [editorArea.xvim_window.sourceView xvim_move:motion];
+
+        return;
+    }
     IDEWorkspaceTabController* tabCtrl = self;
     IDEViewController* current = [tabCtrl _currentFirstResponderArea];
     NSArray* allEditors = [self xvim_allEditorArea];
@@ -259,6 +297,8 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     [targetEditor takeFocus];
+    // redraw caret
+	[current.view setNeedsDisplay:YES];
 }
 
 - (void)xvim_closeOtherEditors{

@@ -23,6 +23,7 @@
 #import "DVTSourceTextView+XVim.h"
 #import "XVimMark.h"
 #import "XVimMarks.h"
+#import "IDEWorkspaceTabController+XVim.h"
 
 @interface XVimWindow () {
     NSMutableArray     *_defaultEvaluatorStack;
@@ -72,7 +73,7 @@
         return obj;
     }
 
-    if (_editorArea.editorMode == 2 && [editor isKindOfClass:[IDEComparisonEditor class]]) {
+    if (_editorArea.editorMode == VERSION && [editor isKindOfClass:[IDEComparisonEditor class]]) {
         obj = [[(IDEComparisonEditor *)editor keyEditor] mainScrollView].documentView;
         return obj;
     }
