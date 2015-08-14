@@ -783,7 +783,7 @@
             motion.motion == TEXTOBJECT_BACKQUOTE ){
             newPos = r.location;
         } else if (motion.type == LINEWISE) {
-            newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:motionPoint allowEOL:YES];
+            newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:r.location allowEOL:YES];
         }
     } else if (self.selectionMode != XVIM_VISUAL_BLOCK) {
         BOOL toFirstNonBlank = (self.selectionMode == XVIM_VISUAL_LINE);

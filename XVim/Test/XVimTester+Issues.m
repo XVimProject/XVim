@@ -47,6 +47,11 @@
 
     static NSString* issue_776_text = @"";
     static NSString* issue_776_result = @"\n";
+    static NSString* issue_805_text = @"aaaa bbbb cccc dddd eeee ffff gggg\n"
+                                      @"hhhh iiii jjjj kkkk llll\n"
+                                      @"mmmm nnnn oooo pppp qqqq\n";
+    static NSString* issue_805_result = @"hhhh iiii jjjj kkkk llll\n"
+                                        @"mmmm nnnn oooo pppp qqqq\n";
      
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
@@ -63,6 +68,7 @@
             
             XVimMakeTestCase(text0, 0, 0, @"i<TAB><ESC>.", issue_606_result , 7, 0 ),  // Issue #606. Repeating tab insertion crashes Xcode. (This test assumes that tab expands 4 space)
             XVimMakeTestCase(issue_776_text, 0, 0, @"O<ESC>", issue_776_result,  0, 0), // Issue #776 crash
+            XVimMakeTestCase(issue_805_text, 33, 0, @"dd", issue_805_result, 0, 0), // Issue #805
             nil];
     
 }
