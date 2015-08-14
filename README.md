@@ -12,7 +12,8 @@
 
 ## Support Xcode Versions
   - Xcode5
-  - Xcode6 GM
+  - Xcode6
+  - Xcode7 GM
 
 ## INSTALL
   Download source code or clone the repo. Then,
