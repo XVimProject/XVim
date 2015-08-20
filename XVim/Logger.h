@@ -33,6 +33,10 @@ typedef enum LogLevel_t{
     LogFatal
 } LogLevel;
 
+
+@class NSView;
+@class NSMenu;
+
 @interface Logger : NSObject
 
 @property LogLevel level;
