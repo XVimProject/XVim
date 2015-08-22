@@ -704,7 +704,13 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
             } else {
                 // last word or blank
                 // preserve the point
-                info->lastEndOfLine = pos-1;
+                if( count == 1 ){
+                    if( info->lastEndOfLine == NSNotFound ){
+                        info->lastEndOfLine = pos-1;
+                    }
+                } else {
+                    info->lastEndOfLine = pos-1;
+                }
                 // [D,G]
                 wordInLineFound = NO;
                 if( ![self isNonblank:pos-1] ){
