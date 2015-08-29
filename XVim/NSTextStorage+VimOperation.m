@@ -383,6 +383,10 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     return isKeyword([[self xvim_string] characterAtIndex:index]);
 }
 
+- (KeywordType) keywordType:(NSUInteger)index{
+    return keywordType([[self xvim_string] characterAtIndex:index]);
+}
+
 - (BOOL) isLastLine:(NSUInteger)index{
     ASSERT_VALID_RANGE_WITH_EOF(index);
     return [self xvim_lineNumberAtIndex:index] == [self xvim_numberOfLines];
@@ -759,7 +763,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
                 }else{
                     info->isFirstWordInLine = NO;
                 }
-            } else if( !(opt & BIGWORD) && [self isKeyword:pos-1] != [self isKeyword:pos] ){
+            } else if( !(opt & BIGWORD) && [self keywordType:pos-1] != [self keywordType:pos] ){
                 // - another keyword (ex. from '>' to 'a' or from 'a' to '<')
                 // [E]
                 ++word_count;
@@ -799,7 +803,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         //    - newline and newline(blankline) 
         if( ([self isNewline:pos-1] && [self isBlankline:pos]) ||
            (([self isWhitespaceOrNewline:pos-1] && [self isNonblank:pos]) ) ||
-            (!(opt & BIGWORD) && [self isKeyword:pos-1] != [self isKeyword:pos] && ![self isWhitespaceOrNewline:pos])
+            (!(opt & BIGWORD) && [self keywordType:pos-1] != [self keywordType:pos] && ![self isWhitespaceOrNewline:pos])
         )
         {
             word_count++;
@@ -869,7 +873,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         } else if( ![self isWhitespaceOrNewline:pos] ){
             if( (![self isWhitespaceOrNewline:pos+1] &&
                  !(opt & BIGWORD) &&
-                 [self isKeyword:pos] != [self isKeyword:pos+1] ) ||
+                 [self keywordType:pos] != [self keywordType:pos+1] ) ||
                 [self isWhitespaceOrNewline:pos+1] ||
                [self rangePlaceHolder:pos+1 option:opt].location != NSNotFound
                ){

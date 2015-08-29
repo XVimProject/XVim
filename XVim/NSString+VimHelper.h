@@ -8,6 +8,15 @@
 
 #import <Foundation/Foundation.h>
 
+typedef NS_ENUM(NSUInteger, KeywordType) {
+    KeywordType_None,       ///< Is not keyword
+    KeywordType_Ascii,      ///< Is keyword
+    KeywordType_Hiragana,   ///<
+    KeywordType_Katakana,   ///<
+    KeywordType_Punctuation,///< 、。
+    KeywordType_Other,      ///< Kanji, Other keyword
+};
+
 BOOL isDigit(unichar ch);
 BOOL isOctDigit(unichar ch);
 BOOL isHexDigit(unichar ch);
@@ -18,6 +27,7 @@ BOOL isNewline(unichar ch);
 BOOL isNonblank(unichar ch);
 BOOL isWhiteSpaceOrNewline(unichar ch);
 BOOL isKeyword(unichar ch);
+KeywordType keywordType(unichar ch);
 
 @interface NSString (VimHelper)
 - (BOOL) isDigit:(NSUInteger)index;
@@ -27,6 +37,7 @@ BOOL isKeyword(unichar ch);
 - (BOOL) isDelimeter:(NSUInteger)index;
 - (BOOL) isNewline:(NSUInteger)index;
 - (BOOL) isKeyword:(NSUInteger)index;
+- (KeywordType) keywordType:(NSUInteger)index;
 
 /**
  * Convert Vim regex to ICU regex.

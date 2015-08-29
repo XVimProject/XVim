@@ -33,6 +33,21 @@ BOOL isWhiteSpaceOrNewline(unichar ch) {
 BOOL isKeyword(unichar ch){ // same as Vim's 'iskeyword' except that Vim's one is only defined for 1 byte char
     return isDigit(ch) || isAlpha(ch)  || ch >= 192;
 }
+KeywordType keywordType(unichar ch){
+    if (isDigit(ch) || isAlpha(ch)) {
+        return KeywordType_Ascii;
+    } else if( ch < 192 ){
+        return KeywordType_None;
+    } else if (ch == L'、' || ch == L'。'){
+        return KeywordType_Punctuation;
+    } else if (ch >= 0x3040 && ch <= 0x309F) {
+        return KeywordType_Hiragana;
+    } else if (ch >= 0x30A0 && ch <= 0x30FF) {
+        return KeywordType_Katakana;
+    } else {
+        return KeywordType_Other;
+    }
+}
 
 static NSString *precomputed[9] = {
     @"",
@@ -72,6 +87,10 @@ static NSString *precomputed[9] = {
 
 - (BOOL) isKeyword:(NSUInteger)index{
     return isKeyword([self characterAtIndex:index]);
+}
+
+- (KeywordType) keywordType:(NSUInteger)index{
+    return keywordType([self characterAtIndex:index]);
 }
 
 - (NSString*)convertToICURegex:(NSRegularExpressionOptions*)options{

@@ -10,6 +10,7 @@
 #import "XVimMotion.h"
 #import "XVimDefs.h"
 #import "XVimTextStoring.h"
+#import "NSString+VimHelper.h"
 
 typedef enum {
     XVimSortOptionReversed              = 1,
@@ -72,6 +73,7 @@ typedef enum {
  * Column number starts from 0.
  **/
 
+
 @interface NSTextStorage (VimOperation) <XVimTextStoring>
 
 #pragma mark Definitions
@@ -97,6 +99,8 @@ typedef enum {
 - (BOOL) isWhitespaceOrNewline:(NSUInteger)index;
 
 - (BOOL) isKeyword:(NSUInteger)index;
+
+- (KeywordType) keywordType:(NSUInteger)index;
 
 // Determine if the position is on the last line in the document
 - (BOOL) isLastLine:(NSUInteger)index;
