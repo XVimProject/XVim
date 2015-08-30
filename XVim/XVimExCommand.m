@@ -11,6 +11,7 @@
 #import "XVim.h"
 #import "XVimSearch.h"
 #import "IDEWorkspaceTabController+XVim.h"
+#import "NSColor+Extra.h"
 #import "NSTextView+VimOperation.h"
 #import "NSString+VimHelper.h"
 #import "Logger.h"
@@ -910,6 +911,56 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
 - (void)exit:(XVimExArg*)args inWindow:(XVimWindow*)window{ // :wq
     [NSApp sendAction:@selector(saveDocument:) to:nil from:self];
     [NSApp sendAction:@selector(closeDocument:) to:nil from:self];
+}
+
+-(void)highlight:(XVimExArg*)args inWindow:(XVimWindow*)window {
+    XVimOptions* options = [[XVim instance] options];
+   	NSString *argString = args.arg;
+    NSScanner* scanner = [NSScanner scannerWithString:argString];
+    
+    NSString* key = nil;
+    NSCharacterSet* whiteSpaceSet = [NSCharacterSet whitespaceCharacterSet];
+    [scanner scanCharactersFromSet:whiteSpaceSet intoString:&key];
+    [scanner scanUpToCharactersFromSet:whiteSpaceSet intoString:&key];
+    
+    NSMutableDictionary* colorMap = [NSMutableDictionary dictionaryWithDictionary:options.highlight];
+    if( key == nil || colorMap[key] == nil ) {
+        return;
+    }
+    
+    NSMutableDictionary* textColorMap = [NSMutableDictionary dictionaryWithDictionary:colorMap[key]];
+    while( !scanner.isAtEnd ) {
+        NSMutableCharacterSet* characterSet = [NSMutableCharacterSet whitespaceCharacterSet];
+        [characterSet addCharactersInString:@"="];
+        
+        NSString* fgOrBg = nil;
+        [scanner scanCharactersFromSet:characterSet intoString:&fgOrBg];
+        if( scanner.isAtEnd ) {
+            return;
+        }
+        [scanner scanUpToCharactersFromSet:characterSet intoString:&fgOrBg];
+        
+        NSString* equal = nil;
+        [scanner scanCharactersFromSet:[NSMutableCharacterSet characterSetWithCharactersInString:@"="] intoString:&equal];
+        if( scanner.isAtEnd ) {
+            return;
+        }
+        
+        NSString* colorStr = nil;
+        [scanner scanCharactersFromSet:whiteSpaceSet intoString:&colorStr];
+        [scanner scanUpToCharactersFromSet:whiteSpaceSet intoString:&colorStr];
+        
+        if( !fgOrBg || !colorStr ) {
+            return;
+        }
+        
+        NSColor* color = [NSColor colorWithString:colorStr];
+        if( color ) {
+            textColorMap[fgOrBg] = color;
+        }
+    }
+    colorMap[key] = textColorMap;
+    options.highlight = colorMap;
 }
 
 - (void)imap:(XVimExArg*)args inWindow:(XVimWindow*)window{

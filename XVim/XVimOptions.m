@@ -39,6 +39,7 @@
          @"relativenumber", @"rn",
          @"alwaysuseinputsource", @"auis",
          @"blinkcursor", @"bc",
+         @"highlight", @"hi",
          nil];
         
         // Default values
@@ -58,6 +59,10 @@
         _relativenumber = NO;
         _alwaysuseinputsource = NO;
         _blinkcursor = NO;
+        self.highlight = @{@"Search": @{
+                                   @"guibg": [NSColor yellowColor],
+                                   }
+                           };
     }
     return self;
 }

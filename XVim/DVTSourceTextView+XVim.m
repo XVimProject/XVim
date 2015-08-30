@@ -263,11 +263,13 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
             [XVim.instance.options addObserver:self forKeyPath:@"hlsearch" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
             [XVim.instance.options addObserver:self forKeyPath:@"ignorecase" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
             [XVim.instance.searcher addObserver:self forKeyPath:@"lastSearchString" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
+            [XVim.instance.options addObserver:self forKeyPath:@"highlight" options:NSKeyValueObservingOptionInitial|NSKeyValueObservingOptionNew context:nil];
             [ self xvim_performOnDealloc:^{
                 @try{
                     [XVim.instance.options removeObserver:self forKeyPath:@"hlsearch"];
                     [XVim.instance.options removeObserver:self forKeyPath:@"ignorecase"];
                     [XVim.instance.searcher removeObserver:self forKeyPath:@"lastSearchString"];
+                    [XVim.instance.searcher removeObserver:self forKeyPath:@"highlight"];
                 }
                 @catch (NSException* exception){
                     ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
@@ -289,7 +291,7 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
 }
 
 - (void)xvim_observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
-	if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"]){
+	if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"] || [keyPath isEqualToString:@"highlight"]){
         [self setNeedsUpdateFoundRanges:YES];
         [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:YES];
     }
