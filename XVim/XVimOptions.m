@@ -40,6 +40,7 @@
          @"alwaysuseinputsource", @"auis",
          @"blinkcursor", @"bc",
          @"startofline", @"sol",
+         @"highlight", @"hi",
          nil];
         
         // Default values
@@ -60,6 +61,10 @@
         _alwaysuseinputsource = NO;
         _blinkcursor = NO;
         _startofline = YES;
+        self.highlight = @{@"Search": @{
+                                   @"guibg": [NSColor yellowColor],
+                                   }
+                           };
     }
     return self;
 }
