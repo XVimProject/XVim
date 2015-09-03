@@ -1493,7 +1493,7 @@
                 self.insertionPoint = [ts xvim_endOfLine:pos];
                 break;
             case XVIM_INSERT_APPEND:
-                NSAssert(self.cursorMode == CURSOR_MODE_COMMAND, @"self.cursorMode shoud be CURSOR_MODE_COMMAND");
+                //NSAssert(self.cursorMode == CURSOR_MODE_COMMAND, @"self.cursorMode shoud be CURSOR_MODE_COMMAND");
                 if (![ts isEOF:pos] && ![ts isNewline:pos]){
                     self.insertionPoint = pos + 1;
                 }
