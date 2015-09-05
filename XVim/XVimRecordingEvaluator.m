@@ -70,8 +70,8 @@
 }
 
 - (NSString*)modeString{
-    return @"  Recording  ";
-    //return [[self.evaluatorStack lastObject] modeString];
+    NSString* str = [[self.evaluatorStack lastObject] modeString];
+    return [NSString stringWithFormat:@"%@Recording", str];
 }
 
 - (XVIM_MODE)mode{

@@ -375,7 +375,10 @@ static const NSString* s_enum_registers = @"\"0123456789abcdefghijklmnopqrstuvwx
 
 - (void)startRecording:(NSString*)name{
     NSAssert( [self isValidForRecording:name] , @"Must specify valid register for recording");
-    NSAssert( self.recordingRegisterName == nil, @"Must be called when not recording.");
+    if ([self isRecording]){
+        DEBUG_LOG(@"Must be called when not recording. name[%@]", name);
+        return;
+    }
     
     if( [@"\"" isEqualToString:name] ){
         name = @"0";
