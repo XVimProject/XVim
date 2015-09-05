@@ -98,6 +98,25 @@ Delete the following directory:
 
   Any pull requests are very much appreciated. Before you make a pull request see [Make a Pull Request](Documents/Developers/PullRequest.md)
 
+Watch the videos mentioned earlier for a full tutorial on developing, debugging and testing XVim. Here is a very simple guide to get you started.
+
+### Debugging
+  1. Make sure you have Xcode.app installed at /Applications/Xcode.app, if that's true just open XVim.xcodeproj and Run (CMD + R). You can ignore the rest steps.
+  2. If you have Xcode installed at a different path, follow these steps.
+  3. Open XVim.xcodeproj
+  4. Got to Edit Scheme... => Run => Executable => Other => Choose The Xcode.app you installed to.
+  5. Run (CMD + R)
+
+### Run Unit Tests
+  1. In your .xvimrc, add a line "set debug", which tells XVim to run in debug mode.
+  2. Open XVim.xcodeproj, a debug instance of Xcode shows up.
+  3. In the debug Xcode instance, create a random small disposable project (say HelloWorld.xcodeproj) if you have don't this already.
+  4. Open HelloWorld.xcodeproj using debug Xcode instance.
+  5. Go to XVim menu, there should be an item "test categories"
+  6. Choose a category to run
+  7. A separate window shows up and unit tests are run inside that window.
+  8. Results will be shown when all the tests in that category are completed.
+
 ## Donations
   If you think the plugin is useful, please donate.
   There are two options you can take. Donate for Japan Earthquake and Tsunami Relief or back the project via [BountySource](https://www.bountysource.com/teams/xvim). There is no rule that you cannot take both :) .
