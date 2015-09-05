@@ -109,17 +109,24 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         [subm setSubmenu:cat_menu];
     }
     
+    // PLEASE READ THIS IF YOU ARE ATTEMPTING TO ADD THE XVim menu into Editor.
+    // There have been multiple attempts by multiple developer to do that. It somehow myteriously
+    // work for some users not others. Please don't commit unless you are sure about your solution.
+    // For more context see the following issues.
+    // https://github.com/XVimProject/XVim/pull/758
+    // https://github.com/XVimProject/XVim/issues/741
+    // https://github.com/XVimProject/XVim/issues/803
+    // https://github.com/XVimProject/XVim/issues/791
 
-    NSMenuItem* editorMenuItem = [menu itemWithTitle:@"Editor"];
-    if (editorMenuItem) {
-        // Add XVim menu next to Editor menu
-        [[editorMenuItem submenu] addItem:[NSMenuItem separatorItem]];
-        [[editorMenuItem submenu] addItem:item];
-    } else {
-        // if editor menu is not available
-        NSInteger editorIndex = [menu indexOfItemWithTitle:@"Edit"];
-        [menu insertItem:item atIndex:editorIndex];
-    }
+    // The following code is commented out intentionally so this unreliable solution doesn't get
+    // pulled in again.
+    // NSMenuItem* editorMenuItem = [menu itemWithTitle:@"Editor"];
+    // [[editorMenuItem submenu] addItem:[NSMenuItem separatorItem]];
+    // [[editorMenuItem submenu] addItem:item];
+
+    NSInteger editorIndex = [menu indexOfItemWithTitle:@"Editor"];
+    [menu insertItem:item atIndex:editorIndex];
+
     return;
     
 }
@@ -196,9 +203,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 
 - (void)applicationDidFinishLaunching_ {
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [XVim addXVimMenu];
-    });
+    [XVim addXVimMenu];
 }
 
 - (void)init2{
