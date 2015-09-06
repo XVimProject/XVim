@@ -192,6 +192,8 @@ typedef enum {
 // The following code is from xVim by WarWithinMe.
 // These will be integreted into NSTextView category.
 
+- (NSRange) currentCamelCaseWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt;
+
 // =======================
 // Return the location of the start of indentation on current line. '^'
 NSInteger xv_caret(NSString *string, NSInteger index);

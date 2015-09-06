@@ -64,6 +64,7 @@ typedef enum _MOTION{
     TEXTOBJECT_SQUOTE,
     TEXTOBJECT_DQUOTE,
     TEXTOBJECT_BACKQUOTE,
+    TEXTOBJECT_UNDERSCORE,
     MOTION_LINE_COLUMN,             // For custom (Line,Column) position
     MOTION_POSITION,                // For custom position
     MOTION_POSITION_JUMP,           // For custom position with jump
