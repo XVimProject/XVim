@@ -17,6 +17,7 @@
 #import "NSEvent+VimHelper.h"
 #import "NSObject+XVimAdditions.h"
 #import "DVTSourceTextView+XVim.h"
+#import "IDEApplicationController+XVim.h"
 
 @implementation IDEWorkspaceWindow (XVim)
 
@@ -52,6 +53,7 @@
     [DVTSourceTextScrollView xvim_initialize];
     [IDESourceCodeEditor xvim_initialize];
     [IDEEditor xvim_initialize];
+    [IDEApplicationController xvim_initialize];
 }
 
 @end
