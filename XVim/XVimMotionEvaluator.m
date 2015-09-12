@@ -337,7 +337,13 @@
     [eval execute];
     XVimMotion* motion = eval.evalutionResult;
     if( !forward ){
-        ++motion.count;
+        // NB when searching backward (`QUESTION`) while in the middle of the
+        // searched word, the first match is the word at the cursor. Therefore,
+        // search backwards an extra time if not at the beginning of a word.
+        NSUInteger index = self.sourceView.insertionPoint;
+        if( isKeyword([self.sourceView.xvim_string characterAtIndex:(index - 1)]) ){
+            ++motion.count;
+        }
     }
     [self _motionFixed:motion];
     return nil;

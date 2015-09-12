@@ -164,6 +164,9 @@
             
             // # must not match the searched word itself
             XVimMakeTestCase(text2, 29,  0, @"#" , text2, 4, 0),
+
+            // # must not skip a match when starting at beginning of word
+            XVimMakeTestCase(text2,44,  0, @"#" , text2, 28, 0),
             
             // Search with * or # must be saved in search history
             XVimMakeTestCase(text2, 5,  0, @"*/<UP><CR>" , text2, 44, 0),
