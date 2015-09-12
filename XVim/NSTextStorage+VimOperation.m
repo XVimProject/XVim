@@ -1314,8 +1314,32 @@ void initNSStringHelper(NSStringHelper*, NSString* string, NSUInteger strLen);
 void initNSStringHelperBackward(NSStringHelper*, NSString* string, NSUInteger strLen);
 unichar characterAtIndex(NSStringHelper*, NSInteger index);
 
++ (NSCharacterSet *) wordCharSet:(BOOL)isBigWord {
+  NSCharacterSet *wordSet = nil;
+  if ( isBigWord ) {
+    NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
+    wordSet = charSet;
+  }
+  else {
+    NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
+    [charSet addCharactersInString:@"_"];
+    wordSet = charSet;
+  }
+  return wordSet;
+}
+
 - (NSRange) currentWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
+    NSCharacterSet *wordSet = [[self class] wordCharSet:(opt & BIGWORD)];
     NSString* string = [self xvim_string];
+
+    // We search by starting from index = insertionPoint + 1. If the character at the insertion
+    // point is a valid word character, we need to reset index back by 1. Otherwise we end up with
+    // bugs like this: https://github.com/XVimProject/XVim/issues/554
+    if (index > 0 && [wordSet characterIsMember:[string characterAtIndex:index - 1]]) {
+        --index;
+    }
+
     NSUInteger length = self.length;
     if (length == 0 || index > length-1) { return NSMakeRange(NSNotFound, 0); }
     NSUInteger maxIndex = self.length - 1;
@@ -1333,19 +1357,7 @@ unichar characterAtIndex(NSStringHelper*, NSInteger index);
         if (index > maxIndex) {
             break;
         }
-        NSCharacterSet *wsSet = [NSCharacterSet whitespaceCharacterSet];
-        NSCharacterSet *wordSet = nil;
-        
-        if ( opt & BIGWORD) {
-            NSCharacterSet *charSet = [[NSCharacterSet whitespaceAndNewlineCharacterSet] invertedSet];
-            wordSet = charSet;
-        }
-        else {
-            NSMutableCharacterSet *charSet = [[NSCharacterSet alphanumericCharacterSet] mutableCopy];
-            [charSet addCharactersInString:@"_"];
-            wordSet = charSet;
-        }
-        
+
         unichar initialChar = [string characterAtIndex:index];
         BOOL initialCharIsWs = [wsSet characterIsMember:initialChar];
         NSCharacterSet *searchSet = get_search_set(initialChar, wsSet, wordSet);
@@ -1372,7 +1384,7 @@ unichar characterAtIndex(NSStringHelper*, NSInteger index);
                     newEnd = seek_forwards(string, end, wsSet);
                 }
             }
-            
+
             // If we couldn't eat anything from the end, try to eat start
             NSInteger newBegin = begin;
             if (newEnd == end) {

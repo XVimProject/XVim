@@ -185,10 +185,15 @@
             XVimMakeTestCase(text2, 0,  0, @"vlljj<C-v>d", C_v_d_result, 0, 0), // change in visual
             
             // Text object in Visual mode
+            XVimMakeTestCase(text2, 4,  0, @"viw", text2, 4, 3),
             XVimMakeTestCase(text2, 5,  0, @"viw", text2, 4, 3),
+            XVimMakeTestCase(text2, 6,  0, @"viw", text2, 4, 3),
+            XVimMakeTestCase(text2, 4,  0, @"vaw", text2, 4, 4),
             XVimMakeTestCase(text2, 5,  0, @"vaw", text2, 4, 4),
+            XVimMakeTestCase(text2, 6,  0, @"vaw", text2, 4, 4),
             // Visual Line goes Visual Character with text object 
             XVimMakeTestCase(text2, 5,  0, @"Vjiw", text2, 5, 14), // Must extend one text object
+            XVimMakeTestCase(text2, 5,  0, @"Vjaw", text2, 5, 15), // Must extend one text object
             
             // J in visual
             XVimMakeTestCase(text4, 1, 0, @"<C-v>jjJ"   , v_J_result0, 8, 0), // join 2 lines
