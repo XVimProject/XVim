@@ -1949,9 +1949,11 @@
     
     // Clear current highlight.
     [self xvim_clearHighlightText];
-    // Add yellow highlight
+    XVimOptions* options = [[XVim instance] options];
+    NSColor* highlightColor = options.highlight[@"Search"][@"guibg"];
+    // Add highlight
     for( NSTextCheckingResult* result in self.foundRanges){
-        [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:[NSColor yellowColor] forCharacterRange:result.range];
+        [self.layoutManager addTemporaryAttribute:NSBackgroundColorAttributeName value:highlightColor forCharacterRange:result.range];
     }
     
     [self setNeedsUpdateFoundRanges:NO];
