@@ -33,5 +33,5 @@ list_frameworks(ContentDir, ""){|path, rel_dir|
     targetDir = OutputDir + rel_dir;
     `mkdir -p #{Shellwords.escape(targetDir)}`
     targetFile = targetDir + "/" + File.basename(path, ".*") + ".h"
-	`class-dump -I #{path} > #{targetFile}`
+	`class-dump #{path} > #{targetFile}`
 }
