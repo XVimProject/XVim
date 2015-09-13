@@ -104,9 +104,7 @@
         }
     }
     // category names need to be sorted alphabetically
-    NSArray* sorted = [arr sortedArrayUsingSelector:@selector(compare:)];
-    return sorted;
-    return arr;
+    return [arr sortedArrayUsingSelector:@selector(compare:)];
 }
 
 - (void)selectCategories:(NSArray*)categories{
