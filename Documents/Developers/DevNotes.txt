@@ -21,11 +21,24 @@ I tried to group them up into one action to undo with one "u" command but could 
 
 
 ### How to control documents (Open, Close) ###
-You can use IDEDocumentController. Its like...
-   IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
-   NSError* error;
-   NSURL* doc = [NSURL fileURLWithPath:@"/foo/bar/test.h"];
-   [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
+     NSString* filename = @"file path";
+     NSError* error;
+     NSURL* doc = [NSURL fileURLWithPath:filename];
+     DVTDocumentLocation* loc = [[DVTDocumentLocation alloc] initWithDocumentURL:doc timestamp:nil];
+     IDEEditorOpenSpecifier* spec = [IDEEditorOpenSpecifier structureEditorOpenSpecifierForDocumentLocation:loc inWorkspace:[XVimLastActiveWorkspaceTabController() workspace] error:&error];
+     
+     [IDEEditorCoordinator _doOpenIn_NewWindow_withWorkspaceTabController:XVimLastActiveWorkspaceTabController() documentURL:doc usingBlock:^(IDEEditorContext* context){
+         [context _openEditorOpenSpecifier:spec updateHistory:NO];
+     }];
+
+
+  (Obsolite: Doesn't work after Xcode 7 GM)
+    You can use IDEDocumentController. Its like...
+       IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+       NSError* error;
+       NSURL* doc = [NSURL fileURLWithPath:@"/foo/bar/test.h"];
+       [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
+
 
 
 ### Debugger area / Console Area ###
@@ -355,6 +368,20 @@ IDEWorkspaceWindowController  -------------------------------->  IDEWorkspaceWin
 (*3) lastActiveEditorContext is a IDEEditorContext object which has had focus most recently.
 
 
+
+### Navigator area structure (left pane of the window)
+
+IDWorkspaceWindowController
+     |
+     |-->(IDEWorkspaceTabController*)activeWorkspaceTabController
+                 |
+                 |-->(IDENavigatorArea*)navigatorArea
+                         |
+                         |-->(IDENavigator*)currentNavigator 
+
+
+ IDENavigator includes
+     - IDEStructureNavigaro (folder and files)
 
 
 

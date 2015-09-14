@@ -133,10 +133,19 @@
         [fm createFileAtPath:filename contents:nil attributes:nil];
     }
     
-    IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+    
+    // Open another window to open temporary file
     NSError* error;
     NSURL* doc = [NSURL fileURLWithPath:filename];
-    [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error];
+    DVTDocumentLocation* loc = [[DVTDocumentLocation alloc] initWithDocumentURL:doc timestamp:nil];
+    IDEEditorOpenSpecifier* spec = [IDEEditorOpenSpecifier structureEditorOpenSpecifierForDocumentLocation:loc inWorkspace:[XVimLastActiveWorkspaceTabController() workspace] error:&error];
+    
+    // IDEDocumentController* ctrl = [IDEDocumentController sharedDocumentController];
+    // [ctrl openDocumentWithContentsOfURL:doc display:YES error:&error]; // This doesn't work anymore after Xcode 7 GM
+    
+    [IDEEditorCoordinator _doOpenIn_NewWindow_withWorkspaceTabController:XVimLastActiveWorkspaceTabController() documentURL:doc usingBlock:^(IDEEditorContext* context){
+        [context _openEditorOpenSpecifier:spec updateHistory:NO];
+    }];
     
 	// Close NSWindow to make test run properly
 	[results close];
