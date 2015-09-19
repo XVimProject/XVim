@@ -19,6 +19,9 @@
     static NSString* text_object5 = @"fff<fff>fff";
     static NSString* text_object6 = @"ggg`ggg`ggg";
     static NSString* text_object7 = @"hhh hhh hhh";
+    static NSString* text_object8 = @"iiiiIIIIiii";
+    static NSString* text_object9 = @"jjj_jjj_jjj";
+    
     
     // Text object results with delete
     static NSString* text_object_i_result0 = @"aaa()aaa";
@@ -44,6 +47,12 @@
     static NSString* text_object_a_result6 = @"gggggg";
     static NSString* text_object_i_result7 = @"hhh  hhh";
     static NSString* text_object_a_result7 = @"hhh hhh";
+    static NSString* text_object_i_result8 = @"iiiiIiii";
+    static NSString* text_object_i_result8_i = @"iiiiJJJIiii";
+    static NSString* text_object_a_result8 = @"iiiiIiii";
+    static NSString* text_object_i_result9 = @"jjj__jjj";
+    static NSString* text_object_i_result9_i = @"jjj_kkk_jjj";
+    static NSString* text_object_a_result9 = @"jjjjjj";
     
     // Text object results with yank
     static NSString* text_object_yi_result0 = @"aaaaaa(aaa)aaa";
@@ -135,6 +144,17 @@
 
         // ci, search not matched (no insert mode)
         XVimMakeTestCase(text_object0, 5, 0, @"ci0[", text_object0 , 5, 0),
+    
+        // camel case
+        XVimMakeTestCase(text_object8, 5, 0, @"di_", text_object_i_result8 , 4, 0),
+        XVimMakeTestCase(text_object8, 5, 0, @"ci_JJJ<ESC>", text_object_i_result8_i , 6, 0),
+        XVimMakeTestCase(text_object8, 5, 0, @"da_", text_object_a_result8 , 4, 0),
+            
+        // underscore
+        XVimMakeTestCase(text_object9, 5, 0, @"di_", text_object_i_result9 , 4, 0),
+        XVimMakeTestCase(text_object9, 5, 0, @"ci_kkk<ESC>", text_object_i_result9_i , 6, 0),
+        XVimMakeTestCase(text_object9, 5, 0, @"da_", text_object_a_result9 , 3, 0),
+  
     nil];
 }
 @end
