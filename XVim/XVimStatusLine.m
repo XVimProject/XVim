@@ -15,122 +15,64 @@
 #import "XVim.h"
 #import "XVimOptions.h"
 
-#define STATUS_LINE_HEIGHT 18 
-#define MAX_STATUS_LINE_FONT_SIZE 14 
-
-NSString* const XVimStatusLineIDEEditorKey = @"IDEEditor";
-
-@interface XVimStatusLine ()
-
-- (void)_documentChangedNotification:(NSNotification *)notification;
-
-@end
-
-@implementation XVimStatusLine{
-    DVTChooserView* _background;
-    NSInsetTextView* _status;
+@implementation XVimLaststatusTransformer 
++ (Class)transformedValueClass
+{
+    return [NSNumber class];
 }
 
-- (id)initWithFrame:(NSRect)frame
++ (BOOL)allowsReverseTransformation
 {
-    self = [super initWithFrame:frame];
+    return NO;
+}
+
+- (id)transformedValue:(id)value
+{
+    if (value == nil) return nil;
+    
+    NSInteger laststatus = [value integerValue];
+    
+    // TODO: Handle "1" case correctly ("only if there are at least two window" case)
+    if( laststatus == 2 ){
+        return [NSNumber numberWithBool:NO]; // HIDDEN = NO
+    }
+    return [NSNumber numberWithBool:YES]; // HIDDEN = YES
+}
+@end
+
+@implementation XVimStatusLine
+
+- (NSSize)intrinsicContentSize{
+    if( self.hidden ){
+        return NSMakeSize(NSViewNoInstrinsicMetric, 0.0);
+    }else{
+        return [super intrinsicContentSize];
+    }
+}
+
+- (void)setHidden:(BOOL)hidden{
+    [super setHidden:hidden];
+    [self invalidateIntrinsicContentSize];
+}
+
+- (id)initWithString:(NSString *)str{
+    self = [super init];
     if (self) {
-        _background = [NSClassFromString(@"DVTChooserView").alloc init];
-        _background.gradientStyle = 2;  // Style number 2 looks like IDEGlassBarView   
-        [_background setBorderSides:12]; // See DVTBorderedView.h for the meaning of the number
-        _status = [[NSInsetTextView alloc] initWithFrame:NSMakeRect(0, 0, 0, STATUS_LINE_HEIGHT)];
-        _status.backgroundColor = [NSColor clearColor];
-        [_status setEditable:NO];
-        
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:) name:XVimDocumentChangedNotification object:nil];
-        
-        [self addSubview:_background];
-        [self addSubview:_status];
+        DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+        if( nil != theme ){
+            NSFont *sourceFont = [theme sourcePlainTextFont];
+            [self setFont:sourceFont];
+            [self setBackgroundColor:[theme sourceTextSidebarBackgroundColor]];
+        }
+        if( nil != str ){
+            [self setStringValue:str];
+        }
+        [self setEditable:NO];
+        [self setSelectable:YES];
+        [self setBordered:NO];
     }
     
     return self;
-}
-
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-}
-
-- (void)layoutStatus:(NSView*)container
-{
-    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
-	NSFont *sourceFont = [theme sourcePlainTextFont];
-	
-        if (sourceFont.pointSize > MAX_STATUS_LINE_FONT_SIZE) {
-            sourceFont = [NSFont fontWithName:[sourceFont fontName] size:MAX_STATUS_LINE_FONT_SIZE];
-        }
-        
-	// Calculate inset
-	CGFloat horizontalInset = 0;
-	CGFloat verticalInset = MAX((STATUS_LINE_HEIGHT - [sourceFont pointSize]) / 2, 0);
-	CGSize inset = CGSizeMake(horizontalInset, verticalInset);
-	
-    XVimOptions* options = [[XVim instance] options];
-    CGFloat height;
-    if( options.laststatus == 2 ){
-        height = STATUS_LINE_HEIGHT;
-    } else {
-        height = 0;
-    }
-    NSRect parentRect = [container frame];
-    [self setFrame:NSMakeRect(0, 0, parentRect.size.width, height)];
-    [_background setFrame:NSMakeRect(0, 0, parentRect.size.width, STATUS_LINE_HEIGHT)];
-    [_status setFrame:NSMakeRect(0, 0, parentRect.size.width, STATUS_LINE_HEIGHT)];
-	[_status setFont:sourceFont];
-	[_status setInset:inset];
-    [_status setBackgroundColor:[theme sourceTextBackgroundColor]];
-    [_status setTextColor:[theme sourcePlainTextColor]];
-
-    // This is heuristic way...
-    if( [NSStringFromClass([container class]) isEqualToString:@"IDEComparisonEditorAutoLayoutView"] ){
-        // Nothing ( Maybe AutoLayout view does the job "automatically")
-    }else{
-        if( [container subviews].count > 0 ){
-            [[[container subviews] objectAtIndex:0] setFrame:NSMakeRect(0, height, parentRect.size.width, parentRect.size.height-height)];
-        }
-    }
-}
-    
-- (void)didContainerFrameChanged:(NSNotification*)notification{
-    // TODO: Find the way to get scrollView from IDESourceCodeEditor class.
-    // Now it is assumed that container view has the scrollView at index 0 of subviews.
-    NSView* container = [notification object];
-    [self layoutStatus:container];
-     
-}
-
-- (void)_documentChangedNotification:(NSNotification *)notification
-{
-    NSDictionary* dic = [notification userInfo];
-    NSString *documentPath = dic[XVimDocumentPathKey];
-    IDEEditor* editor = dic[XVimStatusLineIDEEditorKey];
-    if (documentPath != nil && editor != nil && editor == self.editor ) {
-        [_status setString:documentPath];
-    }
-}
-
-- (void)drawRect:(NSRect)dirtyRect
-{
-    // Drawing code here.
-    
-}
-
-static char s_associate_key = 0;
-
-+ (XVimStatusLine*)associateOf:(id)object
-{
-	return (XVimStatusLine*)objc_getAssociatedObject(object, &s_associate_key);
-}
-
-- (void)associateWith:(id)object
-{
-	objc_setAssociatedObject(object, &s_associate_key, self, OBJC_ASSOCIATION_RETAIN);
 }
 
 @end

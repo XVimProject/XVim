@@ -229,15 +229,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
         }else{
             [[Logger defaultLogger] setLogFile:nil];
         }
-    } else if( [keyPath isEqualToString:@"document"] ){
-        NSString *documentPath = [[[object document] fileURL] path];
-        self.document = documentPath;
-        IDEEditor* editor = (__bridge IDEEditor*)context;
-        
-        if (documentPath != nil) {
-            NSDictionary *userInfo = @{XVimDocumentPathKey:documentPath, XVimStatusLineIDEEditorKey:editor};
-            [[NSNotificationCenter defaultCenter] postNotificationName:XVimDocumentChangedNotification object:nil userInfo:userInfo];
-        }
     }
 }
     

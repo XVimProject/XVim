@@ -12,6 +12,4 @@
 
 @interface IDEEditor(XVim)
 + (void)xvim_initialize;
-- (void)xvim_didSetupEditor;
-- (void)xvim_primitiveInvalidate;
 @end

@@ -9,6 +9,7 @@
 #import "Logger.h"
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
+#import "DVTKit.h"
 
 #define LOGGER_DEFAULT_NAME @"LoggerDefaultName"
 
@@ -235,14 +236,17 @@ static Logger* s_defaultLogger = nil;
     [Logger traceViewInfoImpl:obj subView:sub prefix:@""];
 }
 
+
 + (void)traceView:(NSView*)view depth:(NSUInteger)depth{
     NSMutableString* str = [[NSMutableString alloc] init];
     for( NSUInteger i = 0 ; i < depth; i++ ){
         [str appendString:@"   "];
     }
     [str appendString:@"%p:%@ (Tag:%d)"];
-    NSLog(str, view, NSStringFromClass([view class]), 
-          [view tag]); 
+    if( [view isKindOfClass:NSClassFromString(@"DVTControllerContentView")]){
+        [str appendFormat:@" <--- %@", [(DVTControllerContentView*)view viewController].description];
+    }
+    NSLog(str, view, NSStringFromClass([view class]), [view tag]); 
     for(NSView* v in [view subviews] ){
         [self traceView:v depth:depth+1];
     }

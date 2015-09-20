@@ -8,14 +8,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-extern NSString* const XVimStatusLineIDEEditorKey;
+@interface XVimLaststatusTransformer : NSValueTransformer
+@end
 
-@class IDEEditor;
-
-@interface XVimStatusLine : NSView
-@property (weak,nonatomic) IDEEditor* editor;
-- (void)layoutStatus:(NSView*)container;
-
-+ (XVimStatusLine*)associateOf:(id)object;
-- (void)associateWith:(id)object;
+@interface XVimStatusLine : NSTextField
+- (id)initWithString:(NSString*)str;
 @end
