@@ -324,8 +324,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 #pragma mark Definitions
 
 - (BOOL) isEOF:(NSUInteger)index{
-    ASSERT_VALID_RANGE_WITH_EOF(index);
-    return [[self xvim_string] length] == index;
+    return [[self xvim_string] length] <= index;
 }
 
 - (BOOL) isLOL:(NSUInteger)index{
