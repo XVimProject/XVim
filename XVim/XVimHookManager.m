@@ -18,6 +18,7 @@
 #import "NSObject+XVimAdditions.h"
 #import "DVTSourceTextView+XVim.h"
 #import "IDEApplicationController+XVim.h"
+#import "DVTTextCompletionController+XVim.h"
 
 @implementation IDEWorkspaceWindow (XVim)
 
@@ -54,6 +55,7 @@
     [IDESourceCodeEditor xvim_initialize];
     [IDEEditor xvim_initialize];
     [IDEApplicationController xvim_initialize];
+    [DVTTextCompletionController xvim_initialize];
 }
 
 @end
