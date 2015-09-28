@@ -27,6 +27,7 @@ typedef enum{
 // XVimRegisterManager must handle all the requests.
 @interface XVimRegisterManager : NSObject
 @property (strong) NSString* lastExecutedRegister;
+@property(readonly) XVimRegister* recordingRegister;
 /**
  * Returns XVimRegister object for the registry "name".
  * The register may be invalid after a few key input because

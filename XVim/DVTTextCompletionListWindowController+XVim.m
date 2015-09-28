@@ -9,47 +9,56 @@
 #import "IDEKit.h"
 #import "DVTTextCompletionListWindowController+XVim.h"
 #import "XVim.h"
+#import "XVimRegister.h"
 
 @implementation DVTTextCompletionListWindowController (XVim)
 
 - (BOOL)tryExpandingCompletion
 {
     IDEIndexCompletionItem *item = [self _selectedCompletionItem];
-    
+   
     [self expandCompletionItem:item];
     
     return NO;
 }
 
-
-
 -(void)expandCompletionItem:(IDEIndexCompletionItem*)completionItem {
     NSMutableString* tempRepeatRegister = [XVim instance].tempRepeatRegister;
-    unichar lastChar = [tempRepeatRegister characterAtIndex:tempRepeatRegister.length - 1];
+    
+    [self expandCompletionItem:completionItem targetRegister:tempRepeatRegister];
+    
+    XVimRegisterManager* registerManager = [XVim instance].registerManager;
+    if( [registerManager isRecording ] ) {
+        NSMutableString* registerString = [NSMutableString stringWithString:registerManager.recordingRegister.string];
+        [self expandCompletionItem:completionItem targetRegister:registerString];
+        [registerManager.recordingRegister setXVimString:registerString];
+    }
+}
+
+-(void)expandCompletionItem:(IDEIndexCompletionItem*)completionItem targetRegister:(NSMutableString*)targetRegister {
+
+    unichar lastChar = [targetRegister characterAtIndex:targetRegister.length - 1];
     if( [[NSCharacterSet whitespaceAndNewlineCharacterSet] characterIsMember:lastChar] ) {
-        [tempRepeatRegister deleteCharactersInRange:NSMakeRange(tempRepeatRegister.length - 1, 1)];
+        [targetRegister deleteCharactersInRange:NSMakeRange(targetRegister.length - 1, 1)];
     }
     
 // This is a little better if completionText contains "< # code # >".
-//    NSRange range = [self rangeOfExpandFromItemName:completionItem.name tempRegister:tempRepeatRegister];
+//    NSRange range = [self rangeOfExpandFromItemName:completionItem.name tempRegister:targetRegister];
 //    if( range.location != NSNotFound ) {
-//        [tempRepeatRegister replaceCharactersInRange:range withString:completionItem.completionText];
+//        [targetRegister replaceCharactersInRange:range withString:completionItem.completionText];
 //        return;
 //    }
-//    
-    
     DVTSourceTextView *textView = (DVTSourceTextView *)self.session.textView;
     if(self.session.wordStartLocation == NSNotFound) {
         return;
     }
     
-    
     NSRange wordRange = NSMakeRange(self.session.wordStartLocation, self.session.cursorLocation - self.session.wordStartLocation);
     NSString* word = [textView.string substringWithRange:wordRange];
-    NSRange range = [self rangeOfExpandWord:word tempRegister:tempRepeatRegister];
+    NSRange range = [self rangeOfExpandWord:word tempRegister:targetRegister];
     
     if( range.location != NSNotFound ) {
-        [tempRepeatRegister replaceCharactersInRange:range withString:completionItem.completionText];
+        [targetRegister replaceCharactersInRange:range withString:completionItem.completionText];
     }
 }
 

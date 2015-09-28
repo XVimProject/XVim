@@ -53,7 +53,7 @@ extern NSString * const XVimDocumentPathKey;
 @property (copy) NSString* document;
 @property (nonatomic) BOOL isExecuting; // For @x command executing
 @property (nonatomic) BOOL foundRangesHidden;
-@property (strong,nonatomic) XVimMutableString* tempRepeatRegister;
+@property (strong, nonatomic) XVimMutableString* tempRepeatRegister;
 
 // XVimKeymapProvider protocol
 - (XVimKeymap*)keymapForMode:(XVIM_MODE)mode;
