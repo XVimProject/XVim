@@ -66,6 +66,22 @@ Visual mode: u, U, ~, gu, gU
 
 u, C-r
 
+## Folds
+
+zc, zC, zm, zM, zo, zO, zr, zR
+
+zc - fold
+(Note: zC is mapped to zc as Xcode does not have similar vim behavior.)
+
+zM - fold all
+(Note: zm is mapped to zM as Xcode does not have similar vim behavior.)
+
+zo - unfold
+(Note: zO is mapped to zo as Xcode does not have similar vim behavior.)
+
+zR - unfold all
+(Note: zr is mapped to zR as Xcode does not have similar vim behavior.)
+
 ## Visual
 v, V, Ctrl-v
 
