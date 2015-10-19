@@ -295,6 +295,11 @@
     return [eval performSelector:@selector(l)];
 }
 
+- (XVimEvaluator*)C_t{
+    [NSApp sendAction:@selector(goBackInHistoryByCommand:) to:nil from:self];
+    return nil;
+}
+
 // "S" is Synonym for "cc"
 - (XVimEvaluator*)S{
     XVimDeleteEvaluator* d = [[XVimDeleteEvaluator alloc] initWithWindow:self.window insertModeAtCompletion:YES];
