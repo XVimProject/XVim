@@ -7,6 +7,7 @@
 //
 
 #import "XVimTester.h"
+#import "DVTFoundation.h"
 
 @implementation XVimTester (Operator)
 - (NSArray*)operator_testcases{
@@ -249,9 +250,12 @@
     static NSString* oO_text = @"int abc(){\n"  // 0 4
                                @"}\n";          // 11
     
-    static NSString* oO_result = @"int abc(){\n" // This result may differ from editor setting. This is for 4 spaces for indent.
-                                 @"    \n"      // 11
-                                 @"}\n";
+    static NSString* oO_result_spaces = @"int abc(){\n" // This result may differ from editor setting. This is for 4 spaces for indent.
+                                        @"    \n"       // 11
+                                        @"}\n";
+    static NSString* oO_result_tabs = @"int abc(){\n"
+                                      @"	\n"
+                                      @"}\n";
     
     static NSString* oO_result2 = @"int abc(){\n" 
                                   @"}\n"
@@ -621,8 +625,14 @@
             XVimMakeTestCase(text0, 0,  0,    @"g~w", g_tilde_w_result,   0, 0),
             
             // o, O
-            XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result, 14, 0),
-            XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result, 14, 0),
+            ( [[DVTTextPreferences preferences] useTabsToIndent] ) // check for tab/space indentation
+                ? XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result_tabs, 11, 0)
+                : XVimMakeTestCase(oO_text,  4, 0, @"o<ESC>", oO_result_spaces, 14, 0),
+
+            ( [[DVTTextPreferences preferences] useTabsToIndent] ) // check for tab/space indentation
+                ? XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result_tabs, 11, 0)
+                : XVimMakeTestCase(oO_text, 11, 0, @"O<ESC>", oO_result_spaces, 14, 0),
+
             XVimMakeTestCase(oO_text, 13, 0, @"O<ESC>", oO_result2, 13, 0), // Issue #675
             
             // Insert and Ctrl-o
