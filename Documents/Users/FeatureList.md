@@ -264,6 +264,7 @@ Examples:
   [no]relativenumber |
   [no]alwaysuseinputsource | With this option all the input is first sent to input source of the system. If you are using France, Portugese or Swedish keyboard consider turning this on. When enabling this, also consider running `defaults write com.apple.dt.Xcode ApplePressAndHoldEnabled -bool false` to disable the press and hold character menu in recent OS X releases.  (See issue https://github.com/JugglerShu/XVim/issues/598).
   [no]blinkcursor |
+  [no]blockcursor | Tells XVim to use a block cursor when in insert mode. Defaults to off.
   [no]startofline | Tells XVim to move the cursor to the first non-blank of the line when using jump commands (`gg, G` etc). Defaults to on.
 
 
