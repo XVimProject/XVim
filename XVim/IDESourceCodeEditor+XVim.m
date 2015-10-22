@@ -29,8 +29,19 @@
 
 - (id)xvim_initWithNibName:(NSString*)name bundle:(NSBundle*)bundle document:(IDEEditorDocument*)doc{
     id obj = [self xvim_initWithNibName:name bundle:bundle document:doc];
-    NSView* container = [[obj view] contentView];
-    
+    id v = [obj view];
+    NSView* container;
+    DEBUG_LOG(@"v [%@]", v);
+    if ([NSStringFromClass([v class]) isEqualToString:@"DVTControllerContentView"]) {
+        // Xcode7 or Xcode6.4???
+        container = [v contentView];
+    } else {
+        // Xcode6.1 ???
+        // container is IDESourceCodeEditorContainerView
+        container = [obj containerView];
+    }
+    DEBUG_LOG("container [%@]", container);
+
     // Insert status line
     if( nil != container ){
         // TODO: Observe DVTFontAndColorSourceTextSettingsChangedNotification to change color of status bar
