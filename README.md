@@ -54,6 +54,23 @@ Delete the following directory:
 ## Feature list
   See separate [FeatureList.md](Documents/Users/FeatureList.md)
 
+## Update pluginuuid
+  Xcode cann't load a Xcode plugin doesn't have  pluginuuid of it.
+  XVim might not work for the lastest version Xcode.
+  You can easily add PluginUUID of Xcode you use to Info.plist.
+  ```bash
+  $ rake updatepluginuuid
+  ```
+  If the error relating 'plist' show,
+  ```base
+  $ bundle install
+  ```
+  or
+  ```bash
+  $ gem install plist
+  ```
+  After that, reinstall XVim.
+
 ## Bug reports
   Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs, but it's really hard work.
   It helps greatly when we have your bug reports, with the following information:

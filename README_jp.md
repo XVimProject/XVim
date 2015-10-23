@@ -40,6 +40,23 @@
 ## 機能一覧
   別ファイルを参照ください。[FeatureList.md](Documents/Users/FeatureList.md)
 
+## プラグインUUIDの更新
+  Xcodeは対応したPluginUUIDをInfo.plistに含まないXcodeプラグインを読み込みません。
+  このため最新のXcodeを使う場合、XVimが動作しないことがあります。
+  利用しているXcodeのPluginUUIDを簡単にInfo.plistに追加できます。
+  ```bash
+  $ rake updatepluginuuid
+  ```
+  'plist'関連のエラーがでる場合、
+  ```base
+  $ bundle install
+  ```
+  or
+  ```bash
+  $ gem install plist
+  ```
+  この後、XVimを再インストールします。
+
 ## バグ報告
   残念ながらXVim影響でXcodeがクラッシュしてしまうことがあります。すべてのバグを取り除こうとしていますが、非常に難しいのが現状です。
   以下の情報のバグレポートがあると非常に助かります。
