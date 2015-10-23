@@ -31,16 +31,14 @@
     id obj = [self xvim_initWithNibName:name bundle:bundle document:doc];
     id v = [obj view];
     NSView* container;
-    DEBUG_LOG(@"v [%@]", v);
     if ([NSStringFromClass([v class]) isEqualToString:@"DVTControllerContentView"]) {
-        // Xcode7 or Xcode6.4???
+        // Xcode7 or Xcode6.4
         container = [v contentView];
     } else {
-        // Xcode6.1 ???
+        // Xcode6.1
         // container is IDESourceCodeEditorContainerView
         container = [obj containerView];
     }
-    DEBUG_LOG("container [%@]", container);
 
     // Insert status line
     if( nil != container ){
