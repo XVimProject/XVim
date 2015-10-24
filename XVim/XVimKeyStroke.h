@@ -48,4 +48,5 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string);
 - (BOOL)isEqual:(id)object;
 - (id)copyWithZone:(NSZone *)zone;
 
+- (BOOL)isCTRLModifier;
 @end
