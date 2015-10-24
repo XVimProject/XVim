@@ -692,4 +692,7 @@ NSString* XVimKeyNotationFromXVimString(XVimString* string){
     return sel_getUid(buf);
 }
 
+- (BOOL)isCTRLModifier{
+    return _modifier == XVIM_MOD_CTRL;
+}
 @end

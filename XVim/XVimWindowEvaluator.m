@@ -16,6 +16,37 @@
 
 @implementation XVimWindowEvaluator
 
+/**
+ * CTRL-W_CTRL-c    same as "CTRL-W c"
+ * CTRL-W_CTRL-h    same as "CTRL-W h"
+ * CTRL-W_CTRL-j    same as "CTRL-W j"
+ * CTRL-W_CTRL-k    same as "CTRL-W k"
+ * CTRL-W_CTRL-l    same as "CTRL-W l"
+ * CTRL-W_CTRL-n    same as "CTRL-W n"
+ * CTRL-W_CTRL-o    same as "CTRL-W o"
+ * CTRL-W_CTRL-q    same as "CTRL-W q"
+ * CTRL-W_CTRL-s    same as "CTRL-W s"
+ * CTRL-W_CTRL-v    same as "CTRL-W v"
+ * CTRL-W_CTRL-w    same as "CTRL-W w"
+ * CTRL-W_CTRL-W    same as "CTRL-W W"
+ */
+- (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
+    
+    SEL handler = keyStroke.selector;
+    if ([self respondsToSelector:handler]) {
+        TRACE_LOG(@"Calling SELECTOR %@", NSStringFromSelector(handler));
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+        return [self performSelector:handler];
+#pragma clang diagnostic pop
+    }
+    XVimKeyStroke* modifiedKeyStroke = [keyStroke copy];
+    if( [modifiedKeyStroke isCTRLModifier] ){
+        modifiedKeyStroke.modifier = 0;
+        return [super eval:modifiedKeyStroke];
+    }
+    return [super eval:keyStroke];
+}
 
 - (XVimEvaluator*)c{
         [XVimLastActiveWorkspaceTabController() xvim_closeCurrentEditor];
@@ -78,10 +109,6 @@
     NSInteger count = NSIntegerMax < [self numericArg] ? NSIntegerMax : (NSInteger)[self numericArg] ;
     [XVimLastActiveWorkspaceTabController() xvim_jumpFocus:count relative:![self.parent numericMode]];
     return nil;
-}
-
-- (XVimEvaluator*)C_w{
-    return [self w];
 }
 
 /*
