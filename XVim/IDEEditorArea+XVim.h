@@ -9,6 +9,7 @@
 #import "IDEKit.h"
 
 @class XVimWindow;
+@class XVimCommandLine;
 
 /*
  * This is the extension of IDEEditorArea class in Xcode.
@@ -18,7 +19,9 @@
 @interface IDEEditorArea (XVim)
 
 @property (nonatomic, readonly) XVimWindow *xvim_window;
-
 + (void)xvim_initialize;
+- (XVimCommandLine*)xvim_commandline;
+- (id)xvim_initWithNibName:(NSString*)name bundle:(NSBundle*)bundle;
+- (void)xvim__setEditorModeViewControllerWithPrimaryEditorContext:(id)arg1;
 
 @end

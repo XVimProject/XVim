@@ -29,7 +29,7 @@ NSString* XVimNotificationQuickFixDidComplete = @"XVimNotificationQuickFixDidCom
     self = [super initWithFrame:frame];
     if (self) {
         NSSize contentSize = [self contentSize];
-        NSTextView* _quickFixTextView = [[XVimQuickFixTextView alloc] initWithFrame:[[self documentView] frame] ];
+        NSTextView* _quickFixTextView = [[XVimQuickFixTextView alloc] init];
         
         [self setBorderType:NSNoBorder];
         [self setHasVerticalScroller:YES];

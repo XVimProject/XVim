@@ -42,7 +42,6 @@
 @end
 
 @implementation XVimWindow
-@synthesize commandLine = _commandLine;
 @synthesize tmpBuffer = _tmpBuffer;
 
 - (instancetype)initWithIDEEditorArea:(IDEEditorArea *)editorArea
@@ -54,8 +53,8 @@
         _defaultEvaluatorStack = [[NSMutableArray alloc] init];
         _currentEvaluatorStack = _defaultEvaluatorStack;
         _inputContext = [[NSTextInputContext alloc] initWithClient:self];
+        _commandLine = [_editorArea xvim_commandline];
         [self _resetEvaluatorStack:_defaultEvaluatorStack activateNormalHandler:YES];
-        _commandLine = [[XVimCommandLine alloc] init];
 
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(_documentChangedNotification:)
                                                      name:XVimDocumentChangedNotification object:nil];

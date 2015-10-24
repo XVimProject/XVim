@@ -9,8 +9,6 @@
 #import <AppKit/AppKit.h>
 #import "XVimCommandField.h"
 
-static const NSInteger XVimCommandLineTag = 1337;
-
 @interface XVimCommandLine : NSView
 
 - (id)init;
@@ -19,7 +17,5 @@ static const NSInteger XVimCommandLineTag = 1337;
 - (void)errorMessage:(NSString*)string Timer:(BOOL)aTimer RedColorSetting:(BOOL)aRedColorSetting;
 - (void)quickFixWithString:(NSString*)string completionHandler:(void(^)(void))completionHandler;
 - (NSUInteger)quickFixColWidth;
-- (void)didFrameChanged:(NSNotification*)notification;
-
 - (XVimCommandField*)commandField;
 @end

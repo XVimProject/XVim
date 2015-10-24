@@ -13,7 +13,7 @@
 @class XVimWindow;
 @class XVimCommandField;
 
-@interface XVimCommandField : NSInsetTextView
+@interface XVimCommandField : NSTextView
 - (void)setDelegate:(XVimWindow*)delegate;
 - (void)handleKeyStroke:(XVimKeyStroke*)keyStroke inWindow:(XVimWindow*)window;
 @end

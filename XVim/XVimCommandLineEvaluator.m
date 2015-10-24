@@ -15,6 +15,8 @@
 #import "XVimKeyStroke.h"
 #import "XVimHistoryHandler.h"
 #import "XVim.h"
+#import "XVimUtil.h"
+#import "IDEEditorArea+XVim.h"
 
 @interface XVimCommandLineEvaluator() {
 	XVimHistoryHandler *_history;
@@ -43,8 +45,8 @@
 		_historyNo = 0;
         _evalutionResult = nil;
         self.lastTextView = window.sourceView;
-        XVimCommandField *commandField = self.window.commandLine.commandField;
-        [commandField setString:_firstLetter];
+        XVimCommandField *commandField = [XVimLastActiveEditorArea() xvim_commandline].commandField;
+        [commandField setString:firstLetter];
         [commandField moveToEndOfLine:self];
 	}
 	return self;

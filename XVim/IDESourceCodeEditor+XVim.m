@@ -33,7 +33,6 @@
     
     // Insert status line
     if( nil != container ){
-        // TODO: Observe DVTFontAndColorSourceTextSettingsChangedNotification to change color of status bar
         DVTSourceTextScrollView* scrollView = [self mainScrollView];
         [scrollView setTranslatesAutoresizingMaskIntoConstraints:NO]; // To use autolayout we need set this NO
         

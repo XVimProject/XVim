@@ -70,9 +70,23 @@
         [self setEditable:NO];
         [self setSelectable:YES];
         [self setBordered:NO];
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(fontAndColorSourceTextSettingsChanged:) name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
     }
     
     return self;
+}
+
+- (void)dealloc{
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:@"DVTFontAndColorSourceTextSettingsChangedNotification" object:nil];
+}
+
+- (void)fontAndColorSourceTextSettingsChanged:(NSNotification*)notification{
+    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
+    if( nil != theme ){
+        [self setFont:[theme sourcePlainTextFont]];
+        [self setBackgroundColor:[theme sourceTextSidebarBackgroundColor]];
+    }
 }
 
 @end

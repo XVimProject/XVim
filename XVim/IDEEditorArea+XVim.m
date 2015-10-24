@@ -10,6 +10,8 @@
 #import "IDEEditorArea+XVim.h"
 #import "NSObject+XVimAdditions.h"
 #import "XVimWindow.h"
+#import "Logger.h"
+#import "NSObject+ExtraData.h"
 
 static const char *KEY_WINDOW = "xvimwindow";
 
@@ -27,12 +29,31 @@ static const char *KEY_WINDOW = "xvimwindow";
 
 + (void)xvim_initialize
 {
+    // [Logger registerTracing:@"IDEEditorArea"];
+    
     if (self == [IDEEditorArea class]) {
-        [self xvim_swizzleInstanceMethod:@selector(viewDidInstall)
-                                    with:@selector(xvim_viewDidInstall)];
-        [self xvim_swizzleInstanceMethod:@selector(primitiveInvalidate)
-                                    with:@selector(xvim_primitiveInvalidate)];
+        [self xvim_swizzleInstanceMethod:@selector(initWithNibName:bundle:)
+                                    with:@selector(xvim_initWithNibName:bundle:)];
+        [self xvim_swizzleInstanceMethod:@selector(_setEditorModeViewControllerWithPrimaryEditorContext:)
+                                    with:@selector(xvim__setEditorModeViewControllerWithPrimaryEditorContext:)];
     }
+}
+
+- (id)xvim_initWithNibName:(NSString *)name bundle:(NSBundle *)bundle{
+    id obj = [self xvim_initWithNibName:name bundle:bundle];
+    if( obj ){
+    //    [self setData:cmd forName:@"CommandLine" ];
+    }
+    
+    return obj;
+    
+    // I tried to setup cmdline view here but Xcode doesn't allow it.
+    // It generates assertion that says "state token is nil".
+    // I don't know what state token is but I found that state token is set
+    // during the view setup.
+    // So I defer to install cmdline until _setEditorModeViewWithController... is called.
+    // I have tried several timings 
+    // (Still wondering if this is the best place to insatll cmdline)
 }
 
 - (XVimWindow *)xvim_window
@@ -40,13 +61,20 @@ static const char *KEY_WINDOW = "xvimwindow";
     return objc_getAssociatedObject(self, KEY_WINDOW);
 }
 
+- (XVimCommandLine*)xvim_commandline{
+    return [self dataForName:@"CommandLine"];
+}
+
+- (NSView *)_xvim_editorModeHostView
+{
+    // The view contains editor and navigation bar(at the top)
+    return [ self valueForKey:@"_editorModeHostView"];
+}
+
 - (NSView *)_xvim_editorAreaAutoLayoutView
 {
-    NSView *layoutView;
-
     // The view contains editors and border view
-    layoutView = [ self valueForKey:@"_editorAreaAutoLayoutView"];
-    return layoutView;
+    return [ self valueForKey:@"_editorAreaAutoLayoutView"];
 }
 
 - (DVTBorderedView *)_xvim_debuggerBarBorderedView
@@ -58,40 +86,113 @@ static const char *KEY_WINDOW = "xvimwindow";
     return border;
 }
 
-- (void)xvim_viewDidInstall
-{
-    [self xvim_viewDidInstall];
-
-    XVimWindow *xvim = [[XVimWindow alloc] initWithIDEEditorArea:self];
-    NSView *layoutView = [self _xvim_editorAreaAutoLayoutView];
-    XVimCommandLine *cmd = xvim.commandLine;
-
-    [layoutView addSubview:cmd];
-
-    // This notification is to resize command line view according to the editor area size.
-    [[NSNotificationCenter defaultCenter] addObserver:cmd
-                                             selector:@selector(didFrameChanged:)
-                                                 name:NSViewFrameDidChangeNotification
-                                               object:layoutView];
-    if (layoutView.subviews.count > 0) {
-        DVTBorderedView *border = [self _xvim_debuggerBarBorderedView];
-
-        // We need to know if border view is hidden or not to place editors and command line correctly.
-        [border addObserver:cmd forKeyPath:@"hidden" options:NSKeyValueObservingOptionNew context:nil];
+- (void)xvim__setEditorModeViewControllerWithPrimaryEditorContext:(id)arg1{
+    
+    [self xvim__setEditorModeViewControllerWithPrimaryEditorContext:arg1];
+    
+    NSView *layoutView = [self _xvim_editorModeHostView];
+    if( nil == layoutView){
+        return;
     }
-
-    objc_setAssociatedObject(self, KEY_WINDOW, xvim, OBJC_ASSOCIATION_RETAIN);
-}
-
-- (void)xvim_primitiveInvalidate
-{
-    XVimCommandLine *cmd = self.xvim_window.commandLine;
-    DVTBorderedView *border = [self _xvim_debuggerBarBorderedView];
-
-    [border removeObserver:cmd forKeyPath:@"hidden"];
-    [[NSNotificationCenter defaultCenter] removeObserver:cmd];
-
-    [self xvim_primitiveInvalidate];
+    
+    NSView* editor = [[layoutView subviews] firstObject];
+    if( nil == editor ){
+        return;
+    }
+    
+    XVimCommandLine *cmd = [self dataForName:@"CommandLine"];
+    if( nil == cmd ){
+        cmd = [[XVimCommandLine alloc] init];
+        [self setData:cmd forName:@"CommandLine"];
+    }
+    
+    XVimWindow* xvim = self.xvim_window;
+    if( nil == xvim ){
+        xvim = [[XVimWindow alloc] initWithIDEEditorArea:self];
+        objc_setAssociatedObject(self, KEY_WINDOW, xvim, OBJC_ASSOCIATION_RETAIN);
+    }
+    
+    [editor setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [cmd setTranslatesAutoresizingMaskIntoConstraints:NO];
+    
+    [layoutView addSubview:cmd];
+    
+    
+    // Same width with the parent
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:editor
+                                                          attribute:NSLayoutAttributeWidth
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:layoutView
+                                                          attribute:NSLayoutAttributeWidth
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+    
+    // editor's left position is same as layoutView
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:editor
+                                                          attribute:NSLayoutAttributeLeft
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:layoutView
+                                                          attribute:NSLayoutAttributeLeft
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+    
+    // editor fills to top of the layout view
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:editor
+                                                          attribute:NSLayoutAttributeTop
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:layoutView
+                                                          attribute:NSLayoutAttributeTop
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+    // Place command at bottom edge
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:cmd
+                                                          attribute:NSLayoutAttributeBottom
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:layoutView
+                                                          attribute:NSLayoutAttributeBottom
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+    
+    // command line width fills the layout view
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:cmd
+                                                          attribute:NSLayoutAttributeWidth
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:layoutView
+                                                          attribute:NSLayoutAttributeWidth
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+    
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:cmd
+                                                          attribute:NSLayoutAttributeLeft
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:layoutView
+                                                          attribute:NSLayoutAttributeLeft
+                                                         multiplier:1.0
+                                                           constant:0.0]];
+    
+    // Position editor above the command line
+    [layoutView addConstraint:[NSLayoutConstraint constraintWithItem:editor
+                                                          attribute:NSLayoutAttributeBottom
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:cmd
+                                                          attribute:NSLayoutAttributeTop
+                                                         multiplier:1.0
+                                                           constant:0]];
+    
+    
+    // Make cmd hegiht small as possible as it can be
+    NSLayoutConstraint *constraint = [NSLayoutConstraint constraintWithItem:cmd
+                                                          attribute:NSLayoutAttributeHeight
+                                                          relatedBy:NSLayoutRelationEqual
+                                                             toItem:nil
+                                                          attribute:NSLayoutAttributeNotAnAttribute
+                                                         multiplier:1.0
+                                                           constant:0];
+    
+    constraint.priority = 250;
+    [layoutView addConstraint:constraint]; 
+    
+    [self.view setNeedsLayout:YES];
 }
 
 @end
