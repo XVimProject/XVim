@@ -40,6 +40,7 @@
          @"alwaysuseinputsource", @"auis",
          @"blinkcursor", @"bc",
          @"startofline", @"sol",
+         @"expandtab", @"et",
          @"highlight", @"hi",
          nil];
         
@@ -61,6 +62,7 @@
         _alwaysuseinputsource = NO;
         _blinkcursor = NO;
         _startofline = YES;
+        _expandtab = YES;
         self.highlight = @{@"Search": @{
                                    @"guibg": [NSColor yellowColor],
                                    }

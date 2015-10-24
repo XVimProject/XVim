@@ -27,6 +27,7 @@
 @property BOOL alwaysuseinputsource; //XVim original
 @property BOOL blinkcursor;
 @property BOOL startofline;
+@property BOOL expandtab;
 @property (nonatomic, strong) NSDictionary* highlight;
 
 - (id)getOption:(NSString*)name;

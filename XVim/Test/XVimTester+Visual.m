@@ -54,6 +54,11 @@
                                       @"        ddd e-e fff\n"
                                       @"ggg hhh i_i\n" 
                                       @"    jjj kkk"; 
+
+    static NSString* rshift_result0_1 = @"\t\ta;a bbb ccc\n"
+                                        @"\t\tddd e-e fff\n"
+                                        @"ggg hhh i_i\n"
+                                        @"    jjj kkk";
     
     static NSString* rshift_result1 = @"    a;a bbb ccc\n"
                                       @"    ddd e-e fff\n"
@@ -133,6 +138,7 @@
             XVimMakeTestCase(text2, 0,  0, @"vj>."  , rshift_result0 , 8, 0), // #311
             XVimMakeTestCase(text2, 0,  0, @"vj>..u", rshift_result0 , 8, 0),
             XVimMakeTestCase(text2, 0,  0, @"vj>jj.", rshift_result1 ,36, 0),
+            XVimMakeTestCase(text2, 0,  0, @":set noexpandtab<CR>vj>.:set et<CR>", rshift_result0_1, 2, 0),
             
             XVimMakeTestCase(text2, 0,  0, @"<C-v>lljjd", C_v_d_result, 0, 0),
             XVimMakeTestCase(text1, 0,  0, @"vllcxxx<ESC>", vllccxxx_result, 2, 0),
