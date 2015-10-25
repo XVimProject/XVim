@@ -632,7 +632,9 @@
         }else{
             // Text object expands one text object ( the text object under insertion point + 1 )
             if( ![self.textStorage isEOF:self.insertionPoint+1]){
-                r = [self xvim_getMotionRange:self.insertionPoint+1 Motion:motion];
+                if( motion.motion != TEXTOBJECT_UNDERSCORE) {
+                    r = [self xvim_getMotionRange:self.insertionPoint+1 Motion:motion];
+                }
             }
             if( self.selectionBegin > r.begin ){
                 self.selectionBegin = r.begin;
@@ -2419,6 +2421,9 @@
             break;
         case TEXTOBJECT_WORD:
             range = [self.textStorage currentWord:begin count:motion.count  option:motion.option];
+            break;
+        case TEXTOBJECT_UNDERSCORE:
+            range = [self.textStorage currentCamelCaseWord:begin count:motion.count option:motion.option];
             break;
         case TEXTOBJECT_BRACES:
             range = xv_current_block([self xvim_string], current, motion.count, !(motion.option & TEXTOBJECT_INNER), '{', '}');
