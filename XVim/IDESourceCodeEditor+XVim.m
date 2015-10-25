@@ -31,13 +31,13 @@
 - (id)xvim_initWithNibName:(NSString*)name bundle:(NSBundle*)bundle document:(IDEEditorDocument*)doc{
     id obj = [self xvim_initWithNibName:name bundle:bundle document:doc];
     
-    NSView* container = [[obj view] contentView];
+    NSView* container = [[obj view] performSelector:@selector(contentView)];
     DVTSourceTextScrollView* scrollView = [self mainScrollView];
     
     if ([obj isKindOfClass:NSClassFromString(@"IDEPlaygroundEditor")]) {
         // IDEPlaygroundEditor have one more deeper container
         // Should create new category for IDEPlaygroundEditor
-        NSViewController* controller = [[[obj view] contentView] viewController];
+        NSViewController* controller = [[[obj view] performSelector:@selector(contentView)] viewController];
         container = [[controller view] performSelector:@selector(contentView)];
         scrollView = [controller performSelector:@selector(scrollView)];
     }
