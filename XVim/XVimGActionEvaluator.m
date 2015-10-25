@@ -24,6 +24,7 @@
 @implementation XVimGActionEvaluator
 
 - (XVimEvaluator*)d{
+    [self.window preMotion:XVIM_MAKE_MOTION(MOTION_POSITION_JUMP, LINEWISE, MOTION_OPTION_NONE, 1)];
     [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
     return nil;
 }

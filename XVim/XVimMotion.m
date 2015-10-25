@@ -49,6 +49,7 @@
         _info->lastEndOfWord = NSNotFound;
 
 		_jumpToAnotherFile = NO;
+        _markBeforeJumpToAnotherFile = nil;
         _keepJumpMarkIndex = NO;
     }
     return self;

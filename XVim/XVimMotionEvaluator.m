@@ -372,8 +372,10 @@
     }
     
 	BOOL jumpToAnotherFile = NO;
+    XVimMark* markBeforeJumpToAnotherFile = nil;
     if( ![mark.document isEqualToString:self.sourceView.documentURL.path]){
 		jumpToAnotherFile = YES;
+        markBeforeJumpToAnotherFile = [self.window currentPositionMark];
         NSError* error;
         NSURL* doc = [NSURL fileURLWithPath:mark.document];
         DVTDocumentLocation* loc = [[DVTDocumentLocation alloc] initWithDocumentURL:doc timestamp:nil];
@@ -395,6 +397,7 @@
     m.position = to;
 	if( needUpdateMark ){
 		m.jumpToAnotherFile = jumpToAnotherFile;
+        m.markBeforeJumpToAnotherFile = markBeforeJumpToAnotherFile;
 	}
     m.keepJumpMarkIndex = keepJumpMarkIndex;
 	

@@ -486,7 +486,8 @@
     XVim* xvim = [XVim instance];
 	XVimMark* mark = [self currentPositionMark];
 	if( motion.jumpToAnotherFile ){
-		// do nothing for jumping to another file
+        // In this case alreadly another file is opened, so we use the saved mark.
+        mark = motion.markBeforeJumpToAnotherFile;
 	} else {
 		// update single quote mark
 		[xvim.marks setMark:mark forName:@"'"];

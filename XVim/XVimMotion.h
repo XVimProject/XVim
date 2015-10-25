@@ -9,6 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "XVimMotionType.h"
 #import "XVimMotionOption.h"
+@class XVimMark;
 
 typedef struct {
     BOOL reachedEndOfLine;
@@ -82,6 +83,7 @@ typedef enum _MOTION{
 @property(strong) NSString* regex;
 @property XVimMotionInfo* info;
 @property BOOL jumpToAnotherFile;
+@property XVimMark* markBeforeJumpToAnotherFile;
 @property BOOL keepJumpMarkIndex;
 
 - (id) initWithMotion:(MOTION)motion type:(MOTION_TYPE)type option:(MOTION_OPTION)option count:(NSUInteger)count;
