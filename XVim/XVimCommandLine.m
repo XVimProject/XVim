@@ -50,6 +50,10 @@
         [_argument setTextColor:textColor];
         [_argument invalidateIntrinsicContentSize];
     
+        [_error setFont:textFont];
+        [_error setTextColor:textColor];
+        [_error invalidateIntrinsicContentSize];
+    
         [self invalidateIntrinsicContentSize];
 }
 
@@ -312,14 +316,14 @@
 /**
  * (BOOL)aRedColorSetting
  *      YES: red color background
- *      NO : white color background
+ *      NO : default color background
  */
 - (void)errorMessage:(NSString*)string Timer:(BOOL)aTimer RedColorSetting:(BOOL)aRedColorSetting
 {
     if( aRedColorSetting ){
         _error.backgroundColor = [NSColor redColor];
     } else {
-        _error.backgroundColor = [NSColor whiteColor];
+        _error.backgroundColor = [NSColor clearColor];
     }
 	NSString* msg = string;
 	if( [msg length] != 0 ){
