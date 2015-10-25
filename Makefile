@@ -1,5 +1,5 @@
 
-xcodebuild:=xcodebuild -scheme "XVim for Xcode5 and 6" -configuration
+xcodebuild:=xcodebuild -configuration
 
 
 release:

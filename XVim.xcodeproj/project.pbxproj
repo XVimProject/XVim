@@ -159,6 +159,11 @@
 		A22A00A21709CBE50003046C /* XVimTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimTestCase.m; path = XVim/Test/XVimTestCase.m; sourceTree = SOURCE_ROOT; };
 		A23771571611CD4200FE5F8B /* XVimMotion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMotion.h; path = XVim/XVimMotion.h; sourceTree = SOURCE_ROOT; };
 		A23771581611CD4200FE5F8B /* XVimMotion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotion.m; path = XVim/XVimMotion.m; sourceTree = SOURCE_ROOT; };
+		A2391E3D1BDCC99A00E1F3D5 /* DVTFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTFoundation.h; path = XcodeClasses/Xcode5/DVTFoundation.h; sourceTree = SOURCE_ROOT; };
+		A2391E3E1BDCC99A00E1F3D5 /* DVTKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTKit.h; path = XcodeClasses/Xcode5/DVTKit.h; sourceTree = SOURCE_ROOT; };
+		A2391E3F1BDCC99A00E1F3D5 /* IDEFoundation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEFoundation.h; path = XcodeClasses/Xcode5/IDEFoundation.h; sourceTree = SOURCE_ROOT; };
+		A2391E401BDCC99A00E1F3D5 /* IDEKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDEKit.h; path = XcodeClasses/Xcode5/IDEKit.h; sourceTree = SOURCE_ROOT; };
+		A2391E411BDCC99A00E1F3D5 /* IDESourceEditor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IDESourceEditor.h; path = XcodeClasses/Xcode5/IDESourceEditor.h; sourceTree = SOURCE_ROOT; };
 		A23D002217DA0C7D007EBB21 /* XVimJoinEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimJoinEvaluator.h; path = XVim/XVimJoinEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A23D002317DA0C7D007EBB21 /* XVimJoinEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimJoinEvaluator.m; path = XVim/XVimJoinEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A23E43171770E19B0066BF30 /* XVimTester+map.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+map.m"; path = "XVim/Test/XVimTester+map.m"; sourceTree = SOURCE_ROOT; };
@@ -528,6 +533,11 @@
 		A2C55FCE17EE9F4E000EBEA7 /* Xcode5 */ = {
 			isa = PBXGroup;
 			children = (
+				A2391E3D1BDCC99A00E1F3D5 /* DVTFoundation.h */,
+				A2391E3E1BDCC99A00E1F3D5 /* DVTKit.h */,
+				A2391E3F1BDCC99A00E1F3D5 /* IDEFoundation.h */,
+				A2391E401BDCC99A00E1F3D5 /* IDEKit.h */,
+				A2391E411BDCC99A00E1F3D5 /* IDESourceEditor.h */,
 			);
 			name = Xcode5;
 			sourceTree = "<group>";
@@ -717,9 +727,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A28F422617EEDBC200A3F7AE /* XVim for Xcode5 and 6 */ = {
+		A28F422617EEDBC200A3F7AE /* XVim */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A28F427817EEDBC200A3F7AE /* Build configuration list for PBXNativeTarget "XVim for Xcode5 and 6" */;
+			buildConfigurationList = A28F427817EEDBC200A3F7AE /* Build configuration list for PBXNativeTarget "XVim" */;
 			buildPhases = (
 				A28F422717EEDBC200A3F7AE /* Sources */,
 				A28F427117EEDBC200A3F7AE /* Frameworks */,
@@ -730,7 +740,7 @@
 			);
 			dependencies = (
 			);
-			name = "XVim for Xcode5 and 6";
+			name = XVim;
 			productName = XVim_lite2;
 			productReference = A2E7E45217EF0219008F045A /* XVim.xcplugin */;
 			productType = "com.apple.product-type.bundle";
@@ -755,7 +765,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A28F422617EEDBC200A3F7AE /* XVim for Xcode5 and 6 */,
+				A28F422617EEDBC200A3F7AE /* XVim */,
 			);
 		};
 /* End PBXProject section */
@@ -920,8 +930,6 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
-					"$(SYSTEM_APPS_DIR)/Xcode\\ 2.app/Contents/Frameworks",
-					"$(SYSTEM_APPS_DIR)/Xcode\\ 2.app/Contents/SharedFrameworks",
 					"$(DEVELOPER_DIR)/../Frameworks",
 					"$(DEVELOPER_DIR)/../SharedFrameworks",
 				);
@@ -1021,7 +1029,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A28F427817EEDBC200A3F7AE /* Build configuration list for PBXNativeTarget "XVim for Xcode5 and 6" */ = {
+		A28F427817EEDBC200A3F7AE /* Build configuration list for PBXNativeTarget "XVim" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A28F427917EEDBC200A3F7AE /* Debug */,
