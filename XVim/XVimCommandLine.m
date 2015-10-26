@@ -193,7 +193,7 @@
         [_command setEditable:NO];
         [_command setSelectable:NO];
         [_command setBackgroundColor:[NSColor clearColor]];
-        [_command setHidden:NO];
+        [_command setHidden:YES];
         [_command setTranslatesAutoresizingMaskIntoConstraints:NO];
         // Width
         [self addConstraint:[NSLayoutConstraint constraintWithItem:_command
