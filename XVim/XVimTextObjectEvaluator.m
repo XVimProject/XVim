@@ -136,6 +136,11 @@
     return nil;
 }
 
+-(XVimEvaluator*)UNDERSCORE {
+     _textobject = TEXTOBJECT_UNDERSCORE;
+    return nil;
+}
+
 - (XVimEvaluator*)ESC{
     return nil;
 }

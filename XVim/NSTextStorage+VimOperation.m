@@ -2077,4 +2077,231 @@ NSInteger xv_findChar(NSString *string, NSInteger index, int repeatCount, char c
     [view xvim_move:m];
 }
 
+#pragma mark textobjec camel case
+
+-(NSRange)currentCamelCaseWord:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt {
+    
+    NSRange range;
+    
+    // try underscore textobject.
+    range = [self rangeOfBlcoks:^NSRange(NSInteger idx) {
+        return [self rangeOfIncludesSurrundingCharacter:'_' fromIndex:(NSUInteger)idx];
+    } beginPos:(NSInteger)index count:count];
+    
+    if( range.length != 0 ) {
+        // underscore textobject.
+        if( opt & TEXTOBJECT_INNER) {
+            range = NSMakeRange(range.location + 1, range.length - 2);
+        }
+    } else {
+        // try camelcase textobject.
+        
+        range = [self rangeOfBlcoks:^NSRange(NSInteger idx) {
+            return [self rangeOfCamelcaseSurrundingCharacterWithFromIndex:idx];
+        } beginPos:(NSInteger)index count:count];
+    }
+    
+    return range;
+}
+
+-(NSRange)rangeOfCamelcaseSurrundingCharacterWithFromIndex:(NSInteger)index {
+    NSString* string = [self xvim_string];
+    
+    if( (NSUInteger)index >= self.length )  {
+        return NSMakeRange(NSNotFound, 0);
+    }
+    
+    NSCharacterSet* upperCharSet = [NSCharacterSet uppercaseLetterCharacterSet];
+    NSCharacterSet* lowerCharSet = [NSCharacterSet lowercaseLetterCharacterSet];
+    NSCharacterSet* numberCharSet = [NSCharacterSet decimalDigitCharacterSet];
+    
+    
+    NSInteger beginPos = index;
+    NSInteger endPos = index;
+    
+    unichar currentCh = [string characterAtIndex:(NSUInteger)index];
+    
+    if( [upperCharSet characterIsMember:currentCh] ) {
+        unichar nextCh = [self safetyCharacterAtIndex:(NSUInteger)index + 1 fromString:string];
+        
+        // example: MyPDFViewer. current 'V' => Viewer
+        if( [lowerCharSet characterIsMember:nextCh] ) {
+            beginPos = index;
+            endPos = seek_forwards(string, index + 1, lowerCharSet);
+            
+        // example: MyPDFViewer. current 'D' or 'F' => PDF
+        } else if( [upperCharSet characterIsMember:nextCh] ) {
+            beginPos = seek_backwards(string, index + 1, upperCharSet);
+            endPos = seek_forwards(string, index + 1, upperCharSet);
+            
+            nextCh = [self safetyCharacterAtIndex:(NSUInteger)endPos fromString:string];
+            
+            if( [lowerCharSet characterIsMember:nextCh] ) {
+                --endPos;
+            }
+        // example: MyPDF_. current 'F' => PDF
+        } else {
+            endPos = index + 1;
+            beginPos = seek_backwards(string, endPos, upperCharSet);
+        }
+        
+    } else if([lowerCharSet characterIsMember:currentCh]) {
+        unichar nextCh = [self safetyCharacterAtIndex:(NSUInteger)index + 1 fromString:string];
+        
+        // example: MyPDFViewer. current 'i' or 'e' => Viewer
+        if( [lowerCharSet characterIsMember:nextCh] ) {
+            beginPos = seek_backwards(string, index + 1, lowerCharSet);
+            endPos = seek_forwards(string, index + 1, lowerCharSet);
+        // example: MyPDFViewer. current 'r' => Viewer
+        } else {
+            endPos = index + 1;
+            beginPos = seek_backwards(string, endPos, lowerCharSet);
+        }
+        
+        unichar prevCh = [self safetyCharacterAtIndex:(NSUInteger)beginPos - 1 fromString:string];
+        if( [upperCharSet characterIsMember:prevCh] ) {
+            --beginPos;
+        }
+    } else {
+        // numbers, symbols
+        
+        NSMutableCharacterSet* tempCharSet = [NSMutableCharacterSet whitespaceAndNewlineCharacterSet];
+        [tempCharSet formUnionWithCharacterSet:upperCharSet];
+        [tempCharSet formUnionWithCharacterSet:lowerCharSet];
+        [tempCharSet formUnionWithCharacterSet:numberCharSet];
+        NSCharacterSet* allSymbolCharSet = [tempCharSet invertedSet];
+        
+        NSArray* otherCharSets = @[numberCharSet, allSymbolCharSet];
+        __block NSRange result = NSMakeRange(NSNotFound, 0);
+        [otherCharSets enumerateObjectsUsingBlock:^(id  obj, NSUInteger idx, BOOL* stop) {
+            
+            NSCharacterSet* charSet = obj;
+            if([charSet characterIsMember:currentCh]) {
+                
+                NSInteger beginPos = seek_backwards(string, index + 1, charSet);
+                NSInteger endPos = seek_forwards(string, index + 1, charSet);
+                
+                result = NSMakeRange((NSUInteger)beginPos, (NSUInteger)(endPos - beginPos));
+                *stop = YES;
+            }
+        }];
+        return result;
+    }
+    
+    if( beginPos == index && endPos == index ) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+    NSRange result = NSMakeRange((NSUInteger)beginPos, (NSUInteger)(endPos - beginPos));
+    return result;
+}
+
+-(unichar)safetyCharacterAtIndex:(NSUInteger)index fromString:(NSString*)str {
+    if( index >= str.length ) {
+        return 0;
+    } else {
+        return [str characterAtIndex:index];
+    }
+}
+
+-(NSRange)rangeOfBlcoks:(NSRange (^)(NSInteger index))block beginPos:(NSInteger)beginPos count:(NSUInteger)count {
+    
+    NSRange range = NSMakeRange(NSNotFound, 0);
+    NSInteger currentIndex = beginPos;
+    
+    while( count > 0 ) {
+        if( range.location != NSNotFound ) {
+            currentIndex = (NSInteger)range.location + (NSInteger)range.length;
+        }
+        NSRange tempRange = block(currentIndex);
+        if( tempRange.location == NSNotFound ) {
+            break;
+        } else {
+            if( range.location == NSNotFound ) {
+                range.location = tempRange.location;
+            }
+            range.length += tempRange.length;
+        }
+        --count;
+    }
+    return range;
+}
+
+
+#pragma mark underscore textobject
+
+-(NSRange)rangeOfIncludesSurrundingCharacter:(unichar)character fromIndex:(NSUInteger)index {
+    NSCharacterSet* underScoreCharSet = [NSCharacterSet characterSetWithCharactersInString:@"_"];
+    
+    NSMutableCharacterSet* tempCharSet = [NSMutableCharacterSet new];
+    [tempCharSet formUnionWithCharacterSet:[NSCharacterSet uppercaseLetterCharacterSet]];
+    [tempCharSet formUnionWithCharacterSet:[NSCharacterSet lowercaseLetterCharacterSet]];
+    [tempCharSet formUnionWithCharacterSet:[NSCharacterSet decimalDigitCharacterSet]];
+    NSCharacterSet* delimiters = [tempCharSet invertedSet];
+    
+    NSUInteger beginIndex = [self findBackwardsCharacterSet:underScoreCharSet beginPos:index delimiters:delimiters];
+    if( beginIndex == NSNotFound ) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+    
+    NSUInteger endIndex = NSNotFound;
+    if( beginIndex == index ) {
+        endIndex = [self findForwardCharacterSet:underScoreCharSet beginPos:index + 1 delimiters:delimiters];
+        if( endIndex == NSNotFound ) {
+            endIndex = beginIndex;
+            beginIndex = [self findBackwardsCharacterSet:underScoreCharSet beginPos:index - 1 delimiters:delimiters];
+        }
+    } else {
+        endIndex = [self findForwardCharacterSet:underScoreCharSet beginPos:index delimiters:delimiters];
+    }
+    
+    if( endIndex == NSNotFound ) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+    
+    if( endIndex == beginIndex ) {
+        return NSMakeRange(NSNotFound, 0);
+    }
+    
+    return NSMakeRange(beginIndex, endIndex - beginIndex + 1);
+}
+
+-(NSUInteger)findForwardCharacterSet:(NSCharacterSet*)charSet beginPos:(NSUInteger)beginPos delimiters:(NSCharacterSet*)delimiters {
+    NSString* string = [self xvim_string];
+    
+    NSUInteger index = beginPos;
+    NSUInteger result = NSNotFound;
+    
+    while( index < string.length ) {
+        unichar currentCh = [string characterAtIndex:index];
+        if( [charSet characterIsMember:currentCh] ) {
+            result = index;
+            break;
+        } else if( [delimiters characterIsMember:currentCh] ) {
+            break;
+        }
+        ++index;
+    }
+    return result;
+}
+
+-(NSUInteger)findBackwardsCharacterSet:(NSCharacterSet*)charSet beginPos:(NSUInteger)beginPos delimiters:(NSCharacterSet*)delimiters {
+    NSString* string = [self xvim_string];
+    
+    NSUInteger index = MIN(beginPos, string.length - 1);
+    NSUInteger result = NSNotFound;
+    
+    while( index != (NSUInteger)-1 ) {
+        unichar currentCh = [string characterAtIndex:index];
+        if( [charSet characterIsMember:currentCh] ) {
+            result = index;
+            break;
+        } else if( [delimiters characterIsMember:currentCh] ) {
+            break;
+        }
+        --index;
+    }
+    return result;
+}
+
+
 @end
