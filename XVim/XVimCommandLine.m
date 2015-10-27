@@ -33,10 +33,12 @@
 -(void)updateFontAndColors{
         NSColor* textColor = [NSColor textColor];
         NSFont* textFont = [NSFont systemFontOfSize:[NSFont systemFontSize]];
+        NSColor* textBackgroundColor = [NSColor textBackgroundColor]; 
         DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
         if( nil != theme ){
             textColor = [theme sourcePlainTextColor];
             textFont = [theme sourcePlainTextFont];
+            textBackgroundColor = [theme sourceTextBackgroundColor];
         }
         [_static setFont:textFont];
         [_static setTextColor:textColor];
@@ -52,6 +54,7 @@
     
         [_error setFont:textFont];
         [_error setTextColor:textColor];
+        [_error setBackgroundColor:textBackgroundColor];
         [_error invalidateIntrinsicContentSize];
     
         [self invalidateIntrinsicContentSize];
@@ -320,10 +323,11 @@
  */
 - (void)errorMessage:(NSString*)string Timer:(BOOL)aTimer RedColorSetting:(BOOL)aRedColorSetting
 {
+    DVTFontAndColorTheme* theme = [NSClassFromString(@"DVTFontAndColorTheme") performSelector:@selector(currentTheme)];
     if( aRedColorSetting ){
         _error.backgroundColor = [NSColor redColor];
     } else {
-        _error.backgroundColor = [NSColor clearColor];
+        _error.backgroundColor = [theme sourceTextBackgroundColor];
     }
 	NSString* msg = string;
 	if( [msg length] != 0 ){
