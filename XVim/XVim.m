@@ -246,8 +246,13 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 
 - (void)writeToConsole:(NSString*)fmt, ...{
     
+    IDEDefaultDebugArea* debugArea = (IDEDefaultDebugArea*)[XVimLastActiveEditorArea() activeDebuggerArea];
+    // On playgorund activateConsole call cause crash.
+    if (![debugArea canActivateConsole]){
+        return;
+    }
     [XVimLastActiveEditorArea() activateConsole:self];
-    IDEConsoleArea* console = [(IDEDefaultDebugArea*)[XVimLastActiveEditorArea() activeDebuggerArea] consoleArea];
+    IDEConsoleArea* console = [debugArea consoleArea];
     
     // IDEConsoleArea has IDEConsoleTextView as its view but we do not have public method to access it.
     // It has the view as instance variable named "_consoleView"

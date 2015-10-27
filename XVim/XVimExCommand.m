@@ -1728,6 +1728,12 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
     }
 }
 
+- (void)join:(XVimExArg *)args inWindow:(XVimWindow*)window
+{
+    // not implemented
+    // This empty method prevent from calling ':jumps' for ':j'. @see #871
+}
+
 - (void)jumps:(XVimExArg *)args inWindow:(XVimWindow *)window
 {
     XVim* xvim = [XVim instance];
