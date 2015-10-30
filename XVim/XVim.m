@@ -52,7 +52,6 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 }
 @property (strong,nonatomic) XVimRegisterManager* registerManager;
 @property (strong,nonatomic) XVimMutableString* lastOperationCommands;
-@property (strong,nonatomic) XVimMutableString* tempRepeatRegister;
 - (void)parseRcFile;
 @end
 
