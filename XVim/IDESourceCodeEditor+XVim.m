@@ -14,7 +14,7 @@
 #import "XVimStatusLine.h"
 #import "XVim.h"
 #import "NSObject+XVimAdditions.h"
-#import "NSobject+ExtraData.h"
+#import "NSObject+ExtraData.h"
 #import <objc/runtime.h>
 
 @implementation IDESourceCodeEditor(XVim)
