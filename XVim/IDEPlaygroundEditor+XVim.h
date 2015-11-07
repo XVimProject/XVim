@@ -14,10 +14,9 @@
 
 @interface IDEPlaygroundEditor(XVim)
 + (void)xvim_initialize;
-- (NSArray*) xvim_textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges;
 
 // The reason to append "2" at end of the method name is because this class is inheited from IDESourceCodeEdtior
 // which we also swizzle. It interfares if we us the same name.
-- (id)xvim_initWithNibName2:(NSString*)arg1 bundle:(NSBundle*)arg2 document:(IDEEditorDocument*)arg3;
+- (void)xvim_didSetupEditor2;
 
 @end

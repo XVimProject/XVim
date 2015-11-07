@@ -20,7 +20,7 @@
 @implementation IDESourceCodeEditor(XVim)
 + (void)xvim_initialize{
     [self xvim_swizzleInstanceMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) with:@selector(xvim_textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
-    [self xvim_swizzleInstanceMethod:@selector(initWithNibName:bundle:document:) with:@selector(xvim_initWithNibName:bundle:document:)];
+    [self xvim_swizzleInstanceMethod:@selector(didSetupEditor) with:@selector(xvim_didSetupEditor)];
 }
 
 - (NSArray*) xvim_textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
@@ -28,18 +28,17 @@
     return newSelectedCharRanges;
 }
 
-- (id)xvim_initWithNibName:(NSString*)name bundle:(NSBundle*)bundle document:(IDEEditorDocument*)doc{
-    id obj = [self xvim_initWithNibName:name bundle:bundle document:doc];
+- (void)xvim_didSetupEditor{
+    [self xvim_didSetupEditor];
+    NSScrollView* scrollView = [self mainScrollView];
+    [self xvim_install_statusline:[scrollView superview] sibling:scrollView withDocument:self.document];
+}
+
+// Installs statusline as a child of container and sibling of slibling
+- (void)xvim_install_statusline:(NSView*)container sibling:(NSView*)sibling withDocument:(IDEEditorDocument*)doc{
     
-    if( ![self isMemberOfClass:[IDESourceCodeEditor class]] ){
-        return obj;
-    }
-    NSView* container = [[obj view] performSelector:@selector(contentView)];
-    DVTSourceTextScrollView* scrollView = [self mainScrollView];
-    
-    // Insert status line
-    if( nil != container && nil != scrollView){
-        [scrollView setTranslatesAutoresizingMaskIntoConstraints:NO]; // To use autolayout we need set this NO
+    if( nil != container && nil != sibling){
+        [sibling setTranslatesAutoresizingMaskIntoConstraints:NO]; // To use autolayout we need set this NO
         
         // Add status view
         XVimStatusLine* status = [[XVimStatusLine alloc] initWithString:doc.filePath.pathString];
@@ -54,7 +53,7 @@
         // View autolayout constraints (for the source view and status bar)
         
         // Same width with the parent
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:scrollView
+        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
                                                           attribute:NSLayoutAttributeWidth
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:container
@@ -63,15 +62,15 @@
                                                            constant:0.0]];
         
         // ScrollView's left position is 0
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:scrollView
+        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
                                                               attribute:NSLayoutAttributeLeft
                                                               relatedBy:NSLayoutRelationEqual
                                                                  toItem:container
                                                               attribute:NSLayoutAttributeLeft
                                                              multiplier:1.0
                                                                constant:0.0]];
-        // Position scrollView above the status bar
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:scrollView
+        // Position sibling above the status bar
+        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
                                                           attribute:NSLayoutAttributeBottom
                                                           relatedBy:NSLayoutRelationEqual
                                                              toItem:status
@@ -79,7 +78,7 @@
                                                          multiplier:1.0
                                                            constant:0]];
         // ScrollView fills to top of the container view
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:scrollView
+        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
                                                               attribute:NSLayoutAttributeTop
                                                               relatedBy:NSLayoutRelationEqual
                                                                  toItem:container
@@ -103,7 +102,6 @@
                                                              multiplier:1.0
                                                                constant:0.0]];
     }
-    
-    return obj;
 }
+
 @end

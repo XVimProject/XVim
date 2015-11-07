@@ -13,7 +13,7 @@
 		6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */; };
 		A204814F19702F3E0064BE66 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */; };
 		A212A53D1940A330002FB2CF /* XVim.xcplugin in Copy Files */ = {isa = PBXBuildFile; fileRef = A2E7E45217EF0219008F045A /* XVim.xcplugin */; };
-		A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */; settings = {ASSET_TAGS = (); }; };
+		A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */; };
 		A2193E9A1BE73300002629FB /* IDELanguageSupportUI in Frameworks */ = {isa = PBXBuildFile; fileRef = A2193E991BE73300002629FB /* IDELanguageSupportUI */; };
 		A25032B319F805110021C34E /* IDEWorkspaceTabController+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A25032B219F805110021C34E /* IDEWorkspaceTabController+XVim.m */; };
 		A259E2231B3C263B006000D9 /* NSURL+XVimXcodeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A259E2221B3C263B006000D9 /* NSURL+XVimXcodeModule.m */; };
@@ -704,8 +704,6 @@
 			children = (
 				A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */,
 				A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */,
-				A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */,
-				A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */,
 				E905EE3718B045FE0052D3C1 /* DVTTextSidebarView+XVim.h */,
 				E905EE3818B045FE0052D3C1 /* DVTTextSidebarView+XVim.m */,
 				C38A5B3F15272B0500E1448D /* DVTSourceTextView+XVim.h */,
@@ -714,6 +712,8 @@
 				A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m */,
 				C38A5B4515272DCC00E1448D /* IDESourceCodeEditor+XVim.h */,
 				C38A5B4615272DCD00E1448D /* IDESourceCodeEditor+XVim.m */,
+				A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */,
+				A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */,
 				A26ACC4C154F2D6600B27D69 /* IDEEditor+XVim.h */,
 				A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */,
 				C345DDB9154CE12A009F232E /* XVimHookManager.h */,

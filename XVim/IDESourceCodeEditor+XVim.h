@@ -12,5 +12,6 @@
 @interface IDESourceCodeEditor(XVim)
 + (void)xvim_initialize;
 - (NSArray*) xvim_textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges;
-- (id)xvim_initWithNibName:(NSString*)arg1 bundle:(NSBundle*)arg2 document:(IDEEditorDocument*)arg3;
+- (void)xvim_didSetupEditor;
+- (void)xvim_install_statusline:(NSView*)scrollView sibling:(NSView*)sibling withDocument:(IDEEditorDocument*)doc;
 @end
