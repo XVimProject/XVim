@@ -29,8 +29,6 @@ static const char *KEY_WINDOW = "xvimwindow";
 
 + (void)xvim_initialize
 {
-    // [Logger registerTracing:@"IDEEditorArea"];
-    
     if (self == [IDEEditorArea class]) {
         [self xvim_swizzleInstanceMethod:@selector(initWithNibName:bundle:)
                                     with:@selector(xvim_initWithNibName:bundle:)];

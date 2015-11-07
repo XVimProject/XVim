@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 
-#import "IDESourceCodeEditor+XVim.h"
 #import "IDEKit.h"
 #import "DVTFoundation.h"
 #import "XVimWindow.h"
@@ -16,11 +15,13 @@
 #import "NSObject+XVimAdditions.h"
 #import "NSobject+ExtraData.h"
 #import <objc/runtime.h>
+#import "IDEPlaygroundEditor+XVim.h"
 
-@implementation IDESourceCodeEditor(XVim)
+@implementation IDEPlaygroundEditor(XVim)
+
 + (void)xvim_initialize{
     [self xvim_swizzleInstanceMethod:@selector(textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:) with:@selector(xvim_textView:willChangeSelectionFromCharacterRanges:toCharacterRanges:)];
-    [self xvim_swizzleInstanceMethod:@selector(initWithNibName:bundle:document:) with:@selector(xvim_initWithNibName:bundle:document:)];
+    [self xvim_swizzleInstanceMethod:@selector(initWithNibName:bundle:document:) with:@selector(xvim_initWithNibName2:bundle:document:)];
 }
 
 - (NSArray*) xvim_textView:(NSTextView *)textView willChangeSelectionFromCharacterRanges:(NSArray *)oldSelectedCharRanges toCharacterRanges:(NSArray *)newSelectedCharRanges
@@ -28,14 +29,15 @@
     return newSelectedCharRanges;
 }
 
-- (id)xvim_initWithNibName:(NSString*)name bundle:(NSBundle*)bundle document:(IDEEditorDocument*)doc{
-    id obj = [self xvim_initWithNibName:name bundle:bundle document:doc];
+- (id)xvim_initWithNibName2:(NSString*)name bundle:(NSBundle*)bundle document:(IDEEditorDocument*)doc{
+    id obj = [self xvim_initWithNibName2:name bundle:bundle document:doc];
     
-    if( ![self isMemberOfClass:[IDESourceCodeEditor class]] ){
-        return obj;
-    }
     NSView* container = [[obj view] performSelector:@selector(contentView)];
-    DVTSourceTextScrollView* scrollView = [self mainScrollView];
+    DVTSourceTextScrollView* scrollView = nil;
+    
+    NSViewController* controller = [[[obj view] performSelector:@selector(contentView)] viewController];
+    container = [[controller view] performSelector:@selector(contentView)];
+    scrollView = [controller performSelector:@selector(scrollView)];
     
     // Insert status line
     if( nil != container && nil != scrollView){

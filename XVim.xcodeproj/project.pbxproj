@@ -13,6 +13,8 @@
 		6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */; };
 		A204814F19702F3E0064BE66 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */; };
 		A212A53D1940A330002FB2CF /* XVim.xcplugin in Copy Files */ = {isa = PBXBuildFile; fileRef = A2E7E45217EF0219008F045A /* XVim.xcplugin */; };
+		A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */; settings = {ASSET_TAGS = (); }; };
+		A2193E9A1BE73300002629FB /* IDELanguageSupportUI in Frameworks */ = {isa = PBXBuildFile; fileRef = A2193E991BE73300002629FB /* IDELanguageSupportUI */; };
 		A25032B319F805110021C34E /* IDEWorkspaceTabController+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A25032B219F805110021C34E /* IDEWorkspaceTabController+XVim.m */; };
 		A259E2231B3C263B006000D9 /* NSURL+XVimXcodeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A259E2221B3C263B006000D9 /* NSURL+XVimXcodeModule.m */; };
 		A2752F4F19F3DFAD00D1642C /* NSAttributedString+Geometrics.m in Sources */ = {isa = PBXBuildFile; fileRef = A2752F4E19F3DFAD00D1642C /* NSAttributedString+Geometrics.m */; };
@@ -137,6 +139,9 @@
 		A2165BFC17A3762C00AB18FD /* XVimDefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimDefs.h; path = XVim/XVimDefs.h; sourceTree = SOURCE_ROOT; };
 		A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEEditorArea+XVim.h"; path = "XVim/IDEEditorArea+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEEditorArea+XVim.m"; path = "XVim/IDEEditorArea+XVim.m"; sourceTree = SOURCE_ROOT; };
+		A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEPlaygroundEditor+XVim.h"; path = "XVim/IDEPlaygroundEditor+XVim.h"; sourceTree = SOURCE_ROOT; };
+		A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEPlaygroundEditor+XVim.m"; path = "XVim/IDEPlaygroundEditor+XVim.m"; sourceTree = SOURCE_ROOT; };
+		A2193E991BE73300002629FB /* IDELanguageSupportUI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = IDELanguageSupportUI; path = ../PlugIns/IDELanguageSupportUI.ideplugin/Contents/MacOS/IDELanguageSupportUI; sourceTree = DEVELOPER_DIR; };
 		A222B5DF1514DFCD005E8802 /* XVimOperatorEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorEvaluator.h; path = XVim/XVimOperatorEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorEvaluator.m; path = XVim/XVimOperatorEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A223956316653ACD00CD26AE /* DevNotes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DevNotes.txt; sourceTree = "<group>"; };
@@ -213,7 +218,6 @@
 		A28D895617BFF434002709D8 /* XVimTester+Search.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Search.m"; path = "XVim/Test/XVimTester+Search.m"; sourceTree = SOURCE_ROOT; };
 		A293A38616CE8A8000E1E827 /* XVimDebug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimDebug.h; path = XVim/XVimDebug.h; sourceTree = SOURCE_ROOT; };
 		A293A38716CE8A8000E1E827 /* XVimDebug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimDebug.m; path = XVim/XVimDebug.m; sourceTree = SOURCE_ROOT; };
-		A29683FF1A8F03FE00F14667 /* IDESourceEditor.ideplugin */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = IDESourceEditor.ideplugin; path = ../PlugIns/IDESourceEditor.ideplugin; sourceTree = DEVELOPER_DIR; };
 		A29684011A8F057800F14667 /* IDESourceEditor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = IDESourceEditor; path = ../PlugIns/IDESourceEditor.ideplugin/Contents/MacOS/IDESourceEditor; sourceTree = DEVELOPER_DIR; };
 		A29684031A8F06E500F14667 /* IDEFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEFoundation.framework; path = ../Frameworks/IDEFoundation.framework; sourceTree = DEVELOPER_DIR; };
 		A29684041A8F06E500F14667 /* IDEKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IDEKit.framework; path = ../Frameworks/IDEKit.framework; sourceTree = DEVELOPER_DIR; };
@@ -333,6 +337,7 @@
 				A29684061A8F06E500F14667 /* IDEKit.framework in Frameworks */,
 				A29684091A8F06FC00F14667 /* DVTFoundation.framework in Frameworks */,
 				A296840A1A8F06FC00F14667 /* DVTKit.framework in Frameworks */,
+				A2193E9A1BE73300002629FB /* IDELanguageSupportUI in Frameworks */,
 				A29684021A8F057800F14667 /* IDESourceEditor in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -450,12 +455,12 @@
 		A2B4BABA14D59F6600D817B0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A2193E991BE73300002629FB /* IDELanguageSupportUI */,
 				A29684071A8F06FC00F14667 /* DVTFoundation.framework */,
 				A29684081A8F06FC00F14667 /* DVTKit.framework */,
 				A29684031A8F06E500F14667 /* IDEFoundation.framework */,
 				A29684041A8F06E500F14667 /* IDEKit.framework */,
 				A29684011A8F057800F14667 /* IDESourceEditor */,
-				A29683FF1A8F03FE00F14667 /* IDESourceEditor.ideplugin */,
 				A2B4BABD14D59F6600D817B0 /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -684,8 +689,6 @@
 				A24782BA14D6F56E003B6433 /* XVimCommandField.m */,
 				A2A8A4FE14E41C66002EA6C8 /* XVimCommandLine.h */,
 				A2A8A4FF14E41C66002EA6C8 /* XVimCommandLine.m */,
-				A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */,
-				A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */,
 				6E2B33321836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.h */,
 				6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */,
 				A25032B119F805110021C34E /* IDEWorkspaceTabController+XVim.h */,
@@ -699,6 +702,10 @@
 		C345DDB8154CCF79009F232E /* Event Dispatchers */ = {
 			isa = PBXGroup;
 			children = (
+				A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */,
+				A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */,
+				A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */,
+				A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */,
 				E905EE3718B045FE0052D3C1 /* DVTTextSidebarView+XVim.h */,
 				E905EE3818B045FE0052D3C1 /* DVTTextSidebarView+XVim.m */,
 				C38A5B3F15272B0500E1448D /* DVTSourceTextView+XVim.h */,
@@ -811,6 +818,7 @@
 				A28F423917EEDBC200A3F7AE /* XVimRegisterEvaluator.m in Sources */,
 				A28F423A17EEDBC200A3F7AE /* XVimOperatorEvaluator.m in Sources */,
 				A28F423B17EEDBC200A3F7AE /* XVimKeyStroke.m in Sources */,
+				A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */,
 				A28F423C17EEDBC200A3F7AE /* DVTSourceTextView+XVim.m in Sources */,
 				A28F423D17EEDBC200A3F7AE /* IDESourceCodeEditor+XVim.m in Sources */,
 				A28F423E17EEDBC200A3F7AE /* XVimNumericEvaluator.m in Sources */,
