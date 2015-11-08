@@ -17,15 +17,11 @@
 @implementation DVTSourceTextScrollView(XVim)
 + (void)xvim_initialize{
     [self xvim_swizzleInstanceMethod:@selector(viewWillMoveToWindow:) with:@selector(xvim_viewWillMoveToWindow:)];
-    [self xvim_swizzleInstanceMethod:@selector(hasVerticalScroller) with:@selector(xvim_hasVerticalScroller)];
-    [self xvim_swizzleInstanceMethod:@selector(hasHorizontalScroller) with:@selector(xvim_hasHorizontalScroller)];
     [self xvim_swizzleInstanceMethod:@selector(observeValueForKeyPath:ofObject:change:context:) with:@selector(xvim_observeValueForKeyPath:ofObject:change:context:)];
 }
 
 + (void)xvim_finalize{
     [self xvim_swizzleInstanceMethod:@selector(viewWillMoveToWindow:) with:@selector(xvim_viewWillMoveToWindow:)];
-    [self xvim_swizzleInstanceMethod:@selector(hasVerticalScroller) with:@selector(xvim_hasVerticalScroller)];
-    [self xvim_swizzleInstanceMethod:@selector(hasHorizontalScroller) with:@selector(xvim_hasHorizontalScroller)];
     // TODO: To unhook observe... method, we have to removeObserver from XVimOptions.
     //       We already have PerformOnDealloc object associated to this obj, we just call it then call this unhook method.
     //[self xvim_swizzleInstanceMethod:@selector(observeValueForKeyPath:ofObject:change:context:) with:@selector(xvim_observeValueForKeyPath:ofObject:change:context:)];
@@ -51,22 +47,6 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
         [ self setBool:YES forName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW];
     }
     [self xvim_viewWillMoveToWindow:window ];
-}
-
-- (BOOL)xvim_hasVerticalScroller{
-    if( [XVim.instance.options.guioptions rangeOfString:@"r"].location == NSNotFound) {
-        return NO;
-    }else{
-        return YES;
-    }
-}
-
-- (BOOL)xvim_hasHorizontalScroller{
-    if( [XVim.instance.options.guioptions rangeOfString:@"b"].location == NSNotFound) {
-        return NO;
-    }else{
-        return YES;
-    }
 }
 
 - (void)xvim_observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
