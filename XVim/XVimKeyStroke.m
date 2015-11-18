@@ -203,7 +203,8 @@ static struct key_map key_maps[] = {
     { @"|",        124, @"BAR"}, // Default notation
     { @"}",        125, @"RBRACE"},
     { @"~",        126, @"TILDE"},
-    { @"BS",       127, @"BS"},
+    { @"BACKSPACE",       127, @"BS"},
+    { @"BS",       127, @"BS"}, // Default notation
 
     { @"UP",            NSUpArrowFunctionKey,       @"Up"           },
     { @"DOWN",          NSDownArrowFunctionKey,     @"Down"         },

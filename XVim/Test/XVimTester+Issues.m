@@ -84,6 +84,8 @@
             XVimMakeTestCase(issue_865 , 2, 0, @"2gg", issue_865, 1, 0), // Issue #865
             XVimMakeTestCase(issue_865 , 2, 0, @"2G", issue_865, 1, 0),  // Issue #865
             XVimMakeTestCase(issue_865 , 2, 0, @"G", issue_865, 6, 0),   // Issue #865
+            
+            XVimMakeTestCase(text0, 0, 0, @":nmap <lt>backspace> l<cr><bs><bs>", text0, 2, 0), // Issue #844 mapping <backspace>
             nil];
     
 }
