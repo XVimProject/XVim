@@ -1555,7 +1555,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
         // We use converted text as is.
         // The converted swift file name is set to current file name symbol '%'.
         NSFileManager* fm = [NSFileManager defaultManager];
-        NSString* swiftpath = [NSHomeDirectory() stringByAppendingPathComponent:@".xvimtmp.swift"];
+        NSString* swiftpath = [documentURL xvim_swiftCacheFilePath];
         NSString* str = window.sourceView.string;
         if( str.length > 0 ){
             NSData* data = [NSData dataWithBytes:(void*)str.UTF8String length:str.length];
@@ -1563,7 +1563,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
             contextForExCmd[@"%"] = swiftpath ? swiftpath: @"";
         }
         // The Objective-C Framework header file is set to alternate file name symbol '#'.
-        NSString* objc_header = documentURL.xcode_source_header;
+        NSString* objc_header = documentURL.xvim_header_file;
         if( objc_header.length > 0 ){
             contextForExCmd[@"#"] = objc_header ? objc_header: @"";
         }
