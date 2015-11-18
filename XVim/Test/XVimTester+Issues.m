@@ -56,6 +56,9 @@
     static NSString* issue_809_a_result = @"aaa b\n \nccc\n";
     static NSString* issue_809_b_text   = @"aaa    \n \nccc\n";
     static NSString* issue_809_b_result = @"aaa  \n \nccc\n";
+    static NSString* issue_865 = @"\n" // 0
+                                 @"\n" // 1
+                                 @"ccc\n";// 2
      
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
@@ -75,6 +78,12 @@
             XVimMakeTestCase(issue_805_text, 33, 0, @"dd", issue_805_result, 0, 0), // Issue #805
             XVimMakeTestCase(issue_809_a_text, 5, 0, @"dw", issue_809_a_result, 4, 0),
             XVimMakeTestCase(issue_809_b_text, 5, 0, @"dw", issue_809_b_result, 4, 0),
+            
+            XVimMakeTestCase(issue_865 , 2, 0, @"gg", issue_865, 0, 0),  // Issue #865
+            XVimMakeTestCase(issue_865 , 2, 0, @"1G", issue_865, 0, 0),  // Issue #865
+            XVimMakeTestCase(issue_865 , 2, 0, @"2gg", issue_865, 1, 0), // Issue #865
+            XVimMakeTestCase(issue_865 , 2, 0, @"2G", issue_865, 1, 0),  // Issue #865
+            XVimMakeTestCase(issue_865 , 2, 0, @"G", issue_865, 6, 0),   // Issue #865
             nil];
     
 }

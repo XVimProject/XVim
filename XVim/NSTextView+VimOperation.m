@@ -653,7 +653,7 @@
                 } else if (XVim.instance.options.startofline) {
                     // only jump to nonblank line for last line or line number
                     if (motion.motion == MOTION_LASTLINE || motion.motion == MOTION_LINENUMBER) {
-                        r.end = [self.textStorage xvim_firstNonblankInLineAtIndex:r.end allowEOL:NO];
+                        r.end = [self.textStorage xvim_firstNonblankInLineAtIndex:r.end allowEOL:YES];
                     }
                 }
                 [self xvim_moveCursor:r.end preserveColumn:YES];
