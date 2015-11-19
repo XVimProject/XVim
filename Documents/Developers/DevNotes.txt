@@ -555,3 +555,32 @@
   
   There are other similar class methods that seem to work as well in IDEEditorCoordinator class.
   
+
+
+
+### Keybinding Preferences
+  Keybinding preference is saved in
+  ~/Library/Developer/Xcode/UserData/KeyBindings/Default.idekeybindings
+
+  When you modify keybidning preference from Xcode->Preference menu, it saves changes into this file.
+
+
+  Keybindings are managed by IDEKeybindingSet and its subclasses.
+  Keybindings in menu item is managed by IDEMenuKeyBindingSet.
+  IDEMenuKeyBindingSet is managed by IDEPreferenceSetManager.
+
+  [IDEPerferenceSetManager] --- [IDEMenuKeyBindingSet]
+                                     |- [IDEKeyBinding]
+                                     |- [IDEKeyBinding]
+                                     |- [IDEKeyBinding]
+                                     |- ...
+
+  IDEKeyBindingSet has an array of IDEKeyBinding class objects.
+  IDEKeyBinding class represents one key binding.
+  IDEKeyBinding class keeps "commandIdentifier" property.
+  This property is important to bind it to menu item.
+  NSMenuItem class has "representedObject".
+  By setting the same string value to the "commandIdentifier" and the "representedObject"
+  Xcode automatically sync these NSMenuItem and IDEKeyBind object.
+  
+  See addMenu method in XVim class for acutual example to insert keybinding into Xcode preference and the menu.

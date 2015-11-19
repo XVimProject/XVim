@@ -65,6 +65,8 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     }
 }
 
+
+#define XVIM_MENU_TOGGLE_IDENTIFIER @"XVim.Enable";
 + (NSMenuItem*)xvimMenuItem{
     // Add XVim menu
     NSMenuItem* item = [[NSMenuItem alloc] init];
@@ -78,7 +80,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     [subitem setState:NSOnState];
     subitem.target = [XVim instance];
     subitem.action = @selector(toggleXVim:);
-    subitem.keyEquivalent = @"X";
+    subitem.representedObject = XVIM_MENU_TOGGLE_IDENTIFIER;
     [m addItem:subitem];
     
     // Test cases
@@ -211,6 +213,13 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
 - (void)addMenuItem:(NSNotification*)notification{
     // It will fail in Xcode 6.4
     // Check IDEApplicationController+Xvim.m
+    
+    // Add XVim menu keybinding into keybind preference
+    IDEMenuKeyBindingSet *keyset = [[[IDEKeyBindingPreferenceSet preferenceSetsManager] currentPreferenceSet] menuKeyBindingSet];
+    IDEKeyboardShortcut* shortcut = [[IDEKeyboardShortcut alloc] initWithKeyEquivalent:@"x" modifierMask:NSCommandKeyMask|NSShiftKeyMask];
+    IDEMenuKeyBinding *binding = [[IDEMenuKeyBinding alloc] initWithTitle:@"Enable" parentTitle:@"XVim" group:@"XVim" actions:@[ @"toggleXVim:"]  keyboardShortcuts:@[shortcut]];
+    binding.commandIdentifier = XVIM_MENU_TOGGLE_IDENTIFIER;// This must be same as menu items's represented Object.
+    [keyset insertObject:binding inKeyBindingsAtIndex:0];
     
     NSMenu *menu = [[NSApplication sharedApplication] menu];
     
