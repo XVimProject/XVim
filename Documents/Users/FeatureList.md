@@ -43,6 +43,11 @@ you can specify following line in .xvimrc.
 
      inoremap <C-e> <C-o>$
 
+## Navigation
+C-], C-t
+
+C-] is mapped to "Jump To Definition".
+C-t is mapped to "Go Back" (as it is the closest thing Xcode has to vims behavior).
 
 ## Yank, put and change
 
