@@ -46,6 +46,7 @@
     
         [_command setFont:textFont];
         [_command setTextColor:textColor];
+        [_command setBackgroundColor:textBackgroundColor];
         [_command invalidateIntrinsicContentSize];
     
         [_argument setFont:textFont];
@@ -195,7 +196,6 @@
         _command = [[XVimCommandField alloc] init];
         [_command setEditable:NO];
         [_command setSelectable:NO];
-        [_command setBackgroundColor:[NSColor clearColor]];
         [_command setHidden:YES];
         [_command setTranslatesAutoresizingMaskIntoConstraints:NO];
         // Width
