@@ -23,8 +23,8 @@ uninstall:
 
 uuid:
 	@xcode_path=`xcode-select -p`; \
-	uuid=`defaults read $${xcode_path}/../Info DVTPlugInCompatibilityUUID`; \
-	xcode_version=`defaults read $${xcode_path}/../Info CFBundleShortVersionString`; \
+	uuid=`defaults read "$${xcode_path}/../Info" DVTPlugInCompatibilityUUID`; \
+	xcode_version=`defaults read "$${xcode_path}/../Info" CFBundleShortVersionString`; \
 	grep $${uuid} XVim/Info.plist > /dev/null ; \
 	if [ $$? -ne 0 ]; then \
 		printf "XVim hasn't been confirmed the compatibility with your Xcode Version $${xcode_version}\n"; \
