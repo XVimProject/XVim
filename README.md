@@ -11,9 +11,8 @@
   
 
 ## Support Xcode Versions
-  - Xcode5
-  - Xcode6 GM
-  - Xcode7 GM
+  - Xcode6
+  - Xcode7
 
 ## INSTALL
   Download source code or clone the repo. Then,
@@ -21,15 +20,6 @@
   $ make
   ```
   Create `.xvimrc` as you need and restart your Xcode. 
-
-### Manual build and install
- - Download source code(See also "Branches and Releases" section) and open XVim.xcodeproj with Xcode.
- - Select an appropriate Scheme for your Xcode version
-    - "XVim for Xcode5 and 6" must be built with Xcode5 or 6
- - Select "Edit Scheme" and set "Build Configuration" as "Release"
- - Build it. It automatically installs the plugin into the correct directory.
- - Restart Xcode. (Make sure that the Xcode process is terminated entirely)
- - Create a `.xvimrc` file in the root of your home directory (optional)
 
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
@@ -53,23 +43,6 @@ Delete the following directory:
 
 ## Feature list
   See separate [FeatureList.md](Documents/Users/FeatureList.md)
-
-## Update pluginuuid
-  Xcode cann't load a Xcode plugin doesn't have  pluginuuid of it.
-  XVim might not work for the lastest version Xcode.
-  You can easily add PluginUUID of Xcode you use to Info.plist.
-  ```bash
-  $ rake updatepluginuuid
-  ```
-  If the error relating 'plist' show,
-  ```base
-  $ bundle install
-  ```
-  or
-  ```bash
-  $ gem install plist
-  ```
-  After that, reinstall XVim.
 
 ## Bug reports
   Unfortunately XVim sometimes crashes Xcode. We are working on eliminating all the bugs, but it's really hard work.
