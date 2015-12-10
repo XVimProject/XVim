@@ -18,6 +18,7 @@
 @end
 
 @implementation XVimRecordingEvaluator
+
 - (id)initWithWindow:(XVimWindow *)window withRegister:(NSString*)reg{
     if( self = [super initWithWindow:window] ){
         self.evaluatorStack = [[NSMutableArray alloc] init];
@@ -33,8 +34,21 @@
     [[[XVim instance] registerManager] startRecording:self.reg];
 }
 
+- (BOOL)insertModeActive {
+    return [(XVimEvaluator*)[self.evaluatorStack lastObject] mode] == XVIM_MODE_INSERT;
+}
+
+- (XVimKeymap*)selectKeymapWithProvider:(id<XVimKeymapProvider>)keymapProvider {
+    if ( [self insertModeActive] ) {
+        return [keymapProvider keymapForMode:XVIM_MODE_INSERT];
+    }
+    else {
+        return [keymapProvider keymapForMode:XVIM_MODE_NORMAL];
+    }
+}
+
 - (XVimEvaluator*)eval:(XVimKeyStroke*)keyStroke{
-    if( keyStroke.modifier == 0 && keyStroke.character == 'q' ){
+    if( ![self insertModeActive] && keyStroke.modifier == 0 && keyStroke.character == 'q' ){
         [[[XVim instance] registerManager] stopRecording:NO];
         return nil;
     }
