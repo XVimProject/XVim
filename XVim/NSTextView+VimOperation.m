@@ -852,7 +852,7 @@
         [self xvim_insertNewlineAboveLine:[self.textStorage xvim_lineNumberAtIndex:self.insertionPoint]];
     }
     else if( insertNewline ){
-        [self xvim_insertNewlineAboveLine:[self.textStorage xvim_lineNumberAtIndex:self.insertionPoint]];
+        [self xvim_insertNewlineAboveCurrentLineWithIndent];
     }else{
         
     }
