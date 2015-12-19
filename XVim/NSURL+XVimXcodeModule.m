@@ -64,7 +64,9 @@
     }
     NSString* header_path = [self xvim_header_file];
     if (header_path == nil) {
-        return nil;
+        // Because swift core module has no header path,
+        // We give dummy file name here.
+        header_path = @"core.swift";
     }
     NSString* name = header_path.lastPathComponent.stringByDeletingPathExtension;
     NSString* swiftpath = [xvim_caches_folder stringByAppendingPathComponent:[name stringByAppendingPathExtension:@"swift"]];
