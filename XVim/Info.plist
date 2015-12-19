@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
@@ -36,6 +36,8 @@
 		<string>CC0D0F4F-05B3-431A-8F33-F84AFCB2C651</string>
 		<string>0420B86A-AA43-4792-9ED0-6FE0F2B16A13</string>
 		<string>7265231C-39B4-402C-89E1-16167C4CC990</string>
+		<string>9AFF134A-08DC-4096-8CEE-62A4BB123046</string>
+		<string>F41BD31E-2683-44B8-AE7F-5F09E919790E</string>
 	</array>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2012 JugglerShu.Net. All rights reserved.</string>
