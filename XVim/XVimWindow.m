@@ -341,13 +341,18 @@
     float widthRatio = [current insertionPointWidthRatio];
     float alphaRatio = [current insertionPointAlphaRatio];
 
-	[[color colorWithAlphaComponent:alphaRatio] set];
-
 	rect.origin.y += (1 - heightRatio) * rect.size.height;
 	rect.size.height *= heightRatio;
     rect.size.width *= widthRatio;
 
-	NSRectFillUsingOperation(rect, NSCompositeSourceOver);
+    XVimOptions* options = [[XVim instance] options];
+    if (options.cursorcolor == 1 ){
+    	[[[NSColor blueColor] colorWithAlphaComponent:1.0] set];
+        NSRectFillUsingOperation(rect, NSCompositeDifference);
+    } else {
+	    [[color colorWithAlphaComponent:alphaRatio] set];
+	    NSRectFillUsingOperation(rect, NSCompositeSourceOver);
+    }
     return rect;
 }
 

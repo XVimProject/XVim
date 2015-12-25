@@ -42,6 +42,7 @@
          @"startofline", @"sol",
          @"expandtab", @"et",
          @"highlight", @"hi",
+         @"cursorcolor", @"cc",
          nil];
         
         // Default values
@@ -63,6 +64,7 @@
         _blinkcursor = NO;
         _startofline = YES;
         _expandtab = YES;
+        _cursorcolor = 0;
         self.highlight = @{@"Search": @{
                                    @"guibg": [NSColor yellowColor],
                                    }

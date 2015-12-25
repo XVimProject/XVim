@@ -29,6 +29,7 @@
 @property BOOL startofline;
 @property BOOL expandtab;
 @property (nonatomic, strong) NSDictionary* highlight;
+@property int cursorcolor;
 
 - (id)getOption:(NSString*)name;
 - (void)setOption:(NSString*)name value:(id)value;
