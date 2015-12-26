@@ -67,6 +67,7 @@
         XVimMakeTestCase(text_object0, 5, 0, @"da)", text_object_a_result0 , 3, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"dib", text_object_i_result0 , 4, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"dab", text_object_a_result0 , 3, 0),
+        XVimMakeTestCase(text_object0, 3, 0, @"di(", text_object_i_result0 , 4, 0), // begin on (
             
         XVimMakeTestCase(text_object0, 5, 0, @"yi(0P", text_object_yi_result0 , 2, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"yi)0P", text_object_yi_result0 , 2, 0),
@@ -87,12 +88,14 @@
         XVimMakeTestCase(text_object2, 5, 0, @"da}", text_object_a_result2 , 3, 0),
         XVimMakeTestCase(text_object2, 5, 0, @"diB", text_object_i_result2 , 4, 0),
         XVimMakeTestCase(text_object2, 5, 0, @"daB", text_object_a_result2 , 3, 0),
+        XVimMakeTestCase(text_object2, 3, 0, @"di{", text_object_i_result2 , 4, 0), // begin on {
         
         // []
         XVimMakeTestCase(text_object3, 5, 0, @"di[", text_object_i_result3 , 4, 0),
         XVimMakeTestCase(text_object3, 5, 0, @"di]", text_object_i_result3 , 4, 0),
         XVimMakeTestCase(text_object3, 5, 0, @"da[", text_object_a_result3 , 3, 0),
         XVimMakeTestCase(text_object3, 5, 0, @"da]", text_object_a_result3 , 3, 0),
+        XVimMakeTestCase(text_object3, 3, 0, @"di[", text_object_i_result3 , 4, 0), // begin on [
         
         // '
         XVimMakeTestCase(text_object4, 5, 0, @"di'", text_object_i_result4 , 4, 0),
@@ -105,6 +108,7 @@
         XVimMakeTestCase(text_object5, 5, 0, @"da<", text_object_a_result5 , 3, 0),
         XVimMakeTestCase(text_object5, 5, 0, @"da>", text_object_a_result5 , 3, 0),
         
+        XVimMakeTestCase(text_object5, 3, 0, @"di<", text_object_i_result5 , 4, 0), // begin on <
         // `
         XVimMakeTestCase(text_object6, 5, 0, @"di`", text_object_i_result6 , 4, 0),
         XVimMakeTestCase(text_object6, 5, 0, @"da`", text_object_a_result6 , 3, 0),

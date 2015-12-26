@@ -782,7 +782,11 @@
         [self insertText:@"" replacementRange:r];
         if( motion.motion == TEXTOBJECT_SQUOTE ||
             motion.motion == TEXTOBJECT_DQUOTE ||
-            motion.motion == TEXTOBJECT_BACKQUOTE ){
+            motion.motion == TEXTOBJECT_BACKQUOTE ||
+		    motion.motion == TEXTOBJECT_PARENTHESES ||
+		    motion.motion == TEXTOBJECT_BRACES ||
+		    motion.motion == TEXTOBJECT_SQUAREBRACKETS ||
+		    motion.motion == TEXTOBJECT_ANGLEBRACKETS ){
             newPos = r.location;
         } else if (motion.type == LINEWISE) {
             newPos = [self.textStorage xvim_firstNonblankInLineAtIndex:r.location allowEOL:YES];
