@@ -234,7 +234,7 @@ NSString * const XVimDocumentPathKey = @"XVimDocumentPathKey";
     // Check IDEApplicationController+Xvim.m
     
     // Add XVim menu keybinding into keybind preference
-    IDEMenuKeyBindingSet *keyset = [[[IDEKeyBindingPreferenceSet preferenceSetsManager] currentPreferenceSet] menuKeyBindingSet];
+    IDEMenuKeyBindingSet *keyset = [(IDEKeyBindingPreferenceSet*)[[IDEKeyBindingPreferenceSet preferenceSetsManager] currentPreferenceSet] valueForKey:@"_menuKeyBindingSet"];
     IDEKeyboardShortcut* shortcut = [[IDEKeyboardShortcut alloc] initWithKeyEquivalent:@"x" modifierMask:NSCommandKeyMask|NSShiftKeyMask];
     IDEMenuKeyBinding *binding = [[IDEMenuKeyBinding alloc] initWithTitle:@"Enable" parentTitle:@"XVim" group:@"XVim" actions:@[ @"toggleXVim:"]  keyboardShortcuts:@[shortcut]];
     binding.commandIdentifier = XVIM_MENU_TOGGLE_IDENTIFIER;// This must be same as menu items's represented Object.
