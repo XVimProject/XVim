@@ -32,6 +32,7 @@ extern NSString * const XVimDocumentPathKey;
 
 @interface XVim : NSObject<XVimKeymapProvider>
 
++ (NSString*)xvimrc;
 + (NSMenuItem *)xvimMenuItem;
 + (XVim*)instance;
 @property (strong) XVimOptions* options;

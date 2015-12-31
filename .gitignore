@@ -7,4 +7,4 @@ XVim.xcodeproj/project.xcworkspace/xcuserdata/
 Gemfile.lock
 build
 *.xccheckout
-
+gitrevision.h
