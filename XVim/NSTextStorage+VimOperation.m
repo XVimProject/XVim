@@ -521,7 +521,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 }
 
 - (NSUInteger)next:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt info:(XVimMotionInfo*)info{
-    info->reachedEndOfLine = NO;
+    info.reachedEndOfLine = NO;
     
     if( index == [[self xvim_string] length] )
         return [[self xvim_string] length];
@@ -537,7 +537,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         if( [self isEOF:pos+1] ||
             ((opt&LEFT_RIGHT_NOWRAP) && [self isNewline:pos+1]) )
         {
-            info->reachedEndOfLine = YES;
+            info.reachedEndOfLine = YES;
             break;
         }
 
@@ -552,7 +552,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         if( [self isEOF:pos] ||
             ((opt&LEFT_RIGHT_NOWRAP) && [self isNewline:pos]) ){
             --pos;
-            info->reachedEndOfLine = YES;
+            info.reachedEndOfLine = YES;
             break;
         }
         if( index_count >= count ){
@@ -668,7 +668,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
     NSAssert(nil != info, @"Specify info");
     
     NSUInteger pos = index;
-    info->lastEndOfLine = NSNotFound;
+    info.lastEndOfLine = NSNotFound;
     
     if( [self isEOF:index] ){
         return index;
@@ -683,10 +683,10 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
         NSRange rph = [self rangePlaceHolder:pos option:opt];
         if( [self isEOF:pos] ){
             if( [self isNonblank:pos-1] ){
-                info->lastEndOfLine = pos-1;
-                info->lastEndOfWord = pos-1;
+                info.lastEndOfLine = pos-1;
+                info.lastEndOfWord = pos-1;
             }
-            info->reachedEndOfLine = YES;
+            info.reachedEndOfLine = YES;
             pos--;
             break;
         }
@@ -699,25 +699,25 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
                 lastTwoNewLine = curTwoNewLine;
                 curTwoNewLine = pos-1;
                 if( lastTwoNewLine != NSNotFound ){
-                    info->lastEndOfLine = lastTwoNewLine;
+                    info.lastEndOfLine = lastTwoNewLine;
                 }
                 // [A]
-                info->isFirstWordInLine = YES;
+                info.isFirstWordInLine = YES;
                 wordInLineFound = YES;
             } else {
                 // last word or blank
                 // preserve the point
                 if( count == 1 ){
-                    if( info->lastEndOfLine == NSNotFound ){
-                        info->lastEndOfLine = pos-1;
+                    if( info.lastEndOfLine == NSNotFound ){
+                        info.lastEndOfLine = pos-1;
                     }
                 } else {
-                    info->lastEndOfLine = pos-1;
+                    info.lastEndOfLine = pos-1;
                 }
                 // [D,G]
                 wordInLineFound = NO;
                 if( ![self isNonblank:pos-1] ){
-                    info->isFirstWordInLine = YES;
+                    info.isFirstWordInLine = YES;
                 }
             }
         }
@@ -732,7 +732,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
                 }
             }
             // enough to treat as [E]
-            info->isFirstWordInLine = NO;
+            info.isFirstWordInLine = NO;
             wordInLineFound = YES;
         }
         else if( [self isNonblank:pos] &&
@@ -741,7 +741,7 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
             // - from placeholder to non-placeholder (ex. from '#>' to '[')
             // enough to treat as [E]
             ++word_count;
-            info->isFirstWordInLine = NO;
+            info.isFirstWordInLine = NO;
             wordInLineFound = YES;
         }
         else if( [self isNonblank:pos] ){
@@ -750,23 +750,23 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
                 // - from newline to word
                 // [B]
                 ++word_count;
-                info->isFirstWordInLine = YES;
+                info.isFirstWordInLine = YES;
                 wordInLineFound = YES;
             }else if([self isWhitespaceOrNewline:pos-1]){
                 // - from blank to word
                 // [H]
                 ++word_count;
                 if( !wordInLineFound ){
-                    info->isFirstWordInLine = YES;
+                    info.isFirstWordInLine = YES;
                     wordInLineFound = YES;
                 }else{
-                    info->isFirstWordInLine = NO;
+                    info.isFirstWordInLine = NO;
                 }
             } else if( !(opt & BIGWORD) && [self keywordType:pos-1] != [self keywordType:pos] ){
                 // - another keyword (ex. from '>' to 'a' or from 'a' to '<')
                 // [E]
                 ++word_count;
-                info->isFirstWordInLine = NO;
+                info.isFirstWordInLine = NO;
                 wordInLineFound = YES;
             }
         }

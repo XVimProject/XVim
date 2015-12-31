@@ -28,7 +28,7 @@ typedef NS_ENUM(NSUInteger, XVimInsertionPoint) {
     XVIM_INSERT_BLOCK_KILL,
 };
 
-typedef enum {
+typedef NS_ENUM(NSUInteger, XVIM_MODE) {
     XVIM_MODE_NONE,
     XVIM_MODE_NORMAL,
     XVIM_MODE_CMDLINE,
@@ -37,14 +37,14 @@ typedef enum {
     XVIM_MODE_VISUAL,
     XVIM_MODE_SELECT,
 	XVIM_MODE_COUNT,        // This is the count of modes
-} XVIM_MODE;
+};
 
-typedef enum {
+typedef NS_ENUM(NSUInteger, XVIM_VISUAL_MODE) {
     XVIM_VISUAL_NONE,
     XVIM_VISUAL_CHARACTER, // for 'v'
     XVIM_VISUAL_LINE, // for 'V'
     XVIM_VISUAL_BLOCK, // for 'CTRL-V'
-}XVIM_VISUAL_MODE;
+};
 
 typedef enum {
     _XVIM_VISUAL_RIGHT  = 1,
@@ -101,5 +101,7 @@ NS_INLINE NSRange XVimMakeNSRange(XVimRange range)
 {
     return NSMakeRange(range.begin, range.end - range.begin + 1);
 }
+
+NSString* XVimVisualModeName(XVIM_VISUAL_MODE visual_mode);
 
 #endif

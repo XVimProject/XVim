@@ -124,9 +124,7 @@
  **/
 - (void)xvim_sortLinesFrom:(NSUInteger)line1 to:(NSUInteger)line2 withOptions:(XVimSortOptions)options;
 - (void)xvim_selectNextPlaceholder;
-- (void)xvim_selectPreviousPlaceholder;
 - (void)xvim_hideCompletions;
-- (XVimRange)xvim_getMotionRange:(NSUInteger)current Motion:(XVimMotion*)motion;
 
 #pragma mark Scroll
 - (NSUInteger)xvim_lineUp:(NSUInteger)index count:(NSUInteger)count;

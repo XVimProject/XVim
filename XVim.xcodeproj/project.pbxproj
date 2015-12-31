@@ -11,10 +11,14 @@
 		2616859E1A3E1962007AA008 /* XVimReplaceEvaluator.m in Sources */ = {isa = PBXBuildFile; fileRef = 2616859D1A3E1962007AA008 /* XVimReplaceEvaluator.m */; };
 		6E2B332D1836E42F00EFE4E2 /* XVimBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B332B1836E42F00EFE4E2 /* XVimBuffer.m */; };
 		6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */; };
+		A20332931B88D8100050DD7E /* XVimMotionType.m in Sources */ = {isa = PBXBuildFile; fileRef = A20332921B88D8100050DD7E /* XVimMotionType.m */; };
+		A20332951B88D83D0050DD7E /* XVimVisualMode.m in Sources */ = {isa = PBXBuildFile; fileRef = A20332941B88D83D0050DD7E /* XVimVisualMode.m */; };
 		A204814F19702F3E0064BE66 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */; };
 		A212A53D1940A330002FB2CF /* XVim.xcplugin in Copy Files */ = {isa = PBXBuildFile; fileRef = A2E7E45217EF0219008F045A /* XVim.xcplugin */; };
 		A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */; };
 		A2193E9A1BE73300002629FB /* IDELanguageSupportUI in Frameworks */ = {isa = PBXBuildFile; fileRef = A2193E991BE73300002629FB /* IDELanguageSupportUI */; };
+		A2164CE91B3D823F00A8B69E /* Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = A2C1BB5216CEAC7F0066F420 /* Utils.m */; };
+		A21AEAE41B889BEA00246BFD /* XVimMotionOption.m in Sources */ = {isa = PBXBuildFile; fileRef = A21AEAE31B889BE900246BFD /* XVimMotionOption.m */; };
 		A25032B319F805110021C34E /* IDEWorkspaceTabController+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A25032B219F805110021C34E /* IDEWorkspaceTabController+XVim.m */; };
 		A259E2231B3C263B006000D9 /* NSURL+XVimXcodeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A259E2221B3C263B006000D9 /* NSURL+XVimXcodeModule.m */; };
 		A2752F4F19F3DFAD00D1642C /* NSAttributedString+Geometrics.m in Sources */ = {isa = PBXBuildFile; fileRef = A2752F4E19F3DFAD00D1642C /* NSAttributedString+Geometrics.m */; };
@@ -132,6 +136,8 @@
 		6E2B33321836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DVTTextStorage+XVimTextStoring.h"; path = "XVim/DVTTextStorage+XVimTextStoring.h"; sourceTree = SOURCE_ROOT; };
 		6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "DVTTextStorage+XVimTextStoring.m"; path = "XVim/DVTTextStorage+XVimTextStoring.m"; sourceTree = SOURCE_ROOT; };
 		6EAFF976183777A6003EADAE /* XVimStringBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimStringBuffer.h; path = XVim/XVimStringBuffer.h; sourceTree = SOURCE_ROOT; };
+		A20332921B88D8100050DD7E /* XVimMotionType.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotionType.m; path = XVim/XVimMotionType.m; sourceTree = SOURCE_ROOT; };
+		A20332941B88D83D0050DD7E /* XVimVisualMode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimVisualMode.m; path = XVim/XVimVisualMode.m; sourceTree = SOURCE_ROOT; };
 		A204814D19702F3E0064BE66 /* NSObject+XVimAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+XVimAdditions.h"; path = "XVim/NSObject+XVimAdditions.h"; sourceTree = "<group>"; };
 		A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+XVimAdditions.m"; path = "XVim/NSObject+XVimAdditions.m"; sourceTree = "<group>"; };
 		A2126B7316FB30B0000BE21C /* XVimMark.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimMark.h; path = XVim/XVimMark.h; sourceTree = SOURCE_ROOT; };
@@ -144,6 +150,7 @@
 		A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEPlaygroundEditor+XVim.h"; path = "XVim/IDEPlaygroundEditor+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEPlaygroundEditor+XVim.m"; path = "XVim/IDEPlaygroundEditor+XVim.m"; sourceTree = SOURCE_ROOT; };
 		A2193E991BE73300002629FB /* IDELanguageSupportUI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = IDELanguageSupportUI; path = ../PlugIns/IDELanguageSupportUI.ideplugin/Contents/MacOS/IDELanguageSupportUI; sourceTree = DEVELOPER_DIR; };
+		A21AEAE31B889BE900246BFD /* XVimMotionOption.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimMotionOption.m; path = XVim/XVimMotionOption.m; sourceTree = SOURCE_ROOT; };
 		A222B5DF1514DFCD005E8802 /* XVimOperatorEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorEvaluator.h; path = XVim/XVimOperatorEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorEvaluator.m; path = XVim/XVimOperatorEvaluator.m; sourceTree = SOURCE_ROOT; };
 		A223956316653ACD00CD26AE /* DevNotes.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = DevNotes.txt; sourceTree = "<group>"; };
@@ -634,8 +641,10 @@
 				C3552DA6153AC6F800D57577 /* XVimHistoryHandler.h */,
 				C3552DA7153AC6F800D57577 /* XVimHistoryHandler.m */,
 				C36C1045153104EC00CE1D62 /* XVimMotionType.h */,
+				A20332921B88D8100050DD7E /* XVimMotionType.m */,
 				C32CE8621532F0E5002BCE2B /* XVimKeymapProvider.h */,
 				C36266CB153455C9000C79D8 /* XVimMotionOption.h */,
+				A21AEAE31B889BE900246BFD /* XVimMotionOption.m */,
 				F17D0139150861DC00A8111B /* XVimRegister.h */,
 				F17D013A150861DC00A8111B /* XVimRegister.m */,
 				C38A5B2E1526C6B100E1448D /* XVimKeyStroke.h */,
@@ -656,6 +665,7 @@
 				A2126B7416FB30B0000BE21C /* XVimMark.m */,
 				A2126B7616FB4806000BE21C /* XVimMarks.h */,
 				A2126B7716FB4806000BE21C /* XVimMarks.m */,
+				A20332941B88D83D0050DD7E /* XVimVisualMode.m */,
 				A2640CC717ACE651003D197D /* NSTextView+VimOperation.h */,
 				A2640CC817ACE651003D197D /* NSTextView+VimOperation.m */,
 				A2752F5619F3E04F00D1642C /* ProcessRunner.h */,
@@ -820,6 +830,7 @@
 			files = (
 				E905EE3B18B0461E0052D3C1 /* DVTTextSidebarView+XVim.m in Sources */,
 				D65D3A2F1B92EB2800E67E3E /* NSColor+Extra.m in Sources */,
+				A21AEAE41B889BEA00246BFD /* XVimMotionOption.m in Sources */,
 				A28F422817EEDBC200A3F7AE /* Logger.m in Sources */,
 				A28F422917EEDBC200A3F7AE /* XVim.m in Sources */,
 				A28F422A17EEDBC200A3F7AE /* XVimCommandField.m in Sources */,
@@ -875,6 +886,7 @@
 				A28F425317EEDBC200A3F7AE /* IDEEditor+XVim.m in Sources */,
 				A28F425417EEDBC200A3F7AE /* NSInsetTextView.m in Sources */,
 				A28F425517EEDBC200A3F7AE /* IDEEditorArea+XVim.m in Sources */,
+				A20332931B88D8100050DD7E /* XVimMotionType.m in Sources */,
 				A28F425717EEDBC200A3F7AE /* XVimTester.m in Sources */,
 				A28F425817EEDBC200A3F7AE /* NSEvent+VimHelper.m in Sources */,
 				A28F425917EEDBC200A3F7AE /* XVimMotion.m in Sources */,
@@ -893,6 +905,7 @@
 				A28F426417EEDBC200A3F7AE /* XVimTester+Operator.m in Sources */,
 				A28F426517EEDBC200A3F7AE /* XVimTester+Mark.m in Sources */,
 				A28F426617EEDBC200A3F7AE /* XVimTester+Visual.m in Sources */,
+				A20332951B88D83D0050DD7E /* XVimVisualMode.m in Sources */,
 				A28F426717EEDBC200A3F7AE /* XVimTester+map.m in Sources */,
 				6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */,
 				A28F426817EEDBC200A3F7AE /* XVimTester+Register.m in Sources */,

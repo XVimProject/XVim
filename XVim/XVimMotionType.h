@@ -1,8 +1,10 @@
 
-typedef enum _MOTION_TYPE{
+typedef NS_ENUM(NSUInteger, MOTION_TYPE) {
     DEFAULT_MOTION_TYPE,
     CHARACTERWISE_INCLUSIVE,
     CHARACTERWISE_EXCLUSIVE,
     LINEWISE,
-    BLOCKWISE
-} MOTION_TYPE;
+    BLOCKWISE,
+};
+
+NSString* XVimMotionTypeName(MOTION_TYPE motion_type);
