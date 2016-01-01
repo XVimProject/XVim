@@ -29,6 +29,16 @@
     return nil;
 }
 
+- (XVimEvaluator*)j{
+    self.motion = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, CHARACTERWISE_EXCLUSIVE, DISPLAY_LINE, self.numericArg);
+    return nil;
+}
+
+- (XVimEvaluator*)k{
+    self.motion = XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, CHARACTERWISE_EXCLUSIVE, DISPLAY_LINE, self.numericArg);
+    return nil;
+}
+
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
     XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
     NSRange r = [self.sourceView xvim_currentWord:MOTION_OPTION_NONE];

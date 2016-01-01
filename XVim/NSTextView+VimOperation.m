@@ -25,6 +25,7 @@
 #import "Logger.h"
 #import "XVimMacros.h"
 #import "XVimOptions.h"
+#import <objc/message.h>
 
 #define LOG_STATE() TRACE_LOG(@"mode:%d length:%d cursor:%d ip:%d begin:%d line:%d column:%d preservedColumn:%d", \
                             self.selectionMode,            \
@@ -2056,6 +2057,55 @@
 }
 
 #pragma mark Search Position
+
+- (NSUInteger)xvim_displayNextLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    // This code is based on NSTextView _moveDown: internal method
+    double (*_distanceForVertiacalArrowKeyMovementImp)(id, SEL) = (double(*)(id,SEL))[self methodForSelector:@selector(_distanceForVerticalArrowKeyMovement)];
+    NSRange (*_rangeForMoveDownFromRangeImp)(id, SEL, NSRange, double, double*, unsigned long long*) = (NSRange(*)(id, SEL, NSRange, double, double*, unsigned long long*))[self methodForSelector:@selector(_rangeForMoveDownFromRange:verticalDistance:desiredDistanceIntoContainer:selectionAffinity:)];
+    NSRange current = NSMakeRange(index,0);
+    unsigned long long affinity = [self selectionAffinity];
+    double dist = 1.0;
+    for( NSUInteger i = 0 ; i < count ; i++ ){
+        double desire = _distanceForVertiacalArrowKeyMovementImp(self, @selector(_distanceForVerticalArrowKeyMovement));
+        double preserve = desire;
+        NSRange r = _rangeForMoveDownFromRangeImp(self, @selector(_rangeForMoveDownFromRange:verticalDistance:desiredDistanceIntoContainer:selectionAffinity:),
+                                              current, dist, &desire, &affinity );
+        
+        // This condition is to stop at the last line of a file.
+        //    e.g. 10gj in only 4 display lines file should stop at the same column of the last line.
+        // If we don't stop here, the method _rangeForMoveUpFromRangeImp returns the last character of the file (which at the different column).
+        // This condition is just a kind of trial and error result and don't know what exactly means but
+        // it seems if the method above is called at the end of line, 'desire' value doesn't change when returned.
+        if( desire == preserve){
+            break;
+        }else{
+            current = r;
+        }
+    }
+    return current.location;
+}
+
+- (NSUInteger)xvim_displayPrevLine:(NSUInteger)index column:(NSUInteger)column count:(NSUInteger)count option:(MOTION_OPTION)opt{
+    // This code is based on NSTextView _moveDown: internal method
+    double (*_distanceForVertiacalArrowKeyMovementImp)(id, SEL) = (double(*)(id,SEL))[self methodForSelector:@selector(_distanceForVerticalArrowKeyMovement)];
+    NSRange (*_rangeForMoveUpFromRangeImp)(id, SEL, NSRange, double, double*, unsigned long long*) = (NSRange(*)(id, SEL, NSRange, double, double*, unsigned long long*))[self methodForSelector:@selector(_rangeForMoveUpFromRange:verticalDistance:desiredDistanceIntoContainer:selectionAffinity:)];
+    NSRange current = NSMakeRange(index,0);
+    unsigned long long affinity = [self selectionAffinity];
+    double dist = 1.0;
+    for( NSUInteger i = 0 ; i < count ; i++ ){
+        double desire = _distanceForVertiacalArrowKeyMovementImp(self, @selector(_distanceForVerticalArrowKeyMovement));
+        double preserve = desire;
+        NSRange r = _rangeForMoveUpFromRangeImp(self, @selector(_rangeForMoveUpFromRange:verticalDistance:desiredDistanceIntoContainer:selectionAffinity:),
+                                              current, dist, &desire, &affinity );
+        if( desire == preserve){
+            break;
+        }else{
+            current = r;
+        }
+    }
+    return current.location;
+}
+
 /**
  * Takes point in view and returns its index.
  * This method automatically convert the "folded index" to "real index"
@@ -2320,10 +2370,18 @@
             end = [self.textStorage endOfWordsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_LINE_FORWARD:
-            end = [self.textStorage nextLine:begin column:self.preservedColumn count:motion.count option:motion.option];
+            if( motion.option & DISPLAY_LINE ){
+                end = [self xvim_displayNextLine:begin column:self.preservedColumn count:motion.count option:motion.option];
+            }else{
+                end = [self.textStorage nextLine:begin column:self.preservedColumn count:motion.count option:motion.option];
+            }
             break;
         case MOTION_LINE_BACKWARD:
-            end = [self.textStorage prevLine:begin column:self.preservedColumn count:motion.count option:motion.option];
+            if( motion.option & DISPLAY_LINE ){
+                end = [self xvim_displayPrevLine:begin column:self.preservedColumn count:motion.count option:motion.option];
+            }else{
+                end = [self.textStorage prevLine:begin column:self.preservedColumn count:motion.count option:motion.option];
+            }
             break;
         case MOTION_BEGINNING_OF_LINE:
             end = [self.textStorage xvim_startOfLine:begin];

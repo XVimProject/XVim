@@ -11,7 +11,7 @@ typedef enum{
     LEFT_RIGHT_WRAP = 0x01,
     LEFT_RIGHT_NOWRAP = 0x02,
     BIGWORD = 0x04, // for 'WORD' motion
-    INCLUSIVE = 0x08,
+    DISPLAY_LINE = 0x08, // for gj, gk
     MOPT_PARA_BOUND_BLANKLINE = 0x10,
     TEXTOBJECT_INNER = 0x20,
     SEARCH_WRAP= 0x40,
