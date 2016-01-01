@@ -1,12 +1,16 @@
 xcodebuild:=xcodebuild -configuration
 
-.PHONY: release debug clean clean-release clean-debug uninstall uuid
+ifdef BUILDLOG
+REDIRECT=>> $(BUILDLOG)
+endif
+
+.PHONY: release debug clean clean-release clean-debug uninstall uuid build-test
 
 release: uuid
-	$(xcodebuild) Release
+	$(xcodebuild) Release $(REDIRECT)
 
 debug: uuid
-	$(xcodebuild) Debug
+	$(xcodebuild) Debug $(REDIRECT)
 
 
 clean: clean-release clean-debug
@@ -35,3 +39,14 @@ uuid:
 		fi ;\
 		printf "\n"; \
 	fi ;
+
+# Build with all the available Xcode in /Applications directory
+build-test:
+	@> build.log; \
+    xcode_path=`xcode-select -p`; \
+	for xcode in /Applications/Xcode*.app; do \
+		sudo xcode-select -s "$$xcode"; \
+		echo Building with $$xcode >> build.log; \
+		"$(MAKE)" -C . BUILDLOG=build.log; \
+	done; \
+	sudo xcode-select -s $${xcode_path}; \
