@@ -48,6 +48,20 @@
     return [XVimEvaluator popEvaluator];
 }
 
+- (XVimEvaluator*)j{
+    XVimMotion *motion = XVIM_MAKE_MOTION(MOTION_LINE_FORWARD, CHARACTERWISE_EXCLUSIVE, DISPLAY_LINE, self.numericArg);
+    [[self sourceView] xvim_move:motion];
+    [self.parent resetNumericArg];
+    return [XVimEvaluator popEvaluator];
+}
+
+- (XVimEvaluator*)k{
+    XVimMotion *motion = XVIM_MAKE_MOTION(MOTION_LINE_BACKWARD, CHARACTERWISE_EXCLUSIVE, DISPLAY_LINE, self.numericArg);
+    [[self sourceView] xvim_move:motion];
+    [self.parent resetNumericArg];
+    return [XVimEvaluator popEvaluator];
+}
+
 - (XVimEvaluator*)J{
     XVimJoinEvaluator* eval = [[XVimJoinEvaluator alloc] initWithWindow:self.window addSpace:NO];
     return [eval executeOperationWithMotion:XVIM_MAKE_MOTION(MOTION_NONE, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, self.numericArg)];
