@@ -23,6 +23,12 @@
     return [super eval:keyStroke];
 }
 
+- (XVimEvaluator*)e{
+    // Select previous word end
+    self.motion = XVIM_MAKE_MOTION(MOTION_END_OF_WORD_BACKWARD, CHARACTERWISE_INCLUSIVE, MOTION_OPTION_NONE, [self numericArg]);
+    return nil;
+}
+
 - (XVimEvaluator*)E{
     // Select previous WORD end
     self.motion = XVIM_MAKE_MOTION(MOTION_END_OF_WORD_BACKWARD, CHARACTERWISE_INCLUSIVE, BIGWORD, [self numericArg]);

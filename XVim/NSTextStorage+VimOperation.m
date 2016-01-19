@@ -889,24 +889,16 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
  * Returns position of the end of count words backward.
  **/
 - (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    NSUInteger pos = index;
-    NSUInteger word_count = 0;
-    NSString *string = [self xvim_string];
-    BOOL whitespaceFound = NO;
-    for( ; ; --pos ){
-        // Look for whitespace
-        if (isWhitespace([string characterAtIndex:pos])) {
-            whitespaceFound = YES;
-            word_count++;
-        } else {
-            // Return the first non-whitespace character after a whitespace
-            // or return position 0
-            if ((whitespaceFound && word_count == count) || pos == 0) {
-                return pos;
-            }
-        }
+    // ge is equivalent to b-e
+    NSUInteger beginning = [self wordsBackward:index count:count+1 option:opt];
+    NSUInteger end = [self endOfWordsForward:beginning count:1 option:opt];
+
+    // If index == end, Vim would move the cursor to the beginning of the line.
+    if (index == end) {
+        return beginning;
     }
-    return index;
+
+    return end;
 }
 
 
