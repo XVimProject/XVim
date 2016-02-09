@@ -14,8 +14,8 @@
 [google-group]: https://groups.google.com/d/forum/xvim-developers
 
 ## サポートしているXcodeバージョン
-  - Xcode4.6
-  - Xcode5
+  - Xcode6
+  - Xcode7
 
 ## インストール
  - ソースコードをダウンロードし、XVim.xcodeprojをXcodeで開きます。("ブランチとリリース"の節も参照)
