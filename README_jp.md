@@ -2,11 +2,16 @@
   XVimはXcode用Vimプラグインです。XVimはXcodeの機能を損なうことなく、Vimの操作感を提供することを目指しています。
 
 #### アナウンス
-  [XVim開発者向けGoogleグループ](https://groups.google.com/d/forum/xvim-developers) が作成されました。
-  
-  このグループはXVimの開発者とテスター、報告者向けのものです。
-  XVimプロジェクトのお手伝いをしてみたいという方がいましたらご参加ください。
-  新しいリリースのテストや、問題の報告だけでも非常に助かります。気軽にご参加ください。
+  - XVimのリポジトリはXVimProject organizationに移されました。リポジトリをクローンしている場合は、[こちら][github-transferring]にあるようにリモートリポジトリのURLを変更することをお勧めします (Github では、古いURLから新しいURLへ丁寧な転送が行われており、この対応は必須ではありません)。
+  - XVimではBountysourceを利用しはじめしました。[![Bountysource][bountysource-bouties-badge]][bountysource-bouties] [![Bountysource][bountysource-raised-badge]][bountysource-raised]
+  - [XVim開発者向けGoogleグループ][google-group] が作成されました。
+
+[github-transferring]: https://help.github.com/articles/transferring-a-repository/
+[bountysource-bouties-badge]: https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted
+[bountysource-bouties]: https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted
+[bountysource-raised-badge]: https://www.bountysource.com/badge/team?team_id=918&style=raised
+[bountysource-raised]: https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised
+[google-group]: https://groups.google.com/d/forum/xvim-developers
 
 ## サポートしているXcodeバージョン
   - Xcode4.6
