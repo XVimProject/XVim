@@ -67,6 +67,14 @@
 
   テストケースを書いていただけるとさらに助かります。Documents/Developsers/PullRequest.md hの"Write test"セクションにテストケースの書き方が書かれています。ソースコードを修正する必要はなくここで説明されている7つの項目をIssueに書くだけです。
 
+## Bountysource
+  XVimでは、Bountysourceを利用しています。
+  Issue をなるべく早く解決したい場合、賞金をかけることは一つの選択肢になるでしょう。
+  (必ずしも保障はされませんが) コントリビューターは賞金のかかったIssueに優先的に対応します。
+  賞金をかけるには、以下のリンク先の"Issues"タブへ進み、対象のIssueを選択します。
+
+  https://www.bountysource.com/teams/xvim
+
 ## バグIssueの取り扱い
 
   報告されたバグは以下の順で処理されます。
