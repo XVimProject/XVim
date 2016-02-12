@@ -2,37 +2,47 @@
   XVimはXcode用Vimプラグインです。XVimはXcodeの機能を損なうことなく、Vimの操作感を提供することを目指しています。
 
 #### アナウンス
-  [XVim開発者向けGoogleグループ](https://groups.google.com/d/forum/xvim-developers) が作成されました。
-  
-  このグループはXVimの開発者とテスター、報告者向けのものです。
-  XVimプロジェクトのお手伝いをしてみたいという方がいましたらご参加ください。
-  新しいリリースのテストや、問題の報告だけでも非常に助かります。気軽にご参加ください。
+  - XVimのリポジトリはXVimProject organizationに移されました。リポジトリをクローンしている場合は、[こちら][github-transferring]にあるようにリモートリポジトリのURLを変更することをお勧めします (Github では、古いURLから新しいURLへ丁寧な転送が行われており、この対応は必須ではありません)。
+  - XVimではBountysourceを利用しはじめしました。[![Bountysource][bountysource-bouties-badge]][bountysource-bouties] [![Bountysource][bountysource-raised-badge]][bountysource-raised]
+  - [XVim開発者向けGoogleグループ][google-group] が作成されました。
+
+[github-transferring]: https://help.github.com/articles/transferring-a-repository/
+[bountysource-bouties-badge]: https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted
+[bountysource-bouties]: https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted
+[bountysource-raised-badge]: https://www.bountysource.com/badge/team?team_id=918&style=raised
+[bountysource-raised]: https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised
+[google-group]: https://groups.google.com/d/forum/xvim-developers
 
 ## サポートしているXcodeバージョン
-  - Xcode4.6
-  - Xcode5
+  - Xcode6
+  - Xcode7
 
 ## インストール
- - ソースコードをダウンロードし、XVim.xcodeprojをXcodeで開きます。("ブランチとリリース"の節も参照)
- - 利用するXcodeバージョンに合ったスキームを選択します
-    - XVim for Xcode4はXcode4.6でビルドしてください
-    - XVim for Xcode5はXcode5でビルドしてください
- - "Edit Scheme"を選択し"Build Configuration"を"Release"に設定します
- - ビルドする。このとき自動的に正しいディレクトリにプラグインがインストールされます
- - Xcodeを再起動します。（Xcodeプロセスを完全に終了させてください。）
+  ソースコードをダウンロード、あるいはリポジトリをクローンし、以下を実行します。
+
+  ```bash
+  $ make
+  ```
+
+  必要に応じて `.xvimrc` を作成し、Xcodeを再起動します。
 
 ## ブランチとリリース
  XVimにはいくつかのブランチとリリースがあります。通常はリリースの一つをダウンロードし、利用してください。
  以下はそれぞれのリリースとブランチの説明です。
 
  - リリース(タグ) : リリースはマスターブランチ上のtagです。これらのtag上のコード、ドキュメント類はすべて整った状態になっています。通常のXVimユーザーであればリリースの一つをご利用ください。
- - masterブランチ : 最も安定したブランチです。致命的なバグや、'develop'ブランチで開発された機能が'master'ブランチにマージされます。リリースに致命的なバグがある場合には最新の'master'を試してみてください。
- - developブランチ: 新たな機能や致命的でないバグはこのブランチにマージされます。試験的な機能を利用したい場合にはこのブランチを人用してください。
+ - masterブランチ : 最も安定したブランチです。致命的なバグの修正や、'develop'ブランチで開発された機能が'master'ブランチにマージされます。リリースに致命的なバグがある場合には最新の'master'を試してみてください。
+ - developブランチ: 新たな機能や致命的でないバグの修正はこのブランチにマージされます。試験的な機能を利用したい場合にはこのブランチを使用してください。
 
  他のブランチは'develop'ブランチにマージされる一時的な開発やバグ修正用のものです。Pull Requestは'develop'ブランチにするようにしてください。
 
 
 ## アンインストール
+  ```bash
+  $ make uninstall
+  ```
+
+### 手動でのアンインストール
   以下のディレクトリを削除してください
 
     $HOME/Library/Application\ Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin
@@ -44,7 +54,7 @@
   残念ながらXVim影響でXcodeがクラッシュしてしまうことがあります。すべてのバグを取り除こうとしていますが、非常に難しいのが現状です。
   以下の情報のバグレポートがあると非常に助かります。
 
-   * クラッシュ情報( クラッシュ時にスタックトレースが表示されます。それをコピーしてください。)
+   * クラッシュ情報(クラッシュ時にスタックトレースが表示されます。それをコピーしてください。)
    * クラッシュ時の操作(一連のキー操作やクリック)
    * 編集していたテキスト
    * Xcodeのバージョン
@@ -56,6 +66,14 @@
 
 
   テストケースを書いていただけるとさらに助かります。Documents/Developsers/PullRequest.md hの"Write test"セクションにテストケースの書き方が書かれています。ソースコードを修正する必要はなくここで説明されている7つの項目をIssueに書くだけです。
+
+## Bountysource
+  XVimでは、Bountysourceを利用しています。
+  Issue をなるべく早く解決したい場合、賞金をかけることは一つの選択肢になるでしょう。
+  (必ずしも保障はされませんが) コントリビューターは賞金のかかったIssueに優先的に対応します。
+  賞金をかけるには、以下のリンク先の"Issues"タブへ進み、対象のIssueを選択します。
+
+  https://www.bountysource.com/teams/xvim
 
 ## バグIssueの取り扱い
 
@@ -86,15 +104,28 @@
 
 ## 寄付
   もし、このプラグインを気に入っていただけたら寄付をしていただけると嬉しいです。
-  もともとこのプロジェクトはお金を稼ぐために始めたものではないため、すべての寄付は2011年の東北大震災の被災者の方々へそのまま寄付することとしています。
+  寄付方法は、「東北地方太平洋沖地震」からの復興支援もしくはXVimProjectへのBountySource経由での支援の二種類があります
+  (もちろん両方も選択することもできます)。
 
-  寄付は、以下のURLから直接お願いします。こちらを一度経由すると手数料がかかってしまうため、このようにしています。
+### 東北地方太平洋沖地震
+
+  もともとこのプロジェクトはお金を稼ぐために始めたものではないため、
+  2011年の東北地方太平洋沖地震の被災者の方々へそのまま寄付しています。
+
+  寄付は、以下のURLから直接お願いします。
+  こちらを一度経由すると手数料がかかってしまうため、このようにしています。
 
   https://www.paypal-donations.com/pp-charity/web.us/campaign.jsp?cid=-12
 
-  上記Paypalリンクから寄付を行った場合、こちらにはなんのメッセージも送信されません。以下のメッセージボードに寄付した旨を書いていただけると、私を含めコントリビュータのモチベーションに繋がります。
+  上記Paypalリンクから寄付を行った場合、こちらにはなんのメッセージも送信されません。
+  [メッセージボード][donation-messageboard]に寄付した旨を書いていただけると、
+  私を含めコントリビュータのモチベーションに繋がります。
 
-  [Message Board]( https://github.com/JugglerShu/XVim/wiki/Donation-messages-to-XVim )
+  [donation-messageboard]: https://github.com/JugglerShu/XVim/wiki/Donation-messages-to-XVim
+
+### Bountysource
+  BountySourceでは、チーム (プロジェクト全体) を支援したり、あるいは特定のIssueに賞金をかけることができます
+  (もし、修正して欲しいバグや実装して欲しい機能がIssueとして存在していなければ、新たにIssueを作成してください)。
 
 ## コントリビュータ
   以下のコントリビュータのページを御覧ください
