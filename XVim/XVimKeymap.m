@@ -80,24 +80,6 @@
 	return self;
 }
 
-
-- (void)mapsInNode:(XVimKeymapNode*)node :(NSString*)mappingKey :(NSMutableDictionary*)dictionary{
-    if( node.target != nil ){
-        [dictionary setObject:node.target forKey:mappingKey];
-    }
-    for(XVimKeyStroke* key in node.dict){
-        XVimKeymapNode* next = [node.dict objectForKey:key];
-        NSString* nextMap = [mappingKey stringByAppendingFormat:@"%C", key.character];
-        [self mapsInNode:next :nextMap :dictionary];
-    }
-}
-
-- (NSDictionary*)mapsInNode{
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-    [self mapsInNode:self.root :@"" :dict];
-    return dict;
-}
-
 - (void)map:(XVimString*)keyStrokes to:(XVimString*)targetKeyStrokes withRemap:(BOOL)remap{
     // Create key map trie
     XVimKeymapNode* current = self.root;
@@ -112,8 +94,6 @@
     }
 	current.target = targetKeyStrokes;
     current.remap = remap;
-    
-    [self mapsInNode];
 }
 
 - (void)unmapImpl:(NSMutableArray*)keystrokes atNode:(XVimKeymapNode*)node{
