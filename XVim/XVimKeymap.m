@@ -197,17 +197,28 @@
                 return map;
             }else{
                 // No more mapping
-                return newStr;
+                return [self nopFilter:newStr];
             }
         }else{
             // No map needed
-            return [XVimString stringWithFormat:@"%@%@", context.inputKeys, unProcessedString];
+            return [self nopFilter:[XVimString stringWithFormat:@"%@%@", context.inputKeys, unProcessedString]];
         }
     }
     
     // We still need to wait next key input
     return nil;
 }
+
+// <Nop> feature
+- (XVimString*)nopFilter:(XVimString*)aStr{
+    if (aStr.length > 0){
+        NSString* notation = XVimKeyNotationFromXVimString(aStr);
+        if ([[notation lowercaseString] hasPrefix:@"<nop>"]){
+            return @"";
+        }
+    }
+    return aStr; 
+} 
 
 - (void)enumerateKeymapsImpl:(XVimKeymapNode*)node forKeys:(XVimString*)keys withBlock:(void (^)(NSString *, NSString *))block{
     if( node.target != nil ){

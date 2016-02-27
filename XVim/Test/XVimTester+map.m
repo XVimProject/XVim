@@ -86,6 +86,10 @@
             // mapping should not affect arguments
             XVimMakeTestCase(text2, 0, 0, @":nmap b c<CR>fb", text2, 4, 0), // Issue #510
             
+            // <Nop>
+            XVimMakeTestCase(text2, 0, 0, @":map abc <Nop><CR>abc", text2, 0, 0),
+            XVimMakeTestCase(text2, 0, 0, @":noremap xyz <nop><CR>xyz", text2, 0, 0),
+            
     nil];
 }
 
