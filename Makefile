@@ -31,7 +31,7 @@ uuid:
 	xcode_version=`defaults read "$${xcode_path}/../Info" CFBundleShortVersionString`; \
 	grep $${uuid} XVim/Info.plist > /dev/null ; \
 	if [ $$? -ne 0 ]; then \
-		printf "XVim hasn't been confirmed the compatibility with your Xcode Version $${xcode_version}\n"; \
+		printf "XVim hasn't confirmed the compatibility with your Xcode, Version $${xcode_version}\n"; \
 		printf "Do you want to compile XVim with support Xcode Version $${xcode_version} at your own risk? (y/N)"; \
 		read -r -n 1 in; \
 		if [[ $$in != "" &&  ( $$in == "y" || $$in == "Y") ]]; then \
