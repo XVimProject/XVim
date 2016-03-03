@@ -38,69 +38,17 @@
 - (void)xvim_install_statusline:(NSView*)container sibling:(NSView*)sibling withDocument:(IDEEditorDocument*)doc{
     
     if( nil != container && nil != sibling){
-        [sibling setTranslatesAutoresizingMaskIntoConstraints:NO]; // To use autolayout we need set this NO
-        
+
         // Add status view
-        XVimStatusLine* status = [[XVimStatusLine alloc] initWithString:doc.filePath.pathString];
-        [status setTranslatesAutoresizingMaskIntoConstraints:NO];
-        [container addSubview:status];
+        XVimStatusLine* statusLine = [[XVimStatusLine alloc] initWithString:doc.filePath.pathString];
+        [statusLine sizeToFit];
+        [statusLine setFrame:NSMakeRect(0.0f, 0.0f, CGRectGetWidth(sibling.bounds), CGRectGetHeight(statusLine.bounds))];
+        [statusLine setAutoresizingMask:NSViewMaxYMargin | NSViewWidthSizable | NSViewMaxXMargin];
+        [container addSubview:statusLine];
         
         // Bind its visibility to 'laststatus'
         XVimLaststatusTransformer* transformer = [[XVimLaststatusTransformer alloc] init];
-        [status bind:@"hidden" toObject:[[XVim instance] options] withKeyPath:@"laststatus" options:@{NSValueTransformerBindingOption:transformer}];
-        
-        
-        // View autolayout constraints (for the source view and status bar)
-        
-        // Same width with the parent
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
-                                                          attribute:NSLayoutAttributeWidth
-                                                          relatedBy:NSLayoutRelationEqual
-                                                             toItem:container
-                                                          attribute:NSLayoutAttributeWidth
-                                                         multiplier:1.0
-                                                           constant:0.0]];
-        
-        // ScrollView's left position is 0
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
-                                                              attribute:NSLayoutAttributeLeft
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:container
-                                                              attribute:NSLayoutAttributeLeft
-                                                             multiplier:1.0
-                                                               constant:0.0]];
-        // Position sibling above the status bar
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
-                                                          attribute:NSLayoutAttributeBottom
-                                                          relatedBy:NSLayoutRelationEqual
-                                                             toItem:status
-                                                          attribute:NSLayoutAttributeTop
-                                                         multiplier:1.0
-                                                           constant:0]];
-        // ScrollView fills to top of the container view
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:sibling
-                                                              attribute:NSLayoutAttributeTop
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:container
-                                                              attribute:NSLayoutAttributeTop
-                                                             multiplier:1.0
-                                                               constant:0.0]];
-        // Place Status line at bottom edge
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:status
-                                                              attribute:NSLayoutAttributeBottom
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:container
-                                                              attribute:NSLayoutAttributeBottom
-                                                             multiplier:1.0
-                                                               constant:0.0]];
-        // Status line width fills the container
-        [container addConstraint:[NSLayoutConstraint constraintWithItem:status
-                                                              attribute:NSLayoutAttributeWidth
-                                                              relatedBy:NSLayoutRelationEqual
-                                                                 toItem:container
-                                                              attribute:NSLayoutAttributeWidth
-                                                             multiplier:1.0
-                                                               constant:0.0]];
+        [statusLine bind:@"hidden" toObject:[[XVim instance] options] withKeyPath:@"laststatus" options:@{NSValueTransformerBindingOption:transformer}];
     }
 }
 
