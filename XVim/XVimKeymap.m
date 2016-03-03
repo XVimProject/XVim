@@ -80,24 +80,6 @@
 	return self;
 }
 
-
-- (void)mapsInNode:(XVimKeymapNode*)node :(NSString*)mappingKey :(NSMutableDictionary*)dictionary{
-    if( node.target != nil ){
-        [dictionary setObject:node.target forKey:mappingKey];
-    }
-    for(XVimKeyStroke* key in node.dict){
-        XVimKeymapNode* next = [node.dict objectForKey:key];
-        NSString* nextMap = [mappingKey stringByAppendingFormat:@"%C", key.character];
-        [self mapsInNode:next :nextMap :dictionary];
-    }
-}
-
-- (NSDictionary*)mapsInNode{
-    NSMutableDictionary* dict = [[NSMutableDictionary alloc] init];
-    [self mapsInNode:self.root :@"" :dict];
-    return dict;
-}
-
 - (void)map:(XVimString*)keyStrokes to:(XVimString*)targetKeyStrokes withRemap:(BOOL)remap{
     // Create key map trie
     XVimKeymapNode* current = self.root;
@@ -112,8 +94,6 @@
     }
 	current.target = targetKeyStrokes;
     current.remap = remap;
-    
-    [self mapsInNode];
 }
 
 - (void)unmapImpl:(NSMutableArray*)keystrokes atNode:(XVimKeymapNode*)node{
@@ -217,17 +197,28 @@
                 return map;
             }else{
                 // No more mapping
-                return newStr;
+                return [self nopFilter:newStr];
             }
         }else{
             // No map needed
-            return [XVimString stringWithFormat:@"%@%@", context.inputKeys, unProcessedString];
+            return [self nopFilter:[XVimString stringWithFormat:@"%@%@", context.inputKeys, unProcessedString]];
         }
     }
     
     // We still need to wait next key input
     return nil;
 }
+
+// <Nop> feature
+- (XVimString*)nopFilter:(XVimString*)aStr{
+    if (aStr.length > 0){
+        NSString* notation = XVimKeyNotationFromXVimString(aStr);
+        if ([[notation lowercaseString] hasPrefix:@"<nop>"]){
+            return @"";
+        }
+    }
+    return aStr; 
+} 
 
 - (void)enumerateKeymapsImpl:(XVimKeymapNode*)node forKeys:(XVimString*)keys withBlock:(void (^)(NSString *, NSString *))block{
     if( node.target != nil ){
