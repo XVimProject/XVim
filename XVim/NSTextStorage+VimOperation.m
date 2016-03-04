@@ -889,8 +889,55 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
  * Returns position of the end of count words backward.
  **/
 - (NSUInteger)endOfWordsBackward:(NSUInteger)index count:(NSUInteger)count option:(MOTION_OPTION)opt{
-    // TODO: Implement!
-    return index;
+    ASSERT_VALID_RANGE_WITH_EOF(index);
+    NSAssert( 0 != count , @"count must be greater than 0");
+    if( [self isEOF:index] || [self isLastCharacter:index]){
+        return index;
+    }
+    NSUInteger pos = index;
+    NSUInteger word_count = 0;
+    NSString *string = [self xvim_string];
+    for( ; ; --pos ){
+        if( pos == 0 ){
+            break;
+        }
+        NSRange rph = [self rangePlaceHolder:pos option:opt];
+        if( rph.location != NSNotFound ){
+            // placeholder
+            if( (opt&MOTION_OPTION_CHANGE_WORD) || pos != index ){
+                word_count++;
+            }
+            pos = NSMaxRange(rph) - 1;
+            if( [self isLastCharacter:pos] ){
+                break;
+            }
+        } else if( [self isNewline:pos] && [self isNewline:pos+1] ){
+            // two NewLine
+            if( opt&MOTION_OPTION_CHANGE_WORD ){
+                word_count++;
+            }
+        } else if( (opt&MOTION_OPTION_CHANGE_WORD) && isWhitespace([string characterAtIndex:index]) ){
+            // begins with space in case of 'cw'
+            if( [self isWhitespace:pos] && ![self isWhitespace:pos+1] ){
+                word_count++;
+            }
+        } else if( ![self isWhitespaceOrNewline:pos] ){
+            if( (![self isWhitespaceOrNewline:pos+1] &&
+                 !(opt & BIGWORD) &&
+                 [self isKeyword:pos] != [self isKeyword:pos+1] ) ||
+                [self isWhitespaceOrNewline:pos+1] ||
+               [self rangePlaceHolder:pos+1 option:opt].location != NSNotFound
+               ){
+                if( (opt&MOTION_OPTION_CHANGE_WORD) || pos != index ){
+                    word_count++;
+                }
+            }
+        }
+        if( word_count == count ){
+            break;
+        }
+    }
+    return pos;
 }
 
 

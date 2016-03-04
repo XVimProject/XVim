@@ -210,6 +210,12 @@
             XVimMakeTestCase(text4, 1, 0, @"<C-v>jjgJ"   , v_gJ_result0, 7, 0), // join 2 lines
             // XVimMakeTestCase(text4, 1, 0, @"<C-v>jjgJj." , v_gJ_result1,17, 0), // Repeat (not supported yet)
             XVimMakeTestCase(text4, 1, 0, @"<C-v>jjgJ`." , v_gJ_result0,11, 0), // . Mark
+
+            // ge, gE in visual
+            XVimMakeTestCase(text2, 18, 0, @"vge", text2, 17, 2),
+            XVimMakeTestCase(text2, 18, 0, @"vgE", text2, 14, 5),
+            XVimMakeTestCase(text2, 18, 0, @"v2ge", text2, 16, 3),
+            XVimMakeTestCase(text2, 18, 0, @"v2gE", text2, 10, 9),
             
             nil];
 }

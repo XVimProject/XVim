@@ -663,6 +663,10 @@
                 self.selectionToEOL = YES;
                 [self xvim_moveCursor:r.end preserveColumn:NO];
                 break;
+            case MOTION_END_OF_WORD_BACKWARD:
+                self.selectionToEOL = NO;
+                [self xvim_moveCursor:r.begin preserveColumn:NO];
+                break;
 
             default:
                 self.selectionToEOL = NO;
@@ -2367,7 +2371,9 @@
             end = [self.textStorage endOfWordsForward:begin count:motion.count option:motion.option];
             break;
         case MOTION_END_OF_WORD_BACKWARD:
-            end = [self.textStorage endOfWordsBackward:begin count:motion.count option:motion.option];
+            motion.option |= MOPT_PLACEHOLDER;
+            end = begin;
+            begin = [self.textStorage endOfWordsBackward:begin count:motion.count option:motion.option];
             break;
         case MOTION_LINE_FORWARD:
             if( motion.option & DISPLAY_LINE ){
