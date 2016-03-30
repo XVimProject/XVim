@@ -2122,6 +2122,11 @@
 
 - (NSRect)xvim_boundingRectForGlyphIndex:(NSUInteger)glyphIndex {
 	NSRect glyphRect;
+    // Fix for issue #251
+    if (glyphIndex > self.textStorage.string.length) {
+        glyphIndex = self.textStorage.string.length;
+    }
+
 	if( [self.textStorage isEOF:glyphIndex] ){
 		// When the index is EOF the range to specify here can not be grater than 0. If it is greater than 0 it returns (0,0) as a glyph rect.
 		NSUInteger count;
