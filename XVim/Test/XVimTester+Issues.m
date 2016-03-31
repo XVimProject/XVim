@@ -36,7 +36,10 @@
                                         @"ggg hhh i_i\n" 
                                         @"ddd e-e fff\n" 
                                         @"    jjj kkk";  
-    
+
+    static NSString* issue_251_result = @"a;a bbb ccc\n"
+                                        @"    jjj kkk";
+
     static NSString* issue_429_result = @"bbb bbb ccc\n";
     
     static NSString* issue_587 = @"test\n"
@@ -63,6 +66,7 @@
                                  @"ccc\n";// 2
      
     return [NSArray arrayWithObjects:
+            XVimMakeTestCase(text1, 12, 0, @"Vjd", issue_251_result , 16, 0),  // Issue #251
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
             XVimMakeTestCase(text1, 24, 0, @":inoremap <lt>C-e> <lt>C-o>$<CR>i<Right><Right><Up><Up><C-e><ESC>", text1 , 10, 0),  // Issue #416
             XVimMakeTestCase(text1, 20, 0, @"yyjp", issue_216_result, 36,0 ),
