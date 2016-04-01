@@ -16,10 +16,29 @@
 
 ## INSTALL
   Download source code or clone the repo. Then,
+  
+  1. Confirm `xcode-select` points to your Xcode
+  ```bash
+  $ xcode-select -p
+  /Applications/Xcode.app/Contents/Developer
+  ```
+  
+  If this doesn't show your Xcode application path, use `xcode-select -s` to set.
+  
+  2. make
   ```bash
   $ make
   ```
-  Create `.xvimrc` as you need and restart your Xcode. 
+  
+  If you see something like 
+  
+  ```
+  XVim hasn't confirmed the compatibility with your Xcode, Version X.X
+  Do you want to compile XVim with support Xcode Version X.X at your own risk? 
+  ```
+  Press y if you want to use XVim with your Xcode version (even it is not confirmed it works)
+  
+  3. Create `.xvimrc` as you need and restart your Xcode. 
 
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
