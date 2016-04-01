@@ -1,7 +1,11 @@
 <!---
+For installation problem, please obey the instruction in README.md to install XVim. Then if you still have problem, report it.
+  
 Fill the following [] for a bug issue. 
 Fill the blanks as possible as you can.
 Write freely if it is other issues, like feature request.
+
+
 --->
 
 # Description
