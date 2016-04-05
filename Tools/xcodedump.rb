@@ -23,7 +23,7 @@ def list_frameworks(directory, rel_dir, &block)
         elsif is_framework(path)
             block.call(path, rel_dir)
         elsif File.directory?(path)
-                list_frameworks(path, rel_dir + "/" + x, &block)
+            list_frameworks(path, rel_dir + "/" + x, &block)
         end
     }
 end
