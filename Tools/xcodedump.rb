@@ -22,8 +22,8 @@ def list_frameworks(directory, rel_dir, &block)
             next
         elsif is_framework(path)
             block.call(path, rel_dir)
-        elsif File.directory?(path)
-                list_frameworks(path, rel_dir + "/" + x, &block)
+        elsif File.directory?(path) and !(/\.platform$/ =~ path or /\.app$/ =~ path)
+            list_frameworks(path, rel_dir + "/" + x, &block)
         end
     }
 end
