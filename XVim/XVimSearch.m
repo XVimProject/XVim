@@ -558,7 +558,7 @@
         NSString *springsWithMatch = [splitsOnAmpersands componentsJoinedByString:textToReplace];
         [stringsToJoin addObject:springsWithMatch];
     }
-    
+
     if ([stringsToJoin count] > 0) {
         replacementString = [stringsToJoin componentsJoinedByString:@"\\&"];
     }

@@ -137,6 +137,10 @@ The layout is forced to change with Ctrl-w,s or Ctrl-w,v .
 
 Regex search is supported using the [ICU regex](https://developer.apple.com/library/ios/documentation/Foundation/Reference/NSRegularExpression_Class/Reference/Reference.html) format.
 
+Search and replace using matched string(&) in the replacement text is supported:
+
+`foo bar` -> `:%s/foo/&bar/` gives `foobar bar` 
+
 ## Insert mode commands
 
 C-y, C-e
