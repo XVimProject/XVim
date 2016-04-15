@@ -88,6 +88,8 @@
     static NSString* replace11_result =  @"aaa ddd ccc\n"
                                          @"aaa.ddd.ccc\n\n";
     
+    static NSString* replace12_result = @"aaa bbbbb ccc\n"
+                                        @"bbbbb ccc ccc\n\n";
     return [NSArray arrayWithObjects:
             //
             // replace(:s)
@@ -107,6 +109,9 @@
             XVimMakeTestCase(text6, 0,  0, @"Vj:s/$/fffff/g<CR>", replace7_result, 32, 0),
             // $, two
             XVimMakeTestCase(text7, 0,  0, @"Vj:s/$/fffff/g<CR>", replace8_result, 32, 0),
+            
+            XVimMakeTestCase(text7, 0, 0, @":%s/bbb/&bb/g<CR>", replace12_result, 19, 0),
+            XVimMakeTestCase(text7, 0, 0, @":%s/bb/&bb/g<CR>", replace12_result, 18, 0),
 
             // c, quit
             XVimMakeTestCase(text6, 0,  0, @"Vj:s/ccc/eeeee/gc<CR>q", text6, 8, 0),
@@ -205,6 +210,7 @@
 
             // search followed by implicit replace. added to cover https://github.com/XVimProject/XVim/issues/730
             XVimMakeTestCase(text8, 0,  0, @":set vimregex<CR>/bbb<CR>:%s//ddd/g<CR>", replace11_result, 19, 0),
+            
             nil];
 }
 @end

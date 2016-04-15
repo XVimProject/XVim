@@ -522,11 +522,11 @@
     }
 }
 
-- (void)updateStartLocationInWindow:(XVimWindow*)window
+- (void)updateStartLocationInWindow:(XVimWindow*)window replacementString:(NSString*)replacementString
 {
     // global option on; consider all matches on each line
     if (self.isGlobal) {
-        self.replaceStartLocation = self.lastFoundRange.location + self.lastReplacementString.length;
+        self.replaceStartLocation = self.lastFoundRange.location + replacementString.length;
 
         // If search string contained a $, move to the next line
         if ([self.lastSearchCmd rangeOfString:@"$"].length > 0) {
@@ -539,9 +539,9 @@
     }
 }
 
-- (void) updateEndLocationInWindow:(XVimWindow*)window
+- (void) updateEndLocationInWindow:(XVimWindow*)windo replacementString:(NSString*)replacementString
 {
-    self.replaceEndLocation += ([self.lastReplacementString length] - self.lastFoundRange.length);
+    self.replaceEndLocation += ([replacementString length] - self.lastFoundRange.length);
 }
 
 - (void)replaceCurrentInWindow:(XVimWindow*)window findNext:(BOOL)findNext
@@ -564,12 +564,12 @@
     }
     
     [srcView insertText:replacementString replacementRange:self.lastFoundRange];
-    [srcView xvim_moveCursor:self.lastFoundRange.location + self.lastReplacementString.length preserveColumn:NO];
+    [srcView xvim_moveCursor:self.lastFoundRange.location + replacementString.length preserveColumn:NO];
     self.numReplacements++;
 
     if (findNext) {
-        [self updateStartLocationInWindow:window];
-        [self updateEndLocationInWindow:window];
+        [self updateStartLocationInWindow:window replacementString:replacementString];
+        [self updateEndLocationInWindow:window replacementString:replacementString];
         [self findForwardFrom:self.replaceStartLocation to:self.replaceEndLocation inWindow:window];
     }
     else {
@@ -593,7 +593,7 @@
         [srcView insertText:self.lastReplacementString replacementRange:self.lastFoundRange];
         self.numReplacements++;
 
-        [self updateEndLocationInWindow:window];
+        [self updateEndLocationInWindow:window replacementString:self.lastReplacementString];
         [self findForwardFrom:self.replaceStartLocation to:self.replaceEndLocation inWindow:window];
     } while (self.lastFoundRange.location != NSNotFound);
     [self showStatusIfDoneInWindow:window];
