@@ -139,7 +139,7 @@ Regex search is supported using the [ICU regex](https://developer.apple.com/libr
 
 Search and replace using matched string(&) in the replacement text is supported:
 
-`foo bar` -> `:%s/foo/&bar/` gives `foobar bar` 
+Applying `:%s/foo/&bar/` to `foo bar` gives `foobar bar` 
 
 ## Insert mode commands
 
