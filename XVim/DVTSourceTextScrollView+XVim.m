@@ -45,6 +45,8 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW = @"XVIM_INSTA
             }
         }];
         [ self setBool:YES forName:XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTSCROLLVIEW];
+        // Fix text stretching bug when scrolling
+        self.contentView.copiesOnScroll = NO;
     }
     [self xvim_viewWillMoveToWindow:window ];
 }

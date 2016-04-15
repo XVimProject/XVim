@@ -145,20 +145,14 @@
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
+    return;
 }
 
-- (BOOL)isPlaygroundTextView
-{
-    return [self isMemberOfClass:NSClassFromString(@"IDEPlaygroundTextView")];
-}
-
-BOOL s_turnedOn;
+NSRect s_lastCaret;
 - (void)xvim_drawRect:(NSRect)dirtyRect{ 
-    //TRACE_LOG(@"%@", NSStringFromRect(dirtyRect));
+    // TRACE_LOG(@"drawRect dirtyRect(%f,%f,%f,%f)", dirtyRect.origin.x, dirtyRect.origin.y, dirtyRect.size.width, dirtyRect.size.height);
 
     @try{
-        NSGraphicsContext* context = [NSGraphicsContext currentContext];
-        [context saveGraphicsState];
         if( XVim.instance.options.hlsearch ){
             XVimMotion* lastSearch = [XVim.instance.searcher motionForRepeatSearch];
             if( nil != lastSearch.regex && !XVim.instance.foundRangesHidden ){
@@ -170,32 +164,25 @@ BOOL s_turnedOn;
             [self xvim_clearHighlightText];
         }
         
-        // call original drawRect
         [self xvim_drawRect:dirtyRect];
         
-        // this logic is effective when selecting text.
-        XVimWindow* window = [self xvim_window];
-        if( ![[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
-            // Normal mode
-            
-            if ([self isPlaygroundTextView]) {
-                // Playground
-                if (![[[XVim instance] options] blinkcursor] || s_turnedOn){
-                    [self _drawInsertionPointInRect:NSZeroRect color:[self insertionPointColor]];
-                }
-                s_turnedOn = NO;
-            } else {
-                // DVTSourceTextView
-                NSUInteger glyphIndex = [self insertionPoint];
-                NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
-                if (CGRectIntersectsRect(NSRectToCGRect(dirtyRect), NSRectToCGRect(glyphRect))){
-                    if( ![[[XVim instance] options] blinkcursor] || !s_turnedOn){
-                        [window drawInsertionPointInRect:glyphRect color:[self insertionPointColor]];
-                    }
-                }
-            }
+        if( self.selectionMode != XVIM_VISUAL_NONE ){
+            // NSTextView does not draw insertion point when selecting text. We have to draw insertion point by ourselves.
+            NSUInteger glyphIndex = [self insertionPoint];
+            NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
+            [[[self insertionPointColor] colorWithAlphaComponent:0.5] set];
+            NSRectFillUsingOperation( glyphRect, NSCompositeSourceOver);
         }
-        [context restoreGraphicsState];
+        
+        if( ![XVim instance].options.blinkcursor ){
+            // We need to draw caret on drawRect when it is not blinkcursor.
+            // This is required when the view is IDEPlaygroundSourceTextView because
+            // it doesn't use drawInsertionPointInRect to clear caret but user drawRect to clear the caret.
+            // The reason "turnedOn" is set to NO is because
+            // the drawing caret on this timing corresponds to clear caret.
+            // This will keep consistence when it goes into Insert mode.
+            [self drawInsertionPointInRect:s_lastCaret color:[self insertionPointColor] turnedOn:NO];
+        }
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -205,65 +192,62 @@ BOOL s_turnedOn;
 
 // Drawing Caret
 - (void)xvim__drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
-    //TRACE_LOG(@"aColor %@ %@", aColor, NSStringFromRect(aRect));
+    // TRACE_LOG(@"%f %f %f %f", aRect.origin.x, aRect.origin.y, aRect.size.width, aRect.size.height);
     @try{
         XVimWindow* window = [self xvim_window];
         if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
             // Use original behavior when insert mode.
-            [self xvim__drawInsertionPointInRect:aRect color:aColor];
-        } else {
-            // Normal mode
-            if ([self isPlaygroundTextView]){
-                // Playground
-                NSGraphicsContext* context = [NSGraphicsContext currentContext];
-                [context saveGraphicsState];
-                
-                NSUInteger glyphIndex = [self insertionPoint];
-                NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
-                [window drawInsertionPointInRect:glyphRect color:aColor];
-                
-                [context restoreGraphicsState];
-            } else {
-                // DVTSourceTextView
-            }
+            return [self xvim__drawInsertionPointInRect:aRect color:aColor];
         }
+
+        // Erase old cursor.
+        [self xvim_drawRect:s_lastCaret];
+        
+        NSUInteger glyphIndex = [self insertionPoint];
+        NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
+        s_lastCaret = glyphRect;
+
+        NSGraphicsContext *context = [NSGraphicsContext currentContext];
+        [context saveGraphicsState];
+        [[NSBezierPath bezierPathWithRect:[self visibleRect]] setClip];
+        [window drawInsertionPointInRect:glyphRect color:aColor];
+        [context restoreGraphicsState];
+        
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
     }
 }
-
-/**
- * @brief turnedOn
- */
 - (void)xvim_drawInsertionPointInRect:(NSRect)rect color:(NSColor *)color turnedOn:(BOOL)flag{
-    //TRACE_LOG(@"turnedOn %d %@", flag, NSStringFromRect(rect));
     XVimWindow* window = [self xvim_window];
     if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
         // Use original behavior when insert mode.
-        [self xvim_drawInsertionPointInRect:rect color:color turnedOn:flag];
-    } else {
-        // Normal mode
-        if ([self isPlaygroundTextView]){
-            // Playground
-            // method is called only when flag is YES for Playground.
-            if (flag) {
-                s_turnedOn = YES;
-                NSUInteger glyphIndex = [self insertionPoint];
-                NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
-                [self setNeedsDisplayInRect:glyphRect];
-            }
-        } else {
-            // DVTSourceTextView
-            // method is called when flag is YES/NO for DVTSourceTextView.
-            s_turnedOn = flag;
-            NSUInteger glyphIndex = [self insertionPoint];
-            NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
-            [self setNeedsDisplayInRect:glyphRect];
-        }
+        return [self xvim_drawInsertionPointInRect:rect color:color turnedOn:flag];
     }
-}
 
+    BOOL shouldClear = NO;
+    BOOL shouldDraw = NO;
+
+
+    if( ![self performSelector:@selector(_isLayerBacked)] ){
+        shouldClear = YES;
+        shouldDraw = ![[[XVim instance] options] blinkcursor] || flag;
+    }
+    else {
+        shouldClear = YES;
+        shouldDraw = YES;
+    }
+
+    if (shouldClear) {
+        [self xvim_drawRect:s_lastCaret];
+    }
+
+    if (shouldDraw) {
+        [self _drawInsertionPointInRect:rect color:color];
+    }
+
+    return;
+}
 - (void)xvim_didChangeText{
     [self setNeedsUpdateFoundRanges:YES];
     [self xvim_didChangeText];
