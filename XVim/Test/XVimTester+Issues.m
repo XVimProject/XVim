@@ -61,7 +61,8 @@
     static NSString* issue_865 = @"\n" // 0
                                  @"\n" // 1
                                  @"ccc\n";// 2
-     
+    static NSString* issue_951 = @"aaaa\n";
+    
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
             XVimMakeTestCase(text1, 24, 0, @":inoremap <lt>C-e> <lt>C-o>$<CR>i<Right><Right><Up><Up><C-e><ESC>", text1 , 10, 0),  // Issue #416
@@ -89,6 +90,7 @@
             XVimMakeTestCase(issue_865 , 2, 0, @"2gg", issue_865, 1, 0), // Issue #865
             XVimMakeTestCase(issue_865 , 2, 0, @"2G", issue_865, 1, 0),  // Issue #865
             XVimMakeTestCase(issue_865 , 2, 0, @"G", issue_865, 6, 0),   // Issue #865
+            XVimMakeTestCase(issue_951 , 0, 0, @"r<cr>u", issue_951, 0, 0),   // Issue #951
             
             XVimMakeTestCase(text0, 0, 0, @":nmap <lt>backspace> l<cr><bs><bs>", text0, 2, 0), // Issue #844 mapping <backspace>
             nil];
