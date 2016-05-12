@@ -62,7 +62,7 @@
                                  @"\n" // 1
                                  @"ccc\n";// 2
     static NSString* issue_951 = @"aaaa\n";
-    
+
     return [NSArray arrayWithObjects:
             XVimMakeTestCase(text0, 0, 0, @"qadwpq", @"baaa bb ccc\n", 4, 0),  // Issue #396
             XVimMakeTestCase(text1, 24, 0, @":inoremap <lt>C-e> <lt>C-o>$<CR>i<Right><Right><Up><Up><C-e><ESC>", text1 , 10, 0),  // Issue #416
