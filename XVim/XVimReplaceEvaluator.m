@@ -90,17 +90,33 @@
             // Here we pass the key input to original text view.
             // The input coming to this method is already handled by "Input Method"
             // and the input maight be non ascii like 'あ'
-            if (self.oneCharMode || keyStroke.isPrintable || keyStroke.isWhitespace) {
-                if (!keyStroke.isPrintable && !keyStroke.isWhitespace) {
-                    nextEvaluator = [XVimEvaluator invalidEvaluator];
-                } else if (![self.sourceView xvim_replaceCharacters:keyStroke.character count:1]) {
-                    nextEvaluator = [XVimEvaluator invalidEvaluator];
-                } else if (self.oneCharMode) {
-                    nextEvaluator = nil;
+            BOOL relayEvent = NO;
+            BOOL newlinePressed = NO;
+            unichar replaceWith = keyStroke.character;
+            
+            // injecting a CR right into the sourceView causes issues
+            if (replaceWith == '\r') {
+                replaceWith = '\n';
+                newlinePressed = YES;
+            }
+            
+            if (!keyStroke.isPrintable && !keyStroke.isWhitespace) {
+                nextEvaluator = [XVimEvaluator invalidEvaluator];
+            } else if (!newlinePressed && ![self.sourceView xvim_replaceCharacters:replaceWith count:1]) {
+                nextEvaluator = [XVimEvaluator invalidEvaluator];
+            } else if (self.oneCharMode) {
+                if (newlinePressed) {
+                    relayEvent = YES;
                 }
-            } else {
+                nextEvaluator = nil;
+            }
+            if (relayEvent) {
                 NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
                 [self.sourceView interpretKeyEvents:[NSArray arrayWithObject:event]];
+            }
+            if (newlinePressed) {
+                XVimMotion* m = XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
+                [self.sourceView xvim_delete:m andYank:NO];
             }
         }
     }

@@ -49,7 +49,13 @@
     static NSString* issue_606_result_spaces = @"        aaa bbb ccc\n";
     static NSString* issue_606_result_tabs = @"		aaa bbb ccc\n";
 
-
+    static NSString* issue_770_text = @"aaaa(.)a\n";
+    static NSString* issue_770_newline_result = @"a\naa(.)a\n";
+    static NSString* issue_770_newline_indent_result = @"aaaa(\n     )a\n";
+    static NSString* issue_770_replace_multichar_result = @"bbbb(.)a\n";
+    static NSString* issue_770_eol_text = @"1234\n1234\n";
+    static NSString* issue_770_eol_result = @"123\n\n1234\n";
+    
     static NSString* issue_776_text = @"";
     static NSString* issue_776_result = @"\n";
     static NSString* issue_805_text = @"aaaa bbbb cccc dddd eeee ffff gggg\n"
@@ -83,6 +89,13 @@
                 ? XVimMakeTestCase( text0, 0, 0, @"i<TAB><ESC>.", issue_606_result_tabs, 1, 0 )    // Issue #606. Repeating tab insertion crashes Xcode.
                 : XVimMakeTestCase( text0, 0, 0, @"i<TAB><ESC>.", issue_606_result_spaces, 7, 0 ), // Issue #606. Repeating tab insertion crashes Xcode.
 
+            XVimMakeTestCase(issue_770_text, 0, 0, @"r<cr>u", issue_770_text, 0, 0), // Issue #770
+            XVimMakeTestCase(issue_770_text, 0, 0, @"r u", issue_770_text, 0, 0), // Issue #770
+            XVimMakeTestCase(issue_770_text, 1, 0, @"r<cr>", issue_770_newline_result, 2, 0), // Issue #770
+            XVimMakeTestCase(issue_770_text, 5, 0, @"r<cr>", issue_770_newline_indent_result, 10, 0), // Issue #770
+            XVimMakeTestCase(issue_770_text, 0, 0, @"Rbbbb", issue_770_replace_multichar_result, 4, 0), // Issue #770
+            XVimMakeTestCase(issue_770_eol_text, 3, 0, @"r<cr>kj", issue_770_eol_result, 4, 0), // Issue #770
+            
             XVimMakeTestCase(issue_776_text, 0, 0, @"O<ESC>", issue_776_result,  0, 0), // Issue #776 crash
             XVimMakeTestCase(issue_805_text, 33, 0, @"dd", issue_805_result, 0, 0), // Issue #805
             XVimMakeTestCase(issue_809_a_text, 5, 0, @"dw", issue_809_a_result, 4, 0),

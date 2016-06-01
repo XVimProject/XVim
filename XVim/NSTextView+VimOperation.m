@@ -822,7 +822,12 @@
         newPos = [self.textStorage xvim_indexOfLineNumber:sel.top column:sel.left];
     }
 
-    [self.xvimDelegate textView:self didDelete:self.lastYankedText  withType:self.lastYankedType];
+    // in case yank:NO is passed in and no yanking has been done yet
+    // usually we don't want to report unyanked deletes anyway, as they are usually
+    // internal plumbing
+    if (self.lastYankedText != NULL) {
+        [self.xvimDelegate textView:self didDelete:self.lastYankedText  withType:self.lastYankedType];
+    }
     [self xvim_changeSelectionMode:XVIM_VISUAL_NONE];
     if (newPos != NSNotFound) {
         [self xvim_moveCursor:newPos preserveColumn:NO];
