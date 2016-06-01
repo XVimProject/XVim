@@ -110,13 +110,13 @@
                 }
                 nextEvaluator = nil;
             }
-            if (relayEvent) {
-                NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
-                [self.sourceView interpretKeyEvents:[NSArray arrayWithObject:event]];
-            }
             if (newlinePressed) {
                 XVimMotion* m = XVIM_MAKE_MOTION(MOTION_FORWARD, CHARACTERWISE_EXCLUSIVE, MOTION_OPTION_NONE, 1);
                 [self.sourceView xvim_delete:m andYank:NO];
+            }
+            if (relayEvent) {
+                NSEvent *event = [keyStroke toEventwithWindowNumber:0 context:nil];
+                [self.sourceView interpretKeyEvents:[NSArray arrayWithObject:event]];
             }
         }
     }
