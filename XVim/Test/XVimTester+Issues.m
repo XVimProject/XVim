@@ -51,7 +51,6 @@
 
     static NSString* issue_770_text = @"aaaa(.)a\n";
     static NSString* issue_770_newline_result = @"a\naa(.)a\n";
-    static NSString* issue_770_newline_indent_result = @"aaaa(\n     )a\n";
     static NSString* issue_770_replace_multichar_result = @"bbbb(.)a\n";
     static NSString* issue_770_eol_text = @"1234\n1234\n";
     static NSString* issue_770_eol_result = @"123\n\n1234\n";
@@ -92,7 +91,6 @@
             XVimMakeTestCase(issue_770_text, 0, 0, @"r<cr>u", issue_770_text, 0, 0), // Issue #770
             XVimMakeTestCase(issue_770_text, 0, 0, @"r u", issue_770_text, 0, 0), // Issue #770
             XVimMakeTestCase(issue_770_text, 1, 0, @"r<cr>", issue_770_newline_result, 2, 0), // Issue #770
-            XVimMakeTestCase(issue_770_text, 5, 0, @"r<cr>", issue_770_newline_indent_result, 10, 0), // Issue #770
             XVimMakeTestCase(issue_770_text, 0, 0, @"Rbbbb", issue_770_replace_multichar_result, 4, 0), // Issue #770
             XVimMakeTestCase(issue_770_eol_text, 3, 0, @"r<cr>kj", issue_770_eol_result, 4, 0), // Issue #770
             
