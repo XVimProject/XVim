@@ -5,14 +5,15 @@
 
 #### Announcement
 
-  - XVim repository has moved to XVimProject organization. There are not so many thing you have to do with this but if you cloned the repo and working local it is recommendded to change the remote URL as sited [here](https://help.github.com/articles/transferring-a-repository/) (This is not must. Github nicely forward old URL to new one.)
+  - Xcode 6,7 Users, use the commit before 809527b
   - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
   - [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
   
 
 ## Support Xcode Versions
-  - Xcode6
-  - Xcode7
+  - Xcode6  : Use before 809527b
+  - Xcode7  : Use before 809527b
+  - Xcode8  : Use the latest master
 
 ## INSTALL
   Download source code or clone the repo. Then,
@@ -29,6 +30,10 @@
   ```bash
   $ make
   ```
+
+  With Xcode 8 and above, you'll be asked if you want to remove code singature from Xcode.
+  It is required to make the XCode load XVim.
+  So if you are OK just type 'y' to proceed and remove code signature from your Xcode.
   
   If you see something like 
   
