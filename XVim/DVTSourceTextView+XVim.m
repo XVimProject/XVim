@@ -148,7 +148,7 @@
     return;
 }
 
-NSRect s_lastCaret;
+// NSRect s_lastCaret;
 - (void)xvim_drawRect:(NSRect)dirtyRect{ 
     // TRACE_LOG(@"drawRect dirtyRect(%f,%f,%f,%f)", dirtyRect.origin.x, dirtyRect.origin.y, dirtyRect.size.width, dirtyRect.size.height);
 
@@ -174,6 +174,7 @@ NSRect s_lastCaret;
             NSRectFillUsingOperation( glyphRect, NSCompositeSourceOver);
         }
         
+        /*
         if( ![XVim instance].options.blinkcursor ){
             // We need to draw caret on drawRect when it is not blinkcursor.
             // This is required when the view is IDEPlaygroundSourceTextView because
@@ -183,6 +184,7 @@ NSRect s_lastCaret;
             // This will keep consistence when it goes into Insert mode.
             [self drawInsertionPointInRect:s_lastCaret color:[self insertionPointColor] turnedOn:NO];
         }
+         */
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
@@ -201,11 +203,11 @@ NSRect s_lastCaret;
         }
 
         // Erase old cursor.
-        [self xvim_drawRect:s_lastCaret];
+        // [self xvim_drawRect:s_lastCaret];
         
         NSUInteger glyphIndex = [self insertionPoint];
         NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
-        s_lastCaret = glyphRect;
+        // s_lastCaret = glyphRect;
 
         NSGraphicsContext *context = [NSGraphicsContext currentContext];
         [context saveGraphicsState];
@@ -225,6 +227,7 @@ NSRect s_lastCaret;
         return [self xvim_drawInsertionPointInRect:rect color:color turnedOn:flag];
     }
 
+    /*
     BOOL shouldClear = NO;
     BOOL shouldDraw = NO;
 
@@ -237,7 +240,9 @@ NSRect s_lastCaret;
         shouldClear = YES;
         shouldDraw = YES;
     }
+     */
 
+    /*
     if (shouldClear) {
         [self xvim_drawRect:s_lastCaret];
     }
@@ -245,6 +250,7 @@ NSRect s_lastCaret;
     if (shouldDraw) {
         [self _drawInsertionPointInRect:rect color:color];
     }
+    */
 
     return;
 }
