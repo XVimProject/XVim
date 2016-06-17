@@ -6,10 +6,10 @@ endif
 
 .PHONY: release debug clean clean-release clean-debug uninstall uuid build-test
 
-release: uuid
+release: uuid code_unsign
 	$(xcodebuild) Release $(REDIRECT)
 
-debug: uuid
+debug: uuid code_unsign
 	$(xcodebuild) Debug $(REDIRECT)
 
 
@@ -24,6 +24,29 @@ clean-debug:
 
 uninstall:
 	rm -rf "$(HOME)/Library/Application Support/Developer/Shared/Xcode/Plug-ins/XVim.xcplugin"
+
+code_unsign:
+	@xcode_path=`xcode-select -p`; \
+	echo Target Xcode : $${xcode_path}; \
+	xcode_version=`defaults read "$${xcode_path}/../Info" CFBundleShortVersionString`; \
+	major=`printf '%.0f' $${xcode_version}`; \
+	codesign -dv $${xcode_path}/../MacOS/Xcode > /dev/null 2>&1; \
+	if [[ $$? == 0 && $${major} -ge 8 ]]; then \
+		printf "With your Xcode version $${xcode_version} it is required to remove "; \
+		printf "code signature from Xcode to load XVim plugin. "; \
+		printf "This may increase security risk since you cannot validate Xcode signature once we remove it. "; \
+		printf "Do you want to remove code signature from your Xcode? (y/N)"; \
+		read -r -n 1 in; \
+		if [[ $$in != "" &&  ( $$in == "y" || $$in == "Y") ]]; then \
+			echo ; \
+			printf "Close Xcode and press enter."; \
+			read -r -n 1 in; \
+			$(MAKE) -C Tools/unsign; \
+			cp -n $${xcode_path}/../MacOS/Xcode $${xcode_path}/../MacOS/Xcode_orig; \
+			printf "The original Xcode binary is backed up to $${xcode_path}/../MacOS/Xcode_orig\n"; \
+			Tools/unsign/unsign $${xcode_path}/../MacOS/Xcode $${xcode_path}/../MacOS/Xcode; \
+		fi ;\
+	fi;
 
 uuid:
 	@xcode_path=`xcode-select -p`; \
