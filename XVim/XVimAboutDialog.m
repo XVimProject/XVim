@@ -21,7 +21,7 @@
                        @"OS Version : %@\n"
                        @"Xcode Version : %@\n"
                        @"\n"
-                       @"--- .xvmrc ---\n"
+                       @"--- .xvimrc ---\n"
                        @"%@\n"
                        @"--------------\n";
     
