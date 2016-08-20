@@ -8,3 +8,5 @@ Gemfile.lock
 build
 *.xccheckout
 gitrevision.h
+*.o
+unsign
