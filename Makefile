@@ -41,10 +41,9 @@ code_unsign:
 			echo ; \
 			printf "Close Xcode and press enter."; \
 			read -r -n 1 in; \
-			$(MAKE) -C Tools/unsign; \
 			cp -n $${xcode_path}/../MacOS/Xcode $${xcode_path}/../MacOS/Xcode_orig; \
 			printf "The original Xcode binary is backed up to $${xcode_path}/../MacOS/Xcode_orig\n"; \
-			Tools/unsign/unsign $${xcode_path}/../MacOS/Xcode $${xcode_path}/../MacOS/Xcode; \
+			codesign --remove-signature $${xcode_path}/../MacOS/Xcode; \
 		fi ;\
 	fi;
 
