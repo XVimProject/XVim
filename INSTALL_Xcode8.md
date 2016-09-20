@@ -27,10 +27,10 @@ Since Apple decided not to load 3rd party plugins, we have to make change to it.
 
    Then in a terminal,
 
-         $ codesigner -f -s XcodeSigner /Applications/Xcode.app       (Replace the Xcode path if it is different)
+         $ sudo codesigner -f -s XcodeSigner /Applications/Xcode.app    (Replace the Xcode path if it is different.)
 
    This should take a while.
-
+   
 4. Build XVim
 
    Go to XVim directory you cloned and build it as usual (Read INSTALL section in README.md).
