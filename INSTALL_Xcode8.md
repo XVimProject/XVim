@@ -27,7 +27,7 @@ Since Apple decided not to load 3rd party plugins, we have to make change to it.
 
    Then in a terminal,
 
-         $ codesigner -fv -s XcodeSigner /Applications/Xcode.app       (Replace the Xcode path if it is different)
+         $ codesigner -f -s XcodeSigner /Applications/Xcode.app       (Replace the Xcode path if it is different)
 
    This should take a while.
 
