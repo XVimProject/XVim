@@ -1,21 +1,24 @@
 [\[日本語版\]](README_jp.md)
 
-# XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim)
+# XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
+
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
 
 #### Announcement
-
-  - Xcode 6,7 Users, use the commit before 809527b
-  - XVim started to use BountySource [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
+  - Xcode 8 Users, See [INSTALL_Xcode8.md](INSTALL_Xcode8.md)
+  - Xcode 7 Users, use the commit before 809527b
+  - XVim started to use BountySource 
   - [Google Group for XVim developers](https://groups.google.com/d/forum/xvim-developers) has been created.
   
 
 ## Support Xcode Versions
-  - Xcode6  : Use before 809527b
   - Xcode7  : Use before 809527b
   - Xcode8  : Use the latest master
 
 ## INSTALL
+
+  Xcode 8 Users, Follow instructions in [INSTALL_Xcode8.md](INSTALL_Xcode8.md) first.
+  
   Download source code or clone the repo. Then,
   
   1. Confirm `xcode-select` points to your Xcode
@@ -31,10 +34,6 @@
   $ make
   ```
 
-  With Xcode 8 and above, you'll be asked if you want to remove code singature from Xcode.
-  It is required to make the XCode load XVim.
-  So if you are OK just type 'y' to proceed and remove code signature from your Xcode.
-  
   If you see something like 
   
   ```
@@ -45,6 +44,15 @@
   
   3. Create `.xvimrc` as you need and restart your Xcode. 
 
+  4. Launch Xcode. You'll be asked if you load XVim. Press 'Yes' to it.
+     If you press 'No' by mistake, close the Xcode and execute the following from a terminal
+
+    ```
+    defaults delete  com.apple.dt.Xcode DVTPlugInManagerNonApplePlugIns-Xcode-X.X     (X.X is your Xcode version)
+    ```
+    
+     Then relaunch Xcode.
+    
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
  Here is an explanation about each release and branch.
