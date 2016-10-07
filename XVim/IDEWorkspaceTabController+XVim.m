@@ -60,17 +60,28 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
     return (mode % 2) == 0 ? mode + 1 : mode;
 }
 
+
 @implementation IDEWorkspaceTabController (XVim)
 
 - (NSArray*)xvim_allEditorArea{
     NSMutableArray* otherViews = [[NSMutableArray alloc] init];
-    for( IDEViewController* c in [self _keyboardFocusAreas] ){
+    for( IDEViewController* c in [self xvim_keyboardFocusAreas] ){
         if( [[[c class] description] isEqualToString:@"IDEEditorContext"] ){
             [otherViews addObject:c];
         }
     }
     return otherViews;
 }
+
+- (id)xvim_keyboardFocusAreas {
+        if ([self respondsToSelector:@selector(_keyboardFocusAreas)]) {
+                return [self performSelector:@selector(_keyboardFocusAreas)];
+        } else if ([self respondsToSelector:@selector(_keyboardFocusAreas:)]) {
+                return [self performSelector:@selector(_keyboardFocusAreas:) withObject:@YES];
+        }
+        return nil;
+}
+
 
 -(GeniusLayoutMode)xvim_currentLayout
 {

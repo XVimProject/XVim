@@ -22,8 +22,8 @@
 		A2752F5519F3E00200D1642C /* XVimTaskRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = A2752F5319F3E00200D1642C /* XVimTaskRunner.m */; };
 		A2752F5819F3E04F00D1642C /* ProcessRunner.m in Sources */ = {isa = PBXBuildFile; fileRef = A2752F5719F3E04F00D1642C /* ProcessRunner.m */; };
 		A27EBB8719EA442000C328FB /* XVimTester+Jump.m in Sources */ = {isa = PBXBuildFile; fileRef = A27EBB8619EA442000C328FB /* XVimTester+Jump.m */; };
-		A28275AC1C3512C900535692 /* about.xib in Resources */ = {isa = PBXBuildFile; fileRef = A28275AB1C3512C900535692 /* about.xib */; settings = {ASSET_TAGS = (); }; };
-		A28275E81C35222500535692 /* XVimAboutDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = A28275E71C35222500535692 /* XVimAboutDialog.m */; settings = {ASSET_TAGS = (); }; };
+		A28275AC1C3512C900535692 /* about.xib in Resources */ = {isa = PBXBuildFile; fileRef = A28275AB1C3512C900535692 /* about.xib */; };
+		A28275E81C35222500535692 /* XVimAboutDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = A28275E71C35222500535692 /* XVimAboutDialog.m */; };
 		A28F422817EEDBC200A3F7AE /* Logger.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B314D6F56E003B6433 /* Logger.m */; };
 		A28F422917EEDBC200A3F7AE /* XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782B814D6F56E003B6433 /* XVim.m */; };
 		A28F422A17EEDBC200A3F7AE /* XVimCommandField.m in Sources */ = {isa = PBXBuildFile; fileRef = A24782BA14D6F56E003B6433 /* XVimCommandField.m */; };
@@ -317,6 +317,8 @@
 		D65D3A2E1B92EB2800E67E3E /* NSColor+Extra.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSColor+Extra.m"; path = "XVim/NSColor+Extra.m"; sourceTree = "<group>"; };
 		E905EE3718B045FE0052D3C1 /* DVTTextSidebarView+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "DVTTextSidebarView+XVim.h"; path = "XVim/DVTTextSidebarView+XVim.h"; sourceTree = SOURCE_ROOT; };
 		E905EE3818B045FE0052D3C1 /* DVTTextSidebarView+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "DVTTextSidebarView+XVim.m"; path = "XVim/DVTTextSidebarView+XVim.m"; sourceTree = SOURCE_ROOT; };
+		ED20D1831D65192100A1B58D /* DVTTextSidebarView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DVTTextSidebarView.h; path = XcodeClasses/Xcode8/DVTTextSidebarView.h; sourceTree = SOURCE_ROOT; };
+		ED20D1841D6519E600A1B58D /* DVTTextSidebarView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DVTTextSidebarView.h; sourceTree = SOURCE_ROOT; };
 		ED37857B1A96F099003BE404 /* XVimReplacePromptEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimReplacePromptEvaluator.h; path = XVim/XVimReplacePromptEvaluator.h; sourceTree = SOURCE_ROOT; };
 		ED37857C1A96F099003BE404 /* XVimReplacePromptEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimReplacePromptEvaluator.m; path = XVim/XVimReplacePromptEvaluator.m; sourceTree = SOURCE_ROOT; };
 		F100DC2C150BB6BC002C703C /* XVimRegisterEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimRegisterEvaluator.h; path = XVim/XVimRegisterEvaluator.h; sourceTree = SOURCE_ROOT; };
@@ -539,6 +541,7 @@
 				A2C55FCB17EE9F49000EBEA7 /* IDEFoundation.h */,
 				A2C55FCC17EE9F49000EBEA7 /* IDEKit.h */,
 				A2C55FCD17EE9F49000EBEA7 /* IDESourceEditor.h */,
+				ED20D1841D6519E600A1B58D /* DVTTextSidebarView.h */,
 			);
 			name = Xcode4;
 			sourceTree = "<group>";
@@ -733,10 +736,19 @@
 		C38A5B481527C9EE00E1448D /* Xcode Class Definitions */ = {
 			isa = PBXGroup;
 			children = (
+				ED20D1821D65172600A1B58D /* Xcode8 */,
 				A2C55FCE17EE9F4E000EBEA7 /* Xcode5 */,
 				A2C55FC817EE9F29000EBEA7 /* Xcode4 */,
 			);
 			name = "Xcode Class Definitions";
+			sourceTree = "<group>";
+		};
+		ED20D1821D65172600A1B58D /* Xcode8 */ = {
+			isa = PBXGroup;
+			children = (
+				ED20D1831D65192100A1B58D /* DVTTextSidebarView.h */,
+			);
+			name = Xcode8;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -941,6 +953,11 @@
 					"XVIM_XCODE_VERSION=5",
 					"$(inherited)",
 				);
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=macosx10.12]" = (
+					"XVIM_XCODE_VERSION=5",
+					"XVIM_XCODE8=1",
+					"$(inherited)",
+				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				INFOPLIST_FILE = XVim/Info.plist;
@@ -971,6 +988,10 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "XVim/XVim-Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = "XVIM_XCODE_VERSION=5";
+				"GCC_PREPROCESSOR_DEFINITIONS[sdk=macosx10.12]" = (
+					"XVIM_XCODE_VERSION=5",
+					"XVIM_XCODE8=1",
+				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_SIGN_COMPARE = YES;
 				INFOPLIST_FILE = XVim/Info.plist;
@@ -998,6 +1019,8 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				EXTRA_XCODE_CLASSES_HEADER_PATH = "";
+				"EXTRA_XCODE_CLASSES_HEADER_PATH[sdk=macosx10.12]" = ./XcodeClasses/Xcode8;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_DIR)/../Frameworks",
 					"$(DEVELOPER_DIR)/../PlugIns",
@@ -1022,7 +1045,7 @@
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
 				ONLY_ACTIVE_ARCH = YES;
-				USER_HEADER_SEARCH_PATHS = "./XcodeClasses/Xcode4 ./XVim";
+				USER_HEADER_SEARCH_PATHS = "$(EXTRA_XCODE_CLASSES_HEADER_PATH) ./XcodeClasses/Xcode4 ./XVim";
 				USE_HEADERMAP = NO;
 			};
 			name = Debug;
@@ -1040,6 +1063,8 @@
 				CONFIGURATION_TEMP_DIR = "$(PROJECT_TEMP_DIR)/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXTRA_XCODE_CLASSES_HEADER_PATH = "";
+				"EXTRA_XCODE_CLASSES_HEADER_PATH[sdk=macosx10.12]" = ./XcodeClasses/Xcode8;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_DIR)/../Frameworks",
 					"$(DEVELOPER_DIR)/../PlugIns",
@@ -1056,7 +1081,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = "$(inherited)";
 				MACOSX_DEPLOYMENT_TARGET = 10.6;
-				USER_HEADER_SEARCH_PATHS = "./XcodeClasses/Xcode4 ./XVim";
+				USER_HEADER_SEARCH_PATHS = "$(EXTRA_XCODE_CLASSES_HEADER_PATH) ./XcodeClasses/Xcode4 ./XVim";
 				USE_HEADERMAP = NO;
 			};
 			name = Release;

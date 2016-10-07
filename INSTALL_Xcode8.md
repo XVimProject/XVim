@@ -4,7 +4,7 @@ Since Apple decided not to load 3rd party plugins, we have to make change to it.
 
 1. Close Xcode
     
-2. Prepare code sing certificate
+2. Prepare code sign certificate
    
    If you already have a certificate from Apple's developer program you can use it (so skip to next section now). If you don't have one or don't want to use the existing certificate create new one as follows.
 
