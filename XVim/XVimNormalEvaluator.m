@@ -456,6 +456,11 @@
 }
 
 - (XVimEvaluator*)C_RSQUAREBRACKET{
+    // Add current position/file to jump list
+    XVimMotion *motion = XVIM_MAKE_MOTION(MOTION_POSITION_JUMP, DEFAULT_MOTION_TYPE, MOTION_OPTION_NONE, 0);
+    motion.jumpToAnotherFile = YES;
+    [self.window preMotion:motion];
+        
     [NSApp sendAction:@selector(jumpToDefinition:) to:nil from:self];
     return nil;
 }
