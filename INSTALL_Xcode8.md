@@ -23,7 +23,7 @@ Since Apple decided not to load 3rd party plugins, we have to make change to it.
   Now you have a certificate to code sign.
 
 
-3. Resigning Xcode
+3. Re-signing Xcode
 
    Then in a terminal,
 
