@@ -249,11 +249,11 @@ static NSUInteger xvim_sb_count_columns(xvim_string_buffer_t *sb, NSUInteger tab
 {
     NSUInteger pos = [self xvim_startOfLine:index];
     NSUInteger len = self.length;
-    if( len == 0 ){
+    if( len == 0 || pos == len ){
         return NSNotFound;
     }
 
-    if (pos == index && isNewline([self.xvim_string characterAtIndex:(pos - 1)])) {
+    if (pos == index && isNewline([self.xvim_string characterAtIndex:(pos)])) {
         return NSNotFound;
     }
     return pos;
