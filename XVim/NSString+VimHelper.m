@@ -119,6 +119,15 @@ static NSString *precomputed[9] = {
     return tmp;
 }
 
+- (unichar) safeCharacterAtIndex:(NSUInteger)index
+{
+    if ([self length] <= index){
+        return 0;
+    }
+    unichar uc = [self characterAtIndex:index];
+    return uc;
+}
+
 + (NSString *)stringMadeOfSpaces:(NSUInteger)count
 {
     if (count <= 8) {

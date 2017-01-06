@@ -38,6 +38,7 @@ KeywordType keywordType(unichar ch);
 - (BOOL) isNewline:(NSUInteger)index;
 - (BOOL) isKeyword:(NSUInteger)index;
 - (KeywordType) keywordType:(NSUInteger)index;
+- (unichar) safeCharacterAtIndex:(NSUInteger)index;
 
 /**
  * Convert Vim regex to ICU regex.
