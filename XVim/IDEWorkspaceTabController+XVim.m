@@ -63,6 +63,7 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
 @implementation IDEWorkspaceTabController (XVim)
 
 - (NSArray*)xvim_allEditorArea{
+#ifdef XCODE8_AND_LOWER
     NSMutableArray* otherViews = [[NSMutableArray alloc] init];
     for( IDEViewController* c in [self _keyboardFocusAreas] ){
         if( [[[c class] description] isEqualToString:@"IDEEditorContext"] ){
@@ -70,6 +71,10 @@ static inline BOOL xvim_horizontallyStackingModeForMode(GeniusLayoutMode mode) {
         }
     }
     return otherViews;
+#else
+    // _keyboardFocusAreas is not defined in Xcode8
+    return @[];
+#endif
 }
 
 -(GeniusLayoutMode)xvim_currentLayout
