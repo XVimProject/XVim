@@ -59,7 +59,6 @@
 
 @interface NSTextView(VimOperationPrivate)
 @property BOOL xvim_lockSyncStateFromView;
-- (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve;
 - (void)xvim_syncStateWithScroll:(BOOL)scroll;
 - (void)xvim_syncState; // update self's properties with our variables
 - (NSArray*)xvim_selectedRanges;
@@ -68,9 +67,7 @@
 - (NSRange)xvim_getOperationRangeFrom:(NSUInteger)from To:(NSUInteger)to Type:(MOTION_TYPE)type;
 - (void)xvim_indentCharacterRange:(NSRange)range;
 - (void)xvim_scrollCommon_moveCursorPos:(NSUInteger)lineNumber firstNonblank:(BOOL)fnb;
-- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count;
 - (NSUInteger)xvim_lineNumberAtMiddle;
-- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count;
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward;
 - (void)xvim_swapCaseForRange:(NSRange)range;
 - (void)xvim_registerInsertionPointForUndo;
@@ -80,6 +77,32 @@
 @implementation NSTextView (VimOperation)
 
 #pragma mark internal helpers
+
+/**
+ * Returns start and end position of the specified motion.
+ * Note that this may return NSNotFound
+ **/
+
+- (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
+    // This method only update the internal state(like self.insertionPoint)
+    
+    if( pos > [self xvim_string].length){
+        //ERROR_LOG(@"[%p]Position specified exceeds the length of the text", self);
+        pos = [self xvim_string].length;
+    }
+    
+    if( self.cursorMode == CURSOR_MODE_COMMAND && !(self.selectionMode == XVIM_VISUAL_BLOCK)){
+        self.insertionPoint = [self.textStorage convertToValidCursorPositionForNormalMode:pos];
+    }else{
+        self.insertionPoint = pos;
+    }
+    
+    if( !preserve ){
+        self.preservedColumn = [self.textStorage xvim_columnOfIndex:self.insertionPoint];
+    }
+    
+    //DEBUG_LOG(@"[%p]New Insertion Point:%d   Preserved Column:%d", self, self.insertionPoint, self.preservedColumn);
+}
 
 - (void)_xvim_insertSpaces:(NSUInteger)count replacementRange:(NSRange)replacementRange
 {
@@ -2197,6 +2220,34 @@
     self.selectionBegin = self.insertionPoint;
 }
 
+- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count{
+    NSAssert( 0 != count , @"count starts from 1" );
+    if( count > [self xvim_numberOfLinesInVisibleRect] ){
+        count = [self xvim_numberOfLinesInVisibleRect];
+    }
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSPoint top = [[scrollView contentView] bounds].origin;
+    // Add height of "count" of lines to downwards
+    top.y += (NSHeight(glyphRect) / 2.0f) + (NSHeight(glyphRect) * (count-1));
+    return [self.textStorage xvim_lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:top]];
+}
+
+- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count { // L
+    NSAssert( 0 != count , @"count starts from 1" );
+    if( count > [self xvim_numberOfLinesInVisibleRect] ){
+        count = [self xvim_numberOfLinesInVisibleRect];
+    }
+    NSScrollView *scrollView = [self enclosingScrollView];
+    NSTextContainer *container = [self textContainer];
+    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
+    NSPoint bottom = [[scrollView contentView] bounds].origin;
+    // This calculate the position of the bottom line and substruct height of "count" of lines to upwards
+    bottom.y += [[scrollView contentView] bounds].size.height - (NSHeight(glyphRect) / 2.0f) - (NSHeight(glyphRect) * (count-1));
+    return [self.textStorage xvim_lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:bottom]];
+}
+
 @end
 
 
@@ -2210,32 +2261,6 @@
 
 - (void)setXvim_lockSyncStateFromView:(BOOL)lock{
     [self setBool:lock forName:@"lockSyncStateFromView"];
-}
-
-/**
- * Returns start and end position of the specified motion.
- * Note that this may return NSNotFound
- **/
-
-- (void)xvim_moveCursor:(NSUInteger)pos preserveColumn:(BOOL)preserve{
-    // This method only update the internal state(like self.insertionPoint)
-    
-    if( pos > [self xvim_string].length){
-        //ERROR_LOG(@"[%p]Position specified exceeds the length of the text", self);
-        pos = [self xvim_string].length;
-    }
-    
-    if( self.cursorMode == CURSOR_MODE_COMMAND && !(self.selectionMode == XVIM_VISUAL_BLOCK)){
-        self.insertionPoint = [self.textStorage convertToValidCursorPositionForNormalMode:pos];
-    }else{
-        self.insertionPoint = pos;
-    }
-    
-    if( !preserve ){
-        self.preservedColumn = [self.textStorage xvim_columnOfIndex:self.insertionPoint];
-    }
-    
-    //DEBUG_LOG(@"[%p]New Insertion Point:%d   Preserved Column:%d", self, self.insertionPoint, self.preservedColumn);
 }
 
 - (void)_adjustCursorPosition{
@@ -2643,39 +2668,11 @@
     }
 }
 
-- (NSUInteger)xvim_lineNumberFromBottom:(NSUInteger)count { // L
-    NSAssert( 0 != count , @"count starts from 1" );
-    if( count > [self xvim_numberOfLinesInVisibleRect] ){
-        count = [self xvim_numberOfLinesInVisibleRect];
-    }
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint bottom = [[scrollView contentView] bounds].origin;
-    // This calculate the position of the bottom line and substruct height of "count" of lines to upwards
-    bottom.y += [[scrollView contentView] bounds].size.height - (NSHeight(glyphRect) / 2.0f) - (NSHeight(glyphRect) * (count-1));
-    return [self.textStorage xvim_lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:bottom]];
-}
-
 - (NSUInteger)xvim_lineNumberAtMiddle{
     NSScrollView *scrollView = [self enclosingScrollView];
     NSPoint center = [[scrollView contentView] bounds].origin;
     center.y += [[scrollView contentView] bounds].size.height / 2;
     return [self.textStorage xvim_lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:center]];
-}
-
-- (NSUInteger)xvim_lineNumberFromTop:(NSUInteger)count{
-    NSAssert( 0 != count , @"count starts from 1" );
-    if( count > [self xvim_numberOfLinesInVisibleRect] ){
-        count = [self xvim_numberOfLinesInVisibleRect];
-    }
-    NSScrollView *scrollView = [self enclosingScrollView];
-    NSTextContainer *container = [self textContainer];
-    NSRect glyphRect = [[self layoutManager] boundingRectForGlyphRange:[self selectedRange] inTextContainer:container];
-    NSPoint top = [[scrollView contentView] bounds].origin;
-    // Add height of "count" of lines to downwards
-    top.y += (NSHeight(glyphRect) / 2.0f) + (NSHeight(glyphRect) * (count-1));
-    return [self.textStorage xvim_lineNumberAtIndex:[[scrollView documentView] characterIndexForInsertionAtPoint:top]];
 }
 
 - (NSRange)xvim_search:(NSString*)regex count:(NSUInteger)count option:(MOTION_OPTION)opt forward:(BOOL)forward{
