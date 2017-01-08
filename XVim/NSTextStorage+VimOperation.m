@@ -1865,9 +1865,10 @@ NSRange xv_current_block(NSString *string, NSUInteger index, NSUInteger count, B
         
         /*
          * Search for matching ')', '}', etc.
-         * Put this position in curwin->w_cursor.
+         * Put this position in end_pos.
+         * Ignore quotes here.
          */
-        if ((end_pos = findmatchlimit(string, end_pos, other, NO)) == -1) {
+        if ((end_pos = findmatchlimit(string, end_pos, other, YES)) == -1) {
             return NSMakeRange(NSNotFound, 0);
         }
     }

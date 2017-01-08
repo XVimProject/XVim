@@ -21,6 +21,7 @@
     static NSString* text_object7 = @"hhh hhh hhh";
     static NSString* text_object8 = @"iiiiIIIIiii";
     static NSString* text_object9 = @"jjj_jjj_jjj";
+    static NSString* text_object10 = @"aaa(\"aaa\")aaa";
     
     
     // Text object results with delete
@@ -53,6 +54,8 @@
     static NSString* text_object_i_result9 = @"jjj__jjj";
     static NSString* text_object_i_result9_i = @"jjj_kkk_jjj";
     static NSString* text_object_a_result9 = @"jjjjjj";
+    static NSString* text_object_i_result10 = @"aaa()aaa";
+    static NSString* text_object_i_result10_i = @"aaa(bbb)aaa";
     
     // Text object results with yank
     static NSString* text_object_yi_result0 = @"aaaaaa(aaa)aaa";
@@ -68,6 +71,7 @@
         XVimMakeTestCase(text_object0, 5, 0, @"dib", text_object_i_result0 , 4, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"dab", text_object_a_result0 , 3, 0),
         XVimMakeTestCase(text_object0, 3, 0, @"di(", text_object_i_result0 , 4, 0), // begin on (
+        XVimMakeTestCase(text_object10, 3, 0, @"di(", text_object_i_result10 , 4, 0),
             
         XVimMakeTestCase(text_object0, 5, 0, @"yi(0P", text_object_yi_result0 , 2, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"yi)0P", text_object_yi_result0 , 2, 0),
@@ -121,6 +125,7 @@
         // c ()
         XVimMakeTestCase(text_object0, 5, 0, @"ci(bbb<ESC>", text_object_i_result0_i , 6, 0),
         XVimMakeTestCase(text_object0, 5, 0, @"ci)bbb<ESC>", text_object_i_result0_i , 6, 0),
+        XVimMakeTestCase(text_object10, 5, 0, @"ci)bbb<ESC>", text_object_i_result10_i , 6, 0),
 
         // c "
         XVimMakeTestCase(text_object1, 5, 0, @"ci\"aaa<ESC>", text_object_i_result1_i , 6, 0),
