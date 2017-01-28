@@ -192,6 +192,11 @@
     return;
 }
 
+- (BOOL)isIDEPlaygroundSourceTextView
+{
+    return [self isMemberOfClass:NSClassFromString(@"IDEPlaygroundTextView")];
+} 
+
 // Drawing Caret
 - (void)xvim__drawInsertionPointInRect:(NSRect)aRect color:(NSColor*)aColor{
     // TRACE_LOG(@"%f %f %f %f", aRect.origin.x, aRect.origin.y, aRect.size.width, aRect.size.height);
@@ -200,6 +205,20 @@
         if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
             // Use original behavior when insert mode.
             return [self xvim__drawInsertionPointInRect:aRect color:aColor];
+        }
+
+        if ([self isIDEPlaygroundSourceTextView]){
+            // Copypasta from pebble8888/XVim, Huge thanks to pebble8888!!
+            // Here's the link to the commit:
+            // https://github.com/pebble8888/XVim/commit/e27a614f6b59534b934ddeecba4c7355f34d4057
+            // Playground code
+            NSGraphicsContext* context = [NSGraphicsContext currentContext];
+            [context saveGraphicsState];
+            NSUInteger glyphIndex = [self insertionPoint];
+            NSRect glyphRect = [self xvim_boundingRectForGlyphIndex:glyphIndex];
+            [window drawInsertionPointInRect:glyphRect color:aColor];
+            [context restoreGraphicsState];
+            return;
         }
 
         // Erase old cursor.
@@ -225,6 +244,11 @@
     if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
         // Use original behavior when insert mode.
         return [self xvim_drawInsertionPointInRect:rect color:color turnedOn:flag];
+    }
+
+    if ([self isIDEPlaygroundSourceTextView]) {
+        [self _drawInsertionPointInRect:NSZeroRect color:[NSColor grayColor]];
+        return;
     }
 
     /*

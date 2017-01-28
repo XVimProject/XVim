@@ -1432,10 +1432,7 @@
 }
 
 - (void)xvim_insertNewlineAboveCurrentLineWithIndent{
-    NSUInteger head = [self.textStorage xvim_firstOfLine:self.insertionPoint];
-    if( NSNotFound == head ){
-        head = self.insertionPoint;
-    }
+    NSUInteger head = [self.textStorage xvim_startOfLine:self.insertionPoint];
     if( 0 != head ){
         [self setSelectedRange:NSMakeRange(head-1,0)];
         [self insertNewline:self];
