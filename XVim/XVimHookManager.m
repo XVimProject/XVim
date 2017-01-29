@@ -53,7 +53,6 @@
     [DVTTextSidebarView xvim_initialize];
     [DVTSourceTextScrollView xvim_initialize];
     [IDESourceCodeEditor xvim_initialize];
-    [IDEPlaygroundEditor xvim_initialize];
     [IDEEditor xvim_initialize];
     [IDEApplicationController xvim_initialize];
 }
