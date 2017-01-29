@@ -490,7 +490,7 @@ static const NSTimeInterval EXTERNAL_COMMAND_TIMEOUT_SECS = 5.0;
                        CMD(@"tabnext", @"tabnext:inWindow:"),
                        CMD(@"tabnew", @"splitview:inWindow:"),
                        CMD(@"tabonly", @"tabonly:inWindow:"),
-                       CMD(@"tabprevious", @"tabnext:inWindow:"),
+                       CMD(@"tabprevious", @"tabprevious:inWindow:"),
                        CMD(@"tabNext", @"tabnext:inWindow:"),
                        CMD(@"tabrewind", @"tabnext:inWindow:"),
                        CMD(@"tabs", @"tabs:inWindow:"),
