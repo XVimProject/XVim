@@ -51,6 +51,19 @@
     return nil;
 }
 
+- (XVimEvaluator*)n{
+    self.motion = [XVim.instance.searcher motionForRepeatSearch];
+    self.motion.motion = MOTION_SEARCH_MATCHED_FORWARD;
+
+    return nil;
+}
+
+- (XVimEvaluator*)N{
+    self.motion = [XVim.instance.searcher motionForRepeatSearch];
+    self.motion.motion = MOTION_SEARCH_MATCHED_BACKWARD;
+
+    return nil;
+}
 - (XVimEvaluator*)searchCurrentWord:(BOOL)forward {
     XVimCommandLineEvaluator* eval = [self searchEvaluatorForward:forward];
     NSRange r = [self.sourceView xvim_currentWord:MOTION_OPTION_NONE];

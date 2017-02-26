@@ -2489,6 +2489,18 @@
                 end = range.location;
 			}
             break;
+        case MOTION_SEARCH_MATCHED_FORWARD:
+            range = [self.textStorage searchRegexForward:motion.regex from:self.insertionPoint count:motion.count option:motion.option];
+            if (range.location != NSNotFound) {
+                [self xvim_setSelectedRange:NSMakeRange(range.location, 0)];
+            }
+            break;
+        case MOTION_SEARCH_MATCHED_BACKWARD:
+            range = [self.textStorage searchRegexBackward:motion.regex from:self.insertionPoint count:motion.count option:motion.option];
+            if (range.location != NSNotFound) {
+                [self xvim_setSelectedRange:NSMakeRange(range.location, 0)];
+            }
+            break;
         case TEXTOBJECT_WORD:
             range = [self.textStorage currentWord:begin count:motion.count  option:motion.option];
             break;
