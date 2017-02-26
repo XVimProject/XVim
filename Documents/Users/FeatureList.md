@@ -8,7 +8,7 @@ If you've tried a command and it really is missing, feel free to create an issue
 friendly contributor will pick it up eventually.
 
 ## Motion
-b, B, f, F, gg, G, h, j, k, l, w, W, t, T, 0, $, ^, %, +, -, {, }, (, ), n, N, ', `, M, H, L
+b, B, f, F, gg, G, h, j, k, l, w, W, t, T, 0, $, ^, %, +, -, {, }, (, ), n, N, gn, gN, ', `, M, H, L
 
 Comma and semicolon are supported. Toggle inclusive/exclusive by v is supported.
 
