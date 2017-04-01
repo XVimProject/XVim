@@ -13,7 +13,6 @@
 		6E2B33341836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m in Sources */ = {isa = PBXBuildFile; fileRef = 6E2B33331836E60600EFE4E2 /* DVTTextStorage+XVimTextStoring.m */; };
 		A204814F19702F3E0064BE66 /* NSObject+XVimAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = A204814E19702F3E0064BE66 /* NSObject+XVimAdditions.m */; };
 		A212A53D1940A330002FB2CF /* XVim.xcplugin in Copy Files */ = {isa = PBXBuildFile; fileRef = A2E7E45217EF0219008F045A /* XVim.xcplugin */; };
-		A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */; };
 		A2193E9A1BE73300002629FB /* IDELanguageSupportUI in Frameworks */ = {isa = PBXBuildFile; fileRef = A2193E991BE73300002629FB /* IDELanguageSupportUI */; };
 		A25032B319F805110021C34E /* IDEWorkspaceTabController+XVim.m in Sources */ = {isa = PBXBuildFile; fileRef = A25032B219F805110021C34E /* IDEWorkspaceTabController+XVim.m */; };
 		A259E2231B3C263B006000D9 /* NSURL+XVimXcodeModule.m in Sources */ = {isa = PBXBuildFile; fileRef = A259E2221B3C263B006000D9 /* NSURL+XVimXcodeModule.m */; };
@@ -141,8 +140,6 @@
 		A2165BFC17A3762C00AB18FD /* XVimDefs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = XVimDefs.h; path = XVim/XVimDefs.h; sourceTree = SOURCE_ROOT; };
 		A216F39F156560FE00AD2529 /* IDEEditorArea+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEEditorArea+XVim.h"; path = "XVim/IDEEditorArea+XVim.h"; sourceTree = SOURCE_ROOT; };
 		A216F3A0156560FE00AD2529 /* IDEEditorArea+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEEditorArea+XVim.m"; path = "XVim/IDEEditorArea+XVim.m"; sourceTree = SOURCE_ROOT; };
-		A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "IDEPlaygroundEditor+XVim.h"; path = "XVim/IDEPlaygroundEditor+XVim.h"; sourceTree = SOURCE_ROOT; };
-		A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "IDEPlaygroundEditor+XVim.m"; path = "XVim/IDEPlaygroundEditor+XVim.m"; sourceTree = SOURCE_ROOT; };
 		A2193E991BE73300002629FB /* IDELanguageSupportUI */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = IDELanguageSupportUI; path = ../PlugIns/IDELanguageSupportUI.ideplugin/Contents/MacOS/IDELanguageSupportUI; sourceTree = DEVELOPER_DIR; };
 		A222B5DF1514DFCD005E8802 /* XVimOperatorEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimOperatorEvaluator.h; path = XVim/XVimOperatorEvaluator.h; sourceTree = SOURCE_ROOT; };
 		A222B5E01514DFCD005E8802 /* XVimOperatorEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimOperatorEvaluator.m; path = XVim/XVimOperatorEvaluator.m; sourceTree = SOURCE_ROOT; };
@@ -723,8 +720,6 @@
 				A2F2621A182CEC3600AD3DC4 /* DVTSourceTextScrollView+XVim.m */,
 				C38A5B4515272DCC00E1448D /* IDESourceCodeEditor+XVim.h */,
 				C38A5B4615272DCD00E1448D /* IDESourceCodeEditor+XVim.m */,
-				A2193E941BE56730002629FB /* IDEPlaygroundEditor+XVim.h */,
-				A2193E951BE56730002629FB /* IDEPlaygroundEditor+XVim.m */,
 				A26ACC4C154F2D6600B27D69 /* IDEEditor+XVim.h */,
 				A26ACC4D154F2D6700B27D69 /* IDEEditor+XVim.m */,
 				C345DDB9154CE12A009F232E /* XVimHookManager.h */,
@@ -856,7 +851,6 @@
 				A28F423917EEDBC200A3F7AE /* XVimRegisterEvaluator.m in Sources */,
 				A28F423A17EEDBC200A3F7AE /* XVimOperatorEvaluator.m in Sources */,
 				A28F423B17EEDBC200A3F7AE /* XVimKeyStroke.m in Sources */,
-				A2193E961BE56730002629FB /* IDEPlaygroundEditor+XVim.m in Sources */,
 				A28F423C17EEDBC200A3F7AE /* DVTSourceTextView+XVim.m in Sources */,
 				A28F423D17EEDBC200A3F7AE /* IDESourceCodeEditor+XVim.m in Sources */,
 				A28F423E17EEDBC200A3F7AE /* XVimNumericEvaluator.m in Sources */,
