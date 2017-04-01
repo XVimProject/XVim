@@ -118,10 +118,10 @@
     }@catch (NSException* exception) {
         ERROR_LOG(@"Exception %@: %@", [exception name], [exception reason]);
         [Logger logStackTrace:exception];
-	// For debugging purpose we rethrow the exception
-	if( [XVim instance].options.debug ){
-	    @throw exception;
-	}
+        // For debugging purpose we rethrow the exception
+        if( [XVim instance].options.debug ){
+            @throw exception;
+        }
     }
     return;
 }
@@ -202,7 +202,10 @@
     // TRACE_LOG(@"%f %f %f %f", aRect.origin.x, aRect.origin.y, aRect.size.width, aRect.size.height);
     @try{
         XVimWindow* window = [self xvim_window];
-        if( [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]]){
+
+        // Only execute this code if we do NOT want a blockcursor
+        if( ![[[XVim instance] options] blockcursor] &&
+            [[[window currentEvaluator] class] isSubclassOfClass:[XVimInsertEvaluator class]] ){
             // Use original behavior when insert mode.
             return [self xvim__drawInsertionPointInRect:aRect color:aColor];
         }
@@ -324,7 +327,7 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
 }
 
 - (void)xvim_observeValueForKeyPath:(NSString *)keyPath  ofObject:(id)object  change:(NSDictionary *)change  context:(void *)context {
-	if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"] || [keyPath isEqualToString:@"highlight"]){
+    if([keyPath isEqualToString:@"ignorecase"] || [keyPath isEqualToString:@"hlsearch"] || [keyPath isEqualToString:@"lastSearchString"] || [keyPath isEqualToString:@"highlight"]){
         [self setNeedsUpdateFoundRanges:YES];
         [self setNeedsDisplayInRect:[self visibleRect] avoidAdditionalLayout:YES];
     }

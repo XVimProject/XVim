@@ -39,6 +39,7 @@
          @"relativenumber", @"rn",
          @"alwaysuseinputsource", @"auis",
          @"blinkcursor", @"bc",
+         @"blockcursor", @"blockc",
          @"startofline", @"sol",
          @"expandtab", @"et",
          @"highlight", @"hi",
@@ -49,10 +50,10 @@
         _wrapscan = YES;
         _errorbells = NO;
         _incsearch = YES;
-		_gdefault = NO;
-		_smartcase = NO;
-		_clipboard = @"";
-		_guioptions = @"rb";
+        _gdefault = NO;
+        _smartcase = NO;
+        _clipboard = @"";
+        _guioptions = @"rb";
         _timeoutlen = @"1000";
         _laststatus = 2;
         _hlsearch = NO;
@@ -61,6 +62,7 @@
         _relativenumber = NO;
         _alwaysuseinputsource = NO;
         _blinkcursor = NO;
+        _blockcursor = NO;
         _startofline = YES;
         _expandtab = YES;
         self.highlight = @{@"Search": @{
