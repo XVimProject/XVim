@@ -101,26 +101,26 @@
         return;
     }
 
-	NSInteger remain = (NSInteger)count;
-	NSUInteger pos = head_pos;
-	NSUInteger temp_width = 0;
-	for( ;remain > 0; ++pos ){
-		const unichar c = [s characterAtIndex:pos];
-		if( c == '\t' ){
-			remain -= tabWidth;
-			// reset
-			temp_width = 0;
-		} else if( c == ' ' ){
-			++temp_width;
-			if( temp_width >= tabWidth ){
-				remain -= tabWidth;	
-				// reset
-				temp_width = 0;
-			}
-		} else {
-			break;
-		}
-	}
+    NSInteger remain = (NSInteger)count;
+    NSUInteger pos = head_pos;
+    NSUInteger temp_width = 0;
+    for( ;remain > 0; ++pos ){
+        const unichar c = [s characterAtIndex:pos];
+        if( c == '\t' ){
+            remain -= tabWidth;
+            // reset
+            temp_width = 0;
+        } else if( c == ' ' ){
+            ++temp_width;
+            if( temp_width >= tabWidth ){
+                remain -= tabWidth; 
+                // reset
+                temp_width = 0;
+            }
+        } else {
+            break;
+        }
+    }
     [self insertText:@"" replacementRange:NSMakeRange(head_pos, pos - head_pos)];
 }
 
