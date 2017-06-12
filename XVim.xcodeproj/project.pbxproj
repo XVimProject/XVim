@@ -128,7 +128,7 @@
 		0E698B1B1B09CF7600E3F81F /* XVimTester+Options.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "XVimTester+Options.m"; path = "XVim/Test/XVimTester+Options.m"; sourceTree = SOURCE_ROOT; };
 		2616859C1A3E1962007AA008 /* XVimReplaceEvaluator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimReplaceEvaluator.h; path = XVim/XVimReplaceEvaluator.h; sourceTree = SOURCE_ROOT; };
 		2616859D1A3E1962007AA008 /* XVimReplaceEvaluator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimReplaceEvaluator.m; path = XVim/XVimReplaceEvaluator.m; sourceTree = SOURCE_ROOT; };
-		4D504AD11EC35E1300C5A804 /* IDEPlaygroundEditor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = IDEPlaygroundEditor; path = ../../../../../Applications/Xcode.app/Contents/PlugIns/IDEPlaygroundEditor.ideplugin/Contents/MacOS/IDEPlaygroundEditor; sourceTree = "<group>"; };
+		4D504AD11EC35E1300C5A804 /* IDEPlaygroundEditor */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = IDEPlaygroundEditor; path = ../PlugIns/IDEPlaygroundEditor.ideplugin/Contents/MacOS/IDEPlaygroundEditor; sourceTree = DEVELOPER_DIR; };
 		6E2B332A1836E42F00EFE4E2 /* XVimBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimBuffer.h; path = XVim/XVimBuffer.h; sourceTree = SOURCE_ROOT; };
 		6E2B332B1836E42F00EFE4E2 /* XVimBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = XVimBuffer.m; path = XVim/XVimBuffer.m; sourceTree = SOURCE_ROOT; };
 		6E2B332E1836E47500EFE4E2 /* XVimTextStoring.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XVimTextStoring.h; path = XVim/XVimTextStoring.h; sourceTree = SOURCE_ROOT; };
@@ -782,7 +782,7 @@
 			attributes = {
 				LastUpgradeCheck = 0600;
 			};
-			buildConfigurationList = A2B4BAB214D59F6600D817B0 /* Build configuration list for PBXProject "m" */;
+			buildConfigurationList = A2B4BAB214D59F6600D817B0 /* Build configuration list for PBXProject "XVim" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -1098,7 +1098,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A2B4BAB214D59F6600D817B0 /* Build configuration list for PBXProject "m" */ = {
+		A2B4BAB214D59F6600D817B0 /* Build configuration list for PBXProject "XVim" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				A2B4BAC814D59F6600D817B0 /* Debug */,
