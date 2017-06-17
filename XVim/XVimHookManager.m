@@ -19,6 +19,7 @@
 #import "DVTSourceTextView+XVim.h"
 #import "IDEApplicationController+XVim.h"
 #import "IDEPlaygroundEditor+XVim.h"
+#import "TcC12SourceEditor16SourceEditorView+XVim.h"
 
 @implementation IDEWorkspaceWindow (XVim)
 
@@ -55,6 +56,7 @@
     [IDESourceCodeEditor xvim_initialize];
     [IDEEditor xvim_initialize];
     [IDEApplicationController xvim_initialize];
+    [_TtC12SourceEditor16SourceEditorView xvim_initialize];
 }
 
 @end

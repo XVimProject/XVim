@@ -45,5 +45,5 @@
 - (XVimWindow*)xvim_window;
 
 #pragma Declaration for private methods (To suppress error by ARC)
-- (void)_drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
+//- (void)_drawInsertionPointInRect:(NSRect)rect color:(NSColor*)color;
 @end

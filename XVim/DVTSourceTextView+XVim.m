@@ -244,7 +244,7 @@
     }
 
     if ([self isIDEPlaygroundSourceTextView]) {
-        [self _drawInsertionPointInRect:NSZeroRect color:[NSColor grayColor]];
+        //[self _drawInsertionPointInRect:NSZeroRect color:[NSColor grayColor]];
         return;
     }
 

@@ -24,6 +24,7 @@
 #import "XVimMark.h"
 #import "XVimMarks.h"
 #import "IDEWorkspaceTabController+XVim.h"
+#import "XVimTaskRunner.h"
 
 @interface XVimWindow () {
     NSMutableArray     *_defaultEvaluatorStack;
@@ -156,6 +157,18 @@
  **/
 - (BOOL)handleKeyEvent:(NSEvent *)event
 {
+    if (([event modifierFlags] & NSControlKeyMask) && event.keyCode == 16 /* y */)
+    {
+        // Ctrl-y
+        IDEEditor *editor = _editorArea.lastActiveEditorContext.editor;
+        IDEEditorDocument* document = editor.document;
+        NSURL* documentURL = [document fileURL];
+        NSString* filename = documentURL.path;
+        // FIXME: I don't know how to get current cursor line number in Xcode9.
+        NSInteger linenumber = 1;
+        NSString* str = [NSString stringWithFormat:@"/Applications/mvim +%d %@", linenumber, filename];
+        [XVimTaskRunner runScript:str];
+    }
     // useinputsourcealways option forces to use input source to input on any mode.
     // This is for French or other keyborads.
     // The reason why we do not want to set this option always on is because
@@ -192,6 +205,7 @@
 
 - (BOOL)handleOneXVimString:(XVimString *)oneChar
 {
+    /*
     XVimKeymap *keymap = [self.currentEvaluator selectKeymapWithProvider:[XVim instance]];
     XVimString *mapped = [keymap mapKeys:oneChar withContext:_keymapContext forceFix:NO];
 
@@ -213,6 +227,7 @@
 
     [_commandLine setArgumentString:[self.currentEvaluator argumentDisplayString]];
     [_commandLine setNeedsDisplay:YES];
+    */
     return YES;
 }
 
