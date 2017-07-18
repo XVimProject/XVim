@@ -52,6 +52,8 @@ typedef enum _MOTION{
     MOTION_BOTTOM,                  // L            jump
     MOTION_SEARCH_FORWARD,          // /            jump
     MOTION_SEARCH_BACKWARD,         // ?            jump
+    MOTION_SEARCH_MATCHED_FORWARD,  // gn
+    MOTION_SEARCH_MATCHED_BACKWARD, // gN
     TEXTOBJECT_WORD,
     //TEXTOBJECT_BIGWORD,           // Use motion option
     TEXTOBJECT_SENTENCE,

@@ -14,7 +14,7 @@
     static NSString* text1 = @"aaa\n"   // 0  (index of each WORD)
                              @"bbb\n"   // 4
                              @"ccc";    // 8
-    
+
     static NSString* text2 = @"a;a bbb ccc\n"  // 0  4  8
                              @"ddd e-e fff\n"  // 12 16 20
                              @"ggg hhh i_i\n"  // 24 28 32
@@ -29,9 +29,25 @@
                              @"d(d e-) ddd\n"  // 12 16 20
                              @"g[g }hh i_i\n"  // 24 28 32
                              @"    jj] kkk";   // 36 40 44
-    
+
     static NSString* text5 = @"aaa:<#bbb ccc ddd#> eee"; // 0 3 4 20
-    
+
+
+    static NSString* text6 = @"a;a bbb ccc\n"  // 0  4  8
+                             @"ddd bbb fff\n"  // 12 16 20
+                             @"ggg bbb i_i\n"  // 24 28 32
+                             @"    jjj kkk";   // 36 40 44
+
+    static NSString* text7 = @"a;a  ccc\n"
+                             @"ddd bbb fff\n"
+                             @"ggg bbb i_i\n"
+                             @"    jjj kkk";
+
+    static NSString* text8 = @"a;a bbb ccc\n"
+                             @"ddd bbb fff\n"
+                             @"ggg  i_i\n"
+                             @"    jjj kkk";
+
     return [NSArray arrayWithObjects:
             // b, B
             XVimMakeTestCase(text2,  6, 0,  @"b", text2,  4, 0),
@@ -63,6 +79,10 @@
             XVimMakeTestCase(text2,  4, 0,   @"G", text2, 40, 0),
             XVimMakeTestCase(text2, 44, 0,  @"3G", text2, 24, 0),
             XVimMakeTestCase(text2,  8, 0,  @"9G", text2, 40, 0),
+
+            // gn, gN
+            XVimMakeTestCase(text6, 0, 0, @"/bbb<CR>G<CR>dgn", text7, 4, 0),
+            XVimMakeTestCase(text6, 0, 0, @"/bbb<CR>G<CR>dgN", text8, 28, 0),
 
             // ge, gE
             XVimMakeTestCase(text2,  9, 0, @"gE", text2, 6, 0),
