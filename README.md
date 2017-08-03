@@ -45,13 +45,13 @@
   3. Create `.xvimrc` as you need and restart your Xcode. 
 
   4. Launch Xcode. You'll be asked if you load XVim. Press 'Yes' to it.
-     If you press 'No' by mistake, close the Xcode and execute the following from a terminal
+  If you press 'No' by mistake, close the Xcode and execute the following from a terminal
 
-    ```
-    defaults delete  com.apple.dt.Xcode DVTPlugInManagerNonApplePlugIns-Xcode-X.X     (X.X is your Xcode version)
-    ```
+  ```
+  defaults delete  com.apple.dt.Xcode DVTPlugInManagerNonApplePlugIns-Xcode-X.X     (X.X is your Xcode version)
+  ```
     
-     Then relaunch Xcode.
+  Then relaunch Xcode.
     
 ## Branches and Releases
  XVim has several branches and releases. Usually you only need to download one of 'releases' and use it.
