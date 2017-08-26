@@ -163,11 +163,12 @@
         IDEEditor *editor = _editorArea.lastActiveEditorContext.editor;
         IDEEditorDocument* document = editor.document;
         NSURL* documentURL = [document fileURL];
-        NSString* filename = documentURL.path;
-        // FIXME: I don't know how to get current cursor line number in Xcode9.
-        NSInteger linenumber = 1;
-        NSString* str = [NSString stringWithFormat:@"/Applications/mvim +%d %@", linenumber, filename];
-        [XVimTaskRunner runScript:str];
+        NSString* filepath = documentURL.path;
+        if (filepath != nil){
+            NSUInteger linenumber = [[self class] lineWithPath:filepath pos:self.insertionPoint];
+            NSString* str = [NSString stringWithFormat:@"/Applications/mvim +'%d|silent norm zt' %@", linenumber, filepath];
+            [XVimTaskRunner runScript:str];
+        }
     }
     // useinputsourcealways option forces to use input source to input on any mode.
     // This is for French or other keyborads.
@@ -517,5 +518,20 @@
 					KeepJumpMarkIndex:motion.keepJumpMarkIndex];
 }
 
-@end
++ (NSUInteger)lineWithPath:(NSString*)path pos:(NSUInteger)pos
+{
+    NSError* error;
+    NSString* s = [NSString stringWithContentsOfFile:path encoding:NSUTF8StringEncoding error:&error];
+    if (s == nil){ return 0;}
+    NSUInteger end = s.length;
+    NSUInteger line = 1;
+    for (NSUInteger i = 0; i < end && i < pos; ++i){
+        unichar uc = [s characterAtIndex:i];
+        if (uc == 0x0A){
+            line += 1;
+        }
+    }
+    return line;
+}
 
+@end

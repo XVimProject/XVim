@@ -25,9 +25,6 @@
 + (void)xvim_initialize;
 + (void)xvim_finalize;
 
-@end
-
-@interface _TtC12SourceEditor16SourceEditorView (VimOperation)
 // TODO: Method names in category should have prefix like xvim_
 #pragma mark Properties
 // Make sure that these property names are not conflicting to the properties in NSTextView
@@ -164,7 +161,7 @@
 
 - (void)xvim_syncStateFromView; // update our instance variables with self's properties
 - (IDEEditorArea*)xvim_editorArea;
-- (XVimWindow*)xwim_window;
+- (XVimWindow*)xvim_window;
 
 - (void)setXvimDelegate:(id)xvimDelegate;
 - (id)xvimDelegate;

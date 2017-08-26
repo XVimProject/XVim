@@ -41,6 +41,7 @@
     //[self xvim_swizzleInstanceMethod:@selector(paste:) with:@selector(xvim_paste:)];
     //[self xvim_swizzleInstanceMethod:@selector(delete:) with:@selector(xvim_delete:)];
     [self xvim_swizzleInstanceMethod:@selector(keyDown:) with:@selector(xvim_keyDown:)];
+    [self xvim_swizzleInstanceMethod:@selector(selectedRange) with:@selector(xvim_selectedRange)];
     /*
     [self xvim_swizzleInstanceMethod:@selector(mouseDown:) with:@selector(xvim_mouseDown:)];
     [self xvim_swizzleInstanceMethod:@selector(drawRect:) with:@selector(xvim_drawRect:)];
@@ -65,6 +66,7 @@
     [self xvim_swizzleInstanceMethod:@selector(delete:) with:@selector(xvim_delete:)];
     */
     [self xvim_swizzleInstanceMethod:@selector(keyDown:) with:@selector(xvim_keyDown:)];
+    [self xvim_swizzleInstanceMethod:@selector(selectedRange) with:@selector(xvim_selectedRange)];
     /*
     [self xvim_swizzleInstanceMethod:@selector(mouseDown:) with:@selector(xvim_mouseDown:)];
     [self xvim_swizzleInstanceMethod:@selector(drawRect:) with:@selector(xvim_drawRect:)];
@@ -105,6 +107,14 @@
 }
 
 -  (void)xvim_mouseDown:(NSEvent *)theEvent{
+}
+
+- (struct _NSRange)xvim_selectedRange{
+    NSRange r = [self xvim_selectedRange];
+    //TRACE_LOG(@"%d %d", r.location, r.length);
+    XVimWindow* w = [self xvim_window];
+    w.insertionPoint = r.location;
+    return r;
 }
 
 - (BOOL)isIDEPlaygroundSourceTextView
@@ -166,6 +176,7 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
     return [[self xvim_editorArea] xvim_window];
 }
 
+/*
 @end
 
 @interface _TtC12SourceEditor16SourceEditorView()
@@ -201,6 +212,7 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
 @end
 
 @implementation _TtC12SourceEditor16SourceEditorView (VimOperation)
+*/
 
 /**
  * Properties in this category uses NSObject+ExtraData to
@@ -214,6 +226,7 @@ static NSString* XVIM_INSTALLED_OBSERVERS_DVTSOURCETEXTVIEW = @"XVIM_INSTALLED_O
 
 - (void)setInsertionPoint:(NSUInteger)insertion{
     [self setUnsignedInteger:insertion forName:@"insertionPoint"];
+    
 }
 
 - (XVimPosition)insertionPosition{
