@@ -6,19 +6,23 @@
 	<dict>
 		<key>Resources/ActionMenuController.nib</key>
 		<data>
-		/2c99y9b56MVsbqf5Szy6/ztBhU=
+		gOchd+9GX6/3ZplNdrmlqaAGdYA=
 		</data>
 		<key>Resources/Assets.car</key>
 		<data>
-		STDH+wIpMsAvARVHKcGFaUpgubg=
+		QMOYniffJrt+rrOz8NUXtSVoT28=
+		</data>
+		<key>Resources/FoldIndicator.pdf</key>
+		<data>
+		OoLgN2QP8/ltVOLyrlM+PNg75AI=
 		</data>
 		<key>Resources/Info.plist</key>
 		<data>
-		I0lDWpDbVgVvq/QidHOfqMeYiNc=
+		xxmEvTto4pRyNUZvMwvUWs8kpms=
 		</data>
 		<key>Resources/TextFindPanelViewController.nib</key>
 		<data>
-		zaZuqwwzpBzGccEiuW1BQE8u98I=
+		J9Y8YeuM2hD5qTOzIQNs9Ol/gCQ=
 		</data>
 		<key>Resources/en.lproj/Localizable.strings</key>
 		<dict>
@@ -31,7 +35,7 @@
 		</dict>
 		<key>Resources/version.plist</key>
 		<data>
-		c/iqYlkED+It039hdMORCCW8Eq8=
+		KnVfX5RmrRjgcbwD7f5BrwstBQo=
 		</data>
 	</dict>
 	<key>files2</key>
@@ -40,28 +44,35 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			/1javnMa3O7c7Bg+NP5vHCs2hMdJteStBShJZz8FYVk=
+			cB0xdPL7inOUJNR9+iGtTqZ9+sImWzRPP2fj515amOY=
 			</data>
 		</dict>
 		<key>Resources/Assets.car</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			34zgpETbvK8bPf5RnVzRL1+hcH06zK3VH3RKI/sDGnc=
+			muio8vLxmGAVOp4ces2V09sq95MfRZb7ugvckJfSiUA=
+			</data>
+		</dict>
+		<key>Resources/FoldIndicator.pdf</key>
+		<dict>
+			<key>hash2</key>
+			<data>
+			NoagZgkN02ykqTQUkR6Cngo7pE/xWb9XoWn6Wb+oIgk=
 			</data>
 		</dict>
 		<key>Resources/Info.plist</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			yHAYiHoxRu3iUsc0BrpBwPc6cHEJPNyguf6+A4Yzsdc=
+			d8QHIphMYzstud2wU0nBRHhmSEuPQ4MnOGVDQziCvKA=
 			</data>
 		</dict>
 		<key>Resources/TextFindPanelViewController.nib</key>
 		<dict>
 			<key>hash2</key>
 			<data>
-			kcxSdQpNdKUDPRer/TEcxoFxb/z8vGIX3WbbwaMw3WU=
+			/plQhQsd/7YqNVspNftDvEIaQbixQ3535mfu2HTF5qY=
 			</data>
 		</dict>
 		<key>Resources/en.lproj/Localizable.strings</key>
@@ -77,7 +88,7 @@
 		<dict>
 			<key>hash2</key>
 			<data>
-			7ePvcMvnP5/FzMABLglUtgIeGwx84VNdX9u+MzEz9os=
+			+oiH5jSjBDGTtpmS8vyvxj0lapHtYBOGkigCS9+a9Rk=
 			</data>
 		</dict>
 	</dict>
