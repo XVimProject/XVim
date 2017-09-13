@@ -167,7 +167,7 @@
         if (filepath != nil){
             NSUInteger linenumber = [[self class] lineWithPath:filepath pos:self.insertionPoint];
             // use `brew install macvim`
-            NSString* str = [NSString stringWithFormat:@"/usr/local/bin/mvim +'%d|silent norm zt' %@", linenumber, filepath];
+            NSString* str = [NSString stringWithFormat:@"/usr/local/bin/mvim +%d %@", linenumber, filepath];
             [XVimTaskRunner runScript:str];
         }
     }
