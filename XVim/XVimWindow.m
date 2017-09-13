@@ -166,7 +166,8 @@
         NSString* filepath = documentURL.path;
         if (filepath != nil){
             NSUInteger linenumber = [[self class] lineWithPath:filepath pos:self.insertionPoint];
-            NSString* str = [NSString stringWithFormat:@"/Applications/mvim +'%d|silent norm zt' %@", linenumber, filepath];
+            // use `brew install macvim`
+            NSString* str = [NSString stringWithFormat:@"/usr/local/bin/mvim +'%d|silent norm zt' %@", linenumber, filepath];
             [XVimTaskRunner runScript:str];
         }
     }
