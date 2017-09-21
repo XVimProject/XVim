@@ -29,7 +29,9 @@ Since Apple decided not to load 3rd party plugins, we have to make change to it.
 
          $ sudo codesign -f -s XcodeSigner /Applications/Xcode.app    (Replace the Xcode path if it is different.)
 
-   This should take a while.
+   This should take a while. If `codesign` complains it is not found, you can use `security find-identity -p codesigning` 
+   to see if your certificate is marked as valid (Add `-v` to show only valid certificates. If your certificate is not valid,
+   you can follow the steps [here](https://support.apple.com/kb/PH20127) to see how to make the system trust it. 
    
 4. Build XVim
 
