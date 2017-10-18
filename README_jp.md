@@ -1,30 +1,56 @@
-# XVim
+# !!!Xcode 9 は(まだ)サポートされていません!!!
+
+# XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
+
   XVimはXcode用Vimプラグインです。XVimはXcodeの機能を損なうことなく、Vimの操作感を提供することを目指しています。
 
 #### アナウンス
-  - XVimのリポジトリはXVimProject organizationに移されました。リポジトリをクローンしている場合は、[こちら][github-transferring]にあるようにリモートリポジトリのURLを変更することをお勧めします (Github では、古いURLから新しいURLへ丁寧な転送が行われており、この対応は必須ではありません)。
-  - XVimではBountysourceを利用しはじめしました。[![Bountysource][bountysource-bouties-badge]][bountysource-bouties] [![Bountysource][bountysource-raised-badge]][bountysource-raised]
-  - [XVim開発者向けGoogleグループ][google-group] が作成されました。
 
-[github-transferring]: https://help.github.com/articles/transferring-a-repository/
-[bountysource-bouties-badge]: https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted
-[bountysource-bouties]: https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted
-[bountysource-raised-badge]: https://www.bountysource.com/badge/team?team_id=918&style=raised
-[bountysource-raised]: https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised
-[google-group]: https://groups.google.com/d/forum/xvim-developers
+  - Xcode 8 ユーザーは [INSTALL_Xcode8.md](INSTALL_Xcode8.md) をご覧ください。
+  - Xcode 7 ユーザーは 809527b 以前のコミットを使ってください。
+  - XVimではBountysourceを利用しはじめました。
+  - [XVim開発者向けGoogleグループ]((https://groups.google.com/d/forum/xvim-developers) が作成されました。
 
 ## サポートしているXcodeバージョン
-  - Xcode6
-  - Xcode7
+  - Xcode7  : 809527b 以前のコミットを使用してください。
+  - Xcode8  : 最新のmasterブランチを使用してください。
 
 ## インストール
+  Xcode 8 ユーザーは、まず [INSTALL_Xcode8.md](INSTALL_Xcode8.md) の説明書きに従ってください。
+
   ソースコードをダウンロード、あるいはリポジトリをクローンし、以下を実行します。
 
+  1. `xcode-select` があなたのXcodeを示していることを確認してください。
+  ```bash
+  $ xcode-select -p
+  /Applications/Xcode.app/Contents/Developer
+  ```
+
+  Xcodeのアプリケーションパスが表示されない場合は、 `xcode-select -s` を使って設定してください。
+
+  2. makeします。
   ```bash
   $ make
   ```
 
-  必要に応じて `.xvimrc` を作成し、Xcodeを再起動します。
+  以下のように表示されたら
+
+  ```
+  XVim hasn't confirmed the compatibility with your Xcode, Version X.X
+  Do you want to compile XVim with support Xcode Version X.X at your own risk?
+  ```
+  あなたのXcodeバージョンでXVimを使用したい場合は、yを押します。(それが動作確認されていなくても)
+
+  3. 必要であれば `.xvimrc` を作り、Xcodeを再起動します。
+
+  4. Xcodeを起動します。 XVimを読み込むかどうか尋ねられます。「Yes」を選択してください。
+     間違って「No」を押した場合、Xcodeを閉じてターミナルから次のコマンドを実行します。
+
+    ```
+    defaults delete  com.apple.dt.Xcode DVTPlugInManagerNonApplePlugIns-Xcode-X.X     (X.X はXcodeのバージョンです)
+    ```
+
+     Xcodeを再度開いてください。
 
 ## ブランチとリリース
  XVimにはいくつかのブランチとリリースがあります。通常はリリースの一つをダウンロードし、利用してください。
@@ -75,32 +101,8 @@
 
   https://www.bountysource.com/teams/xvim
 
-## バグIssueの取り扱い
-
-  報告されたバグは以下の順で処理されます。
-
-  1. バグの再現性が確認され、'Bug'というラベルが付けれらます。
-  2. バグが'develop'ブランチで修正されます
-  3. 報告者によってバグが修正されたことが確認されます。
-  4. Issueに'Done'というラベルが付けられます。
-  5. バグ修正が他に副作用がないことを確認します。
-  6. 'master'ブランチにマージされます
-  7. IssueがCloseされます。
-
-  この手順は'Bug' issueにのみ適用されます。
-
-
 ## コントリビューション
-  提案や、バグの報告、機能要望は遠慮無くお寄せください。
-
-  もし、自分で機能追加やバグの修正をしたい場合には、以下の動画が参考になります。
-  
- - [How to get debug log](http://www.youtube.com/watch?v=50Bhu8setlc)
- - [How to debug XVim](http://www.youtube.com/watch?v=AbC6f86VW9A)
- - [How to write a test case](http://www.youtube.com/watch?v=kn-kkRTtRcE)
-
-  Pull Requestしていただけると非常にありがたいです。Pull Requstを行う前に、[Make a Pull Request](Documents/Developers/PullRequest.md)
-をご一読ください。
+  分割された [CONTRIBUTING.md](.github/CONTRIBUTING.md) をご覧ください。
 
 ## 寄付
   もし、このプラグインを気に入っていただけたら寄付をしていただけると嬉しいです。
@@ -124,12 +126,10 @@
   [donation-messageboard]: https://github.com/JugglerShu/XVim/wiki/Donation-messages-to-XVim
 
 ### Bountysource
-  BountySourceでは、チーム (プロジェクト全体) を支援したり、あるいは特定のIssueに賞金をかけることができます
-  (もし、修正して欲しいバグや実装して欲しい機能がIssueとして存在していなければ、新たにIssueを作成してください)。
+プロジェクトを手助けして拡張したいのであれば、 [BountySource](https：//www.bountysource.com/teams/xvim)を通じて直接支援することを検討してください。 チーム (プロジェクト全体) を支援したり、あるいは特定のIssueに賞金をかけることができます。(もし、修正して欲しいバグや実装して欲しい機能がIssueとして存在していなければ、新たにIssueを作成してください)。
 
 ## コントリビュータ
   以下のコントリビュータのページを御覧ください
-
   https://github.com/JugglerShu/XVim/contributors
 
 ## ライセンス
