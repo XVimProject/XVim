@@ -2,6 +2,8 @@
 
 # !!!Xcode 9 is not supported (yet)!!!
 
+# Xcode 9 compatiable version can be found at [XVim2](https://github.com/XVimProject/XVim2) Project is currently under development
+
 # XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
 
   XVim is a Vim plugin for Xcode. The plugin intends to offer a compelling Vim experience without the need to give up any Xcode features.
