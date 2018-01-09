@@ -1,6 +1,6 @@
 [\[日本語版\]](README_jp.md)
 
-# !!!Xcode 9 is not supported (yet)!!!
+### For Xcode 9 support, see [XVim2](https://github.com/XVimProject/XVim2)
 
 # XVim [![Build Status](https://travis-ci.org/XVimProject/XVim.svg?branch=master)](https://travis-ci.org/XVimProject/XVim) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=bounties_posted)](https://www.bountysource.com/teams/xvim/bounties?utm_source=XVim&utm_medium=shield&utm_campaign=bounties_posted) [![Bountysource](https://www.bountysource.com/badge/team?team_id=918&style=raised)](https://www.bountysource.com/teams/xvim?utm_source=XVim&utm_medium=shield&utm_campaign=raised)
 
