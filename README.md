@@ -47,8 +47,8 @@
   
   3. Create `.xvimrc` as you need and restart your Xcode. 
 
-  4. Launch Xcode. You'll be asked if you load XVim. Press 'Yes' to it.
-     If you press 'No' by mistake, close the Xcode and execute the following from a terminal
+  4. Launch Xcode. You'll be asked if you load XVim. Press 'Load Bundle' to it.
+     If you press 'Skip bundle' by mistake, close the Xcode and execute the following from a terminal
 
     ```
     defaults delete  com.apple.dt.Xcode DVTPlugInManagerNonApplePlugIns-Xcode-X.X     (X.X is your Xcode version)
